@@ -1,0 +1,60 @@
+---
+runme:
+  id: 01HJTE5GTPRH5DAPY72S0D2FBW
+  version: v2.0
+---
+
+存档数据结构，config数据使用类似结构，只是key不同
+<buffA>
+    [buffEnabled]
+<buffA>
+    [buffToAdd]
+<buffA>
+    <buff_dataA>
+        <buff_dataB>
+            [header]
+        <buff_dataB>
+            [type]
+        <buff_dataB>
+            [data]
+    <buff_dataA>
+        ...
+
+
+config:
+<buff_configA>
+    <buff_configB>
+        [header]
+    <buff_configB>
+        [type]
+    <buff_configB>
+        [data]
+<buff_configA>
+    ...
+
+
+Buff运行方式：
+    轮回开始
+        ->启用即将启用的buff
+    轮回进行
+        ->运行buff
+    轮回结束
+        ->递增buff轮回计数器
+        ->禁用需要禁用的buff
+
+    存档记录的数据：
+        正在启用的buff
+        将要启用的buff
+
+    BuffManager.RequestEnable(BuffID id); 在管理器里添加记录，并在下轮回开始时启用buff
+    BuffManager.RequestDisable(BuffID id); 在管理器里添加记录，并在下轮回开始时移除buff
+
+BuffStaticData结构：
+    数据采用json文件保存。多语言版本同样内置在json文件内。
+    一次只会加载当前游戏使用语言的版本。
+
+    默认的数据由变量保存，同样可以支持自定义数据，这部分需要通过下面的方法来访问。自定义数据保存在一个Dictionary<string,object>内。
+    这种方法会涉及拆装箱，所以理论上来说应该降低使用频率。
+
+    GetData<T>(string id)获取指定id的值
+    
