@@ -1,99 +1,341 @@
-﻿using RandomBuff.Core.StringData;
+﻿using RandomBuff.Core.Entry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CoralBrain;
+using JetBrains.Annotations;
+using RWCustom;
+using Newtonsoft.Json;
+using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
+using UnityEngine;
 
 namespace RandomBuff.Core.SaveData
 {
     /// <summary>
-    /// 管理DeathPersistenceData中所有的buffdata
-    /// SaveFormater中的格式参见api文档
+    /// 管理本存档下已加载过的全部BuffData（所有猫）
+    /// 更换存档会重新创建
+    ///
+    /// 外部接口
+    /// 没有提供直接获取字典的方式防止意外的外部修改
     /// </summary>
-    internal sealed class BuffDataManager
+    public sealed partial class BuffDataManager
     {
-        public static BuffDataManager Singleton { get; private set; }
+        public static BuffDataManager Instance { get; private set; }
 
-        internal SaveFormater managerFormater;
-        internal SaveFormater buffDataFormater;
 
-        internal Dictionary<string, BuffStringDataBase> bindedStringData = new Dictionary<string, BuffStringDataBase>();
-
-        static BuffDataManager()
+        /// <summary>
+        /// 获取BuffData
+        /// 外部方法
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public BuffData GetBuffData(BuffID id)
         {
-            Singleton = new BuffDataManager();
+            return GetOrCreateBuffData(id);
         }
 
-        internal void FromSave(string save)
+        /// <summary>
+        /// 获取全部启用的BuffID
+        /// 外部方法
+        /// </summary>
+        /// <returns></returns>
+        public List<BuffID> GetAllBuffIds()
         {
-            managerFormater = new SaveFormater("buff", save, true);
-            if (string.IsNullOrEmpty(save))
+            SlugcatStats.Name name;
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+                name = game.StoryCharacter;
+            else
+                name = RainWorld.lastActiveSaveSlot;
+            if (!allDatas.ContainsKey(name))
+                return new List<BuffID>();
+
+            return allDatas[name].Keys.ToList();
+        }
+    }
+
+
+
+    /// <summary>
+    /// 管理本存档下已加载过的全部BuffData（所有猫）
+    /// 更换存档会重新创建
+    ///
+    /// 内部接口
+    /// </summary>
+    public sealed partial class BuffDataManager
+    {
+
+
+        private BuffDataManager()
+        {
+        }
+
+        internal static bool LoadData(string file,string formatVersion)
+        {
+            Instance = new BuffDataManager();
+            return Instance.InitStringData(file,formatVersion);
+        }
+
+        internal void DeleteSaveData(SlugcatStats.Name name)
+        {
+            if (name != null && allDatas.ContainsKey(name))
             {
-                managerFormater.AppendNewChannel();//[buffEnabled]
-                managerFormater.AppendNewChannel();//[buffToAdd]
-                managerFormater.AppendNewChannel();//buff_data
+                BuffPlugin.Log($"Delete Save data : {name}");
+                allDatas.Remove(name);
+            }
+        }
+
+
+
+        internal void DeleteAll()
+        {
+            BuffPlugin.Log($"DELETE ALL SAVE DATA");
+            allDatas.Clear();
+        }
+        /// <summary>
+        /// 获取或创建BuffData
+        /// 内部方法 
+        /// </summary>
+        /// <param name="id">ID</param>
+        /// <param name="createIfMissing">当true时如果BuffData不存在则创建</param>
+        /// <returns>返回值可能为空</returns>
+        internal BuffData GetOrCreateBuffData(BuffID id, bool createIfMissing = false)
+        {
+            SlugcatStats.Name name;
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+                name = game.StoryCharacter;
+            else
+                name = RainWorld.lastActiveSaveSlot;
+            
+            if (!allDatas.ContainsKey(name))
+            {
+                if (createIfMissing)
+                    allDatas.Add(name, new());
+                else
+                    return null;
             }
 
-            buffDataFormater = new SaveFormater("buff_data", managerFormater.GetChannelAt(2).Data);
-
-            foreach (var channel in buffDataFormater.channels)
+            if (!allDatas[name].ContainsKey(id))
             {
-                if (bindedStringData.TryGetValue(channel.subChannels[0].Data, out var buffStringData))
+                if (createIfMissing)
                 {
-                    buffStringData.BindedChannel = channel;
+                    allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
+                    allDatas[name][id].OnDataLoaded(true);
+                    BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
+
                 }
+                else
+                    return null;
             }
+
+            return allDatas[name][id];
         }
-        internal string ToSave()
+
+        /// <summary>
+        /// 轮回结束时更新 通过BuffPoolManager调用
+        /// </summary>
+        /// <param name="name"></param>
+        internal void WinGame(BuffPoolManager manager)
         {
-            foreach (var stringData in bindedStringData.Values)
+            var name = manager.Game.StoryCharacter;
+            foreach (var data in allDatas[name])
+                data.Value.CycleEnd();
+        }
+
+        /// <summary>
+        /// 移除存档内BuffData
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        internal void RemoveBuffData(BuffID id)
+        {
+            SlugcatStats.Name name;
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+                name = game.StoryCharacter;
+            else
+                name = RainWorld.lastActiveSaveSlot;
+
+            if (!allDatas.ContainsKey(name))
             {
-                stringData.ConvertToString();
+                BuffPlugin.LogError($"Try remove buff at null slot: {name}");
+                return;
             }
-            var builder = new StringBuilder();
-            buffDataFormater.BuildSave(builder);
+
+            if (!allDatas[name].ContainsKey(id))
+            {
+                BuffPlugin.LogError($"remove buff not found: {id}");
+                return;
+            }
+            BuffPlugin.LogError($"Remove buff : {name}");
+
+            allDatas[name].Remove(id);
+        }
+
+        /// <summary>
+        /// 获取或创建单猫存档下的BuffData字典
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        internal Dictionary<BuffID, BuffData> GetDataDictionary(SlugcatStats.Name name)
+        {
+            if (!allDatas.ContainsKey(name))
+                allDatas.Add(name, new());
+
+            return allDatas[name];
+        }
+
+        /// <summary>
+        /// 初始化存档信息
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        private bool InitStringData(string file, string formatVersion)
+        {
+            foreach (var catSingle in Regex.Split(file, CatSplit)
+                         .Where(i => !string.IsNullOrEmpty(i)))
+            {
+                var catSplit = Regex.Split(catSingle, CatIdSplit);
+
+                //数据损坏
+                if (catSplit.Length != 2)
+                {
+                    BuffPlugin.LogError($"Corrupted Buff Data At: {catSingle}");
+                    continue;
+                }
+                var slugName = (SlugcatStats.Name)ExtEnumBase.Parse(typeof(SlugcatStats.Name), catSplit[0], true);
+
+                //不存在的猫名字
+                if (slugName == null)
+                {
+                    BuffPlugin.LogWarning($"Unknown Slugcat Name :{catSplit[0]}");
+                    //暂存栏
+                    ukSlugcatDatas.Add(catSingle);
+                    continue;
+                }
+
+                //重定义只做提示
+                if (allDatas.ContainsKey(slugName))
+                    BuffPlugin.LogWarning($"Redefine Slugcat Name :{catSplit[0]}");
+                else
+                    allDatas.Add(slugName, new());
+
+                var slugDatas = allDatas[slugName];
+
+                //读取对应猫内的数据
+                foreach (var dataSingle in Regex.Split(catSplit[1], BuffSplit)
+                             .Where(i => !string.IsNullOrEmpty(i)))
+                {
+
+                    var dataSplit = Regex.Split(dataSingle, BuffIdSplit);
+
+                    if (dataSplit.Length != 2)
+                    {
+                        BuffPlugin.LogError($"Corrupted Buff Data At: {dataSingle}");
+                        continue;
+                    }
+
+                    var dataType = BuffRegister.GetDataType(dataSplit[0]);
+                    //不存在Type
+                    if (dataType.type == null)
+                    {
+                        BuffPlugin.LogWarning($"Unknown BuffData ID : {dataSplit[0]}");
+                        if (!ukBuffDatas.ContainsKey(slugName))
+                            ukBuffDatas.Add(slugName, new());
+                        //暂存数据
+                        ukBuffDatas[slugName].Add(dataSingle);
+                        continue;
+                    }
+
+                    //重定义提示并返回
+                    if (slugDatas.ContainsKey(dataType.id))
+                    {
+                        BuffPlugin.LogWarning($"Redefine Slugcat Name: {dataSplit[0]}, Ignore: {dataSplit[1]}");
+                        continue;
+                    }
+
+                    BuffData newData;
+                    try
+                    {
+                        newData = (BuffData)JsonConvert.DeserializeObject(dataSplit[1], dataType.type);
+                        newData.OnDataLoaded(false);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                        BuffPlugin.LogError($"Corrupted Buff Data At : {dataSplit[1]}");
+                        newData = GetOrCreateBuffData(dataType.id, true);
+                        newData.OnDataLoaded(true);
+                    }
+                    slugDatas.Add(dataType.id, newData);
+                }
+
+            }
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// 序列化存档信息
+        /// </summary>
+        /// <returns></returns>
+        internal string ToStringData()
+        {
+            StringBuilder builder = new();
+            foreach (var catData in allDatas)
+            {
+                builder.Append(catData.Key);
+                builder.Append(CatIdSplit);
+                foreach (var buffData in catData.Value)
+                {
+                    builder.Append(buffData.Key);
+                    builder.Append(BuffIdSplit);
+                    builder.Append(JsonConvert.SerializeObject(buffData.Value));
+                    builder.Append(BuffSplit);
+                }
+
+                if (ukBuffDatas.ContainsKey(catData.Key))
+                {
+                    foreach (var ukBuffData in ukBuffDatas[catData.Key])
+                    {
+                        builder.Append(ukBuffData);
+                        builder.Append(BuffSplit);
+                    }
+                }
+
+                builder.Append(CatSplit);
+            }
+
+            foreach (var ukCatData in ukSlugcatDatas)
+            {
+                builder.Append(ukCatData);
+                builder.Append(CatSplit);
+
+            }
             return builder.ToString();
         }
 
-        public BuffStringData<T> BindBuffData<T>(string key, T defaultValue)
-        {
-            if (bindedStringData.TryGetValue(key, out var result))
-            {
-                return result as BuffStringData<T>;
-            }
+        /// <summary>
+        /// 该存档槽下全部猫的存档数据
+        /// </summary>
+        private readonly Dictionary<SlugcatStats.Name, Dictionary<BuffID, BuffData>> allDatas = new();
 
-            //创建新的数据条目，分配新的数据通道
-            result = new BuffStringData<T>(key, defaultValue);
+        /// 如果被卸载导致slugcat name或data缺失，则暂时储存在此处
+        private readonly List<string> ukSlugcatDatas = new();
+        private readonly Dictionary<SlugcatStats.Name, List<string>> ukBuffDatas = new();
 
-            bool findMatch = false;
-            foreach (var channel in buffDataFormater.channels)
-            {
-                if (channel.subChannels[0].Data == key)
-                {
-                    if (channel.subChannels[1].Data != typeof(T).FullName)
-                    {
-                        BuffPlugin.Log($"string data {key} already exist, but not in same type, reset data");
-                        channel.subChannels[2].Data = "";
-                    }
+        private const string CatSplit = "<BuA>";
+        private const string CatIdSplit = "<BuAI>";
 
-                    result.BindedChannel = channel;
-                    findMatch = true;
-                }
-            }
-
-            if (!findMatch)
-            {
-                var newChannel = buffDataFormater.AppendNewChannel();
-                newChannel.AppendNewChannel(key);
-                newChannel.AppendNewChannel(typeof(T).FullName);
-                newChannel.AppendNewChannel("");
-                result.BindedChannel = newChannel;
-            }
+        private const string BuffSplit = "<BuB>";
+        private const string BuffIdSplit = "<BuBI>";
 
 
-            bindedStringData.Add(key, result);
-            return result as BuffStringData<T>;
-        }
     }
+
+
 }
