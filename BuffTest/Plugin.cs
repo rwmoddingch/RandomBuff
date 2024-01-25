@@ -39,7 +39,7 @@ namespace BuffTest
         }
         public static void Log(object msg)
         {
-            Debug.Log($"<TEST BUFF> {msg}");
+            BuffPlugin.Log($"<TEST BUFF> {msg}");
         }
         public static BuffID TestBuffID = new BuffID("TestBuff", true);
     }
@@ -53,18 +53,21 @@ namespace BuffTest
             TestEntry.Log("Create TestBuffData");
         }
 
-        public override void OnDataLoaded(bool newData)
+        public override void DataLoaded(bool newData)
         {
-            TestEntry.Log($"Data Loaded, Count: {count}");
+            TestEntry.Log($"Data Loaded, Count: {count}, Static Data: {TestConfig}");
         }
 
         public override void CycleEnd()
         {
             count++;
-            TestEntry.Log($"Cycle End, Count: {count}");
+            TestEntry.Log($"Cycle End, Count: {count}, Static Data: {TestConfig}");
         }
 
-        [JsonProperty] public int count;
+        [JsonProperty]
+        public int count;
+
+        [StaticConfig] public int TestConfig { get; } = 0;
     }
     public class TestBuff : Buff<TestBuffData>
     {
