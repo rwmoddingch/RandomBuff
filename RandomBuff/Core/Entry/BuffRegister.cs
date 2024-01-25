@@ -8,12 +8,25 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.SaveData;
 
 
 namespace RandomBuff.Core.Entry
 {
+    /// <summary>
+    /// BuffData 中
+    /// 若属性设置该attribute则会设置get函数获取静态配置
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
+    public class StaticConfigAttribute : Attribute
+    {
+
+    }
+
 
     /// <summary>
     /// 保存Buff的注册信息，负责保存BuffData/Buff的Type信息
@@ -47,8 +60,6 @@ namespace RandomBuff.Core.Entry
     /// </summary>
     public static partial class BuffRegister
     {
-      
-
         internal static (BuffID id, Type type) GetDataType(string id) => 
             (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
 
@@ -94,6 +105,63 @@ namespace RandomBuff.Core.Entry
         }
 
 
+        /// <summary>
+        /// 给BuffData设置config的warpper
+        /// </summary>
+        internal static void BuildAllDataStaticWarpper()
+        {
+            foreach (var dataType in DataTypes)
+            {
+                if (!BuffConfigManager.ContainsId(dataType.Key))
+                {
+                    BuffPlugin.LogError($"Can't find json data for ID :{dataType.Key}!");
+                    continue;
+                }
+                foreach (var property in dataType.Value.GetProperties().
+                             Where(i => i.GetCustomAttribute<StaticConfigAttribute>() != null))
+                {
+                    //不存在get方法
+                    if (property.GetGetMethod() == null)
+                    {
+                        BuffPlugin.LogError($"Property {property.Name} at Type {dataType.Value.Name} has no get method!");
+                        continue;
+                    }
+
+                    //在json不存在属性
+                    if (!BuffConfigManager.ContainsProperty(dataType.Key, property.Name))
+                    {
+                        BuffPlugin.LogWarning($"can't find custom property Named: {property.Name} At {dataType.Key} static data");
+                        continue;
+                    }
+
+                    //有set属性
+                    if (property.CanWrite)
+                        BuffPlugin.LogWarning($"Property {property.Name} can write!");
+
+                    
+            
+                    var hook = new ILHook(property.GetGetMethod(), (il) =>
+                    {
+                        il.Instrs.Clear();
+                        il.Body.MaxStackSize += 1;
+                        ILCursor c = new ILCursor(il);
+                        c.Emit(OpCodes.Ldarg_0);
+                        c.EmitDelegate<Func<BuffData, object>>((self) =>
+                         self.GetConfig(property.Name, property.PropertyType));
+                        if (property.PropertyType.IsValueType)
+                            c.Emit(OpCodes.Unbox_Any, property.PropertyType);
+                        else
+                            c.Emit(OpCodes.Castclass, property.PropertyType);
+                        c.Emit(OpCodes.Ret);
+                    });
+
+                    if (BuffPlugin.DevEnabled)
+                        BuffPlugin.Log($"Warp config property for {dataType.Key} : {property.Name} : {property.PropertyType}");
+                    
+                }
+            }
+        }
+        
         private static Dictionary<BuffID, Type> DataTypes = new();
         private static Dictionary<BuffID, Type> BuffTypes = new();
     }

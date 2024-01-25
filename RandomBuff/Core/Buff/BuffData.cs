@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
  using Newtonsoft.Json;
+ using RandomBuff.Core.SaveData;
 
  namespace RandomBuff.Core.Buff
 {
@@ -29,7 +30,6 @@ using System.Threading.Tasks;
         public virtual void CycleEnd() { }
 
 
-
         /// <summary>
         /// 重复选取
         /// 增加堆叠次数
@@ -40,6 +40,28 @@ using System.Threading.Tasks;
         /// <summary>
         /// 当存档数据读取后调用
         /// </summary>
-        public abstract void OnDataLoaded(bool newData);
+        public abstract void DataLoaded(bool newData);
+
+
+        /// <summary>
+        /// 获取静态配置数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public object GetConfig<T>(string name)
+        {
+            if (BuffConfigManager.Instance.TryGet<T>(ID, name, out var data))
+                return data;
+            return default;
+        }
+
+
+        internal object GetConfig(string name,Type type)
+        {
+            if (BuffConfigManager.Instance.TryGet(ID, name,type, out var data))
+                return data;
+            return default;
+        }
     }
 }

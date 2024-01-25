@@ -84,7 +84,7 @@ namespace RandomBuff.Core.SaveData
         {
             if (name != null && allDatas.ContainsKey(name))
             {
-                BuffPlugin.Log($"Delete Save data : {name}");
+                BuffPlugin.Log($"DELETE SAVE DATA: {name}");
                 allDatas.Remove(name);
             }
         }
@@ -124,7 +124,7 @@ namespace RandomBuff.Core.SaveData
                 if (createIfMissing)
                 {
                     allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
-                    allDatas[name][id].OnDataLoaded(true);
+                    allDatas[name][id].DataLoaded(true);
                     BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
 
                 }
@@ -211,7 +211,7 @@ namespace RandomBuff.Core.SaveData
                 //不存在的猫名字
                 if (slugName == null)
                 {
-                    BuffPlugin.LogWarning($"Unknown Slugcat Name :{catSplit[0]}");
+                    BuffPlugin.LogWarning($"Unknown Slugcat Name: {catSplit[0]}");
                     //暂存栏
                     ukSlugcatDatas.Add(catSingle);
                     continue;
@@ -219,7 +219,7 @@ namespace RandomBuff.Core.SaveData
 
                 //重定义只做提示
                 if (allDatas.ContainsKey(slugName))
-                    BuffPlugin.LogWarning($"Redefine Slugcat Name :{catSplit[0]}");
+                    BuffPlugin.LogWarning($"Redefine Slugcat Name: {catSplit[0]}");
                 else
                     allDatas.Add(slugName, new());
 
@@ -234,7 +234,7 @@ namespace RandomBuff.Core.SaveData
 
                     if (dataSplit.Length != 2)
                     {
-                        BuffPlugin.LogError($"Corrupted Buff Data At: {dataSingle}");
+                        BuffPlugin.LogError($"Corrupted Buff Data At: {catSplit[0]}:{dataSingle}");
                         continue;
                     }
 
@@ -253,7 +253,7 @@ namespace RandomBuff.Core.SaveData
                     //重定义提示并返回
                     if (slugDatas.ContainsKey(dataType.id))
                     {
-                        BuffPlugin.LogWarning($"Redefine Slugcat Name: {dataSplit[0]}, Ignore: {dataSplit[1]}");
+                        BuffPlugin.LogWarning($"Redefine BuffData Id: {catSplit[0]}:{dataSplit[0]}, Ignore: {dataSplit[1]}");
                         continue;
                     }
 
@@ -261,14 +261,14 @@ namespace RandomBuff.Core.SaveData
                     try
                     {
                         newData = (BuffData)JsonConvert.DeserializeObject(dataSplit[1], dataType.type);
-                        newData.OnDataLoaded(false);
+                        newData.DataLoaded(false);
                     }
                     catch (Exception e)
                     {
                         Debug.LogException(e);
                         BuffPlugin.LogError($"Corrupted Buff Data At : {dataSplit[1]}");
                         newData = GetOrCreateBuffData(dataType.id, true);
-                        newData.OnDataLoaded(true);
+                        newData.DataLoaded(true);
                     }
                     slugDatas.Add(dataType.id, newData);
                 }
@@ -292,9 +292,21 @@ namespace RandomBuff.Core.SaveData
                 builder.Append(CatIdSplit);
                 foreach (var buffData in catData.Value)
                 {
+                    string valueData = "";
+                    try
+                    {
+                        valueData = JsonConvert.SerializeObject(buffData.Value);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                        BuffPlugin.LogError($"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
+                        continue;
+                    }
                     builder.Append(buffData.Key);
                     builder.Append(BuffIdSplit);
-                    builder.Append(JsonConvert.SerializeObject(buffData.Value));
+                    builder.Append(valueData);
                     builder.Append(BuffSplit);
                 }
 

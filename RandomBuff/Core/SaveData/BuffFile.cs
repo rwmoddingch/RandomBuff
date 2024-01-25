@@ -43,13 +43,17 @@ namespace RandomBuff.Core.SaveData
             LoadFailedFallBack();
         }
 
-
+        /// <summary>
+        /// 保存数据
+        /// TODO : 请在配置文件修改后调用
+        /// </summary>
         public void SaveFile()
         {
             if (buffCoreFile != null)
             {
                 BuffPlugin.Log("Saving buff data");
                 buffCoreFile.Set<string>("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+                buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
                 return;
             }
             BuffPlugin.LogError("Failed to save buff data");
@@ -98,10 +102,12 @@ namespace RandomBuff.Core.SaveData
                 }
                 BuffPlugin.Log($"Buff file version : [{buffCoreFile.Get<string>("buff-version")}], current version : {BuffPlugin.saveVersion}");
 
-                //LoadConfig(buffCoreFile.Get<string>("buff-config"), buffCoreFile.Get<int>("buff-version"));
+                BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), buffCoreFile.Get<string>("buff-version"));
                 BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), buffCoreFile.Get<string>("buff-version"));
 
+                //更新格式版本
                 buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
+
                 Platform.NotifyUserDataReadCompleted(this);
             }
             else
