@@ -22,9 +22,14 @@ namespace RandomBuff.Core.Entry
     /// 若属性设置该attribute则会设置get函数获取静态配置
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class StaticConfigAttribute : Attribute
+    public sealed class CustomStaticConfigAttribute : Attribute
     {
 
+    }
+
+    public interface IBuffHook
+    {
+        public void HookOn();
     }
 
 
@@ -118,7 +123,7 @@ namespace RandomBuff.Core.Entry
                     continue;
                 }
                 foreach (var property in dataType.Value.GetProperties().
-                             Where(i => i.GetCustomAttribute<StaticConfigAttribute>() != null))
+                             Where(i => i.GetCustomAttribute<CustomStaticConfigAttribute>() != null))
                 {
                     //不存在get方法
                     if (property.GetGetMethod() == null)

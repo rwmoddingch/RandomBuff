@@ -49,7 +49,7 @@ using System.Threading.Tasks;
         /// <typeparam name="T"></typeparam>
         /// <param name="name"></param>
         /// <returns></returns>
-        public object GetConfig<T>(string name)
+        public T GetConfig<T>(string name)
         {
             if (BuffConfigManager.Instance.TryGet<T>(ID, name, out var data))
                 return data;

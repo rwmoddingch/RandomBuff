@@ -27,9 +27,7 @@ namespace RandomBuff.Core.Buff
         public Color Color { get; private set; } = Color.white;
         public BuffType BuffType { get; private set; } = BuffType.Positive;
         public BuffProperty BuffProperty { get; private set; } = BuffProperty.Normal;
-
-
-
+        public bool Stackable { get; private set; } = false;
     }
 
 
@@ -87,6 +85,9 @@ namespace RandomBuff.Core.Buff
 
                 if (rawData.ContainsKey(loadState = "Triggerable"))
                     newData.Triggerable = (bool)rawData[loadState];
+
+                if (rawData.ContainsKey(loadState = "Stackable"))
+                    newData.Stackable = (bool)rawData[loadState];
 
                 if (rawData.ContainsKey(loadState = "BuffType"))
                     newData.BuffType = (BuffType)Enum.Parse(typeof(BuffType),(string)rawData[loadState]);
@@ -171,6 +172,7 @@ namespace RandomBuff.Core.Buff
             builder.AppendLine("----------------------");
             builder.AppendLine($"BuffID : {BuffID}");
             builder.AppendLine($"Triggerable : {Triggerable}");
+            builder.AppendLine($"Stackable : {Stackable}");
             builder.AppendLine($"FaceName : {FaceName}");
             builder.AppendLine($"Color : {Color}");
             builder.AppendLine($"BuffType : {BuffType}");
