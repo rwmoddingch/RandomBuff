@@ -34,7 +34,7 @@ namespace RandomBuff.Core.Buff
         /// <summary>
         /// 数据类属性，只读
         /// </summary>
-        public virtual TData Data => (TData)BuffDataManager.Instance.GetBuffData(ID);
+        public TData Data => (TData)BuffDataManager.Instance.GetBuffData(ID);
 
         public abstract BuffID ID { get; }
 
@@ -62,7 +62,7 @@ namespace RandomBuff.Core.Buff
 
         /// <summary>
         /// 增益的销毁方法，当该增益实例被移除的时候会调用
-        /// 注意：当前轮回结束时会清除全部的Gain物体
+        /// 注意：当前轮回结束时会清除全部的Buff物体
         /// </summary>
         public abstract void Destroy();
 
