@@ -21,4 +21,17 @@ namespace RandomBuff.Core.Buff
         {
         }
     }
+
+    public enum BuffType
+    {
+        Positive,
+        Negative,
+        Duality
+    }
+
+    public enum BuffProperty
+    {
+        Normal,
+        Special
+    }
 }
