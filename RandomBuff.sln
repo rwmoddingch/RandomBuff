@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomBuff", "RandomBuff\RandomBuff.csproj", "{F2CDBD63-1794-46A5-8F5D-419E0B972037}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RandomBuff", "RandomBuff\RandomBuff.csproj", "{F2CDBD63-1794-46A5-8F5D-419E0B972037}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuffTest", "BuffTest\BuffTest.csproj", "{D4A1027B-C841-486F-9563-6CEF60042890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F2CDBD63-1794-46A5-8F5D-419E0B972037}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2CDBD63-1794-46A5-8F5D-419E0B972037}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2CDBD63-1794-46A5-8F5D-419E0B972037}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4A1027B-C841-486F-9563-6CEF60042890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4A1027B-C841-486F-9563-6CEF60042890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4A1027B-C841-486F-9563-6CEF60042890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4A1027B-C841-486F-9563-6CEF60042890}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
