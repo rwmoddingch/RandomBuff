@@ -18,6 +18,7 @@ namespace RandomBuff.Core.StringData
         {
             registedConverter.Add(new FloatConverter());
             registedConverter.Add(new IntConverter());
+            registedConverter.Add(new StringConverter());
         }
 
         /// <summary>
@@ -95,6 +96,24 @@ namespace RandomBuff.Core.StringData
         public override object ConvertToValue(string value)
         {
             return int.Parse(value);
+        }
+    }
+
+    public sealed class StringConverter : StringDataConverter.Converter
+    {
+        public override bool SupportThisType(Type type)
+        {
+            return type == typeof(string);
+        }
+
+        public override string ConvertToString(object value)
+        {
+            return (string)value;
+        }
+
+        public override object ConvertToValue(string value)
+        {
+            return value;
         }
     }
 
