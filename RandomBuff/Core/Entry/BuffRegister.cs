@@ -13,6 +13,7 @@ using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
+using UnityEngine;
 
 
 namespace RandomBuff.Core.Entry
@@ -101,8 +102,18 @@ namespace RandomBuff.Core.Entry
                         if (type.GetInterfaces().Contains(typeof(IBuffEntry)))
                         {
                             var obj = type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
-                            type.GetMethod("OnEnable").Invoke(obj, Array.Empty<object>());
-                            BuffPlugin.Log($"Invoke {type.Name}.OnEnable");
+                            try
+                            {
+                                type.GetMethod("OnEnable").Invoke(obj, Array.Empty<object>());
+                                BuffPlugin.Log($"Invoke {type.Name}.OnEnable");
+                            }
+                            catch (Exception e)
+                            {
+                                BuffPlugin.LogException(e);
+                                BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
+
+                            }
+
                         }
                     }
                 }
