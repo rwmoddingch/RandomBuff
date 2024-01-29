@@ -125,6 +125,7 @@ namespace RandomBuff.Core.SaveData
                 {
                     allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
                     allDatas[name][id].DataLoaded(true);
+                    BuffFile.Instance.AddCollect(id.value);
                     BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
 
                 }
@@ -265,7 +266,7 @@ namespace RandomBuff.Core.SaveData
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        BuffPlugin.LogException(e);
                         BuffPlugin.LogError($"Corrupted Buff Data At : {dataSplit[1]}");
                         newData = GetOrCreateBuffData(dataType.id, true);
                         newData.DataLoaded(true);
@@ -300,7 +301,7 @@ namespace RandomBuff.Core.SaveData
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        BuffPlugin.LogException(e);
                         BuffPlugin.LogError($"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
                         continue;
                     }

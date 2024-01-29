@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Menu;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.TestMenu;
+using UnityEngine;
 
 namespace RandomBuff.Core.Hooks
 {
@@ -19,7 +22,55 @@ namespace RandomBuff.Core.Hooks
             On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
             On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
             On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
+            On.ProcessManager.PreSwitchMainProcess += ProcessManager_PreSwitchMainProcess;
+
+            if (BuffPlugin.DevEnabled)
+            {
+                On.Menu.MainMenu.ctor += MainMenu_ctor;
+                TestStartGameMenu = new("TestStartGameMenu");
+                On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
+            }
+
             BuffPlugin.Log("Core Hook Loaded");
+        }
+
+        private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
+        {
+            if (ID == TestStartGameMenu)
+            {
+                self.currentMainLoop = new TStartGameMenu(self, ID);
+            }
+            orig(self, ID);
+      
+        }
+
+        public static ProcessManager.ProcessID TestStartGameMenu = new ("TestStartGameMenu");
+        private static void MainMenu_ctor(On.Menu.MainMenu.orig_ctor orig, Menu.MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
+        {
+            orig(self, manager, showRegionSpecificBkg);
+
+            float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
+            Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
+            Vector2 size = new Vector2(buttonWidth, 30f);
+            self.AddMainMenuButton(new SimpleButton(self, self.pages[0], "BUFF", "BUFF", pos, size), () =>
+            {
+                self.manager.RequestMainProcessSwitch(TestStartGameMenu);
+                self.PlaySound(SoundID.MENU_Switch_Page_In);
+            }, 0);
+        }
+
+        private static void ProcessManager_PreSwitchMainProcess(On.ProcessManager.orig_PreSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
+        {
+            if (self.rainWorld.options.saveSlot > 100 && ID == ProcessManager.ProcessID.MainMenu)
+            {
+                int lastSlot = self.rainWorld.options.saveSlot;
+                self.rainWorld.options.saveSlot -= 100;
+
+                BuffPlugin.Log($"Change slot from {lastSlot} to {self.rainWorld.options.saveSlot}");
+                self.rainWorld.progression.Destroy(lastSlot);
+                self.rainWorld.progression = new PlayerProgression(self.rainWorld, true, true);
+            }
+            orig(self, ID);
         }
 
         private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
@@ -57,7 +108,8 @@ namespace RandomBuff.Core.Hooks
 
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
-            if (self.oldProcess is RainWorldGame &&
+            if (BuffPoolManager.Instance != null &&
+                self.oldProcess is RainWorldGame &&
                 (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
             {
                 BuffPoolManager.Instance.Destroy();
@@ -68,7 +120,9 @@ namespace RandomBuff.Core.Hooks
             }
 
             orig(self, ID);
-            if (self.currentMainLoop is RainWorldGame game && BuffPoolManager.Instance == null)
+            if (self.currentMainLoop is RainWorldGame game && 
+                BuffPoolManager.Instance == null &&
+                game.rainWorld.options.saveSlot >= 100)
             {
                 BuffPoolManager.LoadGameBuff(game);
             }

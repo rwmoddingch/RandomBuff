@@ -22,9 +22,10 @@ namespace BuffTest
     {
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<TestBuff,TestBuffData>(TestBuffID);
+            BuffRegister.RegisterBuff<TestBuff, TestBuffData>(TestBuffID);
+            BuffRegister.RegisterBuff<TestBuff2, TestBuffData2>(TestBuff2ID);
             On.RainWorldGame.Update += RainWorldGame_Update;
-            Log("Test OnEnable");
+            Log("Test OnEnable 2");
         }
 
 
@@ -36,61 +37,25 @@ namespace BuffTest
                 Log("Create Test Buff!");
                 BuffPoolManager.Instance.CreateBuff(TestEntry.TestBuffID);
             }
+
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                var re = BuffPicker.GetNewBuffsOfType(BuffType.Positive, self.StoryCharacter);
+                foreach (var b in re)
+                {
+                    Log($"Pick {b.BuffID}");
+                }
+            }
         }
+
         public static void Log(object msg)
         {
             BuffPlugin.Log($"<TEST BUFF> {msg}");
         }
         public static BuffID TestBuffID = new BuffID("TestBuff", true);
+        public static BuffID TestBuff2ID = new BuffID("TestBuff2", true);
+
     }
 
-    public class TestBuffData : BuffData
-    {
-        public override BuffID ID => TestEntry.TestBuffID;
 
-        public TestBuffData()
-        {
-            TestEntry.Log("Create TestBuffData");
-        }
-
-        public override void DataLoaded(bool newData)
-        {
-            TestEntry.Log($"Data Loaded, Count: {count}, Static Data: {TestConfig}");
-        }
-
-        public override void CycleEnd()
-        {
-            count++;
-            TestEntry.Log($"Cycle End, Count: {count}, Static Data: {TestConfig}");
-        }
-
-        [JsonProperty]
-        public int count;
-
-        [CustomStaticConfig] 
-        public int TestConfig { get; }
-    }
-    public class TestBuff : Buff<TestBuffData>
-    {
-        public override BuffID ID => TestEntry.TestBuffID;
-
-        public TestBuff()
-        {
-            TestEntry.Log("Create TestBuff");
-        }
-
-        public override bool Trigger(RainWorldGame game)
-        {
-            return false;
-        }
-
-        public override void Update(RainWorldGame game)
-        {
-        }
-
-        public override void Destroy()
-        {
-            TestEntry.Log("Test Buff Destroy");
-        }
-    }
 }
