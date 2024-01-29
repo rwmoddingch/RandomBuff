@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Kittehface.Framework20;
+using Newtonsoft.Json;
 using RWCustom;
 using UnityEngine;
 
@@ -36,8 +38,10 @@ namespace RandomBuff.Core.SaveData
             if (rainWorld?.playerHandler?.profile != null)
             {
                 UserData.OnFileMounted += UserData_OnFileMounted;
-                BuffPlugin.Log($"Loading save data, Slot : {UsedSlot = CurrentSlot}");
+                BuffPlugin.Log($"Loading save data, Slot : {UsedSlot = CurrentSlot}, " +
+                               $"Main game slot: {Custom.rainWorld.options.saveSlot}");
                 UserData.Mount(rainWorld.playerHandler.profile, $"buffsave{UsedSlot}");
+                return;
             }
 
             LoadFailedFallBack();
@@ -45,18 +49,33 @@ namespace RandomBuff.Core.SaveData
 
         /// <summary>
         /// 保存数据
-        /// TODO : 请在配置文件修改后调用
         /// </summary>
         public void SaveFile()
         {
             if (buffCoreFile != null)
             {
-                BuffPlugin.Log("Saving buff data");
+                BuffPlugin.Log($"Saving buff data at slot {Instance.UsedSlot}");
                 buffCoreFile.Set<string>("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+                buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+                buffCoreFile.Set<string>("buff-collect", JsonConvert.SerializeObject(buffCollect), UserData.WriteMode.Immediate);
+                return;
+            }
+            BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
+        }
+
+        /// <summary>
+        /// 会在切回主界面自动调用
+        /// 保存配置文件
+        /// </summary>
+        public void SaveConfigFile()
+        {
+            if (buffCoreFile != null)
+            {
+                BuffPlugin.Log($"Save config file at slot {Instance.UsedSlot}");
                 buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
                 return;
             }
-            BuffPlugin.LogError("Failed to save buff data");
+            BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
         }
 
         private void Platform_OnRequestUserDataRead(List<object> pendingUserDataReads)
@@ -96,7 +115,8 @@ namespace RandomBuff.Core.SaveData
             {
                 if (!buffCoreFile.Contains("buff-config")  ||
                     !buffCoreFile.Contains("buff-version") ||
-                    !buffCoreFile.Contains("buff-data"))
+                    !buffCoreFile.Contains("buff-data")    ||
+                    !buffCoreFile.Contains("buff-collect"))
                 {
                     LoadFailedFallBack();
                 }
@@ -104,6 +124,8 @@ namespace RandomBuff.Core.SaveData
 
                 BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), buffCoreFile.Get<string>("buff-version"));
                 BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), buffCoreFile.Get<string>("buff-version"));
+
+                buffCollect = JsonConvert.DeserializeObject<List<string>>(buffCoreFile.Get<string>("buff-collect"));
 
                 //更新格式版本
                 buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
@@ -131,10 +153,8 @@ namespace RandomBuff.Core.SaveData
             buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
             buffCoreFile.Set<string>("buff-config", "");
             buffCoreFile.Set<string>("buff-data", "");
+            buffCoreFile.Set<string>("buff-collect", "");
         }
-
-
-
     }
 
     /// <summary>
@@ -147,8 +167,9 @@ namespace RandomBuff.Core.SaveData
 
         private static RainWorld rainWorld => Custom.rainWorld;
 
-        private static int CurrentSlot => rainWorld.options.saveSlot >= 0
-            ? (rainWorld.options.saveSlot + 1) : Mathf.Abs(rainWorld.options.saveSlot);
+        private static int CurrentSlot => rainWorld.options.saveSlot >= 100
+            ? (rainWorld.options.saveSlot)
+            : rainWorld.options.saveSlot + 100;
 
         public static void OnModsInit()
         {
@@ -161,9 +182,30 @@ namespace RandomBuff.Core.SaveData
             orig(self,rainWorld, tryLoad, saveAfterLoad);
             if (Instance?.UsedSlot != CurrentSlot)
             {
+                if (Instance != null)
+                {
+                    BuffPlugin.Log($"Save last slot file at slot {Instance.UsedSlot}, Before load file at Slot {CurrentSlot}");
+                    Instance.SaveFile();
+                }
+
                 Instance = new BuffFile();
             }
+            else if (Instance != null &&
+                     Custom.rainWorld.options.saveSlot < 100)
+            {
+                Instance.SaveConfigFile();
+            }
         }
+
+        public void AddCollect(string buffID)
+        {
+            BuffPlugin.Log($"Add buff collect to Save Slot {CurrentSlot}");
+            if(!buffCollect.Contains(buffID))
+                buffCollect.Add(buffID);
+        }
+
+        public List<string> buffCollect = new();
+
     }
 
 }

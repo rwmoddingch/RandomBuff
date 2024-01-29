@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 using BepInEx;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Hooks;
@@ -28,56 +24,47 @@ namespace RandomBuff
 
         public void OnEnable()
         {
-            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
-            On.RainWorld.PostModsInit += RainWorld_PostModsInit;
-        }
-
-        private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
-        {
+            instance = this;
             try
             {
-                orig(self);
+                On.RainWorld.OnModsInit += RainWorld_OnModsInit;
+                On.RainWorld.PostModsInit += RainWorld_PostModsInit;
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
-            }
-
-            try
-            {
-                if (!isPostLoaded)
-                {
-                    //延迟加载以保证其他plugin的注册完毕后再加载
-                    BuffConfigManager.InitBuffStaticData();
-                    BuffRegister.BuildAllDataStaticWarpper();
-                    isPostLoaded = true;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
+                Logger.LogFatal(e.ToString());
             }
         }
+
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
+
+            try
+            {
+                if (!isLoaded)
+                    File.Create(AssetManager.ResolveFilePath("randomBuff.log")).Close();
+
+            }
+            catch (Exception e)
+            {
+                canAccessLog = false;
+                Logger.LogFatal(e.ToString());
+                Debug.LogException(e);
+            }
+          
             try
             {
                 orig(self);
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                LogException(e);
             }
             try
             {
                 if (!isLoaded)
                 {
-
-                    if(File.Exists(AssetManager.ResolveFilePath("randomBuff.log")))
-                        File.Delete(AssetManager.ResolveFilePath("randomBuff.log"));
-                    File.Create(AssetManager.ResolveFilePath("randomBuff.log")).Close();
-
                     Log($"[Random Buff], version: {saveVersion}");
 
                     if (File.Exists(AssetManager.ResolveFilePath("buff.dev")))
@@ -95,13 +82,40 @@ namespace RandomBuff
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                LogException(e);
+            }
+        }
+
+        private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
+        {
+            try
+            {
+                orig(self);
+            }
+            catch (Exception e)
+            {
+                LogException(e);
+            }
+            try
+            {
+                if (!isPostLoaded)
+                {
+                    //延迟加载以保证其他plugin的注册完毕后再加载
+                    BuffConfigManager.InitBuffStaticData();
+                    BuffRegister.BuildAllDataStaticWarpper();
+                    isPostLoaded = true;
+                }
+            }
+            catch (Exception e)
+            {
+                LogException(e);
             }
         }
 
         private static bool isLoaded = false;
         private static bool isPostLoaded = false;
-
+        private static bool canAccessLog = true;
+        private static BuffPlugin instance;
 
         internal static bool DevEnabled { get; private set; }
 
@@ -113,27 +127,31 @@ namespace RandomBuff
         public static void Log(object message)
         {
             Debug.Log($"[RandomBuff] {message}");
-            File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Message]\t{message}\n");
+            if(canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Message]\t{message}\n");
+           
         }
 
-        /// <summary>
-        /// 会额外保存到../RainWorld_Data/StreamingAssets/randomBuff.log
-        /// </summary>
-        /// <param name="message"></param>
         public static void LogWarning(object message)
         {
             Debug.LogWarning($"[RandomBuff] {message}");
-            File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Warning]\t{message}\n");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Warning]\t{message}\n");
         }
 
-        /// <summary>
-        /// 会额外保存到../RainWorld_Data/StreamingAssets/randomBuff.log
-        /// </summary>
-        /// <param name="message"></param>
         public static void LogError(object message)
         {
             Debug.LogError($"[RandomBuff] {message}");
-            File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Error]\t{message}\n");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Error]\t\t{message}\n");
+        }
+
+        public static void LogException(Exception e)
+        {
+            Debug.LogException(e);
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{e.Message}\n");
+          
         }
     }
 }

@@ -50,21 +50,21 @@ namespace RandomBuff.Core.Buff
         /// </summary>
         /// <param name="game"></param>
         /// <returns>返回true时，代表该增益已经完全触发，增益将会被移除</returns>
-        public abstract bool Trigger(RainWorldGame game);
+        public virtual bool Trigger(RainWorldGame game) => false;
 
 
 
         /// <summary>
         /// 增益的更新方法，与RainWorldGame.Update同步
         /// </summary>
-        public abstract void Update(RainWorldGame game);
+        public virtual void Update(RainWorldGame game){}
 
 
         /// <summary>
         /// 增益的销毁方法，当该增益实例被移除的时候会调用
         /// 注意：当前轮回结束时会清除全部的Buff物体
         /// </summary>
-        public abstract void Destroy();
+        public virtual void Destroy(){}
 
 
         protected Buff() { }

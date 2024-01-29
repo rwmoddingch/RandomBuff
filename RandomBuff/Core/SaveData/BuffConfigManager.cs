@@ -80,7 +80,7 @@ namespace RandomBuff.Core.SaveData
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{allConfigs[buffName.value][key]}");
                     data = default;
                     return false;
@@ -98,7 +98,7 @@ namespace RandomBuff.Core.SaveData
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{staticDatas[buffName].customParameters[key]}");
                     data = default;
                     return false;
@@ -149,7 +149,7 @@ namespace RandomBuff.Core.SaveData
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                BuffPlugin.LogException(e);
                 BuffPlugin.LogError($"{buffName}:{key} data serialize failed !");
                 return;
             }
@@ -252,6 +252,17 @@ namespace RandomBuff.Core.SaveData
         internal static bool ContainsProperty(BuffID id, string key)
             => staticDatas.ContainsKey(id) && staticDatas[id].customParameters.ContainsKey(key);
 
+        internal static BuffStaticData GetStaticData(BuffID id)
+            => staticDatas[id];
+
+        internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
+
+        static BuffConfigManager()
+        {
+            buffTypeTable.Add(BuffType.Duality, new List<BuffID>());
+            buffTypeTable.Add(BuffType.Negative, new List<BuffID>());
+            buffTypeTable.Add(BuffType.Positive, new List<BuffID>());
+        }
 
         /// <summary>
         /// 读取static data
@@ -276,7 +287,7 @@ namespace RandomBuff.Core.SaveData
         {
             foreach (var dir in info.GetDirectories())
             {
-                LoadInDirectory(info, rootPath);
+                LoadInDirectory(info, dir.FullName);
             }
 
             foreach (var file in info.GetFiles("*.json"))
@@ -285,6 +296,7 @@ namespace RandomBuff.Core.SaveData
                         info.FullName.Replace(rootPath, ""), out var data))
                 {
                     staticDatas.Add(data.BuffID, data);
+                    buffTypeTable[data.BuffType].Add(data.BuffID);
                 }
             }
         }
