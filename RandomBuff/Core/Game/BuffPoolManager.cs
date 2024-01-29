@@ -64,7 +64,7 @@ namespace RandomBuff.Core.Game
         /// <returns></returns>
         internal static BuffPoolManager LoadGameBuff(RainWorldGame game)
         {
-            BuffPlugin.Log($"New game, character: {game.StoryCharacter}, " +
+            BuffPlugin.Log($"New game, character: {game.StoryCharacter}, Slot: {game.rainWorld.options.saveSlot}, " +
                            $"buff count: {BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter).Count}");
             return Instance = new BuffPoolManager(game);
         }
@@ -81,7 +81,7 @@ namespace RandomBuff.Core.Game
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Exception happened when invoke gain Update of {buff.ID}");
                 }
             }
@@ -105,7 +105,7 @@ namespace RandomBuff.Core.Game
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
@@ -132,7 +132,7 @@ namespace RandomBuff.Core.Game
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }

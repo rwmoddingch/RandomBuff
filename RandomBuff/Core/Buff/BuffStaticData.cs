@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using static System.Net.Mime.MediaTypeNames;
+using Kittehface.Framework20;
 
 namespace RandomBuff.Core.Buff
 {
@@ -56,7 +57,6 @@ namespace RandomBuff.Core.Buff
         /// <returns></returns>
         public static bool TryLoadStaticData(FileInfo jsonFile, string dirPath,out BuffStaticData newData)
         {
-            BuffPlugin.Log(dirPath);
             string loadState = "";
             try
             {
@@ -67,7 +67,7 @@ namespace RandomBuff.Core.Buff
 
                 if (rawData.ContainsKey(loadState = "FaceName"))
                 {
-                    newData.FaceName = $"{dirPath}/{rawData[loadState]}";
+                    newData.FaceName = $"{dirPath.Substring(1)}/{rawData[loadState]}";
                     try
                     {
                         Futile.atlasManager.LoadImage(newData.FaceName);
@@ -84,10 +84,21 @@ namespace RandomBuff.Core.Buff
                 }
 
                 if (rawData.ContainsKey(loadState = "Triggerable"))
-                    newData.Triggerable = (bool)rawData[loadState];
+                {
+                    if (rawData[loadState] is bool)
+                        newData.Triggerable = (bool)rawData[loadState];
+                    else
+                        newData.Triggerable = bool.Parse(rawData[loadState] as string);
+                }
+
 
                 if (rawData.ContainsKey(loadState = "Stackable"))
-                    newData.Stackable = (bool)rawData[loadState];
+                {
+                    if (rawData[loadState] is bool)
+                        newData.Stackable = (bool)rawData[loadState];
+                    else
+                        newData.Stackable = bool.Parse(rawData[loadState] as string);
+                }
 
                 if (rawData.ContainsKey(loadState = "BuffType"))
                     newData.BuffType = (BuffType)Enum.Parse(typeof(BuffType),(string)rawData[loadState]);
@@ -99,7 +110,7 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "Color"))
                     newData.Color = Custom.hexToColor((string)rawData[loadState]);
 
-
+                bool hasMutli = false;
                 foreach (var language in ExtEnumBase.GetNames(typeof(InGameTranslator.LanguageID)))
                 {
                     if (rawData.ContainsKey(language))
@@ -120,7 +131,23 @@ namespace RandomBuff.Core.Buff
                             info.Description = (string)obj1;
 
                         newData.CardInfos.Add(new InGameTranslator.LanguageID(language),info);
+                        hasMutli = true;
                     }
+                }
+
+                if (!hasMutli)
+                {
+                    CardInfo info = new CardInfo();
+                    if (rawData.TryGetValue(loadState = "BuffName", out var obj))
+                        info.BuffName = (string)obj;
+                    else
+                    {
+                        info.BuffName = newData.BuffID.value;
+                        BuffPlugin.LogWarning($"Can't find BuffName At {jsonFile.Name}:Default");
+                    }
+                    if (rawData.TryGetValue(loadState = "Description", out var obj1))
+                        info.Description = (string)obj1;
+                    newData.CardInfos.Add(InGameTranslator.LanguageID.English,info);
                 }
 
                 if (rawData.ContainsKey("Custom"))
@@ -153,7 +180,7 @@ namespace RandomBuff.Core.Buff
                     BuffPlugin.LogError($"Load property failed: {loadState}! at {jsonFile.Name}");
                 else
                     BuffPlugin.LogError($"Load json file failed! at {jsonFile.Name}");
-                Debug.LogException(e);
+                BuffPlugin.LogException(e);
 
                 newData = null;
                 return false;

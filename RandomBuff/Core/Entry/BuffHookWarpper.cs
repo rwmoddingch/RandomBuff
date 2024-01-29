@@ -44,7 +44,7 @@ namespace RandomBuff.Core.Entry
                 catch (Exception ex)
                 {
                     BuffPlugin.Log($"BuffHookWarpper : Exception when enable hook ");
-                    Debug.LogException(ex);
+                    BuffPlugin.LogException(ex);
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace RandomBuff.Core.Entry
                 catch (Exception ex)
                 {
                     BuffPlugin.Log($"BuffHookWarpper : Exception when enable hook ");
-                    Debug.LogException(ex);
+                    BuffPlugin.LogException(ex);
                 }
             }
         }
