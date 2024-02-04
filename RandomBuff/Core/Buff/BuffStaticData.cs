@@ -63,7 +63,7 @@ namespace RandomBuff.Core.Buff
                 var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
                 newData = new BuffStaticData();
 
-                newData.BuffID = (BuffID)ExtEnumBase.Parse(typeof(BuffID),(string)rawData[loadState = "BuffID"],true);
+                newData.BuffID = (BuffID)ExtEnumBase.Parse(typeof(BuffID),(string)rawData[loadState = "ID"],true);
 
                 if (rawData.ContainsKey(loadState = "FaceName"))
                 {
@@ -197,7 +197,7 @@ namespace RandomBuff.Core.Buff
             StringBuilder builder = new();
             builder.AppendLine();
             builder.AppendLine("----------------------");
-            builder.AppendLine($"BuffID : {BuffID}");
+            builder.AppendLine($"ID : {BuffID}");
             builder.AppendLine($"Triggerable : {Triggerable}");
             builder.AppendLine($"Stackable : {Stackable}");
             builder.AppendLine($"FaceName : {FaceName}");

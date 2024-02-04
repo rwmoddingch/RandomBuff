@@ -148,11 +148,12 @@ namespace RandomBuff.Core.SaveData
         }
 
         /// <summary>
-        /// 移除存档内BuffData
+        /// 减少存档内BuffData的堆叠层数
+        /// 层数为0或非堆叠自动删除
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        internal void RemoveBuffData(BuffID id)
+        internal void UnstackBuff(BuffID id)
         {
             SlugcatStats.Name name;
             if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
@@ -162,17 +163,39 @@ namespace RandomBuff.Core.SaveData
 
             if (!allDatas.ContainsKey(name))
             {
-                BuffPlugin.LogError($"Try remove buff at null slot: {name}");
+                BuffPlugin.LogError($"Try unstack buff at null slot: {name}");
                 return;
             }
 
             if (!allDatas[name].ContainsKey(id))
             {
-                BuffPlugin.LogError($"remove buff not found: {id}");
+                BuffPlugin.LogError($"unstack buff not found: {id}");
                 return;
             }
-            BuffPlugin.LogError($"Remove buff : {name}");
 
+            if (BuffConfigManager.GetStaticData(id).Stackable)
+            {
+                BuffPlugin.LogError($"UnStack buff : {name}");
+                allDatas[name][id].UnStack();
+                if (allDatas[name][id].StackLayer == 0)
+                    RemoveBuffData(name, id);
+                return;
+            }
+            else
+            {
+                RemoveBuffData(name, id);
+            }    
+        }
+
+
+        /// <summary>
+        /// 移除存档内BuffData
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private void RemoveBuffData(SlugcatStats.Name name, BuffID id)
+        {
+            BuffPlugin.LogError($"Remove buff : {name}");
             allDatas[name].Remove(id);
         }
 

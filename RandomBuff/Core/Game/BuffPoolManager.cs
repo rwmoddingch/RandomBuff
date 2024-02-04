@@ -29,6 +29,17 @@ namespace RandomBuff.Core.Game
                 return buffDictionary[id];
             return null;
         }
+
+        public bool TryGetBuff(BuffID id, out IBuff buff)
+        {
+            buff = null;
+            if (buffDictionary.ContainsKey(id))
+            {
+                buff = buffDictionary[id];
+                return true;
+            }
+            return false;
+        }
     }
 
 
@@ -55,6 +66,22 @@ namespace RandomBuff.Core.Game
             {
                 CreateBuff(data.Key);
             }
+        }
+
+        /// <summary>
+        /// 游戏进行中删除Buff
+        /// </summary>
+        /// <param name="id"></param>
+        internal void RemoveBuff(BuffID id)
+        {
+            if (!buffDictionary.ContainsKey(id))
+            {
+                BuffPlugin.LogError($"remove buff not found: {id}");
+                return;
+            }
+            buffDictionary[id].Destroy();
+            buffDictionary.Remove(id);
+            BuffDataManager.Instance.UnstackBuff(id);
         }
 
         /// <summary>
@@ -122,12 +149,13 @@ namespace RandomBuff.Core.Game
                 return;
 
             BuffPlugin.Log("------Win Game & Cycle End------");
+            BuffDataManager.Instance.WinGame(this);
             foreach (var buff in buffList)
             {
                 try
                 {
-                    if (buff.NeedDeletion)
-                        BuffDataManager.Instance.RemoveBuffData(buff.ID);
+                    if (BuffDataManager.Instance.GetBuffData(buff.ID).NeedDeletion)
+                        BuffDataManager.Instance.UnstackBuff(buff.ID);
                     
                 }
                 catch (Exception e)
@@ -136,7 +164,6 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
-            BuffDataManager.Instance.WinGame(this);
             BuffFile.Instance.SaveFile();
         }
 
@@ -158,7 +185,7 @@ namespace RandomBuff.Core.Game
 
             if (!BuffDataManager.Instance.GetDataDictionary(Game.StoryCharacter).ContainsKey(id))
             {
-                BuffPlugin.LogWarning($"Buff: {id} Not Contain in BuffDataManager");
+                BuffPlugin.Log($"Buff: {id} Not Contain in BuffDataManager");
                 BuffDataManager.Instance.GetOrCreateBuffData(id, true);
             }
             var type = BuffRegister.GetBuffType(id);
@@ -172,6 +199,20 @@ namespace RandomBuff.Core.Game
             buffDictionary.Add(id, buff);
             buffList.Add(buff);
             return buff;
+        }
+
+
+        internal void TriggerBuff(BuffID id, bool ignoreCheck = false)
+        {
+            if (TryGetBuff(id, out var buff) && ((BuffConfigManager.GetStaticData(id).Triggerable && buff.Triggerable) || ignoreCheck))
+            {
+                //TODO : 一些效果
+                if (buff.Trigger(Game))
+                {
+                    //TODO : 一些效果
+                    RemoveBuff(buff.ID);
+                }
+            }
         }
     }
 }

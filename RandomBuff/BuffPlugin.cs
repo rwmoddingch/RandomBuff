@@ -18,7 +18,7 @@ using UnityEngine;
 namespace RandomBuff
 {
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
-    class BuffPlugin : BaseUnityPlugin
+    public class BuffPlugin : BaseUnityPlugin
     {
         public const string saveVersion = "a-0.0.1";
 
@@ -152,6 +152,19 @@ namespace RandomBuff
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{e.Message}\n");
           
+        }
+
+        public static void LogException(Exception e,object m)
+        {
+            Debug.LogException(e);
+            if (canAccessLog)
+            {
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{e.Message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{m}\n");
+
+            }
+
+
         }
     }
 }
