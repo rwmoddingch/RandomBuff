@@ -1,0 +1,10 @@
+{
+    "FaceName": "pandorabox",
+    "ID" : "PandoraBox",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "潘多拉魔盒",
+    "Description" : "无论玩家吞下去什么，吐出来的时候都会变成一个新的随机物品",
+    "Color" : "#FFF0B9"
+}

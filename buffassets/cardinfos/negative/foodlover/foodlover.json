@@ -1,0 +1,16 @@
+{
+    "FaceName": "foodlover",
+    "ID" : "FoodLover",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "食物爱好者",
+    "Description" : "只能拾取食物",
+    "Color" : "#7B646D",
+    "Chinese" : {
+
+    },
+    "English" : {
+
+    }
+}

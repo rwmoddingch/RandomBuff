@@ -40,7 +40,7 @@ namespace BuffTest
 
             if (Input.GetKeyDown(KeyCode.L))
             {
-                var re = BuffPicker.GetNewBuffsOfType(BuffType.Positive, self.StoryCharacter);
+                var re = BuffPicker.GetNewBuffsOfType(self.StoryCharacter,1, BuffType.Positive);
                 foreach (var b in re)
                 {
                     Log($"Pick {b.BuffID}");
@@ -52,7 +52,7 @@ namespace BuffTest
         {
             BuffPlugin.Log($"<TEST BUFF> {msg}");
         }
-        public static BuffID TestBuffID = new BuffID("BounceSpear", true);
+        public static BuffID TestBuffID = new BuffID("TestBuff", true);
         public static BuffID TestBuff2ID = new BuffID("TestBuff2", true);
 
     }

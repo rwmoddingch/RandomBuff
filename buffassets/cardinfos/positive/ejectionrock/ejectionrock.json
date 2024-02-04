@@ -1,0 +1,10 @@
+{
+    "FaceName": "ejectionrock",
+    "ID" : "EjectionRock",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "弹射石头",
+    "Description" : "抵石头会在击中墙壁的时候随机飞向另一个方向，直到命中生物才会停下。并且对命中目标造成大量击退（包括玩家自己）",
+    "Color" : "#4C535A"
+}

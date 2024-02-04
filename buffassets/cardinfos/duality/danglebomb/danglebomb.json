@@ -1,0 +1,10 @@
+{
+    "FaceName": "danglebomb",
+    "ID" : "DangleBomb",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "蓝果炸弹",
+    "Description" : "使所有蓝果变成定时炸弹，�?投出后倒�?�时并爆炸，食用也会导致爆炸",
+    "Color" : "#FFE7B0"
+}

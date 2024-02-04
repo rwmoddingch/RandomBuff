@@ -79,6 +79,7 @@ namespace RandomBuff.Core.Game
                 BuffPlugin.LogError($"remove buff not found: {id}");
                 return;
             }
+            BuffHookWarpper.DisableBuff(id);
             buffDictionary[id].Destroy();
             buffDictionary.Remove(id);
             BuffDataManager.Instance.UnstackBuff(id);
@@ -196,6 +197,7 @@ namespace RandomBuff.Core.Game
             }
 
             var buff = (IBuff)Activator.CreateInstance(type);
+            BuffHookWarpper.EnableBuff(id);
             buffDictionary.Add(id, buff);
             buffList.Add(buff);
             return buff;

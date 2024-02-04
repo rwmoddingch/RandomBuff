@@ -1,0 +1,10 @@
+{
+    "FaceName": "bouncespear",
+    "ID" : "BounceSpear",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "弹射矛",
+    "Description" : "使普通矛和电矛具有弹射效果，命中一个目标后会射向最近的生物",
+    "Color" : "#74D8FF"
+}

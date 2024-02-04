@@ -25,7 +25,7 @@ namespace BuiltinBuffs.Negative
 
     internal class ArachnophobiaIBuffEntry : IBuffEntry
     {
-        public static BuffID arachnophobiaID = new ("Arachnophobia", true);
+        public static BuffID arachnophobiaID = new BuffID("Arachnophobia", true);
 
         public void OnEnable()
         {

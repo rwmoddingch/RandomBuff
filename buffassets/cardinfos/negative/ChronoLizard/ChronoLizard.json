@@ -1,0 +1,16 @@
+{
+    "FaceName": "ChronoLizard",
+    "ID" : "ChronoLizard",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "#15E6DB",
+    "Chinese" : {
+        "BuffName" : "青色闪电",
+        "Description" : "青蜥蜴可以瞬间完成弹射充能，并且大幅增加弹射速度，身后留下青色拖尾并麻痹（眩晕）接触拖尾的生物"    
+    },
+    "English" : {
+        "BuffName" : "CyanZap",
+        "Description" : "Cyanlizard can instantly complete the jump charge, leaving a cyan tail behind and stun any touching creature"
+    }
+}

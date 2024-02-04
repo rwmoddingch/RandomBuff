@@ -1,0 +1,10 @@
+{
+    "FaceName": "lightspeedspear",
+    "ID" : "LightSpeedSpear",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "光速矛",
+    "Description" : "火矛将会瞬间飞到目的地，同时房间中有小概率刷出火矛",
+    "Color" : "#B0002A"
+}

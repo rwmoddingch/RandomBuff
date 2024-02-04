@@ -1,0 +1,16 @@
+{
+    "FaceName": "upgradation",
+    "ID" : "Upgradation",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "#FF019F",
+    "Chinese" : {
+        "BuffName" : "提升",
+        "Description" : "每过一段时间提升一个房间内可以提升的生物"
+    },
+    "English" : {
+        "BuffName" : "Upgradation",
+        "Description" : "Upgrade creatures that can be upgraded in room every once in a while"
+    }
+}

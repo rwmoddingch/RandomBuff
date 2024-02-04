@@ -1,0 +1,10 @@
+{
+    "FaceName": "infooverload",
+    "ID" : "InfoOverload",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "信息冗余",
+    "Description" : "将所有非彩色珍珠替换为赞美诗",
+    "Color" : "#A475FF"
+}

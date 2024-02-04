@@ -29,8 +29,8 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("Buffassets/assetBundle/builtinbundle"));
-            Custom.rainWorld.Shaders.Add("DivineBeingRing", FShader.CreateShader("DivineBeingRing", bundle.LoadAsset<Shader>("assets/myshader/divinering.shader")));
+            var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/builtinbundle"));
+            Custom.rainWorld.Shaders.Add("DivineBeingRing", FShader.CreateShader("DivineBeingRing", bundle.LoadAsset<Shader>("divinering")));
 
             BuffRegister.RegisterBuff<DivineBeingBuff, DivineBeingBuffData, DivineBeingIBuffEntry>(DivineBeingBuffID);
         }

@@ -28,8 +28,8 @@ namespace BuiltinBuffs.Negative
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<ChronoLizardBuff, ChronoLizardBuffData, ChronoLizardIBuffEntry>(ChronoLizardBuffID);
-            var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("Buffassets/assetBundle/teleportbias"));
-            var shader = bundle.LoadAsset<Shader>("assets/myshader/teleportbias.shader");
+            var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/teleportbias"));
+            var shader = bundle.LoadAsset<Shader>("teleportbias");
             Custom.rainWorld.Shaders.Add("FissureShader", FShader.CreateShader("FissureShader", shader));
         }
 

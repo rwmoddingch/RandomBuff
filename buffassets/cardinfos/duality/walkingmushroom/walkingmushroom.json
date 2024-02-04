@@ -1,0 +1,10 @@
+{
+    "FaceName": "walkingmushroom",
+    "ID" : "WalkingMushroom",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "走路菇",
+    "Description" : "子弹菇获得移动能力",
+    "Color" : "#A475FF"
+}

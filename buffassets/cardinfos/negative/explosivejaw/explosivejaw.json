@@ -1,0 +1,16 @@
+{
+    "FaceName": "explosivejaw",
+    "ID" : "ExplosiveJaw",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "#B90014",
+    "Chinese" : {
+        "BuffName" : "爆炸头",
+        "Description" : "蜥蜴的头部在被矛命中时会产生一次爆炸"
+    },
+    "English" : {
+        "BuffName" : "ExplosiveJaw",
+        "Description" : "lizard's head creates an explosion when hit by spears"
+    }
+}

@@ -8,14 +8,19 @@ using JollyCoop.JollyMenu;
 using Menu;
 using Menu.Remix;
 using Music;
+using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;
 
-namespace RandomBuff.Core.BuffMenu
+namespace RandomBuff.Core.BuffMenu.Test
 {
+
+    //T开头均为测试用
     internal class TStartGameMenu : Menu.Menu, CheckBox.IOwnCheckBox
     {
-        public TStartGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, ID)
+        public static ProcessManager.ProcessID TestStartGameMenu = new("TestStartGameMenu", true);
+
+        public TStartGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, TestStartGameMenu)
         {
             if (manager.rainWorld.options.saveSlot < 100)
             {
@@ -25,19 +30,28 @@ namespace RandomBuff.Core.BuffMenu
                 manager.rainWorld.progression = new PlayerProgression(manager.rainWorld, true, false);
             }
 
+            BuffFile.OnFileReadCompleted += OnDataLoaded;
+        }
+
+        void OnDataLoaded()
+        {
+            BuffFile.OnFileReadCompleted -= OnDataLoaded;
+            loaded=true;
             pages = new List<Page>()
             {
                 new (this, null, "OHHHH", 0)
             };
-            pages[0].subObjects.Add(selectButton = new SimpleButton(this, pages[0], Translate("NONE"), "SELECT", new Vector2(200, 350),
+            pages[0].subObjects.Add(selectButton = new SimpleButton(this, pages[0], Translate(SlugcatStats.getSlugcatName(currentName)), "SELECT", new Vector2(200, 350),
                 new Vector2(120, 40)));
-            pages[0].subObjects.Add(startButton =new SimpleButton(this, pages[0], Translate("NEW GAME"), "START", new Vector2(200, 300),
+            pages[0].subObjects.Add(startButton = new SimpleButton(this, pages[0], Translate("NEW GAME"), "START", new Vector2(200, 300),
                 new Vector2(120, 40)));
             pages[0].subObjects.Add(new SimpleButton(this, pages[0], Translate("EXIT"), "EXIT", new Vector2(200, 250),
                 new Vector2(120, 40)));
-            pages[0].subObjects.Add(new CheckBox(this, pages[0],this, new Vector2(350, 360),65, Translate("Restart"),"RESET",true));
-
-            startButton.inactive = true;
+            pages[0].subObjects.Add(new CheckBox(this, pages[0], this, new Vector2(350, 360), 65, Translate("Restart"), "RESET", true));
+            if (!manager.rainWorld.progression.IsThereASavedGame(currentName))
+                startButton.menuLabel.text = Translate("NEW GAME");
+            else
+                startButton.menuLabel.text = Translate("CONTINUE");
             if (ModManager.JollyCoop)
             {
                 pages[0].subObjects.Add(coopButton = new SymbolButton(this, pages[0],
@@ -46,14 +60,13 @@ namespace RandomBuff.Core.BuffMenu
                 coopButton.size = coopButton.roundedRect.size;
 
             }
-
         }
 
         private SlugcatStats.Name currentName = SlugcatStats.Name.White;
         private SimpleButton startButton;
         private SimpleButton selectButton;
         private SymbolButton coopButton;
-        private bool needReset = false;
+        private bool needReset;
 
         public override void Singal(MenuObject sender, string message)
         {
@@ -64,16 +77,17 @@ namespace RandomBuff.Core.BuffMenu
                     currentName.Index == SlugcatStats.Name.values.entries.Count - 1 ? 0 : currentName.Index + 1]);
 
                 selectButton.menuLabel.text = Translate(SlugcatStats.getSlugcatName(currentName));
-                startButton.inactive = false;
                 if (!manager.rainWorld.progression.IsThereASavedGame(currentName))
                     startButton.menuLabel.text = Translate("NEW GAME");
                 else
                     startButton.menuLabel.text = Translate("CONTINUE");
             }
-            else if(message == "START")
+            else if (message == "START")
             {
                 if (!manager.rainWorld.progression.IsThereASavedGame(currentName) || needReset)
                 {
+                    manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
+                        currentName;
                     manager.rainWorld.progression.WipeSaveState(currentName);
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
                     manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
@@ -81,6 +95,8 @@ namespace RandomBuff.Core.BuffMenu
                 }
                 else
                 {
+                    manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
+                        currentName;
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
                     manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
                     PlaySound(SoundID.MENU_Continue_Game);
@@ -103,6 +119,28 @@ namespace RandomBuff.Core.BuffMenu
         {
             return needReset;
         }
+
+        public override void Update()
+        {
+            if (!loaded)
+                return;
+
+            base.Update();
+        }
+
+        public override void RawUpdate(float dt)
+        {
+            if (!loaded)
+            {
+                manager.blackDelay = 0.1f;
+                return;
+            }
+            base.RawUpdate(dt);
+        }
+
+
+        private bool loaded = false;
+
 
         public void SetChecked(CheckBox box, bool c)
         {
