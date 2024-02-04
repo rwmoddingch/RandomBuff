@@ -11,7 +11,7 @@ using Music;
 using RWCustom;
 using UnityEngine;
 
-namespace RandomBuff.Core.TestMenu
+namespace RandomBuff.Core.BuffMenu
 {
     internal class TStartGameMenu : Menu.Menu, CheckBox.IOwnCheckBox
     {

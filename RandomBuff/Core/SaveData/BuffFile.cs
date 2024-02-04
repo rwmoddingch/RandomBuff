@@ -134,6 +134,7 @@ namespace RandomBuff.Core.SaveData
             }
             else
             {
+                BuffPlugin.LogError("BuffCoreFile read failed");
                 LoadFailedFallBack();
             }
         }

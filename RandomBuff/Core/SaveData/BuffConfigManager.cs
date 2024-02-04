@@ -173,7 +173,6 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     public partial class BuffConfigManager
     {
-
         private BuffConfigManager(string config, string formatVersion)
         {
             foreach (var buffSingle in Regex.Split(config, BuffSplit)
@@ -287,7 +286,7 @@ namespace RandomBuff.Core.SaveData
         {
             foreach (var dir in info.GetDirectories())
             {
-                LoadInDirectory(info, dir.FullName);
+                LoadInDirectory(dir, rootPath);
             }
 
             foreach (var file in info.GetFiles("*.json"))
