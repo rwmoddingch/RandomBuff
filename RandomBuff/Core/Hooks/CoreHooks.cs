@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Menu;
+using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
-using RandomBuff.Core.TestMenu;
 using UnityEngine;
 
 namespace RandomBuff.Core.Hooks
@@ -38,7 +38,7 @@ namespace RandomBuff.Core.Hooks
         {
             if (ID == TestStartGameMenu)
             {
-                self.currentMainLoop = new TStartGameMenu(self, ID);
+                self.currentMainLoop = new BuffGameMenu(self, ID);
             }
             orig(self, ID);
       

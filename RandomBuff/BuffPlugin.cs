@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using BepInEx;
@@ -36,6 +38,10 @@ namespace RandomBuff
             }
         }
 
+        private void Update()
+        {
+            Render.CardRender.CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
+        }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
@@ -72,6 +78,7 @@ namespace RandomBuff
                         DevEnabled = true;
                         LogWarning("Debug Enable");
                     }
+                    Render.CardRender.CardBasicAssets.LoadAssets();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();

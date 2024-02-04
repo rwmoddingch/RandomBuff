@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using static System.Net.Mime.MediaTypeNames;
 using Kittehface.Framework20;
+using RandomBuff.Render.CardRender;
 
 namespace RandomBuff.Core.Buff
 {
@@ -29,6 +30,29 @@ namespace RandomBuff.Core.Buff
         public BuffType BuffType { get; private set; } = BuffType.Positive;
         public BuffProperty BuffProperty { get; private set; } = BuffProperty.Normal;
         public bool Stackable { get; private set; } = false;
+
+        //帮助方法
+        internal Texture GetFaceTexture()
+        {
+            return Futile.atlasManager.GetAtlasWithName(FaceName).texture;
+        }
+
+        internal Texture GetBackTexture()
+        {
+            if (BuffType == BuffType.Positive)
+                return CardBasicAssets.MoonBack;
+            else if (BuffType == BuffType.Duality)
+                return CardBasicAssets.SlugBack;
+            else
+                return CardBasicAssets.FPBack;
+        }
+
+        internal CardInfo GetCardInfo(InGameTranslator.LanguageID languageID)
+        {
+            if(CardInfos.TryGetValue(languageID, out CardInfo cardInfo))
+                return cardInfo;
+            return CardInfos[InGameTranslator.LanguageID.English];
+        }
     }
 
 
@@ -58,6 +82,14 @@ namespace RandomBuff.Core.Buff
         public static bool TryLoadStaticData(FileInfo jsonFile, string dirPath,out BuffStaticData newData)
         {
             string loadState = "";
+            if (string.IsNullOrEmpty(dirPath))
+            {
+                BuffPlugin.Log($"load failed at path {dirPath}");
+                newData = null;
+                return false;
+            }
+            BuffPlugin.Log($"try load static data at {dirPath}");
+
             try
             {
                 var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
