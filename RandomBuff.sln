@@ -5,7 +5,9 @@ VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RandomBuff", "RandomBuff\RandomBuff.csproj", "{F2CDBD63-1794-46A5-8F5D-419E0B972037}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuffTest", "BuffTest\BuffTest.csproj", "{D4A1027B-C841-486F-9563-6CEF60042890}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuffTest", "BuffTest\BuffTest.csproj", "{D4A1027B-C841-486F-9563-6CEF60042890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuiltinBuffs", "BuildInBuff\BuiltinBuffs.csproj", "{87A10DD2-89F9-46F9-BA59-39E5AE589DE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D4A1027B-C841-486F-9563-6CEF60042890}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4A1027B-C841-486F-9563-6CEF60042890}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4A1027B-C841-486F-9563-6CEF60042890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87A10DD2-89F9-46F9-BA59-39E5AE589DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87A10DD2-89F9-46F9-BA59-39E5AE589DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87A10DD2-89F9-46F9-BA59-39E5AE589DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87A10DD2-89F9-46F9-BA59-39E5AE589DE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

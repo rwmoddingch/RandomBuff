@@ -18,11 +18,11 @@ using System.Threading.Tasks;
         [JsonProperty]
         public abstract BuffID ID { get; }
 
+        [JsonProperty]
+        public virtual int StackLayer { get; set; }
 
-        protected BuffData()
-        {
-            
-        }
+
+        protected BuffData() { }
 
         /// <summary>
         /// 轮回结束时候触发
@@ -31,16 +31,37 @@ using System.Threading.Tasks;
 
 
         /// <summary>
+        /// 如果为true，则在周期结束时自动移除Buff
+        /// </summary>
+        public virtual bool NeedDeletion { get; set; }
+
+        /// <summary>
         /// 重复选取
         /// 增加堆叠次数
         /// </summary>
-        public virtual void Stack() { }
+        public virtual void Stack()
+        {
+            StackLayer++;
+        }
+
+        /// <summary>
+        /// 增加减少堆叠次数，在删除的时候被调用
+        /// </summary>
+        public virtual void UnStack()
+        {
+            StackLayer--;
+        }
+
+        /// <summary>
+        /// 是否可以继续增加
+        /// </summary>
+        public virtual bool CanStackMore() => true;
 
 
         /// <summary>
         /// 当存档数据读取后调用
         /// </summary>
-        public abstract void DataLoaded(bool newData);
+        public virtual void DataLoaded(bool newData){}
 
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace BuffTest
         }
 
     }
-    public class TestBuff2 : Buff<TestBuffData2>
+    public class TestBuff2 : Buff<TestBuff2, TestBuffData2>
     {
         public override BuffID ID => TestEntry.TestBuff2ID;
 

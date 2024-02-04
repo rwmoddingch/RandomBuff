@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RandomBuff.Core.Entry
 {
-    internal interface IBuffEntry
+    public interface IBuffEntry
     {
         public void OnEnable();
     }

@@ -35,7 +35,7 @@ namespace BuffTest
         [CustomStaticConfig]
         public int TestConfig { get; }
     }
-    public class TestBuff : Buff<TestBuffData>
+    public class TestBuff : Buff<TestBuff,TestBuffData>
     {
         public override BuffID ID => TestEntry.TestBuffID;
 

@@ -106,8 +106,6 @@ namespace RandomBuff.Core.SaveData
             if (result.Contains(UserData.Result.FileNotFound))
             {
                 buffCoreFile.OnWriteCompleted += BuffCoreFile_OnWriteCompleted_NewFile;
-                LoadFailedFallBack();
-                buffCoreFile.Write();
                 return;
             }
 
@@ -120,6 +118,7 @@ namespace RandomBuff.Core.SaveData
                 {
                     LoadFailedFallBack();
                 }
+
                 BuffPlugin.Log($"Buff file version : [{buffCoreFile.Get<string>("buff-version")}], current version : {BuffPlugin.saveVersion}");
 
                 BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), buffCoreFile.Get<string>("buff-version"));
@@ -134,6 +133,7 @@ namespace RandomBuff.Core.SaveData
             }
             else
             {
+                BuffPlugin.LogError($"Unhandled Exception : State ID :{result}");
                 LoadFailedFallBack();
             }
         }
@@ -141,7 +141,10 @@ namespace RandomBuff.Core.SaveData
         private void BuffCoreFile_OnWriteCompleted_NewFile(UserData.File file, UserData.Result result)
         {
             buffCoreFile.OnWriteCompleted -= BuffCoreFile_OnWriteCompleted_NewFile;
+            BuffPlugin.Log($"Create new save slot file At {UsedSlot}");
             Platform.NotifyUserDataReadCompleted(this);
+            LoadFailedFallBack();
+            buffCoreFile.Write();
             if (result.IsFailure())
                 throw new Exception("Create Buff File Failed!"); //TODO : 添加异常处理
         }
@@ -154,6 +157,9 @@ namespace RandomBuff.Core.SaveData
             buffCoreFile.Set<string>("buff-config", "");
             buffCoreFile.Set<string>("buff-data", "");
             buffCoreFile.Set<string>("buff-collect", "");
+            BuffConfigManager.LoadConfig("", BuffPlugin.saveVersion);
+            BuffDataManager.LoadData("", BuffPlugin.saveVersion);
+
         }
     }
 
