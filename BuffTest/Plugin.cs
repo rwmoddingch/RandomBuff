@@ -52,7 +52,7 @@ namespace BuffTest
         {
             BuffPlugin.Log($"<TEST BUFF> {msg}");
         }
-        public static BuffID TestBuffID = new BuffID("TestBuff", true);
+        public static BuffID TestBuffID = new BuffID("BounceSpear", true);
         public static BuffID TestBuff2ID = new BuffID("TestBuff2", true);
 
     }
