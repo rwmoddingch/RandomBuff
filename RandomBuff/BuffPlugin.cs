@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using BepInEx;
@@ -36,6 +38,10 @@ namespace RandomBuff
             }
         }
 
+        private void Update()
+        {
+            Render.CardRender.CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
+        }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
@@ -72,6 +78,7 @@ namespace RandomBuff
                         DevEnabled = true;
                         LogWarning("Debug Enable");
                     }
+                    Render.CardRender.CardBasicAssets.LoadAssets();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
@@ -165,6 +172,30 @@ namespace RandomBuff
             }
 
 
+        }
+    }
+
+    /// <summary>
+    /// 用来简化应用钩子的过程（懒得自己写了）
+    /// 继承这个类并且编写一个名为 HooksOn 的公共静态方法即可
+    /// </summary>
+    internal class HooksApplier
+    {
+        internal static void ApplyHooks()
+        {
+            var applierType = typeof(HooksApplier);
+            var types = applierType.Assembly.GetTypes().Where(a => a.BaseType == applierType && a != applierType);
+            foreach (var t in types)
+            {
+                try
+                {
+                    t.GetMethod("HooksOn", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
         }
     }
 }
