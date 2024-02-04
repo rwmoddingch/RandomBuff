@@ -17,7 +17,7 @@ namespace BuiltinBuffs.Duality
 {
     internal class DangleBombIBuffEntry : IBuffEntry
     {
-        public static BuffID dangleBombBuffID = new BuffID("DangleBombBuffID", true);
+        public static BuffID dangleBombBuffID = new BuffID("DangleBomb", true);
         public static ConditionalWeakTable<DangleFruit, DangleBombModule> modules = new ConditionalWeakTable<DangleFruit, DangleBombModule>();
 
         public static void HookOn()

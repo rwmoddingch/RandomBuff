@@ -1,0 +1,10 @@
+{
+    "FaceName": "herbicide",
+    "ID" : "Herbicide",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "除草剂",
+    "Description" : "清除所有舌草",
+    "Color" : "#3C8F9E"
+}

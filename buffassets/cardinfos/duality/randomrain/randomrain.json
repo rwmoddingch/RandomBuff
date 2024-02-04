@@ -1,0 +1,10 @@
+{
+    "FaceName": "randomrain",
+    "ID" : "RandomRain",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "随机性雨",
+    "Description" : "雨循环波动更大了，最低雨计时为原来的二分之一，最高的雨计时为原来的两倍",
+    "Color" : "#A475FF"
+}

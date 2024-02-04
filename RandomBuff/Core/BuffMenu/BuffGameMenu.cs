@@ -6,6 +6,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using MoreSlugcats;
+using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
+using RandomBuff.Core.SaveData;
 using UnityEngine;
 
 namespace RandomBuff.Core.BuffMenu
@@ -26,12 +30,13 @@ namespace RandomBuff.Core.BuffMenu
         CheckBox restartCheckbox;
 
         CardInteractionManager interactionManager;
-        BuffCard testCard;
+        BuffCard[] testCard = new BuffCard[3];
 
         MenuLabel testLabel;
 
         public BuffGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, ID)
         {
+          
             if (manager.rainWorld.options.saveSlot < 100)//诺普的存档加载
             {
                 var lastSlot = manager.rainWorld.options.saveSlot;
@@ -40,7 +45,18 @@ namespace RandomBuff.Core.BuffMenu
                 manager.rainWorld.progression = new PlayerProgression(manager.rainWorld, true, false);
             }
             SetupSlugNameOrders();
-            foreach(var name in slugNameOrders)
+
+            //延迟加载等待存档载入完毕
+            BuffFile.OnFileReadCompleted += OnDataLoaded;
+
+
+        }
+
+        void OnDataLoaded()
+        {
+            loaded = true;
+            BuffFile.OnFileReadCompleted -= OnDataLoaded;
+            foreach (var name in slugNameOrders)
             {
                 saveGameData.Add(name, MineFromSave(manager, name));
             }
@@ -67,19 +83,30 @@ namespace RandomBuff.Core.BuffMenu
             restartCheckbox.label.pos.x = restartCheckbox.label.pos.x + (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
 
             interactionManager = new BasicInteractionManager();
-            testCard = new BuffCard(new Buff.BuffID("BounceSpear"));
-            container.AddChild(testCard.Container);
+            var cards = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 3, BuffType.Positive);
 
-            testCard.Position = new Vector2(400f, 300f);
+            for (int i = 0; i < 3; i++)
+            {
+                testCard[i] = new BuffCard(cards[i].BuffID);
+                container.AddChild(testCard[i].Container);
 
-            interactionManager.ManageCard(testCard);
-            testCard.Container.MoveToBack();
+                testCard[i].Position = new Vector2(300 + 300 * i, 300f);
+
+                interactionManager.ManageCard(testCard[i]);
+                testCard[i].Container.MoveToBack();
+            }
+
         }
+
+        private bool loaded = false;
 
         void SetupSlugNameOrders()
         {
             foreach(var entry in SlugcatStats.Name.values.entries)
             {
+                if(entry.Contains("Jolly") || entry == SlugcatStats.Name.Night.value || entry == MoreSlugcatsEnums.SlugcatStatsName.Slugpup.value)
+                    continue;
+                
                 slugNameOrders.Add(new SlugcatStats.Name(entry));
             }
         }
@@ -125,13 +152,25 @@ namespace RandomBuff.Core.BuffMenu
 
         public override void Update()
         {
+            if (!loaded)
+                return;
+
             base.Update();
             interactionManager.Update();
-            testLabel.text = $"CurrentFocused: {testCard.CurrentFocused}; localMousePos x:{testCard.LocalMousePos.x} y:{testCard.LocalMousePos.y}\nEdge : {testCard.Highlight}";
+                testLabel.text = $"CurrentFocused: {testCard[0].CurrentFocused}; localMousePos x:{testCard[0].LocalMousePos.x} y:{testCard[0].LocalMousePos.y}\nEdge : {testCard[0].Highlight}";
+            
         }
+
 
         public override void RawUpdate(float dt)
         {
+            if (!loaded)
+            {
+                manager.blackDelay = 0.1f;
+                return;
+            }
+
+
             base.RawUpdate(dt);
             interactionManager.GrafUpdate();
         }

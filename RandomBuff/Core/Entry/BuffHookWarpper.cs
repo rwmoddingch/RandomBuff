@@ -87,7 +87,7 @@ namespace RandomBuff.Core.Entry
                     {
                         ilProcessor.Emit(OpCodes.Call,
                             hookAssembly.GetType(m.DeclaringType.FullName).GetMethod(m.Name.Replace("add", "remove")));
-                        BuffPlugin.Log($"Add remove {m.Name.Replace("add", "remove")}");
+                        //BuffPlugin.Log($"Add {m.Name.Replace("add", "remove")}");
                         continue;
                     }
                 }
@@ -96,7 +96,7 @@ namespace RandomBuff.Core.Entry
                     for (int i = 0; i < ctor.Parameters.Count; i++)
                         ilProcessor.Emit(OpCodes.Pop);
                     ilProcessor.Emit(OpCodes.Ldnull);
-                    BuffPlugin.Log($"Remove RuntimeDetour in remove function");
+                    //BuffPlugin.Log($"Remove RuntimeDetour in remove function");
                     continue;
                 }
                 else if (str.OpCode == OpCodes.Ret)
@@ -107,6 +107,11 @@ namespace RandomBuff.Core.Entry
                 ilProcessor.Append(str);
 
             }
+            //foreach (var a in il.Instrs)
+            //    Print(a);
+            //BuffPlugin.Log($"------------");
+            //foreach (var a in method.Definition.Body.Instructions)
+            //    Print(a);
 
             ILCursor c = new ILCursor(il);
             while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj<Hook>()))
@@ -118,6 +123,18 @@ namespace RandomBuff.Core.Entry
                 registedRemoveHooks.Add(id, method.Generate().CreateDelegate<Action>());
             if (!registedRuntimeHooks.ContainsKey(id))
                 registedRuntimeHooks.Add(id, new List<Hook>());
+        }
+
+        private static void Print(Instruction instr)
+        {
+            try
+            {
+                BuffPlugin.Log($"{instr}");
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.Log($"{instr.Offset}: {instr.OpCode} _____");
+            }
         }
 
         private static Hook AddRuntimeHook(BuffID id, Hook hook)

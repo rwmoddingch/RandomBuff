@@ -82,6 +82,7 @@ namespace RandomBuff
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
+                    //HooksApplier.ApplyHooks();
                     BuffRegister.InitAllBuffPlugin();
                
                     isLoaded = true;

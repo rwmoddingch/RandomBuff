@@ -140,7 +140,12 @@ namespace RandomBuff.Core.Buff
 
 
                 if (rawData.ContainsKey(loadState = "Color"))
-                    newData.Color = Custom.hexToColor((string)rawData[loadState]);
+                {
+                    if (((string)rawData[loadState])[0] == '#')
+                        newData.Color = Custom.hexToColor(((string)rawData[loadState]).Substring(1));
+                    else
+                        newData.Color = Custom.hexToColor((string)rawData[loadState]);
+                }
 
                 bool hasMutli = false;
                 foreach (var language in ExtEnumBase.GetNames(typeof(InGameTranslator.LanguageID)))
@@ -202,8 +207,8 @@ namespace RandomBuff.Core.Buff
                     newData.CardInfos.Add(InGameTranslator.LanguageID.English,new CardInfo(){BuffName = newData.BuffID.value});
                 }
 
-                if (BuffPlugin.DevEnabled)
-                    BuffPlugin.Log(newData.ToDebugString());
+                //if (BuffPlugin.DevEnabled)
+                //    BuffPlugin.Log(newData.ToDebugString());
                 return true;
             }
             catch (Exception e)

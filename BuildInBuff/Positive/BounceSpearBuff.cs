@@ -19,6 +19,9 @@ using RandomBuff.Core.Entry;
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 #pragma warning restore CS0618
+//一个个怎么都是内部类，下次记得写public
+[assembly: InternalsVisibleTo("RandomBuff")]
+
 namespace BuiltinBuffs.Positive
 {
     internal class BounceSpearBuffData : BuffData

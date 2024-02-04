@@ -16,22 +16,25 @@ namespace RandomBuff.Core.Game
     /// </summary>
     static class BuffPicker
     {
-        public static List<BuffStaticData> GetNewBuffsOfType(BuffType type,SlugcatStats.Name name,int pickCount = 3)
+        public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
         {
             var alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.
-                Where(i =>BuffConfigManager.GetStaticData(i).BuffType == type && 
+                Where(i =>types.Contains(BuffConfigManager.GetStaticData(i).BuffType)  && 
                           !BuffConfigManager.GetStaticData(i).Stackable);
             var list = new List<BuffStaticData>();
 
-          
-            var copyUnique = BuffConfigManager.buffTypeTable[type].ToList();
+            var copyUnique = new List<BuffID>();
+            foreach(var type in types)
+                copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             copyUnique.RemoveAll(alreadyHas.Contains);
 
             //TODO: DEBUG
             if (copyUnique.Count < pickCount)
             {
                 BuffPlugin.LogWarning($"No Enough Unique Buff! Count: {pickCount}");
-                copyUnique = BuffConfigManager.buffTypeTable[type];
+                copyUnique.Clear();
+                foreach (var type in types)
+                    copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             }
 
             //TODO: DEBUG

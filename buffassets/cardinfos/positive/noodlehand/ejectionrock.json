@@ -1,0 +1,10 @@
+{
+    "FaceName": "noodlehand",
+    "ID" : "NoodleHand",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "面条手",
+    "Description" : "可以拾取到平常两倍远的物体",
+    "Color" : "#FFE0DC"
+}

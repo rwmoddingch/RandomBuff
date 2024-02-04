@@ -180,8 +180,17 @@ namespace RandomBuff.Core.SaveData
         public static void OnModsInit()
         {
             On.PlayerProgression.ctor += PlayerProgression_ctor;
+            On.PlayerProgression.LoadProgression += PlayerProgression_LoadProgression;
             BuffPlugin.Log("Buff File Hook Loaded");
         }
+
+        private static void PlayerProgression_LoadProgression(On.PlayerProgression.orig_LoadProgression orig, PlayerProgression self)
+        {
+            orig(self);
+            OnFileReadCompleted?.Invoke();
+        }
+
+
 
         private static void PlayerProgression_ctor(On.PlayerProgression.orig_ctor orig, PlayerProgression self, RainWorld rainWorld, bool tryLoad, bool saveAfterLoad)
         {
@@ -206,11 +215,15 @@ namespace RandomBuff.Core.SaveData
         public void AddCollect(string buffID)
         {
             BuffPlugin.Log($"Add buff collect to Save Slot {CurrentSlot}");
-            if(!buffCollect.Contains(buffID))
+            if (buffCollect == null)
+                buffCollect = new List<string>();
+            if (!buffCollect.Contains(buffID))
                 buffCollect.Add(buffID);
         }
 
         public List<string> buffCollect = new();
+
+        public static event Action OnFileReadCompleted;
 
     }
 

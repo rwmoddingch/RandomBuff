@@ -46,9 +46,9 @@ namespace RandomBuff.Core.Entry
         public static void RegisterBuff<BuffType, DataType, HookType>(BuffID id) where BuffType : IBuff, new()
             where DataType : BuffData, new()
         {
+            BuffHookWarpper.RegisterHook(id, typeof(HookType));
             BuffTypes.Add(id, typeof(BuffType));
             DataTypes.Add(id, typeof(DataType));
-            BuffHookWarpper.RegisterHook(id, typeof(HookType));
         }
 
         public static void RegisterBuff<BuffType, DataType>(BuffID id) where BuffType : IBuff, new()

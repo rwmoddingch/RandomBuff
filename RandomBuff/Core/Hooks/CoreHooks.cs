@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Menu;
 using RandomBuff.Core.BuffMenu;
+using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
@@ -38,7 +39,7 @@ namespace RandomBuff.Core.Hooks
         {
             if (ID == TestStartGameMenu)
             {
-                self.currentMainLoop = new BuffGameMenu(self, ID);
+                self.currentMainLoop = new TStartGameMenu(self, ID);
             }
             orig(self, ID);
       
@@ -109,22 +110,21 @@ namespace RandomBuff.Core.Hooks
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
             if (BuffPoolManager.Instance != null &&
-                self.oldProcess is RainWorldGame &&
+                self.oldProcess is RainWorldGame game &&
                 (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
             {
                 BuffPoolManager.Instance.Destroy();
-
-                //TODO : Add UI
-
-                //return;
+                self.currentMainLoop = new TGachaMenu(ID, game, self);
+                //TODO : TEST UI
+                ID = TestStartGameMenu;
             }
 
             orig(self, ID);
-            if (self.currentMainLoop is RainWorldGame game && 
+            if (self.currentMainLoop is RainWorldGame game2 && 
                 BuffPoolManager.Instance == null &&
-                game.rainWorld.options.saveSlot >= 100)
+                game2.rainWorld.options.saveSlot >= 100)
             {
-                BuffPoolManager.LoadGameBuff(game);
+                BuffPoolManager.LoadGameBuff(game2);
             }
         }
     }
