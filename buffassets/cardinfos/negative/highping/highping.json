@@ -1,0 +1,10 @@
+{
+    "FaceName": "highping",
+    "ID" : "HighPing",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "High Ping",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}

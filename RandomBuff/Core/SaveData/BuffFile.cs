@@ -69,13 +69,15 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         public void SaveConfigFile()
         {
-            if (buffCoreFile != null)
-            {
-                BuffPlugin.Log($"Save config file at slot {Instance.UsedSlot}");
-                buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                return;
-            }
-            BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
+            //哦对我觉得没什么影响于是就直接全保存了.jpg
+            SaveFile();
+            //if (buffCoreFile != null)
+            //{
+            //    BuffPlugin.Log($"Save config file at slot {Instance.UsedSlot}");
+            //    buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+            //    return;
+            //}
+            //BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
         }
 
         private void Platform_OnRequestUserDataRead(List<object> pendingUserDataReads)
