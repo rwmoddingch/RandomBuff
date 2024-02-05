@@ -1,0 +1,10 @@
+{
+    "FaceName": "shortcircuitgate",
+    "ID" : "ShortCircuitGate",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "Short Circuit Gate",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}

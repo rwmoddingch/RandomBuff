@@ -70,32 +70,13 @@ namespace RandomBuff.Core.SaveData
     {
 
 
-        private BuffDataManager()
-        {
-        }
-
         internal static bool LoadData(string file,string formatVersion)
         {
             Instance = new BuffDataManager();
             return Instance.InitStringData(file,formatVersion);
         }
 
-        internal void DeleteSaveData(SlugcatStats.Name name)
-        {
-            if (name != null && allDatas.ContainsKey(name))
-            {
-                BuffPlugin.Log($"DELETE SAVE DATA: {name}");
-                allDatas.Remove(name);
-            }
-        }
 
-
-
-        internal void DeleteAll()
-        {
-            BuffPlugin.Log($"DELETE ALL SAVE DATA");
-            allDatas.Clear();
-        }
         /// <summary>
         /// 获取或创建BuffData
         /// 内部方法 
@@ -134,6 +115,24 @@ namespace RandomBuff.Core.SaveData
             }
 
             return allDatas[name][id];
+        }
+
+
+
+        /// <summary>
+        /// 游戏开始时调用
+        /// 进行初始化
+        /// </summary>
+        /// <param name="name"></param>
+
+        internal void StartGame(SlugcatStats.Name name)
+        {
+            var setting = CreateOrGetSettingInstance(name);
+            if(Custom.rainWorld.processManager.menuSetup.startGameCondition ==
+               ProcessManager.MenuSetup.StoryGameInitCondition.New)
+                setting.NewGame();
+
+            //目前没有别的初始化了
         }
 
         /// <summary>
@@ -213,12 +212,171 @@ namespace RandomBuff.Core.SaveData
         }
 
         /// <summary>
+        /// 安全的获取目前的setting信息
+        /// 不会为空
+        /// 但是instance可能为空
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        internal SafeGameSetting GetSafeSetting(SlugcatStats.Name name)
+        {
+            if(!allSettings.ContainsKey(name))
+                allSettings.Add(name, new SafeGameSetting());
+            return allSettings[name];
+        }
+
+
+
+
+        /// <summary>
+        /// 安全的GameSetting
+        /// 包含了UI界面的偏好信息
+        /// </summary>
+        internal class SafeGameSetting
+        {
+            public BuffSettingID ID = BuffSettingID.Normal;
+            public BaseGameSetting instance;
+        }
+
+
+    }
+
+    /// <summary>
+    /// 私有部分
+    /// </summary>
+    public sealed partial class BuffDataManager
+    {
+        private BuffDataManager()
+        {
+        }
+
+        /// <summary>
+        /// 删除单一猫存档
+        /// </summary>
+        /// <param name="name"></param>
+        internal void DeleteSaveData(SlugcatStats.Name name)
+        {
+            if (name != null && allDatas.ContainsKey(name))
+            {
+                BuffPlugin.Log($"DELETE SAVE DATA: {name}");
+                allDatas.Remove(name);
+            }
+        }
+
+
+        /// <summary>
+        /// 删除存档
+        /// </summary>
+        internal void DeleteAll()
+        {
+            BuffPlugin.Log($"DELETE ALL SAVE DATA");
+            allDatas.Clear();
+        }
+
+        /// <summary>
+        /// 创建新的Setting实例
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private BaseGameSetting CreateOrGetSettingInstance(SlugcatStats.Name name)
+        {
+            if (!allSettings.ContainsKey(name))
+                allSettings.Add(name, new SafeGameSetting());
+            return allSettings[name].instance =
+                (BaseGameSetting)Activator.CreateInstance(BaseGameSetting.settingDict[allSettings[name].ID]);
+        }
+
+        /// <summary>
+        /// 序列化存档信息
+        /// </summary>
+        /// <returns></returns>
+        internal string ToStringData()
+        {
+            StringBuilder builder = new();
+            foreach (var catData in allDatas)
+            {
+                builder.Append(catData.Key);
+                builder.Append(CatIdSplit);
+                foreach (var buffData in catData.Value)
+                {
+                    string valueData = "";
+                    try
+                    {
+                        valueData = JsonConvert.SerializeObject(buffData.Value);
+
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e);
+                        BuffPlugin.LogError($"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
+                        continue;
+                    }
+                    builder.Append(buffData.Key);
+                    builder.Append(BuffIdSplit);
+                    builder.Append(valueData);
+                    builder.Append(BuffSplit);
+                }
+
+                if (ukBuffDatas.ContainsKey(catData.Key))
+                {
+                    foreach (var ukBuffData in ukBuffDatas[catData.Key])
+                    {
+                        builder.Append(ukBuffData);
+                        builder.Append(BuffSplit);
+                    }
+                }
+
+                builder.Append(CatSplit);
+            }
+
+            foreach (var ukCatData in ukSlugcatDatas)
+            {
+                builder.Append(ukCatData);
+                builder.Append(CatSplit);
+            }
+
+            //---------------------设置-------------------//
+
+            builder.Append(SettingSplit);
+            foreach (var catSetting in allSettings)
+            {
+                builder.Append(catSetting.Key);
+                builder.Append(CatIdSplit);
+
+                builder.Append(catSetting.Value.ID);
+                if (catSetting.Value.instance != null)
+                {
+            
+                    builder.Append(BuffSplit);
+                    builder.Append(JsonConvert.SerializeObject(catSetting.Value.instance));
+                }
+
+                builder.Append(CatSplit);
+
+            }
+
+            return builder.ToString();
+        }
+
+
+        /// <summary>
         /// 初始化存档信息
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
         private bool InitStringData(string file, string formatVersion)
         {
+            if (formatVersion != "a-0.0.1")
+            {
+                var split = Regex.Split(file, SettingSplit)
+                    .Where(i => !string.IsNullOrEmpty(i)).ToArray();
+                file = split[0];
+                if (split.Length <= 1)
+                    BuffPlugin.LogError($"Corrupted Data : Missing Setting data");
+                else
+                    InitStringSetting(split[1]);
+            }
+
             foreach (var catSingle in Regex.Split(file, CatSplit)
                          .Where(i => !string.IsNullOrEmpty(i)))
             {
@@ -230,16 +388,17 @@ namespace RandomBuff.Core.SaveData
                     BuffPlugin.LogError($"Corrupted Buff Data At: {catSingle}");
                     continue;
                 }
-                var slugName = (SlugcatStats.Name)ExtEnumBase.Parse(typeof(SlugcatStats.Name), catSplit[0], true);
 
                 //不存在的猫名字
-                if (slugName == null)
+                if (!ExtEnumBase.TryParse(typeof(SlugcatStats.Name), catSplit[0], true, out var re) ||
+                    re is not SlugcatStats.Name slugName)
                 {
                     BuffPlugin.LogWarning($"Unknown Slugcat Name: {catSplit[0]}");
                     //暂存栏
                     ukSlugcatDatas.Add(catSingle);
                     continue;
                 }
+
 
                 //重定义只做提示
                 if (allDatas.ContainsKey(slugName))
@@ -302,57 +461,72 @@ namespace RandomBuff.Core.SaveData
             return true;
         }
 
-
         /// <summary>
-        /// 序列化存档信息
+        /// 初始化setting信息
         /// </summary>
-        /// <returns></returns>
-        internal string ToStringData()
+        /// <param name="data"></param>
+        private void InitStringSetting(string file)
         {
-            StringBuilder builder = new();
-            foreach (var catData in allDatas)
+            foreach (var catSingle in Regex.Split(file, CatSplit)
+                         .Where(i => !string.IsNullOrEmpty(i)))
             {
-                builder.Append(catData.Key);
-                builder.Append(CatIdSplit);
-                foreach (var buffData in catData.Value)
+                var catSplit = Regex.Split(catSingle, CatIdSplit);
+
+                //数据损坏
+                if (catSplit.Length != 2)
                 {
-                    string valueData = "";
+                    BuffPlugin.LogError($"Corrupted Buff Data At: {catSingle}");
+                    continue;
+                }
+                //不存在的猫名字
+                if (!ExtEnumBase.TryParse(typeof(SlugcatStats.Name), catSplit[0], true, out var re) ||
+                    re is not SlugcatStats.Name slugName)
+                {
+                    BuffPlugin.LogWarning($"Unknown Slugcat Name: {catSplit[0]}");
+                    //暂存栏
+                    ukSlugcatDatas.Add(catSingle);
+                    continue;
+                }
+
+
+                //重定义只做提示
+                if (allSettings.ContainsKey(slugName))
+                    BuffPlugin.LogWarning($"Redefine Slugcat Name: {catSplit[0]}");
+                else
+                    allSettings.Add(slugName, new SafeGameSetting());
+
+
+                var split = Regex.Split(catSplit[1], BuffSplit);
+
+
+                //未知game setting类型
+                if (!BaseGameSetting.settingDict.TryGetValue((allSettings[slugName].ID = new BuffSettingID(split[0])), out var type))
+                {
+                    allSettings[slugName].ID = BuffSettingID.Normal;
+                    BuffPlugin.LogError($"Unknown game setting, IGNORED");
+                    continue;
+                }
+                
+                //如果存在实例则获取
+                if (split.Length == 2)
+                {
+                    BuffPlugin.LogDebug($"Setting Data : {split[0]} - {split[1]}");
+
                     try
                     {
-                        valueData = JsonConvert.SerializeObject(buffData.Value);
-
+                        allSettings[slugName].instance = (BaseGameSetting)JsonConvert.DeserializeObject(split[1], type);
                     }
                     catch (Exception e)
                     {
                         BuffPlugin.LogException(e);
-                        BuffPlugin.LogError($"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
-                        continue;
+                        BuffPlugin.LogError($"Corrupted Buff Data At : {split[1]}");
                     }
-                    builder.Append(buffData.Key);
-                    builder.Append(BuffIdSplit);
-                    builder.Append(valueData);
-                    builder.Append(BuffSplit);
                 }
-
-                if (ukBuffDatas.ContainsKey(catData.Key))
+                else
                 {
-                    foreach (var ukBuffData in ukBuffDatas[catData.Key])
-                    {
-                        builder.Append(ukBuffData);
-                        builder.Append(BuffSplit);
-                    }
+                    BuffPlugin.LogDebug($"Setting Data : {split[0]} - NULL");
                 }
-
-                builder.Append(CatSplit);
             }
-
-            foreach (var ukCatData in ukSlugcatDatas)
-            {
-                builder.Append(ukCatData);
-                builder.Append(CatSplit);
-
-            }
-            return builder.ToString();
         }
 
         /// <summary>
@@ -360,18 +534,19 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         private readonly Dictionary<SlugcatStats.Name, Dictionary<BuffID, BuffData>> allDatas = new();
 
+        private readonly Dictionary<SlugcatStats.Name, SafeGameSetting> allSettings = new();
+
         /// 如果被卸载导致slugcat name或data缺失，则暂时储存在此处
         private readonly List<string> ukSlugcatDatas = new();
         private readonly Dictionary<SlugcatStats.Name, List<string>> ukBuffDatas = new();
 
-        private const string CatSplit = "<BuA>";
+        private const string CatSplit = " <BuA>";
         private const string CatIdSplit = "<BuAI>";
 
         private const string BuffSplit = "<BuB>";
         private const string BuffIdSplit = "<BuBI>";
 
-
+        private const string SettingSplit = "<BuS>";
     }
-
 
 }

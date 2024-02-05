@@ -62,7 +62,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void ProcessManager_PreSwitchMainProcess(On.ProcessManager.orig_PreSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
-            if (self.rainWorld.options.saveSlot > 100 && ID == ProcessManager.ProcessID.MainMenu)
+            if (self.rainWorld.options.saveSlot >= 100 && ID == ProcessManager.ProcessID.MainMenu)
             {
                 int lastSlot = self.rainWorld.options.saveSlot;
                 self.rainWorld.options.saveSlot -= 100;
@@ -77,14 +77,16 @@ namespace RandomBuff.Core.Hooks
         private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
         {
             orig(self);
-            BuffDataManager.Instance.DeleteAll();
+            if (self.rainWorld.options.saveSlot >= 100)
+                BuffDataManager.Instance.DeleteAll();
 
         }
 
         private static void PlayerProgression_WipeSaveState(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
         {
             orig(self,saveStateNumber);
-            BuffDataManager.Instance.DeleteSaveData(saveStateNumber);
+            if(self.rainWorld.options.saveSlot >= 100)
+                BuffDataManager.Instance.DeleteSaveData(saveStateNumber);
         }
 
         private static void RainWorldGame_GhostShutDown(On.RainWorldGame.orig_GhostShutDown orig, RainWorldGame self, GhostWorldPresence.GhostID ghostID)

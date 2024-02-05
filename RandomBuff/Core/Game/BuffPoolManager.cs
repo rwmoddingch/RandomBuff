@@ -62,6 +62,8 @@ namespace RandomBuff.Core.Game
         private BuffPoolManager(RainWorldGame game)
         {
             Game = game;
+            BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).instance.EnterGame();
+            BuffPlugin.Log($"Enter Game, setting: {BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).ID}");
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
             {
                 CreateBuff(data.Key);
@@ -113,6 +115,7 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Update of {buff.ID}");
                 }
             }
+            BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.InGameUpdate(game);
         }
 
 
@@ -165,6 +168,7 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
+            BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).instance.SessionEnd();
             BuffFile.Instance.SaveFile();
         }
 

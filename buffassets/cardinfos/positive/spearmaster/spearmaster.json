@@ -1,0 +1,10 @@
+{
+    "FaceName": "spearmaster",
+    "ID" : "SpearMaster",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "Spear Master",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}

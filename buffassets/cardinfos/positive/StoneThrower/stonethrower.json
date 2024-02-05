@@ -1,0 +1,10 @@
+{
+    "FaceName": "stonethrower",
+    "ID" : "StoneThrower",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "Stone Thrower",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}
