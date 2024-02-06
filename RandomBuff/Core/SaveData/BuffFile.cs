@@ -91,11 +91,6 @@ namespace RandomBuff.Core.SaveData
             {
                 buffCoreFile = file;
 
-
-                //DEBUG
-                //file.Delete();
-                //file.OnDeleteCompleted += File_OnDeleteCompletedDebug;
-
                 buffCoreFile.OnReadCompleted += BuffCoreFile_OnReadCompleted;
                 buffCoreFile.Read();
                 return;
@@ -106,10 +101,6 @@ namespace RandomBuff.Core.SaveData
             OnBuffReadCompleted?.Invoke();
         }
 
-        private void File_OnDeleteCompletedDebug(UserData.File arg1, UserData.Result arg2)
-        {
-            buffCoreFile.OnWriteCompleted += BuffCoreFile_OnWriteCompleted_NewFile;
-        }
 
         private void BuffCoreFile_OnReadCompleted(UserData.File file, UserData.Result result)
         {
@@ -245,7 +236,6 @@ namespace RandomBuff.Core.SaveData
         public List<string> buffCollect = new();
 
         private static event Action OnFileReadCompleted;
-
         private static event Action OnBuffReadCompleted;
 
 

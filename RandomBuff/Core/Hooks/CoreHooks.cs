@@ -25,12 +25,11 @@ namespace RandomBuff.Core.Hooks
             On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
             On.ProcessManager.PreSwitchMainProcess += ProcessManager_PreSwitchMainProcess;
 
-            if (BuffPlugin.DevEnabled)
-            {
-                On.Menu.MainMenu.ctor += MainMenu_ctor;
-                TestStartGameMenu = new("TestStartGameMenu");
-                On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
-            }
+      
+            On.Menu.MainMenu.ctor += MainMenu_ctor;
+            TestStartGameMenu = new("TestStartGameMenu");
+            On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
+            
 
             BuffPlugin.Log("Core Hook Loaded");
         }
