@@ -52,7 +52,7 @@ namespace RandomBuff.Core.Buff
         {
             if(CardInfos.TryGetValue(languageID, out CardInfo cardInfo))
                 return cardInfo;
-            return CardInfos[InGameTranslator.LanguageID.English];
+            return CardInfos.First().Value;
         }
     }
 
@@ -116,7 +116,7 @@ namespace RandomBuff.Core.Buff
                     {
                         Futile.atlasManager.LoadImage(newData.FaceName);
                     }
-                    catch (FutileException e)
+                    catch (FutileException _)
                     {
                         BuffPlugin.LogError($"Card image not found at :{newData.FaceName}");
                     }
