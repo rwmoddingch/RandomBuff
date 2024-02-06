@@ -131,7 +131,7 @@ namespace RandomBuff.Core.SaveData
                 buffCollect = JsonConvert.DeserializeObject<List<string>>(buffCoreFile.Get<string>("buff-collect"));
 
                 //更新格式版本
-                buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
+                buffCoreFile.Set("buff-version", BuffPlugin.saveVersion);
 
                 Platform.NotifyUserDataReadCompleted(this);
             }
@@ -238,7 +238,9 @@ namespace RandomBuff.Core.SaveData
         private static event Action OnFileReadCompleted;
         private static event Action OnBuffReadCompleted;
 
-
+        /// <summary>
+        /// 当存档完全读取完毕的回调
+        /// </summary>
         public class BuffFileCompletedCallBack
         {
             private int state;
