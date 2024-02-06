@@ -165,6 +165,14 @@ namespace RandomBuff
                 File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Error]\t\t{message}\n");
         }
 
+        public static void LogFatal(object message)
+        {
+            Debug.Log($"[RandomBuff] {message}");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{message}\n");
+
+        }
+
         public static void LogException(Exception e)
         {
             Debug.LogException(e);
