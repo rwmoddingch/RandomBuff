@@ -12,6 +12,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;
+using static RandomBuff.Core.SaveData.BuffFile;
 
 namespace RandomBuff.Core.BuffMenu.Test
 {
@@ -23,6 +24,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public TStartGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, TestStartGameMenu)
         {
+            callBack = new (OnDataLoaded);
             if (manager.rainWorld.options.saveSlot < 100)
             {
                 var lastSlot = manager.rainWorld.options.saveSlot;
@@ -31,13 +33,13 @@ namespace RandomBuff.Core.BuffMenu.Test
                 manager.rainWorld.progression = new PlayerProgression(manager.rainWorld, true, false);
             }
 
-            BuffFile.OnFileReadCompleted += OnDataLoaded;
         }
+
+
 
         void OnDataLoaded()
         {
-            BuffFile.OnFileReadCompleted -= OnDataLoaded;
-            loaded=true;
+            isLoaded = true;
             pages = new List<Page>()
             {
                 new (this, null, "OHHHH", 0)
@@ -73,6 +75,8 @@ namespace RandomBuff.Core.BuffMenu.Test
         private SimpleButton selectButton;
         private SymbolButton coopButton;
         private bool needReset;
+
+        private BuffFileCompletedCallBack callBack;
 
         public override void Singal(MenuObject sender, string message)
         {
@@ -145,7 +149,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public override void Update()
         {
-            if (!loaded)
+            if (!isLoaded)
                 return;
 
             base.Update();
@@ -153,7 +157,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public override void RawUpdate(float dt)
         {
-            if (!loaded)
+            if (!isLoaded)
             {
                 manager.blackDelay = 0.1f;
                 return;
@@ -162,7 +166,7 @@ namespace RandomBuff.Core.BuffMenu.Test
         }
 
 
-        private bool loaded = false;
+        private bool isLoaded;
 
 
         public void SetChecked(CheckBox box, bool c)
