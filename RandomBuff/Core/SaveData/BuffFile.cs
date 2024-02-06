@@ -5,6 +5,8 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Kittehface.Framework20;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using Newtonsoft.Json;
 using RWCustom;
 using UnityEngine;
@@ -70,14 +72,9 @@ namespace RandomBuff.Core.SaveData
         public void SaveConfigFile()
         {
             //哦对我觉得没什么影响于是就直接全保存了.jpg
-            SaveFile();
-            //if (buffCoreFile != null)
-            //{
-            //    BuffPlugin.Log($"Save config file at slot {Instance.UsedSlot}");
-            //    buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-            //    return;
-            //}
-            //BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
+            if(BuffDataManager.Instance != null &&
+               BuffConfigManager.Instance != null)
+                SaveFile();
         }
 
         private void Platform_OnRequestUserDataRead(List<object> pendingUserDataReads)
@@ -93,6 +90,12 @@ namespace RandomBuff.Core.SaveData
             if (result.IsSuccess())
             {
                 buffCoreFile = file;
+
+
+                //DEBUG
+                //file.Delete();
+                //file.OnDeleteCompleted += File_OnDeleteCompletedDebug;
+
                 buffCoreFile.OnReadCompleted += BuffCoreFile_OnReadCompleted;
                 buffCoreFile.Read();
                 return;
@@ -100,14 +103,22 @@ namespace RandomBuff.Core.SaveData
             BuffPlugin.LogError($"File Mounted Failed, STATE NUM: {result}");
             Platform.NotifyUserDataReadCompleted(this);
             LoadFailedFallBack();
+            OnBuffReadCompleted?.Invoke();
+        }
+
+        private void File_OnDeleteCompletedDebug(UserData.File arg1, UserData.Result arg2)
+        {
+            buffCoreFile.OnWriteCompleted += BuffCoreFile_OnWriteCompleted_NewFile;
         }
 
         private void BuffCoreFile_OnReadCompleted(UserData.File file, UserData.Result result)
         {
             buffCoreFile.OnReadCompleted -= BuffCoreFile_OnReadCompleted;
+
             if (result.Contains(UserData.Result.FileNotFound))
             {
                 buffCoreFile.OnWriteCompleted += BuffCoreFile_OnWriteCompleted_NewFile;
+                buffCoreFile.Write();
                 return;
             }
 
@@ -138,6 +149,9 @@ namespace RandomBuff.Core.SaveData
                 BuffPlugin.LogError($"Unhandled Exception : State ID :{result}");
                 LoadFailedFallBack();
             }
+
+            OnBuffReadCompleted?.Invoke();
+
         }
 
         private void BuffCoreFile_OnWriteCompleted_NewFile(UserData.File file, UserData.Result result)
@@ -146,6 +160,9 @@ namespace RandomBuff.Core.SaveData
             BuffPlugin.Log($"Create new save slot file At {UsedSlot}");
             Platform.NotifyUserDataReadCompleted(this);
             LoadFailedFallBack();
+
+            OnBuffReadCompleted?.Invoke();
+
             buffCoreFile.Write();
             if (result.IsFailure())
                 throw new Exception("Create Buff File Failed!"); //TODO : 添加异常处理
@@ -177,7 +194,9 @@ namespace RandomBuff.Core.SaveData
 
         private static int CurrentSlot => rainWorld.options.saveSlot >= 100
             ? (rainWorld.options.saveSlot)
-            : rainWorld.options.saveSlot + 100;
+            : rainWorld.options.saveSlot >= 0 ?
+                rainWorld.options.saveSlot + 100 :
+                -rainWorld.options.saveSlot + 99;
 
         public static void OnModsInit()
         {
@@ -192,8 +211,6 @@ namespace RandomBuff.Core.SaveData
             OnFileReadCompleted?.Invoke();
         }
 
-
-
         private static void PlayerProgression_ctor(On.PlayerProgression.orig_ctor orig, PlayerProgression self, RainWorld rainWorld, bool tryLoad, bool saveAfterLoad)
         {
             orig(self,rainWorld, tryLoad, saveAfterLoad);
@@ -206,12 +223,14 @@ namespace RandomBuff.Core.SaveData
                 }
 
                 Instance = new BuffFile();
+                return;
             }
             else if (Instance != null &&
                      Custom.rainWorld.options.saveSlot < 100)
             {
                 Instance.SaveConfigFile();
             }
+            OnBuffReadCompleted?.Invoke();
         }
 
         public void AddCollect(string buffID)
@@ -225,7 +244,39 @@ namespace RandomBuff.Core.SaveData
 
         public List<string> buffCollect = new();
 
-        public static event Action OnFileReadCompleted;
+        private static event Action OnFileReadCompleted;
+
+        private static event Action OnBuffReadCompleted;
+
+
+        public class BuffFileCompletedCallBack
+        {
+            private int state;
+            private Action action;
+
+            public BuffFileCompletedCallBack(Action action)
+            {
+                this.action = action;
+                OnFileReadCompleted += BuffFileCompletedCallBack_OnFileReadCompleted;
+                OnBuffReadCompleted += BuffFileCompletedCallBack_OnBuffReadCompleted;
+            }
+
+            private void BuffFileCompletedCallBack_OnBuffReadCompleted()
+            {
+                OnBuffReadCompleted -= BuffFileCompletedCallBack_OnBuffReadCompleted;
+                state++;
+                if (state == 2)
+                    action.Invoke();
+            }
+
+            private void BuffFileCompletedCallBack_OnFileReadCompleted()
+            {
+                OnFileReadCompleted -= BuffFileCompletedCallBack_OnFileReadCompleted;
+                state++;
+                if (state == 2)
+                    action.Invoke();
+            }
+        }
 
     }
 

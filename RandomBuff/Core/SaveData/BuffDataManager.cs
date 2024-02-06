@@ -370,6 +370,12 @@ namespace RandomBuff.Core.SaveData
             {
                 var split = Regex.Split(file, SettingSplit)
                     .Where(i => !string.IsNullOrEmpty(i)).ToArray();
+                if (split.Length == 0)
+                {
+                    BuffPlugin.LogWarning($"Empty Data !");
+                    return false;
+
+                }
                 file = split[0];
                 if (split.Length <= 1)
                     BuffPlugin.LogError($"Corrupted Data : Missing Setting data");
