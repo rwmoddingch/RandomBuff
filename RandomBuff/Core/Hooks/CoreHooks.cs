@@ -39,7 +39,8 @@ namespace RandomBuff.Core.Hooks
         {
             if (ID == TestStartGameMenu)
             {
-                self.currentMainLoop = new TStartGameMenu(self, ID);
+                //self.currentMainLoop = new TStartGameMenu(self, ID);
+                self.currentMainLoop = new BuffGameMenu(self, ID);
             }
             orig(self, ID);
       
