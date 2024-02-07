@@ -1,4 +1,5 @@
 ﻿using RandomBuff.Core.Buff;
+using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,15 @@ namespace RandomBuff.Render.UI
     /// </summary>
     internal class BuffCard
     {
-        const float interactiveScaleBound = 0.6f;
+        public const float interactiveScaleBound = 0.6f;
+        public const float normalScale = 0.5f;
 
         //基础变量
         FTexture _ftexture;
         public FContainer Container { get; private set; }
+
+        public BuffID ID { get; private set; }
+        public BuffStaticData StaticData => BuffConfigManager.GetStaticData(ID);
 
         public Vector3 Rotation
         {
@@ -30,19 +35,16 @@ namespace RandomBuff.Render.UI
                 _ftexture.rotation = value.z;
             }
         }
-
         public Vector2 Position
         {
             get => _ftexture.GetPosition();
             set => _ftexture.SetPosition(value);
         }
-
         public float Scale
         {
             get => _ftexture.scale;
             set => _ftexture.scale = value;
         }
-
         public float Alpha
         {
             get => _ftexture.alpha;
@@ -50,7 +52,7 @@ namespace RandomBuff.Render.UI
         }
 
         //动画机
-        public AnimatorState currentAniamtorState = AnimatorState.None;
+        public AnimatorState currentAniamtorState = AnimatorState.Test_None;
         public BuffCardAnimator currentAnimator;
 
         //交互
@@ -77,7 +79,7 @@ namespace RandomBuff.Render.UI
             {
                 if(interactionManager == null)
                     return false;
-                return interactionManager.currentFocusCard == this;
+                return interactionManager.CurrentFocusCard == this;
             }
         }
 
@@ -102,15 +104,35 @@ namespace RandomBuff.Render.UI
             set => _cardRenderer.DisplayTitle = value;
         }
 
-        public BuffCard(BuffID buffID)
+        public bool DisplayStacker
         {
+            get
+            {
+                if (StaticData.Stackable)
+                    return _cardRenderer.cardStackerTextController.Show;
+                return false;
+            }
+            set
+            {
+                if(StaticData.Stackable)
+                    _cardRenderer.cardStackerTextController.Show = value;
+            }
+        }
+
+        public BuffCard(BuffID buffID) : this(buffID, AnimatorState.Test_None)
+        { 
+        }
+
+        public BuffCard(BuffID buffID, AnimatorState initState)
+        {
+            ID = buffID;
             _cardRenderer = CardRendererManager.GetRenderer(buffID);
             Container = new FContainer();
 
             Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture));
-            SetAnimataorState(AnimatorState.None);
+            SetAnimataorState(initState);
 
-            Scale = 0.5f;
+            Scale = normalScale;
         }
 
         //更新方法，在交互管理器中调用
@@ -124,6 +146,12 @@ namespace RandomBuff.Render.UI
             currentAnimator?.GrafUpdate();
         }
 
+        public void Destroy()
+        {
+            CardRendererManager.RecycleCardRenderer(_cardRenderer);
+            Container.RemoveFromContainer();
+        }
+
         //改变卡牌的状态
         public void SetAnimataorState(AnimatorState newState)
         {
@@ -132,13 +160,38 @@ namespace RandomBuff.Render.UI
 
             currentAnimator?.Destroy();
             currentAniamtorState = newState;
-            if(newState == AnimatorState.None)
+
+            if(newState == AnimatorState.Test_None)
             {
                 currentAnimator = new ClearStateAnimator(this, Position, Rotation, Scale);
             }
-            else if(newState == AnimatorState.MousePreview)
+            else if(newState == AnimatorState.Test_MousePreview)
             {
                 currentAnimator = new MousePreviewAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.InGameSlot_Hide)
+            {
+                currentAnimator = new InGameSlotHideAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.InGameSlot_Show)
+            {
+                currentAnimator = new InGameSlotShowAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.InGameSlot_Exclusive_Show)
+            {
+                currentAnimator = new InGameSlotExclusiveShowAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.CardPicker_Show)
+            {
+                currentAnimator = new CardPickerShowAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.CardPicker_Disappear)
+            {
+                currentAnimator = new CardPickerDisappearAnimator(this, Position, Rotation, Scale);
+            }
+            else
+            {
+                BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
             }
         }
 
@@ -155,8 +208,18 @@ namespace RandomBuff.Render.UI
 
         public enum AnimatorState
         {
-            None,
-            MousePreview
+            //测试状态
+            Test_None,
+            Test_MousePreview,
+
+            //游戏内卡槽状态
+            InGameSlot_Hide,
+            InGameSlot_Show,
+            InGameSlot_Exclusive_Show,
+
+            //选卡卡槽状态
+            CardPicker_Show,
+            CardPicker_Disappear,
         }
     }
 }

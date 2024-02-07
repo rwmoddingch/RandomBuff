@@ -78,23 +78,59 @@ namespace RandomBuff.Render.CardRender
         }
     }
 
+    /// <summary>
+    /// 卡牌渲染基础资源类
+    /// </summary>
     public static class CardBasicAssets
     {
+        /// <summary>
+        /// 卡牌高光shader
+        /// </summary>
         public static Shader CardHighlightShader { get; private set; }
+
+        /// <summary>
+        /// 卡牌字体shader
+        /// </summary>
         public static Shader CardTextShader { get; private set; }
+
+        /// <summary>
+        /// 卡牌shader
+        /// </summary>
         public static Shader CardBasicShader { get; private set; }
 
+        /// <summary>
+        /// 卡牌标题的字体
+        /// </summary>
         public static Font TitleFont { get; private set; }
+
+        /// <summary>
+        /// 卡牌介绍使用的字体
+        /// </summary>
         public static Font DiscriptionFont { get; private set; }
 
+        /// <summary>
+        /// 正面增益的卡背
+        /// </summary>
         public static Texture MoonBack { get; private set; }
+
+        /// <summary>
+        /// 负面增益的卡背
+        /// </summary>
         public static Texture FPBack { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static Texture SlugBack { get; private set; }
 
-        public static Texture TestFace { get; private set; }//之后删掉
-
+        /// <summary>
+        /// 卡牌渲染的贴图尺寸
+        /// </summary>
         public static Vector2Int RenderTextureSize = new Vector2Int(600, 1000);
 
+        /// <summary>
+        /// 从文件中加载资源
+        /// </summary>
         public static void LoadAssets()
         {
             //加载assetbundle资源
@@ -130,8 +166,6 @@ namespace RandomBuff.Render.CardRender
             MoonBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/moonback").texture;
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
-
-            TestFace = Futile.atlasManager.LoadImage("buffassets/cardinfos/positive/bouncespear/bouncespear").texture;
         }
     }
 }

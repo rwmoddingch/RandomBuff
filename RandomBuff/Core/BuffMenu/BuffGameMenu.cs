@@ -29,8 +29,10 @@ namespace RandomBuff.Core.BuffMenu
         BigArrowButton nextButton;
         CheckBox restartCheckbox;
 
-        CardInteractionManager interactionManager;
-        BuffCard[] testCard = new BuffCard[3];
+        //CardInteractionManager interactionManager;
+        //BuffCard[] testCard = new BuffCard[3];
+        CardPickerSlot pickerSlot;
+        InGameBuffCardSlot inGameSlot;
 
         MenuLabel testLabel;
 
@@ -48,8 +50,6 @@ namespace RandomBuff.Core.BuffMenu
 
             //延迟加载等待存档载入完毕
             BuffFile.OnFileReadCompleted += OnDataLoaded;
-
-
         }
 
         void OnDataLoaded()
@@ -82,19 +82,42 @@ namespace RandomBuff.Core.BuffMenu
             pages[0].subObjects.Add(restartCheckbox = new CheckBox(this, this.pages[0], this, new Vector2(this.startButton.pos.x + 200f + restartTextOffset, Mathf.Max(30f, manager.rainWorld.options.SafeScreenOffset.y)), restartTextWidth, base.Translate("Restart game"), "RESTART", false));
             restartCheckbox.label.pos.x = restartCheckbox.label.pos.x + (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
 
-            interactionManager = new BasicInteractionManager();
-            var cards = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 3, BuffType.Positive);
+            inGameSlot = new InGameBuffCardSlot();
+            container.AddChild(inGameSlot.Container);
 
-            for (int i = 0; i < 3; i++)
+            var inGameBuffs = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 8, BuffType.Positive, BuffType.Negative, BuffType.Duality);
+            foreach (var buffs in inGameBuffs)
             {
-                testCard[i] = new BuffCard(cards[i].BuffID);
-                container.AddChild(testCard[i].Container);
-
-                testCard[i].Position = new Vector2(300 + 300 * i, 300f);
-
-                interactionManager.ManageCard(testCard[i]);
-                testCard[i].Container.MoveToBack();
+                inGameSlot.AppendCard(new BuffCard(buffs.BuffID));
             }
+
+            var positiveChoices = new List<BuffID>();
+            foreach (var choice in BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 4, BuffType.Positive))
+            {
+                positiveChoices.Add(choice.BuffID);
+            }
+            var negativeChoice = new BuffID[4];
+            negativeChoice[3] = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 1, BuffType.Negative)[0].BuffID;
+
+            pickerSlot = new CardPickerSlot(inGameSlot, (id) => BuffPlugin.Log($"Pick buff : {id}"), positiveChoices.ToArray(), negativeChoice.ToArray(), 2);
+            container.AddChild(pickerSlot.Container);
+            inGameSlot.Container.MoveInFrontOfOtherNode(pickerSlot.Container);
+
+
+
+            //interactionManager = new TestBasicInteractionManager();
+            //var cards = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 3, BuffType.Positive);
+
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    testCard[i] = new BuffCard(cards[i].BuffID);
+            //    container.AddChild(testCard[i].Container);
+
+            //    testCard[i].Position = new Vector2(300 + 300 * i, 300f);
+
+            //    interactionManager.ManageCard(testCard[i]);
+            //    testCard[i].Container.MoveToBack();
+            //}
 
         }
 
@@ -156,9 +179,10 @@ namespace RandomBuff.Core.BuffMenu
                 return;
 
             base.Update();
-            interactionManager.Update();
-                testLabel.text = $"CurrentFocused: {testCard[0].CurrentFocused}; localMousePos x:{testCard[0].LocalMousePos.x} y:{testCard[0].LocalMousePos.y}\nEdge : {testCard[0].Highlight}";
-            
+            pickerSlot.Update();
+            inGameSlot.Update();
+            //    testLabel.text = $"CurrentFocused: {testCard[0].CurrentFocused}; localMousePos x:{testCard[0].LocalMousePos.x} y:{testCard[0].LocalMousePos.y}\nEdge : {testCard[0].Highlight}";
+
         }
 
 
@@ -172,7 +196,8 @@ namespace RandomBuff.Core.BuffMenu
 
 
             base.RawUpdate(dt);
-            interactionManager.GrafUpdate();
+            pickerSlot.GrafUpdate();
+            inGameSlot.GrafUpdate();
         }
 
         public override void GrafUpdate(float timeStacker)

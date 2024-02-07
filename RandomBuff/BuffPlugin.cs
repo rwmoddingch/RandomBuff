@@ -171,8 +171,6 @@ namespace RandomBuff
                 File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{m}\n");
 
             }
-
-
         }
     }
 

@@ -42,7 +42,7 @@
       <HintPath>..\include\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\OpKeyBinderEx\OpKeyBinderEx\bin\Debug\net48\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>E:\Steam\steamapps\common\Rain World\RainWorld_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\include\UnityEngine.CoreModule.dll</HintPath>
