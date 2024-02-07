@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Menu;
+using MoreSlugcats;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game;
@@ -29,16 +31,24 @@ namespace RandomBuff.Core.Hooks
             On.Menu.MainMenu.ctor += MainMenu_ctor;
             TestStartGameMenu = new("TestStartGameMenu");
             On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
+
+            On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
             
 
             BuffPlugin.Log("Core Hook Loaded");
+        }
+
+        private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
+        {
+            orig(self, cam);
+            if(self.rainWorld.options.saveSlot >= 100)
+                self.AddPart(new BuffHud(self));
         }
 
         private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
             if (ID == TestStartGameMenu)
             {
-                //self.currentMainLoop = new TStartGameMenu(self, ID);
                 self.currentMainLoop = new BuffGameMenu(self, ID);
             }
             orig(self, ID);
@@ -113,12 +123,12 @@ namespace RandomBuff.Core.Hooks
         {
             if (BuffPoolManager.Instance != null &&
                 self.oldProcess is RainWorldGame game &&
-                (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
+                (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream) &&
+                BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket.NeedMenu)
             {
                 BuffPoolManager.Instance.Destroy();
-                self.currentMainLoop = new TGachaMenu(ID, game, self);
-                //TODO : TEST UI
-                ID = TestStartGameMenu;
+                self.currentMainLoop = new GachaMenu.GachaMenu(ID, game, self);
+                ID = GachaMenu.GachaMenu.GachaMenuID;
             }
 
             orig(self, ID);

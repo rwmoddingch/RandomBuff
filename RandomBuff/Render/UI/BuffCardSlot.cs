@@ -52,6 +52,20 @@ namespace RandomBuff.Render.UI
             BuffCards.Remove(buffCard);
         }
 
+        public void ForceRemoveCard_DEBUG(BuffID buffID)
+        {
+            var cardToRemove = GetCard(buffID);
+            if (cardToRemove != null)
+            {
+                RemoveCard(cardToRemove);
+                cardToRemove.Destroy();
+            }
+            else
+            {
+                BuffPlugin.LogWarning($"Buff {buffID} not exist in buffcardslot");
+            }
+        }
+
         public virtual void RemoveCard(BuffID buffID)
         {
             var cardToRemove = GetCard(buffID);
