@@ -44,6 +44,18 @@ namespace RandomBuff.Core.SaveData
         /// 外部方法
         /// </summary>
         /// <returns></returns>
+        public List<BuffID> GetAllBuffIds(SlugcatStats.Name name)
+        {
+            if (!allDatas.ContainsKey(name))
+                return new List<BuffID>();
+            return allDatas[name].Keys.ToList();
+        }
+
+        /// <summary>
+        /// 获取全部启用的BuffID
+        /// 外部方法
+        /// </summary>
+        /// <returns></returns>
         public List<BuffID> GetAllBuffIds()
         {
             SlugcatStats.Name name;
@@ -51,10 +63,7 @@ namespace RandomBuff.Core.SaveData
                 name = game.StoryCharacter;
             else
                 name = RainWorld.lastActiveSaveSlot;
-            if (!allDatas.ContainsKey(name))
-                return new List<BuffID>();
-
-            return allDatas[name].Keys.ToList();
+            return GetAllBuffIds(name);
         }
     }
 

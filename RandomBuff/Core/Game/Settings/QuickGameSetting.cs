@@ -39,7 +39,11 @@ namespace RandomBuff.Core.Game.Settings
             if (counter >= 40 * 30)
             {
                 if (queue[pointer] != BuffID.None)
+                {
                     BuffPoolManager.Instance.RemoveBuff(queue[pointer]);
+                    BuffHud.Instance.RemoveCard(queue[pointer]);
+                }
+
                 if (isPositive) 
                     queue[pointer] = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
                         BuffType.Positive)[0].BuffID;
@@ -48,6 +52,7 @@ namespace RandomBuff.Core.Game.Settings
                         BuffType.Negative, BuffType.Duality)[0].BuffID;
                 BuffPlugin.LogDebug($"Quick Mode : New Buff {queue[pointer]}");
 
+                BuffHud.Instance.AppendNewCard(queue[pointer]);
                 BuffPoolManager.Instance.CreateBuff(queue[pointer++]);
 
                 pointer = pointer % queue.Length;
@@ -59,6 +64,7 @@ namespace RandomBuff.Core.Game.Settings
         {
             CurrentPacket = new CachaPacket();
             inGame = false;
+            BuffPlugin.Log($"QuickGameSetting : SessionEnd! pointer: {pointer}, isPositive: {isPositive}");
         }
 
         public override void NewGame()

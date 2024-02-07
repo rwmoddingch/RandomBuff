@@ -71,6 +71,8 @@ namespace RandomBuff.Core.Game
             public (int selectCount, int showCount, int pickTimes) positive;
             public (int selectCount, int showCount, int pickTimes) negative;
             public bool isEnd;
+
+            public bool NeedMenu => positive.pickTimes + negative.pickTimes != 0;
         }
     }
 

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Kittehface.Framework20;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using RWCustom;
 using UnityEngine;
@@ -22,6 +24,9 @@ namespace RandomBuff.Core.SaveData
         public int UsedSlot { get; private set; } = -1;
 
         private UserData.File buffCoreFile;
+
+        public List<string> buffCollect = new();
+
 
         private BuffFile()
         {
@@ -192,18 +197,23 @@ namespace RandomBuff.Core.SaveData
         public static void OnModsInit()
         {
             On.PlayerProgression.ctor += PlayerProgression_ctor;
-            On.PlayerProgression.LoadProgression += PlayerProgression_LoadProgression;
+            On.PlayerProgression.Update += PlayerProgression_Update;
             BuffPlugin.Log("Buff File Hook Loaded");
         }
 
-        private static void PlayerProgression_LoadProgression(On.PlayerProgression.orig_LoadProgression orig, PlayerProgression self)
+        private static void PlayerProgression_Update(On.PlayerProgression.orig_Update orig, PlayerProgression self)
         {
             orig(self);
-            OnFileReadCompleted?.Invoke();
+            if (waitLoad.Contains(self) && self.progressionLoaded)
+            {
+                OnFileReadCompleted?.Invoke();
+                waitLoad.Remove(self);
+            }
         }
 
         private static void PlayerProgression_ctor(On.PlayerProgression.orig_ctor orig, PlayerProgression self, RainWorld rainWorld, bool tryLoad, bool saveAfterLoad)
         {
+            
             orig(self,rainWorld, tryLoad, saveAfterLoad);
             if (Instance?.UsedSlot != CurrentSlot)
             {
@@ -222,6 +232,12 @@ namespace RandomBuff.Core.SaveData
                 Instance.SaveConfigFile();
             }
             OnBuffReadCompleted?.Invoke();
+
+            if (self.progressionLoaded)
+                OnFileReadCompleted?.Invoke();
+            else
+                waitLoad.Add(self);
+
         }
 
         public void AddCollect(string buffID)
@@ -233,10 +249,11 @@ namespace RandomBuff.Core.SaveData
                 buffCollect.Add(buffID);
         }
 
-        public List<string> buffCollect = new();
 
         private static event Action OnFileReadCompleted;
         private static event Action OnBuffReadCompleted;
+
+        private static List<PlayerProgression> waitLoad = new ();
 
         /// <summary>
         /// 当存档完全读取完毕的回调
