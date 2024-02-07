@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using static System.Net.Mime.MediaTypeNames;
 using Kittehface.Framework20;
+using RandomBuff.Core.Entry;
 using RandomBuff.Render.CardRender;
 
 namespace RandomBuff.Core.Buff
@@ -51,7 +52,7 @@ namespace RandomBuff.Core.Buff
         {
             if(CardInfos.TryGetValue(languageID, out CardInfo cardInfo))
                 return cardInfo;
-            return CardInfos[InGameTranslator.LanguageID.English];
+            return CardInfos.First().Value;
         }
     }
 
@@ -95,7 +96,18 @@ namespace RandomBuff.Core.Buff
                 var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
                 newData = new BuffStaticData();
 
-                newData.BuffID = (BuffID)ExtEnumBase.Parse(typeof(BuffID),(string)rawData[loadState = "ID"],true);
+                if (!ExtEnumBase.TryParse(typeof(BuffID), (string)rawData[loadState = "ID"], true, out var re))
+                {
+                    BuffPlugin.LogFatal("Can't find registered BuffID, Maybe forgot to add codes?");
+                    return false;
+                }
+
+                newData.BuffID = (BuffID)re;
+                if (BuffRegister.GetBuffType(newData.BuffID) == null)
+                {
+                    BuffPlugin.LogFatal("Can't find BuffDataType, Maybe forgot to call BuffRegister.RegisterBuff() ?");
+                    return false;
+                }
 
                 if (rawData.ContainsKey(loadState = "FaceName"))
                 {
@@ -104,7 +116,7 @@ namespace RandomBuff.Core.Buff
                     {
                         Futile.atlasManager.LoadImage(newData.FaceName);
                     }
-                    catch (FutileException e)
+                    catch (FutileException _)
                     {
                         BuffPlugin.LogError($"Card image not found at :{newData.FaceName}");
                     }
@@ -184,7 +196,7 @@ namespace RandomBuff.Core.Buff
                     }
                     if (rawData.TryGetValue(loadState = "Description", out var obj1))
                         info.Description = (string)obj1;
-                    newData.CardInfos.Add(InGameTranslator.LanguageID.English,info);
+                    newData.CardInfos.Add(InGameTranslator.LanguageID.English, info);
                 }
 
                 if (rawData.ContainsKey("Custom"))
@@ -206,9 +218,7 @@ namespace RandomBuff.Core.Buff
                     BuffPlugin.LogError($"BuffName not found at {jsonFile.Name}!");
                     newData.CardInfos.Add(InGameTranslator.LanguageID.English,new CardInfo(){BuffName = newData.BuffID.value});
                 }
-
-                //if (BuffPlugin.DevEnabled)
-                //    BuffPlugin.Log(newData.ToDebugString());
+                //BuffPlugin.LogDebug(newData.ToDebugString());
                 return true;
             }
             catch (Exception e)

@@ -8,9 +8,11 @@ using JollyCoop.JollyMenu;
 using Menu;
 using Menu.Remix;
 using Music;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;
+using static RandomBuff.Core.SaveData.BuffFile;
 
 namespace RandomBuff.Core.BuffMenu.Test
 {
@@ -22,6 +24,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public TStartGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, TestStartGameMenu)
         {
+            callBack = new (OnDataLoaded);
             if (manager.rainWorld.options.saveSlot < 100)
             {
                 var lastSlot = manager.rainWorld.options.saveSlot;
@@ -30,13 +33,13 @@ namespace RandomBuff.Core.BuffMenu.Test
                 manager.rainWorld.progression = new PlayerProgression(manager.rainWorld, true, false);
             }
 
-            BuffFile.OnFileReadCompleted += OnDataLoaded;
         }
+
+
 
         void OnDataLoaded()
         {
-            BuffFile.OnFileReadCompleted -= OnDataLoaded;
-            loaded=true;
+            isLoaded = true;
             pages = new List<Page>()
             {
                 new (this, null, "OHHHH", 0)
@@ -45,9 +48,13 @@ namespace RandomBuff.Core.BuffMenu.Test
                 new Vector2(120, 40)));
             pages[0].subObjects.Add(startButton = new SimpleButton(this, pages[0], Translate("NEW GAME"), "START", new Vector2(200, 300),
                 new Vector2(120, 40)));
-            pages[0].subObjects.Add(new SimpleButton(this, pages[0], Translate("EXIT"), "EXIT", new Vector2(200, 250),
+            pages[0].subObjects.Add(settingButton = new SimpleButton(this, pages[0], Translate(BuffDataManager.Instance.GetSafeSetting(currentName).ID.value), "SELECT_MODE", new Vector2(200, 250),
+                new Vector2(120, 40)));
+            pages[0].subObjects.Add(new SimpleButton(this, pages[0], Translate("EXIT"), "EXIT", new Vector2(200, 200),
                 new Vector2(120, 40)));
             pages[0].subObjects.Add(new CheckBox(this, pages[0], this, new Vector2(350, 360), 65, Translate("Restart"), "RESET", true));
+            
+            settingButton.inactive = BuffDataManager.Instance.GetSafeSetting(currentName).instance != null && !needReset;
             if (!manager.rainWorld.progression.IsThereASavedGame(currentName))
                 startButton.menuLabel.text = Translate("NEW GAME");
             else
@@ -64,9 +71,12 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         private SlugcatStats.Name currentName = SlugcatStats.Name.White;
         private SimpleButton startButton;
+        private SimpleButton settingButton;
         private SimpleButton selectButton;
         private SymbolButton coopButton;
         private bool needReset;
+
+        private BuffFileCompletedCallBack callBack;
 
         public override void Singal(MenuObject sender, string message)
         {
@@ -81,26 +91,33 @@ namespace RandomBuff.Core.BuffMenu.Test
                     startButton.menuLabel.text = Translate("NEW GAME");
                 else
                     startButton.menuLabel.text = Translate("CONTINUE");
+
+                var safeData = BuffDataManager.Instance.GetSafeSetting(currentName);
+                settingButton.menuLabel.text = Translate(safeData.ID.ToString());
+                settingButton.inactive = safeData.instance != null && !needReset;
+
             }
             else if (message == "START")
             {
+            
                 if (!manager.rainWorld.progression.IsThereASavedGame(currentName) || needReset)
                 {
                     manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         currentName;
                     manager.rainWorld.progression.WipeSaveState(currentName);
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
-                    manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
-                    PlaySound(SoundID.MENU_Start_New_Game);
+                 
                 }
                 else
                 {
                     manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         currentName;
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
-                    manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
-                    PlaySound(SoundID.MENU_Continue_Game);
                 }
+
+                BuffDataManager.Instance.StartGame(currentName);
+                manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
+                PlaySound(SoundID.MENU_Start_New_Game);
             }
             else if (message == "EXIT")
             {
@@ -113,6 +130,16 @@ namespace RandomBuff.Core.BuffMenu.Test
                 JollySetupDialog dialog = new JollySetupDialog(currentName, manager, closeButtonPos);
                 manager.ShowDialog(dialog);
             }
+            else if (message == "SELECT_MODE")
+            {
+                var safeData = BuffDataManager.Instance.GetSafeSetting(currentName);
+                safeData.ID = new (BuffSettingID.values.entries[
+                    safeData.ID.Index == BuffSettingID.values.entries.Count - 1 ? 0 : safeData.ID.Index + 1]);
+
+                settingButton.menuLabel.text = Translate(safeData.ID.ToString());
+                settingButton.inactive = safeData.instance != null && !needReset;
+
+            }
         }
 
         public bool GetChecked(CheckBox box)
@@ -122,7 +149,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public override void Update()
         {
-            if (!loaded)
+            if (!isLoaded)
                 return;
 
             base.Update();
@@ -130,7 +157,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public override void RawUpdate(float dt)
         {
-            if (!loaded)
+            if (!isLoaded)
             {
                 manager.blackDelay = 0.1f;
                 return;
@@ -139,7 +166,7 @@ namespace RandomBuff.Core.BuffMenu.Test
         }
 
 
-        private bool loaded = false;
+        private bool isLoaded;
 
 
         public void SetChecked(CheckBox box, bool c)

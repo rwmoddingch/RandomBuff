@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using BepInEx;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
@@ -22,11 +23,10 @@ namespace RandomBuff
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
     public class BuffPlugin : BaseUnityPlugin
     {
-        public const string saveVersion = "a-0.0.1";
+        public const string saveVersion = "a-0.0.2";
 
         public void OnEnable()
         {
-            instance = this;
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
@@ -80,6 +80,7 @@ namespace RandomBuff
                     }
                     Render.CardRender.CardBasicAssets.LoadAssets();
 
+                    BaseGameSetting.Init();
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
                     //HooksApplier.ApplyHooks();
@@ -123,7 +124,6 @@ namespace RandomBuff
         private static bool isLoaded = false;
         private static bool isPostLoaded = false;
         private static bool canAccessLog = true;
-        private static BuffPlugin instance;
 
         internal static bool DevEnabled { get; private set; }
 
@@ -140,6 +140,17 @@ namespace RandomBuff
            
         }
 
+        public static void LogDebug(object message)
+        {
+            if (DevEnabled)
+            {
+                Debug.Log($"[RandomBuff] {message}");
+                if (canAccessLog)
+                    File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Debug]\t\t{message}\n");
+            }
+
+        }
+
         public static void LogWarning(object message)
         {
             Debug.LogWarning($"[RandomBuff] {message}");
@@ -152,6 +163,14 @@ namespace RandomBuff
             Debug.LogError($"[RandomBuff] {message}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Error]\t\t{message}\n");
+        }
+
+        public static void LogFatal(object message)
+        {
+            Debug.Log($"[RandomBuff] {message}");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{message}\n");
+
         }
 
         public static void LogException(Exception e)

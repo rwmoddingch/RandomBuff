@@ -1,0 +1,10 @@
+{
+    "FaceName": "hell",
+    "ID" : "Hell",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "HEll",
+    "Description" : "所有房间色调变为地狱色调",
+    "Color" : "#FFFFFF"
+}

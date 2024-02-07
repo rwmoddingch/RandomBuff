@@ -49,13 +49,14 @@ namespace RandomBuff.Core.BuffMenu
             SetupSlugNameOrders();
 
             //延迟加载等待存档载入完毕
-            BuffFile.OnFileReadCompleted += OnDataLoaded;
+           
+
+
         }
 
         void OnDataLoaded()
         {
             loaded = true;
-            BuffFile.OnFileReadCompleted -= OnDataLoaded;
             foreach (var name in slugNameOrders)
             {
                 saveGameData.Add(name, MineFromSave(manager, name));

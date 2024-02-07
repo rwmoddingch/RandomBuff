@@ -1,0 +1,10 @@
+{
+    "FaceName": "arachnophobia",
+    "ID" : "Arachnophobia",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "Arachnophobia",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}

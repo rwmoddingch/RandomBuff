@@ -1,0 +1,10 @@
+{
+    "FaceName": "eatmore",
+    "ID" : "EatMore",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "Eat More",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}
