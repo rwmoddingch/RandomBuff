@@ -21,7 +21,7 @@ namespace RandomBuff.Core.BuffMenu
         private static void ProcessManager_RequestMainProcessSwitch_ProcessID_float(On.ProcessManager.orig_RequestMainProcessSwitch_ProcessID_float orig, ProcessManager self, ProcessManager.ProcessID ID, float fadeOutSeconds)
         {
             if (self.currentMainLoop is RainWorldGame game && !game.wasAnArtificerDream && ID == ProcessManager.ProcessID.SleepScreen &&
-                self.rainWorld.options.saveSlot > 100)
+                self.rainWorld.options.saveSlot >= 100)
             {
                 ID = GachaMenuID;
             }

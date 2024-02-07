@@ -1,0 +1,10 @@
+{
+    "FaceName": "StoneofBlessing",
+    "ID" : "StoneofBlessing",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "BuffName" : "Stone of Blessing",
+    "Description" : "",
+    "Color" : "#FFFFFF"
+}

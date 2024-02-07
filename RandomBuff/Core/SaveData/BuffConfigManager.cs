@@ -294,8 +294,15 @@ namespace RandomBuff.Core.SaveData
                 if (BuffStaticData.TryLoadStaticData(file,
                         info.FullName.Replace(rootPath, ""), out var data))
                 {
-                    staticDatas.Add(data.BuffID, data);
-                    buffTypeTable[data.BuffType].Add(data.BuffID);
+                    if (!staticDatas.ContainsKey(data.BuffID))
+                    {
+                        staticDatas.Add(data.BuffID, data);
+                        buffTypeTable[data.BuffType].Add(data.BuffID);
+                    }
+                    else
+                    {
+                        BuffPlugin.LogError($"Same Key at {staticDatas[data.BuffID].ToDebugString()}");
+                    }
                 }
             }
         }
