@@ -1,6 +1,8 @@
-﻿using System;
+﻿using DevInterface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -79,6 +81,20 @@ namespace RandomBuff
                     }
                 }
             }
+        }
+
+        public static T GetUninit<T>()
+        {
+            return (T)FormatterServices.GetSafeUninitializedObject(typeof(T));
+        }
+
+        public static void BaseUpdate(this Menu.Page page)
+        {
+            for (int i = 0; i < page.subObjects.Count; i++)
+            {
+                page.subObjects[i].Update();
+            }
+            page.lastPos = page.pos;
         }
     }
 }

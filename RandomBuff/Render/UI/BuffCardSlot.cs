@@ -1,4 +1,6 @@
 ﻿using RandomBuff.Core.Buff;
+using RandomBuff.Core.BuffMenu;
+using RandomBuff.Core.SaveData;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -27,9 +29,9 @@ namespace RandomBuff.Render.UI
             BaseInteractionManager.Update();
         }
 
-        public virtual void GrafUpdate()
+        public virtual void GrafUpdate(float timeStacker)
         {
-            BaseInteractionManager.GrafUpdate();
+            BaseInteractionManager.GrafUpdate(timeStacker);
         }
 
         public virtual void AppendCard(BuffCard buffCard)
@@ -137,9 +139,9 @@ namespace RandomBuff.Render.UI
             darkMaks_front.SetPosition(Custom.rainWorld.screenSize / 2f);
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
-            base.GrafUpdate();
+            base.GrafUpdate(timeStacker);
             if (Mathf.Abs(targetBackDark - darkMask_back.alpha) > 0.01f)
                 darkMask_back.alpha = Mathf.Lerp(darkMask_back.alpha, targetBackDark, 0.1f);
 
@@ -273,6 +275,94 @@ namespace RandomBuff.Render.UI
                     return card;
             }
             return null;
+        }
+    }
+
+    internal class BuffGameMenuSlot : BuffCardSlot
+    {
+        public BuffGameMenu Menu { get; private set; }
+
+        public List<List<BuffID>> buffIDPages = new List<List<BuffID>>();
+        List<BuffCard> positiveCards = new List<BuffCard>();
+        List<BuffCard> negativeCards = new List<BuffCard>();
+
+        public BuffGameMenuSlot(BuffGameMenu buffGameMenu)
+        {
+            Menu = buffGameMenu;
+            BaseInteractionManager = new BuffGameMenuInteractionManager(this);
+        }
+
+        public void SetupBuffs(List<SlugcatStats.Name> nameOrders)
+        {
+            foreach(var name in nameOrders)
+            {
+                buffIDPages.Add(BuffDataManager.Instance.GetAllBuffIds(name));
+                BuffPlugin.Log($"{buffIDPages.Last().Count} buffs for {name}");
+            }
+        }
+
+        public void UpdatePage(int page)
+        {
+            foreach(var card in positiveCards)
+            {
+                card.SetAnimataorState(BuffCard.AnimatorState.BuffGameMenu_Disappear);
+            }
+            positiveCards.Clear();
+            foreach(var card in negativeCards)
+            {
+                card.SetAnimataorState(BuffCard.AnimatorState.BuffGameMenu_Disappear);
+            }
+            negativeCards.Clear();
+            foreach(var ids in buffIDPages[page])
+            {
+                CreateCard(ids);
+                BuffPlugin.Log($"Display buff card {ids} in page {page}");
+            }
+
+            foreach(var card in BuffCards)
+            {
+                if(card.currentAniamtorState != BuffCard.AnimatorState.BuffGameMenu_Disappear)
+                    card.SetAnimataorState(BuffCard.AnimatorState.BuffGameMenu_Show);
+            }
+        }
+
+        public float Scroll(float timeStacker)
+        {
+            return Mathf.Lerp(Mathf.Abs(Menu.lastScroll), Mathf.Abs(Menu.scroll), timeStacker);
+        }
+
+        public void CreateCard(BuffID id)
+        {
+            var card = new BuffCard(id);
+
+            if(card.StaticData.BuffType == BuffType.Positive)
+                positiveCards.Add(card);
+            else
+                negativeCards.Add(card);
+
+            AppendCard(card);
+        }
+
+        public int GetCurrentIndex(BuffCard card, out int positveOrNegative, out int totalLength)
+        {
+            if(card.StaticData.BuffType == BuffType.Positive)
+            {
+                positveOrNegative = 1;
+                totalLength = positiveCards.Count;
+                return positiveCards.IndexOf(card);
+            }
+            else
+            {
+                positveOrNegative = -1;
+                totalLength = negativeCards.Count;
+                return negativeCards.IndexOf(card);
+            }
+        }
+
+        public void DestroyCard(BuffCard card)
+        {
+            RemoveCard(card);
+            card.Destroy();
         }
     }
 }

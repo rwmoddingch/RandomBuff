@@ -100,7 +100,7 @@ namespace RandomBuff.Core.BuffMenu.Test
             {
                 card.Alpha = Mathf.InverseLerp(40, 0, counter + timeStacker);
             }
-            interactionManager.GrafUpdate();
+            interactionManager.GrafUpdate(timeStacker);
         }
 
 
