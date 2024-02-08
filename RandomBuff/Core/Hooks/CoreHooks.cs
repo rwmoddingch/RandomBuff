@@ -11,6 +11,7 @@ using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
+using static RandomBuff.Core.BuffMenu.BuffGameMenu;
 
 namespace RandomBuff.Core.Hooks
 {
@@ -29,6 +30,10 @@ namespace RandomBuff.Core.Hooks
             On.Menu.MainMenu.ctor += MainMenu_ctor;
             On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
 
+            On.Menu.SlugcatSelectMenu.SlugcatUnlocked += SlugcatSelectMenu_SlugcatUnlocked;
+            On.Menu.SlugcatSelectMenu.SlugcatPage.Scroll += SlugcatPage_Scroll;
+            On.Menu.SlugcatSelectMenu.SlugcatPage.NextScroll += SlugcatPage_NextScroll;
+
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
 
             InGameHooksInit();
@@ -40,7 +45,26 @@ namespace RandomBuff.Core.Hooks
 
         }
 
-  
+        private static float SlugcatPage_NextScroll(On.Menu.SlugcatSelectMenu.SlugcatPage.orig_NextScroll orig, SlugcatSelectMenu.SlugcatPage self, float timeStacker)
+        {
+            if (self is SlugcatIllustrationPage page)
+                return page.NextScroll(timeStacker);
+            return orig(self, timeStacker);
+        }
+
+        private static float SlugcatPage_Scroll(On.Menu.SlugcatSelectMenu.SlugcatPage.orig_Scroll orig, SlugcatSelectMenu.SlugcatPage self, float timeStacker)
+        {
+            if (self is SlugcatIllustrationPage page)
+                return page.Scroll(timeStacker);
+            return orig(self, timeStacker);
+        }
+
+        private static bool SlugcatSelectMenu_SlugcatUnlocked(On.Menu.SlugcatSelectMenu.orig_SlugcatUnlocked orig, SlugcatSelectMenu self, SlugcatStats.Name i)
+        {
+            if (self.saveGameData.Count == 0)
+                return true;
+            return orig(self, i);
+        }
 
         private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
         {

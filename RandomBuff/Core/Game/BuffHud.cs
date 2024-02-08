@@ -44,6 +44,11 @@ namespace RandomBuff.Core.Game
             inGameSlot.ForceRemoveCard_DEBUG(id);
         }
 
+        public override void ClearSprites()
+        {
+            base.ClearSprites();
+        }
+
 
         public static BuffHud Instance { get; private set; }
 
