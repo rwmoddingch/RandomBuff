@@ -23,6 +23,7 @@ namespace RandomBuff.Core.BuffMenu
         private RainEffect rainEffect;
 
         private List<SlugcatStats.Name> slugNameOrders = new ();
+        private List<SlugcatIllustrationPage> slugcatPages = new ();
         private Dictionary<SlugcatStats.Name, WawaSaveData> saveGameData = new ();
 
         private bool restartCurrent;
@@ -37,12 +38,29 @@ namespace RandomBuff.Core.BuffMenu
         private CheckBox restartCheckbox;
         private SimpleButton jollyToggleConfigMenu;
 
-
         private MenuLabel testLabel;
 
 
-        private SlugcatStats.Name CurrentName => slugNameOrders[currentIndex];
-        private int currentIndex = 0;
+        BuffGameMenuSlot menuSlot;
+        private SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
+        private int currentPageIndex = 0;
+
+        public float scroll;
+        public float lastScroll;
+        int quedSideInput;
+
+        public float NextScroll
+        {
+            get
+            {
+                float next = Mathf.Lerp(scroll, 0f, 0.20f);
+                if(Mathf.Abs(next) < 0.001f)
+                {
+                    next = 0f;
+                }
+                return next;
+            }
+        }
 
         private BuffFile.BuffFileCompletedCallBack callBack;
 
@@ -50,6 +68,8 @@ namespace RandomBuff.Core.BuffMenu
         public BuffGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, ID)
         {
             SetupSlugNameOrders();
+            menuSlot = new BuffGameMenuSlot(this);
+
             //延迟加载等待存档载入完毕
             callBack = new BuffFile.BuffFileCompletedCallBack(OnDataLoaded);
 
@@ -71,6 +91,7 @@ namespace RandomBuff.Core.BuffMenu
             {
                 saveGameData.Add(name, MineFromSave(manager, name));
             }
+            menuSlot.SetupBuffs(slugNameOrders);
 
             pages = new List<Page>()
             {
@@ -79,6 +100,12 @@ namespace RandomBuff.Core.BuffMenu
 
             //构建页面
             pages[0].subObjects.Add(rainEffect = new RainEffect(this, pages[0]));
+
+            for (int i = 0; i < slugNameOrders.Count; i++)
+            {
+                slugcatPages.Add(new SlugcatIllustrationPage(this, null, i + 1, slugNameOrders[i]));
+                pages.Add(slugcatPages[i]);
+            }
 
             pages[0].subObjects.Add(startButton = new HoldButton(this, this.pages[0], Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
             pages[0].subObjects.Add(backButton = new SimpleButton(this, this.pages[0], base.Translate("BACK"), "BACK", new Vector2(200f, 668f), new Vector2(110f, 30f)));
@@ -99,6 +126,9 @@ namespace RandomBuff.Core.BuffMenu
 
             pages[0].subObjects.Add(restartCheckbox = new CheckBox(this, this.pages[0], this, new Vector2(this.startButton.pos.x + 200f + restartTextOffset, Mathf.Max(30f, manager.rainWorld.options.SafeScreenOffset.y)), restartTextWidth, base.Translate("Restart game"), "RESTART", false));
             restartCheckbox.label.pos.x += (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
+
+            pages[0].Container.MoveToFront();
+            container.AddChild(menuSlot.Container);
 
             UpdateSlugcat();
         }
@@ -141,6 +171,7 @@ namespace RandomBuff.Core.BuffMenu
             {
                 testLabel.label.text = "NEW GAME";
             }
+            menuSlot.UpdatePage(currentPageIndex);
         }
 
 
@@ -190,15 +221,15 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if (message == "PREV")
             {
-                currentIndex--;
-                if(currentIndex < 0)
-                    currentIndex = slugNameOrders.Count - 1;
-                UpdateSlugcat();
+                quedSideInput = Math.Max(-3, quedSideInput - 1);
+                PlaySound(SoundID.MENU_Next_Slugcat);
+                //UpdateSlugcat();
             }
             else if (message == "NEXT")
             {
-                currentIndex = (currentIndex + 1) % (slugNameOrders.Count);
-                UpdateSlugcat();
+                quedSideInput = Math.Min(3, quedSideInput + 1);
+                PlaySound(SoundID.MENU_Next_Slugcat);
+                //UpdateSlugcat();
             }
             else if (message == "START")
             {
@@ -244,6 +275,53 @@ namespace RandomBuff.Core.BuffMenu
                 return;
 
             base.Update();
+            menuSlot.Update();
+
+            lastScroll = scroll;
+            scroll = NextScroll;
+            startButton.GetButtonBehavior.greyedOut = Mathf.Abs(scroll) > 0.1f;
+            if (Mathf.Abs(lastScroll) > 0.5f && Mathf.Abs(scroll) <= 0.5f)
+            {
+                //this.UpdateStartButtonText();
+            }
+            if (scroll == 0f && lastScroll == 0f)
+            {
+                if (quedSideInput < 0)
+                {
+                    quedSideInput++;
+                    currentPageIndex--;
+                    if (currentPageIndex < 0)
+                    {
+                        currentPageIndex = slugcatPages.Count - 1;
+                    }
+                    //UpdateSelectedSlugcatInMiscProg();
+                    if (ModManager.JollyCoop)
+                    {
+                        manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
+                    }
+                    scroll = 1f;
+                    lastScroll = 1f;
+                    UpdateSlugcat();
+                    return;
+                }
+                if (quedSideInput > 0)
+                {
+                    quedSideInput--;
+                    currentPageIndex++;
+                    if (currentPageIndex >= this.slugcatPages.Count)
+                    {
+                        currentPageIndex = 0;
+                    }
+                    //UpdateSelectedSlugcatInMiscProg();
+                    if (ModManager.JollyCoop)
+                    {
+                        manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
+                    }
+                    scroll = -1f;
+                    lastScroll = -1f;
+                    UpdateSlugcat();
+                }
+            }
         }
 
 
@@ -257,11 +335,10 @@ namespace RandomBuff.Core.BuffMenu
             base.RawUpdate(dt);
         }
 
-
-
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+            menuSlot.GrafUpdate(timeStacker);
         }
 
         internal class WawaSaveData
@@ -274,6 +351,48 @@ namespace RandomBuff.Core.BuffMenu
             public bool hasMark;
             public string shelterName;
             public bool karmaRF;
+        }
+
+        public class SlugcatIllustrationPage : SlugcatSelectMenu.SlugcatPage
+        {
+            public SlugcatIllustrationPage(Menu.Menu menu, MenuObject menuObject, int pageIndex, SlugcatStats.Name name) : base(menu, menuObject, pageIndex, name)
+            {
+                var origMenu = menu;
+                this.menu = Helper.GetUninit<SlugcatSelectMenu>();
+                this.menu.manager = origMenu.manager;
+                this.menu.container = origMenu.container;
+                AddImage(false);
+                this.menu = origMenu;
+                slugcatImage.menu = origMenu;
+            }
+
+            public new float Scroll(float timeStacker)
+            {
+                float scroll = (SlugcatPageIndex - (menu as BuffGameMenu).currentPageIndex) - Mathf.Lerp((menu as BuffGameMenu).lastScroll, (menu as BuffGameMenu).scroll, timeStacker);
+                if (scroll < MinOffset)
+                {
+                    scroll += (menu as BuffGameMenu).slugcatPages.Count;
+                }
+                else if (scroll > MaxOffset)
+                {
+                    scroll -= (menu as BuffGameMenu).slugcatPages.Count;
+                }
+                return scroll;
+            }
+
+            public new float NextScroll(float timeStacker)
+            {
+                float scroll = (SlugcatPageIndex - (menu as BuffGameMenu).currentPageIndex) - Mathf.Lerp((menu as BuffGameMenu).scroll, (menu as BuffGameMenu).NextScroll, timeStacker);
+                if (scroll < MinOffset)
+                {
+                    scroll += (menu as BuffGameMenu).slugcatPages.Count;
+                }
+                else if (scroll > MaxOffset)
+                {
+                    scroll -= (menu as BuffGameMenu).slugcatPages.Count;
+                }
+                return scroll;
+            }
         }
     }
 }

@@ -134,8 +134,8 @@ namespace RandomBuff.Core.GachaMenu
         {
             base.GrafUpdate(timeStacker);
             for(int i=0;i<pickerSlots.Count;i++)
-                pickerSlots[i]?.GrafUpdate();
-            inGameSlot?.GrafUpdate();
+                pickerSlots[i]?.GrafUpdate(timeStacker);
+            inGameSlot?.GrafUpdate(timeStacker);
 
             //一个很笨的淡入
             if (exitCounter < 40)
