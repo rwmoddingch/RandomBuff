@@ -48,11 +48,11 @@ namespace RandomBuff.Core.Buff
                 return CardBasicAssets.FPBack;
         }
 
-        internal CardInfo GetCardInfo(InGameTranslator.LanguageID languageID)
+        internal (InGameTranslator.LanguageID id, CardInfo info) GetCardInfo(InGameTranslator.LanguageID languageID)
         {
             if(CardInfos.TryGetValue(languageID, out CardInfo cardInfo))
-                return cardInfo;
-            return CardInfos.First().Value;
+                return (languageID, cardInfo);
+            return (CardInfos.First().Key, CardInfos.First().Value);
         }
     }
 

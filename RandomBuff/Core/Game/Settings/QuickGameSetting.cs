@@ -14,6 +14,8 @@ namespace RandomBuff.Core.Game.Settings
         public override BuffSettingID ID { get; }
 
 
+        public override bool NeedRandomStart => true;
+
 
         public QuickGameSetting()
         {
@@ -35,6 +37,8 @@ namespace RandomBuff.Core.Game.Settings
 
         public override void InGameUpdate(RainWorldGame game)
         {
+            if (BuffHud.Instance == null)
+                return;
             counter++;
             if (counter >= 40 * 30)
             {

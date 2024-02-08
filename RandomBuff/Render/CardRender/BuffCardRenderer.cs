@@ -141,10 +141,10 @@ namespace RandomBuff.Render.CardRender
                 var info = _buffStaticData.GetCardInfo(InGameTranslator.LanguageID.English);
                 //初始化文本
                 cardTextFrontController = _cardQuadFront.AddComponent<CardTextController>();
-                cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.BuffName, true, 5f);
+                cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f);
 
                 cardTextBackController = _cardQuadBack.AddComponent<CardTextController>();
-                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.Description, false, 3f);
+                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f);
 
                 //初始化堆叠层数显示
                 cardStackerTextController = gameObject.AddComponent<CardStackerTextController>();

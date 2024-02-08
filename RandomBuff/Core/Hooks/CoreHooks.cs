@@ -14,34 +14,38 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Hooks
 {
-    static class CoreHooks
+    static  partial class CoreHooks
     {
         public static void OnModsInit()
         {
+            On.ProcessManager.PreSwitchMainProcess += ProcessManager_PreSwitchMainProcess;
             On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess;
 
-            On.RainWorldGame.Update += RainWorldGame_Update;
-            On.RainWorldGame.Win += RainWorldGame_Win;
-            On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
+
             On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
             On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
-            On.ProcessManager.PreSwitchMainProcess += ProcessManager_PreSwitchMainProcess;
 
       
             On.Menu.MainMenu.ctor += MainMenu_ctor;
-            TestStartGameMenu = new("TestStartGameMenu");
             On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
 
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
-            
+
+            InGameHooksInit();
+
 
             BuffPlugin.Log("Core Hook Loaded");
+
+            //TestStartGameMenu = new("TestStartGameMenu");
+
         }
+
+  
 
         private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
         {
             orig(self, cam);
-            if(self.rainWorld.options.saveSlot >= 100)
+            if(self.rainWorld.BuffMode())
                 self.AddPart(new BuffHud(self));
         }
 
@@ -72,7 +76,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void ProcessManager_PreSwitchMainProcess(On.ProcessManager.orig_PreSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
-            if (self.rainWorld.options.saveSlot >= 100 && ID == ProcessManager.ProcessID.MainMenu)
+            if (self.rainWorld.BuffMode() && ID == ProcessManager.ProcessID.MainMenu)
             {
                 int lastSlot = self.rainWorld.options.saveSlot;
                 self.rainWorld.options.saveSlot -= 100;
@@ -87,7 +91,7 @@ namespace RandomBuff.Core.Hooks
         private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
         {
             orig(self);
-            if (self.rainWorld.options.saveSlot >= 100)
+            if (self.rainWorld.BuffMode())
                 BuffDataManager.Instance.DeleteAll();
 
         }
@@ -95,29 +99,10 @@ namespace RandomBuff.Core.Hooks
         private static void PlayerProgression_WipeSaveState(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
         {
             orig(self,saveStateNumber);
-            if(self.rainWorld.options.saveSlot >= 100)
+            if(self.rainWorld.BuffMode())
                 BuffDataManager.Instance.DeleteSaveData(saveStateNumber);
         }
 
-        private static void RainWorldGame_GhostShutDown(On.RainWorldGame.orig_GhostShutDown orig, RainWorldGame self, GhostWorldPresence.GhostID ghostID)
-        {
-            BuffPoolManager.Instance?.WinGame();
-            orig(self, ghostID);
-        }
-
-        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
-        {
-            BuffPoolManager.Instance?.WinGame();
-            orig(self, malnourished);
-        }
-
-
-        private static void RainWorldGame_Update(On.RainWorldGame.orig_Update orig, RainWorldGame self)
-        {
-            orig(self);
-            BuffPoolManager.Instance?.Update(self);
-            
-        }
 
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
@@ -134,10 +119,15 @@ namespace RandomBuff.Core.Hooks
             orig(self, ID);
             if (self.currentMainLoop is RainWorldGame game2 && 
                 BuffPoolManager.Instance == null &&
-                game2.rainWorld.options.saveSlot >= 100)
+                game2.rainWorld.BuffMode())
             {
                 BuffPoolManager.LoadGameBuff(game2);
             }
+        }
+
+        public static bool BuffMode(this RainWorld rainWorld)
+        {
+            return rainWorld.options.saveSlot >= 100;
         }
     }
 }
