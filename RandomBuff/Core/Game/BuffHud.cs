@@ -15,7 +15,7 @@ namespace RandomBuff.Core.Game
         public BuffHud(HUD.HUD hud) : base(hud)
         {
             inGameSlot = new InGameBuffCardSlot();
-            hud.fContainers[0].AddChild(inGameSlot.Container);
+            hud.fContainers[1].AddChild(inGameSlot.Container);
 
             foreach (var id in BuffDataManager.Instance.GetAllBuffIds())
                 inGameSlot.AppendCard(id);
@@ -31,7 +31,6 @@ namespace RandomBuff.Core.Game
         {
             inGameSlot.Update();
         }
-
 
         public override void Draw(float timeStacker)
         {
