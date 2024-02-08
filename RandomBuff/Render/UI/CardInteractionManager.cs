@@ -62,11 +62,11 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        public virtual void GrafUpdate()
+        public virtual void GrafUpdate(float timeStacker)
         {
             for (int i = managedCards.Count - 1; i >= 0; i--)
             {
-                managedCards[i].GrafUpdate();
+                managedCards[i].GrafUpdate(timeStacker);
             }
         }
 
@@ -139,6 +139,16 @@ namespace RandomBuff.Render.UI
         protected override void OnMouseDoubleClick()
         {
             CurrentFocusCard?.OnMouseDoubleClick();
+        }
+    }
+
+    internal class BuffGameMenuInteractionManager : CardInteractionManager
+    {
+        public BuffGameMenuSlot Slot { get; private set; }
+
+        public BuffGameMenuInteractionManager(BuffGameMenuSlot slot)
+        {
+            Slot = slot;
         }
     }
 

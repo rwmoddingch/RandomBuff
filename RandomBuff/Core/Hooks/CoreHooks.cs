@@ -29,6 +29,9 @@ namespace RandomBuff.Core.Hooks
 
       
             On.Menu.MainMenu.ctor += MainMenu_ctor;
+            On.Menu.SlugcatSelectMenu.SlugcatPage.Scroll += SlugcatPage_Scroll;
+            On.Menu.SlugcatSelectMenu.SlugcatPage.NextScroll += SlugcatPage_NextScroll;
+            On.Menu.SlugcatSelectMenu.SlugcatUnlocked += SlugcatSelectMenu_SlugcatUnlocked;
             TestStartGameMenu = new("TestStartGameMenu");
             On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
 
@@ -36,6 +39,29 @@ namespace RandomBuff.Core.Hooks
             
 
             BuffPlugin.Log("Core Hook Loaded");
+        }
+
+        private static bool SlugcatSelectMenu_SlugcatUnlocked(On.Menu.SlugcatSelectMenu.orig_SlugcatUnlocked orig, SlugcatSelectMenu self, SlugcatStats.Name i)
+        {
+            if (self.saveGameData == null)
+                return true;
+            return orig.Invoke(self, i);
+        }
+
+        private static float SlugcatPage_NextScroll(On.Menu.SlugcatSelectMenu.SlugcatPage.orig_NextScroll orig, SlugcatSelectMenu.SlugcatPage self, float timeStacker)
+        {
+            if (self is BuffGameMenu.SlugcatIllustrationPage page)
+                return page.NextScroll(timeStacker);
+            else
+                return orig.Invoke(self, timeStacker);
+        }
+
+        private static float SlugcatPage_Scroll(On.Menu.SlugcatSelectMenu.SlugcatPage.orig_Scroll orig, SlugcatSelectMenu.SlugcatPage self, float timeStacker)
+        {
+            if (self is BuffGameMenu.SlugcatIllustrationPage page)
+                return page.Scroll(timeStacker);
+            else
+                return orig.Invoke(self, timeStacker);
         }
 
         private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)

@@ -13,7 +13,7 @@ namespace RandomBuff.Render.CardRender
         public static Font titleFont;
         public static Font discriptionFont;
 
-        static float maxDestroyTime = 5f;
+        static float maxDestroyTime = 0.5f;
         static int currentID;
         static Queue<BuffCardRenderer> buffCards = new Queue<BuffCardRenderer>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
