@@ -358,12 +358,16 @@ namespace RandomBuff.Core.BuffMenu
             public SlugcatIllustrationPage(Menu.Menu menu, MenuObject menuObject, int pageIndex, SlugcatStats.Name name) : base(menu, menuObject, pageIndex, name)
             {
                 var origMenu = menu;
-                this.menu = Helper.GetUninit<SlugcatSelectMenu>();
+                var selectMenu = Helper.GetUninit<SlugcatSelectMenu>();
+                selectMenu.saveGameData = new();
+                 
+                this.menu = selectMenu;
                 this.menu.manager = origMenu.manager;
                 this.menu.container = origMenu.container;
                 AddImage(false);
                 this.menu = origMenu;
                 slugcatImage.menu = origMenu;
+
             }
 
             public new float Scroll(float timeStacker)
