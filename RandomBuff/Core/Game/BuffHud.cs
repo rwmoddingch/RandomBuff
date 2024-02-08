@@ -35,7 +35,7 @@ namespace RandomBuff.Core.Game
         public override void Draw(float timeStacker)
         {
             base.Draw(timeStacker);
-            inGameSlot.GrafUpdate();
+            inGameSlot.GrafUpdate(timeStacker);
         }
 
         public void RemoveCard(BuffID id)

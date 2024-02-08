@@ -29,7 +29,7 @@ namespace RandomBuff.Render.UI
 
         }
 
-        public virtual void GrafUpdate()
+        public virtual void GrafUpdate(float timeStacker)
         {
 
         }
@@ -54,7 +54,7 @@ namespace RandomBuff.Render.UI
                 buffCard.DisplayTitle = true;
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
             if (finished) return;
 
@@ -78,7 +78,7 @@ namespace RandomBuff.Render.UI
             buffCard.onMouseSingleClick += OnSingleClickFlip;
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
             Vector3 rotationTarget = basicRotation + new Vector3((30f * buffCard.LocalMousePos.y - 15f) * (flip ? -1f : 1f), -(30f * buffCard.LocalMousePos.x - 15f), 0f);
 
@@ -135,7 +135,7 @@ namespace RandomBuff.Render.UI
             targetPosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * InGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
             if (!rotationFinished)
             {
@@ -197,7 +197,7 @@ namespace RandomBuff.Render.UI
                 buffCard.Highlight = false;
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {   
             if (Mathf.Abs(buffCard.Position.x - TargetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - TargetPosition.y) > 0.01f)
                 buffCard.Position = Vector2.Lerp(buffCard.Position, TargetPosition, 0.1f);
@@ -233,7 +233,7 @@ namespace RandomBuff.Render.UI
             buffCard.onMouseSingleClick += OnSingleClickFlip;
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
             if (Mathf.Abs(buffCard.Rotation.x - TargetRotation.x) > 0.01f || Mathf.Abs(buffCard.Rotation.y - TargetRotation.y) > 0.01f)
                 buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, TargetRotation, 0.1f);
@@ -268,6 +268,7 @@ namespace RandomBuff.Render.UI
     }
     #endregion
 
+    #region CardPicker
     internal class CardPickerShowAnimator : BuffCardAnimator
     {
         const int initFlipTime = 40;
@@ -353,7 +354,7 @@ namespace RandomBuff.Render.UI
                 buffCard.Highlight = false;
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
             if (delayTimer < initDelay)
                 return;
@@ -394,6 +395,7 @@ namespace RandomBuff.Render.UI
     {
         bool finished;
         float f = 0f;
+
         public CardPickerDisappearAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
             buffCard.Highlight = false;
@@ -403,7 +405,7 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
         }
 
-        public override void GrafUpdate()
+        public override void GrafUpdate(float timeStacker)
         {
             if (finished)
             {
@@ -416,6 +418,83 @@ namespace RandomBuff.Render.UI
             buffCard.Rotation = Vector3.Lerp(initRotation, Vector3.zero, f);
             buffCard.Position = Vector2.Lerp(initPosition, new Vector2(2000, -200), f);
             if (Mathf.Abs(buffCard.Rotation.x) < 0.01f && Mathf.Abs(buffCard.Rotation.y) < 0.01f)
+                finished = true;
+        }
+    }
+    #endregion
+
+    internal class BuffGameMenuShowAnimataor : BuffCardAnimator
+    {
+        bool finished;
+        BuffGameMenuSlot slot;
+
+        public BuffGameMenuShowAnimataor(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.Highlight = false;
+            buffCard.DisplayDescription = false;
+            buffCard.DisplayTitle = false;
+            buffCard.DisplayStacker = false;
+            buffCard.Highlight = false;
+
+            slot = (buffCard.interactionManager as BuffGameMenuInteractionManager).Slot;
+
+            Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
+            Vector2 basicPosition;
+
+            basicPosition = halfScreenSize + Vector2.up * 40f;
+            int index = slot.GetCurrentIndex(buffCard, out int positiveOrNegative, out int totalLength);
+            basicPosition += positiveOrNegative * Vector2.up * 70f;
+
+            float biasFromMid = index - (totalLength - 1) / 2f;
+            basicPosition += Vector2.right *  Mathf.Min((600 / totalLength), 80f) * biasFromMid;
+
+            buffCard.Position = basicPosition;
+            buffCard.Scale = BuffCard.normalScale * 0.5f;
+            buffCard.Rotation = new Vector3(0f, 90f, 0f);
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            if (finished)
+            {
+                return;
+            }
+
+            float t = 1f - Mathf.InverseLerp(0, 0.5f, slot.Scroll(timeStacker));
+            buffCard.Rotation = new Vector3(0f, 90f * (1f - t), 0f);
+
+            if(t == 1f)
+                finished = true;
+        }
+    }
+
+    internal class BuffGameMenuDisappearAnimataor : BuffCardAnimator
+    {
+        bool finished;
+        BuffGameMenuSlot slot;
+
+        public BuffGameMenuDisappearAnimataor(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.Highlight = false;
+            buffCard.DisplayDescription = false;
+            buffCard.DisplayTitle = false;
+            buffCard.DisplayStacker = false;
+            buffCard.Highlight = false;
+
+            slot = (buffCard.interactionManager as BuffGameMenuInteractionManager).Slot;
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            if (finished)
+            {
+                slot.DestroyCard(buffCard);
+            }
+
+            float t = 1f - Mathf.InverseLerp(0.5f, 1f, slot.Scroll(timeStacker));
+            buffCard.Rotation = new Vector3(0f, -90f * t, 0f);
+
+            if(t == 1)
                 finished = true;
         }
     }

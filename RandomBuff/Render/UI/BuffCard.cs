@@ -141,9 +141,9 @@ namespace RandomBuff.Render.UI
             currentAnimator?.Update();
         }
 
-        public void GrafUpdate()
+        public void GrafUpdate(float timeStacker)
         {
-            currentAnimator?.GrafUpdate();
+            currentAnimator?.GrafUpdate(timeStacker);
         }
 
         public void Destroy()
@@ -189,6 +189,14 @@ namespace RandomBuff.Render.UI
             {
                 currentAnimator = new CardPickerDisappearAnimator(this, Position, Rotation, Scale);
             }
+            else if(newState == AnimatorState.BuffGameMenu_Show)
+            {
+                currentAnimator = new BuffGameMenuShowAnimataor(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.BuffGameMenu_Disappear)
+            {
+                currentAnimator = new BuffGameMenuDisappearAnimataor(this, Position, Rotation, Scale);
+            }
             else
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
@@ -220,6 +228,10 @@ namespace RandomBuff.Render.UI
             //选卡卡槽状态
             CardPicker_Show,
             CardPicker_Disappear,
+
+            //开始游戏界面卡槽状态
+            BuffGameMenu_Show,
+            BuffGameMenu_Disappear,
         }
     }
 }
