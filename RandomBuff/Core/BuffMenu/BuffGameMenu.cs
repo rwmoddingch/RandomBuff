@@ -45,21 +45,17 @@ namespace RandomBuff.Core.BuffMenu
         private SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
         private int currentPageIndex = 0;
 
+        float scrolledPageIndex;
+        int targetScrolledPageIndex;
+        int intScrolledPageIndex;
+
         public float scroll;
         public float lastScroll;
         int quedSideInput;
 
         public float NextScroll
         {
-            get
-            {
-                float next = Mathf.Lerp(scroll, 0f, 0.20f);
-                if(Mathf.Abs(next) < 0.001f)
-                {
-                    next = 0f;
-                }
-                return next;
-            }
+            get => scroll;
         }
 
         private BuffFile.BuffFileCompletedCallBack callBack;
@@ -99,13 +95,14 @@ namespace RandomBuff.Core.BuffMenu
             };
 
             //构建页面
-            pages[0].subObjects.Add(rainEffect = new RainEffect(this, pages[0]));
-
+           
             for (int i = 0; i < slugNameOrders.Count; i++)
             {
                 slugcatPages.Add(new SlugcatIllustrationPage(this, null, i + 1, slugNameOrders[i]));
                 pages.Add(slugcatPages[i]);
             }
+            pages[0].Container.AddChild(new FSprite("pixel") { color = Color.black, alpha = 0.5f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y ,x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f});
+            pages[0].subObjects.Add(rainEffect = new RainEffect(this, pages[0]));
 
             pages[0].subObjects.Add(startButton = new HoldButton(this, this.pages[0], Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
             pages[0].subObjects.Add(backButton = new SimpleButton(this, this.pages[0], base.Translate("BACK"), "BACK", new Vector2(200f, 668f), new Vector2(110f, 30f)));
@@ -130,7 +127,7 @@ namespace RandomBuff.Core.BuffMenu
             pages[0].Container.MoveToFront();
             container.AddChild(menuSlot.Container);
 
-            UpdateSlugcat();
+            UpdateSlugcatAndPage();
         }
 
 
@@ -146,7 +143,7 @@ namespace RandomBuff.Core.BuffMenu
         }
 
 
-        void UpdateSlugcat()
+        void UpdateSlugcatAndPage()
         {
             var safeData = BuffDataManager.Instance.GetSafeSetting(CurrentName);
 
@@ -221,13 +218,15 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if (message == "PREV")
             {
-                quedSideInput = Math.Max(-3, quedSideInput - 1);
+                //quedSideInput = Math.Max(-3, quedSideInput - 1);
+                targetScrolledPageIndex--;
                 PlaySound(SoundID.MENU_Next_Slugcat);
                 //UpdateSlugcat();
             }
             else if (message == "NEXT")
             {
-                quedSideInput = Math.Min(3, quedSideInput + 1);
+                //quedSideInput = Math.Min(3, quedSideInput + 1);
+                targetScrolledPageIndex++;
                 PlaySound(SoundID.MENU_Next_Slugcat);
                 //UpdateSlugcat();
             }
@@ -277,51 +276,97 @@ namespace RandomBuff.Core.BuffMenu
             base.Update();
             menuSlot.Update();
 
-            lastScroll = scroll;
-            scroll = NextScroll;
-            startButton.GetButtonBehavior.greyedOut = Mathf.Abs(scroll) > 0.1f;
-            if (Mathf.Abs(lastScroll) > 0.5f && Mathf.Abs(scroll) <= 0.5f)
+            lastScroll = scroll; 
+            
+            //testLabel.text = $"\ntarget:{targetScrolledPageIndex} scrolledPageIndex : {scrolledPageIndex}\nintScrolledPageIndex : {intScrolledPageIndex}\nscroll:{scroll}";
+            if (scrolledPageIndex != targetScrolledPageIndex)
             {
-                //this.UpdateStartButtonText();
-            }
-            if (scroll == 0f && lastScroll == 0f)
-            {
-                if (quedSideInput < 0)
+                scrolledPageIndex = Mathf.Lerp(scrolledPageIndex, targetScrolledPageIndex, 0.15f);
+
+                int lastIntScrolledPageIndex = intScrolledPageIndex;
+
+                int iterator = targetScrolledPageIndex > scrolledPageIndex ? -1 : 1;
+                int start = targetScrolledPageIndex;
+                while (true)
                 {
-                    quedSideInput++;
-                    currentPageIndex--;
-                    if (currentPageIndex < 0)
+                    if(Mathf.Abs(start - scrolledPageIndex) <= 1f)
                     {
-                        currentPageIndex = slugcatPages.Count - 1;
+                        intScrolledPageIndex = start;
+                        break;
                     }
-                    //UpdateSelectedSlugcatInMiscProg();
-                    if (ModManager.JollyCoop)
-                    {
-                        manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
-                    }
-                    scroll = 1f;
-                    lastScroll = 1f;
-                    UpdateSlugcat();
-                    return;
+                    start += iterator;
                 }
-                if (quedSideInput > 0)
+
+                if (Mathf.Abs(scrolledPageIndex - targetScrolledPageIndex) < 0.001f)
+                    scrolledPageIndex = targetScrolledPageIndex;
+
+                if (intScrolledPageIndex != lastIntScrolledPageIndex)
                 {
-                    quedSideInput--;
-                    currentPageIndex++;
-                    if (currentPageIndex >= this.slugcatPages.Count)
-                    {
-                        currentPageIndex = 0;
-                    }
-                    //UpdateSelectedSlugcatInMiscProg();
-                    if (ModManager.JollyCoop)
-                    {
-                        manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
-                    }
-                    scroll = -1f;
-                    lastScroll = -1f;
-                    UpdateSlugcat();
+                    currentPageIndex = intScrolledPageIndex;
+                    while (currentPageIndex < 0)
+                        currentPageIndex += slugcatPages.Count;
+                    while (currentPageIndex > slugcatPages.Count - 1)
+                        currentPageIndex -= slugcatPages.Count;
+                    lastScroll = scroll;
+                    UpdateSlugcatAndPage();
+                }
+
+                if (intScrolledPageIndex != scrolledPageIndex)
+                {
+                    scroll = scrolledPageIndex - intScrolledPageIndex;
+                }
+                else
+                {
+                    scroll = 0;
+                    lastScroll = 0;
                 }
             }
+
+            //lastScroll = scroll;
+            //scroll = NextScroll;
+            //startButton.GetButtonBehavior.greyedOut = Mathf.Abs(scroll) > 0.1f;
+            //if (Mathf.Abs(lastScroll) > 0.5f && Mathf.Abs(scroll) <= 0.5f)
+            //{
+            //    //this.UpdateStartButtonText();
+            //}
+            //if (scroll == 0f && lastScroll == 0f)
+            //{
+            //    if (quedSideInput < 0)
+            //    {
+            //        quedSideInput++;
+            //        currentPageIndex--;
+            //        if (currentPageIndex < 0)
+            //        {
+            //            currentPageIndex = slugcatPages.Count - 1;
+            //        }
+            //        //UpdateSelectedSlugcatInMiscProg();
+            //        if (ModManager.JollyCoop)
+            //        {
+            //            manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
+            //        }
+            //        scroll = 1f;
+            //        lastScroll = 1f;
+            //        UpdateSlugcatAndPage();
+            //        return;
+            //    }
+            //    if (quedSideInput > 0)
+            //    {
+            //        quedSideInput--;
+            //        currentPageIndex++;
+            //        if (currentPageIndex >= this.slugcatPages.Count)
+            //        {
+            //            currentPageIndex = 0;
+            //        }
+            //        //UpdateSelectedSlugcatInMiscProg();
+            //        if (ModManager.JollyCoop)
+            //        {
+            //            manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
+            //        }
+            //        scroll = -1f;
+            //        lastScroll = -1f;
+            //        UpdateSlugcatAndPage();
+            //    }
+            //}
         }
 
 
@@ -339,6 +384,12 @@ namespace RandomBuff.Core.BuffMenu
         {
             base.GrafUpdate(timeStacker);
             menuSlot.GrafUpdate(timeStacker);
+        }
+
+        public override void ShutDownProcess()
+        {
+            menuSlot.Destory();
+            base.ShutDownProcess();
         }
 
         internal class WawaSaveData

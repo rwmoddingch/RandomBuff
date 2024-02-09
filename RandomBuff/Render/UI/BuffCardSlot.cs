@@ -101,6 +101,11 @@ namespace RandomBuff.Render.UI
             Container.RemoveChild(buffCard.Container);
             Container.AddChildAtIndex(buffCard.Container, BuffCards.IndexOf(buffCard));
         }
+
+        public virtual void Destory()
+        {
+            BaseInteractionManager?.Destroy();
+        }
     }
 
     internal class InGameBuffCardSlot : BuffCardSlot
