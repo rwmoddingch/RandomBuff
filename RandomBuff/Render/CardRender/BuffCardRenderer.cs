@@ -100,7 +100,7 @@ namespace RandomBuff.Render.CardRender
 
         //停用时的计时器，用来决定什么时候彻底移除该对象
         internal float inactiveTimer;
-        bool _firstInit;
+        bool _notFirstInit;
 
         public Vector2 testRotation;
 
@@ -111,7 +111,7 @@ namespace RandomBuff.Render.CardRender
             _cardTextureFront = buffStaticData.GetFaceTexture();
             _cardTextureBack = buffStaticData.GetBackTexture();
 
-            if (!_firstInit)
+            if (!_notFirstInit)
             {
                 cardCameraController = gameObject.AddComponent<CardCameraController>();
                 //初始化卡面和卡背
@@ -154,25 +154,10 @@ namespace RandomBuff.Render.CardRender
                 //初始化专有相机
                 cardCameraController.Init(id);
 
-                _firstInit = true;
+                _notFirstInit = true;
             }
             _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
             _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
-        }
-    }
-
-    public struct InitInfo
-    {
-        public int id;
-        public Texture frontTexture;
-        public Texture backTexture;
-    }
-
-    internal abstract class BuffCardRendererComponent : MonoBehaviour
-    {
-        public virtual void Init(BuffCardRenderer renderer, params object[] additionalParam)
-        {
-
         }
     }
 }

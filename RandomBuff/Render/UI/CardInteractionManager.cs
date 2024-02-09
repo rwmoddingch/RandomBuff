@@ -25,7 +25,7 @@ namespace RandomBuff.Render.UI
             get => _overrideManager;
             set
             {             
-                if (value == null)
+                if (value != null)
                     _overrideManager.overrideDisabled = false;
                 _overrideManager = value;
             }

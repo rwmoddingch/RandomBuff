@@ -13,10 +13,31 @@ namespace RandomBuff.Render.CardRender
         public static Font titleFont;
         public static Font discriptionFont;
 
-        static float maxDestroyTime = 0.5f;
-        static int currentID;
-        static Queue<BuffCardRenderer> buffCards = new Queue<BuffCardRenderer>();
+        static float maxDestroyTime = 60f;
+        static List<BuffCardRenderer> totalRenderers = new List<BuffCardRenderer>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
+
+        static int NextLegalID
+        {
+            get
+            {
+                int nextID = 0;
+                while (true)
+                {
+                    bool anyIDMatched = false;
+                    foreach(var render in totalRenderers)
+                    {
+                        if (render._id == nextID)
+                            anyIDMatched = true;
+                    }
+
+                    if (!anyIDMatched)
+                        return nextID;
+
+                    nextID++;
+                }
+            }
+        }
 
         public static BuffCardRenderer GetRenderer(BuffID buffID)
         {
@@ -35,17 +56,20 @@ namespace RandomBuff.Render.CardRender
             }
 
             mostInavtiveRenderer.gameObject.SetActive(true);
+            mostInavtiveRenderer.Init(mostInavtiveRenderer._id, BuffConfigManager.GetStaticData(buffID));
+            inactiveCardRenderers.Remove(mostInavtiveRenderer);
             return mostInavtiveRenderer;
 
             BuffCardRenderer GetNewRenderer(BuffID buffID)
             {
-                var cardObj = new GameObject($"BuffCard_{currentID}");
-                cardObj.transform.position = new Vector3(currentID * 20, 0, 0);
+                int id = NextLegalID;
+                var cardObj = new GameObject($"BuffCard_{id}");
+                cardObj.transform.position = new Vector3(id * 20, 0, 0);
                 var renderer = cardObj.AddComponent<BuffCardRenderer>();
+                totalRenderers.Add(renderer);
 
-                renderer.Init(currentID, BuffConfigManager.GetStaticData(buffID));
-
-                currentID++;
+                renderer.Init(id, BuffConfigManager.GetStaticData(buffID));
+                BuffPlugin.Log($"Get new card renderer of id {id}");
                 return renderer;
             }
         }
@@ -69,6 +93,7 @@ namespace RandomBuff.Render.CardRender
                 if (inactiveCardRenderers[i].inactiveTimer > maxDestroyTime)
                 {
                     var card = inactiveCardRenderers[i];
+                    totalRenderers.Remove(card);
                     BuffPlugin.Log($"Destroy inactive card renderer of id{card._id}");
 
                     inactiveCardRenderers.RemoveAt(i);
