@@ -37,6 +37,12 @@ namespace RandomBuff.Core.Game
         {
         }
 
+
+        /// <summary>
+        /// 是否需要随机出生点
+        /// </summary>
+        public virtual bool NeedRandomStart => false;
+
         public abstract BuffSettingID ID { get; }
 
         /// <summary>

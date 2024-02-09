@@ -10,6 +10,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
+using RandomBuff.Core.Hooks;
 using RWCustom;
 using UnityEngine;
 
@@ -188,7 +189,7 @@ namespace RandomBuff.Core.SaveData
 
         private static RainWorld rainWorld => Custom.rainWorld;
 
-        private static int CurrentSlot => rainWorld.options.saveSlot >= 100
+        private static int CurrentSlot => rainWorld.BuffMode()
             ? (rainWorld.options.saveSlot)
             : rainWorld.options.saveSlot >= 0 ?
                 rainWorld.options.saveSlot + 100 :
