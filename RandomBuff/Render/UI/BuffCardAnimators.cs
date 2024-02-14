@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace RandomBuff.Render.UI
 {
+    /// <summary>
+    /// 卡牌动画机
+    /// </summary>
     internal abstract class BuffCardAnimator
     {
         protected BuffCard buffCard;
@@ -50,7 +53,7 @@ namespace RandomBuff.Render.UI
         public ClearStateAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
             buffCard.Highlight = false;
-            if(!buffCard.DisplayTitle) 
+            if (!buffCard.DisplayTitle)
                 buffCard.DisplayTitle = true;
         }
 
@@ -59,7 +62,7 @@ namespace RandomBuff.Render.UI
             if (finished) return;
 
             buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, Vector3.zero, 0.1f);
-            if(Mathf.Abs(buffCard.Rotation.x) < 0.01f && Mathf.Abs(buffCard.Rotation.y) < 0.01f)
+            if (Mathf.Abs(buffCard.Rotation.x) < 0.01f && Mathf.Abs(buffCard.Rotation.y) < 0.01f)
                 finished = true;
         }
     }
@@ -143,18 +146,18 @@ namespace RandomBuff.Render.UI
                 if (Mathf.Abs(buffCard.Rotation.x) < 0.01f && Mathf.Abs(buffCard.Rotation.y) < 0.01f)
                     rotationFinished = true;
             }
-            
-            if(!positionFinished)
+
+            if (!positionFinished)
             {
                 buffCard.Position = Vector2.Lerp(buffCard.Position, targetPosition, 0.1f);
-                if(Mathf.Abs(buffCard.Position.x - targetPosition.x) < 0.01f && Mathf.Abs(buffCard.Position.y - targetPosition.y) < 0.01f)
+                if (Mathf.Abs(buffCard.Position.x - targetPosition.x) < 0.01f && Mathf.Abs(buffCard.Position.y - targetPosition.y) < 0.01f)
                     positionFinished = true;
             }
 
             if (!scaleFinished)
             {
                 buffCard.Scale = Mathf.Lerp(buffCard.Scale, targetScale, 0.1f);
-                if(Mathf.Abs(buffCard.Scale - targetScale) < 0.01f)
+                if (Mathf.Abs(buffCard.Scale - targetScale) < 0.01f)
                     scaleFinished = true;
             }
         }
@@ -193,12 +196,12 @@ namespace RandomBuff.Render.UI
         {
             if (buffCard.CurrentFocused && !buffCard.Highlight)
                 buffCard.Highlight = true;
-            else if(!buffCard.CurrentFocused && buffCard.Highlight)
+            else if (!buffCard.CurrentFocused && buffCard.Highlight)
                 buffCard.Highlight = false;
         }
 
         public override void GrafUpdate(float timeStacker)
-        {   
+        {
             if (Mathf.Abs(buffCard.Position.x - TargetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - TargetPosition.y) > 0.01f)
                 buffCard.Position = Vector2.Lerp(buffCard.Position, TargetPosition, 0.1f);
 
@@ -319,9 +322,9 @@ namespace RandomBuff.Render.UI
 
             initDelay = cardPickerInteractionManager.GetCardIndex(buffCard, out int _) * 20;
 
-            if(cardPickerInteractionManager.Major2AdditionalMapper.TryGetValue(buffCard, out var additional))
+            if (cardPickerInteractionManager.Major2AdditionalMapper.TryGetValue(buffCard, out var additional))
                 linkedCard = additional;
-            if(cardPickerInteractionManager.Additional2MajorMapper.TryGetValue(buffCard, out var major))
+            if (cardPickerInteractionManager.Additional2MajorMapper.TryGetValue(buffCard, out var major))
                 linkedCard = major;
         }
 
@@ -331,26 +334,26 @@ namespace RandomBuff.Render.UI
             if (delayTimer < initDelay)
                 delayTimer++;
 
-            if(delayTimer == initDelay)
+            if (delayTimer == initDelay)
             {
                 delayTimer++;
             }
 
-            if(delayTimer >= initDelay)
+            if (delayTimer >= initDelay)
             {
                 if (initFlipTimer < initFlipTime)
                     initFlipTimer++;
 
-                if(initFlipTimer == initFlipTime)
+                if (initFlipTimer == initFlipTime)
                 {
                     basicRotation = new Vector3(0f, 360f, 0f);
                     initFlipTimer++;
                 }
             }
 
-            if(CurrentFocused && !buffCard.Highlight)
+            if (CurrentFocused && !buffCard.Highlight)
                 buffCard.Highlight = true;
-            if(!CurrentFocused && buffCard.Highlight)
+            if (!CurrentFocused && buffCard.Highlight)
                 buffCard.Highlight = false;
         }
 
@@ -413,16 +416,18 @@ namespace RandomBuff.Render.UI
                 buffCard.Destroy();
             }
 
-            f = Mathf.Lerp(f, 1f, 0.02f);
+            f = Mathf.Lerp(f, 1f, 0.05f);
 
             buffCard.Rotation = Vector3.Lerp(initRotation, Vector3.zero, f);
             buffCard.Position = Vector2.Lerp(initPosition, new Vector2(2000, -200), f);
-            if (Mathf.Abs(buffCard.Rotation.x) < 0.01f && Mathf.Abs(buffCard.Rotation.y) < 0.01f)
+            buffCard.Alpha = 1f - f;
+            if (Mathf.Abs(f - 1) < 0.01f)
                 finished = true;
         }
     }
     #endregion
 
+    #region BuffGameMenu
     internal class BuffGameMenuShowAnimataor : BuffCardAnimator
     {
         bool finished;
@@ -436,7 +441,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayStacker = false;
             buffCard.Highlight = false;
 
-            slot = (buffCard.interactionManager as BuffGameMenuInteractionManager).Slot;
+            slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
 
             Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
             Vector2 basicPosition;
@@ -446,7 +451,7 @@ namespace RandomBuff.Render.UI
             basicPosition += positiveOrNegative * Vector2.up * 70f;
 
             float biasFromMid = index - (totalLength - 1) / 2f;
-            basicPosition += Vector2.right *  Mathf.Min((600 / totalLength), 80f) * biasFromMid;
+            basicPosition += Vector2.right * Mathf.Min((600 / totalLength), 80f) * biasFromMid;
 
             buffCard.Position = basicPosition;
             buffCard.Scale = BuffCard.normalScale * 0.5f;
@@ -463,7 +468,7 @@ namespace RandomBuff.Render.UI
             float t = 1f - Mathf.InverseLerp(0, 0.5f, slot.Scroll(timeStacker));
             buffCard.Rotation = new Vector3(0f, 90f * (1f - t), 0f);
 
-            if(t == 1f)
+            if (t == 1f)
                 finished = true;
         }
     }
@@ -481,7 +486,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayStacker = false;
             buffCard.Highlight = false;
 
-            slot = (buffCard.interactionManager as BuffGameMenuInteractionManager).Slot;
+            slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -494,8 +499,197 @@ namespace RandomBuff.Render.UI
             float t = 1f - Mathf.InverseLerp(0.5f, 1f, slot.Scroll(timeStacker));
             buffCard.Rotation = new Vector3(0f, -90f * t, 0f);
 
-            if(t == 1)
+            if (t == 1)
                 finished = true;
+        }
+    }
+    #endregion
+
+    internal class ActivateCardAnimSlotAppendAnimator : BuffCardAnimator
+    {
+        static int flyInTime = 40;
+        static int turnTime = 40;
+
+        State currentState = State.FlyIn;
+        int timer;
+        int lastTimer;
+
+        Vector2 halfScreen = Custom.rainWorld.screenSize / 2f;
+        Vector2 targetPosition;
+        Vector3 targetRotation;
+
+        CommmmmmmmmmmmmmpleteInGameSlot.ActivateCardAnimSlot Slot;
+
+        public ActivateCardAnimSlotAppendAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.Highlight = false;
+            buffCard.DisplayDescription = false;
+            buffCard.DisplayTitle = false;
+            buffCard.DisplayStacker = false;
+            buffCard.Highlight = false;
+
+            buffCard.Scale = BuffCard.normalScale * 0.5f;
+
+            Slot = buffCard.interactionManager.BaseSlot as CommmmmmmmmmmmmmpleteInGameSlot.ActivateCardAnimSlot;
+
+            this.initRotation = buffCard.Rotation = new Vector3(0, 180, 0);
+            this.initPosition = buffCard.Position = new Vector2(Custom.rainWorld.screenSize.x + 200f, halfScreen.y - 100f);
+            targetPosition = new Vector2(Custom.rainWorld.screenSize.x - 50f, halfScreen.y - 100f);
+            targetRotation = Vector3.zero;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if(currentState == State.FlyIn)
+            {
+                if (timer < flyInTime)
+                {
+                    lastTimer = timer;
+                    timer++;
+                }
+                else
+                {
+                    currentState = State.Turn;
+                    timer = 0;
+                    lastTimer = 0;
+                }
+            }
+            else if(currentState == State.Turn)
+            {
+                if(timer < turnTime)
+                {
+                    lastTimer = timer;
+                    timer++;
+                }
+                else
+                {
+                    Slot.FinishAnimation(buffCard);
+                }
+            }
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            if(currentState == State.FlyIn)
+            {
+                float t = Mathf.Lerp((float)lastTimer / flyInTime, (float)timer / flyInTime, timeStacker);
+                buffCard.Position = Vector2.Lerp(initPosition, targetPosition, Helper.LerpEase(t));
+            }
+            else if(currentState == State.Turn)
+            {
+                float t = Mathf.Lerp((float)lastTimer / turnTime, (float)timer / turnTime, timeStacker);
+                buffCard.Rotation = Vector3.Lerp(initRotation, targetRotation, Helper.LerpEase(t));
+            }
+        }
+
+        enum State
+        {
+            FlyIn,
+            Turn
+        }
+    }
+
+    internal class TriggerBuffAnimSlotTriggerAnimator : BuffCardAnimator
+    {
+        static int showUpTime = 40;
+        static int hideTimer = 120;
+        static int totalDisplayTime = 160;
+
+        CommmmmmmmmmmmmmpleteInGameSlot.TriggerBuffAnimSlot Slot;
+
+        Vector2 halfScreen = Custom.rainWorld.screenSize / 2f;
+        Vector2 targetPosition;
+        Vector3 targetRotation;
+
+        Vector2 TargetPosition
+        {
+            get => targetPosition + Vector2.down * 60f * Slot.BuffCards.IndexOf(buffCard);
+        }
+
+        float targetScale;
+        float targetAlpha;
+        int timer;
+
+        float lerpMulti = 1f;
+
+        bool stage2;
+
+        public TriggerBuffAnimSlotTriggerAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.Highlight = false;
+            buffCard.DisplayDescription = false;
+            buffCard.DisplayTitle = false;
+            buffCard.DisplayStacker = false;
+            buffCard.Highlight = false;
+
+            buffCard.Scale = BuffCard.normalScale * 0.5f;
+
+            Slot = buffCard.interactionManager.BaseSlot as CommmmmmmmmmmmmmpleteInGameSlot.TriggerBuffAnimSlot;
+
+            this.initRotation = buffCard.Rotation = new Vector3(0, 360, 0);
+            this.initPosition = buffCard.Position = CommmmmmmmmmmmmmpleteInGameSlot.TriggerBuffAnimSlot.hoverPos;
+
+            targetPosition = this.initPosition;
+            targetScale = BuffCard.normalScale * 0.3f;
+            targetRotation = Vector3.zero;
+
+            this.initScale = buffCard.Scale = 0f;
+            buffCard.Alpha = 0f;
+            targetAlpha = 1f;
+            lerpMulti = 2f;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if(timer < totalDisplayTime)
+            {
+                timer++;
+            }
+            if(timer == totalDisplayTime)
+            {
+                timer++;
+                Slot.RemoveCard(buffCard, true);
+            }
+            else if(!stage2 && (timer == showUpTime || Slot.BuffCards.IndexOf(buffCard) != 0))
+            {
+                IntoStage2();
+            }
+            else if(timer == hideTimer)
+            {
+                targetPosition += Vector2.left * 40f;
+                targetAlpha = 0f;
+                lerpMulti = 1f;
+            }
+        }
+
+        void IntoStage2()
+        {
+            if (stage2)
+                return;
+
+            targetScale *= 0.6f;
+            lerpMulti = 1.5f;
+
+            stage2 = true;
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+
+            if (Mathf.Abs(buffCard.Rotation.x - targetRotation.x) > 0.01f || Mathf.Abs(buffCard.Rotation.y - targetRotation.y) > 0.01f)
+                buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, targetRotation, 0.1f * lerpMulti);
+
+            if (Mathf.Abs(buffCard.Position.x - TargetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - TargetPosition.y) > 0.01f)
+                buffCard.Position = Vector2.Lerp(buffCard.Position, TargetPosition, 0.1f * lerpMulti);
+
+            if (Mathf.Abs(buffCard.Scale - targetScale) > 0.01f)
+                buffCard.Scale = Mathf.Lerp(buffCard.Scale, targetScale, 0.1f * lerpMulti);
+
+            if (Mathf.Abs(buffCard.Alpha - targetAlpha) > 0.01f)
+                buffCard.Alpha = Mathf.Lerp(buffCard.Alpha, targetAlpha, 0.1f * lerpMulti);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace RandomBuff.Core.GachaMenu
                 new Vector2(ContinueAndExitButtonsXPos - 320f - manager.rainWorld.options.SafeScreenOffset.x, 50f), new Vector2(100f, 30f)));
             this.lastID = lastID;
             this.game = game;
-            inGameSlot = new InGameBuffCardSlot();
+            inGameSlot = new BasicInGameBuffCardSlot();
             foreach(var id in BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter))
                 inGameSlot.AppendCard(id);
             container.AddChild(inGameSlot.Container);
@@ -144,7 +144,7 @@ namespace RandomBuff.Core.GachaMenu
         }
 
         private List<CardPickerSlot> pickerSlots = new ();
-        private InGameBuffCardSlot inGameSlot;
+        private BasicInGameBuffCardSlot inGameSlot;
         private ProcessManager.ProcessID lastID;
         private RainWorldGame game;
 

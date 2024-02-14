@@ -321,52 +321,6 @@ namespace RandomBuff.Core.BuffMenu
                     lastScroll = 0;
                 }
             }
-
-            //lastScroll = scroll;
-            //scroll = NextScroll;
-            //startButton.GetButtonBehavior.greyedOut = Mathf.Abs(scroll) > 0.1f;
-            //if (Mathf.Abs(lastScroll) > 0.5f && Mathf.Abs(scroll) <= 0.5f)
-            //{
-            //    //this.UpdateStartButtonText();
-            //}
-            //if (scroll == 0f && lastScroll == 0f)
-            //{
-            //    if (quedSideInput < 0)
-            //    {
-            //        quedSideInput++;
-            //        currentPageIndex--;
-            //        if (currentPageIndex < 0)
-            //        {
-            //            currentPageIndex = slugcatPages.Count - 1;
-            //        }
-            //        //UpdateSelectedSlugcatInMiscProg();
-            //        if (ModManager.JollyCoop)
-            //        {
-            //            manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
-            //        }
-            //        scroll = 1f;
-            //        lastScroll = 1f;
-            //        UpdateSlugcatAndPage();
-            //        return;
-            //    }
-            //    if (quedSideInput > 0)
-            //    {
-            //        quedSideInput--;
-            //        currentPageIndex++;
-            //        if (currentPageIndex >= this.slugcatPages.Count)
-            //        {
-            //            currentPageIndex = 0;
-            //        }
-            //        //UpdateSelectedSlugcatInMiscProg();
-            //        if (ModManager.JollyCoop)
-            //        {
-            //            manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = null;
-            //        }
-            //        scroll = -1f;
-            //        lastScroll = -1f;
-            //        UpdateSlugcatAndPage();
-            //    }
-            //}
         }
 
 

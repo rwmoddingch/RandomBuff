@@ -21,7 +21,7 @@ namespace RandomBuff.Core.BuffMenu.Test
             lastId = lastID;
             pages.Add(new Menu.Page(this, null, "TGachaMenu", 0));
             pages[0].subObjects.Add(new Menu.SimpleButton(this, pages[0], "Exit", "ExitButton", new Vector2(1300, 50f), new Vector2(100f, 30f)));
-            interactionManager = new TestBasicInteractionManager();
+            interactionManager = new TestBasicInteractionManager(null);
             //获取随机增益
             var cards = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 3, BuffType.Positive);
             

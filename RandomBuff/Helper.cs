@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace RandomBuff
 {
@@ -83,6 +84,11 @@ namespace RandomBuff
             }
         }
 
+        /// <summary>
+        /// 获取未初始化的实例
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static T GetUninit<T>()
         {
             return (T)FormatterServices.GetSafeUninitializedObject(typeof(T));
@@ -95,6 +101,16 @@ namespace RandomBuff
                 page.subObjects[i].Update();
             }
             page.lastPos = page.pos;
+        }
+    
+        /// <summary>
+        /// 缓动函数
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static float LerpEase(float t)
+        {
+            return Mathf.Lerp(t, 1f, Mathf.Pow(t, 0.5f));
         }
     }
 }
