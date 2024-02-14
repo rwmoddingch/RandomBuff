@@ -130,7 +130,7 @@ namespace RandomBuff.Render.UI
             Container = new FContainer();
 
             Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture));
-            SetAnimataorState(initState);
+            SetAnimatorState(initState);
 
             Scale = normalScale;
         }
@@ -153,7 +153,7 @@ namespace RandomBuff.Render.UI
         }
 
         //改变卡牌的状态
-        public void SetAnimataorState(AnimatorState newState)
+        public void SetAnimatorState(AnimatorState newState)
         {
             if (newState == currentAniamtorState && currentAnimator != null)
                 return;
@@ -197,6 +197,14 @@ namespace RandomBuff.Render.UI
             {
                 currentAnimator = new BuffGameMenuDisappearAnimataor(this, Position, Rotation, Scale);
             }
+            else if(newState == AnimatorState.ActivateCardAnimSlot_Append)
+            {
+                currentAnimator = new ActivateCardAnimSlotAppendAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.TriggerBuffAnimSlot_Trigger)
+            {
+                currentAnimator = new TriggerBuffAnimSlotTriggerAnimator(this, Position, Rotation, Scale);
+            }
             else
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
@@ -232,6 +240,12 @@ namespace RandomBuff.Render.UI
             //开始游戏界面卡槽状态
             BuffGameMenu_Show,
             BuffGameMenu_Disappear,
+
+            //游戏内卡槽预动画状态
+            ActivateCardAnimSlot_Append,
+
+            //触发buff卡槽动画状态
+            TriggerBuffAnimSlot_Trigger
         }
     }
 }

@@ -13,6 +13,7 @@ namespace RandomBuff.Render.UI
         //常量
         const int Double_ClickThreashold = 10;//单击双击阈值（逻辑帧） 
 
+        public virtual BuffCardSlot BaseSlot { get; protected set; }
         //卡牌信息
         public virtual BuffCard CurrentFocusCard { get; protected set; }
         protected List<BuffCard> managedCards = new List<BuffCard>();
@@ -26,7 +27,7 @@ namespace RandomBuff.Render.UI
             set
             {             
                 if (value != null)
-                    _overrideManager.overrideDisabled = false;
+                    value.overrideDisabled = false;
                 _overrideManager = value;
             }
         }
@@ -37,6 +38,11 @@ namespace RandomBuff.Render.UI
         protected Helper.InputButtonTracker mouseLeftButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0), true, true, Double_ClickThreashold);
 
         protected bool enableMouseInput = true;
+
+        public CardInteractionManager(BuffCardSlot slot)
+        {
+            BaseSlot = slot;
+        }
 
         public virtual void Update()
         {
@@ -92,10 +98,16 @@ namespace RandomBuff.Render.UI
 
             managedCards.Add(card);
             card.interactionManager = this;
+
+            if(BaseSlot != null && !BaseSlot.BuffCards.Contains(card))
+                BaseSlot.BuffCards.Add(card);
         }
 
         public virtual void DismanageCard(BuffCard card)
         {
+            if (BaseSlot != null && BaseSlot.BuffCards.Contains(card))
+                BaseSlot.BuffCards.Remove(card);
+
             managedCards.Remove(card);
             card.interactionManager = null;
         }
@@ -115,6 +127,10 @@ namespace RandomBuff.Render.UI
 
     internal class TestBasicInteractionManager : CardInteractionManager
     {
+        public TestBasicInteractionManager(BuffCardSlot slot) : base(slot)
+        {
+        }
+
         protected override void UpdateFocusCard()
         {
             foreach(var card in managedCards)
@@ -122,12 +138,12 @@ namespace RandomBuff.Render.UI
                 if(card.LocalMousePos.x > 0 && card.LocalMousePos.x < 1f && card.LocalMousePos.y > 0f && card.LocalMousePos.y < 1f)
                 {
                     CurrentFocusCard = card;
-                    CurrentFocusCard.SetAnimataorState(BuffCard.AnimatorState.Test_MousePreview);
+                    CurrentFocusCard.SetAnimatorState(BuffCard.AnimatorState.Test_MousePreview);
                     return;
                 }
             }
 
-            CurrentFocusCard?.SetAnimataorState(BuffCard.AnimatorState.Test_None);
+            CurrentFocusCard?.SetAnimatorState(BuffCard.AnimatorState.Test_None);
             CurrentFocusCard = null;
         }
 
@@ -142,13 +158,20 @@ namespace RandomBuff.Render.UI
         }
     }
 
-    internal class BuffGameMenuInteractionManager : CardInteractionManager
+    internal class DoNotingInteractionManager<T> : CardInteractionManager where T : BuffCardSlot
     {
-        public BuffGameMenuSlot Slot { get; private set; }
+        public T Slot { get => BaseSlot as T; protected set => BaseSlot = value; }
 
-        public BuffGameMenuInteractionManager(BuffGameMenuSlot slot)
+        public DoNotingInteractionManager(T slot) : base(slot)
         {
-            Slot = slot;
+        }
+
+        public override void Update()
+        {
+            for (int i = managedCards.Count - 1; i >= 0; i--)
+            {
+                managedCards[i].Update();
+            }
         }
     }
 
@@ -156,9 +179,9 @@ namespace RandomBuff.Render.UI
     {
         //静态信息
         public static KeyCode ToggleShowButton = KeyCode.Tab;
-        public static int maxCardBiasCount = 0;
+        public static int maxCardBiasCount = 5;
 
-        public InGameBuffCardSlot Slot { get; private set; }
+        public BasicInGameBuffCardSlot Slot { get => BaseSlot as BasicInGameBuffCardSlot; }
 
         public override BuffCard CurrentFocusCard 
         { 
@@ -202,9 +225,8 @@ namespace RandomBuff.Render.UI
         Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
         Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
 
-        public InGameSlotInteractionManager(InGameBuffCardSlot slot)
+        public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot) : base(slot)
         {
-            Slot = slot;
         }
 
         public override void Update()
@@ -240,12 +262,17 @@ namespace RandomBuff.Render.UI
                         card.LocalMousePos.y < 1f)
                     {
                         CurrentFocusCard = card;
+                        Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnMouseFocus, card.ID);
                         return;
                     }
                 }
 
-                if (CurrentFocusCard != null) 
+                if (CurrentFocusCard != null)
+                {
+                    Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_NoCardFocus);
                     CurrentFocusCard = null;
+                }
+
             }
             else if(currentState == State.ExclusiveShow)
             {
@@ -256,6 +283,7 @@ namespace RandomBuff.Render.UI
                     exclusiveShowCard.LocalMousePos.y < 1f)
                 {
                     CurrentFocusCard = exclusiveShowCard;
+                    Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnCardExclusiveShow);
                     return;
                 }
 
@@ -264,7 +292,8 @@ namespace RandomBuff.Render.UI
             }
             else if(currentState == State.Hide)
             {
-                if(CurrentFocusCard != null)
+                Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
+                if (CurrentFocusCard != null)
                     CurrentFocusCard = null;
             }
         }
@@ -279,9 +308,9 @@ namespace RandomBuff.Render.UI
                 NegativeBuffCards.Add(card);
 
             if (currentState == State.Hide)
-                card.SetAnimataorState(BuffCard.AnimatorState.InGameSlot_Hide);
+                card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Hide);
             else if (currentState == State.Show)
-                card.SetAnimataorState(BuffCard.AnimatorState.InGameSlot_Show);
+                card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
         }
 
         public override void DismanageCard(BuffCard card)
@@ -359,7 +388,7 @@ namespace RandomBuff.Render.UI
                 Slot.BackDark = false;
                 Slot.FrontDark = false;
                 foreach (var card in managedCards)
-                    card.SetAnimataorState(BuffCard.AnimatorState.InGameSlot_Hide);
+                    card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Hide);
 
                 if (SubManager != null) SubManager.overrideDisabled = false;
             }
@@ -368,18 +397,17 @@ namespace RandomBuff.Render.UI
                 Slot.BackDark = true;
                 Slot.FrontDark = false;
                 foreach (var card in managedCards)
-                    card.SetAnimataorState(BuffCard.AnimatorState.InGameSlot_Show);
+                    card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
                 if (SubManager != null) SubManager.overrideDisabled = true;
             }
             else if(newState == State.ExclusiveShow)
             {
                 Slot.FrontDark = true;
-                exclusiveShowCard.SetAnimataorState(BuffCard.AnimatorState.InGameSlot_Exclusive_Show);
+                exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Exclusive_Show);
 
                 if (SubManager != null) SubManager.overrideDisabled = true;
             }
         }
-
 
         public enum State
         {
@@ -391,11 +419,11 @@ namespace RandomBuff.Render.UI
 
     internal class CardPickerInteractionManager : CardInteractionManager
     {
-        public static int maxCardBiasCount = 1;
+        public static int maxCardBiasCount = 2;
 
         bool finishSelection;
 
-        public CardPickerSlot Slot { get; private set; }
+        public CardPickerSlot Slot { get => BaseSlot as CardPickerSlot; }
 
         public List<BuffCard> MajorCard { get; private set; } = new List<BuffCard>();
         public List<BuffCard> AdditionalCard { get; private set; } = new List<BuffCard>();
@@ -424,18 +452,17 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        public CardPickerInteractionManager(CardPickerSlot slot)
+        public CardPickerInteractionManager(CardPickerSlot slot) : base(slot)
         {
-            Slot = slot;
         }
 
         public void FinishManage()
         {
             foreach(var card in managedCards)
             {
-                card.SetAnimataorState(BuffCard.AnimatorState.CardPicker_Show);
+                card.SetAnimatorState(BuffCard.AnimatorState.CardPicker_Show);
             }
-            CardShowIndex = Mathf.CeilToInt(MajorCard.Count / 2f);
+            CardShowIndex = Mathf.RoundToInt(MajorCard.Count / 2f);
         }
 
         public void FinishSelection()
@@ -443,7 +470,7 @@ namespace RandomBuff.Render.UI
             finishSelection = true;
             foreach(var card in managedCards)
             {
-                card.SetAnimataorState(BuffCard.AnimatorState.CardPicker_Disappear);
+                card.SetAnimatorState(BuffCard.AnimatorState.CardPicker_Disappear);
             }
         }
 
@@ -466,6 +493,12 @@ namespace RandomBuff.Render.UI
             BuffPlugin.Log($"Manage additional : {card.ID} linked with : {linkedMajorCard.ID}");
         }
 
+        public override void ManageCard(BuffCard card)
+        {
+            base.ManageCard(card);
+            BuffPlugin.Log($"Card picker manage card, {Slot.BuffCards.Count} in total");
+        }
+
         public override void DismanageCard(BuffCard card)
         {
             if (MajorCard.Contains(card))
@@ -474,6 +507,7 @@ namespace RandomBuff.Render.UI
             if (AdditionalCard.Contains(card))
                 Additional2MajorMapper.Remove(card);
             base.DismanageCard(card);
+            BuffPlugin.Log($"Card picker dismanage card, {Slot.BuffCards.Count} remains");
         }
 
         /// <summary>
