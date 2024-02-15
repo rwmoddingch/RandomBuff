@@ -150,9 +150,9 @@ namespace RandomBuff.Render.UI
 
         static int CardStartIndex = 1;//卡牌帮助信息+黑幕
 
-        public BasicInGameBuffCardSlot()
+        public BasicInGameBuffCardSlot(bool canTriggerBuff = false)
         {
-            BaseInteractionManager = new InGameSlotInteractionManager(this);
+            BaseInteractionManager = new InGameSlotInteractionManager(this, canTriggerBuff);
             Container.AddChild(darkMask_back = new FSprite("pixel") { scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, color = Color.black, alpha = 0f });
             Container.AddChild(darkMaks_front = new FSprite("pixel") { scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, color = Color.black, alpha = 0f });
             darkMask_back.SetPosition(Custom.rainWorld.screenSize / 2f);
@@ -483,7 +483,7 @@ namespace RandomBuff.Render.UI
             BuffCards = null;//不直接管理卡牌，所以设置为null来提前触发异常
             BaseInteractionManager = new DoNotingInteractionManager<CommmmmmmmmmmmmmpleteInGameSlot>(this);
 
-            BasicSlot = new BasicInGameBuffCardSlot();
+            BasicSlot = new BasicInGameBuffCardSlot(true);
             ActiveAnimSlot = new ActivateCardAnimSlot(this);
             TriggerAnimSlot = new TriggerBuffAnimSlot(this);
             Container.AddChild(BasicSlot.Container);

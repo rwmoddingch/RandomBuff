@@ -1,10 +1,11 @@
 {
     "FaceName": "spearrain",
-    "ID" : "SpearRain",
+    "BuffID" : "SpearRain",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "#B9835D",
+    "Color" : "B9835D",
+
     "Chinese" : {
         "BuffName" : "矛矛雨",
         "Description" : "下雨更改为天上落下触地消失的矛"

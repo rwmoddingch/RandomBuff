@@ -1,10 +1,17 @@
 {
     "FaceName": "armstron",
-    "ID" : "Armstron",
+    "BuffID" : "Armstron",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "登月第一人",
-    "Description" : "进入迭代器moon所在的房间后，全局游戏重力变为1/6",
-    "Color" : "#7E0A00"
+    "Color" : "7E0A00",
+
+    "Chinese" : {
+        "BuffName" : "登月第一人",
+        "Description" : "进入迭代器moon所在的房间后，全局游戏重力变为1/6"
+    },
+    "English": {
+        "BuffName" : "Armstron",
+        "Description" : "Upon entering the room where the iterator moon is located, the global game gravity changes to 1/6"
+    }
 }

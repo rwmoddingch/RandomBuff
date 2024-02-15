@@ -1,10 +1,17 @@
 {
     "FaceName": "highping",
-    "ID" : "HighPing",
+    "BuffID" : "HighPing",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "High Ping",
-    "Description" : "",
-    "Color" : "#FFFFFF"
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "高ping战士",
+        "Description" : "画面和游戏实际进程不同步，显示实际进程0.5秒前画面"
+    },
+    "English" : {
+        "BuffName" : "HighPing",
+        "Description" : "The screen is not synchronized with the actual progress of the game, showing the screen 0.5 seconds before the actual process"
+    }
 }

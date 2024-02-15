@@ -1,4 +1,5 @@
-﻿using RWCustom;
+﻿using RandomBuff.Core.Game;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -181,6 +182,7 @@ namespace RandomBuff.Render.UI
         public static KeyCode ToggleShowButton = KeyCode.Tab;
         public static int maxCardBiasCount = 5;
 
+        bool canTriggerBuff;
         public BasicInGameBuffCardSlot Slot { get => BaseSlot as BasicInGameBuffCardSlot; }
 
         public override BuffCard CurrentFocusCard 
@@ -225,8 +227,9 @@ namespace RandomBuff.Render.UI
         Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
         Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
 
-        public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot) : base(slot)
+        public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot, bool canTriggerBuff = false) : base(slot)
         {
+            this.canTriggerBuff = canTriggerBuff;
         }
 
         public override void Update()
@@ -261,6 +264,8 @@ namespace RandomBuff.Render.UI
                         card.LocalMousePos.y > 0f &&
                         card.LocalMousePos.y < 1f)
                     {
+                        if (CurrentFocusCard != card)
+                            Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
                         CurrentFocusCard = card;
                         Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnMouseFocus, card.ID);
                         return;
@@ -374,6 +379,22 @@ namespace RandomBuff.Render.UI
             else if(currentState == State.ExclusiveShow)
             {
                 exclusiveShowCard.OnMouseSingleClick();
+            }
+        }
+
+
+        protected override void OnMouseDoubleClick()
+        {
+            if (overrideDisabled || !canTriggerBuff)
+                return;
+
+            if (currentState == State.Show || currentState == State.ExclusiveShow)
+            {
+                if (CurrentFocusCard != null && CurrentFocusCard.StaticData.Triggerable)
+                {
+                    CurrentFocusCard.onMouseDoubleClick();
+                    BuffPoolManager.Instance.TriggerBuff(CurrentFocusCard.ID);
+                }
             }
         }
 

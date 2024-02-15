@@ -1,16 +1,17 @@
 {
     "FaceName": "givealight",
-    "ID" : "GiveALight",
+    "BuffID" : "GiveALight",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "借个火",
-    "Description" : "烈焰蜥蜴和焦糖蜥蜴吐出的口水接触实体会发生一次爆炸",
-    "Color" : "#FF5435",
-    "Chinese" : {
+    "Color" : "FF5435",
 
+    "Chinese" : {
+        "BuffName" : "借个火",
+        "Description" : "烈焰蜥蜴和焦糖蜥蜴吐出的口水接触实体会发生一次爆炸"
     },
     "English" : {
-
+        "BuffName" : "GiveALight",
+        "Description" : "Red lizards and caramel Lizards spitting out spit will explode once in contact with other entities."
     }
 }
