@@ -1,10 +1,11 @@
 {
     "FaceName": "upgradation",
-    "ID" : "Upgradation",
+    "BuffID" : "Upgradation",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "#FF019F",
+    "Color" : "FF019F",
+
     "Chinese" : {
         "BuffName" : "提升",
         "Description" : "每过一段时间提升一个房间内可以提升的生物"

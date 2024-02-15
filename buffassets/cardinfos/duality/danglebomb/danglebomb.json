@@ -1,10 +1,17 @@
 {
     "FaceName": "danglebomb",
-    "ID" : "DangleBombBuffID",
+    "BuffID" : "DangleBombBuffID",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "蓝果炸弹",
-    "Description" : "使所有蓝果变成定时炸弹，投出后倒记时并爆炸，食用也会导致爆炸",
-    "Color" : "#FFE7B0"
+    "Color" : "FFE7B0",
+
+    "Chinese" : {
+        "BuffName" : "蓝果炸弹",
+        "Description" : "使所有蓝果变成定时炸弹，投出后倒记时并爆炸，食用也会导致爆炸"
+    },
+    "English": {
+        "BuffName" : "DangleBomb",
+        "Description" : "Turns all dangle fruits into time bombs that count down and explode when thrown, and eating them also causes them to explode"
+    }
 }

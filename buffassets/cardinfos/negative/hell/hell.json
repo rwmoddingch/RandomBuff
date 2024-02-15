@@ -1,10 +1,17 @@
 {
     "FaceName": "hell",
-    "ID" : "Hell",
+    "BuffID" : "Hell",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "HEll",
-    "Description" : "所有房间色调变为地狱色调",
-    "Color" : "#FFFFFF"
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "地狱",
+        "Description" : "所有房间色调变为地狱色调"
+    },
+    "English" : {
+        "BuffName" : "Hell",
+        "Description" : "All rooms have been changed to the palette of hell."
+    }
 }
