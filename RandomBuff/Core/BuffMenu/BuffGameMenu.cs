@@ -69,7 +69,7 @@ namespace RandomBuff.Core.BuffMenu
             //延迟加载等待存档载入完毕
             callBack = new BuffFile.BuffFileCompletedCallBack(OnDataLoaded);
 
-            if (manager.rainWorld.options.saveSlot < 100)//诺普的存档加载
+            if (!manager.rainWorld.BuffMode())//诺普的存档加载
             {
                 var lastSlot = manager.rainWorld.options.saveSlot;
                 BuffPlugin.Log($"Enter from slot {lastSlot}, To {manager.rainWorld.options.saveSlot += 100}");

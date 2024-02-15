@@ -137,11 +137,10 @@ namespace RandomBuff.Core.SaveData
         internal void StartGame(SlugcatStats.Name name)
         {
             var setting = CreateOrGetSettingInstance(name);
-            if(Custom.rainWorld.processManager.menuSetup.startGameCondition ==
-               ProcessManager.MenuSetup.StoryGameInitCondition.New)
+            if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
+                ProcessManager.MenuSetup.StoryGameInitCondition.New)
                 setting.NewGame();
-
-            //目前没有别的初始化了
+            
         }
 
         /// <summary>

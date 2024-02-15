@@ -78,6 +78,8 @@ namespace RandomBuff.Render.CardRender
               
 
                 _hoverPoint.transform.localScale = new Vector3(0f, _origScale.y, _origScale.z);
+                _firstInit = true;
+
             }
             _lozengeQuadOuter.GetComponent<MeshRenderer>().material.color = color;
             _lozengeQuadOuter.GetComponent<MeshRenderer>().material.SetColor("_Color", color);

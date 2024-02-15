@@ -15,10 +15,12 @@ namespace RandomBuff.Core.Game
     {
         public static BuffSettingID Normal;
         public static BuffSettingID Quick;
+        public static BuffSettingID Survival;
         static BuffSettingID()
         {
             Normal = new BuffSettingID("Normal", true);
             Quick = new BuffSettingID("Quick", true);
+            Survival = new BuffSettingID("Survival", true);
         }
 
         public BuffSettingID(string value, bool register = false) : base(value, register)
@@ -90,6 +92,7 @@ namespace RandomBuff.Core.Game
         {
             settingDict.Add(BuffSettingID.Normal, typeof(NormalGameSetting));
             settingDict.Add(BuffSettingID.Quick, typeof(QuickGameSetting));
+            settingDict.Add(BuffSettingID.Survival, typeof(SurvivalGameSetting));
 
         }
     }
