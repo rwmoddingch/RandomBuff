@@ -96,13 +96,32 @@ namespace RandomBuff.Core.Buff
                 var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
                 newData = new BuffStaticData();
 
-                if (!ExtEnumBase.TryParse(typeof(BuffID), (string)rawData[loadState = "ID"], true, out var re))
+                if (rawData.ContainsKey("BuffID"))
                 {
-                    BuffPlugin.LogFatal("Can't find registered BuffID, Maybe forgot to add codes?");
-                    return false;
+
+                    if (!ExtEnumBase.TryParse(typeof(BuffID), (string)rawData[loadState = "BuffID"], true, out var re))
+                    {
+                        BuffPlugin.LogFatal("Can't find registered BuffID, Maybe forgot to add codes?");
+                        return false;
+                    }
+                    newData.BuffID = (BuffID)re;
+
+
+                }
+                else
+                {
+                    BuffPlugin.LogWarning("OutDate Format At ID, Now BuffID");
+                    if (!ExtEnumBase.TryParse(typeof(BuffID), (string)rawData[loadState = "ID"], true, out var re))
+                    {
+                        BuffPlugin.LogFatal("Can't find registered BuffID, Maybe forgot to add codes?");
+                        return false;
+                    }
+                    newData.BuffID = (BuffID)re;
+
                 }
 
-                newData.BuffID = (BuffID)re;
+
+
                 if (BuffRegister.GetBuffType(newData.BuffID) == null)
                 {
                     BuffPlugin.LogFatal("Can't find BuffDataType, Maybe forgot to call BuffRegister.RegisterBuff() ?");

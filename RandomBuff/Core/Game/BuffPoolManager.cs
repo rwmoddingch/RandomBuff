@@ -208,17 +208,20 @@ namespace RandomBuff.Core.Game
         }
 
 
-        internal void TriggerBuff(BuffID id, bool ignoreCheck = false)
+        internal bool TriggerBuff(BuffID id, bool ignoreCheck = false)
         {
+            var re = false;
+            BuffPlugin.Log($"Trigger Buff: {id}, ignoreCheck: {ignoreCheck}");
             if (TryGetBuff(id, out var buff) && ((BuffConfigManager.GetStaticData(id).Triggerable && buff.Triggerable) || ignoreCheck))
             {
-                //TODO : 一些效果
-                if (buff.Trigger(Game))
+                BuffHud.Instance.TriggerCard(id);
+                if ((re = buff.Trigger(Game)) == true)
                 {
-                    //TODO : 一些效果
                     RemoveBuff(buff.ID);
                 }
             }
+
+            return re;
         }
     }
 }

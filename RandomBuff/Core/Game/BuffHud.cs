@@ -46,7 +46,6 @@ namespace RandomBuff.Core.Game
                     inGameSlot.RequestPickCards((id) =>
                         {
                             BuffPoolManager.Instance.CreateBuff(id);
-                            AppendNewCard(id);
 
                         }, positiveCards.Select(i => i.BuffID).ToArray(),
                         negativeCards, setting.instance.CurrentPacket.positive.selectCount);
@@ -57,7 +56,6 @@ namespace RandomBuff.Core.Game
                     inGameSlot.RequestPickCards((id) =>
                         {
                             BuffPoolManager.Instance.CreateBuff(id);
-                            AppendNewCard(id);
 
                         }, BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.negative.showCount,
                             BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).ToArray(),
@@ -88,9 +86,14 @@ namespace RandomBuff.Core.Game
 
         }
 
+        public void TriggerCard(BuffID id)
+        {
+            inGameSlot.TriggerBuff(id);
+        }
+
         public void RemoveCard(BuffID id)
         {
-            inGameSlot.BasicSlot.RemoveCard(id, true);
+            inGameSlot.BasicSlot.RemoveCard(id);
         }
 
         public override void ClearSprites()

@@ -1,6 +1,6 @@
 {
     "FaceName": "danglebomb",
-    "BuffID" : "DangleBombBuffID",
+    "BuffID" : "DangleBomb",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,

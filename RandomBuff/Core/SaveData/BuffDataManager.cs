@@ -202,7 +202,7 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         private void RemoveBuffData(SlugcatStats.Name name, BuffID id)
         {
-            BuffPlugin.LogError($"Remove buff : {name}");
+            BuffPlugin.Log($"Remove buff : {name}-{id}");
             allDatas[name].Remove(id);
         }
 
@@ -269,6 +269,8 @@ namespace RandomBuff.Core.SaveData
                 BuffPlugin.Log($"DELETE SAVE DATA: {name}");
                 allDatas.Remove(name);
             }
+
+            GetSafeSetting(name).instance = null;
         }
 
 
@@ -279,6 +281,7 @@ namespace RandomBuff.Core.SaveData
         {
             BuffPlugin.Log($"DELETE ALL SAVE DATA");
             allDatas.Clear();
+            allSettings.Clear();
         }
 
         /// <summary>
