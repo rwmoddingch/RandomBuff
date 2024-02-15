@@ -19,8 +19,6 @@ namespace RandomBuff.Core.Game.Settings
 
         public QuickGameSetting()
         {
-            for(int i=0;i<10;i++)
-                queue[i] = BuffID.None;
         }
 
         public override void EnterGame()
@@ -42,24 +40,26 @@ namespace RandomBuff.Core.Game.Settings
             counter++;
             if (counter >= 40 * 30)
             {
-                if (queue[pointer] != BuffID.None)
+                
+                if (queue.Count == 10)
                 {
-                    BuffPoolManager.Instance.RemoveBuff(queue[pointer]);
-                    BuffHud.Instance.RemoveCard(queue[pointer]);
+                    BuffPoolManager.Instance.RemoveBuff(queue.Peek());
+                    BuffHud.Instance.RemoveCard(queue.Dequeue());
                 }
 
+                BuffID buffId;
                 if (isPositive) 
-                    queue[pointer] = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
+                    buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
                         BuffType.Positive)[0].BuffID;
                 else
-                    queue[pointer] = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
+                    buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
                         BuffType.Negative, BuffType.Duality)[0].BuffID;
-                BuffPlugin.LogDebug($"Quick Mode : New Buff {queue[pointer]}");
 
-                BuffHud.Instance.AppendNewCard(queue[pointer]);
-                BuffPoolManager.Instance.CreateBuff(queue[pointer++]);
+                BuffPlugin.LogDebug($"Quick Mode : New Buff {buffId}");
 
-                pointer = pointer % queue.Length;
+                BuffHud.Instance.AppendNewCard(buffId);
+                BuffPoolManager.Instance.CreateBuff(buffId);
+                queue.Enqueue(buffId);
                 counter = 0;
             }
             
@@ -68,7 +68,7 @@ namespace RandomBuff.Core.Game.Settings
         {
             CurrentPacket = new CachaPacket();
             inGame = false;
-            BuffPlugin.Log($"QuickGameSetting : SessionEnd! pointer: {pointer}, isPositive: {isPositive}");
+            BuffPlugin.Log($"QuickGameSetting : SessionEnd! isPositive: {isPositive}");
         }
 
         public override void NewGame()
@@ -82,7 +82,7 @@ namespace RandomBuff.Core.Game.Settings
         private bool newGame;
 
         [JsonProperty]
-        public BuffID[] queue = new BuffID[10];
+        public Queue<BuffID> queue = new ();
 
         [JsonProperty] 
         public int pointer = 0;

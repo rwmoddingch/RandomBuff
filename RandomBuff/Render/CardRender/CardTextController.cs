@@ -49,7 +49,7 @@ namespace RandomBuff.Render.CardRender
 
         public string[] words;
 
-        public void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, bool isTitle, float size)
+        public void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, bool isTitle, float size,InGameTranslator.LanguageID id)
         {
             _renderer = renderer;
             _opaqueColor = color;
@@ -73,7 +73,7 @@ namespace RandomBuff.Render.CardRender
                 _firstInit = true;
             }
 
-            SplitText(text, isTitle);
+            SplitText(text, isTitle, id);
             SetText();
 
             SwitchMode(Mode.FadeOut);
@@ -179,7 +179,7 @@ namespace RandomBuff.Render.CardRender
             currentMode = newMode;
         }
 
-        void SplitText(string origText, bool isTitle)
+        void SplitText(string origText, bool isTitle, InGameTranslator.LanguageID id)
         {
             if (isTitle)
             {
@@ -193,7 +193,7 @@ namespace RandomBuff.Render.CardRender
             }
             else
             {
-                if(Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
+                if(id == InGameTranslator.LanguageID.Chinese)
                 {
                     int maxCharInLine = 10;
                     int maxLine = 14;

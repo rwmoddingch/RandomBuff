@@ -148,10 +148,5 @@ namespace RandomBuff.Core.Hooks
                 BuffPoolManager.LoadGameBuff(game2);
             }
         }
-
-        public static bool BuffMode(this RainWorld rainWorld)
-        {
-            return rainWorld.options.saveSlot >= 100;
-        }
     }
 }

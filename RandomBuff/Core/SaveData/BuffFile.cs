@@ -10,6 +10,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Hooks;
 using RWCustom;
 using UnityEngine;

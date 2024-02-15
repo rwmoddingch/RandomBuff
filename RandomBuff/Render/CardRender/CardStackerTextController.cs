@@ -17,6 +17,8 @@ namespace RandomBuff.Render.CardRender
         Vector3 _origScale;
         float _targetWidth;
         float _currentWidth;
+
+        bool _firstInit;
         public bool Show
         {
             get => _targetWidth != 0;
@@ -26,55 +28,60 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
+
+
         public void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text)
         {
             _renderer = renderer;
 
-            _hoverPoint = new GameObject("StackerTextHoverPoint");
-            _hoverPoint.transform.parent = parent;
-            _hoverPoint.transform.localPosition = new Vector3(-0.5f, 0.618f * 0.5f, 0f);
-            _origScale = _hoverPoint.transform.localScale;
+            if (!_firstInit)
+            {
+                _hoverPoint = new GameObject("StackerTextHoverPoint");
+                _hoverPoint.transform.parent = parent;
+                _hoverPoint.transform.localPosition = new Vector3(-0.5f, 0.618f * 0.5f, 0f);
+                _origScale = _hoverPoint.transform.localScale;
 
-            _lozengeQuadOuter = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            _lozengeQuadOuter.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-            _lozengeQuadOuter.transform.parent = _hoverPoint.transform;
-            _lozengeQuadOuter.transform.localPosition = Vector3.forward * -0.001f;
-            _lozengeQuadOuter.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 45f));
-            _lozengeQuadOuter.layer = 8;
-            _lozengeQuadOuter.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
+                _lozengeQuadOuter = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                _lozengeQuadOuter.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+                _lozengeQuadOuter.transform.parent = _hoverPoint.transform;
+                _lozengeQuadOuter.transform.localPosition = Vector3.forward * -0.001f;
+                _lozengeQuadOuter.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 45f));
+                _lozengeQuadOuter.layer = 8;
+                _lozengeQuadOuter.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
+
+
+                _lozengeQuadInner = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                _lozengeQuadInner.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
+                _lozengeQuadInner.transform.parent = _hoverPoint.transform;
+                _lozengeQuadInner.transform.localPosition = Vector3.forward * -0.002f;
+                _lozengeQuadInner.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 45f));
+                _lozengeQuadInner.layer = 8;
+                _lozengeQuadInner.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
+                _lozengeQuadInner.GetComponent<MeshRenderer>().material.color = Color.black * 0.8f + Color.white * 0.2f;
+                _lozengeQuadInner.GetComponent<MeshRenderer>().material
+                    .SetColor("_Color", Color.black * 0.8f + Color.white * 0.2f);
+
+
+                _stackerTextObj = new GameObject("StackerText");
+                _stackerTextObj.transform.parent = _hoverPoint.transform;
+                _stackerTextObj.transform.localPosition = Vector3.forward * -0.003f;
+                _stackerTextObj.layer = 8;
+                stackerTextMesh = _stackerTextObj.AddComponent<TextMesh>();
+                stackerTextMesh.font = font;
+                stackerTextMesh.font.material.shader = CardBasicAssets.CardTextShader;
+
+                stackerTextMesh.fontSize = 100;
+                stackerTextMesh.characterSize = 0.01f * 2f;
+                stackerTextMesh.anchor = TextAnchor.MiddleCenter;
+                stackerTextMesh.alignment = TextAlignment.Center;
+                stackerTextMesh.color = Color.white;
+              
+
+                _hoverPoint.transform.localScale = new Vector3(0f, _origScale.y, _origScale.z);
+            }
             _lozengeQuadOuter.GetComponent<MeshRenderer>().material.color = color;
             _lozengeQuadOuter.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
-
-
-
-            _lozengeQuadInner = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            _lozengeQuadInner.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
-            _lozengeQuadInner.transform.parent = _hoverPoint.transform;
-            _lozengeQuadInner.transform.localPosition = Vector3.forward * -0.002f;
-            _lozengeQuadInner.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 45f));
-            _lozengeQuadInner.layer = 8;
-            _lozengeQuadInner.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
-            _lozengeQuadInner.GetComponent<MeshRenderer>().material.color = Color.black * 0.8f + Color.white * 0.2f;
-            _lozengeQuadInner.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black * 0.8f + Color.white * 0.2f);
-
-
-            _stackerTextObj = new GameObject("StackerText");
-            _stackerTextObj.transform.parent = _hoverPoint.transform;
-            _stackerTextObj.transform.localPosition = Vector3.forward * -0.003f;
-            _stackerTextObj.layer = 8;
-            stackerTextMesh = _stackerTextObj.AddComponent<TextMesh>();
-            stackerTextMesh.font = font;
-            stackerTextMesh.font.material.shader = CardBasicAssets.CardTextShader;
-
-            stackerTextMesh.fontSize = 100;
-            stackerTextMesh.characterSize = 0.01f * 2f;
-            stackerTextMesh.anchor = TextAnchor.MiddleCenter;
-            stackerTextMesh.alignment = TextAlignment.Center;
-            stackerTextMesh.color = Color.white;
             stackerTextMesh.text = text;
-
-            _hoverPoint.transform.localScale = new Vector3(0f, _origScale.y, _origScale.z);
-
         }
 
         void Start()

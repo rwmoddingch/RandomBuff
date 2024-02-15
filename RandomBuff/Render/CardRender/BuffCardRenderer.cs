@@ -1,6 +1,8 @@
+using System;
 using RandomBuff.Core.Buff;
 using System.Collections;
 using System.Collections.Generic;
+using RWCustom;
 using UnityEngine;
 
 namespace RandomBuff.Render.CardRender
@@ -111,6 +113,9 @@ namespace RandomBuff.Render.CardRender
             _cardTextureFront = buffStaticData.GetFaceTexture();
             _cardTextureBack = buffStaticData.GetBackTexture();
 
+
+            var info = _buffStaticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage);
+
             if (!_notFirstInit)
             {
                 cardCameraController = gameObject.AddComponent<CardCameraController>();
@@ -138,17 +143,13 @@ namespace RandomBuff.Render.CardRender
                 Depth = 8.5f;
                 Rotation = Vector2.zero;
 
-                var info = _buffStaticData.GetCardInfo(InGameTranslator.LanguageID.English);
                 //初始化文本
                 cardTextFrontController = _cardQuadFront.AddComponent<CardTextController>();
-                cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f);
 
                 cardTextBackController = _cardQuadBack.AddComponent<CardTextController>();
-                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f);
 
                 //初始化堆叠层数显示
                 cardStackerTextController = gameObject.AddComponent<CardStackerTextController>();
-                cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, "1");
 
 
                 //初始化专有相机
@@ -156,6 +157,10 @@ namespace RandomBuff.Render.CardRender
 
                 _notFirstInit = true;
             }
+            cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f, info.id);
+            cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f, info.id);
+            cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString());
+
             _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
             _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
         }
