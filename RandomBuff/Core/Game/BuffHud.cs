@@ -16,6 +16,7 @@ namespace RandomBuff.Core.Game
 
             foreach (var id in BuffDataManager.Instance.GetAllBuffIds())
                 inGameSlot.AppendCardDirectly(id);
+
             Instance = this;
         }
 
@@ -26,6 +27,7 @@ namespace RandomBuff.Core.Game
 
         public void AppendCardDirectly(BuffID id)
         {
+            inGameSlot.AppendCardDirectly(id);
         }
 
         public override void Update()
@@ -38,24 +40,11 @@ namespace RandomBuff.Core.Game
             base.Draw(timeStacker);
             inGameSlot.GrafUpdate(timeStacker);
 
-            if (Input.GetKeyDown(KeyCode.N))
-            {
-                var positiveCards = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 1,
-                   BuffType.Positive, BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).First();
-
-                inGameSlot.TriggerBuff(positiveCards);
-                //var negativeCards = BuffPicker.GetNewBuffsOfType(SlugcatStats.Name.Yellow, 3,
-                //    BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).ToArray();
-
-                //inGameSlot.RequestPickCards((id) => BuffPlugin.Log($"Pick {id}"), positiveCards, new BuffID[3]);
-                //inGameSlot.RequestPickCards((id) => BuffPlugin.Log($"Pick {id}"), negativeCards, new BuffID[3]);
-            }
         }
 
         public void RemoveCard(BuffID id)
         {
-            //TODO : Debug
-            inGameSlot.RemoveCard(id, true);
+            inGameSlot.BasicSlot.RemoveCard(id, true);
         }
 
         public override void ClearSprites()
