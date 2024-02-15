@@ -4,7 +4,8 @@
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "#FF7EBC",
+    "Color" : "FF7EBC",
+
     "Chinese" : {
         "BuffName" : "老年痴呆",
         "Description" : "区域五块卵石内只会生成极少量的神经元"

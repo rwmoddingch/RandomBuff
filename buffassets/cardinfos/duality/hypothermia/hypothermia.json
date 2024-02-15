@@ -1,10 +1,17 @@
 {
     "FaceName": "Hypothermia",
-    "ID" : "Hypothermia",
+    "BuffID" : "Hypothermia",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "失温症",
-    "Description" : "所有非水生生物待在水里过久会失温直到冻死（自发热的除外）",
-    "Color" : "#475875"
+    "Color" : "475875",
+   
+    "Chinese" : {
+        "BuffName" : "失温症",
+        "Description" : "所有非水生生物待在水里过久会失温直到冻死（自发热的除外）"
+    },
+    "English": {
+        "BuffName" : "Hypothermia",
+        "Description" : "All non-aquatic creature left in water for too long will lose temperature until they freeze to death (except self-heating ones)"
+    }
 }

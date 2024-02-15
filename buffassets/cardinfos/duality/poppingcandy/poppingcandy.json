@@ -1,10 +1,17 @@
 {
     "FaceName": "poppingcandy",
-    "ID" : "PoppingCandy",
+    "BuffID" : "PoppingCandy",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "跳跳糖",
-    "Description" : "食用神经元以后玩家会小范围震颤跳动1秒",
-    "Color" : "#FFE7B0"
+    "Color" : "FFE7B0",
+    
+    "Chinese" : {
+        "BuffName" : "跳跳糖",
+        "Description" : "食用神经元以后玩家会小范围震颤跳动1秒"
+    },
+    "English": {
+        "BuffName" : "PoppingCandy",
+        "Description" : "After consuming a neuron, the player will experience a small tremor for 1 second."
+    }
 }

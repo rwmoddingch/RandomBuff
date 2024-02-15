@@ -1,10 +1,17 @@
 {
     "FaceName": "unlimitedfirepower",
-    "ID" : "UnlimitedFirepower",
+    "BuffID" : "UnlimitedFirepower",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "无限火力",
-    "Description" : "炸弹、炸矛、鞭炮草爆炸后不会消耗",
-    "Color" : "#7E0A00"
+    "Color" : "7E0A00",
+    
+    "Chinese" : {
+        "BuffName" : "无限火力",
+        "Description" : "炸弹、炸矛、鞭炮草爆炸后不会消耗"
+    },
+    "English": {
+        "BuffName" : "UnlimitedFirepower",
+        "Description" : "Bombs, explosive spears, and firecrackers explode without depleting themselves"
+    }
 }

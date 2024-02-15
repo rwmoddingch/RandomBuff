@@ -1,10 +1,11 @@
 {
     "FaceName": "explosivejaw",
-    "ID" : "ExplosiveJaw",
+    "BuffID" : "ExplosiveJaw",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "#B90014",
+    "Color" : "B90014",
+
     "Chinese" : {
         "BuffName" : "爆炸头",
         "Description" : "蜥蜴的头部在被矛命中时会产生一次爆炸"

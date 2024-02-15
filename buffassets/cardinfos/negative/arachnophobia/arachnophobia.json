@@ -1,10 +1,17 @@
 {
     "FaceName": "arachnophobia",
-    "ID" : "Arachnophobia",
+    "BuffID" : "Arachnophobia",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "Arachnophobia",
-    "Description" : "",
-    "Color" : "#FFFFFF"
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "蜘蛛恐惧症",
+        "Description" : "所有生物死后都会生成一大堆小蜘蛛"
+    },
+    "English" : {
+        "BuffName" : "Arachnophobia",
+        "Description" : "All creatures spawn a bunch of little spiders when they die."
+    }
 }
