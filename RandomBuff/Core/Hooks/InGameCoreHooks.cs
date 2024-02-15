@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Expedition;
 using MoreSlugcats;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;

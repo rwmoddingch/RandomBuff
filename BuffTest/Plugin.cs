@@ -6,6 +6,7 @@ using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 
@@ -32,18 +33,13 @@ namespace BuffTest
         private void RainWorldGame_Update(On.RainWorldGame.orig_Update orig, RainWorldGame self)
         {
             orig(self);
-            if (Input.GetKeyDown(KeyCode.LeftControl))
+            if (self.rainWorld.BuffMode() && BuffPlugin.DevEnabled)
             {
-                Log("Create Test Buff!");
-                BuffPoolManager.Instance.CreateBuff(TestEntry.TestBuffID);
-            }
-
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                var re = BuffPicker.GetNewBuffsOfType(self.StoryCharacter,1, BuffType.Positive);
-                foreach (var b in re)
+                if (Input.GetKeyDown(KeyCode.LeftControl))
                 {
-                    Log($"Pick {b.BuffID}");
+                    Log("Create Test Buff2!");
+                    BuffPoolManager.Instance.CreateBuff(TestBuff2ID);
+                    BuffHud.Instance.AppendNewCard(TestBuff2ID);
                 }
             }
         }
