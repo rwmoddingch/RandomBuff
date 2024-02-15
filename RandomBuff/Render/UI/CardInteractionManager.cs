@@ -392,8 +392,11 @@ namespace RandomBuff.Render.UI
             {
                 if (CurrentFocusCard != null && CurrentFocusCard.StaticData.Triggerable)
                 {
-                    CurrentFocusCard.onMouseDoubleClick();
-                    BuffPoolManager.Instance.TriggerBuff(CurrentFocusCard.ID);
+                    CurrentFocusCard.onMouseDoubleClick?.Invoke();
+                    if (BuffPoolManager.Instance.TriggerBuff(CurrentFocusCard.ID))
+                    {
+                        Slot.RemoveCard(CurrentFocusCard.ID);
+                    }
                 }
             }
         }

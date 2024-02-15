@@ -35,7 +35,7 @@ namespace BuffTest
             TestEntry.Log("Create TestBuff2");
         }
 
-        public override bool Triggerable => counter == 0;
+        public override bool Triggerable => counter <= 0;
 
         public override bool Active => !Triggerable;
 

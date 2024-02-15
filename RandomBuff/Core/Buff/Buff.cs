@@ -87,7 +87,10 @@ namespace RandomBuff.Core.Buff
         /// </summary>
         public void TriggerSelf(bool ignoreCheck = false)
         {
-            BuffPoolManager.Instance.TriggerBuff(ID, ignoreCheck);
+            if (BuffPoolManager.Instance.TriggerBuff(ID, ignoreCheck))
+            {
+                BuffHud.Instance.RemoveCard(ID);
+            }
         }
 
 
