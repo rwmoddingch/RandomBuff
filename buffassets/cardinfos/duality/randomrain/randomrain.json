@@ -4,7 +4,14 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "随机性雨",
-    "Description" : "雨循环波动更大了，最低雨计时为原来的二分之一，最高的雨计时为原来的两倍",
-    "Color" : "#A475FF"
+    "Color" : "A475FF",
+    
+    "Chinese" : {
+        "BuffName" : "随机性雨",
+        "Description" : "雨循环波动更大了，最低雨计时为原来的二分之一，最高的雨计时为原来的两倍"
+    },
+    "English": {
+        "BuffName" : "RandomRain",
+        "Description" : "Cycles fluctuate even more, with the lowest rains timed at one-half of the original, and the highest rains timed at twice as high"
+    }
 }

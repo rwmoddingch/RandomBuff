@@ -1,16 +1,17 @@
 {
     "FaceName": "invisiblekiller",
-    "ID" : "InvisibleKiller",
+    "BuffID" : "InvisibleKiller",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "隐形杀手",
-    "Description" : "白蜥蜴将会持续处于隐形状态，直到咬住猎物",
-    "Color" : "#A7B7C7",
-    "Chinese" : {
+    "Color" : "A7B7C7",
 
+    "Chinese" : {
+        "BuffName" : "隐形杀手",
+        "Description" : "白蜥蜴将会持续处于隐形状态，直到咬住猎物"
     },
     "English" : {
-
+        "BuffName" : "InvisibleKiller",
+        "Description" : "White lizards will remain invisible until they bite their prey."
     }
 }

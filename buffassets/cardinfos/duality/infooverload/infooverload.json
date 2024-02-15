@@ -1,10 +1,17 @@
 {
     "FaceName": "infooverload",
-    "ID" : "InfoOverload",
+    "BuffID" : "InfoOverload",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "信息冗余",
-    "Description" : "将所有非彩色珍珠替换为赞美诗",
-    "Color" : "#A475FF"
+    "Color" : "A475FF",
+
+    "Chinese" : {
+        "BuffName" : "信息冗余",
+        "Description" : "将所有非彩色珍珠替换为赞美诗"
+    },
+    "English": {
+        "BuffName" : "InfoOverload",
+        "Description" : "Replace all non-colored pearls with HalcyonPearl"
+    }
 }

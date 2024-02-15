@@ -1,16 +1,17 @@
 {
     "FaceName": "MobileAssault",
-    "ID" : "MobileAssault",
+    "BuffID" : "MobileAssault",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "机动突袭",
-    "Description" : "每过一段时间提升一个房间内可以提升的生物",
-    "Color" : "#FF019F",
-    "Chinese" : {
+    "Color" : "FF019F",
 
+    "Chinese" : {
+        "BuffName" : "机动突袭",
+        "Description" : "每种蜥蜴都会获得弹跳能力"
     },
     "English" : {
-
+        "BuffName" : "MobileAssault",
+        "Description" : "Each species of lizard gains the ability to jump"
     }
 }

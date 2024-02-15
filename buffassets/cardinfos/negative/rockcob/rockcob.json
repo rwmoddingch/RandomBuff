@@ -1,16 +1,17 @@
 {
     "FaceName": "rockcob",
-    "ID" : "RockCob",
+    "BuffID" : "RockCob",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "石米花",
-    "Description" : "激活爆米花只会生成一堆石头",
-    "Color" : "#7B646D",
-    "Chinese" : {
+    "Color" : "7B646D",
 
+    "Chinese" : {
+        "BuffName" : "石米花",
+        "Description" : "激活爆米花只会生成一堆石头"
     },
     "English" : {
-
+        "BuffName" : "RockCob",
+        "Description" : "Activating popcorn only generates a pile of rocks"
     }
 }

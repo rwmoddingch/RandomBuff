@@ -1,10 +1,17 @@
 {
     "FaceName": "walkingmushroom",
-    "ID" : "WalkingMushroom",
+    "BuffID" : "WalkingMushroom",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "走路菇",
-    "Description" : "子弹菇获得移动能力",
-    "Color" : "#A475FF"
+    "Color" : "A475FF",
+    
+    "Chinese" : {
+        "BuffName" : "走路菇",
+        "Description" : "子弹菇获得移动能力"
+    },
+    "English": {
+        "BuffName" : "WalkingMushroom",
+        "Description" : "Bullet Mushroom gains mobility"
+    }
 }

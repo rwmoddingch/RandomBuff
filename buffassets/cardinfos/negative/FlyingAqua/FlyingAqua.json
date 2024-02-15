@@ -1,10 +1,11 @@
 {
     "FaceName": "FlyingAqua",
-    "ID" : "FlyingAqua",
+    "BuffID" : "FlyingAqua",
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "#7B646D",
+    "Color" : "7B646D",
+
     "Chinese" : {
         "BuffName" : "飞蜈出水",
         "Description" : "水蜈蚣在空气中也能游泳了，并且游的更快"
