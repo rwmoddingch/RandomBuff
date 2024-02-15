@@ -22,6 +22,9 @@ namespace BuffTest
         {
         }
 
+        [JsonProperty] 
+        public int count = 2;
+
     }
     public class TestBuff2 : Buff<TestBuff2, TestBuffData2>
     {
@@ -32,5 +35,23 @@ namespace BuffTest
             TestEntry.Log("Create TestBuff2");
         }
 
+        public override bool Triggerable => counter == 0;
+
+        public override bool Active => !Triggerable;
+
+        public int counter = 0;
+
+        public override void Update(RainWorldGame game)
+        {
+            base.Update(game);
+            counter--;
+        }
+
+        public override bool Trigger(RainWorldGame game)
+        {
+            Data.count--;
+            counter = 40;
+            return Data.count == 0;
+        }
     }
 }
