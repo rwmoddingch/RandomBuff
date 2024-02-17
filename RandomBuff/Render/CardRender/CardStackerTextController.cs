@@ -29,7 +29,7 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
-        int _value = -1;
+        int _value = 0;
         public int Value
         {
             get => _value;
@@ -46,7 +46,7 @@ namespace RandomBuff.Render.CardRender
         bool _addOne;
         public bool AddOne
         {
-            get => AddOne;
+            get => _addOne;
             set
             {
                 if(value != _addOne)

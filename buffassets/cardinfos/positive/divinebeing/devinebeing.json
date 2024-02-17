@@ -1,10 +1,17 @@
 {
     "FaceName": "devinebeing",
-    "ID" : "DivineBeing",
+    "BuffID" : "DivineBeing",
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "神圣存在",
-    "Description" : "玩家周边圆形范围内生物都保持匍匐静止，玩家离开后恢复",
-    "Color" : "#FFC88D"
+    "Color" : "FFC88D",
+
+    "Chinese" : {
+        "BuffName" : "神圣存在",
+        "Description" : "玩家周边圆形范围内生物都保持匍匐静止，玩家离开后恢复"
+    },
+    "English" : {
+        "BuffName" : "DivineBeing",
+        "Description" : "Creatures in a circle around the player remain prostrate and stationary, recovering when the player leaves."
+    }
 }

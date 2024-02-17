@@ -1,10 +1,17 @@
 {
     "FaceName": "deathpreventer",
-    "ID" : "DeathFreeMedallion",
+    "BuffID" : "DeathFreeMedallion",
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "免死金牌",
-    "Description" : "抵消一次死亡，并且把玩家传送到安全的地方",
-    "Color" : "#FFE7B0"
+    "Color" : "FFE7B0",
+
+    "Chinese" : {
+        "BuffName" : "免死金牌",
+        "Description" : "抵消一次死亡，并且把玩家传送到安全的地方"
+    },
+    "English" : {
+        "BuffName" : "DeathFreeMedallion",
+        "Description" : "Counteracts one death and teleports the player to safety"
+    }
 }
