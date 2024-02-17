@@ -19,6 +19,7 @@ namespace RandomBuff.Render.CardRender
         float _currentWidth;
 
         bool _firstInit;
+
         public bool Show
         {
             get => _targetWidth != 0;
@@ -28,7 +29,33 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
+        int _value = -1;
+        public int Value
+        {
+            get => _value;
+            set
+            {
+                if(value != _value)
+                {
+                    _value = value;
+                    UpdateText();
+                }
+            }
+        }
 
+        bool _addOne;
+        public bool AddOne
+        {
+            get => AddOne;
+            set
+            {
+                if(value != _addOne)
+                {
+                    _addOne = value;
+                    UpdateText();
+                }
+            }
+        }
 
         public void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text)
         {
@@ -83,12 +110,27 @@ namespace RandomBuff.Render.CardRender
             }
             _lozengeQuadOuter.GetComponent<MeshRenderer>().material.color = color;
             _lozengeQuadOuter.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
-            stackerTextMesh.text = text;
+            UpdateText();
         }
 
         void Start()
         {
 
+        }
+
+        void UpdateText()
+        {
+            string result = "";
+            if (AddOne)
+            {
+                if (Value > 0)
+                    result = $"{Value}+1";
+                else
+                    result = $"+1";
+            }
+            else
+                result = Value.ToString();
+            stackerTextMesh.text = result;
         }
 
         // Update is called once per frame
