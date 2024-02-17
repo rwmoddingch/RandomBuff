@@ -1,10 +1,17 @@
 {
     "FaceName": "shortcircuitgate",
-    "ID" : "ShortCircuitGate",
+    "BuffID" : "ShortCircuitGate",
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "Short Circuit Gate",
-    "Description" : "",
-    "Color" : "#FFFFFF"
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "短路元件",
+        "Description" : "下一次使用的业力门永久成为僧侣一样的不需要业力需求的门"
+    },
+    "English" : {
+        "BuffName" : "ShortCircuitGate",
+        "Description" : "The next gate passed no longer requires karma level"
+    }
 }

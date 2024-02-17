@@ -181,9 +181,15 @@ namespace RandomBuff.Render.CardRender
 
         void SplitText(string origText, bool isTitle, InGameTranslator.LanguageID id)
         {
+            if (string.IsNullOrEmpty(origText))
+            {
+                splitedTexts = new string[1] { "" };
+                return;
+            }
+
             if (isTitle)
             {
-                int maxCharInLine = 6;
+                int maxCharInLine = 7;
                 splitedTexts = new string[Mathf.CeilToInt(origText.Length / (float)maxCharInLine)];
 
                 for (int i = 0; i < splitedTexts.Length; i++)

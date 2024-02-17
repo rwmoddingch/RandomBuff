@@ -1,10 +1,17 @@
 {
     "FaceName": "lightspeedspear",
-    "ID" : "LightSpeedSpear",
+    "BuffID" : "LightSpeedSpear",
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "BuffName" : "光速矛",
-    "Description" : "火矛将会瞬间飞到目的地，同时房间中有小概率刷出火矛",
-    "Color" : "#B0002A"
+    "Color" : "B0002A",
+
+    "Chinese" : {
+        "BuffName" : "光速矛",
+        "Description" : "火矛将会瞬间飞到目的地，同时房间中有小概率刷出火矛"
+    },
+    "English" : {
+        "BuffName" : "LightSpeedSpear",
+        "Description" : "Bug spears will instantly fly to their destinations, and there is a small chance that the spears will appear in the room."
+    }
 }

@@ -108,61 +108,69 @@ namespace RandomBuff.Render.CardRender
 
         public void Init(int id, BuffStaticData buffStaticData)
         {
-            _id = id;
-            _buffStaticData = buffStaticData;
-            _cardTextureFront = buffStaticData.GetFaceTexture();
-            _cardTextureBack = buffStaticData.GetBackTexture();
-
-
-            var info = _buffStaticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage);
-
-            if (!_notFirstInit)
+            try
             {
-                cardCameraController = gameObject.AddComponent<CardCameraController>();
-                //初始化卡面和卡背
-                _cardQuadFront = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                _cardQuadFront.transform.parent = transform;
-                _cardQuadFront.transform.localScale = new Vector3(3f, 5f, 1f);
-                _cardQuadFront.name = $"BuffCardQuadFront_{id}";
-                _cardQuadFront.layer = 8;
-                _cardQuadFront.transform.localPosition = new Vector3(0, 0, 0);
-                _cardQuadFront.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
-                cardHighlightFrontController = _cardQuadFront.AddComponent<CardHighlightController>();
-                cardHighlightFrontController.Init(this, _cardTextureFront);
-
-                _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                _cardQuadBack.transform.parent = transform;
-                _cardQuadBack.transform.localScale = new Vector3(3f, 5f, 1f);
-                _cardQuadBack.name = $"BuffCardQuadBack_{id}";
-                _cardQuadBack.layer = 8;
-                _cardQuadBack.transform.localPosition = new Vector3(0, 0, 0);
-                _cardQuadBack.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
-                cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
-                cardHighlightBackController.Init(this, _cardTextureBack);
-
-                Depth = 8.5f;
-                Rotation = Vector2.zero;
-
-                //初始化文本
-                cardTextFrontController = _cardQuadFront.AddComponent<CardTextController>();
-
-                cardTextBackController = _cardQuadBack.AddComponent<CardTextController>();
-
-                //初始化堆叠层数显示
-                cardStackerTextController = gameObject.AddComponent<CardStackerTextController>();
+                _id = id;
+                _buffStaticData = buffStaticData;
+                _cardTextureFront = buffStaticData.GetFaceTexture();
+                _cardTextureBack = buffStaticData.GetBackTexture();
 
 
-                //初始化专有相机
-                cardCameraController.Init(id);
+                var info = _buffStaticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage);
 
-                _notFirstInit = true;
+                if (!_notFirstInit)
+                {
+                    cardCameraController = gameObject.AddComponent<CardCameraController>();
+                    //初始化卡面和卡背
+                    _cardQuadFront = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    _cardQuadFront.transform.parent = transform;
+                    _cardQuadFront.transform.localScale = new Vector3(3f, 5f, 1f);
+                    _cardQuadFront.name = $"BuffCardQuadFront_{id}";
+                    _cardQuadFront.layer = 8;
+                    _cardQuadFront.transform.localPosition = new Vector3(0, 0, 0);
+                    _cardQuadFront.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
+                    cardHighlightFrontController = _cardQuadFront.AddComponent<CardHighlightController>();
+                    cardHighlightFrontController.Init(this, _cardTextureFront);
+
+                    _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    _cardQuadBack.transform.parent = transform;
+                    _cardQuadBack.transform.localScale = new Vector3(3f, 5f, 1f);
+                    _cardQuadBack.name = $"BuffCardQuadBack_{id}";
+                    _cardQuadBack.layer = 8;
+                    _cardQuadBack.transform.localPosition = new Vector3(0, 0, 0);
+                    _cardQuadBack.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
+                    cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
+                    cardHighlightBackController.Init(this, _cardTextureBack);
+
+                    Depth = 8.5f;
+                    Rotation = Vector2.zero;
+
+                    //初始化文本
+                    cardTextFrontController = _cardQuadFront.AddComponent<CardTextController>();
+
+                    cardTextBackController = _cardQuadBack.AddComponent<CardTextController>();
+
+                    //初始化堆叠层数显示
+                    cardStackerTextController = gameObject.AddComponent<CardStackerTextController>();
+
+
+                    //初始化专有相机
+                    cardCameraController.Init(id);
+
+                    _notFirstInit = true;
+                }
+                cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f, info.id);
+                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f, info.id);
+                cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString());
+
+                _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
+                _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
             }
-            cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f, info.id);
-            cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f, info.id);
-            cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString());
-
-            _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
-            _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
+            catch(Exception e)
+            {
+                BuffPlugin.LogError($"Exception in buffcard init : {_buffStaticData.BuffID}");
+                BuffPlugin.LogException(e);
+            }
         }
     }
 }
