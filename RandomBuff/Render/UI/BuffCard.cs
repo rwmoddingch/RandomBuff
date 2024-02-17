@@ -1,4 +1,5 @@
 ﻿using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using System;
@@ -119,6 +120,36 @@ namespace RandomBuff.Render.UI
             }
         }
 
+        public bool StackerAddOne
+        {
+            get
+            {
+                if (StaticData.Stackable)
+                    return _cardRenderer.cardStackerTextController.AddOne;
+                return false;
+            }
+            set
+            {
+                if (StaticData.Stackable)
+                    _cardRenderer.cardStackerTextController.AddOne = value;
+            }
+        }
+
+        public int StackerValue
+        {
+            get
+            {
+                if (StaticData.Stackable)
+                    return _cardRenderer.cardStackerTextController.Value;
+                return -1;
+            }
+            set
+            {
+                if (StaticData.Stackable)
+                    _cardRenderer.cardStackerTextController.Value = value;
+            }
+        }
+
         public BuffCard(BuffID buffID) : this(buffID, AnimatorState.Test_None)
         { 
         }
@@ -208,6 +239,14 @@ namespace RandomBuff.Render.UI
             else
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
+            }
+        }
+
+        public void UpdateStacker()
+        {
+            if (StaticData.Stackable)
+            {
+                StackerValue = BuffDataManager.Instance.GetBuffData(ID).StackLayer;
             }
         }
 

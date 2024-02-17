@@ -232,6 +232,9 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayTitle = true;
             buffCard.DisplayStacker = true;
 
+            buffCard.UpdateStacker();
+            buffCard.StackerAddOne = false;
+
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
             buffCard.onMouseSingleClick += OnSingleClickFlip;
         }
@@ -316,6 +319,9 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
             buffCard.DisplayStacker = true;
+
+            buffCard.UpdateStacker();
+            buffCard.StackerAddOne = true;
 
             cardPickerInteractionManager = buffCard.interactionManager as CardPickerInteractionManager;
             buffCard.onMouseSingleClick += OnSingleClickFlip;
