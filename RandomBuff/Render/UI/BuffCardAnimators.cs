@@ -525,6 +525,7 @@ namespace RandomBuff.Render.UI
         Vector3 targetRotation;
 
         CommmmmmmmmmmmmmpleteInGameSlot.ActivateCardAnimSlot Slot;
+        bool finished;
 
         public ActivateCardAnimSlotAppendAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -546,8 +547,11 @@ namespace RandomBuff.Render.UI
 
         public override void Update()
         {
-            base.Update();
-            if(currentState == State.FlyIn)
+            if (finished)
+            {
+                return;   
+            }
+            if (currentState == State.FlyIn)
             {
                 if (timer < flyInTime)
                 {
@@ -571,6 +575,7 @@ namespace RandomBuff.Render.UI
                 else
                 {
                     Slot.FinishAnimation(buffCard);
+                    finished = true;
                 }
             }
         }
