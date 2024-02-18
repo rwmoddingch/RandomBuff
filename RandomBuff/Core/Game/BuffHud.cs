@@ -36,9 +36,13 @@ namespace RandomBuff.Core.Game
 
                     var positiveCards = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.positive.showCount,
                         BuffType.Positive);
+                    var negativeCardsList = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.positive.showCount,
+                        BuffType.Negative, BuffType.Duality);
 
-                    var negativeCards = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.positive.showCount,
-                        BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).ToArray();
+                    if (positiveCards == null || negativeCardsList == null)
+                        break;
+
+                    var negativeCards = negativeCardsList.Select(i => i.BuffID).ToArray();
 
                     for (int j = 0; j < positiveCards.Count; j++)
                         negativeCards[j] = positiveCards[j].BuffProperty == BuffProperty.Special ? negativeCards[j] : null;
@@ -52,13 +56,14 @@ namespace RandomBuff.Core.Game
                 }
                 for (int i = 0; i < setting.instance.CurrentPacket.negative.pickTimes; i++)
                 {
-
+                    var pickList = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.negative.showCount, 
+                        BuffType.Negative, BuffType.Duality);
+                    if (pickList == null)
+                        break;
                     inGameSlot.RequestPickCards((id) =>
                         {
                             BuffPoolManager.Instance.CreateBuff(id);
-
-                        }, BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.negative.showCount,
-                            BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).ToArray(),
+                        }, pickList.Select(i => i.BuffID).ToArray(),
                         new BuffID[setting.instance.CurrentPacket.negative.showCount], setting.instance.CurrentPacket.negative.selectCount);
                 }
             }

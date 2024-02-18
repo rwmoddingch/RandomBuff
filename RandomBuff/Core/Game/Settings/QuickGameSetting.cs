@@ -37,7 +37,9 @@ namespace RandomBuff.Core.Game.Settings
         {
             if (BuffHud.Instance == null)
                 return;
+          
             counter++;
+
             if (counter >= 40 * 30)
             {
                 

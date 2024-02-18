@@ -85,10 +85,18 @@ namespace RandomBuff.Core.BuffMenu
             loaded = true;
             foreach (var name in slugNameOrders)
             {
+                if (!manager.rainWorld.progression.IsThereASavedGame(name))
+                {
+                    if (BuffDataManager.Instance.GetAllBuffIds(name).Count > 0)
+                        BuffDataManager.Instance.DeleteSaveData(name);
+
+                    BuffDataManager.Instance.GetSafeSetting(name).instance = null;
+                } 
                 saveGameData.Add(name, MineFromSave(manager, name));
             }
+       
             menuSlot.SetupBuffs(slugNameOrders);
-
+       
             pages = new List<Page>()
             {
                 new (this, null, "WawaPage", 0)
@@ -248,7 +256,7 @@ namespace RandomBuff.Core.BuffMenu
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
                 }
 
-                BuffDataManager.Instance.StartGame(CurrentName);
+                BuffDataManager.Instance.EnterGameFromMenu(CurrentName);
                 manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
                 PlaySound(SoundID.MENU_Start_New_Game);
             }
