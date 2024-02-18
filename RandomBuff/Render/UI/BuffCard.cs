@@ -246,7 +246,7 @@ namespace RandomBuff.Render.UI
         {
             if (StaticData.Stackable)
             {
-                StackerValue = BuffDataManager.Instance.GetBuffData(ID).StackLayer;
+                StackerValue = BuffDataManager.Instance.GetBuffData(ID)?.StackLayer ?? 0;
             }
         }
 

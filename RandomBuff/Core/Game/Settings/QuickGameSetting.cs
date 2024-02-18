@@ -43,8 +43,8 @@ namespace RandomBuff.Core.Game.Settings
                 
                 if (queue.Count == 10)
                 {
-                    BuffPoolManager.Instance.RemoveBuff(queue.Peek());
                     BuffHud.Instance.RemoveCard(queue.Dequeue());
+                    BuffPoolManager.Instance.RemoveBuff(queue.Peek());
                 }
 
                 BuffID buffId;

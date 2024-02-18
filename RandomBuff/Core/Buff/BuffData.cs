@@ -19,7 +19,7 @@ using System.Threading.Tasks;
         public abstract BuffID ID { get; }
 
         [JsonProperty]
-        public virtual int StackLayer { get; set; }
+        public int StackLayer { get; set; }
 
 
         protected BuffData() { }
