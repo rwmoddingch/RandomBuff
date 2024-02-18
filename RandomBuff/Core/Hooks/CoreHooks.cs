@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JollyCoop;
 using Menu;
 using MoreSlugcats;
 using RandomBuff.Core.Buff;
@@ -10,6 +11,7 @@ using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
+using RWCustom;
 using UnityEngine;
 using static RandomBuff.Core.BuffMenu.BuffGameMenu;
 
@@ -36,6 +38,9 @@ namespace RandomBuff.Core.Hooks
 
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
 
+            On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
+            On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
+
             InGameHooksInit();
 
 
@@ -43,6 +48,29 @@ namespace RandomBuff.Core.Hooks
 
             //TestStartGameMenu = new("TestStartGameMenu");
 
+        }
+
+        private static bool SlugcatStats_SlugcatUnlocked(On.SlugcatStats.orig_SlugcatUnlocked orig, SlugcatStats.Name i, RainWorld rainWorld)
+        {
+            if (!Custom.rainWorld.BuffMode())
+                return orig(i, rainWorld);
+            return true;
+        }
+
+        private static SlugcatStats.Name JollyCustom_SlugClassMenu(On.JollyCoop.JollyCustom.orig_SlugClassMenu orig, int playerNumber, SlugcatStats.Name fallBack)
+        {
+            if(!Custom.rainWorld.BuffMode())
+                return orig(playerNumber,fallBack);
+
+            SlugcatStats.Name name = JollyCustom.JollyOptions(playerNumber).playerClass;
+            if (name == null ||
+                SlugcatStats.HiddenOrUnplayableSlugcat(name) || 
+                (SlugcatStats.IsSlugcatFromMSC(name) && !ModManager.MSC))
+            {
+                JollyCustom.JollyOptions(playerNumber).playerClass = fallBack;
+                name = fallBack;
+            }
+            return name;
         }
 
         private static float SlugcatPage_NextScroll(On.Menu.SlugcatSelectMenu.SlugcatPage.orig_NextScroll orig, SlugcatSelectMenu.SlugcatPage self, float timeStacker)
@@ -131,13 +159,15 @@ namespace RandomBuff.Core.Hooks
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
             if (BuffPoolManager.Instance != null &&
-                self.oldProcess is RainWorldGame game &&
-                (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream) &&
-                BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket.NeedMenu)
+                self.oldProcess is RainWorldGame game)
             {
                 BuffPoolManager.Instance.Destroy();
-                self.currentMainLoop = new GachaMenu.GachaMenu(ID, game, self);
-                ID = GachaMenu.GachaMenu.GachaMenuID;
+                if(BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket.NeedMenu &&
+                   (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
+                {
+                    self.currentMainLoop = new GachaMenu.GachaMenu(ID, game, self);
+                    ID = GachaMenu.GachaMenu.GachaMenuID;
+                }
             }
 
             orig(self, ID);
@@ -145,6 +175,7 @@ namespace RandomBuff.Core.Hooks
                 BuffPoolManager.Instance == null &&
                 game2.rainWorld.BuffMode())
             {
+                BuffDataManager.Instance.EnterGame(game2.StoryCharacter);
                 BuffPoolManager.LoadGameBuff(game2);
             }
         }

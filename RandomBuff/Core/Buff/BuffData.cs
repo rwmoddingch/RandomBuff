@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
  using Newtonsoft.Json;
+ using RandomBuff.Core.Entry;
  using RandomBuff.Core.SaveData;
 
  namespace RandomBuff.Core.Buff
@@ -20,7 +21,6 @@ using System.Threading.Tasks;
 
         [JsonProperty]
         public int StackLayer { get; set; }
-
 
         protected BuffData() { }
 
@@ -42,6 +42,11 @@ using System.Threading.Tasks;
         public virtual void Stack()
         {
             StackLayer++;
+        }
+
+        internal BuffData Clone()
+        {
+           return (BuffData)JsonConvert.DeserializeObject(JsonConvert.SerializeObject(this), BuffRegister.GetDataType(ID));
         }
 
         /// <summary>

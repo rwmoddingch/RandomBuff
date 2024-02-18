@@ -30,6 +30,8 @@ namespace RandomBuff.Core.GachaMenu
             container.AddChild(inGameSlot.Container);
 
             currentPacket = BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket;
+            if(currentPacket.positive.pickTimes == 0)
+                positive = false;
             NewPicker();
         }
 
@@ -47,7 +49,13 @@ namespace RandomBuff.Core.GachaMenu
         {
             BuffPlugin.Log($"Pick buff : {id}");
             BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+            RequestNewPicker();
+        }
+
+        public void RequestNewPicker()
+        {
             selectCount++;
+            bool needNew = false;
             if (positive)
             {
                 if (selectCount == currentPacket.positive.selectCount)
@@ -56,6 +64,7 @@ namespace RandomBuff.Core.GachaMenu
                     if (currentPacket.positive.pickTimes == 0)
                         positive = false;
                     selectCount = 0;
+                    needNew = true;
                 }
             }
             else
@@ -68,15 +77,14 @@ namespace RandomBuff.Core.GachaMenu
                         exitCounter = 0;
                         return;
                     }
-
+                    needNew = true;
                     selectCount = 0;
                 }
             }
 
-            NewPicker();
+            if(needNew)
+                NewPicker();
         }
-        public float ContinueAndExitButtonsXPos => 
-            manager.rainWorld.options.ScreenSize.x + (1366f - manager.rainWorld.options.ScreenSize.x) / 2f;
 
         private void NewPicker()
         {
@@ -86,10 +94,21 @@ namespace RandomBuff.Core.GachaMenu
                 var positiveCards = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
                     BuffType.Positive);
 
-                var negativeCards = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
-                    BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).ToArray();
+                var negativeCardsList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
+                    BuffType.Negative, BuffType.Duality);
 
-                for(int i=0;i< positiveCards.Count;i++)
+                //卡牌库存不足
+                if (positiveCards == null || negativeCardsList == null)
+                {
+                    positive = false;
+                    selectCount = 0;
+                    RequestNewPicker();
+                    return;
+                }
+
+                var negativeCards = negativeCardsList.Select(i => i.BuffID).ToArray();
+
+                for (int i=0;i< positiveCards.Count;i++)
                     negativeCards[i] = positiveCards[i].BuffProperty == BuffProperty.Special ? negativeCards[i] : null;
 
                 pickerSlot = new CardPickerSlot(inGameSlot, Select,
@@ -99,9 +118,18 @@ namespace RandomBuff.Core.GachaMenu
             }
             else
             {
+                var pickList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.negative.showCount,
+                    BuffType.Negative, BuffType.Duality);
+
+                //卡牌库存不足
+                if (pickList == null)
+                {
+                    exitCounter = 0;
+                    return;
+                }
+
                 pickerSlot = new CardPickerSlot(inGameSlot, Select,
-                    BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.negative.showCount,
-                        BuffType.Negative, BuffType.Duality).Select(i => i.BuffID).ToArray(),
+                    pickList.Select(i => i.BuffID).ToArray(),
                     new BuffID[currentPacket.negative.showCount], currentPacket.negative.selectCount);
             }
             pickerSlots.Add(pickerSlot);
@@ -142,6 +170,12 @@ namespace RandomBuff.Core.GachaMenu
                 exitButton.roundedRect.borderColor = exitButton.labelColor =
                     new HSLColor(0, 0, Custom.LerpMap(exitCounter + timeStacker, 0, 40, 0, 1f, 0.75f));
         }
+
+
+
+        public float ContinueAndExitButtonsXPos =>
+            manager.rainWorld.options.ScreenSize.x + (1366f - manager.rainWorld.options.ScreenSize.x) / 2f;
+
 
         private List<CardPickerSlot> pickerSlots = new ();
         private BasicInGameBuffCardSlot inGameSlot;
