@@ -141,7 +141,7 @@ namespace BuiltinBuffs.Positive
             bindPlayer.aerobicLevel = 0f;
             bindPlayer.stun = 4;
             bindAbPlayer.Abstractize(bindPlayer.room.GetWorldCoordinate(endPos));
-            bindPlayer.Destroy();
+            bindPlayer.slatedForDeletetion = true;
 
             for(int i = room.roomSettings.effects.Count - 1; i >= 0; i--)
             {
@@ -215,13 +215,17 @@ namespace BuiltinBuffs.Positive
                 creature.stun = 120;
                 //creature.Die();
             }
-            room.game.cameras[0].ApplyFade();
 
-            if (currentStage == Stage.ReSpawn)
-                effect.amount = Mathf.Lerp(1f, 0f, tInStage);
-            else
-                effect.amount = 1f;
+            if (room.game.cameras[0].room == room)
+            {
+                room.game.cameras[0].ApplyFade();
 
+                if (currentStage == Stage.ReSpawn)
+                    effect.amount = Mathf.Lerp(1f, 0f, tInStage);
+                else
+                    effect.amount = 1f;
+            }
+  
             if (currentStage == Stage.Prepare)
                 PrepareUpdate();
             else if (currentStage == Stage.Move)

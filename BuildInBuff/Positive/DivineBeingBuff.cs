@@ -26,11 +26,13 @@ namespace BuiltinBuffs.Positive
     internal class DivineBeingIBuffEntry : IBuffEntry
     {
         public static BuffID DivineBeingBuffID = new BuffID("DivineBeing", true);
+        public static Shader RingShaderInstance { get; private set; }
 
         public void OnEnable()
         {
             var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/builtinbundle"));
-            Custom.rainWorld.Shaders.Add("DivineBeingRing", FShader.CreateShader("DivineBeingRing", bundle.LoadAsset<Shader>("divinering")));
+            RingShaderInstance = bundle.LoadAsset<Shader>("divinering");
+            //Custom.rainWorld.Shaders.Add("DivineBeingRing", FShader.CreateShader("DivineBeingRing", ));
 
             BuffRegister.RegisterBuff<DivineBeingBuff, DivineBeingBuffData, DivineBeingIBuffEntry>(DivineBeingBuffID);
         }
@@ -61,6 +63,10 @@ namespace BuiltinBuffs.Positive
 
         int nextUpdatParamCounter;
 
+        float lastRingStrength;
+        public float ringStrength;
+        float targetRingStrength;
+
         static DivineRing()
         {
             ColorUtility.TryParseHtmlString("#FF8500", out colorA);
@@ -81,10 +87,15 @@ namespace BuiltinBuffs.Positive
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
+            if (!rCam.game.rainWorld.Shaders.ContainsKey($"DivineBeingRing_{bindPlayer.playerState.playerNumber}"))//生成shader防止合批处理
+            {
+                Custom.rainWorld.Shaders.Add($"DivineBeingRing_{bindPlayer.playerState.playerNumber}", FShader.CreateShader($"DivineBeingRing_{bindPlayer.playerState.playerNumber}", DivineBeingIBuffEntry.RingShaderInstance));
+            }
+
             sLeaser.sprites = new FSprite[1];
             sLeaser.sprites[0] = new FSprite("Futile_White", true)
             {
-                shader = rCam.game.rainWorld.Shaders["DivineBeingRing"]
+                shader = rCam.game.rainWorld.Shaders[$"DivineBeingRing_{bindPlayer.playerState.playerNumber}"]
             };
 
             
@@ -122,6 +133,8 @@ namespace BuiltinBuffs.Positive
 
                 sLeaser.sprites[0]._renderLayer._material.SetVectorArray("params", Params);
             }
+
+            sLeaser.sprites[0].alpha = Mathf.Lerp(lastRingStrength, ringStrength, timeStacker);
         }
 
         public override void Update(bool eu)
@@ -130,6 +143,9 @@ namespace BuiltinBuffs.Positive
                 return;
 
             base.Update(eu);
+
+            if (bindPlayer.slatedForDeletetion)
+                Destroy();
 
             if (bindPlayer.room == null || room != bindPlayer.room)
                 Destroy();
@@ -150,15 +166,23 @@ namespace BuiltinBuffs.Positive
                 ParamInstances[index].ResetParam();
             }
 
+            targetRingStrength = 0;
             foreach (var obj in room.updateList)
             {
                 if (!(obj is Creature creature))
                     continue;
                 if (obj is Player)
                     continue;
-                if(creature.stun < 10 && Vector2.Distance(pos, creature.DangerPos) < ringRad)
-                    creature.stun = 80;
+                if(Vector2.Distance(pos, creature.DangerPos) < ringRad)
+                {
+                    if (creature.stun < 10)
+                        creature.stun = 80;
+                    targetRingStrength = 1;
+                }
             }
+
+            lastRingStrength = ringStrength;
+            ringStrength = Mathf.Lerp(ringStrength, targetRingStrength, 0.1f);
         }
 
         public class ParamInstance
@@ -180,6 +204,8 @@ namespace BuiltinBuffs.Positive
             {
                 this.ring = ring;
                 this.bindIndex = bindIndex;
+
+                strength = 0f;
             }
 
             public void ResetParam()
@@ -216,7 +242,7 @@ namespace BuiltinBuffs.Positive
                 }
 
                 ring.Params[bindIndex].x = angle;
-                ring.Params[bindIndex].y = Mathf.Lerp(lastStrenth, strength, timeStacker);
+                ring.Params[bindIndex].y = Mathf.Lerp(lastStrenth, strength, timeStacker) * ring.ringStrength;
             }
         }
     }
