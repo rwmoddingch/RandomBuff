@@ -18,6 +18,10 @@ namespace BuiltinBuffs.Positive
         public AbstractCreature spawnlater;
         public int counter;
 
+        public DeathFreeMedallionBuff()
+        {
+        }
+
         public override bool Trigger(RainWorldGame game)
         {
             triggerdThisCycle = true;

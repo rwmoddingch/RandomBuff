@@ -175,7 +175,7 @@ namespace BuiltinBuffs.Positive
                     continue;
                 if(Vector2.Distance(pos, creature.DangerPos) < ringRad)
                 {
-                    if (creature.stun < 10)
+                    if (creature.stun < 20)
                         creature.stun = 80;
                     targetRingStrength = 1;
                 }

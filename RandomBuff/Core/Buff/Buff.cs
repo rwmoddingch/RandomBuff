@@ -22,6 +22,8 @@ namespace RandomBuff.Core.Buff
 
         public bool Triggerable { get; }
 
+        public BuffTimer MyTimer { get; set; }
+
         public bool Trigger(RainWorldGame game);
 
         public void Update(RainWorldGame game);
@@ -59,7 +61,6 @@ namespace RandomBuff.Core.Buff
         /// </summary>
         public virtual bool Triggerable => true;
 
-
         /// <summary>
         /// 点击触发方法，仅对可触发的增益有效。
         /// </summary>
@@ -67,12 +68,19 @@ namespace RandomBuff.Core.Buff
         /// <returns>返回true时，代表该增益已经完全触发，增益将会被减少堆叠层数（或移除）</returns>
         public virtual bool Trigger(RainWorldGame game) => false;
 
+        /// <summary>
+        /// 卡牌的计时器，在构造方法中赋值，可以为null
+        /// </summary>
+        public BuffTimer MyTimer { get; set; }
 
 
         /// <summary>
         /// 增益的更新方法，与RainWorldGame.Update同步
         /// </summary>
-        public virtual void Update(RainWorldGame game){}
+        public virtual void Update(RainWorldGame game)
+        {
+            MyTimer?.Update(game);
+        }
 
 
         /// <summary>
