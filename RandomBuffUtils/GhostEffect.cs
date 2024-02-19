@@ -90,7 +90,7 @@ namespace RandomBuffUtils
                     deltas[i] = GetDeltas(sprites[i], screenCenterPos);
                     origAlphas[i] = GetAlphas(sprites[i]);
                 }
-                center = screenCenterPos + roomCamera.pos;
+                center = screenCenterPos;
                 BuffPlugin.Log($"GhostEffect: center : {center}, pos : {graphicsModule.owner.firstChunk.pos}");
 
                 return sprites;
