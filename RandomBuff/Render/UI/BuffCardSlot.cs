@@ -562,8 +562,8 @@ namespace RandomBuff.Render.UI
 
             //if (Input.GetKeyDown(KeyCode.C))
             //{
-            //    BuffPoolManager.Instance.CreateBuff(new BuffID("Upgradation"));
-            //    AppendCard(new BuffID("Upgradation"));
+            //    BuffPoolManager.Instance.CreateBuff(new BuffID("Dozer"));
+            //    AppendCard(new BuffID("Dozer"));
             //}
         }
 
