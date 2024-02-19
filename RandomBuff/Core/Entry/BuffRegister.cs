@@ -28,10 +28,6 @@ namespace RandomBuff.Core.Entry
 
     }
 
-    public interface IBuffHook
-    {
-        public void HookOn();
-    }
 
 
     /// <summary>

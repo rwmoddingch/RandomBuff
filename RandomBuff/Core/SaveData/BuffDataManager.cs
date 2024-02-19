@@ -5,11 +5,6 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using CoralBrain;
-using HarmonyLib;
-using JetBrains.Annotations;
-using MonoMod.Utils;
 using RWCustom;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
@@ -87,9 +82,9 @@ namespace RandomBuff.Core.SaveData
         /// 内部方法 
         /// </summary>
         /// <param name="id">ID</param>
-        /// <param name="createIfMissing">当true时如果BuffData不存在则创建</param>
+        /// <param name="createOrStack">当true时如果BuffData不存在则创建，存在则叠加</param>
         /// <returns>返回值可能为空</returns>
-        internal BuffData GetOrCreateBuffData(BuffID id, bool createIfMissing = false)
+        internal BuffData GetOrCreateBuffData(BuffID id, bool createOrStack = false)
         {
             if (BuffPoolManager.Instance != null)
             {
@@ -104,7 +99,7 @@ namespace RandomBuff.Core.SaveData
             
             if (!allDatas.ContainsKey(name))
             {
-                if (createIfMissing)
+                if (createOrStack)
                     allDatas.Add(name, new());
                 else
                     return null;
@@ -112,7 +107,7 @@ namespace RandomBuff.Core.SaveData
 
             if (!allDatas[name].ContainsKey(id))
             {
-                if (createIfMissing)
+                if (createOrStack)
                 {
                     allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
                     allDatas[name][id].DataLoaded(true);
@@ -123,6 +118,8 @@ namespace RandomBuff.Core.SaveData
                 else
                     return null;
             }
+            if(createOrStack)
+                allDatas[name][id].Stack();
 
             return allDatas[name][id];
         }
