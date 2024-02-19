@@ -703,4 +703,56 @@ namespace RandomBuff.Render.UI
                 buffCard.Alpha = Mathf.Lerp(buffCard.Alpha, targetAlpha, 0.1f * lerpMulti);
         }
     }
+
+    internal class BuffTimerAnimSlotShowAnimator : BuffCardAnimator
+    {
+        CommmmmmmmmmmmmmpleteInGameSlot.BuffTimerAnimSlot slot;
+        CommmmmmmmmmmmmmpleteInGameSlot.BuffTimerAnimSlot.TimerInstance timerInstance;
+
+        Vector2 pos;
+        Vector2 lastPos;
+
+        bool start;
+
+        public BuffTimerAnimSlotShowAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.Highlight = false;
+            buffCard.DisplayDescription = false;
+            buffCard.DisplayTitle = false;
+            buffCard.DisplayStacker = false;
+            buffCard.Highlight = false;
+
+            buffCard.Scale = BuffCard.normalScale * 0.3f;
+            buffCard.Alpha = 0f;
+
+            slot = buffCard.interactionManager.BaseSlot as CommmmmmmmmmmmmmpleteInGameSlot.BuffTimerAnimSlot;
+        }
+
+        public override void Update()
+        {
+            if (!start)
+            {
+                if(slot.buffCard2TimerInstanceMapper.TryGetValue(buffCard, out var timerInstance))
+                {
+                    this.timerInstance = timerInstance;
+                    buffCard.Scale = BuffCard.normalScale * 0.15f;
+                    start = true;
+                }
+            }
+            else
+            {
+                lastPos = pos;
+                pos = timerInstance.pos + Vector2.right * (1f - Helper.LerpEase(timerInstance.ShowTimerFactor)) * 80f;
+            }
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            if(start)
+            {
+                buffCard.Position = Vector2.Lerp(lastPos, pos, timeStacker);
+                buffCard.Alpha = Mathf.Lerp(timerInstance.LastShowTimerFactor, timerInstance.ShowTimerFactor, timeStacker);
+            }
+        }
+    }
 }

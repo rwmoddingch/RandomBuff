@@ -1,5 +1,6 @@
 ﻿using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 using System;
@@ -483,6 +484,7 @@ namespace RandomBuff.Render.UI
         public BasicInGameBuffCardSlot BasicSlot { get; private set; }
         public ActivateCardAnimSlot ActiveAnimSlot { get; private set; }//加卡动画
         public TriggerBuffAnimSlot TriggerAnimSlot { get; private set; }
+        public BuffTimerAnimSlot TimerAnimSlot { get; private set; }
         public CardPickerSlot ActivePicker { get; private set; }
 
         Queue<Action> pickerRequests = new();
@@ -495,9 +497,11 @@ namespace RandomBuff.Render.UI
             BasicSlot = new BasicInGameBuffCardSlot(true);
             ActiveAnimSlot = new ActivateCardAnimSlot(this);
             TriggerAnimSlot = new TriggerBuffAnimSlot(this);
+            TimerAnimSlot = new BuffTimerAnimSlot(this);
             Container.AddChild(BasicSlot.Container);
             Container.AddChild(ActiveAnimSlot.Container);
             Container.AddChild(TriggerAnimSlot.Container);
+            Container.AddChild(TimerAnimSlot.Container);
         }
 
         public override void Update()
@@ -506,6 +510,7 @@ namespace RandomBuff.Render.UI
             BasicSlot.Update();
             ActiveAnimSlot.Update();
             TriggerAnimSlot.Update();
+            TimerAnimSlot.Update();
             if(ActivePicker != null)
             {
                 ActivePicker.Update();
@@ -529,6 +534,7 @@ namespace RandomBuff.Render.UI
         public override void AppendCard(BuffCard buffCard)
         {
             ActiveAnimSlot.AppendCard(buffCard);
+            TimerAnimSlot.TryAddTimer(buffCard.ID);
         }
 
         /// <summary>
@@ -550,6 +556,7 @@ namespace RandomBuff.Render.UI
         public void AppendCardDirectly(BuffCard buffCard)
         {
             BasicSlot.AppendCard(buffCard);
+            TimerAnimSlot.TryAddTimer(buffCard.ID);
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -559,6 +566,7 @@ namespace RandomBuff.Render.UI
             ActiveAnimSlot.GrafUpdate(timeStacker);
             TriggerAnimSlot.GrafUpdate(timeStacker);
             ActivePicker?.GrafUpdate(timeStacker);
+            TimerAnimSlot.GrafUpdate(timeStacker);
         }
 
         /// <summary>
@@ -613,6 +621,16 @@ namespace RandomBuff.Render.UI
         public void TriggerBuff(BuffID buffID)
         {
             TriggerAnimSlot.TriggerBuff(buffID);
+        }
+
+        public override void Destory()
+        {
+            BasicSlot.Destory();
+            ActivePicker?.Destory();
+            ActiveAnimSlot.Destory();
+            TriggerAnimSlot.Destory();
+            TimerAnimSlot.Destory();
+            base.Destory();
         }
 
         /// <summary>
@@ -708,6 +726,184 @@ namespace RandomBuff.Render.UI
                 flatLight.RemoveFromContainer();
                 flatLight = null;
                 base.Destory();
+            }
+        }
+        
+        internal class BuffTimerAnimSlot : BuffCardSlot
+        {
+            CommmmmmmmmmmmmmpleteInGameSlot completeSlot;
+
+            FContainer timerContainer;
+
+            List<TimerInstance> activeTimerInstances = new();
+            public Dictionary<BuffCard, TimerInstance> buffCard2TimerInstanceMapper = new();
+            Dictionary<TimerInstance, BuffCard> timerInstance2BuffCardMapper = new();
+
+            public BuffTimerAnimSlot(CommmmmmmmmmmmmmpleteInGameSlot completeSlot)
+            {
+                this.completeSlot = completeSlot;
+                BaseInteractionManager = new DoNotingInteractionManager<BuffTimerAnimSlot>(this);
+
+                timerContainer = new FContainer();
+                Container.AddChild(timerContainer);
+            }
+
+            public void TryAddTimer(BuffID id)
+            {
+                if(BuffPoolManager.Instance.TryGetBuff(id, out var ibuff))
+                {
+                    foreach(var timerInstance in activeTimerInstances)
+                    {
+                        if (timerInstance.id == id)
+                        {
+                            BuffPlugin.LogWarning($"timer of {id} already added");
+                            return;
+                        }
+                    }
+
+                    if(ibuff.MyTimer != null)
+                        activeTimerInstances.Add(new TimerInstance(this, id, ibuff.MyTimer));
+                }
+            }
+
+            public override void AppendCard(BuffCard buffCard)
+            {
+                base.AppendCard(buffCard);
+                buffCard.SetAnimatorState(BuffCard.AnimatorState.BuffTimerAnimSlot_Show);
+            }
+
+            public override void Update()
+            {
+                base.Update();
+                for(int i = activeTimerInstances.Count - 1; i >= 0; i--)
+                {
+                    activeTimerInstances[i].Update();
+                }
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                for (int i = activeTimerInstances.Count - 1; i >= 0; i--)
+                {
+                    activeTimerInstances[i].GrafUpdate(timeStacker);
+                }
+            }
+
+            public override void Destory()
+            {
+                base.Destory();
+                foreach(var timerInstance in activeTimerInstances)
+                    timerInstance.Destroy();
+
+                activeTimerInstances.Clear();
+                buffCard2TimerInstanceMapper.Clear();
+                timerInstance2BuffCardMapper.Clear();
+            }
+
+            internal class TimerInstance
+            {
+                public BuffTimer timer;
+                public BuffID id;
+
+                BuffTimerAnimSlot slot;
+
+                BuffCardTimer cardTimer;
+
+                public float ShowTimerFactor => counter / 40f;
+                public float LastShowTimerFactor => lastCounter / 40f;
+
+                int lastCounter;
+                int counter;
+
+                int index;
+
+                public Vector2 lastPos;
+                public Vector2 pos;
+                Vector2 TargetPos => new Vector2(Custom.rainWorld.screenSize.x - 80, Custom.rainWorld.screenSize.y - 80 - index * 80);
+
+                public TimerInstance(BuffTimerAnimSlot slot, BuffID id, BuffTimer timer)
+                {
+                    this.id = id;
+                    this.timer = timer;
+                    this.slot = slot;
+
+                    if (timer.DisplayStrategy == null)
+                        throw new ArgumentException($"displayStrategy for {id} cant be null");
+                }
+
+                public void Update()
+                {
+                    cardTimer?.Update();
+                    lastCounter = counter;
+
+                    lastPos = pos;
+                    if (Mathf.Abs(pos.x - TargetPos.x) > 0.01f || Mathf.Abs(pos.y - TargetPos.y) > 0.01f)
+                        pos = Vector2.Lerp(pos, TargetPos, 0.2f);
+
+                    if (timer.DisplayStrategy.DisplayThisFrame)
+                    {
+                        if (counter < 40)
+                            counter++;
+
+                        if(cardTimer == null)
+                        {
+                            cardTimer = new BuffCardTimer(slot.timerContainer, timer);
+                             
+                            slot.buffCard2TimerInstanceMapper.Add(slot.AppendCard(id), this);
+                        }
+
+                        UpdateIndexAndTimer();
+                    }
+                    else
+                    {
+                        if (counter > 0)
+                        {
+                            counter--;
+                            UpdateIndexAndTimer();
+                        }
+                        else if (counter == 0)
+                        {
+                            if (cardTimer != null)
+                            {
+                                cardTimer.ClearSprites();
+                                cardTimer = null;
+                                slot.RemoveCard(id, true);
+
+                            }
+                            counter--;
+                        }
+                    }
+                }
+
+                void UpdateIndexAndTimer()
+                {
+                    int newIndex = 0;
+                    foreach (var timerInstance in slot.activeTimerInstances)
+                    {
+                        if (timerInstance == this)
+                            break;
+                        if (timerInstance.timer.DisplayStrategy.DisplayThisFrame)
+                            newIndex++;
+                    }
+                    index = newIndex;
+
+                    cardTimer.pos = pos + Vector2.right * 60f + Vector2.left * Helper.LerpEase(ShowTimerFactor) * 100f;
+                    cardTimer.alpha = ShowTimerFactor;
+                }
+
+                public void GrafUpdate(float timeStacker)
+                {
+                    if(cardTimer != null)
+                    {
+                        cardTimer.DrawSprites(timeStacker);
+                    }
+                }
+
+                public void Destroy()
+                {
+                    cardTimer?.ClearSprites();
+                }
             }
         }
     }

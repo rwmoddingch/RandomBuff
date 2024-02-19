@@ -236,6 +236,10 @@ namespace RandomBuff.Render.UI
             {
                 currentAnimator = new TriggerBuffAnimSlotTriggerAnimator(this, Position, Rotation, Scale);
             }
+            else if(newState == AnimatorState.BuffTimerAnimSlot_Show)
+            {
+                currentAnimator = new BuffTimerAnimSlotShowAnimator(this, Position, Rotation, Scale);
+            }
             else
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
@@ -284,7 +288,10 @@ namespace RandomBuff.Render.UI
             ActivateCardAnimSlot_Append,
 
             //触发buff卡槽动画状态
-            TriggerBuffAnimSlot_Trigger
+            TriggerBuffAnimSlot_Trigger,
+
+            //计时器卡槽动画状态
+            BuffTimerAnimSlot_Show
         }
     }
 }
