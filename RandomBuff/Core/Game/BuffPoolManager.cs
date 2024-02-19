@@ -179,7 +179,8 @@ namespace RandomBuff.Core.Game
         {
             if (cycleDatas.ContainsKey(id))
             {
-                BuffPlugin.LogWarning($"Already contains BuffData {id} in {Game.StoryCharacter} game");
+                BuffPlugin.Log($"Already contains BuffData {id} in {Game.StoryCharacter} game, stack More");
+                cycleDatas[id].Stack();
                 return cycleDatas[id];
             }
             var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
