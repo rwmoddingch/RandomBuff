@@ -41,6 +41,8 @@ namespace RandomBuff.Core.Buff
     {
         public static BuffData GetData(this BuffID id)
         {
+            if (BuffPoolManager.Instance != null)
+                return BuffPoolManager.Instance.GetBuffData(id);
             return BuffDataManager.Instance.GetBuffData(id);
         }
 
@@ -58,6 +60,7 @@ namespace RandomBuff.Core.Buff
         {
             return BuffConfigManager.GetStaticData(id);
         }
+
     }
 }
 

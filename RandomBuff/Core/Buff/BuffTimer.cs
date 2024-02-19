@@ -137,7 +137,7 @@ namespace RandomBuff.Core.Buff
             if (Second != LastSecond)
             {
                 DisplayStrategy?.UpdateSecond(Second);
-                BuffPlugin.Log($"{GetType()} timer : {LastSecond} => {Second}, display : {DisplayStrategy.DisplayThisFrame}");
+                //BuffPlugin.Log($"{GetType()} timer : {LastSecond} => {Second}, display : {DisplayStrategy.DisplayThisFrame}");
             }
         }
 

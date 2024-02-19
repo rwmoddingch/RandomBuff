@@ -27,52 +27,43 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     public sealed partial class BuffDataManager
     {
-        public static BuffDataManager Instance { get; private set; }
+        internal static BuffDataManager Instance { get; private set; }
 
 
         /// <summary>
         /// 获取BuffData
-        /// 外部方法
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public BuffData GetBuffData(BuffID id)
+        internal BuffData GetBuffData(BuffID id)
         {
+            if (BuffPoolManager.Instance != null)
+            {
+                BuffPlugin.LogError("Access BuffDataManager:GetBuffData in Game");
+                return BuffPoolManager.Instance.GetBuffData(id);
+            }
             return GetOrCreateBuffData(id);
         }
 
         /// <summary>
         /// 获取全部启用的BuffID
-        /// 外部方法
         /// </summary>
         /// <returns></returns>
-        public List<BuffID> GetAllBuffIds(SlugcatStats.Name name)
+        internal List<BuffID> GetAllBuffIds(SlugcatStats.Name name)
         {
+            if (BuffPoolManager.Instance != null)
+            {
+                BuffPlugin.LogError("Access BuffDataManager:GetAllBuffIds in Game");
+                if (BuffPoolManager.Instance.Game.StoryCharacter == name)
+                    return BuffPoolManager.Instance.GetAllBuffIds();
+            }
             if (!allDatas.ContainsKey(name))
                 return new List<BuffID>();
-
-            if (BuffPoolManager.Instance != null)
-                return tempDatas.Keys.ToList();
 
             return allDatas[name].Keys.ToList();
         }
 
-        /// <summary>
-        /// 获取全部启用的BuffID
-        /// 外部方法
-        /// </summary>
-        /// <returns></returns>
-        public List<BuffID> GetAllBuffIds()
-        {
-            SlugcatStats.Name name;
-            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
-                name = game.StoryCharacter;
-            else
-                name = RainWorld.lastActiveSaveSlot;
-            return GetAllBuffIds(name);
-        }
     }
-
 
 
     /// <summary>
@@ -84,16 +75,15 @@ namespace RandomBuff.Core.SaveData
     public sealed partial class BuffDataManager
     {
 
-
         internal static bool LoadData(string file,string formatVersion)
         {
             Instance = new BuffDataManager();
             return Instance.InitStringData(file,formatVersion);
         }
 
-
         /// <summary>
         /// 获取或创建BuffData
+        /// 仅限非游戏局内使用
         /// 内部方法 
         /// </summary>
         /// <param name="id">ID</param>
@@ -101,16 +91,17 @@ namespace RandomBuff.Core.SaveData
         /// <returns>返回值可能为空</returns>
         internal BuffData GetOrCreateBuffData(BuffID id, bool createIfMissing = false)
         {
-            if (tempDatas.ContainsKey(id))
-                return tempDatas[id];
-
+            if (BuffPoolManager.Instance != null)
+            {
+                BuffPlugin.LogError("Access BuffDataManager:GetOrCreateBuffData in Game");
+                return BuffPoolManager.Instance.GetBuffData(id) ?? BuffPoolManager.Instance.CreateNewBuffData(id);
+            }
             SlugcatStats.Name name;
             if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
                 name = game.StoryCharacter;
             else
                 name = RainWorld.lastActiveSaveSlot;
             
-
             if (!allDatas.ContainsKey(name))
             {
                 if (createIfMissing)
@@ -136,27 +127,6 @@ namespace RandomBuff.Core.SaveData
             return allDatas[name][id];
         }
 
-        /// <summary>
-        /// 创建BuffData在游戏局内
-        /// 内部方法 
-        /// </summary>
-        /// <param name="id">ID</param>
-        internal void CreateTempBuffData(SlugcatStats.Name name, BuffID id)
-        {
-            if (!allDatas.ContainsKey(name))
-            {
-                allDatas.Add(name, new());
-      
-            }
-
-
-            if (!allDatas[name].ContainsKey(id) && !tempDatas.ContainsKey(id))
-            {
-                tempDatas.Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
-                tempDatas[id].DataLoaded(true);
-                BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
-            }
-        }
 
 
         /// <summary>
@@ -171,100 +141,38 @@ namespace RandomBuff.Core.SaveData
             if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
                 ProcessManager.MenuSetup.StoryGameInitCondition.New)
                 setting.NewGame();
-            
         }
 
-        /// <summary>
-        /// 每轮回进入游戏时调用
-        /// </summary>
-        /// <param name="name"></param>
-        internal void EnterGame(SlugcatStats.Name name)
+        internal BaseGameSetting CreateOrGetSettingInstance(SlugcatStats.Name name)
         {
-            tempDatas = new();
-
-            if (allDatas.ContainsKey(name))
-            {
-                BuffPlugin.Log("Clone all data to tempData");
-                foreach (var data in allDatas[name].Values)
-                    tempDatas.Add(data.ID, data.Clone());
-            }
+            if (GetSafeSetting(name).instance == null)
+                GetSafeSetting(name).instance = (BaseGameSetting)Activator.CreateInstance(
+                    BaseGameSetting.settingDict[GetSafeSetting(name).ID]);
+            return GetSafeSetting(name).instance;
         }
 
-      
+
 
         /// <summary>
         /// 轮回结束时更新 通过BuffPoolManager调用
         /// 负责把临时数据转移到永久
         /// </summary>
         /// <param name="name"></param>
-        internal void WinGame(BuffPoolManager manager)
+        internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, BaseGameSetting setting)
         {
             var name = manager.Game.StoryCharacter;
+
             if(!allDatas.ContainsKey(name)) allDatas.Add(name, new());
-
-
             allDatas[name] = tempDatas;
-            foreach(var id in tempDatas.Keys)
+            GetSafeSetting(name).instance = setting;
+
+            foreach(var id in allDatas[name].Keys)
                 BuffFile.Instance.AddCollect(id.value);
 
             foreach (var data in allDatas[name])
                 data.Value.CycleEnd();
         }
 
-        /// <summary>
-        /// 减少存档内BuffData的堆叠层数
-        /// 层数为0或非堆叠自动删除
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        internal void UnstackBuff(BuffID id)
-        {
-            SlugcatStats.Name name;
-            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
-                name = game.StoryCharacter;
-            else
-                name = RainWorld.lastActiveSaveSlot;
-
-            if (!allDatas.ContainsKey(name))
-            {
-                BuffPlugin.LogError($"Try unstack buff at null slot: {name}");
-                return;
-            }
-
-            if (!allDatas[name].ContainsKey(id))
-            {
-                BuffPlugin.LogError($"unstack buff not found: {id}");
-                return;
-            }
-
-            if (BuffConfigManager.GetStaticData(id).Stackable)
-            {
-                BuffPlugin.LogError($"UnStack buff : {name}");
-                allDatas[name][id].UnStack();
-                if (allDatas[name][id].StackLayer == 0)
-                    RemoveBuffData(name, id);
-                return;
-            }
-            else
-            {
-                RemoveBuffData(name, id);
-            }    
-        }
-
-
-        /// <summary>
-        /// 移除存档内BuffData
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        private void RemoveBuffData(SlugcatStats.Name name, BuffID id)
-        {
-            BuffPlugin.Log($"Remove buff : {name}-{id}");
-            if (tempDatas.ContainsKey(id))
-                tempDatas.Remove(id);
-            else
-;               allDatas[name].Remove(id);
-        }
 
         /// <summary>
         /// 获取或创建单猫存档下的BuffData字典
@@ -275,9 +183,6 @@ namespace RandomBuff.Core.SaveData
         {
             if (!allDatas.ContainsKey(name))
                 allDatas.Add(name, new());
-
-            if (BuffPoolManager.Instance != null)
-                return tempDatas;
 
             return allDatas[name];
         }
@@ -352,13 +257,7 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        private BaseGameSetting CreateOrGetSettingInstance(SlugcatStats.Name name)
-        {
-            if (!allSettings.ContainsKey(name))
-                allSettings.Add(name, new SafeGameSetting());
-            return allSettings[name].instance =
-                (BaseGameSetting)Activator.CreateInstance(BaseGameSetting.settingDict[allSettings[name].ID]);
-        }
+   
 
         /// <summary>
         /// 序列化存档信息
@@ -616,8 +515,6 @@ namespace RandomBuff.Core.SaveData
 
         private readonly Dictionary<SlugcatStats.Name, SafeGameSetting> allSettings = new();
 
-        /// 轮回内的临时数据
-        private Dictionary<BuffID, BuffData> tempDatas = new ();
 
         /// 如果被卸载导致slugcat name或data缺失，则暂时储存在此处
         private readonly List<string> ukSlugcatDatas = new();

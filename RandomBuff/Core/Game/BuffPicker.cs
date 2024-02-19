@@ -20,9 +20,20 @@ namespace RandomBuff.Core.Game
     {
         public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
         {
-            var alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.
-                Where(i =>types.Contains(BuffConfigManager.GetStaticData(i).BuffType)  && 
-                          !BuffConfigManager.GetStaticData(i).Stackable);
+            IEnumerable<BuffID> alreadyHas;
+            if (BuffPoolManager.Instance == null)
+            {
+                alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.Where(i =>
+                    types.Contains(BuffConfigManager.GetStaticData(i).BuffType) &&
+                    !BuffConfigManager.GetStaticData(i).Stackable);
+            }
+            else
+            {
+                alreadyHas = BuffPoolManager.Instance.GetDataDictionary().Keys.Where(i =>
+                    types.Contains(BuffConfigManager.GetStaticData(i).BuffType) &&
+                    !BuffConfigManager.GetStaticData(i).Stackable);
+            }
+
             var list = new List<BuffStaticData>();
 
             var copyUnique = new List<BuffID>();
