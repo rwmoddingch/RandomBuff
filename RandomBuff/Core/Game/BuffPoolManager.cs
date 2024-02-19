@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IL.MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
+using static RandomBuff.Core.SaveData.BuffDataManager;
 
 namespace RandomBuff.Core.Game
 {
@@ -30,6 +32,23 @@ namespace RandomBuff.Core.Game
             return null;
         }
 
+        /// <summary>
+        /// 获取ID对应的BuffData
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public BuffData GetBuffData(BuffID id)
+        {
+            if (cycleDatas.ContainsKey(id))
+                return cycleDatas[id];
+            return null;
+        }
+
+        /// <summary>
+        /// 获取ID对应的Buff
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public bool TryGetBuff(BuffID id, out IBuff buff)
         {
             buff = null;
@@ -39,6 +58,16 @@ namespace RandomBuff.Core.Game
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 获取全部启用的BuffID
+        /// 外部方法
+        /// </summary>
+        /// <returns></returns>
+        public List<BuffID> GetAllBuffIds()
+        {
+            return cycleDatas.Keys.ToList();
         }
     }
 
@@ -61,15 +90,28 @@ namespace RandomBuff.Core.Game
 
         private BuffPoolManager(RainWorldGame game)
         {
+
             Game = game;
+
+            BuffPlugin.Log("Clone all data to CycleData");
+            foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
+                cycleDatas.Add(data.Key, data.Value.Clone());
+
+            gameSetting = BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance;
             BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).instance.EnterGame();
-            BuffPlugin.Log($"Enter Game, setting: {BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).ID}");
+          
+            BuffPlugin.Log($"Enter Game, setting: {gameSetting.ID}");
 
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 CreateBuff(data.Key);
 
 
+        }
 
+
+        internal Dictionary<BuffID, BuffData> GetDataDictionary()
+        {
+            return cycleDatas;
         }
 
         /// <summary>
@@ -86,7 +128,63 @@ namespace RandomBuff.Core.Game
             BuffHookWarpper.DisableBuff(id);
             buffDictionary[id].Destroy();
             buffDictionary.Remove(id);
-            BuffDataManager.Instance.UnstackBuff(id);
+            UnstackBuff(id);
+        }
+
+        /// <summary>
+        /// 减少游戏内BuffData的堆叠层数
+        /// 层数为0或非堆叠自动删除
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        internal void UnstackBuff(BuffID id)
+        {
+            
+            if (!cycleDatas.ContainsKey(id))
+            {
+                BuffPlugin.LogError($"unstack buff not found: {id}");
+                return;
+            }
+
+            if (BuffConfigManager.GetStaticData(id).Stackable)
+            {
+                BuffPlugin.LogError($"UnStack buff : {Game.StoryCharacter}");
+                cycleDatas[id].UnStack();
+                if (cycleDatas[id].StackLayer == 0)
+                    RemoveBuffData(id);
+            }
+            else
+            {
+                RemoveBuffData(id);
+            }
+        }
+
+
+        /// <summary>
+        /// 移除游戏内BuffData
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private void RemoveBuffData(BuffID id)
+        {
+            BuffPlugin.Log($"Remove buff : {Game.StoryCharacter}-{id}");
+            cycleDatas.Remove(id);
+        }
+
+        /// <summary>
+        /// 局内创建BuffData
+        /// </summary>
+        /// <param name="id"></param>
+        internal BuffData CreateNewBuffData(BuffID id)
+        {
+            if (cycleDatas.ContainsKey(id))
+            {
+                BuffPlugin.LogWarning($"Already contains BuffData {id} in {Game.StoryCharacter} game");
+                return cycleDatas[id];
+            }
+            var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
+            cycleDatas.Add(id, re);
+            return re;
         }
 
         /// <summary>
@@ -120,7 +218,7 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Update of {buff.ID}");
                 }
             }
-            BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.InGameUpdate(game);
+            gameSetting.InGameUpdate(game);
         }
 
 
@@ -159,13 +257,13 @@ namespace RandomBuff.Core.Game
                 return;
 
             BuffPlugin.Log("------Win Game & Cycle End------");
-            BuffDataManager.Instance.WinGame(this);
+
             foreach (var buff in buffList)
             {
                 try
                 {
-                    if (BuffDataManager.Instance.GetBuffData(buff.ID).NeedDeletion)
-                        BuffDataManager.Instance.UnstackBuff(buff.ID);
+                    if (GetBuffData(buff.ID).NeedDeletion)
+                        UnstackBuff(buff.ID);
                     
                 }
                 catch (Exception e)
@@ -174,7 +272,8 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
-            BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).instance.SessionEnd();
+            gameSetting.SessionEnd();
+            BuffDataManager.Instance.WinGame(this, cycleDatas, gameSetting);
             BuffFile.Instance.SaveFile();
         }
 
@@ -194,10 +293,10 @@ namespace RandomBuff.Core.Game
                 return buffDictionary[id];
             }
 
-            if (!BuffDataManager.Instance.GetDataDictionary(Game.StoryCharacter).ContainsKey(id))
+            if (!cycleDatas.ContainsKey(id))
             {
-                BuffPlugin.Log($"Buff: {id} Not Contain in BuffDataManager");
-                BuffDataManager.Instance.CreateTempBuffData(Game.StoryCharacter, id);
+                BuffPlugin.Log($"Buff: {id} Not Contain in CycleData");
+                CreateNewBuffData(id);
             }
             var type = BuffRegister.GetBuffType(id);
             if (type == null)
@@ -229,5 +328,9 @@ namespace RandomBuff.Core.Game
 
             return re;
         }
+
+        /// 轮回内的临时数据
+        private readonly Dictionary<BuffID, BuffData> cycleDatas = new();
+        private readonly BaseGameSetting gameSetting;
     }
 }

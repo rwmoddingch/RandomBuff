@@ -56,7 +56,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public void OnPositiveClicked(BuffID id)
         {
-            BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+            //BuffDataManager.Instance.GetOrCreateBuffData(id, true);
             for (int i = 0; i < 3; i++)
             {
                 interactionManager.DismanageCard(pickCard[i]);
@@ -67,7 +67,7 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public void OnNegativeClicked(BuffID id)
         {
-            BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+           // BuffDataManager.Instance.GetOrCreateBuffData(id, true);
             manager.RequestMainProcessSwitch(lastId);
         }
 

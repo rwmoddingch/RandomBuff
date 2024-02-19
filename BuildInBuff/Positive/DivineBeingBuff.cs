@@ -16,6 +16,18 @@ namespace BuiltinBuffs.Positive
     internal class DivineBeingBuff : Buff<DivineBeingBuff, DivineBeingBuffData>
     {
         public override BuffID ID => DivineBeingIBuffEntry.DivineBeingBuffID;
+
+        public DivineBeingBuff()
+        {
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+            {
+                foreach (var player in game.Players.Where(i =>
+                             i.state.alive && i.realizedCreature?.room != null))
+                {
+                    player.realizedCreature.room.AddObject(new DivineRing(player.realizedCreature as Player));
+                }
+            }
+        }
     }
 
     internal class DivineBeingBuffData : BuffData

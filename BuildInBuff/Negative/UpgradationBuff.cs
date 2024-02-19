@@ -255,11 +255,8 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<UpgradationBuff, UpgradationBuffData, UpgradationIBuffEntry>(UpgradationBuffID);
+            BuffRegister.RegisterBuff<UpgradationBuff, UpgradationBuffData>(UpgradationBuffID);
         }
 
-        public static void HookOn()
-        {
-        }
     }
 }

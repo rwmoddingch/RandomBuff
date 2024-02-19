@@ -162,8 +162,8 @@ namespace RandomBuff.Core.Hooks
                 self.oldProcess is RainWorldGame game)
             {
                 BuffPoolManager.Instance.Destroy();
-                if(BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket.NeedMenu &&
-                   (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
+                if (BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket.NeedMenu &&
+                    (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
                 {
                     self.currentMainLoop = new GachaMenu.GachaMenu(ID, game, self);
                     ID = GachaMenu.GachaMenu.GachaMenuID;
@@ -175,7 +175,6 @@ namespace RandomBuff.Core.Hooks
                 BuffPoolManager.Instance == null &&
                 game2.rainWorld.BuffMode())
             {
-                BuffDataManager.Instance.EnterGame(game2.StoryCharacter);
                 BuffPoolManager.LoadGameBuff(game2);
             }
         }
