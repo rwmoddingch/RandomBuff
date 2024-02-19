@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -34,7 +35,7 @@ namespace BuiltinBuffs.Negative
                     foreach (var shortCut in player.realizedCreature.room.shortcuts.Where(i =>
                                  i.shortCutType == ShortcutData.Type.RoomExit &&
                                  Custom.DistLess(i.StartTile.ToVector2() * 20f, player.realizedCreature.DangerPos,
-                                     150)))
+                                     200)))
                     {
                         var speed = player.realizedCreature.mainBodyChunk.vel.magnitude *
                                     Custom.VecToDeg(Custom.DirVec(player.realizedCreature.DangerPos,
@@ -42,7 +43,7 @@ namespace BuiltinBuffs.Negative
 
                         if (Random.value < Custom.LerpMap(Custom.Dist(
                                 shortCut.StartTile.ToVector2() * 20f - new Vector2(10, 10),
-                                player.realizedCreature.DangerPos), 0, 150, 0.08f, 0.02f, 0.4f) / 20f *
+                                player.realizedCreature.DangerPos), 60, 150, 0.08f, 0.02f, 0.4f) / 20f *
                             Custom.LerpMap(speed, 0, 10, 1, 2.3f))
                         {
                             if (Random.value < 0.5f)
@@ -105,7 +106,6 @@ namespace BuiltinBuffs.Negative
                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedLizard),
                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedCentipede),
                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedLizard),
-                    StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.SpitterSpider),
                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.CyanLizard),
                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.YellowLizard),
                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.BlueLizard),
@@ -212,7 +212,7 @@ namespace BuiltinBuffs.Negative
         {
             if (modules.TryGetValue(self, out var module))
             {
-                module.SuckIntoShortCut();
+                module.SuckIntoShortCut(false);
                 return;
             }
 
@@ -285,8 +285,18 @@ namespace BuiltinBuffs.Negative
             creature.Destroy();
         }
 
-        public void SuckIntoShortCut()
+        public void SuckIntoShortCut(bool createShadow = true)
         {
+            if (!creatureRef.TryGetTarget(out var creature))
+                return;
+
+            if (creature.graphicsModule != null && createShadow)
+            {
+                creature.room.AddObject(new GhostEffect(creature.graphicsModule, 40, 1, 0.4f));
+                creature.room.PlaySound(SoundID.SB_A14, 0f, 0.76f, 1f);
+
+            }
+
             Destroy();
         }
 

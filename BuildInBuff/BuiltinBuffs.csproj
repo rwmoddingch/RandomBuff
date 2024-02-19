@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RandomBuffUtils\RandomBuffUtils.csproj" />
     <ProjectReference Include="..\RandomBuff\RandomBuff.csproj" />
   </ItemGroup>
   <ItemGroup>
