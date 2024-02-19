@@ -64,10 +64,12 @@ namespace RandomBuff.Core.Game
             Game = game;
             BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).instance.EnterGame();
             BuffPlugin.Log($"Enter Game, setting: {BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).ID}");
+
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
-            {
                 CreateBuff(data.Key);
-            }
+
+
+
         }
 
         /// <summary>
@@ -103,6 +105,9 @@ namespace RandomBuff.Core.Game
 
         internal void Update(RainWorldGame game)
         {
+            if (game.GamePaused)
+                return;
+
             foreach (var buff in buffList)
             {
                 try
@@ -126,7 +131,7 @@ namespace RandomBuff.Core.Game
         /// </summary>
         internal void Destroy()
         {
-            BuffPlugin.Log("Destroy buff pool");
+            BuffPlugin.Log("DESTROY BUFF POOL!");
             foreach (var buff in buffList)
             {
                 try
@@ -142,6 +147,7 @@ namespace RandomBuff.Core.Game
             }
             Instance = null;
         }
+
 
         /// <summary>
         /// 周期结束后的移除或更新
@@ -191,7 +197,7 @@ namespace RandomBuff.Core.Game
             if (!BuffDataManager.Instance.GetDataDictionary(Game.StoryCharacter).ContainsKey(id))
             {
                 BuffPlugin.Log($"Buff: {id} Not Contain in BuffDataManager");
-                BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+                BuffDataManager.Instance.CreateTempBuffData(Game.StoryCharacter, id);
             }
             var type = BuffRegister.GetBuffType(id);
             if (type == null)

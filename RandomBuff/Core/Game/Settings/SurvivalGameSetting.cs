@@ -16,7 +16,7 @@ namespace RandomBuff.Core.Game.Settings
 
         public override void SessionEnd()
         {
-            CurrentPacket = new CachaPacket();
+            CurrentPacket = new CachaPacket(){negative = (1,2,1)};
         }
     }
 }

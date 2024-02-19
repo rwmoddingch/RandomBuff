@@ -385,16 +385,8 @@ namespace RandomBuff.Render.UI
         {
             foreach(var name in nameOrders)
             {
-                if(Menu.manager.rainWorld.progression.IsThereASavedGame(name))
-                    buffIDPages.Add(BuffDataManager.Instance.GetAllBuffIds(name));
-                else
-                {
-                    if(BuffDataManager.Instance.GetAllBuffIds(name).Count > 0)
-                        BuffDataManager.Instance.DeleteSaveData(name);
-                    buffIDPages.Add(BuffDataManager.Instance.GetAllBuffIds(name));
-               
-                }
-
+       
+                buffIDPages.Add(BuffDataManager.Instance.GetAllBuffIds(name));
                 BuffPlugin.Log($"{buffIDPages.Last().Count} buffs for {name}");
             }
         }
