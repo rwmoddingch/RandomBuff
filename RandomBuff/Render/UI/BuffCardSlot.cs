@@ -559,6 +559,12 @@ namespace RandomBuff.Render.UI
             TriggerAnimSlot.GrafUpdate(timeStacker);
             ActivePicker?.GrafUpdate(timeStacker);
             TimerAnimSlot.GrafUpdate(timeStacker);
+
+            //if (Input.GetKeyDown(KeyCode.C))
+            //{
+            //    BuffPoolManager.Instance.CreateBuff(new BuffID("Upgradation"));
+            //    AppendCard(new BuffID("Upgradation"));
+            //}
         }
 
         /// <summary>
@@ -654,7 +660,7 @@ namespace RandomBuff.Render.UI
         {
             public static Vector2 hoverPos = new Vector2(40f, Custom.rainWorld.screenSize.y - 60f);
             static int CardStartIndex = 1;
-            static float flashScale = 15f;
+            static float flashScale = 40f;
             CommmmmmmmmmmmmmpleteInGameSlot completeSlot;
 
             float flash;
@@ -697,7 +703,7 @@ namespace RandomBuff.Render.UI
             {
                 var card = AppendCard(buffID);
                 card.SetAnimatorState(BuffCard.AnimatorState.TriggerBuffAnimSlot_Trigger);
-                flatLight.color = card.StaticData.Color;
+                flatLight.color = Color.Lerp(card.StaticData.Color, Color.white, 0.4f);
                 flash = 1f;
                 flatLight.alpha = flash;
                 flatLight.scale = flash * flashScale;
