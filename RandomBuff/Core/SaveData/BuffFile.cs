@@ -244,11 +244,13 @@ namespace RandomBuff.Core.SaveData
 
         public void AddCollect(string buffID)
         {
-            BuffPlugin.Log($"Add buff collect to Save Slot {CurrentSlot}");
             if (buffCollect == null)
                 buffCollect = new List<string>();
             if (!buffCollect.Contains(buffID))
+            {
+                BuffPlugin.Log($"Add buff collect to Save Slot {CurrentSlot}");
                 buffCollect.Add(buffID);
+            }
         }
 
 
