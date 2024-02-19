@@ -18,9 +18,9 @@ namespace BuiltinBuffs.Positive
         public AbstractCreature spawnlater;
         public int counter;
 
-        public DeathFreeMedallionBuff()
-        {
-        }
+        public int triggerCounter = 0;
+
+        public override bool Active => triggerCounter > 0;
 
         public override bool Trigger(RainWorldGame game)
         {
@@ -33,7 +33,10 @@ namespace BuiltinBuffs.Positive
             base.Update(game);
             if (counter > 0 && spawnlater != null)
                 counter--;
-            if(counter == 0 && spawnlater != null)
+
+            if (triggerCounter > 0)
+                triggerCounter--;
+            if (counter == 0 && spawnlater != null)
             {
                 spawnlater.RealizeInRoom();
                 spawnlater = null;
@@ -71,6 +74,7 @@ namespace BuiltinBuffs.Positive
             else if(!DeathFreeMedallionBuff.Instance.triggerdThisCycle)
             {
                 self.room.AddObject(new DeathPreventer(self, self.DangerPos + Vector2.up * 80f));
+                DeathFreeMedallionBuff.Instance.triggerCounter = 40;
                 DeathFreeMedallionBuff.Instance.TriggerSelf(true);
                 return;
             }

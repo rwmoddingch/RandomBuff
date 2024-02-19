@@ -115,7 +115,7 @@ namespace RandomBuff.Core.BuffMenu.Test
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
                 }
 
-                BuffDataManager.Instance.StartGame(currentName);
+                BuffDataManager.Instance.EnterGameFromMenu(currentName);
                 manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
                 PlaySound(SoundID.MENU_Start_New_Game);
             }

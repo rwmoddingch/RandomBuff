@@ -21,11 +21,19 @@ namespace RandomBuff.Core.Hooks
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
             On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
-
             On.StoryGameSession.ctor += StoryGameSession_ctor;
             On.SaveState.setDenPosition += SaveState_setDenPosition;
             On.SaveState.ctor += SaveState_setup;
             On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
+
+            On.SaveState.ctor += SaveState_ctor;
+        }
+
+        private static void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
+        {
+            orig(self, saveStateNumber, progression);
+            if (Custom.rainWorld.BuffMode())
+                self.dreamsState = null;
         }
 
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)

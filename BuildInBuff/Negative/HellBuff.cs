@@ -45,6 +45,26 @@ namespace BuiltinBuffs.Negative
     {
         public override BuffID ID => HellIBuffEntry.hellBuffID;
 
-        
+        public bool isInit = false;
+
+        public override void Update(RainWorldGame game)
+        {
+            base.Update(game);
+            if (!isInit && game.cameras != null && game.cameras[0]?.room != null)
+            {
+                game.cameras[0].ChangeBothPalettes(31, 75, 0.75f);
+                game.cameras[0].ApplyEffectColorsToAllPaletteTextures(15, 13);
+                if(game.cameras[0]?.room.waterObject != null)
+                    game.cameras[0].room.waterObject.WaterIsLethal = true;
+                Shader.EnableKeyword("HR");
+                isInit = true;
+            }
+        }
+
+        public override void Destroy()
+        {
+            Shader.DisableKeyword("HR");
+            base.Destroy();
+        }
     }
 }
