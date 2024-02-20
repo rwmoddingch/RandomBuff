@@ -1,10 +1,12 @@
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -62,15 +64,24 @@ namespace RandomBuff.Render.CardRender
 
             BuffCardRenderer GetNewRenderer(BuffID buffID)
             {
-                int id = NextLegalID;
-                var cardObj = new GameObject($"BuffCard_{id}");
-                cardObj.transform.position = new Vector3(id * 20, 0, 0);
-                var renderer = cardObj.AddComponent<BuffCardRenderer>();
-                totalRenderers.Add(renderer);
+                try
+                {
+                    int id = NextLegalID;
+                    var cardObj = new GameObject($"BuffCard_{id}");
+                    cardObj.transform.position = new Vector3(id * 20, 0, 0);
+                    var renderer = cardObj.AddComponent<BuffCardRenderer>();
+                    totalRenderers.Add(renderer);
 
-                renderer.Init(id, BuffConfigManager.GetStaticData(buffID));
-                BuffPlugin.Log($"Get new card renderer of id {id}");
-                return renderer;
+                    renderer.Init(id, BuffConfigManager.GetStaticData(buffID));
+                    BuffPlugin.Log($"Get new card renderer of id {id}");
+                    return renderer;
+                }
+                catch(Exception e)
+                {
+                    BuffPlugin.LogError($"Render error : {buffID}");
+                    BuffPlugin.LogException(e);
+                    return null;
+                }
             }
         }
 

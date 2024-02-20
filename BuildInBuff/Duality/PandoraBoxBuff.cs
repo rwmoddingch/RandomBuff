@@ -29,6 +29,13 @@ namespace BuiltinBuffs.Duality
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<PandoraBoxBuff, PandoraBoxBuffData, PandoraBoxIBuffEntry>(PandoraBoxBuffID);
+            session = Helper.GetUninit<SandboxGameSession>();
+            session.game = Helper.GetUninit<RainWorldGame>();
+            session.game.overWorld = Helper.GetUninit<OverWorld>();
+            session.game.overWorld.activeWorld = Helper.GetUninit<World>();
+            session.game.world.abstractRooms = new AbstractRoom[1];
+            session.game.world.abstractRooms[0] = Helper.GetUninit<AbstractRoom>();
+            session.game.world.abstractRooms[0].entities = new List<AbstractWorldEntity>();
         }
 
         public static void HookOn()
@@ -38,8 +45,10 @@ namespace BuiltinBuffs.Duality
 
         private static void Player_Regurgitate(On.Player.orig_Regurgitate orig, Player self)
         {
+            BuffPlugin.Log("Player_Regurgitate");
             if (self.objectInStomach != null)
             {
+                BuffPlugin.Log("Player_Regurgitate yes");
                 AbstractPhysicalObject origObject = self.objectInStomach;
                 bool replaceSuccessfully = false;
                 for (int i = 0; i < 5 && !replaceSuccessfully; i++)
