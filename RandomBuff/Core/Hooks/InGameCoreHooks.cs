@@ -84,7 +84,7 @@ namespace RandomBuff.Core.Hooks
         {
             orig(self);
             if (self.progression.rainWorld.BuffMode() &&
-                BuffDataManager.Instance.GetSafeSetting(self.saveStateNumber).instance.NeedRandomStart)
+                BuffDataManager.Instance.GetGameSetting(self.saveStateNumber).gachaTemplate.NeedRandomStart)
             {
                 //TODO : 这里用了探险
                 string name = ExpeditionGame.ExpeditionRandomStarts(self.progression.rainWorld, self.saveStateNumber);

@@ -89,8 +89,6 @@ namespace RandomBuff.Core.BuffMenu
                 {
                     if (BuffDataManager.Instance.GetAllBuffIds(name).Count > 0)
                         BuffDataManager.Instance.DeleteSaveData(name);
-
-                    BuffDataManager.Instance.GetSafeSetting(name).instance = null;
                 } 
                 saveGameData.Add(name, MineFromSave(manager, name));
             }
@@ -116,7 +114,7 @@ namespace RandomBuff.Core.BuffMenu
             pages[0].subObjects.Add(backButton = new SimpleButton(this, this.pages[0], base.Translate("BACK"), "BACK", new Vector2(200f, 668f), new Vector2(110f, 30f)));
             pages[0].subObjects.Add(prevButton = new BigArrowButton(this, this.pages[0], "PREV", new Vector2(200f, 50f), -1));
             pages[0].subObjects.Add(nextButton = new BigArrowButton(this, this.pages[0], "NEXT", new Vector2(1116f, 50f), 1));
-            pages[0].subObjects.Add(settingButton = new SimpleButton(this, this.pages[0], Translate(BuffDataManager.Instance.GetSafeSetting(CurrentName).ID.value),
+            pages[0].subObjects.Add(settingButton = new SimpleButton(this, this.pages[0], Translate(BuffDataManager.Instance.GetGameSetting(CurrentName).TemplateName),
                 "SELECT_MODE", new Vector2(683 - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
                 new Vector2(120, 40)));
             if(ModManager.JollyCoop)
@@ -138,6 +136,7 @@ namespace RandomBuff.Core.BuffMenu
             UpdateSlugcatAndPage();
         }
 
+        
 
         void SetupSlugNameOrders()
         {
@@ -150,14 +149,15 @@ namespace RandomBuff.Core.BuffMenu
             }
         }
 
+        private bool IsInactive => manager.rainWorld.progression.IsThereASavedGame(CurrentName);
 
         void UpdateSlugcatAndPage()
         {
-            var safeData = BuffDataManager.Instance.GetSafeSetting(CurrentName);
+            var gameSetting = BuffDataManager.Instance.GetGameSetting(CurrentName);
 
             startButton.menuLabel.text = Translate(SlugcatStats.getSlugcatName(CurrentName));
-            settingButton.inactive = safeData.instance != null && !restartCurrent;
-            settingButton.menuLabel.text = Translate(safeData.ID.ToString());
+            settingButton.inactive = IsInactive;
+            settingButton.menuLabel.text = Translate(gameSetting.TemplateName);
             if(manager.rainWorld.progression.IsThereASavedGame(CurrentName))
             {
                 //暂时使用
@@ -213,7 +213,7 @@ namespace RandomBuff.Core.BuffMenu
         public void SetChecked(CheckBox box, bool c)
         {
             restartCurrent = c;
-            settingButton.inactive = BuffDataManager.Instance.GetSafeSetting(CurrentName).instance != null && !restartCurrent;
+            settingButton.inactive = IsInactive;
 
         }
 
@@ -262,11 +262,12 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if (message == "SELECT_MODE" && !settingButton.inactive)
             {
-                var safeData = BuffDataManager.Instance.GetSafeSetting(CurrentName);
-                safeData.ID = new(BuffSettingID.values.entries[
-                    safeData.ID.Index == BuffSettingID.values.entries.Count - 1 ? 0 : safeData.ID.Index + 1]);
-
-                settingButton.menuLabel.text = Translate(safeData.ID.ToString());
+                var gameSetting = BuffDataManager.Instance.GetGameSetting(CurrentName);
+                var list = BuffConfigManager.GetTemplateNameList();
+                var index = list.IndexOf(gameSetting.TemplateName) + 1;
+                gameSetting.LoadTemplate(list[index == list.Count ? 0 : index]);
+          
+                settingButton.menuLabel.text = Translate(gameSetting.TemplateName);
             }
             else if (message == "JOLLY_TOGGLE_CONFIG")
             {

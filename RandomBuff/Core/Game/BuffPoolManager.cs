@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IL.MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.SaveData;
-using UnityEngine;
-using static RandomBuff.Core.SaveData.BuffDataManager;
 
 namespace RandomBuff.Core.Game
 {
@@ -97,10 +93,10 @@ namespace RandomBuff.Core.Game
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 cycleDatas.Add(data.Key, data.Value.Clone());
 
-            gameSetting = BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance;
-            BuffDataManager.Instance.GetSafeSetting(Game.StoryCharacter).instance.EnterGame();
+            GameSetting = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).Clone();
+            GameSetting.EnterGame();
           
-            BuffPlugin.Log($"Enter Game, setting: {gameSetting.ID}");
+            BuffPlugin.Log($"Enter Game,TemplateID: {GameSetting.gachaTemplate.ID}, Difficulty: {GameSetting.Difficulty}, Condition Count: {GameSetting.conditions.Count}");
 
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 CreateBuff(data.Key);
@@ -219,7 +215,7 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Update of {buff.ID}");
                 }
             }
-            gameSetting.InGameUpdate(game);
+            GameSetting.InGameUpdate(game);
         }
 
 
@@ -273,9 +269,16 @@ namespace RandomBuff.Core.Game
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
-            gameSetting.SessionEnd();
-            BuffDataManager.Instance.WinGame(this, cycleDatas, gameSetting);
+            GameSetting.SessionEnd(Game);
+            BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
             BuffFile.Instance.SaveFile();
+
+            if (GameSetting.Win)
+            {
+                Game.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Statistics,0.6f);
+                Game.manager.upcomingProcess = ProcessManager.ProcessID.Statistics;
+            }
+
         }
 
 
@@ -332,6 +335,6 @@ namespace RandomBuff.Core.Game
 
         /// 轮回内的临时数据
         private readonly Dictionary<BuffID, BuffData> cycleDatas = new();
-        private readonly BaseGameSetting gameSetting;
+        internal GameSetting GameSetting { get; private set; }
     }
 }

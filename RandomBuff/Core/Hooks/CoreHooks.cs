@@ -162,7 +162,7 @@ namespace RandomBuff.Core.Hooks
                 self.oldProcess is RainWorldGame game)
             {
                 BuffPoolManager.Instance.Destroy();
-                if (BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket.NeedMenu &&
+                if (BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket.NeedMenu &&
                     (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
                 {
                     self.currentMainLoop = new GachaMenu.GachaMenu(ID, game, self);

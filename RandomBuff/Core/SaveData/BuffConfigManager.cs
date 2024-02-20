@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using UnityEngine;
 
 namespace RandomBuff.Core.SaveData
@@ -245,6 +246,7 @@ namespace RandomBuff.Core.SaveData
     public partial class BuffConfigManager
     {
         private static Dictionary<BuffID, BuffStaticData> staticDatas = new();
+        private static Dictionary<string,TemplateStaticData> templateDatas = new();
 
         internal static bool ContainsId(BuffID id)
             => staticDatas.ContainsKey(id);
@@ -253,6 +255,14 @@ namespace RandomBuff.Core.SaveData
 
         internal static BuffStaticData GetStaticData(BuffID id)
             => staticDatas[id];
+
+        internal static bool ContainsTemplateName(string name)
+            => templateDatas.ContainsKey(name);
+
+        internal static TemplateStaticData GetTemplateData(string name)
+            => templateDatas[name];
+
+        internal static List<string> GetTemplateNameList() => templateDatas.Keys.ToList();
 
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 
@@ -278,6 +288,34 @@ namespace RandomBuff.Core.SaveData
                     continue;
 
                 LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName);
+            }
+        }
+
+        /// <summary>
+        /// 读取templateData
+        /// post init时调用
+        /// 文件格式 mod根目录/bufftemplates/
+        /// </summary>
+        internal static void InitTemplateStaticData()
+        {
+            BuffPlugin.Log("Loading All Template Data!");
+            foreach (var mod in ModManager.ActiveMods)
+            {
+                string path = mod.path + Path.DirectorySeparatorChar + "bufftemplates";
+                if (!Directory.Exists(path))
+                    continue;
+                var info = new DirectoryInfo(path);
+                foreach (var file in info.GetFiles("*.json"))
+                {
+                    if (TemplateStaticData.TryLoadTemplateStaticData(file, out var data))
+                    {
+                        if (!templateDatas.ContainsKey(data.Name))
+                            templateDatas.Add(data.Name, data);
+                        else
+                            BuffPlugin.LogError($"Same Key at {data.Name}");
+                        
+                    }
+                }
             }
         }
 

@@ -7,29 +7,29 @@ using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
 
-namespace RandomBuff.Core.Game.Settings
+namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
-    internal class QuickGameSetting : BaseGameSetting
+    internal class QuickGachaTemplate : BaseGachaTemplate
     {
-        public override BuffSettingID ID { get; }
+        public override GachaTemplateID ID => GachaTemplateID.Quick;
 
 
         public override bool NeedRandomStart => true;
 
 
-        public QuickGameSetting()
+        public QuickGachaTemplate()
         {
         }
 
         public override void EnterGame()
         {
-     
+
             inGame = true;
             counter = 0;
             if (newGame)
             {
                 newGame = false;
-                counter = 40 * 30 - 1;
+                counter = 40 * Time - 1;
             }
         }
 
@@ -37,24 +37,24 @@ namespace RandomBuff.Core.Game.Settings
         {
             if (BuffHud.Instance == null)
                 return;
-          
+
             counter++;
 
-            if (counter >= 40 * 30)
+            if (counter >= 40 * Time)
             {
-                
-                if (queue.Count == 10)
+
+                if (queue.Count == MaxCount)
                 {
                     BuffHud.Instance.RemoveCard(queue.Dequeue());
                     BuffPoolManager.Instance.RemoveBuff(queue.Peek());
                 }
 
                 BuffID buffId;
-                if (isPositive) 
-                    buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
+                if (isPositive)
+                    buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1,
                         BuffType.Positive)[0].BuffID;
                 else
-                    buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1, 
+                    buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1,
                         BuffType.Negative, BuffType.Duality)[0].BuffID;
 
                 BuffPlugin.LogDebug($"Quick Mode : New Buff {buffId}");
@@ -64,7 +64,7 @@ namespace RandomBuff.Core.Game.Settings
                 queue.Enqueue(buffId);
                 counter = 0;
             }
-            
+
         }
         public override void SessionEnd()
         {
@@ -84,13 +84,19 @@ namespace RandomBuff.Core.Game.Settings
         private bool newGame;
 
         [JsonProperty]
-        public Queue<BuffID> queue = new ();
+        public Queue<BuffID> queue = new();
 
-        [JsonProperty] 
+        [JsonProperty]
         public int pointer = 0;
 
         [JsonProperty]
         public bool isPositive = true;
+
+        [JsonProperty]
+        public int Time = 30;
+
+        [JsonProperty]
+        public int MaxCount = 10;
 
     }
 }

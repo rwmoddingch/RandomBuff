@@ -12,6 +12,8 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings.Condition;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 
@@ -39,19 +41,57 @@ namespace RandomBuff.Core.Entry
     /// </summary>
     public static partial class BuffRegister
     {
-        public static void RegisterBuff<BuffType, DataType, HookType>(BuffID id) where BuffType : IBuff, new()
-            where DataType : BuffData, new()
+
+        /// <summary>
+        /// 注册新的Buff，并且包含hook
+        /// </summary>
+        /// <typeparam name="TBuffType"></typeparam>
+        /// <typeparam name="TDataType"></typeparam>
+        /// <typeparam name="THookType"></typeparam>
+        /// <param name="id"></param>
+        public static void RegisterBuff<TBuffType, TDataType, THookType>(BuffID id) where TBuffType : IBuff, new()
+            where TDataType : BuffData, new()
         {
-            BuffHookWarpper.RegisterHook(id, typeof(HookType));
-            BuffTypes.Add(id, typeof(BuffType));
-            DataTypes.Add(id, typeof(DataType));
+            BuffHookWarpper.RegisterHook(id, typeof(THookType));
+            BuffTypes.Add(id, typeof(TBuffType));
+            DataTypes.Add(id, typeof(TDataType));
         }
 
-        public static void RegisterBuff<BuffType, DataType>(BuffID id) where BuffType : IBuff, new()
-            where DataType : BuffData, new()
+
+        /// <summary>
+        /// 注册新的buff，不包含hook
+        /// </summary>
+        /// <typeparam name="TBuffType"></typeparam>
+        /// <typeparam name="TDataType"></typeparam>
+        /// <param name="id"></param>
+        public static void RegisterBuff<TBuffType, TDataType>(BuffID id) where TBuffType : IBuff, new()
+            where TDataType : BuffData, new()
         {
-            BuffTypes.Add(id, typeof(BuffType));
-            DataTypes.Add(id, typeof(DataType));
+            BuffTypes.Add(id, typeof(TBuffType));
+            DataTypes.Add(id, typeof(TDataType));
+        }
+
+
+        /// <summary>
+        /// 注册新的抽卡模式
+        /// </summary>
+        /// <typeparam name="TTemplateType"></typeparam>
+        /// <param name="id"></param>
+        public static void RegisterGachaTemplate<TTemplateType>(GachaTemplateID id)
+            where TTemplateType : BaseGachaTemplate, new()
+        {
+            templateTypes.Add(id,typeof(TTemplateType));
+        }
+
+        /// <summary>
+        /// 注册新的通关条件
+        /// </summary>
+        /// <typeparam name="TConditionType"></typeparam>
+        /// <param name="id"></param>
+        public static void RegisterCondition<TConditionType>(ConditionID id)
+            where TConditionType : BaseCondition, new()
+        {
+            conditionTypes.Add(id,typeof(TConditionType));
         }
     }
 
@@ -62,17 +102,20 @@ namespace RandomBuff.Core.Entry
     /// </summary>
     public static partial class BuffRegister
     {
-        internal static (BuffID id, Type type) GetDataType(string id) => 
-            (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
+        internal static (BuffID id, Type type) GetDataType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
 
-        internal static (BuffID id, Type type) GetBuffType(string id) => 
-            (new BuffID(id), GetAnyType(new BuffID(id), BuffTypes));
+        internal static (BuffID id, Type type) GetBuffType(string id) => (new BuffID(id), GetAnyType(new BuffID(id), BuffTypes));
 
         internal static Type GetDataType(BuffID id) => GetAnyType(id, DataTypes);
 
         internal static Type GetBuffType(BuffID id) => GetAnyType(id, BuffTypes);
 
-        private static Type GetAnyType(BuffID id, Dictionary<BuffID, Type> dic)
+        internal static Type GetCondition(ConditionID id) => GetAnyType(id, conditionTypes);
+
+        internal static Type GetTemplate(GachaTemplateID id) => GetAnyType(id, templateTypes);
+
+
+        private static Type GetAnyType<T>(T id, Dictionary<T, Type> dic)
         {
             if (dic.ContainsKey(id))
                 return dic[id];
@@ -174,7 +217,9 @@ namespace RandomBuff.Core.Entry
             }
         }
         
-        private static Dictionary<BuffID, Type> DataTypes = new();
-        private static Dictionary<BuffID, Type> BuffTypes = new();
+        private static readonly Dictionary<BuffID, Type> DataTypes = new();
+        private static readonly Dictionary<BuffID, Type> BuffTypes = new();
+        private static readonly Dictionary<GachaTemplateID, Type> templateTypes = new();
+        private static readonly Dictionary<ConditionID, Type> conditionTypes = new();
     }
 }

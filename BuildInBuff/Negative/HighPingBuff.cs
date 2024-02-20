@@ -4,9 +4,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using BuiltinBuffs.Positive;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RWCustom;
 
 namespace BuiltinBuffs.Negative
 {
@@ -39,7 +41,7 @@ namespace BuiltinBuffs.Negative
                 modules.Add(self,new HighPingPlayerModule());
         }
 
-        private static ConditionalWeakTable<Player, HighPingPlayerModule> modules = new ConditionalWeakTable<Player, HighPingPlayerModule>();
+        public static ConditionalWeakTable<Player, HighPingPlayerModule> modules = new ConditionalWeakTable<Player, HighPingPlayerModule>();
         public class HighPingPlayerModule
         {
             public Queue<Player.InputPackage> input = new Queue<Player.InputPackage>();
@@ -64,5 +66,19 @@ namespace BuiltinBuffs.Negative
     class HighPingBuff : Buff<HighPingBuff,HighPingBuffData>
     {
         public override BuffID ID => HighPingIBuffEntry.highPingID;
+
+        public HighPingBuff()
+        {
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+            {
+                foreach (var player in game.Players.Where(i =>
+                             i.state.alive && i.realizedCreature?.room != null))
+                {
+                    var rp = player.realizedCreature as Player;
+                    if (HighPingIBuffEntry.modules.TryGetValue(rp, out _))
+                        HighPingIBuffEntry.modules.Add(rp, new HighPingIBuffEntry.HighPingPlayerModule());
+                }
+            }
+        }
     }
 }
