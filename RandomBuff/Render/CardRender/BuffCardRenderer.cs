@@ -130,7 +130,7 @@ namespace RandomBuff.Render.CardRender
                     _cardQuadFront.transform.localPosition = new Vector3(0, 0, 0);
                     _cardQuadFront.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
                     cardHighlightFrontController = _cardQuadFront.AddComponent<CardHighlightController>();
-                    cardHighlightFrontController.Init(this, _cardTextureFront);
+                    //cardHighlightFrontController.Init(this, _cardTextureFront);
 
                     _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
                     _cardQuadBack.transform.parent = transform;
@@ -165,6 +165,9 @@ namespace RandomBuff.Render.CardRender
 
                 _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
                 _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
+
+                cardHighlightFrontController.Init(this, _cardTextureFront);
+                cardHighlightBackController.Init(this, _cardTextureBack);
             }
             catch(Exception e)
             {

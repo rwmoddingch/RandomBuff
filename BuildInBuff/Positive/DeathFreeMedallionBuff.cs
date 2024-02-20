@@ -57,13 +57,20 @@ namespace BuiltinBuffs.Positive
         public static void HookOn()
         {
             On.Player.Die += Player_Die;
-            //On.Player.Destroy += Player_Destroy;
+            On.Player.Destroy += Player_Destroy;
         }
 
         private static void Player_Destroy(On.Player.orig_Destroy orig, Player self)
         {
             if (DeathPreventer.Singleton != null && DeathPreventer.Singleton.bindAbPlayer == self.abstractCreature)
                 return;
+            else if (!DeathFreeMedallionBuff.Instance.triggerdThisCycle)
+            {
+                self.room.AddObject(new DeathPreventer(self, self.DangerPos + Vector2.up * 80f));
+                DeathFreeMedallionBuff.Instance.triggerCounter = 40;
+                DeathFreeMedallionBuff.Instance.TriggerSelf(true);
+                return;
+            }
             orig.Invoke(self);
         }
 
@@ -73,7 +80,7 @@ namespace BuiltinBuffs.Positive
                 return;
             else if(!DeathFreeMedallionBuff.Instance.triggerdThisCycle)
             {
-                self.room.AddObject(new DeathPreventer(self, self.DangerPos + Vector2.up * 80f));
+                self.abstractCreature.Room.realizedRoom.AddObject(new DeathPreventer(self, self.DangerPos + Vector2.up * 80f));
                 DeathFreeMedallionBuff.Instance.triggerCounter = 40;
                 DeathFreeMedallionBuff.Instance.TriggerSelf(true);
                 return;
@@ -133,8 +140,12 @@ namespace BuiltinBuffs.Positive
 
         public DeathPreventer(Player bindPlayer, Vector2 endPos)
         {
-            this.room = bindPlayer.room;
+            bindPlayer.enteringShortCut = null;
+            if(bindPlayer.dangerGrasp != null)
+                bindPlayer.dangerGrasp.discontinued = true;
             bindAbPlayer = bindPlayer.abstractCreature;
+            bindAbPlayer.InDen = false;
+            this.room = bindAbPlayer.Room.realizedRoom;
             this.endPos = endPos;
             endPosTile = room.GetTilePosition(endPos);
 
@@ -146,9 +157,10 @@ namespace BuiltinBuffs.Positive
             BuffPlugin.Log($"Init DeathPreventer : {bindPlayer}");
 
             bindPlayer.dead = false;
+            bindPlayer.playerState.alive = true;
             bindPlayer.aerobicLevel = 0f;
             bindPlayer.stun = 4;
-            bindAbPlayer.Abstractize(bindPlayer.room.GetWorldCoordinate(endPos));
+            bindAbPlayer.Abstractize(room.GetWorldCoordinate(endPos));
             bindPlayer.slatedForDeletetion = true;
 
             for(int i = room.roomSettings.effects.Count - 1; i >= 0; i--)
@@ -289,14 +301,26 @@ namespace BuiltinBuffs.Positive
                     bindAbPlayer.Room.world.game.AlivePlayers.Add(bindAbPlayer);
 
                 
-                if(bindAbPlayer.Room.creatures.Contains(bindAbPlayer))
+                if(!bindAbPlayer.Room.creatures.Contains(bindAbPlayer))
                     bindAbPlayer.Room.AddEntity(bindAbPlayer);
 
                 if (!bindAbPlayer.Room.realizedRoom.updateList.Contains(bindAbPlayer.realizedCreature))
                     bindAbPlayer.Room.realizedRoom.AddObject(bindAbPlayer.realizedCreature);
 
                 bindAbPlayer.realizedCreature.deaf = 0;
-
+                if (bindAbPlayer.realizedCreature.dead)
+                    bindAbPlayer.realizedCreature.dead = false;
+                if ((bindAbPlayer.realizedCreature as Player).playerState.dead)
+                    (bindAbPlayer.realizedCreature as Player).playerState.alive = true;
+                if (bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.textPrompt.gameOverMode)
+                {
+                    bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.textPrompt.gameOverMode = false;
+                    bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.textPrompt.dependentOnGrasp = null;
+                }
+                if(bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.owner == null || (bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.owner is Player player && player.slatedForDeletetion))
+                {
+                    bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.owner = bindAbPlayer.realizedCreature as Player;
+                }
                 playerRespawned = true;
             }
         }

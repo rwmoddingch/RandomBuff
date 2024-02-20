@@ -48,6 +48,7 @@ namespace RandomBuff.Render.CardRender
         {
             _renderer = buffCardRenderer;
             float widthFactor = texture.width / 300f;
+            //BuffPlugin.Log($"{buffCardRenderer._buffStaticData.BuffID} width factor : {widthFactor}");
             _MeshRenderer.material.SetFloat("_HighlighWidth", 30f * widthFactor);
             _MeshRenderer.material.SetFloat("_HighlighExpose", 4f);
             _MeshRenderer.material.SetFloat("_EdgeHighLightStrength", 0f);

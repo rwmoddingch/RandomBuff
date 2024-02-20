@@ -308,6 +308,9 @@ namespace RandomBuff.Render.CardRender
                     splitedTexts = pages.ToArray();
                 }
             }
+
+            if(splitedTexts.Length == 0)
+                splitedTexts = new string[1] { "" };
         }
 
         /// <summary>

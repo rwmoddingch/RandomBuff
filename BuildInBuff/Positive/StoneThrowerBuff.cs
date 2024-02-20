@@ -57,7 +57,7 @@ namespace BuiltinBuffs.Positive
                 {
                     stunBonus = 90f;
                 }
-                (result.obj as Creature).Violence(self.firstChunk, new Vector2?(self.firstChunk.vel * self.firstChunk.mass), result.chunk, result.onAppendagePos, Creature.DamageType.Blunt, 0.01f, stunBonus);
+                (result.obj as Creature).Violence(self.firstChunk, new Vector2?(self.firstChunk.vel * self.firstChunk.mass), result.chunk, result.onAppendagePos, Creature.DamageType.Blunt, 0.99f, stunBonus);
             }
             return a;
         }

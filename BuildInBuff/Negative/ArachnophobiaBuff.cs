@@ -39,19 +39,24 @@ namespace BuiltinBuffs.Negative
 
         private static void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
-            orig(self);
-            int max = Random.Range(5, 12);
-            for (int i = 0; i < max; i++)
+            if(self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Spider &&
+               self.abstractCreature.creatureTemplate.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MotherSpider)
             {
-                AbstractCreature creature = new AbstractCreature(self.abstractCreature.world,
-                    StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Spider), null,
-                    self.abstractCreature.pos, self.abstractCreature.world.game.GetNewID());
+                BuffPlugin.Log("Arachnophobia Creature_Die");
+                int max = Random.Range(5, 12);
+                for (int i = 0; i < max; i++)
+                {
+                    AbstractCreature creature = new AbstractCreature(self.abstractCreature.world,
+                        StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Spider), null,
+                        self.abstractCreature.pos, self.abstractCreature.world.game.GetNewID());
 
-                creature.Realize();
-                foreach (var chunk in creature.realizedCreature.bodyChunks)
-                    chunk.pos = chunk.lastPos = self.firstChunk.pos + Custom.RNV() * Random.Range(0, 10);
-
+                    creature.RealizeInRoom();
+                    foreach (var chunk in creature.realizedCreature.bodyChunks)
+                        chunk.pos = chunk.lastPos = self.firstChunk.pos + Custom.RNV() * Random.Range(0, 10);
+                }
             }
+
+            orig(self);
         }
     }
 }
