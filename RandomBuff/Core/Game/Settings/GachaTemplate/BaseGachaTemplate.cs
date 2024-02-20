@@ -4,26 +4,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RandomBuff.Core.Game.Settings;
+using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 
 namespace RandomBuff.Core.Game
 {
     /// <summary>
-    /// 游戏模式ID
+    /// 抽卡模式ID
     /// </summary>
-    internal class BuffSettingID : ExtEnum<BuffSettingID>
+    public class GachaTemplateID : ExtEnum<GachaTemplateID>
     {
-        public static BuffSettingID Normal;
-        public static BuffSettingID Quick;
-        public static BuffSettingID Survival;
-        static BuffSettingID()
+        public static GachaTemplateID Normal;
+        public static GachaTemplateID Quick;
+        static GachaTemplateID()
         {
-            Normal = new BuffSettingID("Normal", true);
-            Quick = new BuffSettingID("Quick", true);
-            Survival = new BuffSettingID("Survival", true);
+            Normal = new GachaTemplateID("Normal", true);
+            Quick = new GachaTemplateID("Quick", true);
         }
 
-        public BuffSettingID(string value, bool register = false) : base(value, register)
+        public GachaTemplateID(string value, bool register = false) : base(value, register)
         {
         }
     }
@@ -33,9 +32,9 @@ namespace RandomBuff.Core.Game
     /// 基类
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal abstract partial class BaseGameSetting
+    public abstract partial class BaseGachaTemplate
     {
-        protected BaseGameSetting()
+        protected BaseGachaTemplate()
         {
         }
 
@@ -45,7 +44,7 @@ namespace RandomBuff.Core.Game
         /// </summary>
         public virtual bool NeedRandomStart => false;
 
-        public abstract BuffSettingID ID { get; }
+        public abstract GachaTemplateID ID { get; }
 
         /// <summary>
         /// 创建新游戏时触发
@@ -72,7 +71,8 @@ namespace RandomBuff.Core.Game
         /// <summary>
         /// 当前的抽卡信息
         /// </summary>
-        public CachaPacket CurrentPacket { get; protected set; }
+        [JsonProperty]
+        public CachaPacket CurrentPacket { get; protected set; } = new ();
 
         public class CachaPacket
         {
@@ -84,16 +84,13 @@ namespace RandomBuff.Core.Game
         }
     }
 
-    internal abstract partial class BaseGameSetting
+    public abstract partial class BaseGachaTemplate
     {
-        public static readonly Dictionary<BuffSettingID, Type> settingDict = new ();
 
-        public static void Init()
+        internal static void Init()
         {
-            settingDict.Add(BuffSettingID.Normal, typeof(NormalGameSetting));
-            settingDict.Add(BuffSettingID.Quick, typeof(QuickGameSetting));
-            settingDict.Add(BuffSettingID.Survival, typeof(SurvivalGameSetting));
-
+            BuffRegister.RegisterGachaTemplate<NormalGachaTemplate>(GachaTemplateID.Normal);
+            BuffRegister.RegisterGachaTemplate<QuickGachaTemplate>(GachaTemplateID.Quick);
         }
     }
 

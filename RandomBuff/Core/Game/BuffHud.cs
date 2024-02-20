@@ -28,15 +28,15 @@ namespace RandomBuff.Core.Game
 
         public void NewGame(SlugcatStats.Name saveName)
         {
-            var setting = BuffDataManager.Instance.GetSafeSetting(saveName);
-            if (setting.instance.CurrentPacket.NeedMenu)
+            var setting = BuffPoolManager.Instance.GameSetting.gachaTemplate;
+            if (setting.CurrentPacket.NeedMenu)
             {
-                for (int i = 0; i < setting.instance.CurrentPacket.positive.pickTimes; i++)
+                for (int i = 0; i < setting.CurrentPacket.positive.pickTimes; i++)
                 {
 
-                    var positiveCards = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.positive.showCount,
+                    var positiveCards = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.positive.showCount,
                         BuffType.Positive);
-                    var negativeCardsList = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.positive.showCount,
+                    var negativeCardsList = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.positive.showCount,
                         BuffType.Negative, BuffType.Duality);
 
                     if (positiveCards == null || negativeCardsList == null)
@@ -52,11 +52,11 @@ namespace RandomBuff.Core.Game
                             BuffPoolManager.Instance.CreateBuff(id);
 
                         }, positiveCards.Select(i => i.BuffID).ToArray(),
-                        negativeCards, setting.instance.CurrentPacket.positive.selectCount);
+                        negativeCards, setting.CurrentPacket.positive.selectCount);
                 }
-                for (int i = 0; i < setting.instance.CurrentPacket.negative.pickTimes; i++)
+                for (int i = 0; i < setting.CurrentPacket.negative.pickTimes; i++)
                 {
-                    var pickList = BuffPicker.GetNewBuffsOfType(saveName, setting.instance.CurrentPacket.negative.showCount, 
+                    var pickList = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.negative.showCount, 
                         BuffType.Negative, BuffType.Duality);
                     if (pickList == null)
                         break;
@@ -64,7 +64,7 @@ namespace RandomBuff.Core.Game
                         {
                             BuffPoolManager.Instance.CreateBuff(id);
                         }, pickList.Select(i => i.BuffID).ToArray(),
-                        new BuffID[setting.instance.CurrentPacket.negative.showCount], setting.instance.CurrentPacket.negative.selectCount);
+                        new BuffID[setting.CurrentPacket.negative.showCount], setting.CurrentPacket.negative.selectCount);
                 }
             }
         }

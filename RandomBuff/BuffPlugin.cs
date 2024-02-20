@@ -7,6 +7,7 @@ using System.Security.Permissions;
 using BepInEx;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings.Condition;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
@@ -23,7 +24,7 @@ namespace RandomBuff
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
     public class BuffPlugin : BaseUnityPlugin
     {
-        public const string saveVersion = "a-0.0.2";
+        public const string saveVersion = "a-0.0.3";
 
         public void OnEnable()
         {
@@ -80,18 +81,29 @@ namespace RandomBuff
                     }
                     Render.CardRender.CardBasicAssets.LoadAssets();
 
-                    BaseGameSetting.Init();
+                    BaseGachaTemplate.Init();
+                    BaseCondition.Init();
+
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
-                    //HooksApplier.ApplyHooks();
                     BuffRegister.InitAllBuffPlugin();
-               
+
+                    On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
                     isLoaded = true;
                 }
             }
             catch (Exception e)
             {
                 LogException(e);
+            }
+        }
+
+        private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
+        {
+            orig(self, dt);
+            if (Input.GetKey(KeyCode.K) && self.IsStorySession)
+            {
+                self.GetStorySession.saveState.cycleNumber = 20;
             }
         }
 
@@ -111,6 +123,7 @@ namespace RandomBuff
                 {
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
+                    BuffConfigManager.InitTemplateStaticData();
                     BuffRegister.BuildAllDataStaticWarpper();
                     isPostLoaded = true;
                 }
