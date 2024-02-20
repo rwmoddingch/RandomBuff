@@ -1,6 +1,7 @@
 ﻿using RandomBuff.Core.Entry;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
@@ -9,6 +10,7 @@ using RWCustom;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings;
 using UnityEngine;
 
 namespace RandomBuff.Core.SaveData
@@ -134,19 +136,13 @@ namespace RandomBuff.Core.SaveData
 
         internal void EnterGameFromMenu(SlugcatStats.Name name)
         {
-            var setting = CreateOrGetSettingInstance(name);
+            var setting = GetGameSetting(name);
             if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
                 ProcessManager.MenuSetup.StoryGameInitCondition.New)
                 setting.NewGame();
         }
 
-        internal BaseGameSetting CreateOrGetSettingInstance(SlugcatStats.Name name)
-        {
-            if (GetSafeSetting(name).instance == null)
-                GetSafeSetting(name).instance = (BaseGameSetting)Activator.CreateInstance(
-                    BaseGameSetting.settingDict[GetSafeSetting(name).ID]);
-            return GetSafeSetting(name).instance;
-        }
+    
 
 
 
@@ -155,13 +151,13 @@ namespace RandomBuff.Core.SaveData
         /// 负责把临时数据转移到永久
         /// </summary>
         /// <param name="name"></param>
-        internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, BaseGameSetting setting)
+        internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, GameSetting setting)
         {
             var name = manager.Game.StoryCharacter;
 
             if(!allDatas.ContainsKey(name)) allDatas.Add(name, new());
             allDatas[name] = tempDatas;
-            GetSafeSetting(name).instance = setting;
+            gameSettings[name] = setting;
 
             foreach(var id in allDatas[name].Keys)
                 BuffFile.Instance.AddCollect(id.value);
@@ -185,31 +181,22 @@ namespace RandomBuff.Core.SaveData
         }
 
         /// <summary>
-        /// 安全的获取目前的setting信息
+        /// 获取目前的setting信息
         /// 不会为空
-        /// 但是instance可能为空
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        internal SafeGameSetting GetSafeSetting(SlugcatStats.Name name)
+        internal GameSetting GetGameSetting(SlugcatStats.Name name)
         {
-            if(!allSettings.ContainsKey(name))
-                allSettings.Add(name, new SafeGameSetting());
-            return allSettings[name];
+            if(!gameSettings.ContainsKey(name))
+                gameSettings.Add(name, new GameSetting());
+            return gameSettings[name];
         }
 
 
 
 
-        /// <summary>
-        /// 安全的GameSetting
-        /// 包含了UI界面的偏好信息
-        /// </summary>
-        internal class SafeGameSetting
-        {
-            public BuffSettingID ID = BuffSettingID.Normal;
-            public BaseGameSetting instance;
-        }
+     
 
 
     }
@@ -227,15 +214,13 @@ namespace RandomBuff.Core.SaveData
         /// 删除单一猫存档
         /// </summary>
         /// <param name="name"></param>
-        internal void DeleteSaveData(SlugcatStats.Name name,bool deleteSetting = true)
+        internal void DeleteSaveData(SlugcatStats.Name name)
         {
             if (name != null && allDatas.ContainsKey(name))
             {
                 BuffPlugin.Log($"DELETE SAVE DATA: {name}");
                 allDatas.Remove(name);
             }
-            if(deleteSetting)
-                GetSafeSetting(name).instance = null;
         }
 
 
@@ -246,7 +231,7 @@ namespace RandomBuff.Core.SaveData
         {
             BuffPlugin.Log($"DELETE ALL SAVE DATA");
             allDatas.Clear();
-            allSettings.Clear();
+            gameSettings.Clear();
         }
 
         /// <summary>
@@ -308,21 +293,18 @@ namespace RandomBuff.Core.SaveData
             //---------------------设置-------------------//
 
             builder.Append(SettingSplit);
-            foreach (var catSetting in allSettings)
+            foreach (var catSetting in gameSettings)
             {
                 builder.Append(catSetting.Key);
                 builder.Append(CatIdSplit);
-
-                builder.Append(catSetting.Value.ID);
-                if (catSetting.Value.instance != null)
-                {
-            
-                    builder.Append(BuffSplit);
-                    builder.Append(JsonConvert.SerializeObject(catSetting.Value.instance));
-                }
-
+                builder.Append(catSetting.Value.SaveToString());
                 builder.Append(CatSplit);
+            }
 
+            foreach (var ukCatSetting in ukSlugcatSettings)
+            {
+                builder.Append(ukCatSetting);
+                builder.Append(CatSplit);
             }
 
             return builder.ToString();
@@ -350,7 +332,7 @@ namespace RandomBuff.Core.SaveData
                 if (split.Length <= 1)
                     BuffPlugin.LogError($"Corrupted Data : Missing Setting data");
                 else
-                    InitStringSetting(split[1]);
+                    InitStringSetting(split[1],formatVersion);
             }
 
             foreach (var catSingle in Regex.Split(file, CatSplit)
@@ -399,7 +381,7 @@ namespace RandomBuff.Core.SaveData
 
                     var dataType = BuffRegister.GetDataType(dataSplit[0]);
                     //不存在Type
-                    if (dataType.type == null)
+                    if (dataType.type == null || !BuffConfigManager.ContainsId(dataType.id))
                     {
                         BuffPlugin.LogWarning($"Unknown BuffData ID : {dataSplit[0]}");
                         if (!ukBuffDatas.ContainsKey(slugName))
@@ -441,8 +423,15 @@ namespace RandomBuff.Core.SaveData
         /// 初始化setting信息
         /// </summary>
         /// <param name="data"></param>
-        private void InitStringSetting(string file)
+        ///  <param name="version"></param>
+        private void InitStringSetting(string file, string version)
         {
+            if (version == "a-0.0.2")
+            {
+                BuffPlugin.LogWarning("Remove OutDate settings.");
+                return;
+            }
+
             foreach (var catSingle in Regex.Split(file, CatSplit)
                          .Where(i => !string.IsNullOrEmpty(i)))
             {
@@ -454,55 +443,24 @@ namespace RandomBuff.Core.SaveData
                     BuffPlugin.LogError($"Corrupted Buff Data At: {catSingle}");
                     continue;
                 }
+
                 //不存在的猫名字
                 if (!ExtEnumBase.TryParse(typeof(SlugcatStats.Name), catSplit[0], true, out var re) ||
                     re is not SlugcatStats.Name slugName)
                 {
                     BuffPlugin.LogWarning($"Unknown Slugcat Name: {catSplit[0]}");
                     //暂存栏
-                    ukSlugcatDatas.Add(catSingle);
+                    ukSlugcatSettings.Add(catSingle);
                     continue;
                 }
 
+                if (!GameSetting.TryLoadGameSetting(catSplit[1], out var setting))
+                    setting = new GameSetting();
+                gameSettings.Add(slugName,setting);
 
-                //重定义只做提示
-                if (allSettings.ContainsKey(slugName))
-                    BuffPlugin.LogWarning($"Redefine Slugcat Name: {catSplit[0]}");
-                else
-                    allSettings.Add(slugName, new SafeGameSetting());
-
-
-                var split = Regex.Split(catSplit[1], BuffSplit);
-
-
-                //未知game setting类型
-                if (!BaseGameSetting.settingDict.TryGetValue((allSettings[slugName].ID = new BuffSettingID(split[0])), out var type))
-                {
-                    allSettings[slugName].ID = BuffSettingID.Normal;
-                    BuffPlugin.LogError($"Unknown game setting, IGNORED");
-                    continue;
-                }
-                
-                //如果存在实例则获取
-                if (split.Length == 2)
-                {
-                    BuffPlugin.LogDebug($"Setting Data : {split[0]} - {split[1]}");
-
-                    try
-                    {
-                        allSettings[slugName].instance = (BaseGameSetting)JsonConvert.DeserializeObject(split[1], type);
-                    }
-                    catch (Exception e)
-                    {
-                        BuffPlugin.LogException(e);
-                        BuffPlugin.LogError($"Corrupted Buff Data At : {split[1]}");
-                    }
-                }
-                else
-                {
-                    BuffPlugin.LogDebug($"Setting Data : {split[0]} - NULL");
-                }
             }
+
+
         }
 
         /// <summary>
@@ -510,12 +468,16 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         private readonly Dictionary<SlugcatStats.Name, Dictionary<BuffID, BuffData>> allDatas = new();
 
-        private readonly Dictionary<SlugcatStats.Name, SafeGameSetting> allSettings = new();
+        
 
 
         /// 如果被卸载导致slugcat name或data缺失，则暂时储存在此处
         private readonly List<string> ukSlugcatDatas = new();
         private readonly Dictionary<SlugcatStats.Name, List<string>> ukBuffDatas = new();
+
+        private readonly Dictionary<SlugcatStats.Name, GameSetting> gameSettings = new();
+        private readonly List<string> ukSlugcatSettings = new();
+
 
         private const string CatSplit = " <BuA>";
         private const string CatIdSplit = "<BuAI>";
