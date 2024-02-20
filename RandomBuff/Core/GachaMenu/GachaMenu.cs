@@ -29,7 +29,7 @@ namespace RandomBuff.Core.GachaMenu
                 inGameSlot.AppendCard(id);
             container.AddChild(inGameSlot.Container);
 
-            currentPacket = BuffDataManager.Instance.GetSafeSetting(game.StoryCharacter).instance.CurrentPacket;
+            currentPacket = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket;
             if(currentPacket.positive.pickTimes == 0)
                 positive = false;
             NewPicker();
@@ -187,7 +187,7 @@ namespace RandomBuff.Core.GachaMenu
 
         private int selectCount;
         private bool positive = true;
-        private BaseGameSetting.CachaPacket currentPacket;
+        private BaseGachaTemplate.CachaPacket currentPacket;
 
     }
 }
