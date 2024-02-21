@@ -13,7 +13,7 @@ using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
-using RandomBuff.Core.Game.Settings.Condition;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 
@@ -78,7 +78,7 @@ namespace RandomBuff.Core.Entry
         /// <typeparam name="TTemplateType"></typeparam>
         /// <param name="id"></param>
         public static void RegisterGachaTemplate<TTemplateType>(GachaTemplateID id)
-            where TTemplateType : BaseGachaTemplate, new()
+            where TTemplateType : GachaTemplate, new()
         {
             templateTypes.Add(id,typeof(TTemplateType));
         }
@@ -89,7 +89,7 @@ namespace RandomBuff.Core.Entry
         /// <typeparam name="TConditionType"></typeparam>
         /// <param name="id"></param>
         public static void RegisterCondition<TConditionType>(ConditionID id)
-            where TConditionType : BaseCondition, new()
+            where TConditionType : Condition, new()
         {
             conditionTypes.Add(id,typeof(TConditionType));
         }
