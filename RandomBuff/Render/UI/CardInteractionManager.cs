@@ -415,6 +415,7 @@ namespace RandomBuff.Render.UI
                     card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Hide);
 
                 if (SubManager != null) SubManager.overrideDisabled = false;
+                if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
             }
             else if(newState == State.Show)
             {
@@ -423,6 +424,7 @@ namespace RandomBuff.Render.UI
                 foreach (var card in managedCards)
                     card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
                 if (SubManager != null) SubManager.overrideDisabled = true;
+                if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
             }
             else if(newState == State.ExclusiveShow)
             {

@@ -1,7 +1,9 @@
 ﻿using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI.BuffCondition;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -126,6 +128,8 @@ namespace RandomBuff.Render.UI
     /// </summary>
     internal class BasicInGameBuffCardSlot : BuffCardSlot
     {
+        public CommmmmmmmmmmmmmpleteInGameSlot completeSlot;
+
         FSprite darkMask_back;
         FSprite darkMaks_front;
 
@@ -151,7 +155,7 @@ namespace RandomBuff.Render.UI
 
         static int CardStartIndex = 1;//卡牌帮助信息+黑幕
 
-        public BasicInGameBuffCardSlot(bool canTriggerBuff = false)
+        public BasicInGameBuffCardSlot(bool canTriggerBuff = false, CommmmmmmmmmmmmmpleteInGameSlot completeSlot = null)
         {
             BaseInteractionManager = new InGameSlotInteractionManager(this, canTriggerBuff);
             Container.AddChild(darkMask_back = new FSprite("pixel") { scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, color = Color.black, alpha = 0f });
@@ -161,6 +165,7 @@ namespace RandomBuff.Render.UI
 
             HelpInfoProvider = new HelpInfoProvider(this);
             HelpInfoProvider.label.MoveToFront();
+            this.completeSlot = completeSlot;
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -479,6 +484,8 @@ namespace RandomBuff.Render.UI
         public BuffTimerAnimSlot TimerAnimSlot { get; private set; }
         public CardPickerSlot ActivePicker { get; private set; }
 
+        public BuffConditionHUD ConditionHUD { get; private set; }
+
         Queue<Action> pickerRequests = new();
 
         public CommmmmmmmmmmmmmpleteInGameSlot()
@@ -486,14 +493,18 @@ namespace RandomBuff.Render.UI
             BuffCards = null;//不直接管理卡牌，所以设置为null来提前触发异常
             BaseInteractionManager = new DoNotingInteractionManager<CommmmmmmmmmmmmmpleteInGameSlot>(this);
 
-            BasicSlot = new BasicInGameBuffCardSlot(true);
+            BasicSlot = new BasicInGameBuffCardSlot(true, this);
             ActiveAnimSlot = new ActivateCardAnimSlot(this);
             TriggerAnimSlot = new TriggerBuffAnimSlot(this);
             TimerAnimSlot = new BuffTimerAnimSlot(this);
+
+            ConditionHUD = new BuffConditionHUD();
             Container.AddChild(BasicSlot.Container);
             Container.AddChild(ActiveAnimSlot.Container);
             Container.AddChild(TriggerAnimSlot.Container);
             Container.AddChild(TimerAnimSlot.Container);
+            
+            Container.AddChild(ConditionHUD.Container);
         }
 
         public override void Update()
@@ -503,6 +514,7 @@ namespace RandomBuff.Render.UI
             ActiveAnimSlot.Update();
             TriggerAnimSlot.Update();
             TimerAnimSlot.Update();
+            ConditionHUD.Update();
             if(ActivePicker != null)
             {
                 ActivePicker.Update();
@@ -559,6 +571,7 @@ namespace RandomBuff.Render.UI
             TriggerAnimSlot.GrafUpdate(timeStacker);
             ActivePicker?.GrafUpdate(timeStacker);
             TimerAnimSlot.GrafUpdate(timeStacker);
+            ConditionHUD.DrawSprites(timeStacker);
 
             //if (Input.GetKeyDown(KeyCode.C))
             //{
@@ -628,6 +641,7 @@ namespace RandomBuff.Render.UI
             ActiveAnimSlot.Destory();
             TriggerAnimSlot.Destory();
             TimerAnimSlot.Destory();
+            ConditionHUD.Destroy();
             base.Destory();
         }
 
