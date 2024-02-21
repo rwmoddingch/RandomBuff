@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
-using RandomBuff.Core.Game.Settings.Condition;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 
@@ -20,9 +21,9 @@ namespace RandomBuff.Core.Game.Settings
         private const string SubSettingSplit = "<GSB>";
 
 
-        public List<BaseCondition> conditions = new ();
+        public List<Condition> conditions = new ();
 
-        public BaseGachaTemplate gachaTemplate = new NormalGachaTemplate();
+        public Game.GachaTemplate gachaTemplate = new NormalGachaTemplate();
 
         public bool MissingDependence => fallBack != null;
 
@@ -34,8 +35,7 @@ namespace RandomBuff.Core.Game.Settings
         public GameSetting()
         {
             LoadTemplate("Normal");
-            if(BuffPlugin.DevEnabled)
-                CreateNewCondition(ConditionID.Cycle);
+      
         }
 
         public bool Win
@@ -128,7 +128,7 @@ namespace RandomBuff.Core.Game.Settings
             }
 
             var data = BuffConfigManager.GetTemplateData(name);
-            gachaTemplate = (BaseGachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplate(data.Id));
+            gachaTemplate = (Game.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplate(data.Id));
             foreach (var pair in data.datas)
             {
                 try
@@ -142,14 +142,25 @@ namespace RandomBuff.Core.Game.Settings
                 }
             }
             TemplateName = name;
+            if (BuffPlugin.DevEnabled)
+            {
+                conditions.Clear();
+                CreateNewCondition(ConditionID.Cycle);
+                CreateNewCondition(ConditionID.Card);
+            }
         }
 
-        public BaseCondition CreateNewCondition(ConditionID id)
+        public Condition CreateNewCondition(ConditionID id)
         {
-            var re = (BaseCondition)Activator.CreateInstance(BuffRegister.GetCondition(id));
+            var re = (Condition)Activator.CreateInstance(BuffRegister.GetCondition(id));
             re.SetRandomParameter(Difficulty);
             conditions.Add(re);
             return re;
+        }
+
+        public void SaveGameSettingToPath(string path)
+        {
+            File.WriteAllText(path, SaveToString());
         }
 
 
@@ -182,7 +193,7 @@ namespace RandomBuff.Core.Game.Settings
                                 return true;
                             }
 
-                            setting.gachaTemplate = (BaseGachaTemplate)JsonConvert.DeserializeObject(subs[2],
+                            setting.gachaTemplate = (Game.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
                                     BuffRegister.GetTemplate((GachaTemplateID)id));
                             break;
                         case "CONDITION":
@@ -192,7 +203,7 @@ namespace RandomBuff.Core.Game.Settings
                                 setting.fallBack = str;
                                 return true;
                             }
-                            setting.conditions.Add((BaseCondition)JsonConvert.DeserializeObject(subs[2],
+                            setting.conditions.Add((Condition)JsonConvert.DeserializeObject(subs[2],
                                 BuffRegister.GetCondition((ConditionID)cid)));
                             break;
                     }

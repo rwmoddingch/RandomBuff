@@ -9,7 +9,7 @@ using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
-    internal class QuickGachaTemplate : BaseGachaTemplate
+    internal class QuickGachaTemplate : Game.GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.Quick;
 
@@ -23,7 +23,6 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public override void EnterGame()
         {
-
             inGame = true;
             counter = 0;
             if (newGame)
@@ -59,8 +58,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
                 BuffPlugin.LogDebug($"Quick Mode : New Buff {buffId}");
 
-                BuffHud.Instance.AppendNewCard(buffId);
                 BuffPoolManager.Instance.CreateBuff(buffId);
+                BuffHud.Instance.AppendNewCard(buffId);
                 queue.Enqueue(buffId);
                 counter = 0;
             }

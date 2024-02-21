@@ -149,7 +149,7 @@ namespace RandomBuff.Core.BuffMenu
             }
         }
 
-        private bool IsInactive => manager.rainWorld.progression.IsThereASavedGame(CurrentName);
+        private bool IsInactive => manager.rainWorld.progression.IsThereASavedGame(CurrentName) && !restartCurrent;
 
         void UpdateSlugcatAndPage()
         {

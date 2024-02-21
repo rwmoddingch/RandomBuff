@@ -5,9 +5,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using BepInEx;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
-using RandomBuff.Core.Game.Settings.Condition;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
@@ -81,14 +82,16 @@ namespace RandomBuff
                     }
                     Render.CardRender.CardBasicAssets.LoadAssets();
 
-                    BaseGachaTemplate.Init();
-                    BaseCondition.Init();
+                    GachaTemplate.Init();
+                    Condition.Init();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
                     BuffRegister.InitAllBuffPlugin();
 
-                    On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+                    if(DevEnabled)
+                        On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+
                     isLoaded = true;
                 }
             }
@@ -101,9 +104,9 @@ namespace RandomBuff
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
-            if (Input.GetKey(KeyCode.K) && self.IsStorySession)
+            if (Input.GetKey(KeyCode.K) && self.rainWorld.BuffMode() && Directory.Exists("Debug"))
             {
-                self.GetStorySession.saveState.cycleNumber = 20;
+                BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
             }
         }
 

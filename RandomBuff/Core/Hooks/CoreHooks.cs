@@ -97,8 +97,11 @@ namespace RandomBuff.Core.Hooks
         private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
         {
             orig(self, cam);
-            if(self.rainWorld.BuffMode())
+            if (self.rainWorld.BuffMode())
+            {
                 self.AddPart(new BuffHud(self));
+                self.AddPart(new TConditionHud(self));
+            }
         }
 
         private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)

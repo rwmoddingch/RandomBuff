@@ -32,9 +32,9 @@ namespace RandomBuff.Core.Game
     /// 基类
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract partial class BaseGachaTemplate
+    public abstract partial class GachaTemplate
     {
-        protected BaseGachaTemplate()
+        protected GachaTemplate()
         {
         }
 
@@ -84,7 +84,7 @@ namespace RandomBuff.Core.Game
         }
     }
 
-    public abstract partial class BaseGachaTemplate
+    public abstract partial class GachaTemplate
     {
 
         internal static void Init()
