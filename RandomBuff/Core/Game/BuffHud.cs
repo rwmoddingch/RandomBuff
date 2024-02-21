@@ -115,57 +115,56 @@ namespace RandomBuff.Core.Game
         private CommmmmmmmmmmmmmpleteInGameSlot inGameSlot;
     }
 
-    internal class TConditionHud : HudPart
-    {
-        public TConditionHud(HUD.HUD hud) : base(hud)
-        {
-            gameSetting = BuffPoolManager.Instance.GameSetting;
-            foreach (var condition in gameSetting.conditions)
-            {
-                condition.BindHudFunction(OnCompleted, OnUncompleted,OnLabelRefresh);
-                //加入已经完成的判断
-                FLabel label = new FLabel(Custom.GetDisplayFont(),
-                    condition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
-                    condition.DisplayProgress(Custom.rainWorld.inGameTranslator))
-                {
-                    alignment = FLabelAlignment.Left,
-                    anchorX = 0,
-                    anchorY = 1
-                };
-                hud.fContainers[1].AddChild(label);
-                label.y = Custom.rainWorld.screenSize.y - dicts.Count * 30;
-                label.x = 20;
-                dicts.Add(condition,label);
-            }
-        }
+    //internal class TConditionHud : HudPart
+    //{
+    //    public TConditionHud(HUD.HUD hud) : base(hud)
+    //    {
+    //        gameSetting = BuffPoolManager.Instance.GameSetting;
+    //        foreach (var condition in gameSetting.conditions)
+    //        {
+    //            condition.BindHudFunction(OnCompleted, OnUncompleted,OnLabelRefresh);
+    //            //加入已经完成的判断
+    //            FLabel label = new FLabel(Custom.GetDisplayFont(),
+    //                condition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
+    //                condition.DisplayProgress(Custom.rainWorld.inGameTranslator))
+    //            {
+    //                alignment = FLabelAlignment.Left,
+    //                anchorX = 0,
+    //                anchorY = 1
+    //            };
+    //            hud.fContainers[1].AddChild(label);
+    //            label.y = Custom.rainWorld.screenSize.y - dicts.Count * 30;
+    //            label.x = 20;
+    //            dicts.Add(condition,label);
+    //        }
+    //    }
 
-        public void OnLabelRefresh(Condition condition)
-        {
-            if (dicts.TryGetValue(condition, out var label))
-                label.text = condition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
-                             condition.DisplayProgress(Custom.rainWorld.inGameTranslator);
-        }
+    //    public void OnLabelRefresh(Condition condition)
+    //    {
+    //        if (dicts.TryGetValue(condition, out var label))
+    //            label.text = condition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
+    //                         condition.DisplayProgress(Custom.rainWorld.inGameTranslator);
+    //    }
 
-        public void OnCompleted(Condition condition)
-        {
-            //TODO: 完成时效果
-        }
-        public void OnUncompleted(Condition condition)
-        {
-            //TODO: 撤销完成时效果
-        }
+    //    public void OnCompleted(Condition condition)
+    //    {
+    //        //TODO: 完成时效果
+    //    }
+    //    public void OnUncompleted(Condition condition)
+    //    {
+    //        //TODO: 撤销完成时效果
+    //    }
 
+    //    public override void ClearSprites()
+    //    {
+    //        base.ClearSprites();
+    //        foreach(var condition in gameSetting.conditions)
+    //            condition.UnbindHudFunction(OnCompleted,OnUncompleted,OnLabelRefresh);
+    //        foreach(var label in dicts.Values)
+    //            label.RemoveFromContainer();
+    //    }
 
-        public override void ClearSprites()
-        {
-            base.ClearSprites();
-            foreach(var condition in gameSetting.conditions)
-                condition.UnbindHudFunction(OnCompleted,OnUncompleted,OnLabelRefresh);
-            foreach(var label in dicts.Values)
-                label.RemoveFromContainer();
-        }
-
-        private Dictionary<Condition, FLabel> dicts = new();
-        private GameSetting gameSetting;
-    }
+    //    private Dictionary<Condition, FLabel> dicts = new();
+    //    private GameSetting gameSetting;
+    //}
 }

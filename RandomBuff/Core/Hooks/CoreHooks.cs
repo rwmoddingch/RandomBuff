@@ -100,7 +100,7 @@ namespace RandomBuff.Core.Hooks
             if (self.rainWorld.BuffMode())
             {
                 self.AddPart(new BuffHud(self));
-                self.AddPart(new TConditionHud(self));
+                //self.AddPart(new TConditionHud(self));
             }
         }
 
