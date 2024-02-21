@@ -187,7 +187,7 @@ namespace RandomBuff.Core.GachaMenu
 
         private int selectCount;
         private bool positive = true;
-        private BaseGachaTemplate.CachaPacket currentPacket;
+        private GachaTemplate.CachaPacket currentPacket;
 
     }
 }
