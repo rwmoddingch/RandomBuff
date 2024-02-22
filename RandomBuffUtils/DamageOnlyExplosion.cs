@@ -1,7 +1,6 @@
 ﻿using Expedition;
 using MoreSlugcats;
 using Noise;
-using RandomBuff;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -184,7 +183,7 @@ namespace RandomBuffUtils
             if (this.frame > this.lifeTime)
             {
                 this.Destroy();
-                BuffPlugin.Log("DamageOnlyExplosion: Destroy explosion");
+                BuffUtils.Log("DamageOnlyExplosion", "Destroy explosion");
             }
         }
     }
