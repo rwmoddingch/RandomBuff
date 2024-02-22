@@ -23,12 +23,10 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public override void EnterGame()
         {
-            inGame = true;
-            counter = 0;
             if (newGame)
             {
                 newGame = false;
-                counter = 40 * Time - 1;
+                counter = 40 * Time;
             }
         }
 
@@ -68,18 +66,19 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         public override void SessionEnd()
         {
             CurrentPacket = new CachaPacket();
-            inGame = false;
             BuffPlugin.Log($"QuickGameSetting : SessionEnd! isPositive: {isPositive}");
         }
 
         public override void NewGame()
         {
+            BuffPlugin.LogDebug("New Quick Game");
             newGame = true;
             CurrentPacket = new CachaPacket();
         }
 
         private int counter;
-        private bool inGame;
+
+        [JsonProperty]
         private bool newGame;
 
         [JsonProperty]

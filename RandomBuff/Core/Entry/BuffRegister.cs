@@ -88,10 +88,12 @@ namespace RandomBuff.Core.Entry
         /// </summary>
         /// <typeparam name="TConditionType"></typeparam>
         /// <param name="id"></param>
-        public static void RegisterCondition<TConditionType>(ConditionID id)
+        /// <param name="displayName"></param>
+        public static void RegisterCondition<TConditionType>(ConditionID id,string displayName)
             where TConditionType : Condition, new()
         {
             conditionTypes.Add(id,typeof(TConditionType));
+            conditionNames.Add(id,displayName);
         }
     }
 
@@ -221,5 +223,7 @@ namespace RandomBuff.Core.Entry
         private static readonly Dictionary<BuffID, Type> BuffTypes = new();
         private static readonly Dictionary<GachaTemplateID, Type> templateTypes = new();
         private static readonly Dictionary<ConditionID, Type> conditionTypes = new();
+        private static readonly Dictionary<ConditionID, string> conditionNames = new();
+
     }
 }

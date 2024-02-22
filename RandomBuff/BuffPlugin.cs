@@ -93,6 +93,9 @@ namespace RandomBuff
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 
                     isLoaded = true;
+
+                    //TODO : 测试用
+                    DevEnabled = true;
                 }
             }
             catch (Exception e)

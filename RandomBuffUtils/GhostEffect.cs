@@ -1,5 +1,4 @@
-﻿using RandomBuff;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Permissions;
@@ -13,6 +12,23 @@ using UnityEngine;
 
 namespace RandomBuffUtils
 {
+    public static class BuffUtils
+    {
+        public static void Log(object header,object m)
+        {
+            Debug.Log($"[RandomBuffUtils - {header}] {m}");
+        }
+
+        public static void LogWarning(object header, object m)
+        {
+            Debug.LogWarning($"[RandomBuffUtils - {header}] {m}");
+        }
+        public static void LogError(object header, object m)
+        {
+            Debug.LogError($"[RandomBuffUtils - {header}] {m}");
+        }
+    }
+
     public class GhostEffect : CosmeticSprite
     {
         Vector2 center;
@@ -91,7 +107,7 @@ namespace RandomBuffUtils
                     origAlphas[i] = GetAlphas(sprites[i]);
                 }
                 center = screenCenterPos;
-                BuffPlugin.Log($"GhostEffect: center : {center}, pos : {graphicsModule.owner.firstChunk.pos}");
+                BuffUtils.Log("GhostEffect", $"center : {center}, pos : {graphicsModule.owner.firstChunk.pos}");
 
                 return sprites;
             }

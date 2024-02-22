@@ -16,11 +16,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public static ConditionID Cycle;
         public static ConditionID Card;
+        public static ConditionID Hunt;
 
         static ConditionID()
         {
             Cycle = new ConditionID("Cycle", true);
             Card = new ConditionID("Card", true);
+            Hunt = new ConditionID("Hunt", true);
 
         }
 
@@ -100,8 +102,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         internal static void Init()
         {
-            BuffRegister.RegisterCondition<CycleCondition>(ConditionID.Cycle);
-            BuffRegister.RegisterCondition<CardCondition>(ConditionID.Card);
+            BuffRegister.RegisterCondition<CycleCondition>(ConditionID.Cycle, "Cycle Condition");
+            BuffRegister.RegisterCondition<CardCondition>(ConditionID.Card, "Card Condition");
+            //BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
+
         }
     }
 }
