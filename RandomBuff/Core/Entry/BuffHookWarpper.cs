@@ -43,8 +43,7 @@ namespace RandomBuff.Core.Entry
                 }
                 catch (Exception ex)
                 {
-                    BuffPlugin.Log($"BuffHookWarpper : Exception when enable hook ");
-                    BuffPlugin.LogException(ex);
+                    BuffPlugin.LogException(ex, $"BuffHookWarpper : Exception when enable hook for {buffID}");
                 }
             }
         }
@@ -61,8 +60,7 @@ namespace RandomBuff.Core.Entry
                 }
                 catch (Exception ex)
                 {
-                    BuffPlugin.Log($"BuffHookWarpper : Exception when enable hook ");
-                    BuffPlugin.LogException(ex);
+                    BuffPlugin.LogException(ex, $"BuffHookWarpper : Exception when enable hook for {buffID}");
                 }
             }
         }
@@ -79,39 +77,57 @@ namespace RandomBuff.Core.Entry
             foreach (var v in il.Body.Variables)
                 ilProcessor.Body.Variables.Add(new VariableDefinition(v.VariableType));
 
+            List<(Instruction target, Instruction from)> labelList = new();
+
             foreach (var str in il.Instrs)
             {
-                if (str.MatchCallOrCallvirt(out var m))
+            
+                if (str.MatchCallOrCallvirt(out var m) &&
+                    m.Name.Contains("add") && hookAssembly.GetType(m.DeclaringType.FullName) != null)
                 {
-                    if (m.Name.Contains("add") && hookAssembly.GetType(m.DeclaringType.FullName) != null)
-                    {
-                        ilProcessor.Emit(OpCodes.Call,
-                            hookAssembly.GetType(m.DeclaringType.FullName).GetMethod(m.Name.Replace("add", "remove")));
-                        //BuffPlugin.Log($"Add {m.Name.Replace("add", "remove")}");
-                        continue;
-                    }
+                    ilProcessor.Emit(OpCodes.Call,
+                        hookAssembly.GetType(m.DeclaringType.FullName).GetMethod(m.Name.Replace("add", "remove")));
+                    //BuffPlugin.Log($"Add {m.Name.Replace("add", "remove")}");
+
                 }
                 else if (str.MatchNewobj<Hook>() && str.MatchNewobj(out var ctor))
                 {
                     for (int i = 0; i < ctor.Parameters.Count; i++)
                         ilProcessor.Emit(OpCodes.Pop);
                     ilProcessor.Emit(OpCodes.Ldnull);
-                    //BuffPlugin.Log($"Remove RuntimeDetour in remove function");
-                    continue;
                 }
                 else if (str.OpCode == OpCodes.Ret)
                 {
                     ilProcessor.Emit(OpCodes.Ldstr, id.value);
                     ilProcessor.Emit(OpCodes.Call, typeof(BuffHookWarpper).GetMethod("RemoveRuntimeHook", BindingFlags.NonPublic | BindingFlags.Static));
-                }
-                ilProcessor.Append(str);
+                    ilProcessor.Append(str);
 
+                }
+                else if (str.MatchBr(out var label) || str.MatchBrtrue(out label) || str.MatchBrfalse(out label))
+                {
+                    var from = ilProcessor.Create(str.OpCode, str);
+                    ilProcessor.Append(from);
+                    labelList.Add(new (label.Target,from));
+                }
+                else
+                {
+                    ilProcessor.Append(str);
+                }
+
+                foreach (var pair in labelList)
+                {
+                    if (str == pair.target)
+                        pair.from.Operand = ilProcessor.Body.Instructions.Last();
+                }
             }
+
+            //BuffPlugin.LogDebug($"----------------------------");
             //foreach (var a in il.Instrs)
             //    Print(a);
-            //BuffPlugin.Log($"------------");
+            //BuffPlugin.LogDebug($"----------------------------");
             //foreach (var a in method.Definition.Body.Instructions)
             //    Print(a);
+
 
             ILCursor c = new ILCursor(il);
             while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj<Hook>()))
