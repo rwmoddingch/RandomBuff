@@ -51,10 +51,10 @@ namespace BuiltinBuffs.Duality
             //BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
         }
 
-        //private static void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
-        //{
-        //    BuffUtils.Log(ArmstronBuffID,"killed creature");
-        //}
+        private static void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
+        {
+            BuffUtils.Log(ArmstronBuffID,"killed creature");
+        }
 
         private static void AntiGravity_Update(On.AntiGravity.orig_Update orig, AntiGravity self, bool eu)
         {
