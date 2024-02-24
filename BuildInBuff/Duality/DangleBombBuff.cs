@@ -63,29 +63,12 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    internal class DangleBombBuffData : BuffData
+    internal class DangleBombBuffData : CountableBuffData
     {
-        [JsonProperty]
-        int cycleLeft;
+     
 
         public override BuffID ID => DangleBombIBuffEntry.dangleBombBuffID;
-
-        public override bool NeedDeletion => cycleLeft <= 0;
-
-
-        public override void DataLoaded(bool newData)
-        {
-            base.DataLoaded(newData);
-        }
-
-
-        public override void CycleEnd()
-        {
-            base.CycleEnd();
-            BuffPlugin.Log($"DangleBombBuffData : stepping cycle {cycleLeft}->{cycleLeft - 1}");
-            cycleLeft--;
-        }
-        
+        public override int MaxCycleCount => 3;
     }
 
     internal class DangleBombBuff : Buff<DangleBombBuff, DangleBombBuffData>
@@ -97,7 +80,7 @@ namespace BuiltinBuffs.Duality
     {
         public WeakReference<DangleFruit> dangleRef;
         Color origCol;
-        public WeakReference<Creature> lastThrowBy = new WeakReference<Creature>(null);
+        public WeakReference<Creature> lastThrowBy = new (null);
 
         public bool bombActivate;
         int bombCounter = 120;

@@ -90,4 +90,38 @@ using System.Threading.Tasks;
             return default;
         }
     }
+
+
+    /// <summary>
+    /// 带轮回倒数的BuffData
+    /// </summary>
+    public abstract class CountableBuffData : BuffData
+    {
+        public abstract override BuffID ID { get; }
+
+        /// <summary>
+        /// 最大轮回数量
+        /// 超过数量会删除
+        /// </summary>
+        public abstract int MaxCycleCount { get; }
+
+
+        public override void Stack()
+        {
+            CycleUse = 0;
+            base.Stack();
+        }
+
+        [JsonProperty]
+        public int CycleUse { get; protected set; }
+
+        public override bool NeedDeletion => CycleUse > MaxCycleCount;
+
+        public override void CycleEnd()
+        {
+            base.CycleEnd();
+            CycleUse++;
+        }
+    }
+
 }

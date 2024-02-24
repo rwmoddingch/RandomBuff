@@ -7,29 +7,182 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static MoreSlugcats.MoreSlugcatsEnums;
+using static RandomBuffUtils.BuffEvent;
 using static RandomBuffUtils.BuffEvents.BuffRegionGateEvent;
 
 namespace RandomBuffUtils.BuffEvents
 {
     //TODO : 修复原游戏多次过门重复加载生物的问题
-    public static class BuffRegionGateEvent
-    {
-        public static event Action<RegionGateInstance> OnGateLoaded;
-        public static event Action<RegionGateInstance> OnGateOpened;
 
-        static RegionGateSaveDataTx saveData;
+    public static partial class BuffRegionGateEvent
+    {
+        public static event RegionGateHandler OnGateLoaded;
+        public static event RegionGateHandler OnGateOpened;
+
+        public static RegionGateInstance TryGetGateInstance(string region1, string region2, RainWorldGame game)
+        {
+            region1 = region1.ToUpper();
+            region2 = region2.ToUpper();
+
+            foreach (var instance in loadedInstance)
+            {
+                if (instance.IsThisGate(region1, region2))
+                    return instance;
+            }
+
+            string[] locks = File.ReadAllLines(AssetManager.ResolveFilePath(string.Concat(new string[]
+            {
+                "World",
+                Path.DirectorySeparatorChar.ToString(),
+                "Gates",
+                Path.DirectorySeparatorChar.ToString(),
+                "locks.txt"
+            })));
+
+            var gateRoomName = $"GATE_{region1}_{region2}";
+            for (int i = 0; i < locks.Length; i++)
+            {
+                if (Regex.Split(locks[i], " : ")[0] == gateRoomName)
+                {
+                    var karmaRequirements = new RegionGate.GateRequirement[2];
+                    karmaRequirements[0] = new RegionGate.GateRequirement(Regex.Split(locks[i], " : ")[1].Trim());
+                    karmaRequirements[1] = new RegionGate.GateRequirement(Regex.Split(locks[i], " : ")[2].Trim());
+
+                    var unlocked = game.GetStorySession.saveState.deathPersistentSaveData.unlockedGates.Contains(gateRoomName);
+
+                    var result = new RegionGateInstance(gateRoomName, karmaRequirements, unlocked);
+                    loadedInstance.Add(result);
+                    return result;
+                }
+            }
+
+            BuffUtils.LogError("BuffRegionGateEvent", $"{gateRoomName} doesnt exist!");
+            return null;
+        }
+
+        public class RegionGateInstance
+        {
+            public string[] BindRegions { get; private set; }
+
+            internal RegionGate.GateRequirement[] _karmaReqs = new RegionGate.GateRequirement[2];
+            public RegionGate.GateRequirement KarmaRequirementLeft
+            {
+                get => _karmaReqs[0];
+                set
+                {
+                    if (value != _karmaReqs[0])
+                    {
+                        _karmaReqs[0] = value;
+                        _gateStateModified = true;
+                    }
+                }
+            }
+
+            public RegionGate.GateRequirement KarmaRequirementRight
+            {
+                get => _karmaReqs[1];
+                set
+                {
+                    if (value != _karmaReqs[1])
+                    {
+                        _karmaReqs[1] = value;
+                        _gateStateModified = true;
+                    }
+                }
+            }
+
+            bool _unlocked;
+            public bool Unlocked
+            {
+                get => _unlocked;
+                set
+                {
+                    if (value != _unlocked)
+                    {
+                        _unlocked = value;
+                        _gateStateModified = true;
+                    }
+                }
+            }
+
+            public bool EnergyEnoughToOpen;
+
+            internal bool _gateStateModified;
+
+            internal RegionGateInstance(string[] bindRegions, RegionGate.GateRequirement[] requirements, bool unlock)
+            {
+                BindRegions = bindRegions;
+                _karmaReqs = requirements;
+                _unlocked = unlock;
+            }
+
+            internal RegionGateInstance(string roomName, RegionGate.GateRequirement[] requirements, bool unlock)
+            {
+                string[] names = roomName.Split('_');
+                BindRegions = new string[2] { names[1], names[2] };
+
+                _karmaReqs = requirements;
+                _unlocked = unlock;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null)
+                    return false;
+                if (obj is RegionGateInstance instance)
+                {
+                    return BindRegions.SequenceEqual(instance.BindRegions);
+                }
+                return false;
+            }
+
+            public bool IsThisGate(string region1, string region2)
+            {
+                return BindRegions[0] == region1 && BindRegions[1] == region2; ;
+            }
+
+            public bool IsThisGate(string roomName)
+            {
+                string[] names = roomName.Split('_');
+                return IsThisGate(names[1], names[2]);
+            }
+
+            public override string ToString()
+            {
+                return $"{BindRegions[0]}_{BindRegions[1]}_{KarmaRequirementLeft.value}_{KarmaRequirementRight.value}_{_unlocked}";
+            }
+
+            public void ToString(StringBuilder builder)
+            {
+                builder.Append(this.ToString());
+                builder.Append("|");
+            }
+
+            public static RegionGateInstance FromString(string str)
+            {
+                string[] array = str.Split('_');
+                return new RegionGateInstance(new string[] { array[0], array[1] },
+                                              new RegionGate.GateRequirement[] { new RegionGate.GateRequirement(array[2]), new RegionGate.GateRequirement(array[3]) },
+                                              bool.Parse(array[4]));
+            }
+        }
+    }
+
+
+    public static partial class BuffRegionGateEvent
+    {
+ 
+
+        private static RegionGateSaveDataTx saveData;
         internal static List<RegionGateInstance> loadedInstance = new List<RegionGateInstance>();
 
-        public static void OnEnable()
+        internal static void OnEnable()
         {
             DeathPersistentSaveDataRx.AppplyTreatment(saveData = new RegionGateSaveDataTx(null));
 
             On.RegionGate.ctor += RegionGate_ctor;
             //On.RegionGate.NewWorldLoaded += RegionGate_NewWorldLoaded;
             On.RegionGate.Update += RegionGate_Update;
-
-            OnGateLoaded += Test2;
-            OnGateOpened += Test;
         }
 
         private static void RegionGate_Update(On.RegionGate.orig_Update orig, RegionGate self, bool eu)
@@ -67,19 +220,19 @@ namespace RandomBuffUtils.BuffEvents
             }
         }
 
-        public static void Test(RegionGateInstance instance)
-        {
-            var a = instance.KarmaRequirementLeft;
-            instance.KarmaRequirementLeft = instance.KarmaRequirementRight;
-            instance.KarmaRequirementRight = a;
-            instance.EnergyEnoughToOpen = true;
-        }
+        //public static void Test(RegionGateInstance instance)
+        //{
+        //    var a = instance.KarmaRequirementLeft;
+        //    instance.KarmaRequirementLeft = instance.KarmaRequirementRight;
+        //    instance.KarmaRequirementRight = a;
+        //    instance.EnergyEnoughToOpen = true;
+        //}
 
-        public static void Test2(RegionGateInstance instance)
-        {
-            instance.KarmaRequirementLeft = MoreSlugcats.MoreSlugcatsEnums.GateRequirement.OELock;
-            instance.KarmaRequirementRight = RegionGate.GateRequirement.OneKarma;
-        }
+        //public static void Test2(RegionGateInstance instance)
+        //{
+        //    instance.KarmaRequirementLeft = MoreSlugcats.MoreSlugcatsEnums.GateRequirement.OELock;
+        //    instance.KarmaRequirementRight = RegionGate.GateRequirement.OneKarma;
+        //}
 
         private static void RegionGate_ctor(On.RegionGate.orig_ctor orig, RegionGate self, Room room)
         {
@@ -98,7 +251,7 @@ namespace RandomBuffUtils.BuffEvents
             CheckRegionGateInstance(room, self, gateInstance);
         }
 
-        static RegionGateInstance CreateInstanceForGate(RegionGate gate)
+        private static RegionGateInstance CreateInstanceForGate(RegionGate gate)
         {
             RegionGateInstance gateInstance = null;
             foreach (var instance in loadedInstance)
@@ -116,7 +269,7 @@ namespace RandomBuffUtils.BuffEvents
             return gateInstance;
         }
 
-        static void CheckRegionGateInstance(Room room, RegionGate gate, RegionGateInstance gateInstance)
+        private static void CheckRegionGateInstance(Room room, RegionGate gate, RegionGateInstance gateInstance)
         {
             if (saveData.modifiedGateInstances.Contains(gateInstance))
             {
@@ -164,154 +317,6 @@ namespace RandomBuffUtils.BuffEvents
             }
 
             gateInstance._gateStateModified = false;
-        }
-
-        public static RegionGateInstance TryGetGateInstance(string region1, string region2, RainWorldGame game)
-        {
-            region1 = region1.ToUpper();
-            region2 = region2.ToUpper();
-
-            foreach(var instance in loadedInstance)
-            {
-                if (instance.IsThisGate(region1, region2))
-                    return instance;
-            }
-
-            string[] locks = File.ReadAllLines(AssetManager.ResolveFilePath(string.Concat(new string[]
-            {
-                "World",
-                Path.DirectorySeparatorChar.ToString(),
-                "Gates",
-                Path.DirectorySeparatorChar.ToString(),
-                "locks.txt"
-            })));
-
-            var gateRoomName = $"GATE_{region1}_{region2}";
-            for (int i = 0; i < locks.Length; i++)
-            {
-                if (Regex.Split(locks[i], " : ")[0] == gateRoomName)
-                {
-                    var karmaRequirements = new RegionGate.GateRequirement[2];
-                    karmaRequirements[0] = new RegionGate.GateRequirement(Regex.Split(locks[i], " : ")[1].Trim());
-                    karmaRequirements[1] = new RegionGate.GateRequirement(Regex.Split(locks[i], " : ")[2].Trim());
-
-                    var unlocked = game.GetStorySession.saveState.deathPersistentSaveData.unlockedGates.Contains(gateRoomName);
-
-                    var result = new RegionGateInstance(gateRoomName, karmaRequirements, unlocked);
-                    loadedInstance.Add(result);
-                    return result;
-                }
-            }
-
-            BuffUtils.LogError("BuffRegionGateEvent", $"{gateRoomName} doesnt exist!");
-            return null;
-        }
-
-        public class RegionGateInstance
-        {
-            public string[] BindRegions { get; private set; }
-
-            internal RegionGate.GateRequirement[] _karmaReqs = new RegionGate.GateRequirement[2];
-            public RegionGate.GateRequirement KarmaRequirementLeft
-            {
-                get => _karmaReqs[0];
-                set
-                {
-                    if(value != _karmaReqs[0])
-                    {
-                        _karmaReqs[0] = value;
-                        _gateStateModified = true;
-                    }
-                }
-            }
-
-            public RegionGate.GateRequirement KarmaRequirementRight
-            {
-                get => _karmaReqs[1];
-                set
-                {
-                    if(value != _karmaReqs[1])
-                    {
-                        _karmaReqs[1] = value;
-                        _gateStateModified = true;
-                    }
-                }
-            }
-
-            bool _unlocked;
-            public bool Unlocked
-            {
-                get => _unlocked;
-                set
-                {
-                    if(value != _unlocked)
-                    {
-                        _unlocked = value;
-                        _gateStateModified = true;
-                    }
-                }
-            }
-
-            public bool EnergyEnoughToOpen;
-
-            internal bool _gateStateModified;
-
-            internal RegionGateInstance(string[] bindRegions, RegionGate.GateRequirement[] requirements, bool unlock)
-            {
-                BindRegions = bindRegions;
-                _karmaReqs = requirements;
-                _unlocked = unlock;
-            }
-
-            internal RegionGateInstance(string roomName, RegionGate.GateRequirement[] requirements, bool unlock)
-            {
-                string[] names = roomName.Split('_');
-                BindRegions = new string[2] { names[1], names[2] };
-
-                _karmaReqs = requirements;
-                _unlocked = unlock;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj == null)
-                    return false;
-                if(obj is RegionGateInstance instance)
-                {
-                    return BindRegions.SequenceEqual(instance.BindRegions);
-                }
-                return false;
-            }
-
-            public bool IsThisGate(string region1, string region2)
-            {
-                return BindRegions[0] == region1 && BindRegions[1] == region2; ;
-            }
-
-            public bool IsThisGate(string roomName)
-            {
-                string[] names = roomName.Split('_');
-                return IsThisGate(names[1], names[2]);
-            }
-
-            public override string ToString()
-            {
-                return $"{BindRegions[0]}_{BindRegions[1]}_{KarmaRequirementLeft.value}_{KarmaRequirementRight.value}_{_unlocked}";
-            }
-
-            public void ToString(StringBuilder builder)
-            {
-                builder.Append(this.ToString());
-                builder.Append("|");
-            }
-
-            public static RegionGateInstance FromString(string str)
-            {
-                string[] array = str.Split('_');
-                return new RegionGateInstance(new string[] { array[0], array[1]}, 
-                                              new RegionGate.GateRequirement[] {new RegionGate.GateRequirement(array[2]), new RegionGate.GateRequirement(array[3])},
-                                              bool.Parse(array[4]));
-            }
         }
     }
 
