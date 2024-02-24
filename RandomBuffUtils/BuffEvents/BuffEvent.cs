@@ -27,6 +27,23 @@ namespace RandomBuffUtils
             }
 
         }
+        public static event NewRoomHandler OnPlayerNewRoom
+        {
+            add
+            {
+                if (onNewRoom == null || onNewRoom.GetInvocationList().Length == 0)
+                    On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
+                onNewRoom += value;
+            }
+            remove
+            {
+                if (onNewRoom.GetInvocationList().Length == 1)
+                    On.Player.NewRoom += Player_NewRoom;
+                onNewRoom -= value;
+            }
+        }
+
+ 
     }
 
     /// <summary>
@@ -39,6 +56,12 @@ namespace RandomBuffUtils
             orig(self, victim);
             onCreatureKilled.Invoke(victim, self.playerNumber);
         }
+
+        private static void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
+        {
+            orig(self, newRoom);
+            onNewRoom.Invoke(newRoom.abstractRoom.name);
+        }
     }
 
     public static partial class BuffEvent
@@ -46,5 +69,8 @@ namespace RandomBuffUtils
         private static CreatureKilledHandler onCreatureKilled;
         public delegate void CreatureKilledHandler(Creature creature, int playerNumber);
 
+        private static NewRoomHandler onNewRoom;
+        public delegate void NewRoomHandler(string roomName);
     }
+
 }
