@@ -67,7 +67,7 @@ namespace BuiltinBuffs.Duality
         private static void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom)
         {
             orig.Invoke(self, game, world, abstractRoom);
-            if (game.session is StoryGameSession storyGameSession)
+            if (game?.session is StoryGameSession storyGameSession)
             {
                 if (storyGameSession.saveState.miscWorldSaveData.EverMetMoon)
                 {

@@ -195,6 +195,10 @@ namespace RandomBuff.Core.Game.Settings
 
                             setting.gachaTemplate = (Game.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
                                     BuffRegister.GetTemplate((GachaTemplateID)id));
+                            if (subs.Length == 4)
+                                setting.TemplateName = subs[3];
+                            else
+                                setting.TemplateName = subs[1];
                             break;
                         case "CONDITION":
                             if (!ExtEnumBase.TryParse(typeof(ConditionID), subs[1], true, out var cid))
@@ -208,6 +212,7 @@ namespace RandomBuff.Core.Game.Settings
                             break;
                     }
                 }
+
             }
             catch (Exception e)
             {
@@ -224,7 +229,7 @@ namespace RandomBuff.Core.Game.Settings
 
             StringBuilder builder = new StringBuilder();
             builder.Append($"DIFFICULTY{SubSettingSplit}{Difficulty}{SettingSplit}");
-            builder.Append($"TEMPLATE{SubSettingSplit}{gachaTemplate.ID}{SubSettingSplit}{JsonConvert.SerializeObject(gachaTemplate)}{SettingSplit}");
+            builder.Append($"TEMPLATE{SubSettingSplit}{gachaTemplate.ID}{SubSettingSplit}{JsonConvert.SerializeObject(gachaTemplate)}{SubSettingSplit}{TemplateName}{SettingSplit}");
             foreach (var condition in conditions)
             {
                 builder.Append($"CONDITION{SubSettingSplit}{condition.ID}{SubSettingSplit}{JsonConvert.SerializeObject(condition)}{SettingSplit}");

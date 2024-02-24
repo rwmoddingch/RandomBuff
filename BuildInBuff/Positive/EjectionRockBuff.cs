@@ -5,6 +5,7 @@ using Random = UnityEngine.Random;
 using System.Runtime.CompilerServices;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Positive
 {
@@ -130,7 +131,7 @@ namespace BuiltinBuffs.Positive
                 return;
             }
             RandomBounce(self as Rock, false);
-            BuffPlugin.Log("Rock hit wall");
+            BuffUtils.Log(ejectionRockBuffID,"Rock hit wall");
         }
 
         static bool RandomBounce(Rock self, bool eu, Vector2? normOverride = null)

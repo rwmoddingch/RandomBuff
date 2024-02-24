@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -45,10 +46,10 @@ namespace BuiltinBuffs.Duality
 
         private static void Player_Regurgitate(On.Player.orig_Regurgitate orig, Player self)
         {
-            BuffPlugin.Log("Player_Regurgitate");
+            BuffUtils.Log(PandoraBoxBuffID,"Player_Regurgitate");
             if (self.objectInStomach != null)
             {
-                BuffPlugin.Log("Player_Regurgitate yes");
+                BuffUtils.Log(PandoraBoxBuffID, "Player_Regurgitate yes");
                 AbstractPhysicalObject origObject = self.objectInStomach;
                 bool replaceSuccessfully = false;
                 for (int i = 0; i < 5 && !replaceSuccessfully; i++)
@@ -72,7 +73,7 @@ namespace BuiltinBuffs.Duality
                     }
                     catch (Exception e)
                     {
-                        BuffPlugin.Log($"Try to spawn {type}, but meet exception.you can just ignore this.\n{e}");
+                        BuffUtils.Log(PandoraBoxBuffID, $"Try to spawn {type}, but meet exception.you can just ignore this.\n{e}");
                         if(nextObject != null)
                         {
                             if(nextObject.realizedObject != null)

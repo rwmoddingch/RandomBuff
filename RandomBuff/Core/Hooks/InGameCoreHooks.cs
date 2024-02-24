@@ -27,6 +27,18 @@ namespace RandomBuff.Core.Hooks
             On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
 
             On.SaveState.ctor += SaveState_ctor;
+            On.MoreSlugcats.MSCRoomSpecificScript.SI_SAINTINTRO_tut.ctor += SI_SAINTINTRO_tut_ctor;
+        }
+
+        private static void SI_SAINTINTRO_tut_ctor(On.MoreSlugcats.MSCRoomSpecificScript.SI_SAINTINTRO_tut.orig_ctor orig, MSCRoomSpecificScript.SI_SAINTINTRO_tut self, Room room)
+        {
+            if (room.game.rainWorld.BuffMode())
+            {
+                self.Destroy();
+                return;
+            }
+
+            orig(self,room);
         }
 
         private static void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)

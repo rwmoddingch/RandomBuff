@@ -9,6 +9,7 @@ using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 
@@ -17,6 +18,10 @@ namespace BuiltinBuffs.Negative
     internal class EatMoreBuff : Buff<EatMoreBuff, EatMoreBuffData>
     {
         public override BuffID ID => EatMoreIBuffEntry.eatMoreBuffID;
+
+        public EatMoreBuff()
+        {
+        }
     }
 
     class EatMoreBuffData : BuffData
@@ -40,10 +45,11 @@ namespace BuiltinBuffs.Negative
 
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
-            IntVector2 origFoodRequirement = orig.Invoke(slugcat);
-            var data = (BuffPoolManager.Instance.GetBuff(eatMoreBuffID) as EatMoreBuff).Data;
+            IntVector2 origFoodRequirement = orig(slugcat);
+            var data = BuffPoolManager.Instance.GetBuffData(eatMoreBuffID);
             int newHibernateRequirement = origFoodRequirement.y + data.StackLayer;
             int newMaxFoodRequirement = Mathf.Max(newHibernateRequirement, origFoodRequirement.x);
+            BuffUtils.Log(eatMoreBuffID, $"{newMaxFoodRequirement},{newHibernateRequirement}");
 
             return new IntVector2(newMaxFoodRequirement, newHibernateRequirement);
         }

@@ -7,6 +7,7 @@ using RandomBuff;
 
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RWCustom;
 
 using Random = UnityEngine.Random;
@@ -42,7 +43,7 @@ namespace BuiltinBuffs.Negative
             if(self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Spider &&
                self.abstractCreature.creatureTemplate.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MotherSpider)
             {
-                BuffPlugin.Log("Arachnophobia Creature_Die");
+                BuffUtils.Log(arachnophobiaID,"Arachnophobia Creature_Die");
                 int max = Random.Range(5, 12);
                 for (int i = 0; i < max; i++)
                 {

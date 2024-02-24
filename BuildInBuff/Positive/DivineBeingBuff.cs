@@ -9,6 +9,7 @@ using RWCustom;
 using IL;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Positive
@@ -19,7 +20,7 @@ namespace BuiltinBuffs.Positive
 
         public DivineBeingBuff()
         {
-            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+            if (BuffCustom.TryGetGame(out var game))
             {
                 foreach (var player in game.Players.Where(i =>
                              i.state.alive && i.realizedCreature?.room != null))

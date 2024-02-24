@@ -11,6 +11,7 @@ using Mono.Cecil.Cil;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RWCustom;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Positive
 {
@@ -59,13 +60,13 @@ namespace BuiltinBuffs.Positive
                 (i) => i.MatchLdarg(1)
             ))
             {
-                BuffPlugin.Log("Spear_HitSomething");
-                BuffPlugin.Log(emitCursor.Next.OpCode);
+                BuffUtils.Log(HardenedMaskBuffID,"Spear_HitSomething");
+                BuffUtils.Log(HardenedMaskBuffID, emitCursor.Next.OpCode);
                 emitCursor.Emit(OpCodes.Ldarg_0);
 
                 emitCursor.EmitDelegate<Func<SharedPhysics.CollisionResult, Spear, bool>>((result, self) =>
                 {
-                    BuffPlugin.Log($"Spear_HitSomething {result.obj}");
+                    BuffUtils.Log(HardenedMaskBuffID, $"Spear_HitSomething {result.obj}");
                     if(result.obj is Player player)
                     {
                         Vector2 movementum = self.firstChunk.vel * self.firstChunk.mass * 2f;
@@ -112,14 +113,14 @@ namespace BuiltinBuffs.Positive
         {
             for (int i = 0; i < player.grasps.Length; i++)
             {
-                BuffPlugin.Log($"check grasp {i} : {player.grasps[i]?.grabbed}");
+                BuffUtils.Log(HardenedMaskBuffID, $"check grasp {i} : {player.grasps[i]?.grabbed}");
                 if (player.grasps[i] != null && player.grasps[i].grabbed is VultureMask mask && mask.donned > 0.5f)
                 {
                     Vector2 playerDir = new Vector2(player.ThrowDirection, 0f);
 
                     Vector2 spearDir = directionAndMomentum == null ? spear.firstChunk.vel.normalized : directionAndMomentum.Value;
 
-                    BuffPlugin.Log($"{playerDir}, {spearDir}, {Vector2.Dot(playerDir, spearDir)}");
+                    BuffUtils.Log(HardenedMaskBuffID, $"{playerDir}, {spearDir}, {Vector2.Dot(playerDir, spearDir)}");
 
                     if (Vector2.Dot(playerDir, spearDir) < 0f)
                     {

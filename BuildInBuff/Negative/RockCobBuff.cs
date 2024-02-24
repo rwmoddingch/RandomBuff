@@ -13,6 +13,7 @@ using BuiltinBuffs.Positive;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
@@ -51,7 +52,7 @@ namespace BuiltinBuffs.Negative
                 {
                     if (sleaser.drawableObject == self)
                     {
-                        BuffPlugin.Log($"SeedCob reapply palettes");
+                        BuffUtils.Log(RockCobBuffID,$"SeedCob reapply palettes");
                         sleaser.RemoveAllSpritesFromContainer();
                         self.InitiateSprites(sleaser, self.room.game.cameras[0]);
                         self.ApplyPalette(sleaser, self.room.game.cameras[0], self.room.game.cameras[0].currentPalette);

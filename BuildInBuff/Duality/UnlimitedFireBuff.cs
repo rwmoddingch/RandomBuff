@@ -8,6 +8,7 @@ using Mono.Cecil.Cil;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 
 
 namespace BuiltinBuffs.Duality
@@ -96,7 +97,7 @@ namespace BuiltinBuffs.Duality
             }
             else
             {
-                BuffPlugin.LogException(new NullReferenceException("c1 cant find"));
+                BuffUtils.Log(UnlimitedFirepowerBuffID, new NullReferenceException("c1 cant find"));
             }
         }
     }
