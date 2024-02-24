@@ -4,10 +4,14 @@ using RandomBuff;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
+using RandomBuffUtils;
+using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
@@ -28,13 +32,29 @@ namespace BuiltinBuffs.Duality
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<ArmstronBuff, ArmstronBuffData, ArmstronIBuffEntry>(ArmstronBuffID);
+            //On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
         }
+
+        //private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
+        //{
+        //    orig(self, dt);
+        //    if(Input.GetKeyDown(KeyCode.K) && self.rainWorld.BuffMode())
+        //       typeof(BuffPoolManager).GetMethod("CreateBuff", BindingFlags.Instance | BindingFlags.NonPublic)
+        //           .Invoke(BuffPoolManager.Instance,new object[] { ArmstronBuffID });
+
+        //}
 
         public static void HookOn()
         {
             On.Room.ctor += Room_ctor;
             On.AntiGravity.Update += AntiGravity_Update;
+            //BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
         }
+
+        //private static void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
+        //{
+        //    BuffUtils.Log(ArmstronBuffID,"killed creature");
+        //}
 
         private static void AntiGravity_Update(On.AntiGravity.orig_Update orig, AntiGravity self, bool eu)
         {
