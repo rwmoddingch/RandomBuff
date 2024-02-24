@@ -33,7 +33,7 @@
       <HintPath>..\include\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\include\PUBLIC-Assembly-CSharp.dll</HintPath>
+      <HintPath>E:\Steam\steamapps\common\Rain World\BepInEx\utils\PUBLIC-Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\include\UnityEngine.dll</HintPath>
