@@ -73,8 +73,8 @@ namespace RandomBuff.Core.Entry
             if(hookAssembly == null)
                 hookAssembly = typeof(On.Player).Assembly;
 
-            DynamicMethodDefinition method = new DynamicMethodDefinition(origMethod);
-
+            DynamicMethodDefinition method =
+                new DynamicMethodDefinition($"BuffDisableHook_{id}", typeof(void), Type.EmptyTypes);
             var ilProcessor = method.GetILProcessor();
             foreach (var v in il.Body.Variables)
                 ilProcessor.Body.Variables.Add(new VariableDefinition(v.VariableType));
@@ -107,6 +107,7 @@ namespace RandomBuff.Core.Entry
                     var from = ilProcessor.Create(str.OpCode, str);
                     ilProcessor.Append(from);
                     labelList.Add(new (label.Target,from));
+                    BuffPlugin.LogWarning("Find Branch in HookOn, maybe cause error!");
                 }
                 else
                 {

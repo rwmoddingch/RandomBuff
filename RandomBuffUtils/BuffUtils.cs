@@ -14,11 +14,21 @@ namespace RandomBuffUtils
     public static class BuffUtils
     {
         static bool everInit;
+        private static bool canAccessLog = false;
         public static void OnEnable()
         {
             if (everInit)
                 return;
-            
+            try
+            {
+                File.Create(AssetManager.ResolveFilePath("buffcustom.log")).Close();
+            }
+            catch (Exception e)
+            {
+                canAccessLog = false;
+                Debug.LogException(e);
+            }
+
             DeathPersistentSaveDataRx.HookOn();
 
             BuffRoomReachEvent.OnEnable();
@@ -29,15 +39,31 @@ namespace RandomBuffUtils
         public static void Log(object header, object m)
         {
             Debug.Log($"[RandomBuffUtils - {header}] {m}");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Message - {header}]\t{m}\n");
         }
 
         public static void LogWarning(object header, object m)
         {
             Debug.LogWarning($"[RandomBuffUtils - {header}] {m}");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Warning - {header}]\t{m}\n");
         }
         public static void LogError(object header, object m)
         {
             Debug.LogError($"[RandomBuffUtils - {header}] {m}");
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Error - {header}]\t{m}\n");
+        }
+
+        public static void LogException(object header, Exception m)
+        {
+            Debug.LogError($"[RandomBuffUtils - {header}] {m.Message}");
+            Debug.LogException(m);
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Fatal - {header}]\t{m.Message}\n");
+            
+
         }
 
         public static string Compress(string str)

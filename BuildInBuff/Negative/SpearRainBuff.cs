@@ -15,6 +15,7 @@ using Random = UnityEngine.Random;
 using System.Runtime.CompilerServices;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
@@ -76,7 +77,7 @@ namespace BuiltinBuffs.Negative
             }
             else
             {
-                BuffPlugin.LogException(new Exception("RoomRain_ThrowAroundObjects1 c1 cant match"));
+                BuffUtils.LogException(SpearRain,new Exception("RoomRain_ThrowAroundObjects1 c1 cant match"));
             }
 
             try
@@ -90,7 +91,7 @@ namespace BuiltinBuffs.Negative
                     (i) => i.MatchLdelemRef()))
                 {
                     c2.Index -= 5;
-                    BuffPlugin.Log($"{c2.Next.OpCode}");
+                    BuffUtils.Log(SpearRain,$"{c2.Next.OpCode}");
                     c2.Emit(OpCodes.Ldloc_0);
                     c2.Emit(OpCodes.Ldarg_0);
                     c2.EmitDelegate<Func<int,int,RoomRain, bool>>((j,i,self) =>
@@ -103,12 +104,12 @@ namespace BuiltinBuffs.Negative
                 }
                 else
                 {
-                    BuffPlugin.LogException(new Exception("RoomRain_ThrowAroundObjects1 c2 cant match"));
+                    BuffUtils.LogException(SpearRain, new Exception("RoomRain_ThrowAroundObjects1 c2 cant match"));
                 }
             }
             catch(Exception e)
             {
-                BuffPlugin.LogException(e, "RoomRain_ThrowAroundObjects1 c2 format error");
+                BuffUtils.LogException(SpearRain, e);
                 Debug.LogException(e);
             }
         }
@@ -170,7 +171,7 @@ namespace BuiltinBuffs.Negative
             }
             else
             {
-                BuffPlugin.LogException(new Exception("RoomRain_Update c1 cant mark label"));
+                BuffUtils.LogException(SpearRain,new Exception("RoomRain_Update c1 cant mark label"));
             }
         }
     }

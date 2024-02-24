@@ -80,7 +80,7 @@ namespace BuiltinBuffs.Duality
     {
         public WeakReference<DangleFruit> dangleRef;
         Color origCol;
-        public WeakReference<Creature> lastThrowBy = new (null);
+        public WeakReference<Creature> lastThrowBy = new WeakReference<Creature>(null);
 
         public bool bombActivate;
         int bombCounter = 120;

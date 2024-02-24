@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -154,7 +155,7 @@ namespace BuiltinBuffs.Positive
             lastPos = pos;
             Singleton = this;
 
-            BuffPlugin.Log($"Init DeathPreventer : {bindPlayer}");
+            BuffUtils.Log(DeathFreeMedallionIBuffEntry.deathFreeMedallionBuffID,$"Init DeathPreventer : {bindPlayer}");
 
             bindPlayer.dead = false;
             bindPlayer.playerState.alive = true;

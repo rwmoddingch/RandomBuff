@@ -115,7 +115,6 @@ namespace RandomBuff.Core.SaveData
                     allDatas[name][id].DataLoaded(true);
                     BuffFile.Instance.AddCollect(id.value);
                     BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
-
                 }
                 else
                     return null;
@@ -456,6 +455,7 @@ namespace RandomBuff.Core.SaveData
 
                 if (!GameSetting.TryLoadGameSetting(catSplit[1], out var setting))
                     setting = new GameSetting();
+                BuffPlugin.LogDebug($"{catSplit[0]}, {catSplit[1]}");
                 gameSettings.Add(slugName,setting);
 
             }

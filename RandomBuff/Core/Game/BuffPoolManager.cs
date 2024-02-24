@@ -180,6 +180,7 @@ namespace RandomBuff.Core.Game
                 return cycleDatas[id];
             }
             var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
+            re.Stack();
             cycleDatas.Add(id, re);
             return re;
         }
@@ -310,9 +311,9 @@ namespace RandomBuff.Core.Game
             }
 
             var buff = (IBuff)Activator.CreateInstance(type);
-            BuffHookWarpper.EnableBuff(id);
             buffDictionary.Add(id, buff);
             buffList.Add(buff);
+            BuffHookWarpper.EnableBuff(id);
             return buff;
         }
 

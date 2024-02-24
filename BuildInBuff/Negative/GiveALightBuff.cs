@@ -9,6 +9,7 @@ using UnityEngine;
 using Mono.Cecil.Cil;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RWCustom;
 using Random = UnityEngine.Random;
 
@@ -49,7 +50,7 @@ namespace BuiltinBuffs.Negative
                 c1.Emit(OpCodes.Ldarg_0);
                 c1.EmitDelegate <Action<LizardSpit>>((self) =>
                 {
-                    BuffPlugin.Log("LizardSpit hit chunk");
+                    BuffUtils.Log(GiveALightBuffID,"LizardSpit hit chunk");
                     Vector2 vector = self.pos;
                     self.room.AddObject(new SootMark(self.room, vector, 80f, true));
                     self.room.AddObject(new DamageOnlyExplosion(self.room, self.lizard, vector, 2, 125f, 6.2f, 0.2f, 120f, 0.25f, self.lizard, 0.7f, 160f, 1f, self.lizard.abstractCreature));

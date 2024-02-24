@@ -8,6 +8,7 @@ using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Positive
 {
@@ -39,13 +40,13 @@ namespace BuiltinBuffs.Positive
         private static void Room_LoadFromDataString(ILContext il)
         {
             if(!ApplySkip(il, (i) => i.Match(OpCodes.Ldloc_S)))
-                BuffPlugin.Log("Room_LoadFromDataString hook failure");
+                BuffUtils.Log(HerbicideBuffID,"Room_LoadFromDataString hook failure");
         }
 
         private static void Room_Loaded(MonoMod.Cil.ILContext il)
         {
             if (!ApplySkip(il, (i) => i.MatchLdloc(1)))
-                BuffPlugin.Log("Room_Loaded hook failure");
+                BuffUtils.Log(HerbicideBuffID, "Room_Loaded hook failure");
         }
 
         static bool ApplySkip(ILContext il, Func<Instruction, bool> midPredict)
@@ -70,7 +71,7 @@ namespace BuiltinBuffs.Positive
                 label = markCursor.MarkLabel();
             }
             else
-                BuffPlugin.LogException(new NullReferenceException("Room_Loaded c1 cant mark"));
+                BuffUtils.LogException(HerbicideBuffID,new NullReferenceException("Room_Loaded c1 cant mark"));
 
             if (emitCursor.TryGotoNext(MoveType.After,
                 predicts
@@ -82,10 +83,10 @@ namespace BuiltinBuffs.Positive
                     return true;
                 }
                 else
-                    BuffPlugin.LogException(new NullReferenceException( "Room_Loaded c2 cant emit"));
+                    BuffUtils.LogException(HerbicideBuffID, new NullReferenceException( "Room_Loaded c2 cant emit"));
             }
             else
-                BuffPlugin.LogException(new NullReferenceException($"Room_Loaded c2 cant find, {label != null}"));
+                BuffUtils.LogException(HerbicideBuffID, new NullReferenceException($"Room_Loaded c2 cant find, {label != null}"));
             return false;
         }
     }

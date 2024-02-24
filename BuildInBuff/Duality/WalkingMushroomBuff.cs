@@ -8,6 +8,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Duality
 {
@@ -140,7 +141,7 @@ namespace BuiltinBuffs.Duality
 
             nextCoord = null;
             idealPath.Clear();
-            BuffPlugin.Log($"{self} find new goal pos {goal}:{self.room.GetTile(goal).Terrain}");
+            BuffUtils.Log(WalkingMushroomIBuffEntry.WalkingMushroomBuffID,$"{self} find new goal pos {goal}:{self.room.GetTile(goal).Terrain}");
         }
 
         void PathFinderUpdate(Mushroom self)

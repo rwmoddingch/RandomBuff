@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using UnityEngine;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
@@ -39,7 +40,7 @@ namespace BuiltinBuffs.Negative
             orig.Invoke(self);
             if(self.lizard.Template.type == CreatureTemplate.Type.WhiteLizard)
             {
-                BuffPlugin.Log($"{self.whiteCamoColorAmount},{self.whiteCamoColorAmountDrag}");
+                BuffUtils.Log(InvisibleKillerBuffID,$"{self.whiteCamoColorAmount},{self.whiteCamoColorAmountDrag}");
                 self.whiteCamoColorAmount = 1;
             }
         }

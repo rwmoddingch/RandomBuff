@@ -52,7 +52,12 @@ namespace RandomBuff
             try
             {
                 if (!isLoaded)
-                    File.Create(AssetManager.ResolveFilePath("randomBuff.log")).Close();
+                {
+                    if(File.Exists(AssetManager.ResolveFilePath("randombuff.log")))
+                        File.Delete("randombuff.log");
+                     
+                    File.Create(AssetManager.ResolveFilePath("buffcore.log")).Close();
+                }
 
             }
             catch (Exception e)
@@ -154,63 +159,62 @@ namespace RandomBuff
         /// 会额外保存到../RainWorld_Data/StreamingAssets/randomBuff.log
         /// </summary>
         /// <param name="message"></param>
-        public static void Log(object message)
+        internal static void Log(object message)
         {
             Debug.Log($"[RandomBuff] {message}");
             if(canAccessLog)
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Message]\t{message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Message]\t{message}\n");
            
         }
 
-        public static void LogDebug(object message)
+        internal static void LogDebug(object message)
         {
             if (DevEnabled)
             {
                 Debug.Log($"[RandomBuff] {message}");
                 if (canAccessLog)
-                    File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Debug]\t\t{message}\n");
+                    File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Debug]\t\t{message}\n");
             }
 
         }
 
-        public static void LogWarning(object message)
+        internal static void LogWarning(object message)
         {
             Debug.LogWarning($"[RandomBuff] {message}");
             if (canAccessLog)
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Warning]\t{message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Warning]\t{message}\n");
         }
 
-        public static void LogError(object message)
+        internal static void LogError(object message)
         {
             Debug.LogError($"[RandomBuff] {message}");
             if (canAccessLog)
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Error]\t\t{message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Error]\t\t{message}\n");
         }
 
-        public static void LogFatal(object message)
+        internal static void LogFatal(object message)
         {
             Debug.Log($"[RandomBuff] {message}");
             if (canAccessLog)
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{message}\n");
 
         }
 
-        public static void LogException(Exception e)
+        internal static void LogException(Exception e)
         {
             Debug.LogException(e);
             if (canAccessLog)
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{e.Message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.Message}\n");
           
         }
 
-        public static void LogException(Exception e,object m)
+        internal static void LogException(Exception e,object m)
         {
             Debug.LogException(e);
             if (canAccessLog)
             {
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{e.Message}\n");
-                File.AppendAllText(AssetManager.ResolveFilePath("randomBuff.log"), $"[Fatal]\t\t{m}\n");
-
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.Message}\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{m}\n");
             }
         }
     }

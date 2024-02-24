@@ -12,6 +12,7 @@ using RandomBuff.Core.Entry;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using RandomBuff.Core.Game;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
@@ -25,7 +26,7 @@ namespace BuiltinBuffs.Negative
         {
             MyTimer = new DownCountBuffTimer((timer, game) => 
             { 
-                BuffPlugin.Log("UpgradationBuff Counter triggered");
+                BuffUtils.Log(ID,"UpgradationBuff Counter triggered");
                 CheckRoom(game);
             }, 30);
         }
