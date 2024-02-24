@@ -11,6 +11,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
+using RandomBuffUtils;
 using UnityEngine;
 
 #pragma warning disable CS0618
@@ -88,6 +89,8 @@ namespace RandomBuff
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
                     BuffRegister.InitAllBuffPlugin();
+
+                    BuffUtils.OnEnable();
 
                     if(DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;

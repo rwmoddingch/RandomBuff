@@ -12,23 +12,6 @@ using UnityEngine;
 
 namespace RandomBuffUtils
 {
-    public static class BuffUtils
-    {
-        public static void Log(object header,object m)
-        {
-            Debug.Log($"[RandomBuffUtils - {header}] {m}");
-        }
-
-        public static void LogWarning(object header, object m)
-        {
-            Debug.LogWarning($"[RandomBuffUtils - {header}] {m}");
-        }
-        public static void LogError(object header, object m)
-        {
-            Debug.LogError($"[RandomBuffUtils - {header}] {m}");
-        }
-    }
-
     public class GhostEffect : CosmeticSprite
     {
         Vector2 center;
