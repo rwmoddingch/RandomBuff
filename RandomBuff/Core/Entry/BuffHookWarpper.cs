@@ -9,6 +9,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
 using System.Reflection;
+using Mono.Cecil;
 using UnityEngine;
 
 namespace RandomBuff.Core.Entry
@@ -26,8 +27,8 @@ namespace RandomBuff.Core.Entry
                 BuffPlugin.LogError("No HookOn");
             else
             {
-                ILHook hook = new ILHook(type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public),
-                    (il) => RegisterHook_Impl(id, type, il));
+                var method = type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public);
+                ILHook hook = new ILHook(method, (il) => RegisterHook_Impl(id, type, il, method));
             }
         }
 
@@ -67,28 +68,26 @@ namespace RandomBuff.Core.Entry
 
 
 
-        private static void RegisterHook_Impl(BuffID id, Type type, ILContext il)
+        private static void RegisterHook_Impl(BuffID id, Type type, ILContext il, MethodBase origMethod)
         {
-            DynamicMethodDefinition method =
-                new DynamicMethodDefinition($"BuffDisableHook_{id}", typeof(void), Type.EmptyTypes);
-            var hookAssembly = typeof(On.Player).Assembly;
+            if(hookAssembly == null)
+                hookAssembly = typeof(On.Player).Assembly;
+
+            DynamicMethodDefinition method = new DynamicMethodDefinition(origMethod);
 
             var ilProcessor = method.GetILProcessor();
             foreach (var v in il.Body.Variables)
                 ilProcessor.Body.Variables.Add(new VariableDefinition(v.VariableType));
 
             List<(Instruction target, Instruction from)> labelList = new();
-
+           
             foreach (var str in il.Instrs)
             {
             
-                if (str.MatchCallOrCallvirt(out var m) &&
-                    m.Name.Contains("add") && hookAssembly.GetType(m.DeclaringType.FullName) != null)
+                if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add") &&
+                    TryGetRemoveMethod(origMethod,m,out var removeMethod))
                 {
-                    ilProcessor.Emit(OpCodes.Call,
-                        hookAssembly.GetType(m.DeclaringType.FullName).GetMethod(m.Name.Replace("add", "remove")));
-                    //BuffPlugin.Log($"Add {m.Name.Replace("add", "remove")}");
-
+                    ilProcessor.Emit(OpCodes.Call, removeMethod);
                 }
                 else if (str.MatchNewobj<Hook>() && str.MatchNewobj(out var ctor))
                 {
@@ -121,13 +120,7 @@ namespace RandomBuff.Core.Entry
                 }
             }
 
-            //BuffPlugin.LogDebug($"----------------------------");
-            //foreach (var a in il.Instrs)
-            //    Print(a);
-            //BuffPlugin.LogDebug($"----------------------------");
-            //foreach (var a in method.Definition.Body.Instructions)
-            //    Print(a);
-
+            
 
             ILCursor c = new ILCursor(il);
             while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj<Hook>()))
@@ -141,6 +134,10 @@ namespace RandomBuff.Core.Entry
                 registedRuntimeHooks.Add(id, new List<Hook>());
         }
 
+        private static Dictionary<string, Assembly> resolvedAssembly = new ();
+
+        private static Assembly hookAssembly;
+
         private static void Print(Instruction instr)
         {
             try
@@ -153,6 +150,47 @@ namespace RandomBuff.Core.Entry
             }
         }
 
+        private static bool TryGetRemoveMethod(MethodBase origMethod, MethodReference methodRef, out MethodInfo method)
+        {
+            method = hookAssembly.GetType(methodRef.DeclaringType.FullName)?.
+                GetMethod(methodRef.Name.Replace("add", "remove"));
+            if (method != null)
+                return true;
+
+            LoadAllReferenceAssembly(origMethod);
+
+            foreach (var ass in resolvedAssembly.Values)
+            {
+                var types = ass.DefinedTypes.Where(t => t.Name == methodRef.DeclaringType.Name &&
+                                                        t.GetMethod(methodRef.Name.Replace("add", "remove")) != null);
+                if (types.Any())
+                {
+                    method = types.First().GetMethod(methodRef.Name.Replace("add", "remove"));
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        private static void LoadAllReferenceAssembly(MethodBase origMethod)
+        {
+            foreach (var a in origMethod.Module.Assembly.GetReferencedAssemblies())
+            {
+                if (a.Name.Contains("UnityEngine") ||
+                    a.Name.Contains("Mono") ||
+                    a.Name.Contains("System") ||
+                    a.Name is "mscorlib" or "Newtonsoft.Json" or "HOOK-Assembly-CSharp")
+                    continue;
+                if (!resolvedAssembly.ContainsKey(a.FullName))
+                {
+                    resolvedAssembly.Add(a.FullName, Assembly.Load(a));
+                    BuffPlugin.LogDebug($"load reference assembly: {a.FullName}");
+                }
+            }
+        }
+
+  
         private static Hook AddRuntimeHook(BuffID id, Hook hook)
         {
             registedRuntimeHooks[id].Add(hook);
