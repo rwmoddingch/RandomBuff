@@ -4,7 +4,7 @@
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "FFFFFF",
+    "Color" : "80003C",
 
     "Chinese" : {
         "BuffName" : "蜘蛛恐惧症",

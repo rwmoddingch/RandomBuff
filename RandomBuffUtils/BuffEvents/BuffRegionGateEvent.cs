@@ -273,6 +273,7 @@ namespace RandomBuffUtils.BuffEvents
         {
             if (saveData.modifiedGateInstances.Contains(gateInstance))
             {
+                BuffUtils.Log("BuffRegionGateEvent", $"gate.unlocked {gate.unlocked} => {gateInstance.Unlocked}");
                 gate.unlocked = gateInstance.Unlocked;
 
                 if (room.game.GetStorySession.saveState.deathPersistentSaveData.unlockedGates == null)
@@ -284,14 +285,8 @@ namespace RandomBuffUtils.BuffEvents
 
                 for (int i = 0; i < 2; i++)
                 {
-                    if (gate.karmaRequirements[i] != gateInstance._karmaReqs[i])
-                    {
-                        BuffUtils.Log("BuffRegionGateEvent", $"Modify karma requirement {i} from {gate.karmaRequirements[i]} to {gateInstance._karmaReqs[i]}");
-                        gate.karmaRequirements[i] = gateInstance._karmaReqs[i];
-                        gate.karmaGlyphs[i].Destroy();
-                        gate.karmaGlyphs[i] = new GateKarmaGlyph(i == 1, gate, gateInstance._karmaReqs[i]);
-                        room.AddObject(gate.karmaGlyphs[i]);
-                    }
+                    gate.karmaRequirements[i] = new RegionGate.GateRequirement(gateInstance._karmaReqs[i].value);
+                    gate.karmaGlyphs[i].symbolDirty = true;
                 }
             }
 

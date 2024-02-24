@@ -6,12 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
+using RandomBuffUtils.BuffEvents;
 
 namespace BuiltinBuffs.Positive
 {
     internal class ShortCircuitGateBuff : Buff<ShortCircuitGateBuff, ShortCircuitGateBuffData>
     {
         public override BuffID ID => ShortCircuitGateIBuffEntry.ShortCircuitGateBuffID;
+
+        public override bool Trigger(RainWorldGame game)
+        {
+            return true;
+        }
     }
 
     internal class ShortCircuitGateBuffData : BuffData
@@ -30,20 +37,13 @@ namespace BuiltinBuffs.Positive
 
         public static void HookOn()
         {
-            On.DeathPersistentSaveData.CanUseUnlockedGates += DeathPersistentSaveData_CanUseUnlockedGates;
-            On.RegionGate.Unlock += RegionGate_Unlock;
+            BuffEvent.OnGateOpened += BuffEvent_OnGateOpened;
         }
 
-        private static void RegionGate_Unlock(On.RegionGate.orig_Unlock orig, RegionGate self)
+        private static void BuffEvent_OnGateOpened(BuffRegionGateEvent.RegionGateInstance gateInstance)
         {
-            orig.Invoke(self);
-            //disable Buff
-        }
-
-        private static bool DeathPersistentSaveData_CanUseUnlockedGates(On.DeathPersistentSaveData.orig_CanUseUnlockedGates orig, DeathPersistentSaveData self, SlugcatStats.Name slugcat)
-        {
-            orig.Invoke(self, slugcat);
-            return true;
+            gateInstance.Unlocked = true;
+            ShortCircuitGateBuff.Instance.TriggerSelf(true);
         }
     }
 }

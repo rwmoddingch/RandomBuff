@@ -4,7 +4,7 @@
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "FFFFFF",
+    "Color" : "B1F6FA",
 
     "Chinese" : {
         "BuffName" : "短路元件",
