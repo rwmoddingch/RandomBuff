@@ -4,17 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static RandomBuffUtils.BuffEvent;
 
 namespace RandomBuffUtils.BuffEvents
 {
-    public static class BuffRoomReachEvent
+    public static partial class BuffRoomReachEvent
     {
+        /// <summary>
+        /// 获取所有到达过的房间。请尽量不要高频使用该方法
+        /// </summary>
+        /// <returns></returns>
+        public static string[] GetReachedRoomNames()
+        {
+            return saveData.reachedRooms.ToArray();
+        }
+
         /// <summary>
         /// 玩家初次到达某房间时触发，包括业力门和避难所房间
         /// </summary>
-        public static event Action<AbstractRoom> OnRoomReached;
+        public static event ReachNewRoomHandler OnRoomReached;
+    }
 
-        static BuffRoomReachSaveDataTx saveData;
+
+    public static partial class BuffRoomReachEvent
+    {
+    
+
+        private static BuffRoomReachSaveDataTx saveData;
 
         internal static void OnEnable()
         {
@@ -36,7 +52,7 @@ namespace RandomBuffUtils.BuffEvents
             OnEnterRoom(self.room.abstractRoom);
         }
 
-        static void OnEnterRoom(AbstractRoom room)
+        private static void OnEnterRoom(AbstractRoom room)
         {
             if (!saveData.IsRoomReached(room))
             {
@@ -47,14 +63,7 @@ namespace RandomBuffUtils.BuffEvents
             }
         }
 
-        /// <summary>
-        /// 获取所有到达过的房间。请尽量不要高频使用该方法
-        /// </summary>
-        /// <returns></returns>
-        public static string[] GetReachedRoomNames()
-        {
-            return saveData.reachedRooms.ToArray();
-        }
+
     }
 
     internal class BuffRoomReachSaveDataTx : DeathPersistentSaveDataTx

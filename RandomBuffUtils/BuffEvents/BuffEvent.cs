@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuffUtils.BuffEvents;
+using static RandomBuffUtils.BuffEvents.BuffRegionGateEvent;
 
 namespace RandomBuffUtils
 {
@@ -11,6 +13,10 @@ namespace RandomBuffUtils
     /// </summary>
     public static partial class BuffEvent
     {
+
+        /// <summary>
+        /// 生物被玩家击杀时调用
+        /// </summary>
         public static event CreatureKilledHandler OnCreatureKilled
         {
             add
@@ -27,7 +33,11 @@ namespace RandomBuffUtils
             }
 
         }
-        public static event NewRoomHandler OnPlayerNewRoom
+
+        /// <summary>
+        /// 玩家进入更换房间调用
+        /// </summary>
+        public static event NewRoomHandler OnPlayerChangeRoom
         {
             add
             {
@@ -43,7 +53,32 @@ namespace RandomBuffUtils
             }
         }
 
- 
+        /// <summary>
+        /// 玩家到达新房间调用
+        /// </summary>
+        public static event ReachNewRoomHandler OnReachNewRoom
+        {
+            add => BuffRoomReachEvent.OnRoomReached += value;
+            remove => BuffRoomReachEvent.OnRoomReached -= value;
+        }
+
+        /// <summary>
+        /// 业力门被加载时调用
+        /// </summary>
+        public static event RegionGateHandler OnGateLoaded
+        {
+            add => BuffRegionGateEvent.OnGateLoaded += value;
+            remove => BuffRegionGateEvent.OnGateLoaded -= value;
+        }
+
+        /// <summary>
+        /// 业力门被开启时调用
+        /// </summary>
+        public static event RegionGateHandler OnGateOpened
+        {
+            add => BuffRegionGateEvent.OnGateOpened += value;
+            remove => BuffRegionGateEvent.OnGateOpened -= value;
+        }
     }
 
     /// <summary>
@@ -71,6 +106,10 @@ namespace RandomBuffUtils
 
         private static NewRoomHandler onNewRoom;
         public delegate void NewRoomHandler(string roomName);
+
+        public delegate void ReachNewRoomHandler(AbstractRoom room);
+
+        public delegate void RegionGateHandler(RegionGateInstance gateInstance);
     }
 
 }
