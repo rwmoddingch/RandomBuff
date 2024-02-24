@@ -161,13 +161,10 @@ namespace RandomBuff.Core.Entry
 
             foreach (var ass in resolvedAssembly.Values)
             {
-                var types = ass.DefinedTypes.Where(t => t.Name == methodRef.DeclaringType.Name &&
-                                                        t.GetMethod(methodRef.Name.Replace("add", "remove")) != null);
-                if (types.Any())
-                {
-                    method = types.First().GetMethod(methodRef.Name.Replace("add", "remove"));
+                method = ass.GetType(methodRef.DeclaringType.FullName)?.
+                    GetMethod(methodRef.Name.Replace("add", "remove"));
+                if (method != null)
                     return true;
-                }
             }
             return false;
         }
@@ -180,7 +177,7 @@ namespace RandomBuff.Core.Entry
                 if (a.Name.Contains("UnityEngine") ||
                     a.Name.Contains("Mono") ||
                     a.Name.Contains("System") ||
-                    a.Name is "mscorlib" or "Newtonsoft.Json" or "HOOK-Assembly-CSharp")
+                    a.Name is "mscorlib" or "Newtonsoft.Json" or "HOOKS-Assembly-CSharp")
                     continue;
                 if (!resolvedAssembly.ContainsKey(a.FullName))
                 {
