@@ -488,7 +488,7 @@ namespace RandomBuff.Render.UI
             {
                 card.SetAnimatorState(BuffCard.AnimatorState.CardPicker_Show);
             }
-            CardShowIndex = Mathf.RoundToInt(MajorCard.Count / 2f);
+            CardShowIndex = Mathf.RoundToInt(MajorCard.Count / 2f) - 1;
         }
 
         public void FinishSelection()

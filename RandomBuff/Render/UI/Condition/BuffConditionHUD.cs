@@ -142,6 +142,8 @@ namespace RandomBuff.Render.UI.BuffCondition
 
                 InitSprites();
                 Refresh(bindCondition, true);
+                if (bindCondition.Finished)
+                    Complete(bindCondition);
             }
 
             public void Refresh(Condition condition, bool forceUpdateText = false)

@@ -23,6 +23,17 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
+        float _saturation = 1f;
+        float _targetSaturation = 1f;
+        internal bool Grey
+        {
+            get => _targetSaturation != 1f;
+            set
+            {
+                _targetSaturation = value ? 0.2f : 1f;
+            }
+        }
+
         [SerializeField] float _targetEdgeHighLightStrength;
         [SerializeField] float _EdgeHighLightStrength;
         [SerializeField] float _EdgeHighLightTimeFactor;
@@ -54,6 +65,7 @@ namespace RandomBuff.Render.CardRender
             _MeshRenderer.material.SetFloat("_EdgeHighLightStrength", 0f);
             _MeshRenderer.material.SetFloat("_EdgeHighLightStrength", _EdgeHighLightStrength);
             _MeshRenderer.material.SetFloat("_EdgeHighLightTimeFactor", _EdgeHighLightTimeFactor);
+            _MeshRenderer.material.SetFloat("_Saturation", _saturation);
         }
 
         void Update()
@@ -89,6 +101,16 @@ namespace RandomBuff.Render.CardRender
                     if (_EdgeHighlightBreakTimer >= 1f)
                         _EdgeHighlightBreakTimer = 0f;
                 }
+            }
+
+            if(_saturation != _targetSaturation)
+            {
+                _saturation = Mathf.Lerp(_saturation, _targetSaturation, 0.05f);
+                if(Mathf.Abs(_saturation -  _targetSaturation) < 0.01f)
+                    _saturation = _targetSaturation;
+
+                _MeshRenderer.material.SetFloat("_Saturation", _saturation);
+                _renderer.cardCameraController.CardDirty = true;
             }
         }
 
