@@ -46,7 +46,7 @@ namespace BuiltinBuffs.Negative
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
             IntVector2 origFoodRequirement = orig(slugcat);
-            var data = BuffPoolManager.Instance.GetBuffData(eatMoreBuffID);
+            var data = BuffCore.GetBuffData(eatMoreBuffID);
             int newHibernateRequirement = origFoodRequirement.y + data.StackLayer;
             int newMaxFoodRequirement = Mathf.Max(newHibernateRequirement, origFoodRequirement.x);
             BuffUtils.Log(eatMoreBuffID, $"{newMaxFoodRequirement},{newHibernateRequirement}");

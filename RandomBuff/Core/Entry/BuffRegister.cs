@@ -30,6 +30,12 @@ namespace RandomBuff.Core.Entry
 
     }
 
+    public enum HookLifeTimeLevel
+    {
+        InGame,
+        UntilQuit
+    }
+
 
 
     /// <summary>
@@ -56,6 +62,12 @@ namespace RandomBuff.Core.Entry
             BuffTypes.Add(id, typeof(TBuffType));
             DataTypes.Add(id, typeof(TDataType));
         }
+
+        /// <summary>
+        /// 更改hook的生命周期
+        /// </summary>
+        /// <param name="level"></param>
+        public static void ChangeHookLifeTime(HookLifeTimeLevel level) { }
 
 
         /// <summary>
