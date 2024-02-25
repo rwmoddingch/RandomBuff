@@ -54,7 +54,7 @@ namespace RandomBuff.Core.Buff
         /// <summary>
         /// 是否处于激活状态
         /// </summary>
-        public virtual bool Active => false;
+        public virtual bool Active => true;
 
         /// <summary>
         /// 是否可以触发
