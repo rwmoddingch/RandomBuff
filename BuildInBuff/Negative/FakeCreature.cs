@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff;
 using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -85,7 +86,6 @@ namespace BuiltinBuffs.Negative
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<FakeCreatureBuff, FakeCreatureBuffData, FakeCreatureHook>(FakeCreatureBuffData.FakeCreatureID);
-            On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
         }
 
@@ -121,14 +121,6 @@ namespace BuiltinBuffs.Negative
 
 
 
-
-
-        private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
-        {
-            orig(self, dt);
-            if (!self.rainWorld.BuffMode())
-                return;
-        }
 
 
     }
