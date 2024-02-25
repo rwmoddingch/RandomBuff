@@ -288,13 +288,16 @@ namespace RandomBuff.Core.Game
         /// 理论上不应出现添加BuffDataManager不存在的实例的情况
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="needStack"></param>
         /// <returns></returns>
-        internal IBuff CreateBuff(BuffID id)
+        internal IBuff CreateBuff(BuffID id, bool needStack = false)
         {
             BuffPlugin.Log($"Create buff instance: {id}");
             if (buffDictionary.ContainsKey(id))
             {
                 BuffPlugin.LogWarning($"Buff: {id} Already Contain");
+                if(needStack)
+                    GetBuffData(id).Stack();
                 return buffDictionary[id];
             }
 

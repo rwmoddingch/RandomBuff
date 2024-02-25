@@ -52,7 +52,7 @@ namespace RandomBuff.Core.Game
 
                     inGameSlot.RequestPickCards((id) =>
                         {
-                            BuffPoolManager.Instance.CreateBuff(id);
+                            BuffPoolManager.Instance.CreateBuff(id,true);
 
                         }, positiveCards.Select(i => i.BuffID).ToArray(),
                         negativeCards, setting.CurrentPacket.positive.selectCount);
@@ -65,7 +65,7 @@ namespace RandomBuff.Core.Game
                         break;
                     inGameSlot.RequestPickCards((id) =>
                         {
-                            BuffPoolManager.Instance.CreateBuff(id);
+                            BuffPoolManager.Instance.CreateBuff(id, true);
                         }, pickList.Select(i => i.BuffID).ToArray(),
                         new BuffID[setting.CurrentPacket.negative.showCount], setting.CurrentPacket.negative.selectCount);
                 }

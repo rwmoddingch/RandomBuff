@@ -22,7 +22,7 @@ namespace RandomBuff.Core.SaveData
     /// 外部接口
     /// 没有提供直接获取字典的方式防止意外的外部修改
     /// </summary>
-    public sealed partial class BuffDataManager
+    internal sealed partial class BuffDataManager
     {
         internal static BuffDataManager Instance { get; private set; }
 
@@ -69,7 +69,7 @@ namespace RandomBuff.Core.SaveData
     ///
     /// 内部接口
     /// </summary>
-    public sealed partial class BuffDataManager
+    internal sealed partial class BuffDataManager
     {
 
         internal static bool LoadData(string file,string formatVersion)
@@ -203,7 +203,7 @@ namespace RandomBuff.Core.SaveData
     /// <summary>
     /// 私有部分
     /// </summary>
-    public sealed partial class BuffDataManager
+    internal sealed partial class BuffDataManager
     {
         private BuffDataManager()
         {
@@ -323,13 +323,13 @@ namespace RandomBuff.Core.SaveData
                     .Where(i => !string.IsNullOrEmpty(i)).ToArray();
                 if (split.Length == 0)
                 {
-                    BuffPlugin.LogWarning($"Empty Data !");
+                    BuffPlugin.LogWarning($"Empty data !");
                     return false;
 
                 }
                 file = split[0];
                 if (split.Length <= 1)
-                    BuffPlugin.LogError($"Corrupted Data : Missing Setting data");
+                    BuffPlugin.LogWarning($"Missing Setting data !");
                 else
                     InitStringSetting(split[1],formatVersion);
             }
