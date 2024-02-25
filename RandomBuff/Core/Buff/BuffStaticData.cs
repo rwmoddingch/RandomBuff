@@ -32,6 +32,12 @@ namespace RandomBuff.Core.Buff
         public BuffProperty BuffProperty { get; private set; } = BuffProperty.Normal;
         public bool Stackable { get; private set; } = false;
 
+        public int MaxCycleCount { get; private set; } = -1;
+        public bool Countable => MaxCycleCount != -1;
+
+        public Dictionary<string, object> ExtProperty { get; private set; } = new ();
+
+
         //帮助方法
         internal Texture GetFaceTexture()
         {
@@ -237,6 +243,9 @@ namespace RandomBuff.Core.Buff
                     BuffPlugin.LogError($"BuffName not found at {jsonFile.Name}!");
                     newData.CardInfos.Add(InGameTranslator.LanguageID.English,new CardInfo(){BuffName = newData.BuffID.value});
                 }
+
+                var rdata = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(newData.BuffID));
+                GetCustomStaticBuffData(rdata, newData, rawData);
                 //BuffPlugin.LogDebug(newData.ToDebugString());
                 return true;
             }
@@ -252,6 +261,15 @@ namespace RandomBuff.Core.Buff
                 return false;
             }
 
+        }
+
+        internal static void GetCustomStaticBuffData(BuffData data,BuffStaticData staticData,Dictionary<string,object> customArgs)
+        {
+            if (data is CountableBuffData countable)
+            {
+                staticData.MaxCycleCount = countable.MaxCycleCount;
+                BuffPlugin.LogDebug($"{staticData.BuffID},{staticData.MaxCycleCount}");
+            }
         }
 
         /// <summary>
