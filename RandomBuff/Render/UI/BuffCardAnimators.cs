@@ -133,6 +133,8 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
+            buffCard.DisplayCycle = false;
+            buffCard.UpdateGrey();
 
             targetScale = BuffCard.normalScale * 0.1f;
             targetPosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * InGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
@@ -188,6 +190,8 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
             buffCard.DisplayStacker = false;
+            buffCard.DisplayCycle = false;
+            buffCard.UpdateGrey();
 
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
         }
@@ -231,8 +235,10 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
             buffCard.DisplayStacker = true;
+            buffCard.DisplayCycle = true;
+            buffCard.UpdateGrey();
 
-            buffCard.UpdateStacker();
+            buffCard.UpdateNumer();
             buffCard.StackerAddOne = false;
 
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
@@ -319,8 +325,10 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
             buffCard.DisplayStacker = true;
+            buffCard.DisplayCycle = true;
+            buffCard.Grey = false;
 
-            buffCard.UpdateStacker();
+            buffCard.UpdateNumer();
             buffCard.StackerAddOne = true;
 
             cardPickerInteractionManager = buffCard.interactionManager as CardPickerInteractionManager;
@@ -412,6 +420,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
             buffCard.Highlight = false;
+            buffCard.DisplayCycle = false;
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -446,6 +455,8 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
             buffCard.Highlight = false;
+            buffCard.DisplayCycle = false;
+            buffCard.Grey = false;
 
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
 
@@ -490,7 +501,9 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
+            buffCard.DisplayCycle = false;
             buffCard.Highlight = false;
+            buffCard.Grey = false;
 
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
         }
@@ -533,7 +546,9 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
+            buffCard.DisplayCycle = false;
             buffCard.Highlight = false;
+            buffCard.Grey = false;
 
             buffCard.Scale = BuffCard.normalScale * 0.5f;
 
@@ -633,6 +648,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
             buffCard.Highlight = false;
+            buffCard.Grey = false;
 
             buffCard.Scale = BuffCard.normalScale * 0.5f;
 
@@ -720,7 +736,9 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
             buffCard.DisplayStacker = false;
+            buffCard.DisplayCycle = false;
             buffCard.Highlight = false;
+            buffCard.Grey = false;
 
             buffCard.Scale = BuffCard.normalScale * 0.3f;
             buffCard.Alpha = 0f;

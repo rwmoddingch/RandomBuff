@@ -31,9 +31,11 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class DivineBeingBuffData : BuffData
+    internal class DivineBeingBuffData : CountableBuffData
     {
         public override BuffID ID => DivineBeingIBuffEntry.DivineBeingBuffID;
+
+        public override int MaxCycleCount => 3;
     }
 
     internal class DivineBeingIBuffEntry : IBuffEntry

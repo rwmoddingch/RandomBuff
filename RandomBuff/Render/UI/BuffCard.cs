@@ -93,6 +93,12 @@ namespace RandomBuff.Render.UI
             set => _cardRenderer.EdgeHighlight = value;
         }
 
+        public bool Grey
+        {
+            get => _cardRenderer.Grey;
+            set => _cardRenderer.Grey = value;
+        }
+
         public bool DisplayDescription
         {
             get => _cardRenderer.DisplayDiscription;
@@ -150,6 +156,37 @@ namespace RandomBuff.Render.UI
             }
         }
 
+        public bool DisplayCycle
+        {
+            get
+            {
+                if (StaticData.Countable)
+                    return _cardRenderer.cardCycleCounterTextController.Show;
+                return false;
+            }
+            set
+            {
+                if (StaticData.Countable)
+                    _cardRenderer.cardCycleCounterTextController.Show = value;
+            }
+        }
+
+
+        public int CycleValue
+        {
+            get
+            {
+                if (StaticData.Countable)
+                    return _cardRenderer.cardCycleCounterTextController.Value;
+                return -1;
+            }
+            set
+            {
+                if (StaticData.Countable)
+                    _cardRenderer.cardCycleCounterTextController.Value = value;
+            }
+        }
+
         public BuffCard(BuffID buffID) : this(buffID, AnimatorState.Test_None)
         { 
         }
@@ -192,7 +229,7 @@ namespace RandomBuff.Render.UI
             currentAnimator?.Destroy();
             currentAniamtorState = newState;
 
-            if(newState == AnimatorState.Test_None)
+            if (newState == AnimatorState.Test_None)
             {
                 currentAnimator = new ClearStateAnimator(this, Position, Rotation, Scale);
             }
@@ -246,12 +283,25 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        public void UpdateStacker()
+        public void UpdateNumer()
         {
             if (StaticData.Stackable)
             {
                 StackerValue = BuffDataManager.Instance.GetBuffData(ID)?.StackLayer ?? 0;
             }
+
+            if (StaticData.Countable)
+            {
+                CycleValue = (BuffDataManager.Instance.GetBuffData(ID) is CountableBuffData countable) ? (countable.MaxCycleCount - countable.CycleUse) : StaticData.MaxCycleCount;
+            }
+        }
+
+        public void UpdateGrey()
+        {
+            if (BuffPoolManager.Instance != null)
+                Grey = (!BuffPoolManager.Instance.GetBuff(ID)?.Active) ?? false;
+            else
+                Grey = false;
         }
 
         public void OnMouseSingleClick()

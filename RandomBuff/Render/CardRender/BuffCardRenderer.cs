@@ -23,7 +23,8 @@ namespace RandomBuff.Render.CardRender
         internal CardTextController cardTextFrontController;
         internal CardTextController cardTextBackController;
 
-        internal CardStackerTextController cardStackerTextController;
+        internal CardNumberTextController cardStackerTextController;
+        internal CardNumberTextController cardCycleCounterTextController;
 
         GameObject _cardQuadFront;
         GameObject _cardQuadBack;
@@ -65,6 +66,12 @@ namespace RandomBuff.Render.CardRender
             }
         }
         float _depth;
+
+        public bool Grey
+        {
+            get => cardHighlightFrontController.Grey;
+            set => cardHighlightFrontController.Grey = value;
+        }
 
         public bool DisplayTitle
         {
@@ -150,9 +157,9 @@ namespace RandomBuff.Render.CardRender
 
                     cardTextBackController = _cardQuadBack.AddComponent<CardTextController>();
 
-                    //初始化堆叠层数显示
-                    cardStackerTextController = gameObject.AddComponent<CardStackerTextController>();
-
+                    //初始化堆叠层数和轮回数显示
+                    cardStackerTextController = gameObject.AddComponent<CardNumberTextController>();
+                    cardCycleCounterTextController = gameObject.AddComponent<CardNumberTextController>();
 
                     //初始化专有相机
                     cardCameraController.Init(id);
@@ -160,8 +167,10 @@ namespace RandomBuff.Render.CardRender
                     _notFirstInit = true;
                 }
                 cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f, info.id);
-                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f, info.id);
+                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f, info.id);     
                 cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString());
+                cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
+
 
                 _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
                 _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
