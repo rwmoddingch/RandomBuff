@@ -575,8 +575,8 @@ namespace RandomBuff.Render.UI
 
             if (Input.GetKeyDown(KeyCode.C))
             {
-                BuffPoolManager.Instance.CreateBuff(new BuffID("ShortCircuitGate"));
-                AppendCard(new BuffID("ShortCircuitGate"));
+                BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
+                AppendCard(new BuffID("DeathFreeMedallion"));
             }
         }
 

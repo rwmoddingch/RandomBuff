@@ -1,0 +1,27 @@
+ManifestFileVersion: 0
+CRC: 3641363376
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 48f8e4ebc4ce33c4bbf049e141265f16
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 818998f6ad50b01be7500ae860b195e5
+HashAppended: 0
+ClassTypes:
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 128
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/CardBasicColor.shader
+- Assets/consola.ttf
+- Assets/CardHighlight.shader
+- "Assets/\u5CF0\u5E7F\u660E\u9510\u4F53.ttf"
+- Assets/CardTextShader.shader
+Dependencies: []
