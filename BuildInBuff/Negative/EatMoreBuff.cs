@@ -21,6 +21,20 @@ namespace BuiltinBuffs.Negative
 
         public EatMoreBuff()
         {
+            if (BuffCustom.TryGetGame(out var game) &&
+                game.session is StoryGameSession session &&
+                game.Players[0].realizedCreature is Player player)
+            {
+              
+                var vec = SlugcatStats.SlugcatFoodMeter(game.StoryCharacter);
+                session.characterStats.foodToHibernate = vec.y;
+                session.characterStats.maxFood = vec.x;
+
+                player.slugcatStats.foodToHibernate = vec.y;
+                player.slugcatStats.maxFood = vec.x;
+                game.cameras[0].hud.foodMeter.survivalLimit = vec.y;
+                game.cameras[0].hud.foodMeter.survLimTo = vec.y;
+            }
         }
     }
 
@@ -38,20 +52,17 @@ namespace BuiltinBuffs.Negative
             BuffRegister.RegisterBuff<EatMoreBuff,EatMoreBuffData,EatMoreIBuffEntry>(eatMoreBuffID);
         }
 
-        public static void HookOn()
+        public static void LongLifeCycleHookOn()
         {
             On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
         }
 
-        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
-        {
-            throw new NotImplementedException();
-        }
+   
 
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
             IntVector2 origFoodRequirement = orig(slugcat);
-            var data = BuffCore.GetBuffData(eatMoreBuffID);
+            var data = eatMoreBuffID.GetBuffData();
             int newHibernateRequirement = origFoodRequirement.y + data.StackLayer;
             int newMaxFoodRequirement = Mathf.Max(newHibernateRequirement, origFoodRequirement.x);
             BuffUtils.Log(eatMoreBuffID, $"{newMaxFoodRequirement},{newHibernateRequirement}");
