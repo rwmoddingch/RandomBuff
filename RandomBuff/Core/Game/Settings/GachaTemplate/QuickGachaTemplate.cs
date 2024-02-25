@@ -56,7 +56,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
                 BuffPlugin.LogDebug($"Quick Mode : New Buff {buffId}");
 
-                BuffPoolManager.Instance.CreateBuff(buffId);
+                BuffPoolManager.Instance.CreateBuff(buffId, true);
                 BuffHud.Instance.AppendNewCard(buffId);
                 queue.Enqueue(buffId);
                 counter = 0;

@@ -24,7 +24,7 @@ using UnityEngine;
 namespace RandomBuff
 {
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
-    public class BuffPlugin : BaseUnityPlugin
+    internal class BuffPlugin : BaseUnityPlugin
     {
         public const string saveVersion = "a-0.0.3";
 
@@ -156,7 +156,7 @@ namespace RandomBuff
 
 
         /// <summary>
-        /// 会额外保存到../RainWorld_Data/StreamingAssets/randomBuff.log
+        /// 会额外保存到../RainWorld_Data/StreamingAssets/buffcore.log
         /// </summary>
         /// <param name="message"></param>
         internal static void Log(object message)
