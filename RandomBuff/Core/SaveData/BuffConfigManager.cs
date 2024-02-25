@@ -281,6 +281,7 @@ namespace RandomBuff.Core.SaveData
         internal static void InitBuffStaticData()
         {
             BuffPlugin.Log("Loading All Buff Static Data!");
+            var dt = DateTime.Now;
             foreach (var mod in ModManager.ActiveMods)
             {
                 string path = mod.path + Path.DirectorySeparatorChar + "buffassets";
@@ -289,6 +290,7 @@ namespace RandomBuff.Core.SaveData
 
                 LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName);
             }
+            BuffPlugin.LogDebug($"Cost time {dt-DateTime.Now}");
         }
 
         /// <summary>
