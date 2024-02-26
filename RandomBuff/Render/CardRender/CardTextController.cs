@@ -1,25 +1,23 @@
 using RWCustom;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
+using TMPro;
 
 namespace RandomBuff.Render.CardRender
 {
     internal class CardTextController : MonoBehaviour
     {
-        static float waitModeLength = 5f;
-        static float stepModeLength = 1f;
         static float fadeInOutModeLength = 1f;
+        static float changeScrollDirModeLength = 2f;
 
-
-        public TextMesh textMeshA;
-        public TextMesh textMeshB;
+        public TMP_Text textMesh;
         BuffCardRenderer _renderer;
 
         internal GameObject _textObjectA;
-        internal GameObject _textObjectB;
 
         bool _firstInit;
         bool _isTitle;
@@ -27,29 +25,43 @@ namespace RandomBuff.Render.CardRender
         Color _opaqueColor;
         Color _transparentColor;
 
-        [SerializeField] string[] splitedTexts;
-
-        Vector3 _origLocalScaleA;
-        Vector3 _origLocalScaleB;
-
-        float _modeTimer;
-        int _currentTextIndex;
-        int CurrentTextIndex
+        bool textNeedRefresh;
+        string Text
         {
-            get => _currentTextIndex;
+            get => textMesh.text;
             set
             {
-                if (_currentTextIndex == value)
-                    return;
-                _currentTextIndex = value;
-                SetText();
+                if(value != textMesh.text)
+                {
+                    textMesh.font.HasCharacters(value,out var _,false, true);
+                    textMesh.text = value;
+                    textNeedRefresh = true;
+                }
             }
         }
-        internal Mode currentMode;
+        float textMeshLength;
 
-        public string[] words;
+        float _modeTimer;
+        Mode currentMode = Mode.Scroll;
+        float _maxScrollVel = 1f;
+        float _scrolledLength;
+        float _minScrolledLength;
+        float _maxScrolledLength;
+        bool _scrollReverse;
 
-        public void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, bool isTitle, float size,InGameTranslator.LanguageID id)
+
+        float _alpha;
+        float _targetAlpha = 0f;
+        public bool Fade
+        {
+            get => _targetAlpha == 0f;
+            set => _targetAlpha = value ? 0f : 1f;
+        }
+
+        TMP_CharacterInfo[] origCharInfos;
+        Vector3[] origVertices;
+
+        public void Init(BuffCardRenderer renderer, Transform parent, TMP_FontAsset font, Color color, string text, bool isTitle, InGameTranslator.LanguageID id)
         {
             _renderer = renderer;
             _opaqueColor = color;
@@ -59,49 +71,51 @@ namespace RandomBuff.Render.CardRender
             if (!_firstInit)
             {
                 _textObjectA = new GameObject($"BuffCardTextObjectA");
-                _textObjectA.transform.parent = parent;
-                _origLocalScaleA = _textObjectA.transform.localScale;
+
                 _textObjectA.layer = 8;
-                textMeshA = SetupTextMesh(_textObjectA, font, isTitle, size);
-
-                _textObjectB = new GameObject($"BuffCardTextObjectB");
-                _textObjectB.transform.parent = parent;
-                _origLocalScaleB = _textObjectB.transform.localScale;
-                _textObjectB.layer = 8;
-                textMeshB = SetupTextMesh(_textObjectB, font, isTitle, size);
-
+                textMesh = SetupTextMesh(_textObjectA, font, isTitle);
                 _firstInit = true;
             }
 
-            SplitText(text, isTitle, id);
-            SetText();
+            Text = text;
 
-            SwitchMode(Mode.FadeOut);
-            UpdateTextMesh(0f);
+            SwitchMode(Mode.Scroll);
+            UpdateTextMesh();
 
-            TextMesh SetupTextMesh(GameObject obj, Font font, bool isTitle, float size)
+            TMP_Text SetupTextMesh(GameObject obj, TMP_FontAsset font, bool isTitle)
             {
-                var textMesh = obj.AddComponent<TextMesh>();
-                textMesh.font = font;
-                textMesh.font.material.shader = CardBasicAssets.CardTextShader;
-                obj.GetComponent<MeshRenderer>().material = textMesh.font.material;
-                //obj.GetComponent<MeshRenderer>().material.renderQueue = 2000;
+                var rectTransform = obj.AddComponent<RectTransform>();
+                rectTransform.SetParent(parent);
 
-                textMesh.fontSize = 100;
-                textMesh.characterSize = 0.01f * size;
+                obj.AddComponent<MeshRenderer>();
+                var textMesh = obj.AddComponent<TextMeshPro>();
+
+                textMesh.font = font;
+                //textMesh.enableCulling = true;
                 obj.transform.localEulerAngles = Vector3.zero;
 
                 if (isTitle)
                 {
-                    textMesh.anchor = TextAnchor.LowerCenter;
-                    textMesh.alignment = TextAlignment.Center;
-                    obj.transform.localPosition = new Vector3(0f, -0.5f, 0f);
+                    textMesh.fontSize = id == InGameTranslator.LanguageID.Chinese ? 8 : 6;
+                    rectTransform.pivot = new Vector2(0.5f, 0f);
+                    textMesh.alignment = TextAlignmentOptions.Center;
+                    rectTransform.sizeDelta = new Vector2(3f, 1f);
+                    rectTransform.localPosition = new Vector3(0f, -0.5f, -0.01f);
+                    textMesh.enableWordWrapping = false;
+                    textMesh.margin = new Vector4(0.1f, 0f, 0f, 0f);
+
+                    _maxScrollVel = 1f;
                 }
                 else
                 {
-                    textMesh.anchor = TextAnchor.UpperLeft;
-                    textMesh.alignment = TextAlignment.Left;
-                    obj.transform.localPosition = new Vector3(-0.5f, 0.5f, 0f);
+                    textMesh.fontSize = 3;
+
+                    rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    textMesh.alignment = TextAlignmentOptions.TopLeft;
+                    rectTransform.sizeDelta = new Vector2(2.8f, 4.8f);
+                    rectTransform.localPosition = new Vector3(0f, 0f, -0.01f);
+
+                    _maxScrollVel = 0.25f;
                 }
                 return textMesh;
             }
@@ -110,299 +124,226 @@ namespace RandomBuff.Render.CardRender
         // Update is called once per frame
         void Update()
         {
-            switch (currentMode)
+            if (textNeedRefresh)
             {
-                case Mode.Step:
-                    if (splitedTexts.Length == 1)
+                RefreshTextInfo();
+            }
+
+            if (textMesh == null || origCharInfos == null || origVertices == null || textNeedRefresh)
+                return;
+
+            if (_alpha != _targetAlpha)
+            {
+                if (_alpha > _targetAlpha)
+                    _alpha -= Time.deltaTime * 0.5f;
+                else if (_alpha < _targetAlpha)
+                    _alpha += Time.deltaTime * 0.5f;
+
+                if ((_targetAlpha == 1f && _alpha > _targetAlpha) || (_targetAlpha == 0f && _alpha < _targetAlpha))
+                    _alpha = _targetAlpha;
+                UpdateTextMesh(_alpha == _targetAlpha);
+            }
+
+            if (_isTitle)
+            {
+                if (_renderer.normal.z < 0)
+                    return;
+            }
+            else
+            {
+                if (_renderer.normal.z >= 0)
+                    return;
+            }
+
+            if (_alpha == 0f)
+                return;
+
+            if (currentMode == Mode.Scroll)
+            {
+                if (!_scrollReverse)
+                {
+                    if (_scrolledLength < _maxScrolledLength)
                     {
-                        SwitchMode(Mode.Wait);
-                    }
-                    else
-                    {
-                        _modeTimer += Time.deltaTime;
-                        if (_modeTimer >= stepModeLength)
+                        float lerped = Mathf.Lerp(_scrolledLength, _scrolledLength + _maxScrollVel, 0.05f) - _scrolledLength;
+                        float maxStep = _maxScrollVel * Time.deltaTime;
+                        if (lerped > maxStep)
+                            lerped = maxStep;
+
+                        _scrolledLength += lerped;
+                        if (_scrolledLength >= _maxScrolledLength)
                         {
-                            SwitchMode(Mode.Wait);
-                            CurrentTextIndex = GetNextTextIndex(1);
+                            _scrolledLength = _maxScrolledLength;
+                            SwitchMode(Mode.ChangeScrollDir);
                         }
-                        UpdateTextMesh(SmoothCurve(_modeTimer / stepModeLength));
+                        UpdateTextMesh();
                     }
+                }
+                else
+                {
+                    if (_scrolledLength > _minScrolledLength)
+                    {
+                        float lerped = Mathf.Lerp(_scrolledLength, _scrolledLength - _maxScrollVel, 0.05f) - _scrolledLength;
+                        float maxStep = -_maxScrollVel * Time.deltaTime;
+                        if (lerped < maxStep)
+                            lerped = maxStep;
 
-                    break;
-                case Mode.Wait:
+                        _scrolledLength += lerped;
+                        if (_scrolledLength <= _minScrolledLength)
+                        {
+                            _scrolledLength = _minScrolledLength;
+                            SwitchMode(Mode.ChangeScrollDir);
+                        }
+                        UpdateTextMesh();
+                    }
+                }
+            }
+            if (currentMode == Mode.ChangeScrollDir)
+            {
+                if (_modeTimer < changeScrollDirModeLength)
                     _modeTimer += Time.deltaTime;
-                    if (_modeTimer >= waitModeLength)
-                    {
-                        SwitchMode(Mode.Step);
-                    }
-
-                    break;
-                case Mode.FadeIn:
-                    _modeTimer += Time.deltaTime;
-                    if (_modeTimer >= fadeInOutModeLength)
-                    {
-                        SwitchMode(Mode.Wait);
-                    }
-                    UpdateTextMesh((_modeTimer / fadeInOutModeLength));
-
-                    break;
-                case Mode.FadeOut:
-                    if (_modeTimer > 0)
-                    {
-                        _modeTimer -= Time.deltaTime;
-                        UpdateTextMesh((_modeTimer / fadeInOutModeLength));
-                    }
-                    else if (_modeTimer < 0)
-                    {
-                        _modeTimer = 0f;
-                        UpdateTextMesh(0f);
-                    }
-
-                    break;
+                else
+                {
+                    _scrollReverse = !_scrollReverse;
+                    SwitchMode(Mode.Scroll);
+                }
             }
         }
 
         internal void SwitchMode(Mode newMode)
         {
-            if (currentMode == newMode)
+            if (newMode == currentMode)
                 return;
-
-            if (newMode == Mode.FadeOut)
-            {
-                if (_modeTimer > fadeInOutModeLength)
-                    _modeTimer = fadeInOutModeLength;
-            }
-            else
-            {
-                _modeTimer = 0f;
-            }
             currentMode = newMode;
-        }
-
-        void SplitText(string origText, bool isTitle, InGameTranslator.LanguageID id)
-        {
-            if (string.IsNullOrEmpty(origText))
-            {
-                splitedTexts = new string[1] { "" };
-                return;
-            }
-
-            if (isTitle)
-            {
-                int maxCharInLine = 7;
-                splitedTexts = new string[Mathf.CeilToInt(origText.Length / (float)maxCharInLine)];
-
-                for (int i = 0; i < splitedTexts.Length; i++)
-                {
-                    splitedTexts[i] = origText.Substring(i * maxCharInLine, Mathf.Min(origText.Length - i * maxCharInLine, maxCharInLine)).Trim();
-                }
-            }
-            else
-            {
-                if(id == InGameTranslator.LanguageID.Chinese)
-                {
-                    int maxCharInLine = 10;
-                    int maxLine = 14;
-
-                    List<string> pages = new List<string>();
-                    StringBuilder builder = new StringBuilder();
-
-                    origText = "  " + origText;
-
-                    int charCounter = 0;
-                    int lineCounter = 0;
-                    for(int i = 0;i < origText.Length;i++)
-                    {
-                        builder.Append(origText[i]);
-                        charCounter++;
-
-                        if(lineCounter == maxCharInLine - 1)//最后一行预留省略号
-                        {
-                            if (charCounter == maxCharInLine - 1)
-                                builder.Append("...\n");
-                        }
-                        else
-                        {
-                            if (charCounter == maxCharInLine)
-                                builder.Append("\n");
-                        }
-
-
-                        if (builder[builder.Length - 1] == '\n')
-                        {
-                            lineCounter++;
-                            charCounter = 0;
-                        }
-
-                        if(lineCounter == maxLine)
-                        {
-                            pages.Add(builder.ToString());
-                            builder.Clear();
-
-                            lineCounter = 0;
-                            charCounter = 0;
-                        }
-                    }
-                    if(builder.Length != 0)
-                        pages.Add(builder.ToString());
-
-                    splitedTexts = pages.ToArray();
-                }
-                else
-                {
-                    int maxCharInLine = 18;
-                    int maxLine = 14;
-
-                    string[] words = origText.Split(' ');
-                    this.words = words;
-                    words[0] = "  " + words[0];//第一行加缩进
-
-
-                    int lineCounter = 0;
-                    int charCount = 0;
-                    List<string> pages = new List<string>();
-                    StringBuilder builder = new StringBuilder();
-
-                    for (int i = 0; i < words.Length; i++)
-                    {
-                        if (builder.Length == 0 && words[i].Length >= maxCharInLine)//过长的单词放到一行内
-                        {
-                            builder.AppendLine(words[i]);
-                            lineCounter++;
-                            charCount = 0;
-                        }
-
-                        int extraLength = lineCounter + 1 >= maxLine ? 5 : 1;//若为最后一行，则需要为省略号(...)预留空间,否则只需要计算额外空格的空间
-                        if (charCount + words[i].Length + extraLength > maxCharInLine)//无法再放下一个单词,则直接添加行
-                        {
-                            if (lineCounter + 1 >= maxLine)
-                                builder.Append(" ...");
-
-                            builder.Append("\n");
-                            charCount = 0;
-                            lineCounter++;
-                        }
-
-                        if (lineCounter >= maxLine)//完成当前页
-                        {
-                            pages.Add(builder.ToString());
-                            lineCounter = 0;
-                            charCount = 0;
-                            builder.Clear();
-                        }
-
-                        if (charCount > 0)
-                        {
-                            builder.Append(" ");
-                            charCount++;
-                        }
-
-                        charCount += words[i].Length;
-                        builder.Append(words[i]);
-                    }
-                    if (builder.Length != 0)
-                    {
-                        pages.Add(builder.ToString());
-                    }
-
-                    splitedTexts = pages.ToArray();
-                }
-            }
-
-            if(splitedTexts.Length == 0)
-                splitedTexts = new string[1] { "" };
+            _modeTimer = 0f;
         }
 
         /// <summary>
         /// 根据参数t更新文本的状态，t在0到1之间
         /// </summary>
         /// <param name="t"></param>
-        void UpdateTextMesh(float t)
+        void UpdateTextMesh(bool forceUpdate = false)
         {
             if (_isTitle)
             {
-                switch (currentMode)
+                if (_renderer.normal.z < 0 && !forceUpdate)
+                    return;
+
+                for (int i = 0; i < textMesh.textInfo.characterCount; i++)
                 {
-                    case Mode.Step:
-                    case Mode.Wait:
-                        textMeshA.color = Color.Lerp(_opaqueColor, _transparentColor, t);
+                    var charInfo = textMesh.textInfo.characterInfo[i];
+                    //if (!charInfo.isVisible)
+                    //    continue;
 
-                        if (splitedTexts.Length > 1)
-                            textMeshB.color = Color.Lerp(_transparentColor, _opaqueColor, t);
-                        else
-                            textMeshB.color = _transparentColor;
+                    var verts = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
+                    var colors = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].colors32;
+                    for (int v = 0; v < 4; v++)
+                    {
+                        var orig = origVertices[charInfo.vertexIndex + v];
+                        verts[charInfo.vertexIndex + v] = orig + new Vector3(-_scrolledLength, 0f, 0f);
 
-                        _textObjectA.transform.localPosition = new Vector3(-0.5f * t, -0.5f, 0f);
-                        _textObjectA.transform.localScale = new Vector3((1f - t) * _origLocalScaleA.x, _origLocalScaleA.y, _origLocalScaleA.z);
-                        _textObjectB.transform.localPosition = new Vector3(0.5f * (1f - t), -0.5f, 0f);
-                        _textObjectB.transform.localScale = new Vector3(t * _origLocalScaleB.x, _origLocalScaleB.y, _origLocalScaleB.z);
-
-                        _renderer.cardCameraController.CardDirty = true;
-
-                        break;
-
-                    case Mode.FadeIn:
-                    case Mode.FadeOut:
-                        textMeshA.color = Color.Lerp(_transparentColor, _opaqueColor, t);
-                        textMeshB.color = _transparentColor;
-
-                        _renderer.cardCameraController.CardDirty = true;
-
-                        break;
+                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (1.2f - Mathf.Abs(verts[charInfo.vertexIndex + v].x)) / 0.3f);
+                    }
                 }
             }
             else
             {
-                switch (currentMode)
+                if (_renderer.normal.z >= 0 && !forceUpdate)
+                    return;
+
+                for (int i = 0; i < textMesh.textInfo.characterCount; i++)
                 {
-                    case Mode.Step:
-                    case Mode.Wait:
-                        textMeshA.color = Color.Lerp(_opaqueColor, _transparentColor, t);
+                    var charInfo = textMesh.textInfo.characterInfo[i];
+                    //if (!charInfo.isVisible)
+                    //    continue;
 
-                        if (splitedTexts.Length > 1)
-                            textMeshB.color = Color.Lerp(_transparentColor, _opaqueColor, t);
-                        else
-                            textMeshB.color = _transparentColor;
+                    var verts = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
+                    var colors = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].colors32;
+                    for (int v = 0; v < 4; v++)
+                    {
+                        var orig = origVertices[charInfo.vertexIndex + v];
+                        verts[charInfo.vertexIndex + v] = orig + new Vector3(0f, _scrolledLength, 0f);
 
-                        _textObjectA.transform.localPosition = new Vector3(-0.5f, 0.5f, 0f);
-                        _textObjectA.transform.localScale = new Vector3(_origLocalScaleA.x, (1f - t) * _origLocalScaleA.y, _origLocalScaleA.z);
-                        _textObjectB.transform.localPosition = new Vector3(-0.5f, -0.5f + t, 0f);
-                        _textObjectB.transform.localScale = new Vector3(_origLocalScaleB.x, t * _origLocalScaleB.y, _origLocalScaleB.z);
-
-                        _renderer.cardCameraController.CardDirty = true;
-
-                        break;
-
-                    case Mode.FadeIn:
-                    case Mode.FadeOut:
-                        textMeshA.color = Color.Lerp(_transparentColor, _opaqueColor, t);
-                        textMeshB.color = _transparentColor;
-
-                        _renderer.cardCameraController.CardDirty = true;
-
-                        break;
+                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (2.4f - Mathf.Abs(verts[charInfo.vertexIndex + v].y)) / 0.3f);
+                    }
                 }
             }
+
+            textMesh.textInfo.meshInfo[0].mesh.vertices = textMesh.textInfo.meshInfo[0].vertices;
+            textMesh.textInfo.meshInfo[0].mesh.colors32 = textMesh.textInfo.meshInfo[0].colors32;
+            for (int i = 0; i < textMesh.textInfo.meshInfo.Length; i++)
+            {
+                textMesh.UpdateGeometry(textMesh.textInfo.meshInfo[i].mesh, i);
+            }
+
+            _renderer.cardCameraController.CardDirty = true;
         }
 
-        int GetNextTextIndex(int step)
+        void RefreshTextInfo()
         {
-            int result = _currentTextIndex + step;
-            while (result >= splitedTexts.Length)
-            {
-                result -= splitedTexts.Length;
-            }
-            while (result < 0)
-            {
-                result += splitedTexts.Length;
-            }
-            return result;
-        }
+            textMesh.ForceMeshUpdate(true, true);
+            origCharInfos = new TMP_CharacterInfo[textMesh.textInfo.characterInfo.Length];
+            Array.Copy(textMesh.textInfo.characterInfo, origCharInfos, origCharInfos.Length);
 
-        void SetText()
-        {
-            textMeshA.text = splitedTexts[CurrentTextIndex];
-            textMeshB.text = splitedTexts[GetNextTextIndex(1)];
+            var vert = textMesh.textInfo.meshInfo[0].vertices;
+            origVertices = new Vector3[vert.Length];
+            Array.Copy(vert, origVertices, vert.Length);
+
+            BuffPlugin.Log($"copied vertices : orig length : {textMesh.textInfo.meshInfo[0].vertices.Length}, {origVertices.Length}");
+
+            if (_isTitle)
+            {
+                float xLeft = float.MaxValue;
+                float xRight = float.MinValue;
+
+                foreach (var chara in origCharInfos)
+                {
+                    //if (!chara.isVisible)
+                    //    continue;
+
+                    for (int v = 0; v < 4; v++)
+                    {
+                        BuffPlugin.Log($"vertex : {chara.vertexIndex + v} , chara : {chara.vertexIndex}");
+                        var vertex = origVertices[chara.vertexIndex + v];
+                        if (vertex.x < xLeft)
+                            xLeft = vertex.x;
+                        if (vertex.x > xRight)
+                            xRight = vertex.x;
+                    }
+                }
+                textMeshLength = xRight - xLeft;
+                _maxScrolledLength = Mathf.Max(xRight - 1.4f, 0f);
+                _minScrolledLength = Mathf.Min(xLeft + 1.4f, 0f);
+                _scrolledLength = _minScrolledLength;
+            }
+            else
+            {
+                float yDown = float.MaxValue;
+                float yUp = float.MinValue;
+
+                foreach (var chara in origCharInfos)
+                {
+                    //if (!chara.isVisible)
+                    //    continue;
+
+                    for (int v = 0; v < 4; v++)
+                    {
+                        var vertex = origVertices[chara.vertexIndex + v];
+                        if (vertex.y < yDown)
+                            yDown = vertex.y;
+                        if (vertex.y > yUp)
+                            yUp = vertex.y;
+                    }
+                }
+                textMeshLength = yUp - yDown;
+                _maxScrolledLength = Mathf.Max(textMeshLength - 4.8f, 0f);
+                _minScrolledLength = 0f;
+                _scrolledLength = _minScrolledLength;
+
+                Debug.Log($"{yUp}, {yDown}");
+            }
+
+            Debug.Log($"Refresh Text Info, length:{textMeshLength}");
+            textNeedRefresh = false;
         }
 
         float SmoothCurve(float t)
@@ -414,7 +355,8 @@ namespace RandomBuff.Render.CardRender
         internal enum Mode
         {
             Wait,
-            Step,
+            Scroll,
+            ChangeScrollDir,
             FadeIn,
             FadeOut
         }

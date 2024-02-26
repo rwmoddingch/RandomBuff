@@ -1,3 +1,4 @@
+using MonoMod.RuntimeDetour;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
@@ -5,8 +6,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
+using UnityEngine.TextCore;
 using Object = UnityEngine.Object;
+using System.Drawing;
+using Font = UnityEngine.Font;
+using System.Text;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -117,7 +125,7 @@ namespace RandomBuff.Render.CardRender
     /// <summary>
     /// 卡牌渲染基础资源类
     /// </summary>
-    public static class CardBasicAssets
+    internal static class CardBasicAssets
     {
         /// <summary>
         /// 卡牌高光shader
@@ -137,12 +145,14 @@ namespace RandomBuff.Render.CardRender
         /// <summary>
         /// 卡牌标题的字体
         /// </summary>
-        public static Font TitleFont { get; private set; }
+        public static TMP_FontAsset TitleFont { get; private set; }
 
         /// <summary>
         /// 卡牌介绍使用的字体
         /// </summary>
-        public static Font DiscriptionFont { get; private set; }
+        public static TMP_FontAsset DiscriptionFont { get; private set; }
+
+        public static TMP_Settings TMP_settings { get; private set; }
 
         /// <summary>
         /// 正面增益的卡背
@@ -164,35 +174,96 @@ namespace RandomBuff.Render.CardRender
         /// </summary>
         public static Vector2Int RenderTextureSize = new Vector2Int(600, 1000);
 
+        static Dictionary<string, Shader> LoadedShaders = new Dictionary<string, Shader>();
+
+        static string GB2312;//加载完字体后销毁节省内存
+        static bool[] corounteFlags = new bool[2] { false, false };
+
         /// <summary>
         /// 从文件中加载资源
         /// </summary>
         public static void LoadAssets()
         {
+            //调整TextMeshPro
+            Hook tmp_settings_get_hook = new Hook(typeof(TMP_Settings).GetProperty("instance").GetGetMethod(), TMP_Settings_instance_get);
+
             //加载assetbundle资源
             string path = AssetManager.ResolveFilePath("buffassets/assetbundles/randombuffbuiltinbundle");
-            BuffPlugin.Log(File.Exists(path));
+            string path2 = AssetManager.ResolveFilePath("buffassets/assetbundles/textmeshpro");
+            string path3 = AssetManager.ResolveFilePath($"buffassets/assetbundles/GB2312.txt");
+
+            GB2312 = BuffResource.GB2312;
+            //var lines = File.ReadAllLines(path2, Encoding.UTF8);
+
+            //加载TextMeshPro
+            TMP_FontAsset testAsset = null;
+            AssetBundle ab2 = AssetBundle.LoadFromFile(path2);
+            var allAssets2 = ab2.LoadAllAssets();
+            Shader shader1 = null;
+
+            List<Font> fontsToCreate = new List<Font>();
+            
+            try
+            {
+                foreach (var asset in allAssets2)
+                {
+                    if (asset is TMP_Settings)
+                        TMP_settings = (TMP_Settings)asset;
+
+                    if (asset is Shader shader)
+                    {
+                        Debug.Log($"Loaded shader : {shader.name}");
+                        BuffPlugin.Log($"Loaded shader : {shader.name}");
+                        LoadedShaders.Add(shader.name, shader);
+                        if (shader.name == "TextMeshPro/Distance Field SSD")
+                        {
+                            shader1 = (Shader)shader;
+                        }
+                    }
+
+                    if(asset is Font fontAsset)
+                    {
+                        fontsToCreate.Add(fontAsset);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            TMP_Settings.instance.m_warningsDisabled = false;
+
+            foreach(var font in fontsToCreate)
+            {
+                testAsset = CreateFontAsset(font);
+                testAsset.name = font.name;
+                Debug.Log($"charaters in font : {testAsset.characterTable.Count}, {testAsset.name}");
+                if(testAsset.name == "RuiMingFont")
+                {
+                    TitleFont = testAsset;
+                    BuffPlugin.Instance.StartCoroutine(LoadCharacterForFont(testAsset, 0));
+                }
+                else
+                {
+                    DiscriptionFont = testAsset;
+                    BuffPlugin.Instance.StartCoroutine(LoadCharacterForFont(testAsset, 1));
+                }
+            }
+
+            //加载自带资源
             AssetBundle ab = AssetBundle.LoadFromFile(path);
 
             var allAssets = ab.LoadAllAssets();
 
-            List<Font> loadedFonts = new List<Font>();
+            List<TMP_FontAsset> loadedFonts = new List<TMP_FontAsset>();
             List<Shader> loadedShaders = new List<Shader>();
 
             foreach (var asset in allAssets)
             {
-                if (asset is Font)
-                    loadedFonts.Add((Font)asset);
-
                 if (asset is Shader)
                     loadedShaders.Add((Shader)asset);
                 BuffPlugin.Log($"Load asset from assetbundle : {asset.name}");
             }
-
-            BuffPlugin.Log(Shader.Find("Unlit/Color"));
-
-            DiscriptionFont = loadedFonts[0];
-            TitleFont = loadedFonts[1];
 
             CardHighlightShader = loadedShaders[1];
             CardTextShader = loadedShaders[2];
@@ -202,6 +273,119 @@ namespace RandomBuff.Render.CardRender
             MoonBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/moonback").texture;
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
+        }
+
+        public static TMP_Settings TMP_Settings_instance_get(Func<TMP_Settings> orig)
+        {
+            if (TMP_Settings.s_Instance == null)
+                TMP_Settings.s_Instance = TMP_settings;
+            return TMP_Settings.s_Instance;
+        }
+
+        public static TMP_FontAsset CreateFontAsset(Font font)
+        {
+            return CreateFontAsset(font, 90, 9, GlyphRenderMode.SDFAA, 4096, 4096);
+        }
+
+        public static TMP_FontAsset CreateFontAsset(Font font, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, AtlasPopulationMode atlasPopulationMode = AtlasPopulationMode.Dynamic, bool enableMultiAtlasSupport = true)
+        {
+            FontEngine.InitializeFontEngine();
+            if (FontEngine.LoadFontFace(font, samplingPointSize) != 0)
+            {
+                Debug.LogWarning("Unable to load font face for [" + font.name + "]. Make sure \"Include Font Data\" is enabled in the Font Import Settings.", font);
+                return null;
+            }
+
+            TMP_FontAsset tMP_FontAsset = ScriptableObject.CreateInstance<TMP_FontAsset>();
+            tMP_FontAsset.m_Version = "1.1.0";
+            tMP_FontAsset.faceInfo = FontEngine.GetFaceInfo();
+            if (atlasPopulationMode == AtlasPopulationMode.Dynamic)
+            {
+                tMP_FontAsset.sourceFontFile = font;
+            }
+
+            tMP_FontAsset.atlasPopulationMode = atlasPopulationMode;
+            tMP_FontAsset.atlasWidth = atlasWidth;
+            tMP_FontAsset.atlasHeight = atlasHeight;
+            tMP_FontAsset.atlasPadding = atlasPadding;
+            tMP_FontAsset.atlasRenderMode = renderMode;
+            tMP_FontAsset.atlasTextures = new Texture2D[1];
+            Texture2D texture2D = new Texture2D(0, 0, TextureFormat.Alpha8, mipChain: false);
+            tMP_FontAsset.atlasTextures[0] = texture2D;
+            tMP_FontAsset.isMultiAtlasTexturesEnabled = enableMultiAtlasSupport;
+            int num;
+            if ((renderMode & (GlyphRenderMode)16) == (GlyphRenderMode)16)
+            {
+                num = 0;
+                Material material = new Material(LoadedShaders["TextMeshPro/Mobile/Bitmap"]/*ShaderUtilities.ShaderRef_MobileBitmap*/);
+                material.SetTexture(ShaderUtilities.ID_MainTex, texture2D);
+                material.SetFloat(ShaderUtilities.ID_TextureWidth, atlasWidth);
+                material.SetFloat(ShaderUtilities.ID_TextureHeight, atlasHeight); 
+                tMP_FontAsset.material = material;
+            }
+            else
+            {
+                num = 1;
+                Material material2 = new Material(LoadedShaders["TextMeshPro/Mobile/Distance Field"]/*ShaderUtilities.ShaderRef_MobileSDF*/);
+                material2.SetTexture(ShaderUtilities.ID_MainTex, texture2D);
+                material2.SetFloat(ShaderUtilities.ID_TextureWidth, atlasWidth);
+                material2.SetFloat(ShaderUtilities.ID_TextureHeight, atlasHeight);
+                material2.SetFloat(ShaderUtilities.ID_GradientScale, atlasPadding + num);
+                material2.SetFloat(ShaderUtilities.ID_WeightNormal, tMP_FontAsset.normalStyle);
+                material2.SetFloat(ShaderUtilities.ID_WeightBold, tMP_FontAsset.boldStyle);
+                tMP_FontAsset.material = material2;
+            }
+
+            tMP_FontAsset.freeGlyphRects = new List<GlyphRect>(8)
+            {
+                new GlyphRect(0, 0, atlasWidth - num, atlasHeight - num)
+            };
+            tMP_FontAsset.usedGlyphRects = new List<GlyphRect>(8);
+            tMP_FontAsset.ReadFontAssetDefinition();
+            return tMP_FontAsset;
+        }
+    
+        public static IEnumerator LoadCharacterForFont(TMP_FontAsset fontToLoad, int index)
+        {
+            int targetFrameRate = 60;
+            int pointer = 0;
+
+            DateTime start = DateTime.Now;
+            DateTime end = DateTime.Now;
+
+            
+            while (pointer < GB2312.Length)
+            {
+                fontToLoad.HasCharacter(GB2312[pointer], true, true);
+                BuffPlugin.Log($"{GB2312[pointer]} {fontToLoad.HasCharacter(GB2312[pointer], false, true)}");
+                end = DateTime.Now;
+
+                if((end - start).TotalSeconds >= 1f / targetFrameRate)
+                {
+                    BuffPlugin.Log($"CheckCharacter at {fontToLoad.name}, {pointer} / {GB2312.Length}");
+                    start = DateTime.Now;
+                    yield return null;
+                }
+                pointer++;
+            }
+
+            BuffPlugin.Log($"CheckCharacter at {fontToLoad.name} finish, total charater : {fontToLoad.characterTable.Count}");
+            corounteFlags[index] = true;
+
+            bool allFinisehd = true;
+            foreach(var flag in corounteFlags)
+            {
+                allFinisehd = allFinisehd && flag;
+            }
+
+            if(allFinisehd)
+            {
+                GB2312 = "";
+                corounteFlags = null;
+                BuffPlugin.Log($"CheckCharacter allFinisehd");
+            }
+
+            yield break;
         }
     }
 }
