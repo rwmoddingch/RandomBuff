@@ -13,8 +13,10 @@ using UnityEngine.TextCore.LowLevel;
 using UnityEngine.TextCore;
 using Object = UnityEngine.Object;
 using System.Drawing;
+using System.Linq;
 using Font = UnityEngine.Font;
 using System.Text;
+using RWCustom;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -191,7 +193,7 @@ namespace RandomBuff.Render.CardRender
             string path2 = AssetManager.ResolveFilePath("buffassets/assetbundles/textmeshpro");
             string path3 = AssetManager.ResolveFilePath($"buffassets/assetbundles/GB2312.txt");
 
-            GB2312 = BuffResource.GB2312;
+            GB2312 = BuffResource.CommonlyUsed;
             //var lines = File.ReadAllLines(path2, Encoding.UTF8);
 
             //加载TextMeshPro
@@ -346,7 +348,7 @@ namespace RandomBuff.Render.CardRender
     
         public static IEnumerator LoadCharacterForFont(TMP_FontAsset fontToLoad, int index)
         {
-            int targetFrameRate = 60;
+            int targetFrameRate = Mathf.Clamp(Custom.rainWorld.options.fpsCap + 30,60,120);
             int pointer = 0;
 
             DateTime start = DateTime.Now;
@@ -356,12 +358,12 @@ namespace RandomBuff.Render.CardRender
             while (pointer < GB2312.Length)
             {
                 fontToLoad.HasCharacter(GB2312[pointer], true, true);
-                BuffPlugin.Log($"{GB2312[pointer]} {fontToLoad.HasCharacter(GB2312[pointer], false, true)}");
+                //Debug.Log($"{GB2312[pointer]} {fontToLoad.HasCharacter(GB2312[pointer], false, true)}");
                 end = DateTime.Now;
 
                 if((end - start).TotalSeconds >= 1f / targetFrameRate)
                 {
-                    BuffPlugin.Log($"CheckCharacter at {fontToLoad.name}, {pointer} / {GB2312.Length}");
+                    //BuffPlugin.Log($"CheckCharacter at {fontToLoad.name}, {pointer} / {GB2312.Length}");
                     start = DateTime.Now;
                     yield return null;
                 }
@@ -370,14 +372,9 @@ namespace RandomBuff.Render.CardRender
 
             BuffPlugin.Log($"CheckCharacter at {fontToLoad.name} finish, total charater : {fontToLoad.characterTable.Count}");
             corounteFlags[index] = true;
+            
 
-            bool allFinisehd = true;
-            foreach(var flag in corounteFlags)
-            {
-                allFinisehd = allFinisehd && flag;
-            }
-
-            if(allFinisehd)
+            if(corounteFlags.All(i=>i))
             {
                 GB2312 = "";
                 corounteFlags = null;
