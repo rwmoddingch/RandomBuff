@@ -288,7 +288,7 @@ namespace RandomBuff.Render.CardRender
             origVertices = new Vector3[vert.Length];
             Array.Copy(vert, origVertices, vert.Length);
 
-            BuffPlugin.Log($"copied vertices : orig length : {textMesh.textInfo.meshInfo[0].vertices.Length}, {origVertices.Length}");
+            BuffPlugin.LogDebug($"copied vertices : orig length : {textMesh.textInfo.meshInfo[0].vertices.Length}, {origVertices.Length}");
 
             if (_isTitle)
             {
@@ -300,9 +300,9 @@ namespace RandomBuff.Render.CardRender
                     //if (!chara.isVisible)
                     //    continue;
 
-                    for (int v = 0; v < 4; v++)
+                    for (int v = 0; v < 4 && chara.vertexIndex + v < origVertices.Length; v++)
                     {
-                        BuffPlugin.Log($"vertex : {chara.vertexIndex + v} , chara : {chara.vertexIndex}");
+                        Debug.Log($"vertex : {chara.vertexIndex + v} , chara : {chara.vertexIndex}");
                         var vertex = origVertices[chara.vertexIndex + v];
                         if (vertex.x < xLeft)
                             xLeft = vertex.x;
@@ -325,7 +325,7 @@ namespace RandomBuff.Render.CardRender
                     //if (!chara.isVisible)
                     //    continue;
 
-                    for (int v = 0; v < 4; v++)
+                    for (int v = 0; v < 4 && chara.vertexIndex + v < origVertices.Length; v++)
                     {
                         var vertex = origVertices[chara.vertexIndex + v];
                         if (vertex.y < yDown)
