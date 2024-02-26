@@ -12,9 +12,9 @@ namespace RandomBuff.Core.Game
     /// 游戏局内逻辑控制
     /// 每局游戏会重新创建
     ///
-    /// 外部接口
+    /// 哈哈没有外部接口！
     /// </summary>
-    public sealed partial class BuffPoolManager
+    internal sealed partial class BuffPoolManager
     {
         /// <summary>
         /// 获取ID对应的Buff
@@ -74,7 +74,7 @@ namespace RandomBuff.Core.Game
     ///
     /// 内部接口
     /// </summary>
-    public sealed partial class BuffPoolManager
+    internal sealed partial class BuffPoolManager
     {
         public static BuffPoolManager Instance { get; private set; }
         public RainWorldGame Game { get;}
@@ -100,7 +100,7 @@ namespace RandomBuff.Core.Game
 
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 CreateBuff(data.Key);
-
+            Instance = this;
 
         }
 
@@ -121,7 +121,7 @@ namespace RandomBuff.Core.Game
                 BuffPlugin.LogError($"remove buff not found: {id}");
                 return;
             }
-            BuffHookWarpper.DisableBuff(id);
+            BuffHookWarpper.DisableBuff(id,HookLifeTimeLevel.InGame);
             buffDictionary[id].Destroy();
             buffDictionary.Remove(id);
             UnstackBuff(id);
@@ -180,6 +180,7 @@ namespace RandomBuff.Core.Game
                 return cycleDatas[id];
             }
             var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
+            BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
             re.Stack();
             cycleDatas.Add(id, re);
             return re;
@@ -194,7 +195,7 @@ namespace RandomBuff.Core.Game
         {
             BuffPlugin.Log($"New game, character: {game.StoryCharacter}, Slot: {game.rainWorld.options.saveSlot}, " +
                            $"buff count: {BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter).Count}");
-            return Instance = new BuffPoolManager(game);
+            return new BuffPoolManager(game);
         }
 
    
@@ -232,7 +233,7 @@ namespace RandomBuff.Core.Game
             {
                 try
                 {
-                    BuffHookWarpper.DisableBuff(buff.ID);
+                    BuffHookWarpper.DisableBuff(buff.ID, HookLifeTimeLevel.InGame);
                     buff.Destroy();
                 }
                 catch (Exception e)
@@ -316,7 +317,7 @@ namespace RandomBuff.Core.Game
             var buff = (IBuff)Activator.CreateInstance(type);
             buffDictionary.Add(id, buff);
             buffList.Add(buff);
-            BuffHookWarpper.EnableBuff(id);
+            BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.InGame);
             return buff;
         }
 
