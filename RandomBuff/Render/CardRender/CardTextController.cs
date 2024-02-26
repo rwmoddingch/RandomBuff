@@ -12,7 +12,7 @@ namespace RandomBuff.Render.CardRender
     internal class CardTextController : MonoBehaviour
     {
         static float fadeInOutModeLength = 1f;
-        static float changeScrollDirModeLength = 2f;
+        static float changeScrollDirModeLength = 4f;
 
         public TMP_Text textMesh;
         BuffCardRenderer _renderer;
@@ -231,8 +231,8 @@ namespace RandomBuff.Render.CardRender
                 for (int i = 0; i < textMesh.textInfo.characterCount; i++)
                 {
                     var charInfo = textMesh.textInfo.characterInfo[i];
-                    //if (!charInfo.isVisible)
-                    //    continue;
+                    if (!charInfo.isVisible)
+                        continue;
 
                     var verts = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
                     var colors = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].colors32;
@@ -241,7 +241,7 @@ namespace RandomBuff.Render.CardRender
                         var orig = origVertices[charInfo.vertexIndex + v];
                         verts[charInfo.vertexIndex + v] = orig + new Vector3(-_scrolledLength, 0f, 0f);
 
-                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (1.2f - Mathf.Abs(verts[charInfo.vertexIndex + v].x)) / 0.3f);
+                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (1.4f - Mathf.Abs(verts[charInfo.vertexIndex + v].x)) / 0.2f);
                     }
                 }
             }
@@ -253,8 +253,8 @@ namespace RandomBuff.Render.CardRender
                 for (int i = 0; i < textMesh.textInfo.characterCount; i++)
                 {
                     var charInfo = textMesh.textInfo.characterInfo[i];
-                    //if (!charInfo.isVisible)
-                    //    continue;
+                    if (!charInfo.isVisible)
+                        continue;
 
                     var verts = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
                     var colors = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].colors32;
@@ -263,7 +263,7 @@ namespace RandomBuff.Render.CardRender
                         var orig = origVertices[charInfo.vertexIndex + v];
                         verts[charInfo.vertexIndex + v] = orig + new Vector3(0f, _scrolledLength, 0f);
 
-                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (2.4f - Mathf.Abs(verts[charInfo.vertexIndex + v].y)) / 0.3f);
+                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (2.45f - Mathf.Abs(verts[charInfo.vertexIndex + v].y)) / 0.2f);
                     }
                 }
             }
@@ -297,8 +297,8 @@ namespace RandomBuff.Render.CardRender
 
                 foreach (var chara in origCharInfos)
                 {
-                    //if (!chara.isVisible)
-                    //    continue;
+                    if (!chara.isVisible)
+                        continue;
 
                     for (int v = 0; v < 4; v++)
                     {
@@ -322,8 +322,8 @@ namespace RandomBuff.Render.CardRender
 
                 foreach (var chara in origCharInfos)
                 {
-                    //if (!chara.isVisible)
-                    //    continue;
+                    if (!chara.isVisible)
+                        continue;
 
                     for (int v = 0; v < 4; v++)
                     {
@@ -346,19 +346,11 @@ namespace RandomBuff.Render.CardRender
             textNeedRefresh = false;
         }
 
-        float SmoothCurve(float t)
-        {
-            float res = 6f * Mathf.Pow(t, 5f) - 15f * Mathf.Pow(t, 4f) + 10 * Mathf.Pow(t, 3);
-            return Mathf.Pow(res, 2f);
-        }
-
         internal enum Mode
         {
             Wait,
             Scroll,
             ChangeScrollDir,
-            FadeIn,
-            FadeOut
         }
     }
 }
