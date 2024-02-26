@@ -287,12 +287,12 @@ namespace RandomBuff.Render.UI
         {
             if (StaticData.Stackable)
             {
-                StackerValue = BuffDataManager.Instance.GetBuffData(ID)?.StackLayer ?? 0;
+                StackerValue = ID.GetBuffData()?.StackLayer ?? 0;
             }
 
             if (StaticData.Countable)
             {
-                CycleValue = (BuffDataManager.Instance.GetBuffData(ID) is CountableBuffData countable) ? (countable.MaxCycleCount - countable.CycleUse) : StaticData.MaxCycleCount;
+                CycleValue = (ID.GetBuffData() is CountableBuffData countable) ? (countable.MaxCycleCount - countable.CycleUse) : StaticData.MaxCycleCount;
             }
         }
 

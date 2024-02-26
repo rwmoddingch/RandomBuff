@@ -5,16 +5,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+#pragma warning disable CS0618
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618
 namespace RandomBuffUtils
 {
     public static class BuffUtils
     {
         static bool everInit;
-        private static bool canAccessLog = false;
+        private static bool canAccessLog =true;
         public static void OnEnable()
         {
             if (everInit)
