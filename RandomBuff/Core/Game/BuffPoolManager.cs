@@ -100,7 +100,7 @@ namespace RandomBuff.Core.Game
 
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 CreateBuff(data.Key);
-
+            Instance = this;
 
         }
 
@@ -195,7 +195,7 @@ namespace RandomBuff.Core.Game
         {
             BuffPlugin.Log($"New game, character: {game.StoryCharacter}, Slot: {game.rainWorld.options.saveSlot}, " +
                            $"buff count: {BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter).Count}");
-            return Instance = new BuffPoolManager(game);
+            return new BuffPoolManager(game);
         }
 
    

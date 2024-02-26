@@ -63,11 +63,6 @@ namespace RandomBuff.Core.Entry
             DataTypes.Add(id, typeof(TDataType));
         }
 
-        /// <summary>
-        /// 更改hook的生命周期
-        /// </summary>
-        /// <param name="level"></param>
-        public static void ChangeHookLifeTime(HookLifeTimeLevel level) { }
 
 
         /// <summary>
@@ -82,7 +77,11 @@ namespace RandomBuff.Core.Entry
             BuffTypes.Add(id, typeof(TBuffType));
             DataTypes.Add(id, typeof(TDataType));
         }
-
+        public static void RegisterBuff(BuffID id,Type buffType,Type dataType)
+        {
+            BuffTypes.Add(id, buffType);
+            DataTypes.Add(id, dataType);
+        }
 
         /// <summary>
         /// 注册新的抽卡模式

@@ -39,7 +39,7 @@ namespace RandomBuff.Core.Buff
         /// <summary>
         /// 数据类属性，只读
         /// </summary>
-        public TData Data => (TData)BuffPoolManager.Instance.GetBuffData(ID);
+        public TData Data => (TData)ID.GetBuffData();
 
         /// <summary>
         /// 单例获取
@@ -107,4 +107,6 @@ namespace RandomBuff.Core.Buff
             Instance = (TBuff)this;
         }
     }
+
+
 }

@@ -573,11 +573,11 @@ namespace RandomBuff.Render.UI
             TimerAnimSlot.GrafUpdate(timeStacker);
             ConditionHUD.DrawSprites(timeStacker);
 
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
-                AppendCard(new BuffID("DeathFreeMedallion"));
-            }
+            //if (Input.GetKeyDown(KeyCode.C))
+            //{
+            //    BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
+            //    AppendCard(new BuffID("DeathFreeMedallion"));
+            //}
         }
 
         /// <summary>
