@@ -1,7 +1,10 @@
 ManifestFileVersion: 0
-CRC: 1170830943
+CRC: 484556434
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: randombuffbuiltinbundle
+      Dependencies: {}
+    Info_1:
+      Name: textmesh pro
       Dependencies: {}

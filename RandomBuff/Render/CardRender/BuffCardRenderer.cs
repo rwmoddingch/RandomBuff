@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using RWCustom;
 using UnityEngine;
+using System.Linq;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -27,6 +28,8 @@ namespace RandomBuff.Render.CardRender
         internal CardNumberTextController cardCycleCounterTextController;
 
         GameObject _cardQuadFront;
+        MeshFilter _meshFilterFront;
+
         GameObject _cardQuadBack;
 
         /// <summary>
@@ -45,9 +48,13 @@ namespace RandomBuff.Render.CardRender
                 cardHighlightFrontController.UpdateRotaiton(value);
                 cardHighlightBackController.UpdateRotaiton(new Vector3(-value.x, value.y + 180, 0f));
                 cardCameraController.CardDirty = true;
+
+                var lst = GetVertexs(_meshFilterFront);
+                normal = Vector3.Cross(lst[0] - lst[1], lst[0] - lst[2]).normalized;
             }
         }
         Vector2 _rotation = Vector2.one;
+        internal Vector3 normal;
 
         /// <summary>
         /// 卡牌物体与相机的距离
@@ -75,26 +82,14 @@ namespace RandomBuff.Render.CardRender
 
         public bool DisplayTitle
         {
-            get => cardTextFrontController.currentMode != CardTextController.Mode.FadeOut;
-            set
-            {
-                if (value)
-                    cardTextFrontController.SwitchMode(CardTextController.Mode.FadeIn);
-                else
-                    cardTextFrontController.SwitchMode(CardTextController.Mode.FadeOut);
-            }
+            get => !cardTextFrontController.Fade;
+            set => cardTextFrontController.Fade = !value;
         }
 
         public bool DisplayDiscription
         {
-            get => cardTextBackController.currentMode != CardTextController.Mode.FadeOut;
-            set
-            {
-                if (value)
-                    cardTextBackController.SwitchMode(CardTextController.Mode.FadeIn);
-                else
-                    cardTextBackController.SwitchMode(CardTextController.Mode.FadeOut);
-            }
+            get => !cardTextBackController.Fade;
+            set => cardTextBackController.Fade = !value;
         }
 
         public bool EdgeHighlight
@@ -137,6 +132,7 @@ namespace RandomBuff.Render.CardRender
                     _cardQuadFront.transform.localPosition = new Vector3(0, 0, 0);
                     _cardQuadFront.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
                     cardHighlightFrontController = _cardQuadFront.AddComponent<CardHighlightController>();
+                    _meshFilterFront = _cardQuadFront.GetComponent<MeshFilter>();
                     //cardHighlightFrontController.Init(this, _cardTextureFront);
 
                     _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -166,8 +162,8 @@ namespace RandomBuff.Render.CardRender
 
                     _notFirstInit = true;
                 }
-                cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, 5f, info.id);
-                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, 3f, info.id);
+                cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, info.id);
+                cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, info.id);
                 
                 cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString());
                 cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString(), CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
@@ -183,6 +179,11 @@ namespace RandomBuff.Render.CardRender
                 BuffPlugin.LogError($"Exception in buffcard init : {_buffStaticData.BuffID}");
                 BuffPlugin.LogException(e);
             }
+        }
+
+        List<Vector3> GetVertexs(MeshFilter meshFilter)
+        {
+            return meshFilter.sharedMesh.vertices.Select(v => meshFilter.gameObject.transform.TransformPoint(v)).ToList();
         }
     }
 }

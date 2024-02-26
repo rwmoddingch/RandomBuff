@@ -39,6 +39,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\include\PUBLIC-Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\include\Unity.TextMeshPro_publicized.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\include\UnityEngine.dll</HintPath>
     </Reference>
@@ -60,5 +63,21 @@
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>..\include\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\include\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="BuffResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BuffResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="BuffResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BuffResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

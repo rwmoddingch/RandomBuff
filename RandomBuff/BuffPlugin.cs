@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,9 +28,11 @@ namespace RandomBuff
     internal class BuffPlugin : BaseUnityPlugin
     {
         public const string saveVersion = "a-0.0.3";
+        internal static BuffPlugin Instance { get; private set; }
 
         public void OnEnable()
         {
+            Instance = this;
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
