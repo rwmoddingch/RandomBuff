@@ -165,8 +165,8 @@ namespace RandomBuff.Render.CardRender
                 cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, info.id);
                 cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, info.id);
                 
-                cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString());
-                cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetData()?.StackLayer ?? 1).ToString(), CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
+                cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString());
+                cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
 
                 _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
                 _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
