@@ -9,6 +9,7 @@ using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
+using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RWCustom;
@@ -173,12 +174,33 @@ namespace RandomBuff.Core.Hooks
                 }
             }
 
-            orig(self, ID);
-            if (self.currentMainLoop is RainWorldGame game2 && 
-                BuffPoolManager.Instance == null &&
-                game2.rainWorld.BuffMode())
+            if (ID == ProcessManager.ProcessID.MainMenu)
             {
-                BuffPoolManager.LoadGameBuff(game2);
+                if (self.oldProcess is KarmaLadderScreen screen)
+                {
+                    foreach (var buff in BuffCore.GetAllBuffIds(screen.saveState.saveStateNumber))
+                        BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
+                }
+                else if(self.oldProcess is RainWorldGame game3)
+                {
+                    foreach (var buff in BuffCore.GetAllBuffIds(game3.StoryCharacter))
+                        BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
+                }
+            }
+            
+
+            orig(self, ID);
+            if (self.currentMainLoop is RainWorldGame game2)
+            {
+                if (game2.rainWorld.BuffMode())
+                {
+                    if (BuffPoolManager.Instance == null)
+                        BuffPoolManager.LoadGameBuff(game2);
+                }
+                else
+                {
+                    BuffHookWarpper.CheckAndDisableAllHook();
+                }
             }
         }
     }

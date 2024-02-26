@@ -113,6 +113,7 @@ namespace RandomBuff.Core.SaveData
                 {
                     allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
                     allDatas[name][id].DataLoaded(true);
+                    BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                     BuffFile.Instance.AddCollect(id.value);
                     BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
                 }
@@ -136,14 +137,16 @@ namespace RandomBuff.Core.SaveData
         internal void EnterGameFromMenu(SlugcatStats.Name name)
         {
             var setting = GetGameSetting(name);
+            BuffHookWarpper.CheckAndDisableAllHook();
+            foreach (var id in GetAllBuffIds(name))
+                BuffHookWarpper.EnableBuff(id,HookLifeTimeLevel.UntilQuit);
+
             if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
                 ProcessManager.MenuSetup.StoryGameInitCondition.New)
                 setting.NewGame();
         }
 
     
-
-
 
         /// <summary>
         /// 轮回结束时更新 通过BuffPoolManager调用
@@ -191,12 +194,6 @@ namespace RandomBuff.Core.SaveData
                 gameSettings.Add(name, new GameSetting());
             return gameSettings[name];
         }
-
-
-
-
-     
-
 
     }
 

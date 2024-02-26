@@ -81,13 +81,12 @@ namespace RandomBuff.Render.CardRender
                     totalRenderers.Add(renderer);
 
                     renderer.Init(id, BuffConfigManager.GetStaticData(buffID));
-                    BuffPlugin.Log($"Get new card renderer of id {id}");
+                    BuffPlugin.LogDebug($"Get new card renderer of id {id}");
                     return renderer;
                 }
                 catch(Exception e)
                 {
-                    BuffPlugin.LogError($"Render error : {buffID}");
-                    BuffPlugin.LogException(e);
+                    BuffPlugin.LogException(e, $"Render error : {buffID}");
                     return null;
                 }
             }
@@ -113,7 +112,7 @@ namespace RandomBuff.Render.CardRender
                 {
                     var card = inactiveCardRenderers[i];
                     totalRenderers.Remove(card);
-                    BuffPlugin.Log($"Destroy inactive card renderer of id{card._id}");
+                    BuffPlugin.LogDebug($"Destroy inactive card renderer of id{card._id}");
 
                     inactiveCardRenderers.RemoveAt(i);
                     Object.Destroy(card.gameObject);

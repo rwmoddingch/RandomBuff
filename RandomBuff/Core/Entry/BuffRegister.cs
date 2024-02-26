@@ -30,6 +30,12 @@ namespace RandomBuff.Core.Entry
 
     }
 
+    public enum HookLifeTimeLevel
+    {
+        InGame,
+        UntilQuit
+    }
+
 
 
     /// <summary>
@@ -58,6 +64,7 @@ namespace RandomBuff.Core.Entry
         }
 
 
+
         /// <summary>
         /// 注册新的buff，不包含hook
         /// </summary>
@@ -70,7 +77,11 @@ namespace RandomBuff.Core.Entry
             BuffTypes.Add(id, typeof(TBuffType));
             DataTypes.Add(id, typeof(TDataType));
         }
-
+        public static void RegisterBuff(BuffID id,Type buffType,Type dataType)
+        {
+            BuffTypes.Add(id, buffType);
+            DataTypes.Add(id, dataType);
+        }
 
         /// <summary>
         /// 注册新的抽卡模式

@@ -415,7 +415,7 @@ namespace RandomBuff.Render.UI
             foreach(var ids in buffIDPages[page])
             {
                 CreateCard(ids);
-                BuffPlugin.Log($"Display buff card {ids} in page {page}");
+                BuffPlugin.LogDebug($"Display buff card {ids} in page {page}");
             }
 
             foreach(var card in BuffCards)
@@ -573,11 +573,11 @@ namespace RandomBuff.Render.UI
             TimerAnimSlot.GrafUpdate(timeStacker);
             ConditionHUD.DrawSprites(timeStacker);
 
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
-                AppendCard(new BuffID("DeathFreeMedallion"));
-            }
+            //if (Input.GetKeyDown(KeyCode.C))
+            //{
+            //    BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
+            //    AppendCard(new BuffID("DeathFreeMedallion"));
+            //}
         }
 
         /// <summary>

@@ -117,7 +117,7 @@ namespace BuiltinBuffs.Negative
                     rock.setRotation = dir;
                     
 
-                    if(BuffPoolManager.Instance.TryGetBuff(EjectionRockIBuffEntry.ejectionRockBuffID, out var _))
+                    if(BuffCore.TryGetBuff(EjectionRockIBuffEntry.ejectionRockBuffID, out var _))
                     {
                         rock.ChangeMode(Weapon.Mode.Thrown);rock.doNotTumbleAtLowSpeed = true;
                         rock.rotationSpeed = 0f;
