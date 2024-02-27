@@ -12,6 +12,7 @@ using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
+using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings
 {
@@ -128,7 +129,7 @@ namespace RandomBuff.Core.Game.Settings
             }
 
             var data = BuffConfigManager.GetTemplateData(name);
-            gachaTemplate = (Game.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplate(data.Id));
+            gachaTemplate = (Game.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplateType(data.Id));
             foreach (var pair in data.datas)
             {
                 try
@@ -145,18 +146,35 @@ namespace RandomBuff.Core.Game.Settings
             if (BuffPlugin.DevEnabled)
             {
                 conditions.Clear();
-                CreateNewCondition(ConditionID.Cycle);
-                CreateNewCondition(ConditionID.Card);
+                BuffPlugin.Log($"{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore}");
+                
             }
         }
 
         public Condition CreateNewCondition(ConditionID id)
         {
-            var re = (Condition)Activator.CreateInstance(BuffRegister.GetCondition(id));
+            var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id));
             re.SetRandomParameter(Difficulty);
             conditions.Add(re);
             return re;
         }
+
+        /// <summary>
+        /// 返回获取的条件以及是否还能获取
+        /// canGetMore == false则不能继续获取
+        /// 如果非得获取那返回(null,false)
+        /// </summary>
+        /// <returns></returns>
+        public (Condition condition, bool canGetMore) GetRandomCondition()
+        {
+            var list = BuffRegister.GetAllConditionList();
+            list.RemoveAll(i => conditions.Any(j => j.ID == i));
+            if (list.Count == 0)
+                return (null, false);
+            return (CreateNewCondition(list[Random.Range(0, list.Count)]),
+                    list.Sum(i => BuffRegister.GetConditionCanMore(i) ? 10 : 1) > 1);
+        }
+
 
         public void SaveGameSettingToPath(string path)
         {
@@ -194,7 +212,7 @@ namespace RandomBuff.Core.Game.Settings
                             }
 
                             setting.gachaTemplate = (Game.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
-                                    BuffRegister.GetTemplate((GachaTemplateID)id));
+                                    BuffRegister.GetTemplateType((GachaTemplateID)id));
                             if (subs.Length == 4)
                                 setting.TemplateName = subs[3];
                             else
@@ -208,7 +226,7 @@ namespace RandomBuff.Core.Game.Settings
                                 return true;
                             }
                             setting.conditions.Add((Condition)JsonConvert.DeserializeObject(subs[2],
-                                BuffRegister.GetCondition((ConditionID)cid)));
+                                BuffRegister.GetConditionType((ConditionID)cid)));
                             break;
                     }
                 }

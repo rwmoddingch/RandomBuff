@@ -36,6 +36,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public abstract ConditionID ID {get;}
 
+        public string TypeName => BuffRegister.GetConditionTypeName(ID);
+
         public bool Finished
         {
             get => finished;

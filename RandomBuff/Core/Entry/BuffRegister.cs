@@ -79,8 +79,10 @@ namespace RandomBuff.Core.Entry
         {
             try
             {
-                if (id != ((IBuff)Activator.CreateInstance(buffType)).ID ||
-                    id != ((BuffData)(Activator.CreateInstance(dataType))).ID)
+                var testBuff = ((IBuff)Activator.CreateInstance(buffType));
+                var buffId = testBuff.ID;
+                testBuff.Destroy();
+                if (id != buffId || id != ((BuffData)(Activator.CreateInstance(dataType))).ID)
                 {
                     BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
                     return;
@@ -125,7 +127,7 @@ namespace RandomBuff.Core.Entry
         /// <typeparam name="TConditionType"></typeparam>
         /// <param name="id"></param>
         /// <param name="displayName"></param>
-        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName)
+        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName,bool canUseMore = false)
             where TConditionType : Condition, new()
         {
             try
@@ -137,6 +139,7 @@ namespace RandomBuff.Core.Entry
                 }
                 ConditionTypes.Add(id, typeof(TConditionType));
                 ConditionNames.Add(id, displayName);
+                ConditionMores.Add(id, canUseMore);
             }
             catch (Exception e)
             {
@@ -153,23 +156,26 @@ namespace RandomBuff.Core.Entry
     public static partial class BuffRegister
     {
         internal static (BuffID id, Type type) GetDataType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
-
         internal static (BuffID id, Type type) GetBuffType(string id) => (new BuffID(id), GetAnyType(new BuffID(id), BuffTypes));
 
         internal static Type GetDataType(BuffID id) => GetAnyType(id, DataTypes);
-
         internal static Type GetBuffType(BuffID id) => GetAnyType(id, BuffTypes);
 
-        internal static Type GetCondition(ConditionID id) => GetAnyType(id, ConditionTypes);
 
-        internal static Type GetTemplate(GachaTemplateID id) => GetAnyType(id, TemplateTypes);
+        internal static Type GetConditionType(ConditionID id) => GetAnyType(id, ConditionTypes);
+        internal static bool GetConditionCanMore(ConditionID id) => GetAnyType(id, ConditionMores);
+        internal static string GetConditionTypeName(ConditionID id) => GetAnyType(id, ConditionNames);
+        internal static List<ConditionID> GetAllConditionList() => ConditionTypes.Keys.ToList();
 
 
-        private static Type GetAnyType<T>(T id, Dictionary<T, Type> dic)
+        internal static Type GetTemplateType(GachaTemplateID id) => GetAnyType(id, TemplateTypes);
+
+
+        private static Y GetAnyType<T,Y>(T id, Dictionary<T, Y> dic)
         {
             if (dic.ContainsKey(id))
                 return dic[id];
-            return null;
+            return default;
         }
 
 
@@ -270,7 +276,9 @@ namespace RandomBuff.Core.Entry
         private static readonly Dictionary<BuffID, Type> DataTypes = new();
         private static readonly Dictionary<BuffID, Type> BuffTypes = new();
         private static readonly Dictionary<GachaTemplateID, Type> TemplateTypes = new();
+
         private static readonly Dictionary<ConditionID, Type> ConditionTypes = new();
+        private static readonly Dictionary<ConditionID, bool> ConditionMores = new();
         private static readonly Dictionary<ConditionID, string> ConditionNames = new();
 
     }
