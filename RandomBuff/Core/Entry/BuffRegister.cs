@@ -59,8 +59,7 @@ namespace RandomBuff.Core.Entry
             where TDataType : BuffData, new()
         {
             BuffHookWarpper.RegisterHook(id, typeof(THookType));
-            BuffTypes.Add(id, typeof(TBuffType));
-            DataTypes.Add(id, typeof(TDataType));
+            RegisterBuff<TBuffType, TDataType>(id);
         }
 
 
@@ -74,13 +73,26 @@ namespace RandomBuff.Core.Entry
         public static void RegisterBuff<TBuffType, TDataType>(BuffID id) where TBuffType : IBuff, new()
             where TDataType : BuffData, new()
         {
-            BuffTypes.Add(id, typeof(TBuffType));
-            DataTypes.Add(id, typeof(TDataType));
+            RegisterBuff(id,typeof(TBuffType),typeof(TDataType));
         }
         public static void RegisterBuff(BuffID id,Type buffType,Type dataType)
         {
-            BuffTypes.Add(id, buffType);
-            DataTypes.Add(id, dataType);
+            try
+            {
+                if (id != ((IBuff)Activator.CreateInstance(buffType)).ID ||
+                    id != ((BuffData)(Activator.CreateInstance(dataType))).ID)
+                {
+                    BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
+                    return;
+                }
+                BuffTypes.Add(id, buffType);
+                DataTypes.Add(id, dataType);
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e,$"Exception when register buff {id}");
+            }
+      
         }
 
         /// <summary>
@@ -91,7 +103,20 @@ namespace RandomBuff.Core.Entry
         public static void RegisterGachaTemplate<TTemplateType>(GachaTemplateID id)
             where TTemplateType : GachaTemplate, new()
         {
-            templateTypes.Add(id,typeof(TTemplateType));
+            try
+            {
+                if (id != Activator.CreateInstance<TTemplateType>().ID)
+                {
+                    BuffPlugin.LogError($"{id}'s GachaTemplate has unexpected GachaTemplateID!");
+                    return;
+                }
+
+                templateTypes.Add(id,typeof(TTemplateType));
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception when register GachaTemplate {id}");
+            }
         }
 
         /// <summary>
@@ -100,11 +125,23 @@ namespace RandomBuff.Core.Entry
         /// <typeparam name="TConditionType"></typeparam>
         /// <param name="id"></param>
         /// <param name="displayName"></param>
-        public static void RegisterCondition<TConditionType>(ConditionID id,string displayName)
+        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName)
             where TConditionType : Condition, new()
         {
-            conditionTypes.Add(id,typeof(TConditionType));
-            conditionNames.Add(id,displayName);
+            try
+            {
+                if (id != Activator.CreateInstance<TConditionType>().ID)
+                {
+                    BuffPlugin.LogError($"{id}'s GachaTemplate has unexpected ConditionID!");
+                    return;
+                }
+                conditionTypes.Add(id, typeof(TConditionType));
+                conditionNames.Add(id, displayName);
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception when register condition {id}");
+            }
         }
     }
 
