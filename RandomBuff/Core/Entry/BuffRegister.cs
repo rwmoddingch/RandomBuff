@@ -111,7 +111,7 @@ namespace RandomBuff.Core.Entry
                     return;
                 }
 
-                templateTypes.Add(id,typeof(TTemplateType));
+                TemplateTypes.Add(id,typeof(TTemplateType));
             }
             catch (Exception e)
             {
@@ -135,8 +135,8 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogError($"{id}'s GachaTemplate has unexpected ConditionID!");
                     return;
                 }
-                conditionTypes.Add(id, typeof(TConditionType));
-                conditionNames.Add(id, displayName);
+                ConditionTypes.Add(id, typeof(TConditionType));
+                ConditionNames.Add(id, displayName);
             }
             catch (Exception e)
             {
@@ -160,9 +160,9 @@ namespace RandomBuff.Core.Entry
 
         internal static Type GetBuffType(BuffID id) => GetAnyType(id, BuffTypes);
 
-        internal static Type GetCondition(ConditionID id) => GetAnyType(id, conditionTypes);
+        internal static Type GetCondition(ConditionID id) => GetAnyType(id, ConditionTypes);
 
-        internal static Type GetTemplate(GachaTemplateID id) => GetAnyType(id, templateTypes);
+        internal static Type GetTemplate(GachaTemplateID id) => GetAnyType(id, TemplateTypes);
 
 
         private static Type GetAnyType<T>(T id, Dictionary<T, Type> dic)
@@ -269,9 +269,9 @@ namespace RandomBuff.Core.Entry
         
         private static readonly Dictionary<BuffID, Type> DataTypes = new();
         private static readonly Dictionary<BuffID, Type> BuffTypes = new();
-        private static readonly Dictionary<GachaTemplateID, Type> templateTypes = new();
-        private static readonly Dictionary<ConditionID, Type> conditionTypes = new();
-        private static readonly Dictionary<ConditionID, string> conditionNames = new();
+        private static readonly Dictionary<GachaTemplateID, Type> TemplateTypes = new();
+        private static readonly Dictionary<ConditionID, Type> ConditionTypes = new();
+        private static readonly Dictionary<ConditionID, string> ConditionNames = new();
 
     }
 }
