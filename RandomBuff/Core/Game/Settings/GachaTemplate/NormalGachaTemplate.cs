@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
-    internal class NormalGachaTemplate : Game.GachaTemplate
+    internal class NormalGachaTemplate : GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.Normal;
 
@@ -21,6 +21,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             CurrentPacket = new CachaPacket() { positive = (PSelect, PShow, PCount), negative = (NSelect, NShow, NCount) };
             BuffPlugin.LogDebug($"Session End: {CurrentPacket.positive}, {CurrentPacket.negative}");
         }
+
 
         public override bool NeedRandomStart => RandomStart;
 

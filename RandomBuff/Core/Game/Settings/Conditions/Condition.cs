@@ -36,8 +36,20 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public abstract ConditionID ID {get;}
 
+
+        /// <summary>
+        /// 完成获取的经验值
+        /// </summary>
+        public abstract float Exp { get; }
+
+        /// <summary>
+        /// 条件种类名
+        /// </summary>
         public string TypeName => BuffRegister.GetConditionTypeName(ID);
 
+        /// <summary>
+        /// 条件是否完成
+        /// </summary>
         public bool Finished
         {
             get => finished;

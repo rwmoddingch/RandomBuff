@@ -94,7 +94,7 @@ namespace RandomBuff.Core.Game
                 cycleDatas.Add(data.Key, data.Value.Clone());
 
             GameSetting = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).Clone();
-            GameSetting.EnterGame();
+            GameSetting.EnterGame(Game);
           
             BuffPlugin.Log($"Enter Game,TemplateID: {GameSetting.gachaTemplate.ID}, Difficulty: {GameSetting.Difficulty}, Condition Count: {GameSetting.conditions.Count}");
 

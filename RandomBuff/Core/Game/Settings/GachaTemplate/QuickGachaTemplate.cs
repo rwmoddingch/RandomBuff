@@ -9,7 +9,7 @@ using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
-    internal class QuickGachaTemplate : Game.GachaTemplate
+    internal class QuickGachaTemplate : GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.Quick;
 
@@ -19,9 +19,10 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public QuickGachaTemplate()
         {
+            ExpMultiply = 1.2f;
         }
 
-        public override void EnterGame()
+        public override void EnterGame(RainWorldGame game)
         {
             if (newGame)
             {

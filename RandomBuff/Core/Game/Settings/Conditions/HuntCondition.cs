@@ -12,6 +12,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public override ConditionID ID => ConditionID.Hunt;
 
+        public override float Exp => 0;
+
         [JsonProperty]
         public CreatureTemplate.Type type = CreatureTemplate.Type.GreenLizard;
 
