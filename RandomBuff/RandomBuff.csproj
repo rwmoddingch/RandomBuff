@@ -6,6 +6,11 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Resources\**" />
+    <EmbeddedResource Remove="Resources\**" />
+    <None Remove="Resources\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\RandomBuffUtils\RandomBuffUtils.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -79,8 +84,5 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>BuffResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>
