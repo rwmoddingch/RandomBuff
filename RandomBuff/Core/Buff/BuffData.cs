@@ -117,7 +117,7 @@ using System.Threading.Tasks;
         [JsonProperty]
         public int CycleUse { get; protected set; }
 
-        public override bool NeedDeletion => CycleUse > MaxCycleCount;
+        public override bool NeedDeletion => CycleUse >= MaxCycleCount;
 
         public override void CycleEnd()
         {

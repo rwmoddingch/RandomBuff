@@ -13,12 +13,12 @@ namespace BuiltinBuffs.Positive
 {
     internal class ThundThrowBuff : Buff<ThundThrowBuff, ThundThrowBuffData>
     {
-        public override BuffID ID => DozerBuffEntry.dozerBuffID;
+        public override BuffID ID => ThundThrowBuffEntry.thundTHrowBuffID;
     }
 
     internal class ThundThrowBuffData : BuffData
     {
-        public override BuffID ID => DozerBuffEntry.dozerBuffID;
+        public override BuffID ID => ThundThrowBuffEntry.thundTHrowBuffID;
     }
 
     internal class ThundThrowBuffEntry : IBuffEntry

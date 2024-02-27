@@ -122,6 +122,7 @@ namespace RandomBuff
             if (Input.GetKey(KeyCode.K) && self.rainWorld.BuffMode() && Directory.Exists("Debug"))
             {
                 BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
+                BuffPoolManager.Instance.CreateBuff(new BuffID("DivineBeing"));
             }
         }
 
