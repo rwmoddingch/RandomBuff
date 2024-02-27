@@ -1,13 +1,8 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RandomBuff.Core.Entry;
-using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Game.Settings.Conditions;
 
-namespace RandomBuff.Core.Game
+namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
     /// <summary>
     /// 抽卡模式ID
@@ -16,10 +11,12 @@ namespace RandomBuff.Core.Game
     {
         public static GachaTemplateID Normal;
         public static GachaTemplateID Quick;
+        public static GachaTemplateID Mission;
         static GachaTemplateID()
         {
             Normal = new GachaTemplateID("Normal", true);
             Quick = new GachaTemplateID("Quick", true);
+            Mission = new GachaTemplateID("Mission", true);
         }
 
         public GachaTemplateID(string value, bool register = false) : base(value, register)
@@ -38,6 +35,11 @@ namespace RandomBuff.Core.Game
         {
         }
 
+        /// <summary>
+        /// 总经验的加成倍数
+        /// 可以通过json更改
+        /// </summary>
+        public float ExpMultiply = 1;
 
         /// <summary>
         /// 是否需要随机出生点
@@ -65,7 +67,14 @@ namespace RandomBuff.Core.Game
         /// <summary>
         /// 每轮回进入游戏时触发
         /// </summary>
-        public virtual void EnterGame() {}
+        public virtual void EnterGame(RainWorldGame game) {}
+
+        /// <summary>
+        /// 当数据读取完成触发
+        /// </summary>
+        /// <returns>返回false证明数据损坏</returns>
+        public virtual bool TemplateLoaded() => true;
+
 
 
         /// <summary>
@@ -78,7 +87,6 @@ namespace RandomBuff.Core.Game
         {
             public (int selectCount, int showCount, int pickTimes) positive;
             public (int selectCount, int showCount, int pickTimes) negative;
-            public bool isEnd;
 
             public bool NeedMenu => positive.pickTimes + negative.pickTimes != 0;
         }
@@ -90,7 +98,9 @@ namespace RandomBuff.Core.Game
         internal static void Init()
         {
             BuffRegister.RegisterGachaTemplate<NormalGachaTemplate>(GachaTemplateID.Normal);
-            BuffRegister.RegisterGachaTemplate<QuickGachaTemplate>(GachaTemplateID.Quick);
+            BuffRegister.RegisterGachaTemplate<QuickGachaTemplate>(GachaTemplateID.Quick,ConditionID.Card);
+            BuffRegister.RegisterGachaTemplate<MissionGachaTemplate>(GachaTemplateID.Mission);
+
         }
     }
 

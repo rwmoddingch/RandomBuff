@@ -24,7 +24,7 @@ namespace RandomBuff.Core.Game.Settings
 
         public List<Condition> conditions = new ();
 
-        public Game.GachaTemplate gachaTemplate = new NormalGachaTemplate();
+        public GachaTemplate.GachaTemplate gachaTemplate = new NormalGachaTemplate();
 
         public bool MissingDependence => fallBack != null;
 
@@ -57,9 +57,9 @@ namespace RandomBuff.Core.Game.Settings
             gachaTemplate.NewGame();
         }
 
-        public void EnterGame()
+        public void EnterGame(RainWorldGame game)
         {
-            gachaTemplate.EnterGame();
+            gachaTemplate.EnterGame(game);
         }
 
         public void InGameUpdate(RainWorldGame game)
@@ -129,7 +129,8 @@ namespace RandomBuff.Core.Game.Settings
             }
 
             var data = BuffConfigManager.GetTemplateData(name);
-            gachaTemplate = (Game.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplateType(data.Id));
+            gachaTemplate = (GachaTemplate.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplateType(data.Id).Type);
+            gachaTemplate.ExpMultiply = data.ExpMultiply;
             foreach (var pair in data.datas)
             {
                 try
@@ -142,6 +143,13 @@ namespace RandomBuff.Core.Game.Settings
                     BuffPlugin.LogException(e,$"Exception in load template {pair.Key}-{pair.Value}-{data.Id}");
                 }
             }
+
+            if (!gachaTemplate.TemplateLoaded())
+            {
+                BuffPlugin.LogError($"Template:{name} has wrong data, fallback to Normal");
+                LoadTemplate("Normal");
+                return;
+            }
             TemplateName = name;
             if (BuffPlugin.DevEnabled)
             {
@@ -153,7 +161,7 @@ namespace RandomBuff.Core.Game.Settings
 
         public Condition CreateNewCondition(ConditionID id)
         {
-            var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id));
+            var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
             re.SetRandomParameter(Difficulty);
             conditions.Add(re);
             return re;
@@ -168,11 +176,12 @@ namespace RandomBuff.Core.Game.Settings
         public (Condition condition, bool canGetMore) GetRandomCondition()
         {
             var list = BuffRegister.GetAllConditionList();
-            list.RemoveAll(i => conditions.Any(j => j.ID == i));
+            list.RemoveAll(i => conditions.Any(j => j.ID == i) ||
+                                !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
             if (list.Count == 0)
                 return (null, false);
             return (CreateNewCondition(list[Random.Range(0, list.Count)]),
-                    list.Sum(i => BuffRegister.GetConditionCanMore(i) ? 10 : 1) > 1);
+                    list.Sum(i => BuffRegister.GetConditionType(i).CanUseMore ? 10 : 1) > 1);
         }
 
 
@@ -211,8 +220,8 @@ namespace RandomBuff.Core.Game.Settings
                                 return true;
                             }
 
-                            setting.gachaTemplate = (Game.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
-                                    BuffRegister.GetTemplateType((GachaTemplateID)id));
+                            setting.gachaTemplate = (GachaTemplate.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
+                                    BuffRegister.GetTemplateType((GachaTemplateID)id).Type);
                             if (subs.Length == 4)
                                 setting.TemplateName = subs[3];
                             else
@@ -226,7 +235,7 @@ namespace RandomBuff.Core.Game.Settings
                                 return true;
                             }
                             setting.conditions.Add((Condition)JsonConvert.DeserializeObject(subs[2],
-                                BuffRegister.GetConditionType((ConditionID)cid)));
+                                BuffRegister.GetConditionType((ConditionID)cid).Type));
                             break;
                     }
                 }
