@@ -6,13 +6,15 @@ using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using TMPro;
+using Random = UnityEngine.Random;
+using Newtonsoft.Json.Linq;
 
 namespace RandomBuff.Render.CardRender
 {
     internal class CardTextController : MonoBehaviour
     {
         static float fadeInOutModeLength = 1f;
-        static float changeScrollDirModeLength = 2f;
+        static float changeScrollDirModeLength = 4f;
 
         public TMP_Text textMesh;
         BuffCardRenderer _renderer;
@@ -20,22 +22,25 @@ namespace RandomBuff.Render.CardRender
         internal GameObject _textObjectA;
 
         bool _firstInit;
+        bool _needInit;
         bool _isTitle;
 
         Color _opaqueColor;
         Color _transparentColor;
 
-        bool textNeedRefresh;
+        bool _textNeedRefresh;
+
+        bool _textNeedUpdate;
+        string _text;
         string Text
         {
-            get => textMesh.text;
+            get => _text;
             set
             {
-                if(value != textMesh.text)
+                if(value != _text)
                 {
-                    textMesh.font.HasCharacters(value,out var _,false, true);
-                    textMesh.text = value;
-                    textNeedRefresh = true;
+                    _textNeedUpdate = true;
+                    _text = value;
                 }
             }
         }
@@ -59,7 +64,9 @@ namespace RandomBuff.Render.CardRender
         }
 
         TMP_CharacterInfo[] origCharInfos;
-        Vector3[] origVertices;
+        //Vector3[] origVertices;
+        Vector3[][] meshInfoVertices;
+
 
         public void Init(BuffCardRenderer renderer, Transform parent, TMP_FontAsset font, Color color, string text, bool isTitle, InGameTranslator.LanguageID id)
         {
@@ -77,10 +84,38 @@ namespace RandomBuff.Render.CardRender
                 _firstInit = true;
             }
 
-            Text = text;
+            textMesh.text = _text = " ";//刷新之前的文本
 
+            if (isTitle)
+            {
+                textMesh.fontSize = id == InGameTranslator.LanguageID.Chinese ? 8 : 6;
+                var rectTransform = _textObjectA.GetComponent<RectTransform>();
+                rectTransform.pivot = new Vector2(0.5f, 0f);
+                textMesh.alignment = TextAlignmentOptions.Center;
+                rectTransform.sizeDelta = new Vector2(3f, 1f);
+                rectTransform.localPosition = new Vector3(0f, -0.5f, -0.01f);
+                textMesh.enableWordWrapping = false;
+                textMesh.margin = new Vector4(0.1f, 0f, 0f, 0f);
+                textMesh.outlineWidth = 5f;
+                textMesh.outlineColor = Color.black;
+                _maxScrollVel = 1f;
+            }
+            else
+            {
+                textMesh.fontSize = 3;
+                var rectTransform = _textObjectA.GetComponent<RectTransform>();
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                textMesh.alignment = TextAlignmentOptions.TopLeft;
+                rectTransform.sizeDelta = new Vector2(2.8f, 4.8f);
+                rectTransform.localPosition = new Vector3(0f, 0f, -0.01f);
+                textMesh.SetOutlineThickness(0f);
+                _maxScrollVel = 0.25f;
+            }
+
+            Text = text;
+            _needInit = false;
+ 
             SwitchMode(Mode.Scroll);
-            UpdateTextMesh();
 
             TMP_Text SetupTextMesh(GameObject obj, TMP_FontAsset font, bool isTitle)
             {
@@ -94,42 +129,47 @@ namespace RandomBuff.Render.CardRender
                 //textMesh.enableCulling = true;
                 obj.transform.localEulerAngles = Vector3.zero;
 
-                if (isTitle)
-                {
-                    textMesh.fontSize = id == InGameTranslator.LanguageID.Chinese ? 8 : 6;
-                    rectTransform.pivot = new Vector2(0.5f, 0f);
-                    textMesh.alignment = TextAlignmentOptions.Center;
-                    rectTransform.sizeDelta = new Vector2(3f, 1f);
-                    rectTransform.localPosition = new Vector3(0f, -0.5f, -0.01f);
-                    textMesh.enableWordWrapping = false;
-                    textMesh.margin = new Vector4(0.1f, 0f, 0f, 0f);
-
-                    _maxScrollVel = 1f;
-                }
-                else
-                {
-                    textMesh.fontSize = 3;
-
-                    rectTransform.pivot = new Vector2(0.5f, 0.5f);
-                    textMesh.alignment = TextAlignmentOptions.TopLeft;
-                    rectTransform.sizeDelta = new Vector2(2.8f, 4.8f);
-                    rectTransform.localPosition = new Vector3(0f, 0f, -0.01f);
-
-                    _maxScrollVel = 0.25f;
-                }
+               
                 return textMesh;
             }
         }
 
-        // Update is called once per frame
         void Update()
         {
-            if (textNeedRefresh)
+            if (_needInit)
+                return;
+
+            if (_alpha == 0 && _targetAlpha == 0)
+                return;
+
+            if (_textNeedUpdate)
             {
-                RefreshTextInfo();
+                textMesh.font.HasCharacters(_text, out var missing, true, true);
+
+                if(missing != null)
+                {
+                    string missed = "";
+                    foreach (var character in missing)
+                    {
+                        missed += (char)character;
+                    }
+                    BuffPlugin.LogWarning($"Loading text : {_text}, missing characters : {missed}");
+                }
+
+                textMesh.text = _text;
+                _textNeedUpdate = false;
+                _textNeedRefresh = true;
+                return;
             }
 
-            if (textMesh == null || origCharInfos == null || origVertices == null || textNeedRefresh)
+            if (_textNeedRefresh)
+            {
+                RefreshTextInfo();
+                UpdateTextMesh();
+            }
+
+
+            if (textMesh == null || meshInfoVertices == null || _textNeedRefresh)
                 return;
 
             if (_alpha != _targetAlpha)
@@ -231,17 +271,17 @@ namespace RandomBuff.Render.CardRender
                 for (int i = 0; i < textMesh.textInfo.characterCount; i++)
                 {
                     var charInfo = textMesh.textInfo.characterInfo[i];
-                    //if (!charInfo.isVisible)
-                    //    continue;
+                    if (!charInfo.isVisible)
+                        continue;
 
                     var verts = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
                     var colors = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].colors32;
                     for (int v = 0; v < 4; v++)
                     {
-                        var orig = origVertices[charInfo.vertexIndex + v];
+                        var orig = meshInfoVertices[charInfo.materialReferenceIndex][charInfo.vertexIndex + v];
                         verts[charInfo.vertexIndex + v] = orig + new Vector3(-_scrolledLength, 0f, 0f);
 
-                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (1.2f - Mathf.Abs(verts[charInfo.vertexIndex + v].x)) / 0.3f);
+                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (1.4f - Mathf.Abs(verts[charInfo.vertexIndex + v].x)) / 0.2f);
                     }
                 }
             }
@@ -253,23 +293,28 @@ namespace RandomBuff.Render.CardRender
                 for (int i = 0; i < textMesh.textInfo.characterCount; i++)
                 {
                     var charInfo = textMesh.textInfo.characterInfo[i];
-                    //if (!charInfo.isVisible)
-                    //    continue;
+                    if (!charInfo.isVisible)
+                        continue;
 
                     var verts = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
                     var colors = textMesh.textInfo.meshInfo[charInfo.materialReferenceIndex].colors32;
                     for (int v = 0; v < 4; v++)
                     {
-                        var orig = origVertices[charInfo.vertexIndex + v];
+                        var orig = meshInfoVertices[charInfo.materialReferenceIndex][charInfo.vertexIndex + v];
                         verts[charInfo.vertexIndex + v] = orig + new Vector3(0f, _scrolledLength, 0f);
 
-                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (2.4f - Mathf.Abs(verts[charInfo.vertexIndex + v].y)) / 0.3f);
+                        colors[charInfo.vertexIndex + v] = Color.Lerp(_transparentColor, _opaqueColor, _alpha * (2.45f - Mathf.Abs(verts[charInfo.vertexIndex + v].y)) / 0.2f);
                     }
                 }
             }
 
-            textMesh.textInfo.meshInfo[0].mesh.vertices = textMesh.textInfo.meshInfo[0].vertices;
-            textMesh.textInfo.meshInfo[0].mesh.colors32 = textMesh.textInfo.meshInfo[0].colors32;
+            for (int i = 0; i < textMesh.textInfo.meshInfo.Length; i++)
+            {
+                textMesh.textInfo.meshInfo[i].mesh.vertices = textMesh.textInfo.meshInfo[i].vertices;
+                textMesh.textInfo.meshInfo[i].mesh.colors32 = textMesh.textInfo.meshInfo[i].colors32;
+            }
+
+
             for (int i = 0; i < textMesh.textInfo.meshInfo.Length; i++)
             {
                 textMesh.UpdateGeometry(textMesh.textInfo.meshInfo[i].mesh, i);
@@ -280,29 +325,29 @@ namespace RandomBuff.Render.CardRender
 
         void RefreshTextInfo()
         {
-            textMesh.ForceMeshUpdate(true, true);
-            origCharInfos = new TMP_CharacterInfo[textMesh.textInfo.characterInfo.Length];
-            Array.Copy(textMesh.textInfo.characterInfo, origCharInfos, origCharInfos.Length);
+            meshInfoVertices = new Vector3[textMesh.textInfo.meshInfo.Length][];
+            for(int i = 0; i < textMesh.textInfo.meshInfo.Length; i++)
+            {
+                var vert = textMesh.textInfo.meshInfo[i].vertices;
+                meshInfoVertices[i] = new Vector3[vert.Length];
 
-            var vert = textMesh.textInfo.meshInfo[0].vertices;
-            origVertices = new Vector3[vert.Length];
-            Array.Copy(vert, origVertices, vert.Length);
-
-            BuffPlugin.LogDebug($"copied vertices : orig length : {textMesh.textInfo.meshInfo[0].vertices.Length}, {origVertices.Length}");
+                Array.Copy(vert, meshInfoVertices[i], vert.Length);
+            }
 
             if (_isTitle)
             {
                 float xLeft = float.MaxValue;
                 float xRight = float.MinValue;
 
-                foreach (var chara in origCharInfos)
+                foreach (var chara in textMesh.textInfo.characterInfo)
                 {
-                    //if (!chara.isVisible)
-                    //    continue;
+                    if (!chara.isVisible)
+                        continue;
 
+                    var origVertices = meshInfoVertices[chara.materialReferenceIndex];
                     for (int v = 0; v < 4 && chara.vertexIndex + v < origVertices.Length; v++)
                     {
-                        Debug.Log($"vertex : {chara.vertexIndex + v} , chara : {chara.vertexIndex}");
+                        //BuffPlugin.Log($"vertex : {chara.vertexIndex + v} , chara : {chara.vertexIndex}");
                         var vertex = origVertices[chara.vertexIndex + v];
                         if (vertex.x < xLeft)
                             xLeft = vertex.x;
@@ -320,13 +365,14 @@ namespace RandomBuff.Render.CardRender
                 float yDown = float.MaxValue;
                 float yUp = float.MinValue;
 
-                foreach (var chara in origCharInfos)
+                foreach (var chara in textMesh.textInfo.characterInfo)
                 {
-                    //if (!chara.isVisible)
-                    //    continue;
-
+                    if (!chara.isVisible)
+                        continue;
+                    var origVertices = meshInfoVertices[chara.materialReferenceIndex];
                     for (int v = 0; v < 4 && chara.vertexIndex + v < origVertices.Length; v++)
                     {
+                        //BuffPlugin.Log($"vertex : {chara.vertexIndex + v} , chara : {chara.vertexIndex}");
                         var vertex = origVertices[chara.vertexIndex + v];
                         if (vertex.y < yDown)
                             yDown = vertex.y;
@@ -342,14 +388,16 @@ namespace RandomBuff.Render.CardRender
                 Debug.Log($"{yUp}, {yDown}");
             }
 
-            Debug.Log($"Refresh Text Info, length:{textMeshLength}");
-            textNeedRefresh = false;
+            BuffPlugin.LogDebug($"Refresh Text Info, length:{textMeshLength}");
+            _textNeedRefresh = false;
         }
 
-        float SmoothCurve(float t)
+        void OnDisable()
         {
-            float res = 6f * Mathf.Pow(t, 5f) - 15f * Mathf.Pow(t, 4f) + 10 * Mathf.Pow(t, 3);
-            return Mathf.Pow(res, 2f);
+            _needInit = true;
+            _alpha = 0f;
+            _targetAlpha = 0f;
+            meshInfoVertices = null;
         }
 
         internal enum Mode
@@ -357,8 +405,6 @@ namespace RandomBuff.Render.CardRender
             Wait,
             Scroll,
             ChangeScrollDir,
-            FadeIn,
-            FadeOut
         }
     }
 }

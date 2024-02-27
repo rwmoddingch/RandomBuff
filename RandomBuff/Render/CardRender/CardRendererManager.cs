@@ -121,6 +121,19 @@ namespace RandomBuff.Render.CardRender
                 }
             }
         }
+
+        public static void DestroyAllInactiveRenderer()
+        {
+            for (int i = inactiveCardRenderers.Count - 1; i >= 0; i--)
+            {
+                var card = inactiveCardRenderers[i];
+                totalRenderers.Remove(card);
+                BuffPlugin.LogDebug($"Force destroy inactive card renderer of id{card._id}");
+
+                inactiveCardRenderers.RemoveAt(i);
+                Object.Destroy(card.gameObject);
+            }
+        }
     }
 
     /// <summary>
