@@ -106,6 +106,7 @@ namespace RandomBuff.Core.Game
 
         public override void ClearSprites()
         {
+            inGameSlot.Destory();
             base.ClearSprites();
         }
 

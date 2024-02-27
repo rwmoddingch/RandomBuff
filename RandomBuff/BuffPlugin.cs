@@ -12,6 +12,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.CardRender;
 using RandomBuffUtils;
 using UnityEngine;
 
@@ -100,7 +101,7 @@ namespace RandomBuff
 
                     BuffUtils.OnEnable();
 
-                    if(DevEnabled)
+                    if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 
                     isLoaded = true;
