@@ -32,7 +32,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             
         }
 
-        public override void SetRandomParameter(float difficulty)
+        public override void SetRandomParameter(float difficulty, List<Condition> sameConditions = null)
         {
             
         }

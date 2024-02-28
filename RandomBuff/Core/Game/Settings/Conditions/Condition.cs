@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
@@ -79,10 +80,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         protected Action<Condition> onLabelRefresh;
 
         //轮回结束结算
-        public abstract void SessionEnd(SaveState save);
+        public virtual void SessionEnd(SaveState save){}
+
+        //轮回间抽卡结算
+        public virtual void GachaEnd(List<BuffID> picked, List<BuffID> allCards){}
 
         //设置随机条件
-        public abstract void SetRandomParameter(float difficulty);
+        //如果可以重复第二项则为已有同类型的列表
+        public abstract void SetRandomParameter(float difficulty,List<Condition> sameConditions = null);
 
         //获取进度
         public abstract string DisplayProgress(InGameTranslator translator);
@@ -98,7 +103,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
         //绑定状态更新
-        public void BindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
+        internal void BindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
         {
             onCompleted += hudCompleted;
             onUncompleted += hudUncompleted;
@@ -106,7 +111,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         }
 
         //解绑状态更新
-        public void UnbindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
+        internal void UnbindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
         {
             onCompleted -= hudCompleted;
             onUncompleted -= hudUncompleted;

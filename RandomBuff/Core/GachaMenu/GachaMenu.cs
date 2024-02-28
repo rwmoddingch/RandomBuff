@@ -18,6 +18,8 @@ namespace RandomBuff.Core.GachaMenu
     {
         public static ProcessManager.ProcessID GachaMenuID = new ("GachaMenu", true);
 
+        private List<BuffID> picked = new ();
+
         public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, GachaMenuID)
         {
             pages.Add(new Menu.Page(this, null, "GachaMenu", 0));
@@ -50,6 +52,7 @@ namespace RandomBuff.Core.GachaMenu
         {
             BuffPlugin.Log($"Pick buff : {id}");
             BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+            picked.Add(id);
             RequestNewPicker();
         }
 
@@ -143,7 +146,13 @@ namespace RandomBuff.Core.GachaMenu
         public override void ShutDownProcess()
         {
             base.ShutDownProcess();
-            manager.oldProcess = game;
+            if (manager.oldProcess != game)
+            {
+                var all = BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter);
+                foreach (var con in BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).conditions)
+                    con.GachaEnd(picked,all);
+                manager.oldProcess = game;
+            }
         }
 
         public override void Update()
