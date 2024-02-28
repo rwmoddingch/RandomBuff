@@ -183,6 +183,8 @@ namespace RandomBuff.Render.CardRender
         /// </summary>
         public static Texture SlugBack { get; private set; }
 
+        public static Texture TextBack { get; private set; }
+
         /// <summary>
         /// 卡牌渲染的贴图尺寸
         /// </summary>
@@ -287,6 +289,7 @@ namespace RandomBuff.Render.CardRender
             MoonBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/moonback").texture;
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
+            TextBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/textback").texture;
         }
 
         public static TMP_Settings TMP_Settings_instance_get(Func<TMP_Settings> orig)

@@ -91,10 +91,10 @@ namespace RandomBuff.Render.UI.BuffCondition
             static int MaxShowAnimTimer = 40;
             static int MaxStayDisplayTimer = 120;
             static int MaxFlashTimer = 10;
-            static Color normalColor = Color.white * 0.6f + Color.black * 0.4f;
-            static Color completeColor = Color.green * 0.8f + Color.blue * 0.2f;
-            static Color uncompleteColor = Color.red * 0.8f + Color.yellow * 0.2f;
-            static Color highLightColor = Color.white;
+            public static Color normalColor = Color.white * 0.6f + Color.black * 0.4f;
+            public static Color completeColor = Color.green * 0.8f + Color.blue * 0.2f;
+            public static Color uncompleteColor = Color.red * 0.8f + Color.yellow * 0.2f;
+            public static Color highLightColor = Color.white;
 
             BuffConditionHUD conditionHUD;
             Condition bindCondition;

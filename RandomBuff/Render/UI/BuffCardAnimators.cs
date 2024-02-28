@@ -448,6 +448,11 @@ namespace RandomBuff.Render.UI
         bool finished;
         BuffGameMenuSlot slot;
 
+        Vector2 position;
+        Vector2 lastPosition;
+
+        Vector2 basicPosition;
+
         public BuffGameMenuShowAnimataor(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
             buffCard.Highlight = false;
@@ -461,7 +466,6 @@ namespace RandomBuff.Render.UI
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
 
             Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
-            Vector2 basicPosition;
 
             basicPosition = halfScreenSize + Vector2.up * 40f;
             int index = slot.GetCurrentIndex(buffCard, out int positiveOrNegative, out int totalLength);
@@ -470,13 +474,23 @@ namespace RandomBuff.Render.UI
             float biasFromMid = index - (totalLength - 1) / 2f;
             basicPosition += Vector2.right * Mathf.Min((600 / totalLength), 80f) * biasFromMid;
 
-            buffCard.Position = basicPosition;
+            position = lastPosition = basicPosition + slot.basePos;
+            buffCard.Position = position;
             buffCard.Scale = BuffCard.normalScale * 0.5f;
             buffCard.Rotation = new Vector3(0f, 90f, 0f);
         }
 
+        public override void Update()
+        {
+            base.Update();
+            lastPosition = position;
+            position = basicPosition + slot.basePos;
+        }
+
         public override void GrafUpdate(float timeStacker)
         {
+            buffCard.Position = Vector2.Lerp(lastPosition, position, timeStacker);
+
             if (finished)
             {
                 return;
@@ -488,12 +502,21 @@ namespace RandomBuff.Render.UI
             if (t == 1f)
                 finished = true;
         }
+
+        public override void Destroy()
+        {
+            buffCard.Position = basicPosition;
+        }
     }
 
     internal class BuffGameMenuDisappearAnimataor : BuffCardAnimator
     {
         bool finished;
         BuffGameMenuSlot slot;
+
+        Vector2 basicPosition;
+        Vector2 lastPosition;
+        Vector2 position;
 
         public BuffGameMenuDisappearAnimataor(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -504,12 +527,28 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayCycle = false;
             buffCard.Highlight = false;
             buffCard.Grey = false;
-
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
+
+            Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
+            basicPosition = halfScreenSize + Vector2.up * 40f;
+            int index = slot.GetCurrentIndex(buffCard, out int positiveOrNegative, out int totalLength);
+            basicPosition += positiveOrNegative * Vector2.up * 70f;
+
+            position = lastPosition = basicPosition + slot.basePos;
+            buffCard.Position = position;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            lastPosition = position;
+            position = basicPosition + slot.basePos;
         }
 
         public override void GrafUpdate(float timeStacker)
         {
+            buffCard.Position = Vector2.Lerp(lastPosition, position, timeStacker);
+
             if (finished)
             {
                 slot.DestroyCard(buffCard);
