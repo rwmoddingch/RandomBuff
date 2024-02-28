@@ -376,6 +376,8 @@ namespace RandomBuff.Render.UI
         List<BuffCard> positiveCards = new List<BuffCard>();
         List<BuffCard> negativeCards = new List<BuffCard>();
 
+        public Vector2 basePos;
+
         public BuffGameMenuSlot(BuffGameMenu buffGameMenu)
         {
             Menu = buffGameMenu;
@@ -388,12 +390,17 @@ namespace RandomBuff.Render.UI
         /// <param name="nameOrders"></param>
         public void SetupBuffs(List<SlugcatStats.Name> nameOrders)
         {
-            foreach(var name in nameOrders)
+            buffIDPages.Clear();
+            foreach (var name in nameOrders)
             {
-       
                 buffIDPages.Add(BuffDataManager.Instance.GetAllBuffIds(name));
                 BuffPlugin.Log($"{buffIDPages.Last().Count} buffs for {name}");
             }
+        }
+
+        public override void Update()
+        {
+            base.Update();
         }
 
         /// <summary>

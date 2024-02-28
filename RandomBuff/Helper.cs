@@ -1,4 +1,5 @@
 ﻿using DevInterface;
+using RewiredConsts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Action = System.Action;
 
 namespace RandomBuff
 {
@@ -112,5 +114,6 @@ namespace RandomBuff
         {
             return Mathf.Lerp(t, 1f, Mathf.Pow(t, 0.5f));
         }
+
     }
 }

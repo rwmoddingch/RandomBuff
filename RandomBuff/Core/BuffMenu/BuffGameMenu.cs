@@ -22,28 +22,18 @@ namespace RandomBuff.Core.BuffMenu
     {
         private RainEffect rainEffect;
 
-        private List<SlugcatStats.Name> slugNameOrders = new ();
-        private List<SlugcatIllustrationPage> slugcatPages = new ();
-        private Dictionary<SlugcatStats.Name, WawaSaveData> saveGameData = new ();
+        internal List<SlugcatStats.Name> slugNameOrders = new ();
+        internal List<SlugcatIllustrationPage> slugcatPages = new ();
+        internal Dictionary<SlugcatStats.Name, WawaSaveData> saveGameData = new ();
 
         private bool restartCurrent;
         private bool loaded = false;
 
-        //菜单元素
-        private HoldButton startButton;
-        private SimpleButton backButton;
-        private BigArrowButton prevButton;
-        private BigArrowButton nextButton;
-        private SimpleButton settingButton;
-        private CheckBox restartCheckbox;
-        private SimpleButton jollyToggleConfigMenu;
-
         private MenuLabel testLabel;
 
-
-        BuffGameMenuSlot menuSlot;
-        private SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
-        private int currentPageIndex = 0;
+        internal BuffGameMenuSlot menuSlot;
+        internal SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
+        internal int currentPageIndex = 0;
 
         float scrolledPageIndex;
         int targetScrolledPageIndex;
@@ -76,7 +66,6 @@ namespace RandomBuff.Core.BuffMenu
                 manager.rainWorld.progression.Destroy(lastSlot);
                 manager.rainWorld.progression = new PlayerProgression(manager.rainWorld, true, false);
             }
-         
         }
 
         void OnDataLoaded()
@@ -97,46 +86,86 @@ namespace RandomBuff.Core.BuffMenu
        
             pages = new List<Page>()
             {
-                new (this, null, "WawaPage", 0)
+                new(this, null, "WawaButtonPage", 0),
+                new(this, null, "GameDetailPage", 1),
+                new (this, null, "WawaSlugcatPage", 2),
+                
             };
-
-            //构建页面
            
             for (int i = 0; i < slugNameOrders.Count; i++)
             {
                 slugcatPages.Add(new SlugcatIllustrationPage(this, null, i + 1, slugNameOrders[i]));
                 pages.Add(slugcatPages[i]);
             }
-            pages[0].Container.AddChild(new FSprite("pixel") { color = Color.black, alpha = 0.5f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y ,x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f});
+            //pages.Add();
+            //pages.Add();
+
             pages[0].subObjects.Add(rainEffect = new RainEffect(this, pages[0]));
 
-            pages[0].subObjects.Add(startButton = new HoldButton(this, this.pages[0], Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
-            pages[0].subObjects.Add(backButton = new SimpleButton(this, this.pages[0], base.Translate("BACK"), "BACK", new Vector2(200f, 668f), new Vector2(110f, 30f)));
-            pages[0].subObjects.Add(prevButton = new BigArrowButton(this, this.pages[0], "PREV", new Vector2(200f, 50f), -1));
-            pages[0].subObjects.Add(nextButton = new BigArrowButton(this, this.pages[0], "NEXT", new Vector2(1116f, 50f), 1));
-            pages[0].subObjects.Add(settingButton = new SimpleButton(this, this.pages[0], Translate(BuffDataManager.Instance.GetGameSetting(CurrentName).TemplateName),
-                "SELECT_MODE", new Vector2(683 - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
-                new Vector2(120, 40)));
-            if(ModManager.JollyCoop)
-                pages[0].subObjects.Add(jollyToggleConfigMenu = new SimpleButton(this, this.pages[0], Translate("SHOW"), "JOLLY_TOGGLE_CONFIG", 
-                    new Vector2(1056f, manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
+            InitButtonPage(pages[0]);
+            InitGameDetailPage(pages[0]);
+            
+            continueDetailPage.SetShow(false);
+            newGameDetailPage.SetShow(false);
 
-            pages[0].subObjects.Add(testLabel = new MenuLabel(this, pages[0], "",new Vector2(manager.rainWorld.screenSize.x/2 - 250, 484 - 249f),new Vector2(500,50),true));
-            testLabel.label.alignment = FLabelAlignment.Center;
-            testLabel.label.color = MenuColor(MenuColors.White).rgb;
-            float restartTextWidth = SlugcatSelectMenu.GetRestartTextWidth(CurrLang);
-            float restartTextOffset = SlugcatSelectMenu.GetRestartTextOffset(CurrLang);
-
-            pages[0].subObjects.Add(restartCheckbox = new CheckBox(this, this.pages[0], this, new Vector2(this.startButton.pos.x + 200f + restartTextOffset, Mathf.Max(30f, manager.rainWorld.options.SafeScreenOffset.y)), restartTextWidth, base.Translate("Restart game"), "RESTART", false));
-            restartCheckbox.label.pos.x += (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
-
-            pages[0].Container.MoveToFront();
+            //pages[0].Container.MoveToFront();
             container.AddChild(menuSlot.Container);
+            //detailPage.Container.MoveToFront();
 
             UpdateSlugcatAndPage();
         }
+        //
 
-        
+        BuffContinueGameDetialPage continueDetailPage;
+        BuffNewGameDetailPage newGameDetailPage;
+        void InitGameDetailPage(Page page)
+        {
+            page.subObjects.Add(continueDetailPage = new BuffContinueGameDetialPage(this, page, Vector2.zero));
+            page.subObjects.Add(newGameDetailPage = new BuffNewGameDetailPage(this, page, Vector2.zero));
+
+        }
+
+
+        //菜单元素
+        HoldButton startButton;
+        SimpleButton backButton;
+        BigArrowButton prevButton;
+        BigArrowButton nextButton;
+        //SimpleButton settingButton;
+        //CheckBox restartCheckbox;
+        SimpleButton jollyToggleConfigMenu;
+        void InitButtonPage(Page page)
+        {
+            page.subObjects.Add(startButton = new HoldButton(this, page, Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
+            page.subObjects.Add(backButton = new SimpleButton(this, page, base.Translate("BACK"), "BACK", new Vector2(200f, 668f), new Vector2(110f, 30f)));
+            page.subObjects.Add(prevButton = new BigArrowButton(this, page, "PREV", new Vector2(200f, 50f), -1));
+            page.subObjects.Add(nextButton = new BigArrowButton(this, page, "NEXT", new Vector2(1116f, 50f), 1));
+            //page.subObjects.Add(settingButton = new SimpleButton(this, page, Translate(BuffDataManager.Instance.GetGameSetting(CurrentName).TemplateName),
+            //    "SELECT_MODE", new Vector2(683 - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
+            //    new Vector2(120, 40)));
+
+            if (ModManager.JollyCoop)
+                page.subObjects.Add(jollyToggleConfigMenu = new SimpleButton(this, page, Translate("SHOW"), "JOLLY_TOGGLE_CONFIG",
+                    new Vector2(1056f, manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
+
+            page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));
+            testLabel.label.alignment = FLabelAlignment.Center;
+            testLabel.label.color = MenuColor(MenuColors.White).rgb;
+            //float restartTextWidth = SlugcatSelectMenu.GetRestartTextWidth(CurrLang);
+            //float restartTextOffset = SlugcatSelectMenu.GetRestartTextOffset(CurrLang);
+
+            //page.subObjects.Add(restartCheckbox = new CheckBox(this, page, this, new Vector2(this.startButton.pos.x + 200f + restartTextOffset, Mathf.Max(30f, manager.rainWorld.options.SafeScreenOffset.y)), restartTextWidth, base.Translate("Restart game"), "RESTART", false));
+            //restartCheckbox.label.pos.x += (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
+        }
+
+        public void SetButtonsActive(bool active)
+        {
+            startButton.buttonBehav.greyedOut = !active;
+            backButton.buttonBehav.greyedOut = !active;
+            prevButton.buttonBehav.greyedOut = !active;
+            nextButton.buttonBehav.greyedOut = !active;
+            //settingButton.buttonBehav.greyedOut = !active;
+        }
 
         void SetupSlugNameOrders()
         {
@@ -156,8 +185,8 @@ namespace RandomBuff.Core.BuffMenu
             var gameSetting = BuffDataManager.Instance.GetGameSetting(CurrentName);
 
             startButton.menuLabel.text = Translate(SlugcatStats.getSlugcatName(CurrentName));
-            settingButton.inactive = IsInactive;
-            settingButton.menuLabel.text = Translate(gameSetting.TemplateName);
+            //settingButton.inactive = IsInactive;
+            //settingButton.menuLabel.text = Translate(gameSetting.TemplateName);
             if(manager.rainWorld.progression.IsThereASavedGame(CurrentName))
             {
                 //暂时使用
@@ -177,6 +206,8 @@ namespace RandomBuff.Core.BuffMenu
                 testLabel.label.text = "NEW GAME";
             }
             menuSlot.UpdatePage(currentPageIndex);
+            continueDetailPage.ChangeSlugcat(CurrentName);
+            newGameDetailPage.SetShow(false);
         }
 
 
@@ -213,8 +244,7 @@ namespace RandomBuff.Core.BuffMenu
         public void SetChecked(CheckBox box, bool c)
         {
             restartCurrent = c;
-            settingButton.inactive = IsInactive;
-
+            //settingButton.inactive = IsInactive;
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -240,34 +270,42 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if (message == "START")
             {
-
-                if (!manager.rainWorld.progression.IsThereASavedGame(CurrentName) || restartCurrent)
-                {
-                    manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
-                        CurrentName;
-                    manager.rainWorld.progression.WipeSaveState(CurrentName);
-                    manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
-
-                }
-                else
+                PlaySound(SoundID.MENU_Start_New_Game);
+                if (manager.rainWorld.progression.IsThereASavedGame(CurrentName))
                 {
                     manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         CurrentName;
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
+                    BuffDataManager.Instance.EnterGameFromMenu(CurrentName);
+                    manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
+                    PlaySound(SoundID.MENU_Start_New_Game);
                 }
+                else
+                {
+                    continueDetailPage.SetShow(false);
+                    newGameDetailPage.SetShow(true);
+                }
+            }
+            else if(message == "CONTINUE_DETAIL_RESTART")
+            {
+                manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
+                        CurrentName;
+                manager.rainWorld.progression.WipeSaveState(CurrentName);
+                manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
+
+                continueDetailPage.ChangeSlugcat(CurrentName);
+                menuSlot.SetupBuffs(slugNameOrders);
+            }
+            else if (message == "NEWGAME_DETAIL_NEWGAME")
+            {
+                manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
+                        CurrentName;
+                manager.rainWorld.progression.WipeSaveState(CurrentName);
+                manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
 
                 BuffDataManager.Instance.EnterGameFromMenu(CurrentName);
                 manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
                 PlaySound(SoundID.MENU_Start_New_Game);
-            }
-            else if (message == "SELECT_MODE" && !settingButton.inactive)
-            {
-                var gameSetting = BuffDataManager.Instance.GetGameSetting(CurrentName);
-                var list = BuffConfigManager.GetTemplateNameList();
-                var index = list.IndexOf(gameSetting.TemplateName) + 1;
-                gameSetting.LoadTemplate(list[index == list.Count ? 0 : index]);
-          
-                settingButton.menuLabel.text = Translate(gameSetting.TemplateName);
             }
             else if (message == "JOLLY_TOGGLE_CONFIG")
             {
@@ -275,6 +313,20 @@ namespace RandomBuff.Core.BuffMenu
                 manager.ShowDialog(dialog);
                 PlaySound(SoundID.MENU_Switch_Page_In);
             }
+        }
+
+        float testDifficulty;
+        public override float ValueOfSlider(Slider slider)
+        {
+            if (slider.ID == BuffGameMenuStatics.DifficultySlider)
+                return testDifficulty;
+            return 0f;
+        }
+
+        public override void SliderSetValue(Slider slider, float f)
+        {
+            if (slider.ID == BuffGameMenuStatics.DifficultySlider)
+                testDifficulty = f;
         }
 
         public override void Update()
@@ -367,50 +419,6 @@ namespace RandomBuff.Core.BuffMenu
             public bool karmaRF;
         }
 
-        public class SlugcatIllustrationPage : SlugcatSelectMenu.SlugcatPage
-        {
-            public SlugcatIllustrationPage(Menu.Menu menu, MenuObject menuObject, int pageIndex, SlugcatStats.Name name) : base(menu, menuObject, pageIndex, name)
-            {
-                var origMenu = menu;
-                var selectMenu = Helper.GetUninit<SlugcatSelectMenu>();
-                selectMenu.saveGameData = new();
-                 
-                this.menu = selectMenu;
-                this.menu.manager = origMenu.manager;
-                this.menu.container = origMenu.container;
-                AddImage(false);
-                this.menu = origMenu;
-                slugcatImage.menu = origMenu;
-
-            }
-
-            public new float Scroll(float timeStacker)
-            {
-                float scroll = (SlugcatPageIndex - (menu as BuffGameMenu).currentPageIndex) - Mathf.Lerp((menu as BuffGameMenu).lastScroll, (menu as BuffGameMenu).scroll, timeStacker);
-                if (scroll < MinOffset)
-                {
-                    scroll += (menu as BuffGameMenu).slugcatPages.Count;
-                }
-                else if (scroll > MaxOffset)
-                {
-                    scroll -= (menu as BuffGameMenu).slugcatPages.Count;
-                }
-                return scroll;
-            }
-
-            public new float NextScroll(float timeStacker)
-            {
-                float scroll = (SlugcatPageIndex - (menu as BuffGameMenu).currentPageIndex) - Mathf.Lerp((menu as BuffGameMenu).scroll, (menu as BuffGameMenu).NextScroll, timeStacker);
-                if (scroll < MinOffset)
-                {
-                    scroll += (menu as BuffGameMenu).slugcatPages.Count;
-                }
-                else if (scroll > MaxOffset)
-                {
-                    scroll -= (menu as BuffGameMenu).slugcatPages.Count;
-                }
-                return scroll;
-            }
-        }
+        
     }
 }
