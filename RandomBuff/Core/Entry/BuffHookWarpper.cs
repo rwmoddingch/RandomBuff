@@ -39,16 +39,20 @@ namespace RandomBuff.Core.Entry
 
         public static void CheckAndDisableAllHook()
         {
+            List<(BuffID, HookLifeTimeLevel)> list = new ();
             foreach (var dic in HasEnabled)
             {
                 foreach (var item in dic.Value)
                 {
                     if (item.Value)
-                    {
-                        DisableBuff(dic.Key, item.Key);
-                        BuffPlugin.LogError($"Fallback Disable Hook {dic.Key}:{item.Key}, Forget call DisableBuff?");
-                    }
+                        list.Add((dic.Key,item.Key));
                 }
+            }
+
+            foreach (var needDisable in list)
+            {
+                BuffPlugin.LogError($"Fallback Disable Hook {needDisable.Item1}:{needDisable.Item2}, Forget call DisableBuff?");
+                DisableBuff(needDisable.Item1,needDisable.Item2);
             }
         }
 

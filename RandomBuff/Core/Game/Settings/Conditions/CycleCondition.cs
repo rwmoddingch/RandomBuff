@@ -11,6 +11,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     internal class CycleCondition : Condition
     {
         public override ConditionID ID => ConditionID.Cycle;
+        public override float Exp => cycle * 40;
 
         public override void EnterGame(RainWorldGame game)
         {

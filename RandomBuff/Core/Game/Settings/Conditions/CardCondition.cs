@@ -10,6 +10,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     internal class CardCondition : Condition
     {
         public override ConditionID ID => ConditionID.Card;
+
+        public override float Exp => needCard * 50;
+
         public override void SessionEnd(SaveState save)
         {
         }

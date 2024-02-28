@@ -1,6 +1,7 @@
 ﻿#define BUFFDEBUG 
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,6 +15,7 @@ using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 
@@ -79,8 +81,10 @@ namespace RandomBuff.Core.Entry
         {
             try
             {
-                if (id != ((IBuff)Activator.CreateInstance(buffType)).ID ||
-                    id != ((BuffData)(Activator.CreateInstance(dataType))).ID)
+                var testBuff = ((IBuff)Activator.CreateInstance(buffType));
+                var buffId = testBuff.ID;
+                testBuff.Destroy();
+                if (id != buffId || id != ((BuffData)(Activator.CreateInstance(dataType))).ID)
                 {
                     BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
                     return;
@@ -95,12 +99,14 @@ namespace RandomBuff.Core.Entry
       
         }
 
+      
         /// <summary>
         /// 注册新的抽卡模式
         /// </summary>
         /// <typeparam name="TTemplateType"></typeparam>
-        /// <param name="id"></param>
-        public static void RegisterGachaTemplate<TTemplateType>(GachaTemplateID id)
+        /// <param name="id">ID</param>
+        /// <param name="banList">ban掉的条件</param>
+        public static void RegisterGachaTemplate<TTemplateType>(GachaTemplateID id, params ConditionID[] banList)
             where TTemplateType : GachaTemplate, new()
         {
             try
@@ -111,7 +117,8 @@ namespace RandomBuff.Core.Entry
                     return;
                 }
 
-                templateTypes.Add(id,typeof(TTemplateType));
+                TemplateTypes.Add(id,new GachaTemplateType(
+                    typeof(TTemplateType),new(banList)));
             }
             catch (Exception e)
             {
@@ -123,20 +130,41 @@ namespace RandomBuff.Core.Entry
         /// 注册新的通关条件
         /// </summary>
         /// <typeparam name="TConditionType"></typeparam>
-        /// <param name="id"></param>
-        /// <param name="displayName"></param>
-        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName)
+        /// <param name="id">ID</param>
+        /// <param name="displayName">显示类别名称</param>
+        /// <param name="canUseMore">是否可以同一局选取多个</param>
+        /// <param name="parentId">继承某个条件的Ban情况</param>
+        /// <param name="banList">Ban掉特定的游玩模式，请保证对应的GachaTemplate已经注册</param>
+        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName,bool canUseMore = false,
+            ConditionID parentId = null,params GachaTemplateID[] banList)
             where TConditionType : Condition, new()
         {
             try
             {
                 if (id != Activator.CreateInstance<TConditionType>().ID)
                 {
-                    BuffPlugin.LogError($"{id}'s GachaTemplate has unexpected ConditionID!");
+                    BuffPlugin.LogError($"{id}'s Condition has unexpected ConditionID!");
                     return;
                 }
-                conditionTypes.Add(id, typeof(TConditionType));
-                conditionNames.Add(id, displayName);
+
+                var parent = GetConditionType(parentId);
+                if (parent == null && parentId != null)
+                {
+                    BuffPlugin.LogError($"can't find Condition:{parentId}, When register Condition:{id} parent");
+                    return;
+                }
+                ConditionTypes.Add(id, new ConditionType(id,typeof(TConditionType), GetConditionType(parentId), canUseMore, displayName));
+                foreach (var banId in banList)
+                {
+                    var type = GetTemplateType(banId);
+                    if (type == null)
+                    {
+                        BuffPlugin.LogError($"can't find GachaTemplate:{banId}, When register Condition:{id} ban list");
+                        continue;
+                    }
+                    if (!type.BanConditionIds.Contains(id))
+                        type.BanConditionIds.Add(id);
+                }
             }
             catch (Exception e)
             {
@@ -153,23 +181,29 @@ namespace RandomBuff.Core.Entry
     public static partial class BuffRegister
     {
         internal static (BuffID id, Type type) GetDataType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
-
-        internal static (BuffID id, Type type) GetBuffType(string id) => (new BuffID(id), GetAnyType(new BuffID(id), BuffTypes));
+        internal static (BuffID id, Type type) GetBuffType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), BuffTypes));
 
         internal static Type GetDataType(BuffID id) => GetAnyType(id, DataTypes);
-
         internal static Type GetBuffType(BuffID id) => GetAnyType(id, BuffTypes);
 
-        internal static Type GetCondition(ConditionID id) => GetAnyType(id, conditionTypes);
+        public static ConditionType GetConditionType(ConditionID id)
+        {
+            if(id == null)
+                return null;
+            return GetAnyType(id, ConditionTypes);
+        }
+        internal static string GetConditionTypeName(ConditionID id) => GetAnyType(id, ConditionTypes).DisplayName;
+        internal static List<ConditionID> GetAllConditionList() => ConditionTypes.Keys.ToList();
 
-        internal static Type GetTemplate(GachaTemplateID id) => GetAnyType(id, templateTypes);
+
+        internal static GachaTemplateType GetTemplateType(GachaTemplateID id) => GetAnyType(id, TemplateTypes);
 
 
-        private static Type GetAnyType<T>(T id, Dictionary<T, Type> dic)
+        private static Y GetAnyType<T,Y>(T id, Dictionary<T, Y> dic)
         {
             if (dic.ContainsKey(id))
                 return dic[id];
-            return null;
+            return default;
         }
 
 
@@ -266,12 +300,57 @@ namespace RandomBuff.Core.Entry
                 }
             }
         }
-        
+
+        public class ConditionType
+        {
+            public Type Type { get; }
+            public ConditionType Parent { get; }
+            public bool CanUseMore{ get; }
+            public string DisplayName { get; }
+
+            public ConditionID Id { get; }
+
+            public ConditionType(ConditionID id, Type type, ConditionType parent, bool canUseMore, string displayName)
+            {
+                Id = id;
+                Type = type;
+                Parent = parent;
+                CanUseMore = canUseMore;
+                DisplayName = displayName;
+            }
+
+            public bool CanUseInCurrentTemplate(GachaTemplateID id)
+            {
+                var type = GetTemplateType(id);
+                var con = this;
+                while (con != null)
+                {
+                    if (type.BanConditionIds.Contains(con.Id))
+                        return false;
+                    con = con.Parent;
+                }
+
+                return true;
+            }
+        }
+
+        public class GachaTemplateType
+        {
+            public Type Type { get; }
+            public HashSet<ConditionID> BanConditionIds { get; }
+
+            public GachaTemplateType(Type type, HashSet<ConditionID> banConditionIds)
+            {
+                this.Type = type;
+                BanConditionIds = banConditionIds;
+            }
+        }
+
         private static readonly Dictionary<BuffID, Type> DataTypes = new();
         private static readonly Dictionary<BuffID, Type> BuffTypes = new();
-        private static readonly Dictionary<GachaTemplateID, Type> templateTypes = new();
-        private static readonly Dictionary<ConditionID, Type> conditionTypes = new();
-        private static readonly Dictionary<ConditionID, string> conditionNames = new();
+
+        private static readonly Dictionary<GachaTemplateID, GachaTemplateType> TemplateTypes = new();
+        private static readonly Dictionary<ConditionID, ConditionType> ConditionTypes = new();
 
     }
 }

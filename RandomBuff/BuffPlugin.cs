@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,12 +10,15 @@ using BepInEx;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using RandomBuffUtils;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -119,10 +123,25 @@ namespace RandomBuff
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
-            if (Input.GetKey(KeyCode.K) && self.rainWorld.BuffMode() && Directory.Exists("Debug"))
+            if (self.rainWorld.BuffMode() && Directory.Exists("Debug") && DevEnabled)
             {
-                BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
-                BuffPoolManager.Instance.CreateBuff(new BuffID("DivineBeing"));
+                if (Input.GetKeyDown(KeyCode.K))
+                {
+                    BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
+                }
+                if (Input.GetKeyDown(KeyCode.L))
+                {
+                    var gameSetting = new GameSetting();
+                    var template = new MissionGachaTemplate();
+                    gameSetting.gachaTemplate = template;
+                    gameSetting.GetRandomCondition();
+                    gameSetting.GetRandomCondition();
+
+                    var re = BuffConfigManager.buffTypeTable.Values.ToList();
+                    template.cardPick.Add(0,new List<string>{ re[0][Random.Range(0, re[0].Count)].value , re[0][Random.Range(0, re[0].Count)].value });
+                    template.cardPick.Add(1, new List<string>{ re[1][Random.Range(0, re[1].Count)].value, re[1][Random.Range(0, re[1].Count)].value });
+                    gameSetting.SaveGameSettingToPath("Debug/MissionSetting.txt");
+                }
             }
         }
 
