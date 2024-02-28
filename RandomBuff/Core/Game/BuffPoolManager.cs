@@ -110,22 +110,6 @@ namespace RandomBuff.Core.Game
             return cycleDatas;
         }
 
-        /// <summary>
-        /// 游戏进行中删除Buff
-        /// </summary>
-        /// <param name="id"></param>
-        internal void RemoveBuff(BuffID id)
-        {
-            if (!buffDictionary.ContainsKey(id))
-            {
-                BuffPlugin.LogError($"remove buff not found: {id}");
-                return;
-            }
-            BuffHookWarpper.DisableBuff(id,HookLifeTimeLevel.InGame);
-            buffDictionary[id].Destroy();
-            buffDictionary.Remove(id);
-            UnstackBuff(id);
-        }
 
         /// <summary>
         /// 减少游戏内BuffData的堆叠层数
@@ -133,13 +117,14 @@ namespace RandomBuff.Core.Game
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        internal void UnstackBuff(BuffID id)
+        internal bool UnstackBuff(BuffID id)
         {
             
             if (!cycleDatas.ContainsKey(id))
             {
                 BuffPlugin.LogError($"unstack buff not found: {id}");
-                return;
+                return false;
+           
             }
 
             if (BuffConfigManager.GetStaticData(id).Stackable)
@@ -147,25 +132,21 @@ namespace RandomBuff.Core.Game
                 BuffPlugin.LogError($"UnStack buff : {Game.StoryCharacter}");
                 cycleDatas[id].UnStack();
                 if (cycleDatas[id].StackLayer == 0)
-                    RemoveBuffData(id);
+                {
+                 
+                    RemoveBuffAndData(id);
+                    return true;
+                }
             }
             else
             {
-                RemoveBuffData(id);
+                RemoveBuffAndData(id);
+                return true;
             }
+
+            return false;
         }
 
-
-        /// <summary>
-        /// 移除游戏内BuffData
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        private void RemoveBuffData(BuffID id)
-        {
-            BuffPlugin.Log($"Remove buff : {Game.StoryCharacter}-{id}");
-            cycleDatas.Remove(id);
-        }
 
         /// <summary>
         /// 局内创建BuffData
@@ -324,18 +305,46 @@ namespace RandomBuff.Core.Game
 
         internal bool TriggerBuff(BuffID id, bool ignoreCheck = false)
         {
-            var re = false;
             BuffPlugin.Log($"Trigger Buff: {id}, ignoreCheck: {ignoreCheck}");
             if (TryGetBuff(id, out var buff) && ((BuffConfigManager.GetStaticData(id).Triggerable && buff.Triggerable) || ignoreCheck))
             {
                 BuffHud.Instance.TriggerCard(id);
-                if ((re = buff.Trigger(Game)) == true)
+                if (buff.Trigger(Game))
                 {
-                    RemoveBuff(buff.ID);
+                    return UnstackBuff(buff.ID);
                 }
             }
+            return false;
+        }
 
-            return re;
+        /// <summary>
+        /// 游戏进行中删除Buff
+        /// </summary>
+        /// <param name="id"></param>
+        private void RemoveBuff(BuffID id)
+        {
+            if (!buffDictionary.ContainsKey(id))
+            {
+                BuffPlugin.LogError($"remove buff not found: {id}");
+                return;
+            }
+            BuffHookWarpper.DisableBuff(id, HookLifeTimeLevel.InGame);
+            buffDictionary[id].Destroy();
+            buffList.Remove(buffDictionary[id]);
+            buffDictionary.Remove(id);
+
+        }
+
+        /// <summary>
+        /// 移除游戏内BuffData和Buff
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private void RemoveBuffAndData(BuffID id)
+        {
+            RemoveBuff(id);
+            BuffPlugin.Log($"Remove buff data : {Game.StoryCharacter}-{id}");
+            cycleDatas.Remove(id);
         }
 
         /// 轮回内的临时数据
