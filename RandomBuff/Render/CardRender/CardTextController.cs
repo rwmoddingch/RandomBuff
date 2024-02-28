@@ -88,7 +88,7 @@ namespace RandomBuff.Render.CardRender
 
             if (isTitle)
             {
-                textMesh.fontSize = id == InGameTranslator.LanguageID.Chinese ? 8 : 6;
+                textMesh.fontSize = id == InGameTranslator.LanguageID.Chinese ? 7 : 6;
                 var rectTransform = _textObjectA.GetComponent<RectTransform>();
                 rectTransform.pivot = new Vector2(0.5f, 0f);
                 textMesh.alignment = TextAlignmentOptions.Center;

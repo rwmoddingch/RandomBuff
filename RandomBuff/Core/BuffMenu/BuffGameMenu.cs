@@ -134,6 +134,7 @@ namespace RandomBuff.Core.BuffMenu
         //SimpleButton settingButton;
         //CheckBox restartCheckbox;
         SimpleButton jollyToggleConfigMenu;
+
         void InitButtonPage(Page page)
         {
             page.subObjects.Add(startButton = new HoldButton(this, page, Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
@@ -151,6 +152,7 @@ namespace RandomBuff.Core.BuffMenu
             page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));
             testLabel.label.alignment = FLabelAlignment.Center;
             testLabel.label.color = MenuColor(MenuColors.White).rgb;
+            //page.subObjects.Add(new SimpleButton(this, page, base.Translate("MANUAL"), "MANUAL", new Vector2(Custom.GetScreenOffsets()[1] - 150f, 695f), new Vector2(100f, 30f)));
             //float restartTextWidth = SlugcatSelectMenu.GetRestartTextWidth(CurrLang);
             //float restartTextOffset = SlugcatSelectMenu.GetRestartTextOffset(CurrLang);
 
@@ -164,6 +166,7 @@ namespace RandomBuff.Core.BuffMenu
             backButton.buttonBehav.greyedOut = !active;
             prevButton.buttonBehav.greyedOut = !active;
             nextButton.buttonBehav.greyedOut = !active;
+            if(jollyToggleConfigMenu != null) jollyToggleConfigMenu.buttonBehav.greyedOut = !active;
             //settingButton.buttonBehav.greyedOut = !active;
         }
 
@@ -312,6 +315,12 @@ namespace RandomBuff.Core.BuffMenu
                 JollySetupDialog dialog = new JollySetupDialog(CurrentName, manager, jollyToggleConfigMenu.pos);
                 manager.ShowDialog(dialog);
                 PlaySound(SoundID.MENU_Switch_Page_In);
+            }
+            else if (message == "MANUAL")
+            {
+                ManualDialog dialog = new ExpeditionManualDialog(manager, ExpeditionManualDialog.topicKeys);
+                PlaySound(SoundID.MENU_Player_Join_Game);
+                manager.ShowDialog(dialog);
             }
         }
 

@@ -467,7 +467,7 @@ namespace RandomBuff.Render.UI
 
             Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
 
-            basicPosition = halfScreenSize + Vector2.up * 40f;
+            basicPosition = halfScreenSize + Vector2.up * 140f;
             int index = slot.GetCurrentIndex(buffCard, out int positiveOrNegative, out int totalLength);
             basicPosition += positiveOrNegative * Vector2.up * 70f;
 
@@ -530,7 +530,7 @@ namespace RandomBuff.Render.UI
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
 
             Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
-            basicPosition = halfScreenSize + Vector2.up * 40f;
+            basicPosition = halfScreenSize + Vector2.up * 140f;
             int index = slot.GetCurrentIndex(buffCard, out int positiveOrNegative, out int totalLength);
             basicPosition += positiveOrNegative * Vector2.up * 70f;
 

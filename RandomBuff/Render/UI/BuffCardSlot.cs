@@ -781,7 +781,10 @@ namespace RandomBuff.Render.UI
                     }
 
                     if(ibuff.MyTimer != null)
+                    {
                         activeTimerInstances.Add(new TimerInstance(this, id, ibuff.MyTimer));
+                        BuffPlugin.Log($"Create timer instance for {id}");
+                    }
                 }
             }
 
@@ -789,6 +792,7 @@ namespace RandomBuff.Render.UI
             {
                 base.AppendCard(buffCard);
                 buffCard.SetAnimatorState(BuffCard.AnimatorState.BuffTimerAnimSlot_Show);
+                BuffPlugin.Log($"BuffTimerAnimSlot append card of {buffCard.ID}");
             }
 
             public override void Update()
@@ -868,7 +872,6 @@ namespace RandomBuff.Render.UI
                         if(cardTimer == null)
                         {
                             cardTimer = new BuffCardTimer(slot.timerContainer, timer);
-                             
                             slot.buffCard2TimerInstanceMapper.Add(slot.AppendCard(id), this);
                         }
 
@@ -888,7 +891,6 @@ namespace RandomBuff.Render.UI
                                 cardTimer.ClearSprites();
                                 cardTimer = null;
                                 slot.RemoveCard(id, true);
-
                             }
                             counter--;
                         }
