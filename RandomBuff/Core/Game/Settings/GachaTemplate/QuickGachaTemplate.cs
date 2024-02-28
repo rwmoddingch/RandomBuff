@@ -43,8 +43,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
                 if (queue.Count == MaxCount)
                 {
-                    BuffHud.Instance.RemoveCard(queue.Dequeue());
-                    BuffPoolManager.Instance.RemoveBuff(queue.Peek());
+                    if(BuffPoolManager.Instance.UnstackBuff(queue.Peek()))
+                        BuffHud.Instance.RemoveCard(queue.Dequeue());
                 }
 
                 BuffID buffId;
@@ -57,8 +57,10 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
                 BuffPlugin.LogDebug($"Quick Mode : New Buff {buffId}");
 
+                var has = BuffPoolManager.Instance.GetBuff(buffId);
                 BuffPoolManager.Instance.CreateBuff(buffId, true);
-                BuffHud.Instance.AppendNewCard(buffId);
+                if(has == null) BuffHud.Instance.AppendNewCard(buffId);
+
                 queue.Enqueue(buffId);
                 counter = 0;
             }
