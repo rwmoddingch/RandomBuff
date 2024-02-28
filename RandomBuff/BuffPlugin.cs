@@ -32,7 +32,7 @@ namespace RandomBuff
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
     internal class BuffPlugin : BaseUnityPlugin
     {
-        public const string saveVersion = "a-0.0.3";
+        public const string saveVersion = "a-0.0.4";
         internal static BuffPlugin Instance { get; private set; }
 
         public void OnEnable()

@@ -27,7 +27,6 @@ namespace RandomBuff.Core.SaveData
 
         private UserData.File buffCoreFile;
 
-        public List<string> buffCollect = new();
 
 
         private BuffFile()
@@ -66,7 +65,7 @@ namespace RandomBuff.Core.SaveData
                 BuffPlugin.Log($"Saving buff data at slot {Instance.UsedSlot}");
                 buffCoreFile.Set<string>("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
                 buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                buffCoreFile.Set<string>("buff-collect", JsonConvert.SerializeObject(buffCollect), UserData.WriteMode.Immediate);
+                buffCoreFile.Set<string>("buff-player", JsonConvert.SerializeObject(BuffPlayerData.Instance), UserData.WriteMode.Immediate);
                 return;
             }
             BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
@@ -125,7 +124,7 @@ namespace RandomBuff.Core.SaveData
                 if (!buffCoreFile.Contains("buff-config")  ||
                     !buffCoreFile.Contains("buff-version") ||
                     !buffCoreFile.Contains("buff-data")    ||
-                    !buffCoreFile.Contains("buff-collect"))
+                    !buffCoreFile.Contains("buff-player"))
                 {
                     LoadFailedFallBack();
                 }
@@ -135,7 +134,15 @@ namespace RandomBuff.Core.SaveData
                 BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), buffCoreFile.Get<string>("buff-version"));
                 BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), buffCoreFile.Get<string>("buff-version"));
 
-                buffCollect = JsonConvert.DeserializeObject<List<string>>(buffCoreFile.Get<string>("buff-collect"));
+                BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get<string>("buff-player"));
+
+                //TODO:正式版本删除
+                if (buffCoreFile.Contains("buff-collect"))
+                {
+                    BuffPlugin.LogWarning("Load old collect data");
+                    BuffPlayerData.Instance.LoadOldCollectData(buffCoreFile.Get<string>("buff-collect"));
+                    buffCoreFile.Remove("buff-collect");
+                }
 
                 //更新格式版本
                 buffCoreFile.Set("buff-version", BuffPlugin.saveVersion);
@@ -170,12 +177,14 @@ namespace RandomBuff.Core.SaveData
         {
             if (buffCoreFile == null)
                 return;
-            buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
-            buffCoreFile.Set<string>("buff-config", "");
-            buffCoreFile.Set<string>("buff-data", "");
-            buffCoreFile.Set<string>("buff-collect", "");
-            BuffConfigManager.LoadConfig("", BuffPlugin.saveVersion);
-            BuffDataManager.LoadData("", BuffPlugin.saveVersion);
+            if (!buffCoreFile.Contains("buff-version"))
+                buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
+            if (!buffCoreFile.Contains("buff-config"))
+                buffCoreFile.Set<string>("buff-config", "");
+            if (!buffCoreFile.Contains("buff-data"))
+                buffCoreFile.Set<string>("buff-data", "");
+            if (!buffCoreFile.Contains("buff-player"))
+                buffCoreFile.Set<string>("buff-player", "");
 
         }
     }
@@ -242,16 +251,7 @@ namespace RandomBuff.Core.SaveData
 
         }
 
-        public void AddCollect(string buffID)
-        {
-            if (buffCollect == null)
-                buffCollect = new List<string>();
-            if (!buffCollect.Contains(buffID))
-            {
-                BuffPlugin.Log($"Add buff collect to Save Slot {CurrentSlot}");
-                buffCollect.Add(buffID);
-            }
-        }
+ 
 
 
         private static event Action OnFileReadCompleted;
