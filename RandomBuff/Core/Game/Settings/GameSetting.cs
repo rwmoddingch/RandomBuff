@@ -162,7 +162,8 @@ namespace RandomBuff.Core.Game.Settings
         public Condition CreateNewCondition(ConditionID id)
         {
             var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
-            re.SetRandomParameter(Difficulty);
+            var same = conditions.Where(i => i.ID == id);
+            re.SetRandomParameter(Difficulty, same.Any() ? same.ToList() : null);
             conditions.Add(re);
             return re;
         }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RandomBuff.Core.Buff;
 using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
@@ -13,13 +14,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override float Exp => needCard * 50;
 
-        public override void SessionEnd(SaveState save)
+        public override void GachaEnd(List<BuffID> picked, List<BuffID> allCards)
         {
+            currentCard = allCards.Count;
+            BuffPlugin.LogDebug($"GachaEnd Refresh Card Count: {currentCard}");
         }
 
-
-
-        public override void SetRandomParameter(float difficulty)
+        public override void SetRandomParameter(float difficulty, List<Condition> sameConditions = null)
         {
             needCard = (int)Random.Range(Mathf.Lerp(5, 10, difficulty), Mathf.Lerp(10, 15, difficulty));
             BuffPlugin.LogDebug($"Add Card Condition {needCard}");

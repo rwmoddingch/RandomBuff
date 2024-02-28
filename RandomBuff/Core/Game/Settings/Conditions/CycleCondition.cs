@@ -27,7 +27,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         }
 
-        public override void SetRandomParameter(float difficulty)
+        public override void SetRandomParameter(float difficulty, List<Condition> sameConditions = null)
         {
             cycle = (int)Random.Range(Mathf.Lerp(5, 15, difficulty), Mathf.Lerp(10, 30, difficulty));
             BuffPlugin.LogDebug($"Add Cycle Condition {cycle}");
