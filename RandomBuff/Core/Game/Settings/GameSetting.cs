@@ -12,6 +12,7 @@ using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
+using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings
 {
@@ -23,7 +24,7 @@ namespace RandomBuff.Core.Game.Settings
 
         public List<Condition> conditions = new ();
 
-        public Game.GachaTemplate gachaTemplate = new NormalGachaTemplate();
+        public GachaTemplate.GachaTemplate gachaTemplate = new NormalGachaTemplate();
 
         public bool MissingDependence => fallBack != null;
 
@@ -56,9 +57,9 @@ namespace RandomBuff.Core.Game.Settings
             gachaTemplate.NewGame();
         }
 
-        public void EnterGame()
+        public void EnterGame(RainWorldGame game)
         {
-            gachaTemplate.EnterGame();
+            gachaTemplate.EnterGame(game);
         }
 
         public void InGameUpdate(RainWorldGame game)
@@ -128,7 +129,8 @@ namespace RandomBuff.Core.Game.Settings
             }
 
             var data = BuffConfigManager.GetTemplateData(name);
-            gachaTemplate = (Game.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplate(data.Id));
+            gachaTemplate = (GachaTemplate.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplateType(data.Id).Type);
+            gachaTemplate.ExpMultiply = data.ExpMultiply;
             foreach (var pair in data.datas)
             {
                 try
@@ -141,22 +143,47 @@ namespace RandomBuff.Core.Game.Settings
                     BuffPlugin.LogException(e,$"Exception in load template {pair.Key}-{pair.Value}-{data.Id}");
                 }
             }
+
+            if (!gachaTemplate.TemplateLoaded())
+            {
+                BuffPlugin.LogError($"Template:{name} has wrong data, fallback to Normal");
+                LoadTemplate("Normal");
+                return;
+            }
             TemplateName = name;
             if (BuffPlugin.DevEnabled)
             {
                 conditions.Clear();
-                CreateNewCondition(ConditionID.Cycle);
-                CreateNewCondition(ConditionID.Card);
+                BuffPlugin.Log($"{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore}");
+                
             }
         }
 
         public Condition CreateNewCondition(ConditionID id)
         {
-            var re = (Condition)Activator.CreateInstance(BuffRegister.GetCondition(id));
+            var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
             re.SetRandomParameter(Difficulty);
             conditions.Add(re);
             return re;
         }
+
+        /// <summary>
+        /// 返回获取的条件以及是否还能获取
+        /// canGetMore == false则不能继续获取
+        /// 如果非得获取那返回(null,false)
+        /// </summary>
+        /// <returns></returns>
+        public (Condition condition, bool canGetMore) GetRandomCondition()
+        {
+            var list = BuffRegister.GetAllConditionList();
+            list.RemoveAll(i => conditions.Any(j => j.ID == i) ||
+                                !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
+            if (list.Count == 0)
+                return (null, false);
+            return (CreateNewCondition(list[Random.Range(0, list.Count)]),
+                    list.Sum(i => BuffRegister.GetConditionType(i).CanUseMore ? 10 : 1) > 1);
+        }
+
 
         public void SaveGameSettingToPath(string path)
         {
@@ -193,8 +220,8 @@ namespace RandomBuff.Core.Game.Settings
                                 return true;
                             }
 
-                            setting.gachaTemplate = (Game.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
-                                    BuffRegister.GetTemplate((GachaTemplateID)id));
+                            setting.gachaTemplate = (GachaTemplate.GachaTemplate)JsonConvert.DeserializeObject(subs[2],
+                                    BuffRegister.GetTemplateType((GachaTemplateID)id).Type);
                             if (subs.Length == 4)
                                 setting.TemplateName = subs[3];
                             else
@@ -208,7 +235,7 @@ namespace RandomBuff.Core.Game.Settings
                                 return true;
                             }
                             setting.conditions.Add((Condition)JsonConvert.DeserializeObject(subs[2],
-                                BuffRegister.GetCondition((ConditionID)cid)));
+                                BuffRegister.GetConditionType((ConditionID)cid).Type));
                             break;
                     }
                 }

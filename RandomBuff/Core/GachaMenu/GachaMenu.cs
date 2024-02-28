@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using RWCustom;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 

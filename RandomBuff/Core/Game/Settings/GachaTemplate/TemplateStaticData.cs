@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
@@ -40,6 +41,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         public string Name { get; private set; } = null;
 
         public GachaTemplateID Id { get; private set; } = null;
+
+        public float ExpMultiply { get; private set; } = 1;
 
         public Dictionary<string,object> datas = new ();
 
