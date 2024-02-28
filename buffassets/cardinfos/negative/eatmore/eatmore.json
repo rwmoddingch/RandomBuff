@@ -5,6 +5,7 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "FFFFFF",
+    "Stackable" : true,
 
     "Chinese" : {
         "BuffName" : "多吃一口",
