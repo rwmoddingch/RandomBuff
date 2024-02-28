@@ -117,7 +117,6 @@ namespace RandomBuff.Render.CardRender
                 _cardTextureFront = buffStaticData.GetFaceTexture();
                 _cardTextureBack = buffStaticData.GetBackTexture();
 
-
                 var info = _buffStaticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage);
 
                 if (!_notFirstInit)
@@ -161,6 +160,11 @@ namespace RandomBuff.Render.CardRender
                     cardCameraController.Init(id);
 
                     _notFirstInit = true;
+                    BuffPlugin.Log($"New card renderer for {buffStaticData.BuffID}");
+                }
+                else
+                {
+                    cardCameraController.CardDirty = true;
                 }
                 cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, info.id);
                 cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, info.id);
