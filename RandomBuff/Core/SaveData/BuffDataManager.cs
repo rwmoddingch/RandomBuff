@@ -114,7 +114,6 @@ namespace RandomBuff.Core.SaveData
                     allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
                     allDatas[name][id].DataLoaded(true);
                     BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
-                    BuffFile.Instance.AddCollect(id.value);
                     BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
                 }
                 else
@@ -162,7 +161,7 @@ namespace RandomBuff.Core.SaveData
             gameSettings[name] = setting;
 
             foreach(var id in allDatas[name].Keys)
-                BuffFile.Instance.AddCollect(id.value);
+                BuffPlayerData.Instance.AddCollect(id);
 
             foreach (var data in allDatas[name])
                 data.Value.CycleEnd();
@@ -314,22 +313,21 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         private bool InitStringData(string file, string formatVersion)
         {
-            if (formatVersion != "a-0.0.1")
-            {
-                var split = Regex.Split(file, SettingSplit)
-                    .Where(i => !string.IsNullOrEmpty(i)).ToArray();
-                if (split.Length == 0)
-                {
-                    BuffPlugin.LogWarning($"Empty data !");
-                    return false;
 
-                }
-                file = split[0];
-                if (split.Length <= 1)
-                    BuffPlugin.LogWarning($"Missing Setting data !");
-                else
-                    InitStringSetting(split[1],formatVersion);
+            var split = Regex.Split(file, SettingSplit)
+                .Where(i => !string.IsNullOrEmpty(i)).ToArray();
+            if (split.Length == 0)
+            {
+                BuffPlugin.LogWarning($"Empty data !");
+                return false;
+
             }
+            file = split[0];
+            if (split.Length <= 1)
+                BuffPlugin.LogWarning($"Missing Setting data !");
+            else
+                InitStringSetting(split[1], formatVersion);
+
 
             foreach (var catSingle in Regex.Split(file, CatSplit)
                          .Where(i => !string.IsNullOrEmpty(i)))
