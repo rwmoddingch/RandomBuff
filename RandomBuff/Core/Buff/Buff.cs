@@ -69,7 +69,8 @@ namespace RandomBuff.Core.Buff
         public virtual bool Trigger(RainWorldGame game) => false;
 
         /// <summary>
-        /// 卡牌的计时器，在构造方法中赋值，可以为null
+        /// 卡牌的计时器，在构造方法中赋值后，不可为null
+        /// 赋值后可以在任意时机修改值
         /// </summary>
         public BuffTimer MyTimer { get; set; }
 

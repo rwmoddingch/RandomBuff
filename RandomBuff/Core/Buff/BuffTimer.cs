@@ -141,6 +141,11 @@ namespace RandomBuff.Core.Buff
             }
         }
 
+        public void SetTimer()
+        {
+
+        }
+
         public override void Reset()
         {
             base.Reset();
