@@ -35,10 +35,12 @@ namespace BuiltinBuffs.Positive {
 
         CreatureRecord[] creatureRecords;
         Dictionary<EntityID, CreatureRecord> creatureRecordMapper;
-        bool[] creatureRecordsFinished;
+
         bool creatureRecordsAllFinished;
 
         List<AbstractCreature> creaturesInRegion;
+        List<CreatureRecord> normalRecords = new List<CreatureRecord>();
+        List<CreatureRecord> missingCreatureRecords = new List<CreatureRecord>();
 
         public override bool Trigger(RainWorldGame game)
         {
@@ -53,7 +55,6 @@ namespace BuiltinBuffs.Positive {
 
                 var creatures = GetAllCeatures(game);
                 creatureRecords = new CreatureRecord[creatures.Length];
-                creatureRecordsFinished = new bool[creatures.Length];
                 creatureRecordMapper = new Dictionary<EntityID, CreatureRecord>();
 
                 for (int i = 0; i < creatureRecords.Length; i++)
@@ -61,6 +62,12 @@ namespace BuiltinBuffs.Positive {
                     creatureRecords[i] = new CreatureRecord();
                     creatureRecords[i].Record(game, creatures[i]);
                     creatureRecordMapper.Add(creatureRecords[i].idRecord, creatureRecords[i]);
+                }
+
+
+                foreach (var pair in creatureRecordMapper)
+                {
+                    BuffUtils.Log("RetrospectiveClock", $"{pair.Key} - {pair.Value.typeRecord}");
                 }
             }
             else
@@ -75,6 +82,7 @@ namespace BuiltinBuffs.Positive {
         public override void Update(RainWorldGame game)
         {
             base.Update(game);
+
             if(triggerd && !triggerdFinish)
             {
                 if (!playerRecordFinished)
@@ -83,25 +91,29 @@ namespace BuiltinBuffs.Positive {
                     if (playerRecordFinished)
                     {
                         creaturesInRegion = GetAbstractCreaturesList(game);//获取区域内所有生物，并且删除未记录的生物（除了玩家）
-                        for(int i = creaturesInRegion.Count - 1; i >= 0; i++)
+                        for (int i = creaturesInRegion.Count - 1; i >= 0; i--)
                         {
                             if (game.Players.Contains(creaturesInRegion[i]))
                                 continue;
 
-                            bool matchID = false;
-                            foreach (var record in creatureRecords)
+                            if (creatureRecordMapper.TryGetValue(creaturesInRegion[i].ID, out var record))
                             {
-                                if (creaturesInRegion[i].ID.number == record.idRecord.number)
-                                {
-                                    matchID = true;
-                                    break;
-                                }
+                                normalRecords.Add(record);
                             }
-
-                            if (!matchID)
+                            else
                             {
+                                BuffUtils.Log("RetrospectiveClock", $"Delete {creaturesInRegion[i]} for missing record");
                                 creaturesInRegion[i].Destroy();
                                 creaturesInRegion.RemoveAt(i);
+                            }
+                        }
+
+                        foreach(var record in creatureRecords)
+                        {
+                            if(!normalRecords.Contains(record))
+                            {
+                                BuffUtils.Log("RetrospectiveClock", $"Record {record.typeRecord} {record.idRecord} has no creature matched");
+                                missingCreatureRecords.Add(record);
                             }
                         }
                     }
@@ -113,36 +125,30 @@ namespace BuiltinBuffs.Positive {
 
                 if (playerRecordFinished)
                 {
-                    if(creaturesInRegion.Count > 0)
+                    foreach(var creature in creaturesInRegion)
                     {
-                        for(int i = creaturesInRegion.Count - 1; i >= 0; i--)
-                        {
-                            var creatureRecord = creatureRecordMapper[creaturesInRegion[i].ID];
-                            int index = creatureRecords.IndexOf(creatureRecord);
 
-                            creatureRecordsFinished[index] = creatureRecord.RecoverUpdate(game, creaturesInRegion[i], false);
-                            if (creatureRecordsFinished[index])
+                        if(creatureRecordMapper.TryGetValue(creature.ID, out var record))
+                        {
+                            if (record.RecoverUpdate(game, creature, false))
                             {
-                                creaturesInRegion.RemoveAt(i);
+                                creatureRecordMapper.Remove(creature.ID);
                             }
                         }
-                    }
-                    else
-                    {
-                        bool anyNotFinished = false;
-                        for(int i = 0;i < creatureRecords.Length; i++)
+                        else
                         {
-                            if (creatureRecordsFinished[i])
-                                continue;
-                            creatureRecordsFinished[i] = creatureRecords[i].RecoverUpdate(game, null, true);
-                            anyNotFinished = anyNotFinished || !creatureRecordsFinished[i];
+                            BuffUtils.Log("RetrospectiveClock", $"{creature} missing record!");
                         }
+                    }
 
-                        if (!anyNotFinished)
-                        {
-                            creatureRecordsAllFinished = true;
-                        }
+                    for(int i = missingCreatureRecords.Count - 1; i >= 0; i--)
+                    {
+                        if (missingCreatureRecords[i].RecoverUpdate(game, null, true))
+                            missingCreatureRecords.RemoveAt(i);
                     }
+
+                    if (creatureRecordMapper.Count == 0 && missingCreatureRecords.Count == 0)
+                        creatureRecordsAllFinished = true;
                 }
 
                 if (cycleRecordFinished && playerRecordFinished && creatureRecordsAllFinished)
@@ -165,7 +171,29 @@ namespace BuiltinBuffs.Positive {
                         continue;
                     creatures.Add(creature);
                 }
+
+                if(abRoom.realizedRoom != null)
+                {
+                    TryAddCreature(abRoom.realizedRoom.updateList.Where((i) => i is Creature).Select((i) => i as Creature));
+                }
             }
+
+            TryAddCreature(game.shortcuts.transportVessels.Select((i) => i.creature));
+            TryAddCreature(game.shortcuts.betweenRoomsWaitingLobby.Select((i) => i.creature));
+            TryAddCreature(game.shortcuts.borderTravelVessels.Select((i) => i.creature));
+
+            void TryAddCreature(IEnumerable<Creature> crits)
+            {
+                foreach (var creature in crits)
+                {
+                    if (creature is Player)
+                        continue;
+                    if (creatures.Contains(creature.abstractCreature))
+                        continue;
+                    creatures.Add(creature.abstractCreature);
+                }
+            }
+
             return creatures;
         }
 
@@ -206,7 +234,7 @@ namespace BuiltinBuffs.Positive {
     class CreatureRecord : RecordData<AbstractCreature>
     {
         public EntityID idRecord;
-        CreatureTemplate.Type typeRecord;
+        public CreatureTemplate.Type typeRecord;
         WorldCoordinate coordRecord;
         string stateRecord;
 
@@ -232,15 +260,41 @@ namespace BuiltinBuffs.Positive {
             }
             else
             {
+                if(obj.realizedCreature != null)
+                {
+                    KickOutofShortcut(game, obj.realizedCreature);
+                    obj.Abstractize(obj.pos);
+                }
+
                 obj.Move(coordRecord);
                 var abRoom = game.world.GetAbstractRoom(coordRecord.room);
                 if(abRoom.realizedRoom != null)
                 {
-
                     obj.RealizeInRoom();
                 }
             }
             return true;
+
+            void KickOutofShortcut(RainWorldGame game1, Creature creature)
+            {
+                for (int i = game1.shortcuts.transportVessels.Count - 1; i >= 0; i--)
+                {
+                    if (game1.shortcuts.transportVessels[i].creature == creature)
+                        game1.shortcuts.transportVessels.RemoveAt(i);
+                }
+                for (int i = game1.shortcuts.betweenRoomsWaitingLobby.Count - 1; i >= 0; i--)
+                {
+                    if (game1.shortcuts.betweenRoomsWaitingLobby[i].creature == creature)
+                        game1.shortcuts.betweenRoomsWaitingLobby.RemoveAt(i);
+                }
+                for (int i = game1.shortcuts.borderTravelVessels.Count - 1; i >= 0; i--)
+                {
+                    if (game1.shortcuts.borderTravelVessels[i].creature == creature)
+                        game1.shortcuts.borderTravelVessels.RemoveAt(i);
+                }
+                creature.enteringShortCut = null;
+                creature.shortcutDelay = 40;
+            }
         }
     }
 
