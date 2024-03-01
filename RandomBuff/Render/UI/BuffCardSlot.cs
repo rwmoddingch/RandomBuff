@@ -36,6 +36,7 @@ namespace RandomBuff.Render.UI
         public virtual void GrafUpdate(float timeStacker)
         {
             BaseInteractionManager.GrafUpdate(timeStacker);
+            HelpInfoProvider?.GrafUpdate(timeStacker);
         }
 
         public virtual void AppendCard(BuffCard buffCard)
@@ -164,7 +165,8 @@ namespace RandomBuff.Render.UI
             darkMaks_front.SetPosition(Custom.rainWorld.screenSize / 2f);
 
             HelpInfoProvider = new HelpInfoProvider(this);
-            HelpInfoProvider.label.MoveToFront();
+            foreach (var label in HelpInfoProvider.labels)
+                label.MoveToFront();
             this.completeSlot = completeSlot;
         }
 
@@ -195,7 +197,8 @@ namespace RandomBuff.Render.UI
         public override void BringToTop(BuffCard buffCard)
         {
             darkMaks_front.MoveToFront();
-            HelpInfoProvider.label.MoveToFront();
+            foreach(var label in HelpInfoProvider.labels)
+                label.MoveToFront();
 
             Container.RemoveChild(buffCard.Container);
             Container.AddChild(buffCard.Container);
@@ -223,7 +226,7 @@ namespace RandomBuff.Render.UI
             }
             else if (ID == InGame_OnCardExclusiveShow)
             {
-                helpInfo = $"Single click to turn over the card\nRight click to eixt detail mode\nPress tab to turn off hud";
+                helpInfo = $"Single click to turn over the card\nRight click to exit detail mode\nPress tab to turn off hud";
                 return true;
             }
             else if (ID == InGame_NoCardFocus)
@@ -580,11 +583,14 @@ namespace RandomBuff.Render.UI
             TimerAnimSlot.GrafUpdate(timeStacker);
             ConditionHUD.DrawSprites(timeStacker);
 
-            //if (Input.GetKeyDown(KeyCode.C))
-            //{
-            //    BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
-            //    AppendCard(new BuffID("DeathFreeMedallion"));
-            //}
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                BuffPoolManager.Instance.CreateBuff(new BuffID("RetrospectiveClock"));
+                AppendCard(new BuffID("RetrospectiveClock"));
+
+                //BuffPoolManager.Instance.CreateBuff(new BuffID("EjectionRock"));
+                //AppendCard(new BuffID("EjectionRock"));
+            }
         }
 
         /// <summary>
@@ -601,6 +607,7 @@ namespace RandomBuff.Render.UI
             { 
                 ActivePicker = new CardPickerSlot(BasicSlot, selectCardCallBack, majorSelections, additionalSelections, numOfChoices);
                 Container.AddChild(ActivePicker.Container);
+                ActivePicker.Container.MoveBehindOtherNode(BasicSlot.Container);
             });
             BuffPlugin.Log("Request new pick");
         }
@@ -628,6 +635,7 @@ namespace RandomBuff.Render.UI
 
                 ActivePicker = new CardPickerSlot(BasicSlot, selectCardCallBack, majorSelections, additionalSelections, numOfChoices);
                 Container.AddChild(ActivePicker.Container);
+                ActivePicker.Container.MoveBehindOtherNode(BasicSlot.Container);
             });
             BuffPlugin.Log("Request new pick with custom selection creator");
         }
@@ -782,7 +790,7 @@ namespace RandomBuff.Render.UI
 
                     if(ibuff.MyTimer != null)
                     {
-                        activeTimerInstances.Add(new TimerInstance(this, id, ibuff.MyTimer));
+                        activeTimerInstances.Add(new TimerInstance(this, id, ibuff));
                         BuffPlugin.Log($"Create timer instance for {id}");
                     }
                 }
@@ -824,14 +832,20 @@ namespace RandomBuff.Render.UI
                 timerInstance2BuffCardMapper.Clear();
             }
 
-            internal class TimerInstance
+            internal class TimerInstance : BuffCardTimer.IOwnBuffTimer
             {
-                public BuffTimer timer;
+                //public BuffTimer timer;
                 public BuffID id;
+                WeakReference<IBuff> buffRef;
 
                 BuffTimerAnimSlot slot;
 
                 BuffCardTimer cardTimer;
+                
+
+                public int Second { get; private set; }
+                internal bool Show { get; private set; }
+                bool destroyAfterHide;
 
                 public float ShowTimerFactor => counter / 40f;
                 public float LastShowTimerFactor => lastCounter / 40f;
@@ -845,18 +859,32 @@ namespace RandomBuff.Render.UI
                 public Vector2 pos;
                 Vector2 TargetPos => new Vector2(Custom.rainWorld.screenSize.x - 80, Custom.rainWorld.screenSize.y - 80 - index * 80);
 
-                public TimerInstance(BuffTimerAnimSlot slot, BuffID id, BuffTimer timer)
+                public TimerInstance(BuffTimerAnimSlot slot, BuffID id, IBuff buff)
                 {
                     this.id = id;
-                    this.timer = timer;
+                    buffRef = new WeakReference<IBuff>(buff);
                     this.slot = slot;
 
-                    if (timer.DisplayStrategy == null)
+                    if (buff.MyTimer.DisplayStrategy == null)
                         throw new ArgumentException($"displayStrategy for {id} cant be null");
                 }
 
                 public void Update()
                 {
+                    if(buffRef.TryGetTarget(out var buff))
+                    {
+                        if (buff.MyTimer.DisplayStrategy == null)
+                            throw new ArgumentException($"displayStrategy for {id} cant be null");
+
+                        Second = buff.MyTimer.Second;
+                        Show = buff.MyTimer.DisplayStrategy.DisplayThisFrame;
+                    }
+                    else
+                    {
+                        Show = false;
+                        destroyAfterHide = true;
+                    }    
+
                     cardTimer?.Update();
                     lastCounter = counter;
 
@@ -864,14 +892,14 @@ namespace RandomBuff.Render.UI
                     if (Mathf.Abs(pos.x - TargetPos.x) > 0.01f || Mathf.Abs(pos.y - TargetPos.y) > 0.01f)
                         pos = Vector2.Lerp(pos, TargetPos, 0.2f);
 
-                    if (timer.DisplayStrategy.DisplayThisFrame)
+                    if (Show)
                     {
                         if (counter < 40)
                             counter++;
 
                         if(cardTimer == null)
                         {
-                            cardTimer = new BuffCardTimer(slot.timerContainer, timer);
+                            cardTimer = new BuffCardTimer(slot.timerContainer, this);
                             slot.buffCard2TimerInstanceMapper.Add(slot.AppendCard(id), this);
                         }
 
@@ -893,6 +921,11 @@ namespace RandomBuff.Render.UI
                                 slot.RemoveCard(id, true);
                             }
                             counter--;
+                            if(destroyAfterHide)
+                            {
+                                Destroy();
+                                slot.activeTimerInstances.Remove(this);
+                            }    
                         }
                     }
                 }
@@ -904,7 +937,7 @@ namespace RandomBuff.Render.UI
                     {
                         if (timerInstance == this)
                             break;
-                        if (timerInstance.timer.DisplayStrategy.DisplayThisFrame)
+                        if (timerInstance.Show)
                             newIndex++;
                     }
                     index = newIndex;
@@ -924,6 +957,7 @@ namespace RandomBuff.Render.UI
                 public void Destroy()
                 {
                     cardTimer?.ClearSprites();
+                    slot.RemoveCard(id, true);
                 }
             }
         }

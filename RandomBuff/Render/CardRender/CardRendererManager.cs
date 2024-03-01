@@ -5,17 +5,13 @@ using RandomBuff.Core.SaveData;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 using UnityEngine.TextCore;
 using Object = UnityEngine.Object;
-using System.Drawing;
 using System.Linq;
 using Font = UnityEngine.Font;
-using System.Text;
 using RWCustom;
 
 namespace RandomBuff.Render.CardRender
@@ -252,9 +248,15 @@ namespace RandomBuff.Render.CardRender
             foreach(var font in fontsToCreate)
             {
                 testAsset = CreateFontAsset(font);
+
+                testAsset.material.EnableKeyword("UNDERLAY_ON");
+                testAsset.material.SetColor("_UnderlayColor", Color.black);
+                testAsset.material.SetFloat("_UnderlayDilate", 1f);
+                testAsset.material.SetFloat("_UnderlaySoftness", 1f);
+
                 testAsset.name = font.name;
                 Debug.Log($"charaters in font : {testAsset.characterTable.Count}, {testAsset.name}");
-                if(testAsset.name == "RuiMingFont")
+                if(testAsset.name == "Zhanku")
                 {
                     TitleFont = testAsset;
                     BuffPlugin.Instance.StartCoroutine(LoadCharacterForFont(testAsset, 0));

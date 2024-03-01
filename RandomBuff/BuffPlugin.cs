@@ -104,7 +104,6 @@ namespace RandomBuff
                     BuffRegister.InitAllBuffPlugin();
 
                     BuffUtils.OnEnable();
-
                     if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 

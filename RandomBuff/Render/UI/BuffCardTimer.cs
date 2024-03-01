@@ -14,7 +14,7 @@ namespace RandomBuff.Render.UI
         public readonly float width = 8f;
 
         public FContainer container;
-        public BuffTimer ownerTimer;
+        public IOwnBuffTimer owner;
 
         int lastNumber;
         int adder;
@@ -38,10 +38,10 @@ namespace RandomBuff.Render.UI
 
         public List<SingleNumber> numbers = new List<SingleNumber>();
 
-        public BuffCardTimer(FContainer container, BuffTimer ownerTimer)
+        public BuffCardTimer(FContainer container, IOwnBuffTimer owner)
         {
             this.container = container;
-            this.ownerTimer = ownerTimer;
+            this.owner = owner;
             floatCounter = Number;
             lastFloatCounter = floatCounter;
             lastNumber = Number;
@@ -51,7 +51,7 @@ namespace RandomBuff.Render.UI
         {
             lastPos = pos;
             lastFloatCounter = floatCounter;
-            floatCounter = Mathf.Lerp(floatCounter, ownerTimer.Second, 0.15f);
+            floatCounter = Mathf.Lerp(floatCounter, owner.Second, 0.15f);
 
             lastAlpha = alpha;
             //alpha = Mathf.Lerp(lastAlpha, setAlpha, 0.15f);
@@ -199,6 +199,11 @@ namespace RandomBuff.Render.UI
                 num_1.RemoveFromContainer();
                 num_2.RemoveFromContainer();
             }
+        }
+
+        internal interface IOwnBuffTimer
+        {
+            public int Second { get; }
         }
     }
 }

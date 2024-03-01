@@ -79,7 +79,6 @@ namespace BuiltinBuffs.Positive
                 DeathFreeMedallionBuff.Instance.TriggerSelf(true);
                 return;
             }
-
             orig.Invoke(self);
         }
 
