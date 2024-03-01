@@ -24,7 +24,7 @@ namespace BuiltinBuffs.Positive
 
     internal class ThundThrowBuffEntry : IBuffEntry
     {
-        static float LightningColorHue = 255f / 350f;
+        static float LightningColorHue = 255f / 360f;
         static Color LightningColor = Custom.HSL2RGB(LightningColorHue, 1f, 0.5f);
         public static BuffID thundTHrowBuffID = new BuffID("ThundThrow", true);
 

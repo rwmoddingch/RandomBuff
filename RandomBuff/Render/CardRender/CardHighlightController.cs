@@ -30,7 +30,7 @@ namespace RandomBuff.Render.CardRender
             get => _targetSaturation != 1f;
             set
             {
-                _targetSaturation = value ? 0.2f : 1f;
+                _targetSaturation = value ? 0.1f : 1f;
             }
         }
 

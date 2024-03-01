@@ -1,0 +1,17 @@
+{
+    "FaceName": "ramenpede",
+    "ID" : "Ramenpede",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "A475FF",
+    
+    "Chinese" : {
+        "BuffName" : "拉面蜈蚣",
+        "Description" : "蜈蚣变为两倍长"
+    },
+    "English": {
+        "BuffName" : "RandomRain",
+        "Description" : "Double the length of centipedes"
+    }
+}
