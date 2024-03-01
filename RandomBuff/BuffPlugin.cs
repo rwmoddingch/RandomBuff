@@ -131,7 +131,7 @@ namespace RandomBuff
                 }
                 if (Input.GetKeyDown(KeyCode.L))
                 {
-                    var gameSetting = new GameSetting();
+                    var gameSetting = new GameSetting(self.StoryCharacter);
                     var template = new MissionGachaTemplate();
                     gameSetting.gachaTemplate = template;
                     gameSetting.GetRandomCondition();

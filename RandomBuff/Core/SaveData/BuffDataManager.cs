@@ -98,7 +98,13 @@ namespace RandomBuff.Core.SaveData
                 name = game.StoryCharacter;
             else
                 name = RainWorld.lastActiveSaveSlot;
-            
+            return GetOrCreateBuffData(name,id, createOrStack);
+        }
+
+
+        internal BuffData GetOrCreateBuffData(SlugcatStats.Name name, BuffID id, bool createOrStack = false)
+        {
+
             if (!allDatas.ContainsKey(name))
             {
                 if (createOrStack)
@@ -119,7 +125,7 @@ namespace RandomBuff.Core.SaveData
                 else
                     return null;
             }
-            if(createOrStack)
+            if (createOrStack)
                 allDatas[name][id].Stack();
 
             return allDatas[name][id];
@@ -190,7 +196,7 @@ namespace RandomBuff.Core.SaveData
         internal GameSetting GetGameSetting(SlugcatStats.Name name)
         {
             if(!gameSettings.ContainsKey(name))
-                gameSettings.Add(name, new GameSetting());
+                gameSettings.Add(name, new GameSetting(name));
             return gameSettings[name];
         }
 
@@ -448,8 +454,8 @@ namespace RandomBuff.Core.SaveData
                     continue;
                 }
 
-                if (!GameSetting.TryLoadGameSetting(catSplit[1], out var setting))
-                    setting = new GameSetting();
+                if (!GameSetting.TryLoadGameSetting(slugName, catSplit[1], out var setting))
+                    setting = new GameSetting(slugName);
                 BuffPlugin.LogDebug($"{catSplit[0]}, {catSplit[1]}");
                 gameSettings.Add(slugName,setting);
 
