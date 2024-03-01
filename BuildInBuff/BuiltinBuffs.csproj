@@ -21,6 +21,9 @@
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\..\RandomGains\includings\HOOKS-Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="HOOKS-RandomBuff">
+      <HintPath>..\include\HOOKS-RandomBuff.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\include\Mono.Cecil.dll</HintPath>
     </Reference>
