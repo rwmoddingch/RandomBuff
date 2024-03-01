@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2707833868
+CRC: 1194698569
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 2e5ab6e7d63efa89e821d999e676e76d
+    Hash: 62811bc1621c11153e5cc1230ef72dc7
   TypeTreeHash:
     serializedVersion: 2
     Hash: 7b9812e38d2184a3e564c3d045b1fcef
@@ -71,6 +71,7 @@ Assets:
 - Assets/TextMesh Pro/Sprites/EmojiOne.png
 - Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader
 - Assets/TextMesh Pro/Shaders/TMP_SDF.shader
+- Assets/Zhanku.ttf
 - Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader
 - Assets/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset
 - Assets/TextMesh Pro/Resources/TMP Settings.asset
@@ -78,7 +79,6 @@ Assets:
 - Assets/TextMesh Pro/Shaders/TMP_Sprite.shader
 - Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt
 - Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
-- Assets/RuiMingFont.ttf
 - Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader
 - Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader
 - Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader

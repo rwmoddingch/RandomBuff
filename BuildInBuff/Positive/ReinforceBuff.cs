@@ -1,4 +1,5 @@
-﻿using RandomBuff;
+﻿using MoreSlugcats;
+using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
@@ -14,6 +15,8 @@ namespace BuiltinBuffs.Positive
     internal class ReinforceBuff : Buff<ReinforceBuff, ReinforceBuffData>
     {
         public override BuffID ID => ReinforceBuffEntry.reinforceBuffID;
+
+        public override bool Triggerable => Active;
         public override bool Active => !triggeredThisCycle && reachChieftain && roomMeetRequirements;
 
         bool triggeredThisCycle;
@@ -33,7 +36,7 @@ namespace BuiltinBuffs.Positive
             string idLog = "";
             for(int i = 0;i < 4; i++)
             {
-                AbstractCreature scav = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Scavenger), null, new WorldCoordinate(room.index, 0, 0, -1), game.GetNewID());
+                AbstractCreature scav = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite), null, new WorldCoordinate(room.index, 0, 0, -1), game.GetNewID());
                 room.AddEntity(scav);
                 idLog += $"{scav.ID.number} ";
                 if (squad == null)
@@ -50,7 +53,7 @@ namespace BuiltinBuffs.Positive
                     squad.AddMember(scav);
                 }
                 (scav.abstractAI as ScavengerAbstractAI).ReGearInDen();
-                (scav.abstractAI as ScavengerAbstractAI).SetDestination(game.Players[0].pos);
+                scav.Move(game.Players[0].pos);
             }
             BuffUtils.Log("ReinforceBuff", "Assembly Squad : " + idLog + $"leader : {squad.leader.ID}");
 
@@ -89,6 +92,7 @@ namespace BuiltinBuffs.Positive
                 }
             }
             BuffUtils.Log("ReinforceBuff", $"UpdateRoomRequirements : {roomMeetRequirements}");
+            UpdateReachChieftain(world.game);
         }
     }
 

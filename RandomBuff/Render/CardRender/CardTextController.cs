@@ -128,7 +128,6 @@ namespace RandomBuff.Render.CardRender
                 textMesh.font = font;
                 //textMesh.enableCulling = true;
                 obj.transform.localEulerAngles = Vector3.zero;
-
                
                 return textMesh;
             }
