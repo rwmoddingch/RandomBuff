@@ -264,10 +264,8 @@ namespace RandomBuff.Render.UI
                         card.LocalMousePos.y > 0f &&
                         card.LocalMousePos.y < 1f)
                     {
-                        if (CurrentFocusCard != card)
-                            Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
+                        Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnMouseFocus, CurrentFocusCard != card, card.ID);
                         CurrentFocusCard = card;
-                        Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnMouseFocus, card.ID);
                         return;
                     }
                 }

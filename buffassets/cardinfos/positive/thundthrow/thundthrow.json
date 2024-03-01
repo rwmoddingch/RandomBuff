@@ -4,7 +4,7 @@
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "FFC88D",
+    "Color" : "6459FF",
 
     "Chinese" : {
         "BuffName" : "掷地有声",
