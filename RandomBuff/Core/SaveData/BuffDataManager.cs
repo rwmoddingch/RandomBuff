@@ -221,6 +221,7 @@ namespace RandomBuff.Core.SaveData
             {
                 BuffPlugin.Log($"DELETE SAVE DATA: {name}");
                 allDatas.Remove(name);
+                gameSettings.Remove(name);
             }
         }
 

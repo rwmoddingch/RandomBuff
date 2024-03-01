@@ -25,7 +25,7 @@ using Random = UnityEngine.Random;
 #pragma warning restore CS0618
 
 //添加友元方便调试
-[assembly: InternalsVisibleTo("BuffTest")]
+[assembly: InternalsVisibleTo("BuiltinBuffs")]
 
 namespace RandomBuff
 {
@@ -127,6 +127,7 @@ namespace RandomBuff
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
+                    BuffPoolManager.Instance.CreateBuff(new BuffID("Gambler"));
                 }
                 if (Input.GetKeyDown(KeyCode.L))
                 {

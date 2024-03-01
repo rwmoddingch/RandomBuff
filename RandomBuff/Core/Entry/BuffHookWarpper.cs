@@ -175,6 +175,7 @@ namespace RandomBuff.Core.Entry
             ILCursor c = new ILCursor(il);
             while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj<Hook>()))
                 c.EmitDelegate<Func<Hook, Hook>>(hook => AddRuntimeHook(id, level, hook));
+           
 
         
         }
