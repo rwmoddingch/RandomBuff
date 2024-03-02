@@ -132,8 +132,7 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
-            buffCard.DisplayStacker = false;
-            buffCard.DisplayCycle = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.UpdateGrey();
 
             targetScale = BuffCard.normalScale * 0.1f;
@@ -189,8 +188,7 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
-            buffCard.DisplayStacker = false;
-            buffCard.DisplayCycle = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.UpdateGrey();
 
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
@@ -234,11 +232,10 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
-            buffCard.DisplayStacker = true;
-            buffCard.DisplayCycle = true;
+            buffCard.DisplayAllGraphTexts = true;
             buffCard.UpdateGrey();
 
-            buffCard.UpdateNumer();
+            buffCard.UpdateGraphText();
             buffCard.StackerAddOne = false;
 
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
@@ -324,11 +321,10 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
-            buffCard.DisplayStacker = true;
-            buffCard.DisplayCycle = true;
+            buffCard.DisplayAllGraphTexts = true;
             buffCard.Grey = false;
 
-            buffCard.UpdateNumer();
+            buffCard.UpdateGraphText();
             buffCard.StackerAddOne = true;
 
             cardPickerInteractionManager = buffCard.interactionManager as CardPickerInteractionManager;
@@ -418,9 +414,8 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
-            buffCard.DisplayStacker = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.Highlight = false;
-            buffCard.DisplayCycle = false;
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -458,9 +453,8 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
-            buffCard.DisplayStacker = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.Highlight = false;
-            buffCard.DisplayCycle = false;
             buffCard.Grey = false;
 
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
@@ -523,8 +517,7 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
-            buffCard.DisplayStacker = false;
-            buffCard.DisplayCycle = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.Highlight = false;
             buffCard.Grey = false;
             slot = (buffCard.interactionManager as DoNotingInteractionManager<BuffGameMenuSlot>).Slot;
@@ -584,8 +577,7 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
-            buffCard.DisplayStacker = false;
-            buffCard.DisplayCycle = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.Highlight = false;
             buffCard.Grey = false;
 
@@ -774,8 +766,7 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
-            buffCard.DisplayStacker = false;
-            buffCard.DisplayCycle = false;
+            buffCard.DisplayAllGraphTexts = false;
             buffCard.Highlight = false;
             buffCard.Grey = false;
 
