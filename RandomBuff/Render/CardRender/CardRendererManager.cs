@@ -156,11 +156,13 @@ namespace RandomBuff.Render.CardRender
         /// 卡牌标题的字体
         /// </summary>
         public static TMP_FontAsset TitleFont { get; private set; }
+        public static Font TitleOrigFont { get; private set; }
 
         /// <summary>
         /// 卡牌介绍使用的字体
         /// </summary>
         public static TMP_FontAsset DiscriptionFont { get; private set; }
+        public static Font DiscriptionOrigFont { get; private set; }
 
         public static TMP_Settings TMP_settings { get; private set; }
 
@@ -259,11 +261,13 @@ namespace RandomBuff.Render.CardRender
                 if(testAsset.name == "Zhanku")
                 {
                     TitleFont = testAsset;
+                    TitleOrigFont = font;
                     BuffPlugin.Instance.StartCoroutine(LoadCharacterForFont(testAsset, 0));
                 }
                 else
                 {
                     DiscriptionFont = testAsset;
+                    DiscriptionOrigFont = font;
                     BuffPlugin.Instance.StartCoroutine(LoadCharacterForFont(testAsset, 1));
                 }
             }

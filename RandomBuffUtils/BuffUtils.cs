@@ -37,6 +37,7 @@ namespace RandomBuffUtils
 
             BuffRoomReachEvent.OnEnable();
             BuffRegionGateEvent.OnEnable();
+            BuffExtraDialogBoxEvent.OnEnable();
             everInit = true;
         }
 
