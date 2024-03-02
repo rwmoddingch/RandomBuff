@@ -151,6 +151,8 @@ namespace RandomBuff.Core.GachaMenu
                 var all = BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter);
                 foreach (var con in BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).conditions)
                     con.GachaEnd(picked,all);
+                BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).fallbackPick = null;
+                BuffFile.Instance.SaveFile();
                 manager.oldProcess = game;
             }
         }

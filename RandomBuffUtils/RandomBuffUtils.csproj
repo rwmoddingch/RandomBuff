@@ -35,6 +35,12 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\include\PUBLIC-Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>..\include\Rewired_Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Windows">
+      <HintPath>..\include\Rewired_Windows.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\include\UnityEngine.dll</HintPath>
     </Reference>
