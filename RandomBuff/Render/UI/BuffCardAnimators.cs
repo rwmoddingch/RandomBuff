@@ -133,6 +133,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = false;
             buffCard.DisplayAllGraphTexts = false;
+            buffCard.KeyBinderFlash = false;
             buffCard.UpdateGrey();
 
             targetScale = BuffCard.normalScale * 0.1f;
@@ -189,6 +190,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
             buffCard.DisplayAllGraphTexts = false;
+            buffCard.KeyBinderFlash = false;
             buffCard.UpdateGrey();
 
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
@@ -233,6 +235,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayDescription = false;
             buffCard.DisplayTitle = true;
             buffCard.DisplayAllGraphTexts = true;
+            buffCard.KeyBinderFlash = false;
             buffCard.UpdateGrey();
 
             buffCard.UpdateGraphText();
@@ -240,6 +243,15 @@ namespace RandomBuff.Render.UI
 
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
             buffCard.onMouseSingleClick += OnSingleClickFlip;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if(Input.GetKey(InGameSlotInteractionManager.BindKeyButton))
+                buffCard.KeyBinderFlash = true;
+            else
+                buffCard.KeyBinderFlash = false;
         }
 
         public override void GrafUpdate(float timeStacker)

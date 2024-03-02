@@ -1,4 +1,7 @@
-﻿using RandomBuff.Core.Game;
+﻿using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
+using RandomBuff.Core.SaveData;
+using RandomBuffUtils;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -180,10 +183,12 @@ namespace RandomBuff.Render.UI
     {
         //静态信息
         public static KeyCode ToggleShowButton = KeyCode.Tab;
+        public static KeyCode BindKeyButton = KeyCode.CapsLock;
         public static int maxCardBiasCount = 5;
 
         bool canTriggerBuff;
         public BasicInGameBuffCardSlot Slot { get => BaseSlot as BasicInGameBuffCardSlot; }
+        public KeyBinderProcessor keyBinderProcessor;
 
         public override BuffCard CurrentFocusCard 
         { 
@@ -230,6 +235,7 @@ namespace RandomBuff.Render.UI
         public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot, bool canTriggerBuff = false) : base(slot)
         {
             this.canTriggerBuff = canTriggerBuff;
+            keyBinderProcessor = new KeyBinderProcessor(this);
         }
 
         public override void Update()
@@ -243,6 +249,7 @@ namespace RandomBuff.Render.UI
             if (mouseRightSingle && !overrideDisabled)
                 OnMouseRightSingleClick();
 
+            keyBinderProcessor.Update();
             base.Update();
         }
 
@@ -314,6 +321,8 @@ namespace RandomBuff.Render.UI
                 card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Hide);
             else if (currentState == State.Show)
                 card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
+
+            keyBinderProcessor.AppendCard(card.ID);
         }
 
         public override void DismanageCard(BuffCard card)
@@ -324,6 +333,8 @@ namespace RandomBuff.Render.UI
                 PositiveBuffCards.Remove(card);
             else
                 NegativeBuffCards.Remove(card);
+
+            keyBinderProcessor.RemoveCard(card.ID);
         }
 
         public int IndexInManagedCards(BuffCard card)
@@ -388,13 +399,30 @@ namespace RandomBuff.Render.UI
 
             if (currentState == State.Show || currentState == State.ExclusiveShow)
             {
-                if (CurrentFocusCard != null && CurrentFocusCard.StaticData.Triggerable)
+                TriggerCard(CurrentFocusCard);
+            }
+        }
+
+        public void TriggerCard(BuffID cardID)
+        {
+            foreach(var card in managedCards)
+            {
+                if(card.ID == cardID)
                 {
-                    CurrentFocusCard.onMouseDoubleClick?.Invoke();
-                    if (BuffPoolManager.Instance.TriggerBuff(CurrentFocusCard.ID))
-                    {
-                        Slot.RemoveCard(CurrentFocusCard.ID);
-                    }
+                    TriggerCard(card);
+                    return;
+                }
+            }
+        }
+
+        void TriggerCard(BuffCard card)
+        {
+            if (card.StaticData.Triggerable)
+            {
+                card.onMouseDoubleClick?.Invoke();
+                if (BuffPoolManager.Instance.TriggerBuff(card.ID))
+                {
+                    Slot.RemoveCard(card.ID);
                 }
             }
         }
@@ -430,6 +458,165 @@ namespace RandomBuff.Render.UI
                 exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Exclusive_Show);
 
                 if (SubManager != null) SubManager.overrideDisabled = true;
+            }
+        }
+
+        public class KeyBinderProcessor
+        {
+            public Dictionary<string, BuffID> keyToBuffIDMapper = new();
+            public Dictionary<BuffID, string> buffIDToKeyMapper = new Dictionary<BuffID, string>();
+
+            InGameSlotInteractionManager manager;
+
+            string lastKey;
+            bool keyAlreadyGetted;
+            public bool listenerEnable;
+
+            public KeyBinderProcessor(InGameSlotInteractionManager manager)
+            {
+                this.manager = manager;
+            }
+
+            public void AppendCard(BuffID id)
+            {
+                SyncBuffBindedKey(id);
+            }
+
+            public void RemoveCard(BuffID id)
+            {
+                RemoveExistBindKey(id);
+            }
+
+            public void Update()
+            {
+                foreach(var key in keyToBuffIDMapper.Keys)
+                {
+                    if(BuffInput.GetKeyDown(key))
+                    {
+                        BuffPlugin.Log($"Trigger card {keyToBuffIDMapper[key]} by shorcut key {key}");
+                        manager.TriggerCard(keyToBuffIDMapper[key]);
+                    }
+                }
+
+                if (manager.currentState == State.ExclusiveShow)
+                {
+                    if (Input.GetKey(BindKeyButton))
+                    {
+                        if (!listenerEnable)
+                            EnableListen();
+
+                        if (GetKey(out var key))
+                        {
+                            RebindKey(manager.exclusiveShowCard.ID, key);
+                            manager.exclusiveShowCard.UpdateGraphText(true);
+                        }
+                    }
+                    else
+                    {
+                        if (listenerEnable)
+                            DisableListen();
+                    }
+                }
+            }
+
+            private void BuffInput_OnAnyKeyDown(string keyDown)
+            {
+                //BuffPlugin.Log($"Keybinder get {keyDown} down");
+                if (lastKey == null && !ExclusiveThisKey(keyDown))
+                {
+                    lastKey = keyDown;
+                }
+            }
+
+            public void EnableListen()
+            {
+                BuffPlugin.Log("Keybinder enable listen");
+                listenerEnable = true;
+                keyAlreadyGetted = false;
+                lastKey = null;
+                BuffInput.OnAnyKeyDown += BuffInput_OnAnyKeyDown;
+            }
+            
+            public void DisableListen()
+            {
+                BuffPlugin.Log("Keybinder disable listen");
+                listenerEnable = false;
+                BuffInput.OnAnyKeyDown -= BuffInput_OnAnyKeyDown;
+            }
+
+            public bool GetKey(out string key)
+            {
+                if (listenerEnable && lastKey != null && !keyAlreadyGetted)
+                {
+                    BuffPlugin.Log($"Keybinder get key of {lastKey}");
+                    keyAlreadyGetted = true;
+                    key = lastKey;
+                    return true;
+                }
+                key = null;
+                return false;
+            }
+
+            public void RebindKey(BuffID id, string key)
+            {
+                BuffPlugin.Log($"Keybinder : rebind {id} key to {key}");
+                if (keyToBuffIDMapper.ContainsKey(key))
+                    RemoveExistBindKey(key);
+
+                BuffPlayerData.Instance.SetKeyBind(id, key);
+                SyncBuffBindedKey(id);
+            }
+
+            void RemoveExistBindKey(string key)
+            {
+                var id = keyToBuffIDMapper[key];
+                BuffPlugin.Log($"Keybinder : remove {id} binded key");
+                keyToBuffIDMapper.Remove(key);
+                buffIDToKeyMapper.Remove(id);
+                BuffPlayerData.Instance.SetKeyBind(id, KeyCode.None.ToString());
+                SyncBuffBindedKey(id);
+            }
+
+            void RemoveExistBindKey(BuffID id)
+            {
+                var key = buffIDToKeyMapper[id];
+                BuffPlugin.Log($"Keybinder : remove {id} binded key");
+                buffIDToKeyMapper.Remove(id);
+                keyToBuffIDMapper.Remove(key);
+                BuffPlayerData.Instance.SetKeyBind(id, KeyCode.None.ToString());
+                SyncBuffBindedKey(id);
+            }
+
+            void SyncBuffBindedKey(BuffID buffID)
+            {
+                var key = BuffPlayerData.Instance.GetKeyBind(buffID);
+                if (key == KeyCode.None.ToString())
+                {
+                    BuffPlugin.Log($"Keybinder : sync {buffID} binded key get none!");
+                    return;
+                }
+                
+                if (buffIDToKeyMapper.ContainsKey(buffID))
+                    buffIDToKeyMapper[buffID] = key;
+                else
+                    buffIDToKeyMapper.Add(buffID, key);
+
+                if (keyToBuffIDMapper.ContainsKey(key))
+                    keyToBuffIDMapper[key] = buffID;
+                else
+                    keyToBuffIDMapper.Add(key, buffID);
+                BuffPlugin.Log($"Keybinder : sync {buffID} binded key get {key}!");
+            }
+
+            static bool ExclusiveThisKey(string key)
+            {
+                if (key.StartsWith("Mouse"))
+                    return true;
+                if (key == "CapsLock")
+                    return true;
+                if(key.Contains("Command"))
+                    return true;
+                return false;
             }
         }
 

@@ -119,6 +119,8 @@ namespace RandomBuff.Render.UI
                 DisplayStacker = value;
                 DisplayCycle = value;
                 DisplayKeyBinder = value;
+                if (!value)
+                    KeyBinderFlash = false;
             }
         }
 
@@ -227,6 +229,21 @@ namespace RandomBuff.Render.UI
             }
         }
 
+        public bool KeyBinderFlash
+        {
+            get
+            {
+                if (StaticData.Triggerable)
+                    return _cardRenderer.cardKeyBinderTextController.Flash;
+                return false;
+            }
+            set
+            {
+                if(StaticData.Triggerable)
+                    _cardRenderer.cardKeyBinderTextController.Flash = value;
+            }
+        }
+
         public BuffCard(BuffID buffID) : this(buffID, AnimatorState.Test_None)
         { 
         }
@@ -323,7 +340,7 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        public void UpdateGraphText()
+        public void UpdateGraphText(bool dirty = false)
         {
             if (StaticData.Stackable)
             {
@@ -337,8 +354,14 @@ namespace RandomBuff.Render.UI
 
             if (StaticData.Triggerable)
             {
-                KeyBinderValue = null;
+                var key = BuffPlayerData.Instance.GetKeyBind(ID);
+                if (key == KeyCode.None.ToString())
+                    KeyBinderValue = null;
+                else
+                    KeyBinderValue = key;
             }
+            if(dirty)
+                _cardRenderer.cardCameraController.CardDirty = true;
         }
 
         public void UpdateGrey()
