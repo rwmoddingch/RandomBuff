@@ -585,8 +585,8 @@ namespace RandomBuff.Render.UI
 
             if (Input.GetKeyDown(KeyCode.C))
             {
-                BuffPoolManager.Instance.CreateBuff(new BuffID("RetrospectiveClock"));
-                AppendCard(new BuffID("RetrospectiveClock"));
+                BuffPoolManager.Instance.CreateBuff(new BuffID("DivineBeing"));
+                AppendCard(new BuffID("DivineBeing"));
 
                 //BuffPoolManager.Instance.CreateBuff(new BuffID("EjectionRock"));
                 //AppendCard(new BuffID("EjectionRock"));
