@@ -25,7 +25,7 @@ using Random = UnityEngine.Random;
 #pragma warning restore CS0618
 
 //添加友元方便调试
-[assembly: InternalsVisibleTo("BuffTest")]
+[assembly: InternalsVisibleTo("BuiltinBuffs")]
 
 namespace RandomBuff
 {
@@ -109,6 +109,7 @@ namespace RandomBuff
 
                     isLoaded = true;
 
+                 
                     //TODO : 测试用
                     DevEnabled = true;
                 }
@@ -119,6 +120,7 @@ namespace RandomBuff
             }
         }
 
+
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
@@ -127,10 +129,11 @@ namespace RandomBuff
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
+                    BuffPoolManager.Instance.CreateBuff(new BuffID("Gambler"));
                 }
                 if (Input.GetKeyDown(KeyCode.L))
                 {
-                    var gameSetting = new GameSetting();
+                    var gameSetting = new GameSetting(self.StoryCharacter);
                     var template = new MissionGachaTemplate();
                     gameSetting.gachaTemplate = template;
                     gameSetting.GetRandomCondition();
@@ -142,6 +145,7 @@ namespace RandomBuff
                     gameSetting.SaveGameSettingToPath("Debug/MissionSetting.txt");
                 }
             }
+        
         }
 
         private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)

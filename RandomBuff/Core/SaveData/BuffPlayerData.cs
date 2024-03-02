@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
+using UnityEngine;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -13,12 +14,24 @@ namespace RandomBuff.Core.SaveData
 
         protected BuffPlayerData()
         {
+            Instance = this;
+
         }
 
         public static void LoadBuffPlayerData(string rawData)
         {
-            var newData = JsonConvert.DeserializeObject<BuffPlayerData>(rawData) ?? new BuffPlayerData();
-            Instance = newData;
+            try
+            {
+                var newData = JsonConvert.DeserializeObject<BuffPlayerData>(rawData) ?? new BuffPlayerData();
+                newData.keyBindData ??= new Dictionary<string, string>();
+                newData.collectData ??= new List<string>();
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, "Exception In BuffPlayerData:LoadBuffPlayerData");
+                new BuffPlayerData();
+            }
+      
         }
 
         public static BuffPlayerData Instance { get; private set; }
@@ -52,9 +65,35 @@ namespace RandomBuff.Core.SaveData
             return collectData.Select(i => new BuffID(i)).Where(BuffConfigManager.ContainsId).ToList();
         }
 
+        /// <summary>
+        /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()
+        /// </summary>
+        /// <param name="buffId"></param>
+        /// <returns></returns>
+        public string GetKeyBind(BuffID buffId)
+        {
+            if(keyBindData.ContainsKey(buffId.value)) return keyBindData[buffId.value];
+            return KeyCode.None.ToString();
+        }
+
+        /// <summary>
+        /// 设置按键绑定
+        /// </summary>
+        /// <param name="buffId"></param>
+        /// <param name="keyBind"></param>
+
+        public void SetKeyBind(BuffID buffId, string keyBind)
+        {
+            if(keyBindData.ContainsKey(buffId.value))
+                keyBindData[buffId.value] = keyBind;
+            else
+                keyBindData.Add(buffId.value, keyBind);
+        }
+
         private List<string> collectData = new();
+
         public float playerTotExp = 0;
 
-
+        private Dictionary<string, string> keyBindData = new();
     }
 }

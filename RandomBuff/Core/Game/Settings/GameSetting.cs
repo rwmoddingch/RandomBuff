@@ -32,10 +32,13 @@ namespace RandomBuff.Core.Game.Settings
 
         public string TemplateName { get; private set; }
 
+        private SlugcatStats.Name name;
 
-        public GameSetting()
+
+        public GameSetting(SlugcatStats.Name name)
         {
             LoadTemplate("Normal");
+            this.name = name;
       
         }
 
@@ -91,6 +94,7 @@ namespace RandomBuff.Core.Game.Settings
             try
             {
                 gachaTemplate.SessionEnd();
+                BuildFallBackCard(game);
             }
             catch (Exception e)
             {
@@ -112,10 +116,10 @@ namespace RandomBuff.Core.Game.Settings
 
         public GameSetting Clone()
         {
-            if (!TryLoadGameSetting(SaveToString(), out var setting))
+            if (!TryLoadGameSetting(name,SaveToString(), out var setting))
             {
                 BuffPlugin.LogError("Error In GameSetting:Clone");
-                setting = new GameSetting();
+                setting = new GameSetting(name);
             }
             return setting;
         }
@@ -192,9 +196,9 @@ namespace RandomBuff.Core.Game.Settings
         }
 
 
-        public static bool TryLoadGameSetting(string str,out GameSetting setting)
+        public static bool TryLoadGameSetting(SlugcatStats.Name name,string str,out GameSetting setting)
         {
-            setting = new GameSetting();
+            setting = new GameSetting(name);
             setting.conditions.Clear();
             try
             {
@@ -238,6 +242,13 @@ namespace RandomBuff.Core.Game.Settings
                             setting.conditions.Add((Condition)JsonConvert.DeserializeObject(subs[2],
                                 BuffRegister.GetConditionType((ConditionID)cid).Type));
                             break;
+                        case "FALLBACK":
+                            setting.fallbackPick = JsonConvert.DeserializeObject<List<BuffID>>(subs[1]);
+                            foreach (var fallback in setting.fallbackPick)
+                                if(BuffRegister.GetBuffType(fallback) != null)
+                                    BuffDataManager.Instance.GetOrCreateBuffData(name, fallback, true);
+                            BuffPlugin.Log($"Load Fallback List, Count: {setting.fallbackPick.Count}");
+                            break;
                     }
                 }
 
@@ -249,6 +260,39 @@ namespace RandomBuff.Core.Game.Settings
             }
             return true;
         }
+
+        public void BuildFallBackCard(RainWorldGame game)
+        {
+            if(!gachaTemplate.CurrentPacket.NeedMenu)
+                return;
+            fallbackPick = new List<BuffID>();
+            var negative = gachaTemplate.CurrentPacket.negative.pickTimes *
+                           gachaTemplate.CurrentPacket.negative.selectCount;
+            if (negative > 0)
+            {
+                fallbackPick.AddRange(
+                    BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative, 
+                        BuffType.Duality, BuffType.Negative).Select(i => i.BuffID));
+            }
+            var positive = gachaTemplate.CurrentPacket.negative.pickTimes *
+                           gachaTemplate.CurrentPacket.negative.selectCount;
+
+            if (positive > 0)
+            {
+                var pos = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive,
+                    BuffType.Positive);
+                var negCount = pos.Count(i => i.BuffProperty == BuffProperty.Special);
+                fallbackPick.AddRange(pos.Select(i => i.BuffID));
+                if (negCount > 0)
+                {
+                    fallbackPick.AddRange(
+                        BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negCount,
+                            BuffType.Duality, BuffType.Negative).Select(i => i.BuffID));
+                }
+            }
+        }
+
+        public List<BuffID> fallbackPick = null;
 
         public string SaveToString()
         {
@@ -262,7 +306,8 @@ namespace RandomBuff.Core.Game.Settings
             {
                 builder.Append($"CONDITION{SubSettingSplit}{condition.ID}{SubSettingSplit}{JsonConvert.SerializeObject(condition)}{SettingSplit}");
             }
-            //BuffPlugin.LogDebug(builder.ToString());
+            if(fallbackPick != null)
+                builder.Append($"FALLBACK{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}");
             return builder.ToString();
         }
 
