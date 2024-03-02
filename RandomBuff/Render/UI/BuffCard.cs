@@ -23,6 +23,7 @@ namespace RandomBuff.Render.UI
         //基础变量
         FTexture _ftexture;
         public FContainer Container { get; private set; }
+        public RenderTexture RenderTexture { get => _cardRenderer.cardCameraController.targetTexture; }
 
         public BuffID ID { get; private set; }
         public BuffStaticData StaticData => BuffConfigManager.GetStaticData(ID);
@@ -111,6 +112,16 @@ namespace RandomBuff.Render.UI
             set => _cardRenderer.DisplayTitle = value;
         }
 
+        public bool DisplayAllGraphTexts
+        {
+            set
+            {
+                DisplayStacker = value;
+                DisplayCycle = value;
+                DisplayKeyBinder = value;
+            }
+        }
+
         public bool DisplayStacker
         {
             get
@@ -171,7 +182,6 @@ namespace RandomBuff.Render.UI
             }
         }
 
-
         public int CycleValue
         {
             get
@@ -184,6 +194,36 @@ namespace RandomBuff.Render.UI
             {
                 if (StaticData.Countable)
                     _cardRenderer.cardCycleCounterTextController.Value = value;
+            }
+        }
+
+        public bool DisplayKeyBinder
+        {
+            get
+            {
+                if(StaticData.Triggerable)
+                    return _cardRenderer.cardKeyBinderTextController.Show;
+                return false;
+            }
+            set
+            {
+                if (StaticData.Triggerable)
+                    _cardRenderer.cardKeyBinderTextController.Show = value;
+            }
+        }
+
+        public string KeyBinderValue
+        {
+            get
+            {
+                if (StaticData.Triggerable)
+                    return _cardRenderer.cardKeyBinderTextController.BindKey;
+                return string.Empty;
+            }
+            set
+            {
+                if (StaticData.Triggerable)
+                    _cardRenderer.cardKeyBinderTextController.BindKey = value;
             }
         }
 
@@ -283,7 +323,7 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        public void UpdateNumer()
+        public void UpdateGraphText()
         {
             if (StaticData.Stackable)
             {
@@ -293,6 +333,11 @@ namespace RandomBuff.Render.UI
             if (StaticData.Countable)
             {
                 CycleValue = (ID.GetBuffData() is CountableBuffData countable) ? (countable.MaxCycleCount - countable.CycleUse) : StaticData.MaxCycleCount;
+            }
+
+            if (StaticData.Triggerable)
+            {
+                KeyBinderValue = null;
             }
         }
 

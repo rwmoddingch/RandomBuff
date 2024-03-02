@@ -26,6 +26,7 @@ namespace RandomBuff.Render.CardRender
 
         internal CardNumberTextController cardStackerTextController;
         internal CardNumberTextController cardCycleCounterTextController;
+        internal CardKeyBinderTextController cardKeyBinderTextController;
 
         GameObject _cardQuadFront;
         MeshFilter _meshFilterFront;
@@ -155,6 +156,7 @@ namespace RandomBuff.Render.CardRender
                     //初始化堆叠层数和轮回数显示
                     cardStackerTextController = gameObject.AddComponent<CardNumberTextController>();
                     cardCycleCounterTextController = gameObject.AddComponent<CardNumberTextController>();
+                    cardKeyBinderTextController = gameObject.AddComponent<CardKeyBinderTextController>();
 
                     //初始化专有相机
                     cardCameraController.Init(id);
@@ -169,8 +171,9 @@ namespace RandomBuff.Render.CardRender
                 cardTextFrontController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, _buffStaticData.Color, info.info.BuffName, true, info.id);
                 cardTextBackController.Init(this, _cardQuadBack.transform, CardBasicAssets.DiscriptionFont, Color.white, info.info.Description, false, info.id);
                 
-                cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString());
-                cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
+                cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), new Vector3(0f ,0f ,45f));
+                cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), Vector3.zero,CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
+                cardKeyBinderTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, string.Empty, Vector3.zero, CardNumberTextController.InternalPrimitiveType.Hexagon, 0.618f * -0.3f);
 
                 _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
                 _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;

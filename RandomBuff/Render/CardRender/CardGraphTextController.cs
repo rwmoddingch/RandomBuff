@@ -4,21 +4,21 @@ using UnityEngine;
 
 namespace RandomBuff.Render.CardRender
 {
-    internal class CardNumberTextController : MonoBehaviour
+    internal class CardGraphTextController : MonoBehaviour
     {
-        BuffCardRenderer _renderer;
-        GameObject _hoverPoint;
-        GameObject _lozengeQuadOuter;
-        GameObject _lozengeQuadInner;
-        GameObject _stackerTextObj;
+        protected BuffCardRenderer _renderer;
+        protected GameObject _hoverPoint;
+        protected GameObject _lozengeQuadOuter;
+        protected GameObject _lozengeQuadInner;
+        protected GameObject _stackerTextObj;
 
-        TextMesh stackerTextMesh;
+        protected TextMesh graphTextMesh;
 
-        Vector3 _origScale;
-        float _targetWidth;
-        float _currentWidth;
+        protected Vector3 _origScale;
+        protected float _targetWidth;
+        protected float _currentWidth;
 
-        bool _firstInit;
+        protected bool _firstInit;
 
         public bool Show
         {
@@ -29,35 +29,7 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
-        int _value = 0;
-        public int Value
-        {
-            get => _value;
-            set
-            {
-                if(value != _value)
-                {
-                    _value = value;
-                    UpdateText();
-                }
-            }
-        }
-
-        bool _addOne;
-        public bool AddOne
-        {
-            get => _addOne;
-            set
-            {
-                if(value != _addOne)
-                {
-                    _addOne = value;
-                    UpdateText();
-                }
-            }
-        }
-
-        public virtual void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, InternalPrimitiveType primitiveType = InternalPrimitiveType.Quad, float posFactor = 0.309f)
+        public virtual void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, Vector3 rotation, InternalPrimitiveType primitiveType = InternalPrimitiveType.Quad,  float posFactor = 0.309f )
         {
             _renderer = renderer;
 
@@ -72,7 +44,7 @@ namespace RandomBuff.Render.CardRender
                 _lozengeQuadOuter.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
                 _lozengeQuadOuter.transform.parent = _hoverPoint.transform;
                 _lozengeQuadOuter.transform.localPosition = Vector3.forward * -0.001f;
-                _lozengeQuadOuter.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 45f));
+                _lozengeQuadOuter.transform.localRotation = Quaternion.Euler(rotation);
                 _lozengeQuadOuter.layer = 8;
                 _lozengeQuadOuter.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
 
@@ -81,7 +53,7 @@ namespace RandomBuff.Render.CardRender
                 _lozengeQuadInner.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
                 _lozengeQuadInner.transform.parent = _hoverPoint.transform;
                 _lozengeQuadInner.transform.localPosition = Vector3.forward * -0.002f;
-                _lozengeQuadInner.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 45f));
+                _lozengeQuadInner.transform.localRotation = Quaternion.Euler(rotation);
                 _lozengeQuadInner.layer = 8;
                 _lozengeQuadInner.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
                 _lozengeQuadInner.GetComponent<MeshRenderer>().material.color = Color.black * 0.8f + Color.white * 0.2f;
@@ -91,18 +63,18 @@ namespace RandomBuff.Render.CardRender
 
                 _stackerTextObj = new GameObject("StackerText");
                 _stackerTextObj.transform.parent = _hoverPoint.transform;
-                _stackerTextObj.transform.localPosition = Vector3.forward * -0.003f;
+                _stackerTextObj.transform.localPosition = Vector3.forward * -0.01f;
                 _stackerTextObj.layer = 8;
-                stackerTextMesh = _stackerTextObj.AddComponent<TextMesh>();
-                stackerTextMesh.font = font;
-                stackerTextMesh.font.material.shader = CardBasicAssets.CardTextShader;
+                graphTextMesh = _stackerTextObj.AddComponent<TextMesh>();
+                graphTextMesh.font = font;
+                graphTextMesh.font.material.shader = CardBasicAssets.CardTextShader;
 
-                stackerTextMesh.fontSize = 100;
-                stackerTextMesh.characterSize = 0.01f * 2f;
-                stackerTextMesh.anchor = TextAnchor.MiddleCenter;
-                stackerTextMesh.alignment = TextAlignment.Center;
-                stackerTextMesh.color = Color.white;
-              
+                graphTextMesh.fontSize = 100;
+                graphTextMesh.characterSize = 0.01f * 2f;
+                graphTextMesh.anchor = TextAnchor.MiddleCenter;
+                graphTextMesh.alignment = TextAlignment.Center;
+                graphTextMesh.color = Color.white;
+
 
                 _hoverPoint.transform.localScale = new Vector3(0f, _origScale.y, _origScale.z);
                 _firstInit = true;
@@ -118,22 +90,10 @@ namespace RandomBuff.Render.CardRender
 
         }
 
-        void UpdateText()
+        public virtual void UpdateText()
         {
-            string result = "";
-            if (AddOne)
-            {
-                if (Value > 0)
-                    result = $"{Value}+1";
-                else
-                    result = $"+1";
-            }
-            else
-                result = Value.ToString();
-            stackerTextMesh.text = result;
         }
 
-        // Update is called once per frame
         void Update()
         {
             if (_currentWidth != _targetWidth)
@@ -148,16 +108,18 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
-        GameObject CreatePrimitiveObject(InternalPrimitiveType internalPrimitiveType)
+        protected GameObject CreatePrimitiveObject(InternalPrimitiveType internalPrimitiveType)
         {
             if (internalPrimitiveType == InternalPrimitiveType.Quad)
                 return GameObject.CreatePrimitive(PrimitiveType.Quad);
             else if (internalPrimitiveType == InternalPrimitiveType.Circle)
                 return CreatePrimitiveCircle(0.5f * 1.2f, 20, Vector3.zero);
+            else if (internalPrimitiveType == InternalPrimitiveType.Hexagon)
+                return CreatePrimitiveCircle(0.5f * 1.3f, 6, Vector3.zero);
             return null;
         }
 
-        GameObject CreatePrimitiveCircle(float radius, int segments, Vector3 centerCircle)
+        protected GameObject CreatePrimitiveCircle(float radius, int segments, Vector3 centerCircle)
         {
             GameObject result = new GameObject("");
             result.AddComponent<MeshFilter>();
@@ -209,7 +171,84 @@ namespace RandomBuff.Render.CardRender
         internal enum InternalPrimitiveType
         {
             Quad,
-            Circle
+            Circle,
+            Hexagon
+        }
+    }
+
+    internal class CardKeyBinderTextController : CardGraphTextController
+    {
+        string _bindKey;
+        public string BindKey
+        {
+            get => _bindKey;
+            set
+            {
+                if(value == _bindKey) return;
+                _bindKey = value;
+                UpdateText();
+            }
+        }
+
+        public override void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, Vector3 rotation, InternalPrimitiveType primitiveType = InternalPrimitiveType.Quad, float posFactor = 0.309F)
+        {
+            base.Init(renderer, parent, font, color, text, rotation, primitiveType, posFactor);
+            BindKey = null;
+        }
+
+        public override void UpdateText()
+        {
+            string result = _bindKey;
+            if (string.IsNullOrEmpty(result))
+                result = ">>";
+            graphTextMesh.text = result;
+            BuffPlugin.Log($"KeyBinder text set to {result}");
+        }
+    }
+
+    internal class CardNumberTextController : CardGraphTextController
+    {
+        int _value = 0;
+        public int Value
+        {
+            get => _value;
+            set
+            {
+                if(value != _value)
+                {
+                    _value = value;
+                    UpdateText();
+                }
+            }
+        }
+
+        bool _addOne;
+        public bool AddOne
+        {
+            get => _addOne;
+            set
+            {
+                if(value != _addOne)
+                {
+                    _addOne = value;
+                    UpdateText();
+                }
+            }
+        }
+
+        public override void UpdateText()
+        {
+            string result = "";
+            if (AddOne)
+            {
+                if (Value > 0)
+                    result = $"{Value}+1";
+                else
+                    result = $"+1";
+            }
+            else
+                result = Value.ToString();
+            graphTextMesh.text = result;
         }
     }
 }

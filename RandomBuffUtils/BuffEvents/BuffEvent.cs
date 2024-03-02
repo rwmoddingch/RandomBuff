@@ -101,6 +101,15 @@ namespace RandomBuffUtils
 
     public static partial class BuffEvent
     {
+        public static event ExtraDialogBoxHandler OnExtraDialogsCreated
+        {
+            add => BuffExtraDialogBoxEvent.OnExtraDialogsCreated += value;
+            remove => BuffExtraDialogBoxEvent.OnExtraDialogsCreated -= value;
+        }
+    }
+
+    public static partial class BuffEvent
+    {
         private static CreatureKilledHandler onCreatureKilled;
         public delegate void CreatureKilledHandler(Creature creature, int playerNumber);
 
@@ -110,6 +119,8 @@ namespace RandomBuffUtils
         public delegate void ReachNewRoomHandler(AbstractRoom room);
 
         public delegate void RegionGateHandler(RegionGateInstance gateInstance);
+
+        public delegate void ExtraDialogBoxHandler(ExtraDialogBoxInstance[] extraDialogInstance);
     }
 
 }

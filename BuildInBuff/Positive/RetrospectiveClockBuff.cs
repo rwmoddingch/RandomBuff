@@ -275,6 +275,7 @@ namespace BuiltinBuffs.Positive {
             }
             return true;
 
+            //需要完善效果
             void KickOutofShortcut(RainWorldGame game1, Creature creature)
             {
                 for (int i = game1.shortcuts.transportVessels.Count - 1; i >= 0; i--)
