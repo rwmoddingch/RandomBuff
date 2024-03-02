@@ -304,4 +304,6 @@ namespace RandomBuff.Core.Buff
         internal Dictionary<string,string> customParameters = new();
 
     }
+
+
 }

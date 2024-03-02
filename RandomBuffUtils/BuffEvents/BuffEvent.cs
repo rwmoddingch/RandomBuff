@@ -79,6 +79,16 @@ namespace RandomBuffUtils
             add => BuffRegionGateEvent.OnGateOpened += value;
             remove => BuffRegionGateEvent.OnGateOpened -= value;
         }
+
+        /// <summary>
+        /// 当有任何输入时调用
+        /// 请务必及时取消减少监听时间
+        /// </summary>
+        public static event BuffInput.KeyDownHandler OnAnyKeyDown
+        {
+            add => BuffInput.OnAnyKeyDown += value;
+            remove => BuffInput.OnAnyKeyDown -= value;
+        }
     }
 
     /// <summary>

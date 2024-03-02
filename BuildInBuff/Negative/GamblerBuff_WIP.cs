@@ -16,9 +16,10 @@ namespace BuiltinBuffs.Negative
         public override BuffID ID => GamblerBuffEntry.Gambler;
 
     }
-    internal class GamblerBuffData : BuffData
+    internal class GamblerBuffData : CountableBuffData
     {
         public override BuffID ID => GamblerBuffEntry.Gambler;
+        public override int MaxCycleCount => 5;
     }
 
     internal class GamblerBuffEntry : IBuffEntry
@@ -64,7 +65,5 @@ namespace BuiltinBuffs.Negative
             orig(self,inGameBuffCardSlot,selectCardCallBack,majorSelections, additionalSelections, numOfChoices);
             inCtor = false;
         }
-
-     
     }
 }
