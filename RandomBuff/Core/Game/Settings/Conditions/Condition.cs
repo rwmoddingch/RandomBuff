@@ -18,12 +18,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static ConditionID Cycle;
         public static ConditionID Card;
         public static ConditionID Hunt;
-
+        public static ConditionID Achievement;
         static ConditionID()
         {
             Cycle = new ConditionID("Cycle", true);
             Card = new ConditionID("Card", true);
             Hunt = new ConditionID("Hunt", true);
+            Achievement = new ConditionID("Achievement", true);
 
         }
 
@@ -87,7 +88,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         //设置随机条件
         //如果可以重复第二项则为已有同类型的列表
-        public abstract void SetRandomParameter(float difficulty,List<Condition> sameConditions = null);
+        public abstract bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+            List<Condition> sameConditions = null);
 
         //获取进度
         public abstract string DisplayProgress(InGameTranslator translator);
@@ -123,6 +125,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             BuffRegister.RegisterCondition<CycleCondition>(ConditionID.Cycle, "Cycle Condition");
             BuffRegister.RegisterCondition<CardCondition>(ConditionID.Card, "Card Condition");
+            BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement Condition");
             //BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
 
         }

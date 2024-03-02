@@ -26,6 +26,7 @@ using Random = UnityEngine.Random;
 
 //添加友元方便调试
 [assembly: InternalsVisibleTo("BuiltinBuffs")]
+[assembly: InternalsVisibleTo("BuffTest")]
 
 namespace RandomBuff
 {

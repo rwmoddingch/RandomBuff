@@ -27,29 +27,29 @@ namespace RandomBuffUtils
             }
             remove
             {
-                if(onCreatureKilled.GetInvocationList().Length == 1)
-                    On.PlayerSessionRecord.AddKill -= PlayerSessionRecord_AddKill;
                 onCreatureKilled -= value;
+                if (onCreatureKilled.GetInvocationList().Length == 0)
+                    On.PlayerSessionRecord.AddKill -= PlayerSessionRecord_AddKill;
             }
 
         }
 
         /// <summary>
-        /// 玩家进入更换房间调用
+        /// 玩家更换房间调用
         /// </summary>
         public static event NewRoomHandler OnPlayerChangeRoom
         {
             add
             {
                 if (onNewRoom == null || onNewRoom.GetInvocationList().Length == 0)
-                    On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
+                    On.Player.NewRoom += Player_NewRoom;
                 onNewRoom += value;
             }
             remove
             {
-                if (onNewRoom.GetInvocationList().Length == 1)
-                    On.Player.NewRoom += Player_NewRoom;
                 onNewRoom -= value;
+                if (onNewRoom.GetInvocationList().Length == 0)
+                    On.Player.NewRoom -= Player_NewRoom;
             }
         }
 
@@ -89,6 +89,28 @@ namespace RandomBuffUtils
             add => BuffInput.OnAnyKeyDown += value;
             remove => BuffInput.OnAnyKeyDown -= value;
         }
+
+
+        /// <summary>
+        /// 当成就达成时调用
+        /// </summary>
+        public static event AchievementCompleteHandler OnAchievementCompleted
+        {
+            add
+            {
+                if (onAchievementCompleted == null || onAchievementCompleted.GetInvocationList().Length == 0)
+                    On.WinState.CycleCompleted += WinState_CycleCompleted;
+                onAchievementCompleted += value;
+            }
+            remove
+            {
+                onAchievementCompleted -= value;
+                if (onAchievementCompleted.GetInvocationList().Length == 0)
+                    On.WinState.CycleCompleted -= WinState_CycleCompleted;
+            }
+        }
+
+   
     }
 
     /// <summary>
@@ -106,6 +128,18 @@ namespace RandomBuffUtils
         {
             orig(self, newRoom);
             onNewRoom.Invoke(newRoom.abstractRoom.name);
+        }
+
+        private static void WinState_CycleCompleted(On.WinState.orig_CycleCompleted orig, WinState self, RainWorldGame game)
+        {
+            orig(self, game);
+            var finished = self.endgameTrackers.Where(i => i.GoalFullfilled || !i.GoalAlreadyFullfilled).Select(i => i.ID);
+            var unFinished = self.endgameTrackers.Where(i => !i.GoalFullfilled || i.GoalAlreadyFullfilled).Select(i => i.ID);
+
+            if (finished.Any() || unFinished.Any())
+            {
+                onAchievementCompleted.Invoke(finished.ToList(), unFinished.ToList());
+            }
         }
     }
 
@@ -125,6 +159,9 @@ namespace RandomBuffUtils
 
         private static NewRoomHandler onNewRoom;
         public delegate void NewRoomHandler(string roomName);
+
+        private static AchievementCompleteHandler onAchievementCompleted;
+        public delegate void AchievementCompleteHandler(List<WinState.EndgameID> newFinished, List<WinState.EndgameID> newUnfinished);
 
         public delegate void ReachNewRoomHandler(AbstractRoom room);
 
