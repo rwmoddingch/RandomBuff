@@ -109,6 +109,7 @@ namespace RandomBuff
 
                     isLoaded = true;
 
+                 
                     //TODO : 测试用
                     DevEnabled = true;
                 }
@@ -118,6 +119,7 @@ namespace RandomBuff
                 LogException(e);
             }
         }
+
 
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
@@ -143,6 +145,7 @@ namespace RandomBuff
                     gameSetting.SaveGameSettingToPath("Debug/MissionSetting.txt");
                 }
             }
+        
         }
 
         private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
