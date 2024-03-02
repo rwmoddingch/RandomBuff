@@ -425,7 +425,7 @@ namespace RandomBuff.Core.BuffMenu
 
         void InitConditions()
         {
-            currentGameSetting.conditions.Clear();
+            currentGameSetting.ClearCondition();
             activeConditionCount = BuffGameMenuStatics.DefaultConditionNum;
             for(int i = 0; i < activeConditionCount; i++)
             {
@@ -445,7 +445,7 @@ namespace RandomBuff.Core.BuffMenu
         {
             var loadedCondition = conditionInstances[index];
 
-            currentGameSetting.conditions.Remove(loadedCondition.condition);
+            currentGameSetting.RemoveCondition(loadedCondition.condition);
             loadedCondition.condition = currentGameSetting.GetRandomCondition().condition;
             if(toggleHide)
             {
@@ -479,7 +479,7 @@ namespace RandomBuff.Core.BuffMenu
                 if (activeConditionCount == 0)
                     return;
 
-                currentGameSetting.conditions.Remove(conditionInstances[activeConditionCount - 1].condition);
+                currentGameSetting.RemoveCondition(conditionInstances[activeConditionCount - 1].condition);
                 BuffPlugin.Log($"Remove condition : {conditionInstances[activeConditionCount - 1].condition.ID}, setting has {currentGameSetting.conditions.Count} now");
                 conditionInstances[activeConditionCount - 1] = null;
                 activeConditionCount--;
@@ -495,7 +495,7 @@ namespace RandomBuff.Core.BuffMenu
             {
                 if (conditionInstances[i] == null)
                     break;
-                currentGameSetting.conditions.Remove(conditionInstances[i].condition);
+                currentGameSetting.RemoveCondition(conditionInstances[i].condition);
             }
         }
 

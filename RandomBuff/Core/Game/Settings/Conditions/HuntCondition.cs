@@ -32,9 +32,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             
         }
 
-        public override void SetRandomParameter(float difficulty, List<Condition> sameConditions = null)
+        public override bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+            List<Condition> sameConditions = null)
         {
-            
+            return false;
         }
 
         public override string DisplayProgress(InGameTranslator translator)
@@ -46,6 +47,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override string DisplayName(InGameTranslator translator)
         {
             throw new NotImplementedException();
+        }
+
+        ~HuntCondition()
+        {
+            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
         }
     }
 }

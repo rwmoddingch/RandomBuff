@@ -15,6 +15,8 @@ using UnityEngine;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using JollyCoop.JollyMenu;
+using BepInEx;
+using Object = UnityEngine.Object;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -24,7 +26,7 @@ namespace RandomBuff.Core.BuffMenu
 
         internal List<SlugcatStats.Name> slugNameOrders = new ();
         internal List<SlugcatIllustrationPage> slugcatPages = new ();
-        internal Dictionary<SlugcatStats.Name, WawaSaveData> saveGameData = new ();
+        internal Dictionary<SlugcatStats.Name, SlugcatSelectMenu.SaveGameData> saveGameData = new ();
 
         private bool restartCurrent;
         private bool loaded = false;
@@ -43,10 +45,7 @@ namespace RandomBuff.Core.BuffMenu
         public float lastScroll;
         int quedSideInput;
 
-        public float NextScroll
-        {
-            get => scroll;
-        }
+        public float NextScroll => scroll;
 
         private BuffFile.BuffFileCompletedCallBack callBack;
 
@@ -79,7 +78,7 @@ namespace RandomBuff.Core.BuffMenu
                     if (BuffDataManager.Instance.GetAllBuffIds(name).Count > 0)
                         BuffDataManager.Instance.DeleteSaveData(name);
                 } 
-                saveGameData.Add(name, MineFromSave(manager, name));
+                saveGameData.Add(name, SlugcatSelectMenu.MineForSaveData(manager, name));
             }
        
             menuSlot.SetupBuffs(slugNameOrders);
@@ -172,12 +171,33 @@ namespace RandomBuff.Core.BuffMenu
 
         void SetupSlugNameOrders()
         {
-            foreach(var entry in SlugcatStats.Name.values.entries)
+            if (!Object.FindObjectsOfType<BaseUnityPlugin>().Any(i => i.Info.Metadata.GUID == "slime-cubed.slugbase"))
             {
-                if(entry.Contains("Jolly") || entry == SlugcatStats.Name.Night.value || entry == MoreSlugcatsEnums.SlugcatStatsName.Slugpup.value)
-                    continue;
-                
-                slugNameOrders.Add(new SlugcatStats.Name(entry));
+                foreach (var entry in SlugcatStats.Name.values.entries)
+                {
+                    if (entry.Contains("Jolly") ||
+                        entry == SlugcatStats.Name.Night.value ||
+                        entry == MoreSlugcatsEnums.SlugcatStatsName.Slugpup.value)
+                        continue;
+
+                    slugNameOrders.Add(new SlugcatStats.Name(entry));
+                }
+            }
+            else
+            {
+                var method = Type.GetType("SlugBase.SlugBaseCharacter,SlugBase", true).GetMethod("TryGet");
+                foreach (var entry in SlugcatStats.Name.values.entries.Select(i => new SlugcatStats.Name(i)))
+                {
+
+                    if ((bool)method.Invoke(null, new object[] {entry,null}) ||
+                        entry == SlugcatStats.Name.Red ||
+                        entry == SlugcatStats.Name.Yellow ||
+                        entry == SlugcatStats.Name.White ||
+                        SlugcatStats.IsSlugcatFromMSC(entry))
+                    {
+                        slugNameOrders.Add(entry);
+                    }
+                }
             }
         }
 
@@ -193,7 +213,7 @@ namespace RandomBuff.Core.BuffMenu
             if(manager.rainWorld.progression.IsThereASavedGame(CurrentName))
             {
                 //暂时使用
-                var re = SlugcatSelectMenu.MineForSaveData(manager, CurrentName);
+                var re = saveGameData[CurrentName];
                 if (re != null)
                 {
                     testLabel.label.text =

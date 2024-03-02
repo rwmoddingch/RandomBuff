@@ -11,7 +11,6 @@ namespace RandomBuff.Core.SaveData
 {
     internal class BuffPlayerData
     {
-
         protected BuffPlayerData()
         {
             Instance = this;
@@ -81,7 +80,6 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="buffId"></param>
         /// <param name="keyBind"></param>
-
         public void SetKeyBind(BuffID buffId, string keyBind)
         {
             if(keyBindData.ContainsKey(buffId.value))
