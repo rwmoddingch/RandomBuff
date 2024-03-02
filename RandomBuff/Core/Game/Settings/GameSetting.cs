@@ -21,7 +21,9 @@ namespace RandomBuff.Core.Game.Settings
         private const string SettingSplit = "<GSA>";
         private const string SubSettingSplit = "<GSB>";
 
-
+        /// <summary>
+        /// 不能直接移除，记得调用RemoveCondition,ClearCondition
+        /// </summary>
         public List<Condition> conditions = new ();
 
         public GachaTemplate.GachaTemplate gachaTemplate = new NormalGachaTemplate();
@@ -39,7 +41,6 @@ namespace RandomBuff.Core.Game.Settings
         {
             LoadTemplate("Normal");
             this.name = name;
-      
         }
 
         public bool Win
@@ -64,6 +65,8 @@ namespace RandomBuff.Core.Game.Settings
         {
             gachaTemplate.EnterGame(game);
         }
+
+
 
         public void InGameUpdate(RainWorldGame game)
         {
@@ -157,9 +160,8 @@ namespace RandomBuff.Core.Game.Settings
             TemplateName = name;
             if (BuffPlugin.DevEnabled)
             {
-                conditions.Clear();
+                ClearCondition();
                 BuffPlugin.Log($"{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore}");
-                
             }
         }
 
@@ -167,9 +169,23 @@ namespace RandomBuff.Core.Game.Settings
         {
             var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
             var same = conditions.Where(i => i.ID == id);
-            re.SetRandomParameter(Difficulty, same.Any() ? same.ToList() : null);
+            if(!re.SetRandomParameter(name, Difficulty, same.Any() ? same.ToList() : null))
+                cantAddMore.Add(re.ID);
             conditions.Add(re);
             return re;
+        }
+
+        public void RemoveCondition(Condition condition)
+        {
+            if (cantAddMore.Contains(condition.ID))
+                cantAddMore.Remove(condition.ID);
+            conditions.Remove(condition);
+        }
+
+        public void ClearCondition()
+        {
+            cantAddMore.Clear();
+            conditions.Clear();
         }
 
         /// <summary>
@@ -181,12 +197,12 @@ namespace RandomBuff.Core.Game.Settings
         public (Condition condition, bool canGetMore) GetRandomCondition()
         {
             var list = BuffRegister.GetAllConditionList();
-            list.RemoveAll(i => conditions.Any(j => j.ID == i) ||
-                                !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
+            list.RemoveAll(i =>cantAddMore.Contains(i) ||
+                                 !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
             if (list.Count == 0)
                 return (null, false);
             return (CreateNewCondition(list[Random.Range(0, list.Count)]),
-                    list.Sum(i => BuffRegister.GetConditionType(i).CanUseMore ? 10 : 1) > 1);
+                    cantAddMore.Count != BuffRegister.GetAllConditionList().Count);
         }
 
 
@@ -199,7 +215,7 @@ namespace RandomBuff.Core.Game.Settings
         public static bool TryLoadGameSetting(SlugcatStats.Name name,string str,out GameSetting setting)
         {
             setting = new GameSetting(name);
-            setting.conditions.Clear();
+            setting.ClearCondition();
             try
             {
                 var splits = Regex.Split(str, SettingSplit);
@@ -233,7 +249,8 @@ namespace RandomBuff.Core.Game.Settings
                                 setting.TemplateName = subs[1];
                             break;
                         case "CONDITION":
-                            if (!ExtEnumBase.TryParse(typeof(ConditionID), subs[1], true, out var cid))
+                            if (!ExtEnumBase.TryParse(typeof(ConditionID), subs[1], true, out var cid) ||
+                                BuffRegister.GetConditionType((ConditionID)cid) == null)
                             {
                                 BuffPlugin.LogWarning($"Missing Dependence, Can't find Condition ID: {subs[1]}");
                                 setting.fallBack = str;
@@ -311,6 +328,7 @@ namespace RandomBuff.Core.Game.Settings
             return builder.ToString();
         }
 
+        public HashSet<ConditionID> cantAddMore = new ();
 
     }
 }

@@ -135,7 +135,7 @@ namespace RandomBuff.Core.Entry
         /// <param name="canUseMore">是否可以同一局选取多个</param>
         /// <param name="parentId">继承某个条件的Ban情况</param>
         /// <param name="banList">Ban掉特定的游玩模式，请保证对应的GachaTemplate已经注册</param>
-        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName,bool canUseMore = false,
+        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName,
             ConditionID parentId = null,params GachaTemplateID[] banList)
             where TConditionType : Condition, new()
         {
@@ -153,7 +153,7 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogError($"can't find Condition:{parentId}, When register Condition:{id} parent");
                     return;
                 }
-                ConditionTypes.Add(id, new ConditionType(id,typeof(TConditionType), GetConditionType(parentId), canUseMore, displayName));
+                ConditionTypes.Add(id, new ConditionType(id,typeof(TConditionType), GetConditionType(parentId), displayName));
                 foreach (var banId in banList)
                 {
                     var type = GetTemplateType(banId);
@@ -305,17 +305,15 @@ namespace RandomBuff.Core.Entry
         {
             public Type Type { get; }
             public ConditionType Parent { get; }
-            public bool CanUseMore{ get; }
             public string DisplayName { get; }
 
             public ConditionID Id { get; }
 
-            public ConditionType(ConditionID id, Type type, ConditionType parent, bool canUseMore, string displayName)
+            public ConditionType(ConditionID id, Type type, ConditionType parent, string displayName)
             {
                 Id = id;
                 Type = type;
                 Parent = parent;
-                CanUseMore = canUseMore;
                 DisplayName = displayName;
             }
 
