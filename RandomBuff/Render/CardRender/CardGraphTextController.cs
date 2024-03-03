@@ -6,10 +6,13 @@ namespace RandomBuff.Render.CardRender
 {
     internal class CardGraphTextController : MonoBehaviour
     {
+        public static Color paleBlack = Color.black * 0.85f + Color.white * 0.15f;
+
         protected BuffCardRenderer _renderer;
         protected GameObject _hoverPoint;
-        protected GameObject _lozengeQuadOuter;
-        protected GameObject _lozengeQuadInner;
+        protected GameObject _graphOuter;
+        protected GameObject _graphInner;
+        protected MeshRenderer _graphInnerRenderer;
         protected GameObject _stackerTextObj;
 
         protected TextMesh graphTextMesh;
@@ -40,25 +43,26 @@ namespace RandomBuff.Render.CardRender
                 _hoverPoint.transform.localPosition = new Vector3(-0.5f, posFactor, 0f);
                 _origScale = _hoverPoint.transform.localScale;
 
-                _lozengeQuadOuter = CreatePrimitiveObject(primitiveType);
-                _lozengeQuadOuter.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-                _lozengeQuadOuter.transform.parent = _hoverPoint.transform;
-                _lozengeQuadOuter.transform.localPosition = Vector3.forward * -0.001f;
-                _lozengeQuadOuter.transform.localRotation = Quaternion.Euler(rotation);
-                _lozengeQuadOuter.layer = 8;
-                _lozengeQuadOuter.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
+                _graphOuter = CreatePrimitiveObject(primitiveType);
+                _graphOuter.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+                _graphOuter.transform.parent = _hoverPoint.transform;
+                _graphOuter.transform.localPosition = Vector3.forward * -0.001f;
+                _graphOuter.transform.localRotation = Quaternion.Euler(rotation);
+                _graphOuter.layer = 8;
+                _graphOuter.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
 
 
-                _lozengeQuadInner = CreatePrimitiveObject(primitiveType);
-                _lozengeQuadInner.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
-                _lozengeQuadInner.transform.parent = _hoverPoint.transform;
-                _lozengeQuadInner.transform.localPosition = Vector3.forward * -0.002f;
-                _lozengeQuadInner.transform.localRotation = Quaternion.Euler(rotation);
-                _lozengeQuadInner.layer = 8;
-                _lozengeQuadInner.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
-                _lozengeQuadInner.GetComponent<MeshRenderer>().material.color = Color.black * 0.8f + Color.white * 0.2f;
-                _lozengeQuadInner.GetComponent<MeshRenderer>().material
-                    .SetColor("_Color", Color.black * 0.8f + Color.white * 0.2f);
+                _graphInner = CreatePrimitiveObject(primitiveType);
+                _graphInner.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
+                _graphInner.transform.parent = _hoverPoint.transform;
+                _graphInner.transform.localPosition = Vector3.forward * -0.002f;
+                _graphInner.transform.localRotation = Quaternion.Euler(rotation);
+                _graphInner.layer = 8;
+                _graphInnerRenderer = _graphInner.GetComponent<MeshRenderer>();
+                _graphInnerRenderer.material.shader = CardBasicAssets.CardBasicShader;
+                _graphInnerRenderer.material.color = Color.black * 0.8f + Color.white * 0.2f;
+                _graphInnerRenderer.material
+                    .SetColor("_Color", paleBlack);
 
 
                 _stackerTextObj = new GameObject("StackerText");
@@ -80,21 +84,16 @@ namespace RandomBuff.Render.CardRender
                 _firstInit = true;
 
             }
-            _lozengeQuadOuter.GetComponent<MeshRenderer>().material.color = color;
-            _lozengeQuadOuter.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+            _graphOuter.GetComponent<MeshRenderer>().material.color = color;
+            _graphOuter.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
             UpdateText();
-        }
-
-        void Start()
-        {
-
         }
 
         public virtual void UpdateText()
         {
         }
 
-        void Update()
+        protected virtual void Update()
         {
             if (_currentWidth != _targetWidth)
             {
@@ -190,10 +189,33 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
+        bool _flash;
+        public bool Flash
+        {
+            get => _flash;
+            set
+            {
+                if (_flash == value)
+                    return;
+
+                if (!_flash && value)
+                {
+                    counter = 0f;
+                }
+                _flash = value;
+            }
+        }
+
+        float counter;//0~0.2f~1f;
+
+        Color curretColor;
+        Color nextColor;
+
         public override void Init(BuffCardRenderer renderer, Transform parent, Font font, Color color, string text, Vector3 rotation, InternalPrimitiveType primitiveType = InternalPrimitiveType.Quad, float posFactor = 0.309F)
         {
             base.Init(renderer, parent, font, color, text, rotation, primitiveType, posFactor);
             BindKey = null;
+            _graphInnerRenderer.material.color = paleBlack;   
         }
 
         public override void UpdateText()
@@ -203,6 +225,46 @@ namespace RandomBuff.Render.CardRender
                 result = ">>";
             graphTextMesh.text = result;
             BuffPlugin.Log($"KeyBinder text set to {result}");
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            if(_flash)
+            {
+                counter += Time.deltaTime;
+                while (counter > 1f)
+                    counter--;
+            }
+            else
+            {
+                if(counter < 1f)
+                    counter += Time.deltaTime;
+                else if(counter > 1f)
+                {
+                    counter = 1f;
+                    UpdateColor();
+                }        
+            }
+
+            if(counter < 1f || _flash)
+            {
+                UpdateColor();
+            }
+
+            void UpdateColor()
+            {
+                float t = 0.1f;
+                float a = Mathf.Clamp(counter - t, 0f, t);
+                float b = Mathf.Clamp(t - counter, 0f, t);
+                Color next = Color.Lerp(paleBlack, Color.white, 1f - Mathf.Max(a, b) / t);
+                if (next != curretColor)
+                {
+                    curretColor = next;
+                    _graphInnerRenderer.material.color = curretColor;
+                    _renderer.cardCameraController.CardDirty = true;
+                }
+            }
         }
     }
 
