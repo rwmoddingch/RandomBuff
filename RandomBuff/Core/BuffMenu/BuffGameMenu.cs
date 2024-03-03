@@ -171,34 +171,10 @@ namespace RandomBuff.Core.BuffMenu
 
         void SetupSlugNameOrders()
         {
-            if (!Object.FindObjectsOfType<BaseUnityPlugin>().Any(i => i.Info.Metadata.GUID == "slime-cubed.slugbase"))
-            {
-                foreach (var entry in SlugcatStats.Name.values.entries)
-                {
-                    if (entry.Contains("Jolly") ||
-                        entry == SlugcatStats.Name.Night.value ||
-                        entry == MoreSlugcatsEnums.SlugcatStatsName.Slugpup.value)
-                        continue;
-
-                    slugNameOrders.Add(new SlugcatStats.Name(entry));
-                }
-            }
-            else
-            {
-                var method = Type.GetType("SlugBase.SlugBaseCharacter,SlugBase", true).GetMethod("TryGet");
-                foreach (var entry in SlugcatStats.Name.values.entries.Select(i => new SlugcatStats.Name(i)))
-                {
-
-                    if ((bool)method.Invoke(null, new object[] {entry,null}) ||
-                        entry == SlugcatStats.Name.Red ||
-                        entry == SlugcatStats.Name.Yellow ||
-                        entry == SlugcatStats.Name.White ||
-                        SlugcatStats.IsSlugcatFromMSC(entry))
-                    {
-                        slugNameOrders.Add(entry);
-                    }
-                }
-            }
+            var select = Helper.GetUninit<SlugcatSelectMenu>();
+            select.manager = this.manager;
+            select.SetSlugcatColorOrder();
+            slugNameOrders = select.slugcatColorOrder;
         }
 
         private bool IsInactive => manager.rainWorld.progression.IsThereASavedGame(CurrentName) && !restartCurrent;

@@ -248,7 +248,7 @@ namespace RandomBuff.Render.UI
         public override void Update()
         {
             base.Update();
-            if(Input.GetKey(InGameSlotInteractionManager.BindKeyButton))
+            if(inGameSlotInteractionManager.keyBinderProcessor != null && inGameSlotInteractionManager.keyBinderProcessor.InBindMode)
                 buffCard.KeyBinderFlash = true;
             else
                 buffCard.KeyBinderFlash = false;
@@ -336,7 +336,7 @@ namespace RandomBuff.Render.UI
             buffCard.DisplayAllGraphTexts = true;
             buffCard.Grey = false;
 
-            buffCard.UpdateGraphText();
+            buffCard.UpdateGraphText(true, false);
             buffCard.StackerAddOne = true;
 
             cardPickerInteractionManager = buffCard.interactionManager as CardPickerInteractionManager;
