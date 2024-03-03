@@ -65,6 +65,16 @@ namespace RandomBuff.Core.SaveData
         }
 
         /// <summary>
+        /// 是否已经收集过
+        /// </summary>
+        /// <param name="buffId"></param>
+        /// <returns></returns>
+        public bool IsCollected(BuffID buffId)
+        {
+            return collectData.Contains(buffId.value);
+        }
+
+        /// <summary>
         /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()
         /// </summary>
         /// <param name="buffId"></param>
@@ -87,6 +97,7 @@ namespace RandomBuff.Core.SaveData
             else
                 keyBindData.Add(buffId.value, keyBind);
         }
+
 
         private List<string> collectData = new();
 
