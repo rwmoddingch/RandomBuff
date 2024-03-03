@@ -14,7 +14,6 @@ namespace RandomBuff.Core.SaveData
         protected BuffPlayerData()
         {
             Instance = this;
-
         }
 
         public static void LoadBuffPlayerData(string rawData)
@@ -92,10 +91,24 @@ namespace RandomBuff.Core.SaveData
         /// <param name="keyBind"></param>
         public void SetKeyBind(BuffID buffId, string keyBind)
         {
-            if(keyBindData.ContainsKey(buffId.value))
-                keyBindData[buffId.value] = keyBind;
+            InternalSetKeyBind(buffId.value, keyBind);
+        }
+
+        void InternalSetKeyBind(string id, string keyBind)
+        {
+            if (keyBind != KeyCode.None.ToString())//清除重复的绑定
+            {
+                foreach (var bind in keyBindData)
+                {
+                    if (bind.Value == keyBind)
+                        InternalSetKeyBind(bind.Key, KeyCode.None.ToString());
+                }
+            }
+
+            if (keyBindData.ContainsKey(id))
+                keyBindData[id] = keyBind;
             else
-                keyBindData.Add(buffId.value, keyBind);
+                keyBindData.Add(id, keyBind);
         }
 
 
