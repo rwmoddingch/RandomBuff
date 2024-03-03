@@ -15,6 +15,7 @@ namespace RandomBuffUtils.BuffEvents
     internal partial class BuffExtraDialogBoxEvent
     {
         static event ExtraDialogBoxHandler onAllExtraDialogInit;
+        static bool hudFiredUp;
         public static event ExtraDialogBoxHandler OnExtraDialogsCreated
         {
             remove => onAllExtraDialogInit -= value;
@@ -23,6 +24,9 @@ namespace RandomBuffUtils.BuffEvents
                 onAllExtraDialogInit += value;
                 if (dialogBoxInstances.Count > 0)
                     value.Invoke(dialogBoxInstances.ToArray());
+
+                if (!hudFiredUp)
+                    return;
                 if(BuffCustom.TryGetGame(out var game))
                 {
                     var roomCamera = game.cameras[0];
@@ -66,6 +70,7 @@ namespace RandomBuffUtils.BuffEvents
 
         static void InitDialogs(RoomCamera roomCamera)
         {
+            hudFiredUp = true;
             foreach (var p in roomCamera.room.game.Players)
             {
                 var player = p.realizedCreature as Player;
@@ -115,6 +120,7 @@ namespace RandomBuffUtils.BuffEvents
 
         static void ClearDialogs()
         {
+            hudFiredUp = false;
             foreach (var dialog in extraDialogBoxes)
             {
                 dialog.DeleteDialogBox();
@@ -186,7 +192,7 @@ namespace RandomBuffUtils.BuffEvents
         {
             if (!HasValue)
                 return;
-            Value.baseColor = newColor;
+            Value.Color = newColor;
             BuffUtils.Log("BuffExtraDialogBoxEvent", $"modify color : {newColor}, HasValue : {HasValue}");
         }
 
@@ -216,7 +222,7 @@ namespace RandomBuffUtils.BuffEvents
             lastPos = pos = target.mainBodyChunk.pos + offest;
             this.target = target;
             this.baseColor = baseColor;
-            color = baseColor;
+            Color = baseColor;
         }
         public override void Update()
         {
@@ -242,13 +248,14 @@ namespace RandomBuffUtils.BuffEvents
 
             label.isVisible &= !paused;
 
-            if (messages.Count > 0)
+            if (colorDirty)
             {
                 for (int i = 0; i < 4; i++)
                 {
                     sprites[SideSprite(i)].color = color;
                     sprites[CornerSprite(i)].color = color;
                 }
+                colorDirty = false;
             }
         }
 
@@ -272,18 +279,21 @@ namespace RandomBuffUtils.BuffEvents
         public Color specialColor;
         public Color baseColor;
 
+        bool colorDirty;
         Color color;
-        Color GetToColor
+        public Color Color
         {
-            get
+            get => color;
+            set
             {
-                if (cycle % 30 < 15)
+                if (value != Color)
                 {
-                    return baseColor;
+                    colorDirty = true;
+                    color = value;
                 }
-                return specialColor;
             }
         }
+
         public static ExtraDialogBox CreateDialog(Creature target, Color baseColor)
         {
             var hud = target.abstractCreature.world.game.cameras[0].hud;

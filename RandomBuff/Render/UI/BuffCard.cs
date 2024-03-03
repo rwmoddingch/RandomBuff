@@ -340,7 +340,7 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        public void UpdateGraphText(bool dirty = false)
+        public void UpdateGraphText(bool dirty = false, bool useKeyBindData = true)
         {
             if (StaticData.Stackable)
             {
@@ -354,11 +354,17 @@ namespace RandomBuff.Render.UI
 
             if (StaticData.Triggerable)
             {
-                var key = BuffPlayerData.Instance.GetKeyBind(ID);
-                if (key == KeyCode.None.ToString())
-                    KeyBinderValue = null;
+                if (useKeyBindData)
+                {
+                    var key = BuffPlayerData.Instance.GetKeyBind(ID);
+                    if (key == KeyCode.None.ToString())
+                        KeyBinderValue = null;
+                    else
+                        KeyBinderValue = key;
+                }
                 else
-                    KeyBinderValue = key;
+                    KeyBinderValue = null;
+
             }
             if(dirty)
                 _cardRenderer.cardCameraController.CardDirty = true;
