@@ -52,7 +52,7 @@ namespace RandomBuffUtils
             add
             {
                 if (Listeners.Count == 0)
-                    On.ProcessManager.Update -= ProcessManager_Update;
+                    On.ProcessManager.Update += ProcessManager_Update;
                 
                 if(!Listeners.ContainsKey(value))
                     Listeners.Add(value,new BuffInputListener(value));
