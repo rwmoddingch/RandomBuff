@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
 
@@ -97,6 +98,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         internal static void Init()
         {
+            var id = BuffID.None;
             BuffRegister.RegisterGachaTemplate<NormalGachaTemplate>(GachaTemplateID.Normal);
             BuffRegister.RegisterGachaTemplate<QuickGachaTemplate>(GachaTemplateID.Quick,ConditionID.Card);
             BuffRegister.RegisterGachaTemplate<MissionGachaTemplate>(GachaTemplateID.Mission);
