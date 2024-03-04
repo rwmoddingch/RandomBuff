@@ -14,6 +14,7 @@ namespace RandomBuff.Core.SaveData
         protected BuffPlayerData()
         {
             Instance = this;
+           
         }
 
         public static void LoadBuffPlayerData(string rawData)

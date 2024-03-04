@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Security.Permissions;
+using System.Security.Policy;
 using BepInEx;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -43,6 +45,7 @@ namespace RandomBuff
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
                 On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+           
             }
             catch (Exception e)
             {
@@ -84,6 +87,13 @@ namespace RandomBuff
             {
                 LogException(e);
             }
+
+            OnModsInit();
+        }
+
+
+        private void OnModsInit()
+        {
             try
             {
                 if (!isLoaded)
@@ -95,7 +105,7 @@ namespace RandomBuff
                         DevEnabled = true;
                         LogWarning("Debug Enable");
                     }
-                    Render.CardRender.CardBasicAssets.LoadAssets();
+                    CardBasicAssets.LoadAssets();
 
                     GachaTemplate.Init();
                     Condition.Init();
@@ -110,7 +120,7 @@ namespace RandomBuff
 
                     isLoaded = true;
 
-                 
+
                     //TODO : 测试用
                     DevEnabled = true;
                 }
@@ -120,6 +130,7 @@ namespace RandomBuff
                 LogException(e);
             }
         }
+       
 
 
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
@@ -163,6 +174,16 @@ namespace RandomBuff
             {
                 if (!isPostLoaded)
                 {
+                    if (!isLoaded)
+                    {
+                        LogError("Fallback Call OnModsInit");
+                        OnModsInit();
+                        if (!isLoaded)
+                        {
+                            LogFatal("Can't call OnModsInit !!!!!!");
+                            return;
+                        }
+                    }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
                     BuffConfigManager.InitTemplateStaticData();
