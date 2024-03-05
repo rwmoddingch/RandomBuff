@@ -117,7 +117,6 @@ namespace RandomBuff
                     BuffUtils.OnEnable();
                     if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-
                     isLoaded = true;
 
 
@@ -130,7 +129,6 @@ namespace RandomBuff
                 LogException(e);
             }
         }
-       
 
 
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)

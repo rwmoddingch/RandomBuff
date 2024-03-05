@@ -121,13 +121,14 @@ namespace RandomBuffUtils
         private static void PlayerSessionRecord_AddKill(On.PlayerSessionRecord.orig_AddKill orig, PlayerSessionRecord self, Creature victim)
         {
             orig(self, victim);
-            onCreatureKilled.Invoke(victim, self.playerNumber);
+            onCreatureKilled.SafeInvoke("onCreatureKilled", victim, self.playerNumber);
+        
         }
 
         private static void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
         {
             orig(self, newRoom);
-            onNewRoom.Invoke(newRoom.abstractRoom.name);
+            onNewRoom.SafeInvoke("onNewRoom", newRoom.abstractRoom.name);
         }
 
         private static void WinState_CycleCompleted(On.WinState.orig_CycleCompleted orig, WinState self, RainWorldGame game)
@@ -138,7 +139,7 @@ namespace RandomBuffUtils
 
             if (finished.Any() || unFinished.Any())
             {
-                onAchievementCompleted.Invoke(finished.ToList(), unFinished.ToList());
+                onAchievementCompleted.SafeInvoke("onAchievementCompleted", finished.ToList(), unFinished.ToList());
             }
         }
     }
@@ -168,6 +169,21 @@ namespace RandomBuffUtils
         public delegate void RegionGateHandler(RegionGateInstance gateInstance);
 
         public delegate void ExtraDialogBoxHandler(ExtraDialogBoxInstance[] extraDialogInstance);
+
+        internal static void SafeInvoke(this Delegate del,string eventName, params object[] param)
+        {
+            foreach (var single in del.GetInvocationList())
+            {
+                try
+                {
+                    single.DynamicInvoke(param);
+                }
+                catch (Exception e)
+                {
+                    BuffUtils.LogException($"BuffEvent - {eventName}",e);
+                }
+            }
+        }
     }
 
 }

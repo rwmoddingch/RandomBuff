@@ -117,10 +117,20 @@ namespace RandomBuff.Core.SaveData
             {
                 if (createOrStack)
                 {
-                    allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
-                    allDatas[name][id].DataLoaded(true);
-                    BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
-                    BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
+                    try
+                    {
+                        var data = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
+                        data.DataLoaded(true);
+                        BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
+                        BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
+                        allDatas[name].Add(id, data);
+
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e,$"Exception in BuffDataManager:GetOrCreateBuffData:{id}");
+                    }
+                  
                 }
                 else
                     return null;
@@ -170,7 +180,17 @@ namespace RandomBuff.Core.SaveData
                 BuffPlayerData.Instance.AddCollect(id);
 
             foreach (var data in allDatas[name])
-                data.Value.CycleEnd();
+            {
+                try
+                {
+                    data.Value.CycleEnd();
+
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e,$"Exception at BuffData:CycleEnd:{data.Key}");
+                }
+            }
         }
 
 
