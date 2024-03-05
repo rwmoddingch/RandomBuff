@@ -88,8 +88,10 @@ namespace RandomBuff.Core.Buff
         /// 增益的销毁方法，当该增益实例被移除的时候会调用
         /// 注意：当前轮回结束时会清除全部的Buff物体
         /// </summary>
-        public virtual void Destroy(){}
-
+        public virtual void Destroy()
+        {
+            Instance = null;
+        }
 
         /// <summary>
         /// 强制触发增益效果，一般用于显示HUD反馈

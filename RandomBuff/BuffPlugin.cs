@@ -55,7 +55,7 @@ namespace RandomBuff
 
         private void Update()
         {
-            Render.CardRender.CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
+            CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)

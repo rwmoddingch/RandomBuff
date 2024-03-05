@@ -81,10 +81,7 @@ namespace RandomBuff.Core.Entry
         {
             try
             {
-                var testBuff = ((IBuff)Activator.CreateInstance(buffType));
-                var buffId = testBuff.ID;
-                testBuff.Destroy();
-                if (id != buffId || id != ((BuffData)(Activator.CreateInstance(dataType))).ID)
+                if (id != Helper.GetUninit<IBuff>(buffType).ID || id != Helper.GetUninit<BuffData>(dataType).ID)
                 {
                     BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
                     return;
@@ -111,7 +108,7 @@ namespace RandomBuff.Core.Entry
         {
             try
             {
-                if (id != Activator.CreateInstance<TTemplateType>().ID)
+                if (id != Helper.GetUninit<TTemplateType>().ID)
                 {
                     BuffPlugin.LogError($"{id}'s GachaTemplate has unexpected GachaTemplateID!");
                     return;
@@ -141,7 +138,7 @@ namespace RandomBuff.Core.Entry
         {
             try
             {
-                if (id != Activator.CreateInstance<TConditionType>().ID)
+                if (id != Helper.GetUninit<TConditionType>().ID)
                 {
                     BuffPlugin.LogError($"{id}'s Condition has unexpected ConditionID!");
                     return;
