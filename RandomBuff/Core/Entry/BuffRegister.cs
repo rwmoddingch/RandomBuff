@@ -183,7 +183,7 @@ namespace RandomBuff.Core.Entry
         internal static Type GetDataType(BuffID id) => GetAnyType(id, DataTypes);
         internal static Type GetBuffType(BuffID id) => GetAnyType(id, BuffTypes);
 
-        public static ConditionType GetConditionType(ConditionID id)
+        internal static ConditionType GetConditionType(ConditionID id)
         {
             if(id == null)
                 return null;
