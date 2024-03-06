@@ -45,9 +45,8 @@ namespace RandomBuffUtils
             return Input.GetKey((KeyCode)Enum.Parse(typeof(KeyCode), action));
         }
 
-        public delegate void KeyDownHandler(string keyDown);
         
-        public static event KeyDownHandler OnAnyKeyDown
+        public static event BuffEvent.KeyDownHandler OnAnyKeyDown
         {
             add
             {
@@ -75,13 +74,13 @@ namespace RandomBuffUtils
                 listener.Value.ListenInput();
         }
 
-        static readonly Dictionary<KeyDownHandler,BuffInputListener> Listeners = new Dictionary<KeyDownHandler,BuffInputListener>();
+        static readonly Dictionary<BuffEvent.KeyDownHandler,BuffInputListener> Listeners = new Dictionary<BuffEvent.KeyDownHandler,BuffInputListener>();
     }
 
 
     internal class BuffInputListener
     {
-        internal BuffInputListener(KeyDownHandler handler)
+        internal BuffInputListener(BuffEvent.KeyDownHandler handler)
         {
             keyDownHandler = handler;
         }
@@ -128,6 +127,6 @@ namespace RandomBuffUtils
 
         private readonly HashSet<string> alreadyDown = new HashSet<string>();
 
-        private readonly KeyDownHandler keyDownHandler;
+        private readonly BuffEvent.KeyDownHandler keyDownHandler;
     }
 }

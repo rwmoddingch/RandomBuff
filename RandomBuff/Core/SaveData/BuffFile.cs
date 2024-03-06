@@ -14,9 +14,110 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Hooks;
 using RWCustom;
 using UnityEngine;
+using static RainWorld;
 
 namespace RandomBuff.Core.SaveData
 {
+
+    /// <summary>
+    /// 保存格式版本
+    /// </summary>
+    public sealed class BuffFormatVersion
+    {
+        private readonly char buildType;
+        private readonly int mainVersion;
+        private readonly int subVersion;
+        private readonly int minVersion;
+
+        public BuffFormatVersion(char buildType, int mainVersion, int subVersion, int minVersion)
+        {
+            this.buildType = buildType;
+            this.mainVersion = mainVersion;
+            this.subVersion = subVersion;
+            this.minVersion = minVersion;
+        }
+
+        public BuffFormatVersion(string serVersion)
+        {
+            try
+            {
+                buildType = serVersion[0];
+                var split = serVersion.Substring(2).Split('.');
+                mainVersion = int.Parse(split[0]);
+                subVersion = int.Parse(split[1]);
+                minVersion = int.Parse(split[2]);
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogInstance.LogFatal(e);
+                this.buildType = BuffPlugin.saveVersion.buildType;
+                this.mainVersion = BuffPlugin.saveVersion.mainVersion;
+                this.subVersion = BuffPlugin.saveVersion.subVersion;
+                this.minVersion = BuffPlugin.saveVersion.minVersion;
+
+
+            }
+
+        }
+
+        public override string ToString()
+        {
+            return $"{buildType}-{mainVersion}.{subVersion}.{minVersion}";
+        }
+
+        public static bool operator==(BuffFormatVersion a, BuffFormatVersion b)
+        {
+            if(a is null|| b is null) return false;
+            return a.buildType == b.buildType && a.mainVersion == b.mainVersion && a.subVersion == b.subVersion && a.minVersion== b.minVersion;
+        }
+
+
+
+        public static bool operator !=(BuffFormatVersion a, BuffFormatVersion b)
+        {
+            return !(a == b);
+        }
+
+
+        public static bool operator >(BuffFormatVersion a, BuffFormatVersion b)
+        {
+            if (a is null || b is null) return false;
+            if (a.mainVersion == b.mainVersion)
+            {
+                if (a.subVersion == b.subVersion)
+                {
+                    return a.minVersion > b.minVersion;
+                }
+                return a.subVersion > b.subVersion;
+            }
+            return a.mainVersion > b.mainVersion;
+        }
+
+        public static bool operator <(BuffFormatVersion a, BuffFormatVersion b)
+        {
+            if(a is null || b is null)  return false;
+            if (a.mainVersion == b.mainVersion)
+            {
+                if (a.subVersion == b.subVersion)
+                {
+                    return a.minVersion < b.minVersion;
+                }
+                return a.subVersion < b.subVersion;
+            }
+            return a.mainVersion < b.mainVersion;
+        }
+
+        public static bool operator <=(BuffFormatVersion a, BuffFormatVersion b)
+        {
+            return a < b || a == b;
+        }
+
+        public static bool operator >=(BuffFormatVersion a, BuffFormatVersion b)
+        {
+            return a > b || a == b;
+        }
+    }
+
     /// <summary>
     /// 一个存档读取接口 实际不用修改
     /// 会在更改存档时重新创建
@@ -63,9 +164,10 @@ namespace RandomBuff.Core.SaveData
             if (buffCoreFile != null)
             {
                 BuffPlugin.Log($"Saving buff data at slot {Instance.UsedSlot}");
-                buffCoreFile.Set<string>("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                buffCoreFile.Set<string>("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                buffCoreFile.Set<string>("buff-player", JsonConvert.SerializeObject(BuffPlayerData.Instance), UserData.WriteMode.Immediate);
+                buffCoreFile.Set("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+                buffCoreFile.Set("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+                buffCoreFile.Set("buff-player", BuffPlayerData.Instance.ToStringData(), UserData.WriteMode.Immediate);
+                buffCoreFile.Set("buff-version", BuffPlugin.saveVersion.ToString());
                 return;
             }
             BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
@@ -128,24 +230,18 @@ namespace RandomBuff.Core.SaveData
                 {
                     LoadFailedFallBack();
                 }
+                var fileVersion = new BuffFormatVersion(buffCoreFile.Get<string>("buff-version"));
 
-                BuffPlugin.Log($"Buff file version : [{buffCoreFile.Get<string>("buff-version")}], current version : {BuffPlugin.saveVersion}");
-
-                BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), buffCoreFile.Get<string>("buff-version"));
-                BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), buffCoreFile.Get<string>("buff-version"));
-
-                BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get<string>("buff-player"));
-
-                //TODO:正式版本删除
-                if (buffCoreFile.Contains("buff-collect"))
+                if (fileVersion < BuffPlugin.outDateVersion)
                 {
-                    BuffPlugin.LogWarning("Load old collect data");
-                    BuffPlayerData.Instance.LoadOldCollectData(buffCoreFile.Get<string>("buff-collect"));
-                    buffCoreFile.Remove("buff-collect");
+                    BuffPlugin.LogError("OutDate version, clean all data!");
+                    LoadFailedFallBack(true);
                 }
+                BuffPlugin.Log($"Buff file version : [{fileVersion}], current version : [{BuffPlugin.saveVersion}]");
+                BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), fileVersion);
+                BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), fileVersion);
 
-                //更新格式版本
-                buffCoreFile.Set("buff-version", BuffPlugin.saveVersion);
+                BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get<string>("buff-player"), fileVersion);
 
                 Platform.NotifyUserDataReadCompleted(this);
             }
@@ -173,17 +269,17 @@ namespace RandomBuff.Core.SaveData
                 throw new Exception("Create Buff File Failed!"); //TODO : 添加异常处理
         }
 
-        private void LoadFailedFallBack()
+        private void LoadFailedFallBack(bool forceDelete = false)
         {
             if (buffCoreFile == null)
                 return;
-            if (!buffCoreFile.Contains("buff-version"))
-                buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion);
-            if (!buffCoreFile.Contains("buff-config"))
+            if (!buffCoreFile.Contains("buff-version") || forceDelete)
+                buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion.ToString());
+            if (!buffCoreFile.Contains("buff-config") || forceDelete)
                 buffCoreFile.Set<string>("buff-config", "");
-            if (!buffCoreFile.Contains("buff-data"))
+            if (!buffCoreFile.Contains("buff-data") || forceDelete)
                 buffCoreFile.Set<string>("buff-data", "");
-            if (!buffCoreFile.Contains("buff-player"))
+            if (!buffCoreFile.Contains("buff-player") || forceDelete)
                 buffCoreFile.Set<string>("buff-player", "");
 
         }

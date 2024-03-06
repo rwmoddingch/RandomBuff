@@ -84,7 +84,7 @@ namespace RandomBuffUtils
         /// 当有任何输入时调用
         /// 请务必及时取消减少监听时间
         /// </summary>
-        public static event BuffInput.KeyDownHandler OnAnyKeyDown
+        public static event KeyDownHandler OnAnyKeyDown
         {
             add => BuffInput.OnAnyKeyDown += value;
             remove => BuffInput.OnAnyKeyDown -= value;
@@ -170,13 +170,16 @@ namespace RandomBuffUtils
 
         public delegate void ExtraDialogBoxHandler(ExtraDialogBoxInstance[] extraDialogInstance);
 
+        public delegate void KeyDownHandler(string keyDown);
+
+
         internal static void SafeInvoke(this Delegate del,string eventName, params object[] param)
         {
             foreach (var single in del.GetInvocationList())
             {
                 try
                 {
-                    single.DynamicInvoke(param);
+                    single.Method.Invoke(single.Target, param);
                 }
                 catch (Exception e)
                 {
@@ -184,6 +187,9 @@ namespace RandomBuffUtils
                 }
             }
         }
+
+
+        
     }
 
 }
