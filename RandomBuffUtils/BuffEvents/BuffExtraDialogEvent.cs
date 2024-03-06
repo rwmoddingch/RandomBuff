@@ -76,7 +76,7 @@ namespace RandomBuffUtils.BuffEvents
                 var player = p.realizedCreature as Player;
                 CreateInstanceSingle(player);
             }
-            onAllExtraDialogInit?.Invoke(dialogBoxInstances.ToArray());
+            onAllExtraDialogInit?.SafeInvoke("OnAllExtraDialogInit", dialogBoxInstances.ToArray());
             foreach(var p in roomCamera.room.game.Players)
             {
                 var player = p.realizedCreature as Player;

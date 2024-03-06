@@ -21,7 +21,7 @@ namespace RandomBuff.Core.SaveData
     {
         public static BuffConfigManager Instance { get; private set; }
 
-        internal static void LoadConfig(string config, string formatVersion)
+        internal static void LoadConfig(string config, BuffFormatVersion formatVersion)
         {
             Instance = new BuffConfigManager(config, formatVersion);
         }
@@ -174,8 +174,9 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     public partial class BuffConfigManager
     {
-        private BuffConfigManager(string config, string formatVersion)
+        private BuffConfigManager(string config, BuffFormatVersion formatVersion)
         {
+
             foreach (var buffSingle in Regex.Split(config, BuffSplit)
                          .Where(i => !string.IsNullOrEmpty(i)))
             {
@@ -211,11 +212,12 @@ namespace RandomBuff.Core.SaveData
 
                     buffConfigs.Add(paraSplit[0], paraSplit[1]);
                 }
-
             }
+            BuffPlugin.Log($"Completed loaded config data, Count: {allConfigs.Count}");
+
         }
 
-        
+
         /// <summary>
         /// 添加已读取config
         /// </summary>

@@ -9,6 +9,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 using BepInEx;
+using BepInEx.Logging;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
@@ -35,11 +36,18 @@ namespace RandomBuff
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
     internal class BuffPlugin : BaseUnityPlugin
     {
-        public const string saveVersion = "a-0.0.4";
+        public static BuffFormatVersion saveVersion = new ("a-0.0.5");
+
+        public static BuffFormatVersion outDateVersion = new("a-0.0.3");
+
+        internal static ManualLogSource LogInstance { get; private set; }
+
         internal static BuffPlugin Instance { get; private set; }
+
 
         public void OnEnable()
         {
+            LogInstance = this.Logger;
             Instance = this;
             try
             {
