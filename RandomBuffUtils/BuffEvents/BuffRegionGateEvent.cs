@@ -200,7 +200,7 @@ namespace RandomBuffUtils.BuffEvents
                 BuffUtils.Log("BuffRegionGateEvent", $"Trigger OnGateOpened");
                 RegionGateInstance gateInstance = CreateInstanceForGate(self);
 
-                OnGateOpened?.Invoke(gateInstance);
+                OnGateOpened?.SafeInvoke("OnGateOpened", gateInstance);
 
                 if (gateInstance._gateStateModified && !saveData.modifiedGateInstances.Contains(gateInstance))
                 {
@@ -240,7 +240,7 @@ namespace RandomBuffUtils.BuffEvents
 
             RegionGateInstance gateInstance = CreateInstanceForGate(self);
             
-            OnGateLoaded?.Invoke(gateInstance);
+            OnGateLoaded?.SafeInvoke("OnGateLoaded", gateInstance);
 
             if (gateInstance._gateStateModified && !saveData.modifiedGateInstances.Contains(gateInstance))
             {

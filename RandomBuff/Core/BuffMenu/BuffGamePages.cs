@@ -39,6 +39,7 @@ namespace RandomBuff.Core.BuffMenu
             this.menu = selectMenu;
             this.menu.manager = origMenu.manager;
             this.menu.container = origMenu.container;
+            selectMenu.manager.rainWorld.progression.miscProgressionData.redUnlocked = true;
             AddImage(false);
             this.menu = origMenu;
             slugcatImage.menu = origMenu;

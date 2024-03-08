@@ -96,6 +96,11 @@ namespace RandomBuff
             return (T)FormatterServices.GetSafeUninitializedObject(typeof(T));
         }
 
+        public static T GetUninit<T>(Type type)
+        {
+            return (T)FormatterServices.GetSafeUninitializedObject(type);
+        }
+
         public static void BaseUpdate(this Menu.Page page)
         {
             for (int i = 0; i < page.subObjects.Count; i++)

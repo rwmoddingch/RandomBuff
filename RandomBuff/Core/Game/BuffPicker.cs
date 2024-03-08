@@ -40,7 +40,7 @@ namespace RandomBuff.Core.Game
             foreach(var type in types)
                 copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             copyUnique.RemoveAll(alreadyHas.Contains);
-
+            copyUnique.RemoveAll(i => BuffConfigManager.GetStaticData(i).NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
             //TODO: DEBUG
             if (copyUnique.Count < pickCount)
             {

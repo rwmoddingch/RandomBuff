@@ -117,7 +117,7 @@ namespace RandomBuff.Core.Game
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        internal bool UnstackBuff(BuffID id)
+        internal bool UnstackBuff(BuffID id,bool removeBuffInstance = true)
         {
             
             if (!cycleDatas.ContainsKey(id))
@@ -130,17 +130,29 @@ namespace RandomBuff.Core.Game
             if (BuffConfigManager.GetStaticData(id).Stackable)
             {
                 BuffPlugin.LogError($"UnStack buff : {Game.StoryCharacter}");
-                cycleDatas[id].UnStack();
+                try
+                {
+                    cycleDatas[id].UnStack();
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e,$"Exception in BuffPoolManager:UnstackBuff:{id}");
+                }
                 if (cycleDatas[id].StackLayer == 0)
                 {
-                 
-                    RemoveBuffAndData(id);
+                    if(removeBuffInstance)
+                        RemoveBuffAndData(id);
+                    else
+                        RemoveData(id);
                     return true;
                 }
             }
             else
             {
-                RemoveBuffAndData(id);
+                if (removeBuffInstance)
+                    RemoveBuffAndData(id);
+                else
+                    RemoveData(id);
                 return true;
             }
 
@@ -160,11 +172,20 @@ namespace RandomBuff.Core.Game
                 cycleDatas[id].Stack();
                 return cycleDatas[id];
             }
-            var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
-            BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
-            re.Stack();
-            cycleDatas.Add(id, re);
-            return re;
+
+            try
+            {
+                var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
+                BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
+                re.Stack();
+                cycleDatas.Add(id, re);
+                return re;
+            }
+            catch (Exception ex)
+            {
+                BuffPlugin.LogException(ex,$"Exception at BuffPoolManger:CreateNewBuffData:{id}");
+                return null;
+            }
         }
 
         /// <summary>
@@ -243,7 +264,7 @@ namespace RandomBuff.Core.Game
                 try
                 {
                     if (GetBuffData(buff.ID).NeedDeletion)
-                        UnstackBuff(buff.ID);
+                        UnstackBuff(buff.ID,false);
                     
                 }
                 catch (Exception e)
@@ -286,7 +307,11 @@ namespace RandomBuff.Core.Game
             if (!cycleDatas.ContainsKey(id))
             {
                 BuffPlugin.Log($"Buff: {id} Not Contain in CycleData");
-                CreateNewBuffData(id);
+                if (CreateNewBuffData(id) == null)
+                {
+                    BuffPlugin.LogError($"Create BuffData {id} Failed!");
+                    return null;
+                }
             }
             var type = BuffRegister.GetBuffType(id);
             if (type == null)
@@ -295,11 +320,22 @@ namespace RandomBuff.Core.Game
                 return null;
             }
 
-            var buff = (IBuff)Activator.CreateInstance(type);
-            buffDictionary.Add(id, buff);
-            buffList.Add(buff);
-            BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.InGame);
-            return buff;
+            try
+            {
+                var buff = (IBuff)Activator.CreateInstance(type);
+                buffDictionary.Add(id, buff);
+                buffList.Add(buff);
+                BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.InGame);
+                return buff;
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e,$"Exception in BuffPoolManager:CreateBuff:{id}");
+                cycleDatas.Remove(id);
+                return null;
+            }
+
+
         }
 
 
@@ -308,8 +344,18 @@ namespace RandomBuff.Core.Game
             BuffPlugin.Log($"Trigger Buff: {id}, ignoreCheck: {ignoreCheck}");
             if (TryGetBuff(id, out var buff) && ((BuffConfigManager.GetStaticData(id).Triggerable && buff.Triggerable) || ignoreCheck))
             {
-                BuffHud.Instance.TriggerCard(id);
-                if (buff.Trigger(Game))
+                bool re = false;
+                try
+                {
+                    re = buff.Trigger(Game);
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e,$"Exception in BuffPoolManager:TriggerBuff:{id}");
+                }
+
+                BuffHud.Instance.TriggerCard(buff.ID);
+                if (re)
                 {
                     return UnstackBuff(buff.ID);
                 }
@@ -329,10 +375,20 @@ namespace RandomBuff.Core.Game
                 return;
             }
             BuffHookWarpper.DisableBuff(id, HookLifeTimeLevel.InGame);
-            buffDictionary[id].Destroy();
-            buffList.Remove(buffDictionary[id]);
-            buffDictionary.Remove(id);
+            try
+            {
+                buffDictionary[id].Destroy();
 
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception in BuffPoolManager:RemoveBuff:{id}");
+            }
+            finally
+            {
+                buffList.Remove(buffDictionary[id]);
+                buffDictionary.Remove(id);
+            }
         }
 
         /// <summary>
@@ -343,6 +399,11 @@ namespace RandomBuff.Core.Game
         private void RemoveBuffAndData(BuffID id)
         {
             RemoveBuff(id);
+            RemoveData(id);
+        }
+
+        private void RemoveData(BuffID id)
+        {
             BuffPlugin.Log($"Remove buff data : {Game.StoryCharacter}-{id}");
             cycleDatas.Remove(id);
         }
