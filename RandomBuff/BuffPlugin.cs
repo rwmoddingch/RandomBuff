@@ -18,8 +18,10 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Hooks;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuff.Render.CardRender;
 using RandomBuffUtils;
+using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -117,6 +119,7 @@ namespace RandomBuff
 
                     GachaTemplate.Init();
                     Condition.Init();
+                    TypeSerializer.Init();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
@@ -126,8 +129,8 @@ namespace RandomBuff
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
                     isLoaded = true;
 
-
                     //TODO : 测试用
+                    //TestTypeSerializer();
                     DevEnabled = true;
                 }
             }
@@ -136,6 +139,16 @@ namespace RandomBuff
                 LogException(e);
             }
         }
+
+        //private void TestTypeSerializer()
+        //{
+        //    Color color = Color.cyan;
+        //    var se = TypeSerializer.GetSerializer<Color>().Serialize(color);
+        //    Log(se);
+        //    Log(TypeSerializer.GetSerializer<Color>().Deserialize(se));
+        //    Log(TypeSerializer.GetSerializer<IntVector2>().Serialize(new IntVector2(1,2)));
+
+        //}
 
 
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)

@@ -291,7 +291,6 @@ namespace RandomBuff.Core.Entry
                             InternalRegisterBuff(new BuffID(name),
                                 runtimeAss.GetType($"{CurrentModId}.{name}Buff", true),
                                 runtimeAss.GetType($"{CurrentModId}.{name}BuffData", true));
-                            BuffPlugin.LogDebug($"Load RuntimeBuff {name}");
                         }
                     }
                 }
@@ -338,8 +337,9 @@ namespace RandomBuff.Core.Entry
                     if (property.CanWrite)
                         BuffPlugin.LogWarning($"Property {property.Name} can write!");
 
-                    
-            
+                    //TODO:在这里读取属性的默认值到
+                    //BuffConfigManager.GetStaticData(dataType.Key).customParameterDefaultValues[property.Name] =
+
                     var hook = new ILHook(property.GetGetMethod(), (il) =>
                     {
                         il.Instrs.Clear();

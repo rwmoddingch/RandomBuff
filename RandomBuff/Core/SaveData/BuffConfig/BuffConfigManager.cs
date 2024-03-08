@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.SaveData.BuffConfig;
 using UnityEngine;
 
 namespace RandomBuff.Core.SaveData
@@ -75,7 +76,7 @@ namespace RandomBuff.Core.SaveData
             {
                 try
                 {
-                    data = JsonConvert.DeserializeObject(allConfigs[buffName.value][key], type);
+                    data = TypeSerializer.GetSerializer(type).Deserialize(allConfigs[buffName.value][key]);
                     AddLoadedConfig(buffName.value, key, data);
                     return true;
                 }
@@ -89,18 +90,18 @@ namespace RandomBuff.Core.SaveData
             }
 
             if (staticDatas.ContainsKey(buffName) &&
-                staticDatas[buffName].customParameters.ContainsKey(key))
+                staticDatas[buffName].customParameterDefaultValues.ContainsKey(key))
             {
                 try
                 {
-                    data = JsonConvert.DeserializeObject(staticDatas[buffName].customParameters[key], type);
+                    data = TypeSerializer.GetSerializer(type).Deserialize(staticDatas[buffName].customParameterDefaultValues[key]);
                     AddLoadedConfig(buffName.value, key, data);
                     return true;
                 }
                 catch (Exception e)
                 {
                     BuffPlugin.LogException(e);
-                    BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{staticDatas[buffName].customParameters[key]}");
+                    BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{staticDatas[buffName].customParameterDefaultValues[key]}");
                     data = default;
                     return false;
                 }
@@ -146,7 +147,7 @@ namespace RandomBuff.Core.SaveData
             string strData = "";
             try
             {
-               strData = JsonConvert.SerializeObject(obj);
+               strData = TypeSerializer.GetSerializer(obj.GetType()).Serialize(obj);
             }
             catch (Exception e)
             {
@@ -253,7 +254,7 @@ namespace RandomBuff.Core.SaveData
         internal static bool ContainsId(BuffID id)
             => staticDatas.ContainsKey(id);
         internal static bool ContainsProperty(BuffID id, string key)
-            => staticDatas.ContainsKey(id) && staticDatas[id].customParameters.ContainsKey(key);
+            => staticDatas.ContainsKey(id) && staticDatas[id].customParameterDefaultValues.ContainsKey(key);
 
         internal static BuffStaticData GetStaticData(BuffID id)
             => staticDatas[id];

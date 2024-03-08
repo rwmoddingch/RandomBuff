@@ -6,8 +6,11 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Render\UI\BuffCard\**" />
     <Compile Remove="Resources\**" />
+    <EmbeddedResource Remove="Render\UI\BuffCard\**" />
     <EmbeddedResource Remove="Resources\**" />
+    <None Remove="Render\UI\BuffCard\**" />
     <None Remove="Resources\**" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +65,9 @@
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>..\..\RandomGains\includings\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\include\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextCoreModule">
       <HintPath>..\include\UnityEngine.TextCoreModule.dll</HintPath>
     </Reference>
@@ -84,8 +90,5 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>BuffResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Render\UI\BuffCard\" />
   </ItemGroup>
 </Project>
