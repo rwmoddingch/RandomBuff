@@ -85,4 +85,7 @@
       <LastGenOutput>BuffResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Render\UI\BuffCard\" />
+  </ItemGroup>
 </Project>
