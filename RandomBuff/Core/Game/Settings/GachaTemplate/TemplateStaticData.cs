@@ -13,22 +13,27 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
     {
         public static bool TryLoadTemplateStaticData(FileInfo jsonFile, out TemplateStaticData data)
         {
+            return TryLoadTemplateStaticData(jsonFile.Name,File.ReadAllText(jsonFile.FullName),out data);
+        }
+
+
+        public static bool TryLoadTemplateStaticData(string fileName,string str, out TemplateStaticData data)
+        {
             string loadState = "";
             data = new TemplateStaticData();
             try
             {
-                BuffPlugin.Log($"try load template data at {jsonFile.FullName}");
-                var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
+                var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(str);
                 data.Name = rawData[loadState = "Name"].ToString();
                 rawData.Remove("Name");
-                data.Id = (GachaTemplateID)ExtEnumBase.Parse((typeof(GachaTemplateID)),rawData[loadState = "ID"].ToString(),true);
+                data.Id = (GachaTemplateID)ExtEnumBase.Parse((typeof(GachaTemplateID)), rawData[loadState = "ID"].ToString(), true);
                 rawData.Remove("ID");
                 data.datas = rawData;
                 return true;
             }
             catch (Exception e)
             {
-                BuffPlugin.LogError($"Load template json file failed! at {jsonFile.Name}-{loadState}");
+                BuffPlugin.LogError($"Load template json file failed! at {fileName}-{loadState}");
                 BuffPlugin.LogException(e);
                 return false;
             }

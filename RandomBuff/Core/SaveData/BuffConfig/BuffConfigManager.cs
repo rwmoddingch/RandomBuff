@@ -322,6 +322,15 @@ namespace RandomBuff.Core.SaveData
                     }
                 }
             }
+
+            if (templateDatas.Count == 0)
+            {
+                BuffPlugin.LogWarning("Missing Template, Load fallback template");
+                if (TemplateStaticData.TryLoadTemplateStaticData("FallBackNormalTemplate",BuffResource.NormalTemplate, out var data))
+                {
+                    templateDatas.Add(data.Name, data);
+                }
+            }
         }
 
 

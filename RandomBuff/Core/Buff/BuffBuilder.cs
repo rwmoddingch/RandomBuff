@@ -20,7 +20,8 @@ namespace RandomBuff.Core.Buff
 {
     internal static class BuffBuilder
     {
-        public static (TypeDefinition buffType, TypeDefinition dataType) GenerateBuffType(string modId, string usedId,bool needRegisterId = false,
+        public static (TypeDefinition buffType, TypeDefinition dataType) 
+            GenerateBuffType(string modId, string usedId,bool needRegisterId = false,
             Action<ILProcessor> buffCtor = null,
             Action<ILProcessor> dataCtor = null)
         {
@@ -153,7 +154,7 @@ namespace RandomBuff.Core.Buff
                 var method = type.DefineMethodOverride($"set_{propertyName}", returnType, Type.EmptyTypes, attr, setBuilder);
                 property.SetMethod = method;
             }
-
+            type.Properties.Add(property);
             return property;
         }
 

@@ -77,5 +77,20 @@ namespace RandomBuff {
                 return ResourceManager.GetString("GB2312", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 {
+        ///    &quot;Name&quot; : &quot;Normal&quot;,
+        ///    &quot;ID&quot; :&quot;Normal&quot;,
+        ///    &quot;ExpMultiply&quot;: 1,
+        ///    &quot;PCount&quot; : 1,
+        ///    &quot;NCount&quot; : 1
+        ///} 的本地化字符串。
+        /// </summary>
+        internal static string NormalTemplate {
+            get {
+                return ResourceManager.GetString("NormalTemplate", resourceCulture);
+            }
+        }
     }
 }
