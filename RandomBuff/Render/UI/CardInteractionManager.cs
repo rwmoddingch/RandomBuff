@@ -392,7 +392,6 @@ namespace RandomBuff.Render.UI
             }
         }
 
-
         protected override void OnMouseDoubleClick()
         {
             if (overrideDisabled || !canTriggerBuff)
@@ -493,15 +492,6 @@ namespace RandomBuff.Render.UI
 
             public void Update()
             {
-                foreach(var id in triggerableBuffIDs)
-                {
-                    if(BuffInput.GetKeyDown(BuffPlayerData.Instance.GetKeyBind(id)))
-                    {
-                        BuffPlugin.Log($"Trigger card {id} by shorcut key {BuffPlayerData.Instance.GetKeyBind(id)}");
-                        manager.TriggerCard(id);
-                    }
-                }
-
                 if (manager.currentState == State.ExclusiveShow)
                 {
                     if (Input.GetKey(BindKeyButton))
@@ -519,6 +509,17 @@ namespace RandomBuff.Render.UI
                     {
                         if (listenerEnable)
                             DisableListen();
+                    }
+                }
+                else
+                {
+                    foreach (var id in triggerableBuffIDs)
+                    {
+                        if (BuffInput.GetKeyDown(BuffPlayerData.Instance.GetKeyBind(id)))
+                        {
+                            BuffPlugin.Log($"Trigger card {id} by shorcut key {BuffPlayerData.Instance.GetKeyBind(id)}");
+                            manager.TriggerCard(id);
+                        }
                     }
                 }
             }
@@ -544,6 +545,8 @@ namespace RandomBuff.Render.UI
             {
                 BuffPlugin.Log("Keybinder disable listen");
                 listenerEnable = false;
+                lastKey = null;
+                keyAlreadyGetted = false;
                 BuffInput.OnAnyKeyDown -= BuffInput_OnAnyKeyDown;
             }
 
