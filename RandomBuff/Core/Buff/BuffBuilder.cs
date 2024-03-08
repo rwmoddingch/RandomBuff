@@ -173,8 +173,6 @@ namespace RandomBuff.Core.Buff
 
                 return null;
             }
-
-            return null;
         }
 
 

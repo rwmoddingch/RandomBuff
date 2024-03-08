@@ -232,15 +232,19 @@ namespace RandomBuff.Core.Buff
 
                 if (rawData.ContainsKey("Custom"))
                 {
-                    var customObject = (JObject)rawData["Custom"];
+                    var customObject = (JArray)rawData["Custom"];
                     foreach (var data in customObject)
                     {
-                        if (data.Value == null)
+                        if (data is not JObject param)
                         {
-                            BuffPlugin.LogWarning($"Null JToken at Custom:{data.Key} At {jsonFile.Name}");
+                            BuffPlugin.LogWarning($"Error JToken at Custom:{data} At {jsonFile.Name}");
                             continue;
                         }
-                        newData.customParameters.Add(data.Key,data.Value.ToString());
+                        newData.customParameterNames.Add((string)param.GetValue(loadState = "PropertyName"),
+                            (string)param.GetValue(loadState = "DisplayName"));
+
+                        newData.customParameterDefaultValues.Add((string)param.GetValue(loadState = "PropertyName"),string.Empty);
+                        //BuffPlugin.LogDebug($"Load {newData.BuffID} CustomParameter :{(string)param.GetValue(loadState = "PropertyName")}");
                     }
                 }
 
@@ -269,7 +273,7 @@ namespace RandomBuff.Core.Buff
 
         }
 
-        internal static void GetCustomStaticBuffData(BuffData data,BuffStaticData staticData,Dictionary<string,object> customArgs)
+        internal static void GetCustomStaticBuffData(BuffData data, BuffStaticData staticData, Dictionary<string,object> customArgs)
         {
             if (data is CountableBuffData countable)
             {
@@ -301,13 +305,22 @@ namespace RandomBuff.Core.Buff
                 builder.AppendLine($"---BuffName: {info.Value.BuffName}");
                 builder.AppendLine($"---Description: {info.Value.Description}");
             }
+            builder.AppendLine("Custom Parameters : ");
+            foreach (var info in customParameterNames)
+            {
+                builder.AppendLine($"------");
+                builder.AppendLine($"---PropertyName: {info.Key}");
+                builder.AppendLine($"---DisplayName: {info.Value}");
+            }
             return builder.ToString();
         }
 
 
         internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; } = new();
 
-        internal Dictionary<string,string> customParameters = new();
+        internal Dictionary<string, string> customParameterNames = new();
+        internal Dictionary<string, string> customParameterDefaultValues = new();
+
 
     }
 
