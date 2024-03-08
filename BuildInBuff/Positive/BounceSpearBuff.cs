@@ -24,16 +24,12 @@ using RandomBuff.Core.Entry;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class BounceSpearBuffData : BuffData
+    internal class BounceSpearBuffData : CountableBuffData
     {
-        [JsonProperty]
-        int cycleLeft;
-
-        public override bool NeedDeletion => cycleLeft <= 0;
+ 
 
         public override BuffID ID => BounceSpearBuffHooks.bounceSpearID;
-
-
+        public override int MaxCycleCount => 3;
     }
     internal class BounceSpearBuff : Buff<BounceSpearBuff, BounceSpearBuffData>
     {

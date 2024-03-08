@@ -10,15 +10,7 @@ using System.Threading.Tasks;
 
 namespace BuiltinBuffs.Duality 
 {
-    internal class RamenpedeBuff : Buff<RamenpedeBuff, RamenpedeBuffData>
-    {
-        public override BuffID ID => RamenpedeBuffEntry.ramenpedeBuffID;
-    }
 
-    internal class RamenpedeBuffData : BuffData 
-    {
-        public override BuffID ID => RamenpedeBuffEntry.ramenpedeBuffID;
-    }
 
     internal class RamenpedeBuffEntry : IBuffEntry
     {
@@ -26,7 +18,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<RamenpedeBuff, RamenpedeBuffData, RamenpedeBuffEntry>(ramenpedeBuffID);
+            BuffRegister.RegisterBuff<RamenpedeBuffEntry>(ramenpedeBuffID);
         }
 
         public static void HookOn()

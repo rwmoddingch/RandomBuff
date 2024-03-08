@@ -7,15 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class DozerBuff : Buff<DozerBuff, DozerBuffData>
-    {
-        public override BuffID ID => DozerBuffEntry.dozerBuffID;
-    }
 
-    internal class DozerBuffData : BuffData
-    {
-        public override BuffID ID => DozerBuffEntry.dozerBuffID;
-    }
 
     internal class DozerBuffEntry : IBuffEntry
     {
@@ -25,7 +17,7 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<DozerBuff, DozerBuffData, DozerBuffEntry>(dozerBuffID);
+            BuffRegister.RegisterBuff<DozerBuffEntry>(dozerBuffID);
         }
 
         public static void HookOn()

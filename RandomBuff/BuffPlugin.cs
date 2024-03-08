@@ -121,7 +121,6 @@ namespace RandomBuff
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
                     BuffRegister.InitAllBuffPlugin();
-
                     BuffUtils.OnEnable();
                     if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
@@ -192,8 +191,8 @@ namespace RandomBuff
                     }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
-                    BuffConfigManager.InitTemplateStaticData();
                     BuffRegister.BuildAllDataStaticWarpper();
+                    BuffConfigManager.InitTemplateStaticData();
                     isPostLoaded = true;
                 }
             }

@@ -12,15 +12,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class HerbicideBuff : Buff<HerbicideBuff, HerbicideBuffData>
-    {
-        public override BuffID ID => HerbicideIBuffEntry.HerbicideBuffID;
-    }
 
-    internal class HerbicideBuffData : BuffData
-    {
-        public override BuffID ID => HerbicideIBuffEntry.HerbicideBuffID;
-    }
 
     internal class HerbicideIBuffEntry : IBuffEntry
     {
@@ -28,7 +20,7 @@ namespace BuiltinBuffs.Positive
 
         public  void OnEnable()
         {
-            BuffRegister.RegisterBuff<HerbicideBuff, HerbicideBuffData, HerbicideIBuffEntry>(HerbicideBuffID);
+            BuffRegister.RegisterBuff<HerbicideIBuffEntry>(HerbicideBuffID);
         }
 
         public static void HookOn()

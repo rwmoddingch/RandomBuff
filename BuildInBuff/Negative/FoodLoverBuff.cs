@@ -10,15 +10,7 @@ using RandomBuff.Core.Entry;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class FoodLoverBuff : Buff<FoodLoverBuff, FoodLoverBuffData>
-    {
-        public override BuffID ID => FoodLoverIBuffEntry.FoodLoverBuffID;
-    }
 
-    internal class FoodLoverBuffData : BuffData
-    {
-        public override BuffID ID => FoodLoverIBuffEntry.FoodLoverBuffID;
-    }
 
     internal class FoodLoverIBuffEntry : IBuffEntry
     {
@@ -26,7 +18,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<FoodLoverBuff, FoodLoverBuffData, FoodLoverIBuffEntry>(FoodLoverBuffID);
+            BuffRegister.RegisterBuff<FoodLoverIBuffEntry>(FoodLoverBuffID);
         }
 
         public static void HookOn()

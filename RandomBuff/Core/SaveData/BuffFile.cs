@@ -128,8 +128,6 @@ namespace RandomBuff.Core.SaveData
 
         private UserData.File buffCoreFile;
 
-
-
         private BuffFile()
         {
             buffCoreFile = null;
@@ -240,7 +238,6 @@ namespace RandomBuff.Core.SaveData
                 BuffPlugin.Log($"Buff file version : [{fileVersion}], current version : [{BuffPlugin.saveVersion}]");
                 BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), fileVersion);
                 BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), fileVersion);
-
                 BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get<string>("buff-player"), fileVersion);
 
                 Platform.NotifyUserDataReadCompleted(this);

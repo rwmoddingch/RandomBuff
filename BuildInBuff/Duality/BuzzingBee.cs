@@ -10,15 +10,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class BuzzingBeeBuff : Buff<BuzzingBeeBuff, BuzzingBeeBuffData>
-    {
-        public override BuffID ID => BuzzingBeeBuffEntry.buzzingBeeBuffID;
-    }
 
-    internal class BuzzingBeeBuffData : BuffData
-    {
-        public override BuffID ID => BuzzingBeeBuffEntry.buzzingBeeBuffID;
-    }
 
     internal class BuzzingBeeBuffEntry : IBuffEntry
     {
@@ -26,7 +18,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<BuzzingBeeBuff, BuzzingBeeBuffData, BuzzingBeeBuffEntry>(buzzingBeeBuffID);
+            BuffRegister.RegisterBuff<BuzzingBeeBuffEntry>(buzzingBeeBuffID);
             
         }
 

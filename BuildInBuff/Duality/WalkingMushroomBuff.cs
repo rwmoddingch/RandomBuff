@@ -12,15 +12,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class WalkingMushroomBuff : Buff<WalkingMushroomBuff, WalkingMushroomBuffData>
-    {
-        public override BuffID ID => WalkingMushroomIBuffEntry.WalkingMushroomBuffID;
-    }
-
-    internal class WalkingMushroomBuffData : BuffData
-    {
-        public override BuffID ID => WalkingMushroomIBuffEntry.WalkingMushroomBuffID;
-    }
+ 
 
     internal class WalkingMushroomIBuffEntry : IBuffEntry
     {
@@ -30,7 +22,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<WalkingMushroomBuff, WalkingMushroomBuffData, WalkingMushroomIBuffEntry>(WalkingMushroomBuffID);
+            BuffRegister.RegisterBuff<WalkingMushroomIBuffEntry>(WalkingMushroomBuffID);
         }
 
         public static void HookOn()
@@ -42,10 +34,11 @@ namespace BuiltinBuffs.Duality
         private static void Mushroom_Update(On.Mushroom.orig_Update orig, Mushroom self, bool eu)
         {
             orig.Invoke(self, eu);
-            if(mushroomModules.TryGetValue(self, out var module))
-            {
-                module.Update(self);
-            }
+
+            if (!mushroomModules.TryGetValue(self, out var module))
+                mushroomModules.Add(self, module = new MushroomModule(self));
+
+            module.Update(self);
         }
 
         private static void Mushroom_ctor(On.Mushroom.orig_ctor orig, Mushroom self, AbstractPhysicalObject abstractPhysicalObject)

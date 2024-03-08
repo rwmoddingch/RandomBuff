@@ -12,15 +12,7 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class Hypothermia : Buff<Hypothermia, HypothermiaData>
-    {
-        public override BuffID ID => HypothermiaIBuffEntry.HypothermiaID;
-    }
 
-    internal class HypothermiaData : BuffData
-    {
-        public override BuffID ID => HypothermiaIBuffEntry.HypothermiaID;
-    }
 
     internal class HypothermiaIBuffEntry : IBuffEntry
     {
@@ -28,7 +20,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<Hypothermia, HypothermiaData, HypothermiaIBuffEntry>(HypothermiaID);
+            BuffRegister.RegisterBuff<HypothermiaIBuffEntry>(HypothermiaID);
         }
 
         public static void HookOn()

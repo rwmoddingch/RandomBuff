@@ -12,15 +12,7 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class PoppingCandyBuff : Buff<PoppingCandyBuff, PoppingCandyBuffData>
-    {
-        public override BuffID ID => PoppingCandyIBuffEntry.PoppingCandyBuffID;
-    }
 
-    internal class PoppingCandyBuffData : BuffData
-    {
-        public override BuffID ID => PoppingCandyIBuffEntry.PoppingCandyBuffID;
-    }
 
     internal class PoppingCandyIBuffEntry : IBuffEntry
     {
@@ -28,7 +20,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<PoppingCandyBuff, PoppingCandyBuffData, PoppingCandyIBuffEntry>(PoppingCandyBuffID);
+            BuffRegister.RegisterBuff<PoppingCandyIBuffEntry>(PoppingCandyBuffID);
         }
 
         public static void HookOn()

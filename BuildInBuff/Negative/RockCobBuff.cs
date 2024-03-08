@@ -17,15 +17,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class RockCobBuff : Buff<RockCobBuff, RockCobBuffData>
-    {
-        public override BuffID ID => RockCobIBuffEntry.RockCobBuffID;
-    }
 
-    internal class RockCobBuffData : BuffData
-    {
-        public override BuffID ID => RockCobIBuffEntry.RockCobBuffID;
-    }
 
     internal class RockCobIBuffEntry : IBuffEntry
     {
@@ -33,7 +25,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<RockCobBuff, RockCobBuffData, RockCobIBuffEntry>(RockCobBuffID); 
+            BuffRegister.RegisterBuff<RockCobIBuffEntry>(RockCobBuffID); 
         }
 
         public static void HookOn()

@@ -15,15 +15,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class ArmstronBuff : Buff<ArmstronBuff, ArmstronBuffData>
-    {
-        public override BuffID ID => ArmstronIBuffEntry.ArmstronBuffID;
-    }
 
-    internal class ArmstronBuffData : BuffData
-    {
-        public override BuffID ID => ArmstronIBuffEntry.ArmstronBuffID;
-    }
 
     internal class ArmstronIBuffEntry : IBuffEntry
     {
@@ -31,7 +23,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<ArmstronBuff, ArmstronBuffData, ArmstronIBuffEntry>(ArmstronBuffID);
+            BuffRegister.RegisterBuff<ArmstronIBuffEntry>(ArmstronBuffID);
             //On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
         }
 

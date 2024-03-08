@@ -7,15 +7,7 @@ using RandomBuff.Core.Entry;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class NoodleHandBuff : Buff<NoodleHandBuff, NoodleHandBuffData>
-    {
-        public override BuffID ID => NoodleHandIBuffEntry.noodleHandBuffID;
-    }
 
-    internal class NoodleHandBuffData : BuffData
-    {
-        public override BuffID ID => NoodleHandIBuffEntry.noodleHandBuffID;
-    }
 
     internal class NoodleHandIBuffEntry : IBuffEntry
     {
@@ -23,7 +15,7 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<NoodleHandBuff, NoodleHandBuffData, NoodleHandIBuffEntry>(noodleHandBuffID);
+            BuffRegister.RegisterBuff<NoodleHandIBuffEntry>(noodleHandBuffID);
         }
 
         public static void HookOn()

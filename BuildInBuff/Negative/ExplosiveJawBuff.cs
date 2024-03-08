@@ -16,15 +16,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class ExplosiveJawBuffData : BuffData
-    {
-        public override BuffID ID => ExplosiveJawIBuffEntry.explosiveJawBuffID;
-    }
 
-    internal class ExplosiveJawBuff : Buff<ExplosiveJawBuff, ExplosiveJawBuffData>
-    {
-        public override BuffID ID => ExplosiveJawIBuffEntry.explosiveJawBuffID;
-    }
 
     internal class ExplosiveJawIBuffEntry : IBuffEntry
     {
@@ -51,7 +43,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<ExplosiveJawBuff, ExplosiveJawBuffData, ExplosiveJawIBuffEntry>(
+            BuffRegister.RegisterBuff<ExplosiveJawIBuffEntry>(
                 explosiveJawBuffID);
         }
     }

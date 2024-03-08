@@ -12,15 +12,7 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class PandoraBoxBuff : Buff<PandoraBoxBuff, PandoraBoxBuffData>
-    {
-        public override BuffID ID => PandoraBoxIBuffEntry.PandoraBoxBuffID;
-    }
 
-    internal class PandoraBoxBuffData : BuffData
-    {
-        public override BuffID ID => PandoraBoxIBuffEntry.PandoraBoxBuffID;
-    }
 
     internal class PandoraBoxIBuffEntry : IBuffEntry
     {
@@ -29,7 +21,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<PandoraBoxBuff, PandoraBoxBuffData, PandoraBoxIBuffEntry>(PandoraBoxBuffID);
+            BuffRegister.RegisterBuff<PandoraBoxIBuffEntry>(PandoraBoxBuffID);
             session = Helper.GetUninit<SandboxGameSession>();
             session.game = Helper.GetUninit<RainWorldGame>();
             session.game.overWorld = Helper.GetUninit<OverWorld>();

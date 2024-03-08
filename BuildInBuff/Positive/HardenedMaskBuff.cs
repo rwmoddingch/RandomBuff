@@ -15,15 +15,6 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class HardenedMaskBuff : Buff<HardenedMaskBuff, HardenedMaskBuffData>
-    {
-        public override BuffID ID => HardenedMaskIBuffEntry.HardenedMaskBuffID;
-    }
-
-    internal class HardenedMaskBuffData : BuffData
-    {
-        public override BuffID ID => HardenedMaskIBuffEntry.HardenedMaskBuffID;
-    }
 
     internal class HardenedMaskIBuffEntry : IBuffEntry
     {
@@ -33,7 +24,7 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<HardenedMaskBuff, HardenedMaskBuffData, HardenedMaskIBuffEntry>(HardenedMaskBuffID);
+            BuffRegister.RegisterBuff<HardenedMaskIBuffEntry>(HardenedMaskBuffID);
         }
 
         public static void HookOn()
