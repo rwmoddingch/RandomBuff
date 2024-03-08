@@ -65,7 +65,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayName(InGameTranslator translator)
         {
-            return translator.Translate($"Earn <> passage").Replace("<>",
+            return string.Format(translator.Translate("Earn {0} passage"),
                 translator.Translate(WinState.PassageDisplayName(achievementID)));
         }
 

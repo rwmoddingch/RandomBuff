@@ -27,23 +27,24 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
         public override bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions = null)
+            List<Condition> sameConditions)
         {
-            sameConditions ??= new List<Condition>();
             List<string> list = new() { "all", "Positive", "Negative", "Duality" };
-            if (sameConditions.Any(i => (i as CardCondition).all))
-                list.Remove("all");
+    
 
             foreach (var condition in sameConditions.Select(i => i as CardCondition))
-                if(!condition.all && list.Contains(condition.type.ToString()))
+                if(condition.all)
+                    list.Remove("all");
+                else if (!condition.all && list.Contains(condition.type.ToString()))
                     list.Remove(condition.type.ToString());
 
             var current = list[Random.Range(0, list.Count)];
-            if (current == "all")
-                all = true;
-            else
-                type = (BuffType)Enum.Parse(typeof(BuffType),current);
-            
+            if (current != "all")
+            {
+                all = false;
+                type = (BuffType)Enum.Parse(typeof(BuffType), current);
+            }
+
             needCard = (int)Random.Range(Mathf.Lerp(5, 10, difficulty), Mathf.Lerp(10, 15, difficulty)) / (all ? 1: 2);
             BuffPlugin.LogDebug($"Add Card Condition {needCard}:{current}");
             return list.Count != 1;
@@ -91,7 +92,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public int currentCard;
 
         [JsonProperty]
-        public bool all;
+        public bool all = true;
         
         [JsonProperty]
         public BuffType type;

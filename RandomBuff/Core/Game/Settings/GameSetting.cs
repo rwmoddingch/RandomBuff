@@ -36,6 +36,9 @@ namespace RandomBuff.Core.Game.Settings
 
         private SlugcatStats.Name name;
 
+        public HashSet<ConditionID> cantAddMore = new();
+
+        public List<BuffID> fallbackPick = null;
 
         public GameSetting(SlugcatStats.Name name)
         {
@@ -158,18 +161,13 @@ namespace RandomBuff.Core.Game.Settings
                 return;
             }
             TemplateName = name;
-            if (BuffPlugin.DevEnabled)
-            {
-                ClearCondition();
-                BuffPlugin.Log($"{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore},{GetRandomCondition().canGetMore}");
-            }
         }
 
         public Condition CreateNewCondition(ConditionID id)
         {
             var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
             var same = conditions.Where(i => i.ID == id);
-            if(!re.SetRandomParameter(name, Difficulty, same.Any() ? same.ToList() : null))
+            if(!re.SetRandomParameter(name, Difficulty, same.ToList()))
                 cantAddMore.Add(re.ID);
             conditions.Add(re);
             return re;
@@ -309,8 +307,6 @@ namespace RandomBuff.Core.Game.Settings
             }
         }
 
-        public List<BuffID> fallbackPick = null;
-
         public string SaveToString()
         {
             if (MissingDependence)
@@ -328,7 +324,7 @@ namespace RandomBuff.Core.Game.Settings
             return builder.ToString();
         }
 
-        public HashSet<ConditionID> cantAddMore = new ();
+
 
     }
 }

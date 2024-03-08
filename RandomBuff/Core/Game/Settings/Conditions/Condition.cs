@@ -23,7 +23,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             Cycle = new ConditionID("Cycle", true);
             Card = new ConditionID("Card", true);
-            Hunt = new ConditionID("Hunt", true);
+            //Hunt = new ConditionID("Hunt", true);
             Achievement = new ConditionID("Achievement", true);
 
         }
@@ -36,8 +36,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class Condition
     {
-        public abstract ConditionID ID {get;}
-
+        public abstract ConditionID ID { get; }
 
         /// <summary>
         /// 完成获取的经验值
@@ -78,6 +77,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         private Action<Condition> onUncompleted;
 
         //当文本更改时触发
+        //记得调用————
         protected Action<Condition> onLabelRefresh;
 
         //轮回结束结算
@@ -88,8 +88,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         //设置随机条件
         //如果可以重复第二项则为已有同类型的列表
+        //返回true代表可以继续选择本类型
         public abstract bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions = null);
+            List<Condition> sameConditions);
 
         //获取进度
         public abstract string DisplayProgress(InGameTranslator translator);

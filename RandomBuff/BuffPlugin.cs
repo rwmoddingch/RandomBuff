@@ -5,8 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Security.Permissions;
+using System.Security.Policy;
 using BepInEx;
+using BepInEx.Logging;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
@@ -33,16 +36,24 @@ namespace RandomBuff
     [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
     internal class BuffPlugin : BaseUnityPlugin
     {
-        public const string saveVersion = "a-0.0.4";
+        public static BuffFormatVersion saveVersion = new ("a-0.0.5");
+
+        public static BuffFormatVersion outDateVersion = new("a-0.0.3");
+
+        internal static ManualLogSource LogInstance { get; private set; }
+
         internal static BuffPlugin Instance { get; private set; }
+
 
         public void OnEnable()
         {
+            LogInstance = this.Logger;
             Instance = this;
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
                 On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+           
             }
             catch (Exception e)
             {
@@ -52,7 +63,7 @@ namespace RandomBuff
 
         private void Update()
         {
-            Render.CardRender.CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
+            CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
@@ -84,6 +95,13 @@ namespace RandomBuff
             {
                 LogException(e);
             }
+
+            OnModsInit();
+        }
+
+
+        private void OnModsInit()
+        {
             try
             {
                 if (!isLoaded)
@@ -95,7 +113,7 @@ namespace RandomBuff
                         DevEnabled = true;
                         LogWarning("Debug Enable");
                     }
-                    Render.CardRender.CardBasicAssets.LoadAssets();
+                    CardBasicAssets.LoadAssets();
 
                     GachaTemplate.Init();
                     Condition.Init();
@@ -107,10 +125,9 @@ namespace RandomBuff
                     BuffUtils.OnEnable();
                     if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-
                     isLoaded = true;
 
-                 
+
                     //TODO : 测试用
                     DevEnabled = true;
                 }
@@ -163,6 +180,16 @@ namespace RandomBuff
             {
                 if (!isPostLoaded)
                 {
+                    if (!isLoaded)
+                    {
+                        LogError("Fallback Call OnModsInit");
+                        OnModsInit();
+                        if (!isLoaded)
+                        {
+                            LogFatal("Can't call OnModsInit !!!!!!");
+                            return;
+                        }
+                    }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
                     BuffConfigManager.InitTemplateStaticData();

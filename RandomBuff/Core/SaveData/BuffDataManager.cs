@@ -72,7 +72,7 @@ namespace RandomBuff.Core.SaveData
     internal sealed partial class BuffDataManager
     {
 
-        internal static bool LoadData(string file,string formatVersion)
+        internal static bool LoadData(string file, BuffFormatVersion formatVersion)
         {
             Instance = new BuffDataManager();
             return Instance.InitStringData(file,formatVersion);
@@ -117,10 +117,20 @@ namespace RandomBuff.Core.SaveData
             {
                 if (createOrStack)
                 {
-                    allDatas[name].Add(id, (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id)));
-                    allDatas[name][id].DataLoaded(true);
-                    BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
-                    BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
+                    try
+                    {
+                        var data = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
+                        data.DataLoaded(true);
+                        BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
+                        BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
+                        allDatas[name].Add(id, data);
+
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e,$"Exception in BuffDataManager:GetOrCreateBuffData:{id}");
+                    }
+                  
                 }
                 else
                     return null;
@@ -170,7 +180,17 @@ namespace RandomBuff.Core.SaveData
                 BuffPlayerData.Instance.AddCollect(id);
 
             foreach (var data in allDatas[name])
-                data.Value.CycleEnd();
+            {
+                try
+                {
+                    data.Value.CycleEnd();
+
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e,$"Exception at BuffData:CycleEnd:{data.Key}");
+                }
+            }
         }
 
 
@@ -250,6 +270,7 @@ namespace RandomBuff.Core.SaveData
         internal string ToStringData()
         {
             StringBuilder builder = new();
+            builder.Append($"BUFFDATA{SettingSubSplit}");
             foreach (var catData in allDatas)
             {
                 builder.Append(catData.Key);
@@ -291,10 +312,12 @@ namespace RandomBuff.Core.SaveData
                 builder.Append(ukCatData);
                 builder.Append(CatSplit);
             }
+            builder.Append(SettingSplit);
 
             //---------------------设置-------------------//
 
-            builder.Append(SettingSplit);
+            builder.Append($"SETTINGS{SettingSubSplit}");
+
             foreach (var catSetting in gameSettings)
             {
                 builder.Append(catSetting.Key);
@@ -308,6 +331,10 @@ namespace RandomBuff.Core.SaveData
                 builder.Append(ukCatSetting);
                 builder.Append(CatSplit);
             }
+            builder.Append(SettingSplit);
+
+            foreach (var ukData in unrecognizedSaveStrings)
+                builder.Append($"{ukData}{SettingSplit}");
 
             return builder.ToString();
         }
@@ -318,24 +345,66 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
-        private bool InitStringData(string file, string formatVersion)
+        private bool InitStringData(string file, BuffFormatVersion formatVersion)
         {
-
             var split = Regex.Split(file, SettingSplit)
                 .Where(i => !string.IsNullOrEmpty(i)).ToArray();
-            if (split.Length == 0)
+
+            // TODO: 正式版删除
+            if (formatVersion < new BuffFormatVersion("a-0.0.5"))
             {
-                BuffPlugin.LogWarning($"Empty data !");
-                return false;
+                BuffPlugin.LogWarning($"Update FormatVersion from {formatVersion} to {BuffPlugin.saveVersion}");
+                if (split.Length == 0)
+                {
+                    BuffPlugin.LogWarning($"Empty data !");
+                    return false;
 
+                }
+                InitStringBuffData(split[0],formatVersion);
+                if (split.Length <= 1)
+                    BuffPlugin.LogWarning($"Missing Setting data !");
+                else
+                    InitStringSetting(split[1], formatVersion);
+                return true;
             }
-            file = split[0];
-            if (split.Length <= 1)
-                BuffPlugin.LogWarning($"Missing Setting data !");
-            else
-                InitStringSetting(split[1], formatVersion);
+
+        
+
+            foreach (var data in split)
+            {
+                var dataSplit = Regex.Split(data, SettingSubSplit);
+                if (dataSplit.Length <= 1)
+                {
+                    BuffPlugin.LogError($"Corrupted Data at :{data}");
+                    continue;
+                }
+
+                switch (dataSplit[0])
+                {
+                    case "BUFFDATA":
+                        InitStringBuffData(dataSplit[1],formatVersion);
+                        break;
+                    case "SETTINGS":
+                        InitStringSetting(dataSplit[1],formatVersion);
+                        break;
+                    default:
+                        unrecognizedSaveStrings.Add(data);
+                        break;
+                }
+            }
+            BuffPlugin.Log("Completed loaded buff data");
+            return true;
+        }
 
 
+        /// <summary>
+        /// 初始化存档信息
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        private void InitStringBuffData(string file, BuffFormatVersion version)
+        {
             foreach (var catSingle in Regex.Split(file, CatSplit)
                          .Where(i => !string.IsNullOrEmpty(i)))
             {
@@ -416,22 +485,15 @@ namespace RandomBuff.Core.SaveData
                 }
 
             }
-
-            return true;
         }
 
         /// <summary>
         /// 初始化setting信息
         /// </summary>
-        /// <param name="data"></param>
-        ///  <param name="version"></param>
-        private void InitStringSetting(string file, string version)
+        /// <param name="file"></param>
+        /// <param name="version"></param>
+        private void InitStringSetting(string file, BuffFormatVersion version)
         {
-            if (version == "a-0.0.2")
-            {
-                BuffPlugin.LogWarning("Remove OutDate settings.");
-                return;
-            }
 
             foreach (var catSingle in Regex.Split(file, CatSplit)
                          .Where(i => !string.IsNullOrEmpty(i)))
@@ -457,7 +519,7 @@ namespace RandomBuff.Core.SaveData
 
                 if (!GameSetting.TryLoadGameSetting(slugName, catSplit[1], out var setting))
                     setting = new GameSetting(slugName);
-                BuffPlugin.LogDebug($"{catSplit[0]}, {catSplit[1]}");
+                //BuffPlugin.LogDebug($"{catSplit[0]}, {catSplit[1]}");
                 gameSettings.Add(slugName,setting);
 
             }
@@ -480,6 +542,7 @@ namespace RandomBuff.Core.SaveData
         private readonly Dictionary<SlugcatStats.Name, GameSetting> gameSettings = new();
         private readonly List<string> ukSlugcatSettings = new();
 
+        private readonly List<string> unrecognizedSaveStrings = new ();
 
         private const string CatSplit = " <BuA>";
         private const string CatIdSplit = "<BuAI>";
@@ -488,6 +551,8 @@ namespace RandomBuff.Core.SaveData
         private const string BuffIdSplit = "<BuBI>";
 
         private const string SettingSplit = "<BuS>";
+        private const string SettingSubSplit = "<BuSI>";
+
     }
 
 }

@@ -57,7 +57,7 @@ namespace RandomBuffUtils.BuffEvents
             if (!saveData.IsRoomReached(room))
             {
                 saveData.ReachRoom(room);
-                OnRoomReached?.Invoke(room);
+                OnRoomReached?.SafeInvoke("OnRoomReached", room);
 
                 BuffUtils.Log("BuffRoomReachEvent", $"Reach room {room.name} for the first time");
             }

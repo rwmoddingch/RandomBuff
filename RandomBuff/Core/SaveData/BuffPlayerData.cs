@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using UnityEngine;
@@ -16,13 +17,67 @@ namespace RandomBuff.Core.SaveData
             Instance = this;
         }
 
-        public static void LoadBuffPlayerData(string rawData)
+        protected BuffPlayerData(string file, BuffFormatVersion formatVersion) 
+        {
+            var split = Regex.Split(file, PlayerDataSplit)
+                .Where(i => !string.IsNullOrEmpty(i)).ToArray();
+            foreach (var item in split)
+            {
+                var dataSplit = Regex.Split(item, PlayerDataSubSplit);
+                if (dataSplit.Length <= 1)
+                {
+                    BuffPlugin.LogError($"Corrupted PlayerData at :{item}");
+                    continue;
+                }
+
+                switch (dataSplit[0])
+                {
+                    case "COLLECT":
+                        collectData = JsonConvert.DeserializeObject<List<string>>(dataSplit[1]);
+                        break;
+                    case "KEYBIND":
+                        keyBindData = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataSplit[1]);
+                        break;
+                    case "EXP":
+                        playerTotExp = float.Parse(dataSplit[1]);
+                        break;
+                    default:
+                        unrecognizedSaveStrings.Add(item);
+                        break;
+                }
+            }
+            Instance = this;
+
+            BuffPlugin.Log("Completed loaded player data");
+
+        }
+
+        internal string ToStringData()
+        {
+            StringBuilder builder = new();
+            builder.Append($"COLLECT{PlayerDataSubSplit}{JsonConvert.SerializeObject(collectData)}{PlayerDataSplit}");
+            builder.Append($"KEYBIND{PlayerDataSubSplit}{JsonConvert.SerializeObject(keyBindData)}{PlayerDataSplit}");
+            builder.Append($"EXP{PlayerDataSubSplit}{playerTotExp}{PlayerDataSplit}");
+
+            foreach(var item in unrecognizedSaveStrings)
+                builder.Append($"{item}{PlayerDataSplit}");
+            return builder.ToString();
+        }
+
+        public static void LoadBuffPlayerData(string rawData, BuffFormatVersion formatVersion)
         {
             try
-            {
-                var newData = JsonConvert.DeserializeObject<BuffPlayerData>(rawData) ?? new BuffPlayerData();
-                newData.keyBindData ??= new Dictionary<string, string>();
-                newData.collectData ??= new List<string>();
+            {   // TODO: 正式版删除
+                if (formatVersion < new BuffFormatVersion("a-0.0.5"))
+                {
+                    var newData = JsonConvert.DeserializeObject<BuffPlayerData>(rawData) ?? new BuffPlayerData();
+                    newData.keyBindData ??= new Dictionary<string, string>();
+                    newData.collectData ??= new List<string>();
+                    return;
+                }
+
+                new BuffPlayerData(rawData, formatVersion);
+
             }
             catch (Exception e)
             {
@@ -33,11 +88,6 @@ namespace RandomBuff.Core.SaveData
         }
 
         public static BuffPlayerData Instance { get; private set; }
-
-        public void LoadOldCollectData(string rawData)
-        {
-            collectData = JsonConvert.DeserializeObject<List<string>>(rawData);
-        }
 
         /// <summary>
         /// 添加新的BuffID
@@ -53,6 +103,16 @@ namespace RandomBuff.Core.SaveData
                 collectData.Add(buffId.value);
             }
         }
+
+        /// <summary>
+        /// 判断对应ID是否在收藏
+        /// </summary>
+        /// <param name="buffId"></param>
+        /// <returns></returns>
+        public bool ContainsCollect(BuffID buffId)
+        {
+            return collectData.Contains(buffId.value);
+        }
         
         /// <summary>
         /// 获取所有可用的收集过的BuffID
@@ -61,6 +121,16 @@ namespace RandomBuff.Core.SaveData
         public List<BuffID> GetAllCollect()
         {
             return collectData.Select(i => new BuffID(i)).Where(BuffConfigManager.ContainsId).ToList();
+        }
+
+        /// <summary>
+        /// 是否已经收集过
+        /// </summary>
+        /// <param name="buffId"></param>
+        /// <returns></returns>
+        public bool IsCollected(BuffID buffId)
+        {
+            return collectData.Contains(buffId.value);
         }
 
         /// <summary>
@@ -101,10 +171,17 @@ namespace RandomBuff.Core.SaveData
                 keyBindData.Add(id, keyBind);
         }
 
+
         private List<string> collectData = new();
 
         public float playerTotExp = 0;
 
         private Dictionary<string, string> keyBindData = new();
+
+        private readonly List<string> unrecognizedSaveStrings = new();
+
+        private const string PlayerDataSplit = "<Bpd>";
+        private const string PlayerDataSubSplit = "<BpdI>";
+
     }
 }
