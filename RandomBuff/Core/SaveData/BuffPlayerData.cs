@@ -17,7 +17,7 @@ namespace RandomBuff.Core.SaveData
             Instance = this;
         }
 
-        protected BuffPlayerData(string file, BuffFormatVersion formatVersion)
+        protected BuffPlayerData(string file, BuffFormatVersion formatVersion) 
         {
             var split = Regex.Split(file, PlayerDataSplit)
                 .Where(i => !string.IsNullOrEmpty(i)).ToArray();
@@ -46,6 +46,8 @@ namespace RandomBuff.Core.SaveData
                         break;
                 }
             }
+            Instance = this;
+
             BuffPlugin.Log("Completed loaded player data");
 
         }
@@ -87,11 +89,6 @@ namespace RandomBuff.Core.SaveData
 
         public static BuffPlayerData Instance { get; private set; }
 
-        public void LoadOldCollectData(string rawData)
-        {
-            collectData = JsonConvert.DeserializeObject<List<string>>(rawData);
-        }
-
         /// <summary>
         /// 添加新的BuffID
         /// </summary>
@@ -105,6 +102,16 @@ namespace RandomBuff.Core.SaveData
                 BuffPlugin.Log($"Add buff:{buffId} collect to Save Slot");
                 collectData.Add(buffId.value);
             }
+        }
+
+        /// <summary>
+        /// 判断对应ID是否在收藏
+        /// </summary>
+        /// <param name="buffId"></param>
+        /// <returns></returns>
+        public bool ContainsCollect(BuffID buffId)
+        {
+            return collectData.Contains(buffId.value);
         }
         
         /// <summary>
