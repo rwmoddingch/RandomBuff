@@ -12,15 +12,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class AlzheimersBuff : Buff<AlzheimersBuff, AlzheimersBuffData>
-    {
-        public override BuffID ID => AlzheimersIBuffEntry.AlzheimersBuffID;
-    }
-
-    internal class AlzheimersBuffData : BuffData
-    {
-        public override BuffID ID => AlzheimersIBuffEntry.AlzheimersBuffID;
-    }
+ 
 
     internal class AlzheimersIBuffEntry : IBuffEntry
     {
@@ -28,7 +20,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<AlzheimersBuff, AlzheimersBuffData, AlzheimersIBuffEntry>(AlzheimersBuffID);
+            BuffRegister.RegisterBuff<AlzheimersIBuffEntry>(AlzheimersBuffID);
         }
 
         public static void HookOn()

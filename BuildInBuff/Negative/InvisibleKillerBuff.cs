@@ -11,15 +11,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class InvisibleKillerBuff : Buff<InvisibleKillerBuff, InvisibleKillerBuffData>
-    {
-        public override BuffID ID => InvisibleKillerIBuffEntry.InvisibleKillerBuffID;
-    }
 
-    internal class InvisibleKillerBuffData : BuffData
-    {
-        public override BuffID ID => InvisibleKillerIBuffEntry.InvisibleKillerBuffID;
-    }
 
     internal class InvisibleKillerIBuffEntry : IBuffEntry
     {
@@ -27,7 +19,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<InvisibleKillerBuff, InvisibleKillerBuffData, InvisibleKillerIBuffEntry>(InvisibleKillerBuffID);
+            BuffRegister.RegisterBuff<InvisibleKillerIBuffEntry>(InvisibleKillerBuffID);
         }
 
         public static void HookOn()

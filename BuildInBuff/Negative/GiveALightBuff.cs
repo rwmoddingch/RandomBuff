@@ -16,15 +16,7 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class GiveALightBuff : Buff<GiveALightBuff, GiveALightBuffData>
-    {
-        public override BuffID ID => GiveALightIBuffEntry.GiveALightBuffID;
-    }
 
-    internal class GiveALightBuffData : BuffData
-    {
-        public override BuffID ID => GiveALightIBuffEntry.GiveALightBuffID;
-    }
 
     internal class GiveALightIBuffEntry : IBuffEntry
     {
@@ -32,7 +24,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<GiveALightBuff, GiveALightBuffData, GiveALightIBuffEntry>(GiveALightBuffID);
+            BuffRegister.RegisterBuff<GiveALightIBuffEntry>(GiveALightBuffID);
         }
 
         public static void HookOn()

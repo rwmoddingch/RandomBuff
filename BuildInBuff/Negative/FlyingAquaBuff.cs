@@ -13,15 +13,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class FlyingAquaBuff : Buff<FlyingAquaBuff, FlyingAquaBuffData>
-    {
-        public override BuffID ID => FlyingAquaIBuffEntry.FlyingAquaBuffID;
-    }
-
-    internal class FlyingAquaBuffData : BuffData
-    {
-        public override BuffID ID => FlyingAquaIBuffEntry.FlyingAquaBuffID;
-    }
+ 
 
     internal class FlyingAquaIBuffEntry : IBuffEntry
     {
@@ -30,7 +22,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<FlyingAquaBuff, FlyingAquaBuffData, FlyingAquaIBuffEntry>(FlyingAquaBuffID);
+            BuffRegister.RegisterBuff<FlyingAquaIBuffEntry>(FlyingAquaBuffID);
         }
 
         public static void HookOn()

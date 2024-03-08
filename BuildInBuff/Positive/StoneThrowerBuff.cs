@@ -11,15 +11,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class StoneThrowerBuff : Buff<StoneThrowerBuff, StoneThrowerBuffData>
-    {
-        public override BuffID ID => StoneThrowerIBuffEntry.stoneThrowerBuffID;
-    }
 
-    internal class StoneThrowerBuffData : BuffData
-    {
-        public override BuffID ID => StoneThrowerIBuffEntry.stoneThrowerBuffID;
-    }
 
     internal class StoneThrowerIBuffEntry : IBuffEntry
     {
@@ -27,7 +19,7 @@ namespace BuiltinBuffs.Positive
 
         public  void OnEnable()
         {
-            BuffRegister.RegisterBuff<StoneThrowerBuff, StoneThrowerBuffData, StoneThrowerIBuffEntry>(stoneThrowerBuffID);
+            BuffRegister.RegisterBuff<StoneThrowerIBuffEntry>(stoneThrowerBuffID);
         }
 
         public static void HookOn()

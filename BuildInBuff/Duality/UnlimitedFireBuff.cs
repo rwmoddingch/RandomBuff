@@ -13,15 +13,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class UnlimitedFirepowerBuff : Buff<UnlimitedFirepowerBuff, UnlimitedFirepowerBuffData>
-    {
-        public override BuffID ID => UnlimitedFirepowerIBuffEntry.UnlimitedFirepowerBuffID;
-    }
-
-    internal class UnlimitedFirepowerBuffData : BuffData
-    {
-        public override BuffID ID => UnlimitedFirepowerIBuffEntry.UnlimitedFirepowerBuffID;
-    }
+  
 
     internal class UnlimitedFirepowerIBuffEntry : IBuffEntry
     {
@@ -29,7 +21,7 @@ namespace BuiltinBuffs.Duality
         static ILCursor c1;
         public  void OnEnable()
         {
-            BuffRegister.RegisterBuff<UnlimitedFirepowerBuff, UnlimitedFirepowerBuffData, UnlimitedFirepowerIBuffEntry>(UnlimitedFirepowerBuffID);
+            BuffRegister.RegisterBuff<UnlimitedFirepowerIBuffEntry>(UnlimitedFirepowerBuffID);
         }
 
         public static void HookOn()

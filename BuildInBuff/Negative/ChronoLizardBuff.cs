@@ -11,15 +11,7 @@ using RWCustom;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class ChronoLizardBuff : Buff<ChronoLizardBuff,ChronoLizardBuffData>
-    {
-        public override BuffID ID => ChronoLizardIBuffEntry.ChronoLizardBuffID;
-    }
 
-    internal class ChronoLizardBuffData : BuffData
-    {
-        public override BuffID ID => ChronoLizardIBuffEntry.ChronoLizardBuffID;
-    }
 
     internal class ChronoLizardIBuffEntry : IBuffEntry
     {
@@ -27,7 +19,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<ChronoLizardBuff, ChronoLizardBuffData, ChronoLizardIBuffEntry>(ChronoLizardBuffID);
+            BuffRegister.RegisterBuff<ChronoLizardIBuffEntry>(ChronoLizardBuffID);
             var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/teleportbias"));
             var shader = bundle.LoadAsset<Shader>("teleportbias");
             Custom.rainWorld.Shaders.Add("FissureShader", FShader.CreateShader("FissureShader", shader));

@@ -19,16 +19,7 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class SpearRainBuff : Buff<SpearRainBuff, SpearRainBuffData>
-    {
-        public override BuffID ID => SpearRainIBuffEntry.SpearRainBuffID;
-    }
-
-    internal class SpearRainBuffData : BuffData
-    {
-        public override BuffID ID => SpearRainIBuffEntry.SpearRainBuffID;
-    }
-
+ 
     internal class SpearRainIBuffEntry : IBuffEntry
     {
         public static BuffID SpearRainBuffID = new BuffID("SpearRain", true);
@@ -36,7 +27,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<SpearRainBuff, SpearRainBuffData, SpearRainIBuffEntry>(SpearRainBuffID);
+            BuffRegister.RegisterBuff<SpearRainIBuffEntry>(SpearRainBuffID);
         }
 
         public static void HookOn()

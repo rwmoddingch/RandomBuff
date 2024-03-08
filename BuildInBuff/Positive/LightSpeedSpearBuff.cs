@@ -14,15 +14,7 @@ using RWCustom;
 namespace BuiltinBuffs.Positive
 {
     //TODO : 完成随机生成
-    internal class LightSpeedSpearBuff : Buff<LightSpeedSpearBuff, LightSpeedSpearBuffData>
-    {
-        public override BuffID ID => LightSpeedSpearIBuffEntry.LightSpeedSpearBuffID;
-    }
 
-    internal class LightSpeedSpearBuffData : BuffData
-    {
-        public override BuffID ID => LightSpeedSpearIBuffEntry.LightSpeedSpearBuffID;
-    }
 
     internal class LightSpeedSpearIBuffEntry : IBuffEntry
     {
@@ -30,7 +22,7 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<LightSpeedSpearBuff, LightSpeedSpearBuffData, LightSpeedSpearIBuffEntry>(LightSpeedSpearBuffID);
+            BuffRegister.RegisterBuff<LightSpeedSpearIBuffEntry>(LightSpeedSpearBuffID);
         }
 
         public static void HookOn()

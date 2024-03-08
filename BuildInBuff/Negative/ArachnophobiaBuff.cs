@@ -14,15 +14,7 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class ArachnophobiaBuff : Buff<ArachnophobiaBuff, ArachnophobiaBuffData>
-    {
-        public override BuffID ID => ArachnophobiaIBuffEntry.arachnophobiaID;
-    }
 
-    internal class ArachnophobiaBuffData : BuffData
-    {
-        public override BuffID ID => ArachnophobiaIBuffEntry.arachnophobiaID;
-    }
 
     internal class ArachnophobiaIBuffEntry : IBuffEntry
     {
@@ -30,7 +22,7 @@ namespace BuiltinBuffs.Negative
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<ArachnophobiaBuff,ArachnophobiaBuffData,ArachnophobiaIBuffEntry>(arachnophobiaID);
+            BuffRegister.RegisterBuff<ArachnophobiaIBuffEntry>(arachnophobiaID);
         }
 
         public static void HookOn()

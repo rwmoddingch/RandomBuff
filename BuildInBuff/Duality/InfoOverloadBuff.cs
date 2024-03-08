@@ -12,15 +12,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class InfoOverloadBuff : Buff<InfoOverloadBuff, InfoOverloadBuffData>
-    {
-        public override BuffID ID => InfoOverloadIBuffEntry.InfoOverloadBuffID;
-    }
 
-    internal class InfoOverloadBuffData : BuffData
-    {
-        public override BuffID ID => InfoOverloadIBuffEntry.InfoOverloadBuffID;
-    }
 
     internal class InfoOverloadIBuffEntry : IBuffEntry
     {
@@ -28,7 +20,7 @@ namespace BuiltinBuffs.Duality
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<InfoOverloadBuff, InfoOverloadBuffData, InfoOverloadIBuffEntry>(InfoOverloadBuffID);
+            BuffRegister.RegisterBuff<InfoOverloadIBuffEntry>(InfoOverloadBuffID);
         }
 
         public static void HookOn()

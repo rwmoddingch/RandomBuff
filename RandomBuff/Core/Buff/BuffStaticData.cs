@@ -305,7 +305,7 @@ namespace RandomBuff.Core.Buff
         }
 
 
-        internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; private set; } = new();
+        internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; } = new();
 
         internal Dictionary<string,string> customParameters = new();
 

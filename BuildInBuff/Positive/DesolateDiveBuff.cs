@@ -10,15 +10,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class DesolateDiveBuff : Buff<DesolateDiveBuff, DesolateDiveBuffData>
-    {
-        public override BuffID ID => DesolateDiveBuffEntry.desolateDiveBuffID;
-    }
 
-    internal class DesolateDiveBuffData : BuffData
-    {
-        public override BuffID ID => DesolateDiveBuffEntry.desolateDiveBuffID;
-    }
 
     internal class DesolateDiveBuffEntry : IBuffEntry
     {
@@ -27,7 +19,7 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<DesolateDiveBuff, DesolateDiveBuffData, DesolateDiveBuffEntry>(desolateDiveBuffID);
+            BuffRegister.RegisterBuff<DesolateDiveBuffEntry>(desolateDiveBuffID);
         }
 
         public static void HookOn()

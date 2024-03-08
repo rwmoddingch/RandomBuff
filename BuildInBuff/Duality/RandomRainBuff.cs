@@ -10,15 +10,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class RandomRainBuff : Buff<RandomRainBuff, RandomRainBuffData>
-    {
-        public override BuffID ID => RandomRainIBuffEntry.RandomRainBuffID;
-    }
-
-    internal class RandomRainBuffData : BuffData
-    {
-        public override BuffID ID => RandomRainIBuffEntry.RandomRainBuffID;
-    }
+   
 
     internal class RandomRainIBuffEntry : IBuffEntry
     {
@@ -26,7 +18,7 @@ namespace BuiltinBuffs.Duality
 
         public  void OnEnable()
         {
-            BuffRegister.RegisterBuff<RandomRainBuff, RandomRainBuffData, RandomRainIBuffEntry>(RandomRainBuffID);
+            BuffRegister.RegisterBuff<RandomRainIBuffEntry>(RandomRainBuffID);
         }
 
         public static void HookOn()

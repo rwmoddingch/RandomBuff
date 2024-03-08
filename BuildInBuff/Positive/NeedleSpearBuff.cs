@@ -12,15 +12,7 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class NeedleSpearBuff : Buff<NeedleSpearBuff, NeedleSpearBuffData>
-    {
-        public override BuffID ID => NeedleSpearIBuffEntry.NeedleSpearBuffID;
-    }
 
-    internal class NeedleSpearBuffData : BuffData
-    {
-        public override BuffID ID => NeedleSpearIBuffEntry.NeedleSpearBuffID;
-    }
 
     internal class NeedleSpearIBuffEntry : IBuffEntry
     {
@@ -28,7 +20,7 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<NeedleSpearBuff, NeedleSpearBuffData, NeedleSpearIBuffEntry>(NeedleSpearBuffID);
+            BuffRegister.RegisterBuff<NeedleSpearIBuffEntry>(NeedleSpearBuffID);
         }
 
         public static void HookOn()

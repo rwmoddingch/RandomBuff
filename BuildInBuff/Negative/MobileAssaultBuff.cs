@@ -7,31 +7,33 @@ using On.Menu;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class MobileAssaultBuff : Buff<MobileAssaultBuff, MobileAssaultBuffData>
-    {
-        public override BuffID ID => MobileAssaultIBuffEntry.mobileAssaultBuffID;
-    }
-    internal class MobileAssaultBuffData : BuffData
-    {
-        public override BuffID ID => MobileAssaultIBuffEntry.mobileAssaultBuffID;
-    }
+  
     internal class MobileAssaultIBuffEntry : IBuffEntry
     {
         public static BuffID mobileAssaultBuffID = new BuffID("MobileAssault", true);
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<MobileAssaultBuff,MobileAssaultBuffData,MobileAssaultIBuffEntry>(mobileAssaultBuffID);
+            BuffRegister.RegisterBuff<MobileAssaultIBuffEntry>(mobileAssaultBuffID);
         }
 
         public static void HookOn()
         {
             On.Lizard.ctor += Lizard_ctor;
+            On.Lizard.Update += Lizard_Update;
             
+        }
+
+        private static void Lizard_Update(On.Lizard.orig_Update orig, Lizard self, bool eu)
+        {
+            orig(self,eu);
+            if (self.jumpModule == null)
+                self.jumpModule = new LizardJumpModule(self);
         }
 
         private static void Lizard_ctor(On.Lizard.orig_ctor orig, Lizard self, AbstractCreature abstractCreature, World world)

@@ -9,15 +9,19 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using MonoMod.Utils;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 
 namespace RandomBuff.Core.Entry
@@ -75,9 +79,46 @@ namespace RandomBuff.Core.Entry
         public static void RegisterBuff<TBuffType, TDataType>(BuffID id) where TBuffType : IBuff, new()
             where TDataType : BuffData, new()
         {
-            RegisterBuff(id,typeof(TBuffType),typeof(TDataType));
+            InternalRegisterBuff(id,typeof(TBuffType),typeof(TDataType));
         }
-        public static void RegisterBuff(BuffID id,Type buffType,Type dataType)
+
+        /// <summary>
+        /// 无Buff类型注册Buff
+        /// </summary>
+        /// <typeparam name="THookType"></typeparam>
+        /// <param name="id"></param>
+        public static (TypeDefinition buffType, TypeDefinition dataTypeDefinition) RegisterBuff<THookType>(BuffID id)
+        {
+            BuffHookWarpper.RegisterHook(id, typeof(THookType));
+            return RegisterBuff(id);
+        }
+
+        /// <summary>
+        /// 无Buff类型注册Buff
+        /// </summary>
+        /// <param name="id"></param>
+        public static (TypeDefinition buffType, TypeDefinition dataTypeDefinition) RegisterBuff(BuffID id)
+        {
+            if (CurrentModId == string.Empty)
+            {
+                BuffPlugin.LogError("Missing Mod ID!, can't use this out of IBuffEntry.OnEnable");
+                return (null, null);
+            }
+
+            try
+            {
+                var re = BuffBuilder.GenerateBuffType(CurrentModId, id.value);
+                currentRuntimeBuffName.Add(id.value);
+                return re;
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e,$"Exception in GenerateBuffType:{CurrentModId}:{id}");
+            }
+            return (null, null);
+        }
+
+        internal static void InternalRegisterBuff(BuffID id,Type buffType,Type dataType)
         {
             try
             {
@@ -203,6 +244,9 @@ namespace RandomBuff.Core.Entry
             return default;
         }
 
+        internal static string CurrentModId { get; private set; } = string.Empty;
+
+        private static readonly List<string> currentRuntimeBuffName = new ();
 
         internal static void InitAllBuffPlugin()
         {
@@ -211,14 +255,13 @@ namespace RandomBuff.Core.Entry
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
                 if (!Directory.Exists(path))
                     continue;
-                BuffPlugin.Log($"Find correct path in {mod.id} to load plugins");
+                BuffPlugin.Log($"Find correct path in {CurrentModId = mod.id} to load plugins");
                 DirectoryInfo info = new DirectoryInfo(path);
                 foreach (var file in info.GetFiles("*.dll"))
                 {
                     var assembly = Assembly.LoadFile(file.FullName);
                     foreach (var type in assembly.GetTypes())
                     {
-
                         if (type.GetInterfaces().Contains(typeof(IBuffEntry)))
                         {
                             var obj = type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
@@ -237,7 +280,28 @@ namespace RandomBuff.Core.Entry
                         }
                     }
                 }
+
+                try
+                {
+                    var runtimeAss = BuffBuilder.FinishGenerate(CurrentModId);
+                    if (runtimeAss != null)
+                    {
+                        foreach (var name in currentRuntimeBuffName)
+                        {
+                            InternalRegisterBuff(new BuffID(name),
+                                runtimeAss.GetType($"{CurrentModId}.{name}Buff", true),
+                                runtimeAss.GetType($"{CurrentModId}.{name}BuffData", true));
+                            BuffPlugin.LogDebug($"Load RuntimeBuff {name}");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e,$"Exception when load {mod.id}'s RuntimeBuff");
+                }
+                currentRuntimeBuffName.Clear();
             }
+            CurrentModId = string.Empty;
         }
 
 

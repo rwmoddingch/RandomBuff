@@ -16,7 +16,7 @@ namespace BuiltinBuffs.Positive
         public static BuffID spearMasterBuffID = new BuffID("SpearMaster", true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<SpearMasterBuff,SpearMasterBuffData,SpearMasterIBuffEntry>(spearMasterBuffID);
+            BuffRegister.RegisterBuff<SpearMasterIBuffEntry>(spearMasterBuffID);
         }
 
         public static void HookOn()
@@ -104,16 +104,6 @@ namespace BuiltinBuffs.Positive
 
     }
 
-    class SpearMasterBuffData : BuffData
-    {
-        public override BuffID ID => SpearMasterIBuffEntry.spearMasterBuffID;
-    }
-
-    class SpearMasterBuff : Buff<SpearMasterBuff, SpearMasterBuffData>
-    {
-        public override BuffID ID => SpearMasterIBuffEntry.spearMasterBuffID;
-
-    }
 
 
 }

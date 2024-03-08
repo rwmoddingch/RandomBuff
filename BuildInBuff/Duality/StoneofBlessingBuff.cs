@@ -9,23 +9,14 @@ using RandomBuff.Core.Entry;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class StoneofBlessingBuff : Buff<StoneofBlessingBuff, StoneofBlessingBuffData>
-    {
-        public override BuffID ID => StoneofBlessingIBuffEntry.StoneofBlessingBuffID;
-    }
-
-    internal class StoneofBlessingBuffData : BuffData
-    {
-        public override BuffID ID => StoneofBlessingIBuffEntry.StoneofBlessingBuffID;
-    }
-
+  
     internal class StoneofBlessingIBuffEntry : IBuffEntry
     {
         public static BuffID StoneofBlessingBuffID = new BuffID("StoneofBlessing", true);
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<StoneofBlessingBuff, StoneofBlessingBuffData, StoneofBlessingIBuffEntry>(StoneofBlessingBuffID);
+            BuffRegister.RegisterBuff<StoneofBlessingIBuffEntry>(StoneofBlessingBuffID);
         }
 
         public static void HookOn()
