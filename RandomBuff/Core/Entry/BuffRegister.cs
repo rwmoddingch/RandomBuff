@@ -20,21 +20,14 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 using UnityEngine;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 
 namespace RandomBuff.Core.Entry
 {
-    /// <summary>
-    /// BuffData 中
-    /// 若属性设置该attribute则会设置get函数获取静态配置
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public sealed class CustomStaticConfigAttribute : Attribute
-    {
-
-    }
+    
 
     public enum HookLifeTimeLevel
     {
@@ -274,9 +267,7 @@ namespace RandomBuff.Core.Entry
                             {
                                 BuffPlugin.LogException(e);
                                 BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
-
                             }
-
                         }
                     }
                 }
@@ -317,7 +308,7 @@ namespace RandomBuff.Core.Entry
                     continue;
                 }
                 foreach (var property in dataType.Value.GetProperties().
-                             Where(i => i.GetCustomAttribute<CustomStaticConfigAttribute>() != null))
+                             Where(i => i.GetCustomAttribute<CustomBuffConfigAttribute>(true) != null))
                 {
                     //不存在get方法
                     if (property.GetGetMethod() == null)
@@ -326,19 +317,26 @@ namespace RandomBuff.Core.Entry
                         continue;
                     }
 
-                    //在json不存在属性
-                    if (!BuffConfigManager.ContainsProperty(dataType.Key, property.Name))
-                    {
-                        BuffPlugin.LogWarning($"can't find custom property Named: {property.Name} At {dataType.Key} static data");
-                        continue;
-                    }
-
                     //有set属性
                     if (property.CanWrite)
                         BuffPlugin.LogWarning($"Property {property.Name} can write!");
 
-                    //TODO:在这里读取属性的默认值到
-                    //BuffConfigManager.GetStaticData(dataType.Key).customParameterDefaultValues[property.Name] =
+                    //读取特性
+                    var configAttribute = property.GetCustomAttribute<CustomBuffConfigAttribute>();
+                    var infoAttribute = property.GetCustomAttribute<CustomBuffConfigInfoAttribute>();//可为null
+                    var bindConfigurable = BuffConfigurableManager.TryGetConfigurable(dataType.Key, property.Name, true, property.PropertyType, configAttribute.defaultValue);
+                    bindConfigurable.acceptable = BuffConfigurableManager.GetProperAcceptable(configAttribute);
+
+                    if (infoAttribute != null)
+                    {
+                        bindConfigurable.name = infoAttribute.name;
+                        bindConfigurable.description = infoAttribute.description;
+                    }
+                    else
+                    {
+                        bindConfigurable.name = property.Name;
+                        bindConfigurable.description = "";
+                    }
 
                     var hook = new ILHook(property.GetGetMethod(), (il) =>
                     {
@@ -347,7 +345,10 @@ namespace RandomBuff.Core.Entry
                         ILCursor c = new ILCursor(il);
                         c.Emit(OpCodes.Ldarg_0);
                         c.EmitDelegate<Func<BuffData, object>>((self) =>
-                         self.GetConfig(property.Name, property.PropertyType));
+                        {
+                            BuffPlugin.Log($"property get : {bindConfigurable.name}-{bindConfigurable.key}, {bindConfigurable.BoxedValue}");
+                            return bindConfigurable.BoxedValue;
+                        });
                         if (property.PropertyType.IsValueType)
                             c.Emit(OpCodes.Unbox_Any, property.PropertyType);
                         else
