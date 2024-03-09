@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JollyCoop;
 using Menu;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
@@ -41,6 +44,7 @@ namespace RandomBuff.Core.Hooks
 
             On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
             On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
+            IL.ModManager.ModApplyer.ApplyModsThread += ModApplyer_ApplyModsThread;
 
             InGameHooksInit();
 
@@ -49,6 +53,34 @@ namespace RandomBuff.Core.Hooks
 
             //TestStartGameMenu = new("TestStartGameMenu");
 
+        }
+
+        private static void ModApplyer_ApplyModsThread(ILContext il)
+        {
+            try
+            {
+                ILCursor c = new ILCursor(il);
+                c.GotoNext(MoveType.After,
+                    i => i.MatchLdsfld<ModManager>("InstalledMods"),
+                    i => i.MatchLdloc(8),
+                    i => i.Match(OpCodes.Callvirt),
+                    i => i.MatchLdfld<ModManager.Mod>("path"),
+                    i => i.MatchLdstr("plugins"),
+                    i => i.Match(OpCodes.Call),
+                    i => i.Match(OpCodes.Call),
+                    i=>i.Match(OpCodes.Brtrue_S));
+                var label = c.Previous.Operand as ILLabel;
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldloc_S,(byte)8);
+                c.EmitDelegate<Func<ModManager.ModApplyer, int, bool>>((self, i) =>
+                    Directory.Exists(Path.Combine(ModManager.InstalledMods[i].path, "buffplugins")));
+                c.Emit(OpCodes.Brtrue_S, label);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         private static bool SlugcatStats_SlugcatUnlocked(On.SlugcatStats.orig_SlugcatUnlocked orig, SlugcatStats.Name i, RainWorld rainWorld)

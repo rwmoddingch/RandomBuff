@@ -97,7 +97,11 @@ namespace RandomBuff.Core.Entry
                 BuffPlugin.LogError("Missing Mod ID!, can't use this out of IBuffEntry.OnEnable");
                 return (null, null);
             }
-
+            if (BuffTypes.ContainsKey(id) || currentRuntimeBuffName.Contains(id.value))
+            {
+                BuffPlugin.LogError($"{id} has already registered!");
+                return (null, null);
+            }
             try
             {
                 var re = BuffBuilder.GenerateBuffType(CurrentModId, id.value);
@@ -115,6 +119,11 @@ namespace RandomBuff.Core.Entry
         {
             try
             {
+                if (BuffTypes.ContainsKey(id))
+                {
+                    BuffPlugin.LogError($"{id} has already registered!");
+                    return;
+                }
                 if (id != Helper.GetUninit<IBuff>(buffType).ID || id != Helper.GetUninit<BuffData>(dataType).ID)
                 {
                     BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
@@ -239,7 +248,7 @@ namespace RandomBuff.Core.Entry
 
         internal static string CurrentModId { get; private set; } = string.Empty;
 
-        private static readonly List<string> currentRuntimeBuffName = new ();
+        private static readonly HashSet<string> currentRuntimeBuffName = new ();
 
         internal static void InitAllBuffPlugin()
         {

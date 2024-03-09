@@ -20,7 +20,8 @@ namespace RandomBuff.Core.Buff
 {
     internal static class BuffBuilder
     {
-        public static (TypeDefinition buffType, TypeDefinition dataType) GenerateBuffType(string modId, string usedId,bool needRegisterId = false,
+        public static (TypeDefinition buffType, TypeDefinition dataType) 
+            GenerateBuffType(string modId, string usedId,bool needRegisterId = false,
             Action<ILProcessor> buffCtor = null,
             Action<ILProcessor> dataCtor = null)
         {
@@ -153,12 +154,17 @@ namespace RandomBuff.Core.Buff
                 var method = type.DefineMethodOverride($"set_{propertyName}", returnType, Type.EmptyTypes, attr, setBuilder);
                 property.SetMethod = method;
             }
-
+            type.Properties.Add(property);
             return property;
         }
 
         public static Assembly FinishGenerate(string modId, string debugOutputPath = null)
         {
+            if (hasUse.Contains(modId))
+            {
+                BuffPlugin.LogError($"Already load DynamicBuff_{modId}.dll!");
+                return null;
+            }
             if (Directory.Exists("Debug") && debugOutputPath == null)
                 debugOutputPath = $"Debug/DynamicBuff_{modId}.dll";
             using (MemoryStream ms = new MemoryStream())
@@ -168,6 +174,7 @@ namespace RandomBuff.Core.Buff
                     assemblyDefs[modId].Write(ms);
                     if (debugOutputPath != null)
                         assemblyDefs[modId].Write(debugOutputPath);
+                    hasUse.Add(modId);
                     return Assembly.Load(ms.GetBuffer());
                 }
 
@@ -183,6 +190,8 @@ namespace RandomBuff.Core.Buff
         }
 
         private static readonly Dictionary<string, AssemblyDefinition> assemblyDefs = new();
+        private static readonly HashSet<string> hasUse = new();
+
 
     }
 }
