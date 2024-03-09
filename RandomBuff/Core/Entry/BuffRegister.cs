@@ -21,6 +21,7 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
+using RandomBuffUtils;
 using UnityEngine;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
@@ -250,18 +251,103 @@ namespace RandomBuff.Core.Entry
 
         private static readonly HashSet<string> currentRuntimeBuffName = new ();
 
+        private static bool IsDerivedType(this TypeReference checkType, TypeReference baseType)
+        {
+            var aType = checkType.SafeResolve()?.BaseType;
+            while (aType != null)
+            {
+                if (aType.FullName == baseType.FullName)
+                    return true;
+                aType = aType.SafeResolve()?.BaseType;
+            }
+
+            return false;
+        }
+
+
+
         internal static void InitAllBuffPlugin()
         {
+       
             foreach (var mod in ModManager.ActiveMods)
             {
+                var resolver = new DefaultAssemblyResolver();
+                resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/plugins");
+                foreach(var modPath in ModManager.ActiveMods.Where(i => mod.requirements.Contains(i.id) 
+                                                                        && i.requirements.Contains(BuffPlugin.ModId)))
+                    resolver.AddSearchDirectory(modPath.path + "/plugins");
+
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
                 if (!Directory.Exists(path))
                     continue;
                 BuffPlugin.Log($"Find correct path in {CurrentModId = mod.id} to load plugins");
                 DirectoryInfo info = new DirectoryInfo(path);
+
+        
                 foreach (var file in info.GetFiles("*.dll"))
                 {
-                    var assembly = Assembly.LoadFile(file.FullName);
+                    var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName, 
+                        new ReaderParameters(){ AssemblyResolver = resolver});
+                    var module = assemblyDef.MainModule;
+                    var dataType = module.ImportReference(typeof(BuffData));
+                    var attrType = module.ImportReference(typeof(CustomBuffConfigAttribute));
+                    foreach (var type in module.Types)
+                    {
+                        if (type.IsDerivedType(dataType))
+                        {
+                            foreach (var property in type.Properties)
+                            {
+                                if (property.HasCustomAttributes &&
+                                    property.CustomAttributes.Any(i =>i.AttributeType.IsDerivedType(attrType)))
+                                {
+                                    BuffPlugin.Log($"Find Property {type.Name}:{property.Name}");
+
+                                    if (property.SetMethod != null)
+                                    {
+                                        BuffPlugin.LogWarning($"{type.Name}:{property.Name} has set method!");
+                                        property.SetMethod.Body.Instructions.Clear();
+                                        var setIl = property.SetMethod.Body.GetILProcessor();
+                                        setIl.Emit(OpCodes.Ldarg_0);
+                                        setIl.Emit(OpCodes.Callvirt, typeof(BuffData).GetProperty(nameof(BuffData.ID)).GetGetMethod());
+                                        setIl.Emit(OpCodes.Ldstr, $"Try to set config:{property.Name}");
+                                        setIl.Emit(OpCodes.Call, typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
+                                        setIl.Emit(OpCodes.Ret);
+                                    }
+
+                                    if (property.GetMethod == null)
+                                    {
+                                        property.GetMethod = type.DefineMethodOverride($"get_{property.Name}", property.PropertyType, Array.Empty<TypeReference>(),
+                                            MethodAttributes.SpecialName | MethodAttributes.HideBySig |
+                                            MethodAttributes.Virtual | MethodAttributes.Public);
+                                    }
+
+                             
+                                    property.GetMethod.Body.Instructions.Clear();
+                                    var il = property.GetMethod.Body.GetILProcessor();
+                                    
+                                    il.Emit(OpCodes.Ldarg_0);
+                                    il.Emit(OpCodes.Ldstr,property.Name);
+                                    il.Emit(OpCodes.Call,module.ImportReference(typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
+                                        BindingFlags.NonPublic | BindingFlags.Instance)));
+                                    if (property.PropertyType.IsValueType)
+                                        il.Emit(OpCodes.Unbox_Any, property.PropertyType);
+                                    else
+                                        il.Emit(OpCodes.Castclass, property.PropertyType); 
+                                    il.Emit(OpCodes.Ret);
+
+                                    BuffPlugin.LogDebug($"Warp config property for {dataType.Name} : {property.Name} : {property.PropertyType}");
+                                }
+                            }
+                        }
+                    }
+
+                    Assembly assembly = null;
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        assemblyDef.Write(ms);
+                        assembly = Assembly.Load(ms.GetBuffer());
+                    }
+
                     foreach (var type in assembly.GetTypes())
                     {
                         if (type.GetInterfaces().Contains(typeof(IBuffEntry)))
@@ -346,28 +432,6 @@ namespace RandomBuff.Core.Entry
                         bindConfigurable.name = property.Name;
                         bindConfigurable.description = "";
                     }
-
-                    var hook = new ILHook(property.GetGetMethod(), (il) =>
-                    {
-                        il.Instrs.Clear();
-                        il.Body.MaxStackSize += 1;
-                        ILCursor c = new ILCursor(il);
-                        c.Emit(OpCodes.Ldarg_0);
-                        c.EmitDelegate<Func<BuffData, object>>((self) =>
-                        {
-                            BuffPlugin.Log($"property get : {bindConfigurable.name}-{bindConfigurable.key}, {bindConfigurable.BoxedValue}");
-                            return bindConfigurable.BoxedValue;
-                        });
-                        if (property.PropertyType.IsValueType)
-                            c.Emit(OpCodes.Unbox_Any, property.PropertyType);
-                        else
-                            c.Emit(OpCodes.Castclass, property.PropertyType);
-                        c.Emit(OpCodes.Ret);
-                    });
-
-                    if (BuffPlugin.DevEnabled)
-                        BuffPlugin.Log($"Warp config property for {dataType.Key} : {property.Name} : {property.PropertyType}");
-                    
                 }
             }
         }
