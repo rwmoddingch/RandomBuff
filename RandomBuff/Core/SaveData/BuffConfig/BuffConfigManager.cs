@@ -25,6 +25,7 @@ namespace RandomBuff.Core.SaveData
         internal static void LoadConfig(string config, BuffFormatVersion formatVersion)
         {
             Instance = new BuffConfigManager(config, formatVersion);
+            BuffConfigurableManager.FetchAllConfigs();
         }
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         internal string ToStringData()
         {
+            BuffConfigurableManager.PushAllConfigs();
             StringBuilder builder = new();
             foreach (var buffConfig in allConfigs)
             {
@@ -64,65 +66,65 @@ namespace RandomBuff.Core.SaveData
         /// <param name="type"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool TryGet(BuffID buffName, string key, Type type, out object data)
-        {
-            if (allLoadedConfigs.ContainsKey(buffName.value) && allLoadedConfigs[buffName.value].ContainsKey(key))
-            {
-                data = allLoadedConfigs[buffName.value][key];
-                return true;
-            }
+        //public bool TryGet(BuffID buffName, string key, Type type, out object data)
+        //{
+        //    if (allLoadedConfigs.ContainsKey(buffName.value) && allLoadedConfigs[buffName.value].ContainsKey(key))
+        //    {
+        //        data = allLoadedConfigs[buffName.value][key];
+        //        return true;
+        //    }
 
-            if (allConfigs.ContainsKey(buffName.value))
-            {
-                try
-                {
-                    data = TypeSerializer.GetSerializer(type).Deserialize(allConfigs[buffName.value][key]);
-                    AddLoadedConfig(buffName.value, key, data);
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    BuffPlugin.LogException(e);
-                    BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{allConfigs[buffName.value][key]}");
-                    data = default;
-                    return false;
-                }
-            }
+        //    if (allConfigs.ContainsKey(buffName.value))
+        //    {
+        //        try
+        //        {
+        //            data = TypeSerializer.GetSerializer(type).Deserialize(allConfigs[buffName.value][key]);
+        //            AddLoadedConfig(buffName.value, key, data);
+        //            return true;
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            BuffPlugin.LogException(e);
+        //            BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{allConfigs[buffName.value][key]}");
+        //            data = default;
+        //            return false;
+        //        }
+        //    }
 
-            if (staticDatas.ContainsKey(buffName) &&
-                staticDatas[buffName].customParameterDefaultValues.ContainsKey(key))
-            {
-                try
-                {
-                    data = TypeSerializer.GetSerializer(type).Deserialize(staticDatas[buffName].customParameterDefaultValues[key]);
-                    AddLoadedConfig(buffName.value, key, data);
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    BuffPlugin.LogException(e);
-                    BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{staticDatas[buffName].customParameterDefaultValues[key]}");
-                    data = default;
-                    return false;
-                }
+        //    if (staticDatas.ContainsKey(buffName) &&
+        //        staticDatas[buffName].customParameterDefaultValues.ContainsKey(key))
+        //    {
+        //        try
+        //        {
+        //            data = TypeSerializer.GetSerializer(type).Deserialize(staticDatas[buffName].customParameterDefaultValues[key]);
+        //            AddLoadedConfig(buffName.value, key, data);
+        //            return true;
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            BuffPlugin.LogException(e);
+        //            BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{staticDatas[buffName].customParameterDefaultValues[key]}");
+        //            data = default;
+        //            return false;
+        //        }
 
-            }
+        //    }
 
-            BuffPlugin.LogError($"Can't Find Config Data For : {buffName}:{key}");
-            data = default;
-            return false;
-        }
+        //    BuffPlugin.LogError($"Can't Find Config Data For : {buffName}:{key}");
+        //    data = default;
+        //    return false;
+        //}
 
-        public bool TryGet<T>(BuffID buffName, string key, out T data)
-        {
-            if (TryGet(buffName, key, typeof(T), out var obj))
-            {
-                data = (T)obj;
-                return true;
-            }
-            data = default;
-            return false;
-        }
+        //public bool TryGet<T>(BuffID buffName, string key, out T data)
+        //{
+        //    if (TryGet(buffName, key, typeof(T), out var obj))
+        //    {
+        //        data = (T)obj;
+        //        return true;
+        //    }
+        //    data = default;
+        //    return false;
+        //}
 
         /// <summary>
         /// 设置Config和loadedConfig
@@ -134,40 +136,39 @@ namespace RandomBuff.Core.SaveData
         /// <param name="buffName"></param>
         /// <param name="key"></param>
         /// <param name="obj"></param>
-        internal void Set<T>(BuffID buffName, string key,T obj)
-        {
-            if(!allLoadedConfigs.ContainsKey(buffName.value))
-                allLoadedConfigs.Add(buffName.value,new ());
+        //internal void Set<T>(BuffID buffName, string key,T obj)
+        //{
+        //    if(!allLoadedConfigs.ContainsKey(buffName.value))
+        //        allLoadedConfigs.Add(buffName.value,new ());
 
-            if (!allLoadedConfigs[buffName.value].ContainsKey(key))
-                allLoadedConfigs[buffName.value].Add(key, obj);
-            else
-                allLoadedConfigs[buffName.value][key] = obj;
+        //    if (!allLoadedConfigs[buffName.value].ContainsKey(key))
+        //        allLoadedConfigs[buffName.value].Add(key, obj);
+        //    else
+        //        allLoadedConfigs[buffName.value][key] = obj;
 
-            string strData = "";
-            try
-            {
-               strData = TypeSerializer.GetSerializer(obj.GetType()).Serialize(obj);
-            }
-            catch (Exception e)
-            {
-                BuffPlugin.LogException(e);
-                BuffPlugin.LogError($"{buffName}:{key} data serialize failed !");
-                return;
-            }
+        //    string strData = "";
+        //    try
+        //    {
+        //       strData = TypeSerializer.GetSerializer(obj.GetType()).Serialize(obj);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        BuffPlugin.LogException(e);
+        //        BuffPlugin.LogError($"{buffName}:{key} data serialize failed !");
+        //        return;
+        //    }
 
-            if(!allConfigs.ContainsKey(buffName.value))
-                allConfigs.Add(buffName.value, new ());
+        //    if(!allConfigs.ContainsKey(buffName.value))
+        //        allConfigs.Add(buffName.value, new ());
 
-            if (!allConfigs[buffName.value].ContainsKey(key))
-                allConfigs[buffName.value].Add(key, strData);
-            else
-                allConfigs[buffName.value][key] = strData;
-        }
+        //    if (!allConfigs[buffName.value].ContainsKey(key))
+        //        allConfigs[buffName.value].Add(key, strData);
+        //    else
+        //        allConfigs[buffName.value][key] = strData;
+        //}
 
-        private readonly Dictionary<string, Dictionary<string, string>> allConfigs = new();
-        private readonly Dictionary<string, Dictionary<string, object>> allLoadedConfigs = new();
-
+        public readonly Dictionary<string, Dictionary<string, string>> allConfigs = new();
+        //private readonly Dictionary<string, Dictionary<string, object>> allLoadedConfigs = new();
     }
 
     /// <summary>
@@ -215,7 +216,6 @@ namespace RandomBuff.Core.SaveData
                 }
             }
             BuffPlugin.Log($"Completed loaded config data, Count: {allConfigs.Count}");
-
         }
 
 
@@ -225,22 +225,22 @@ namespace RandomBuff.Core.SaveData
         /// <param name="id"></param>
         /// <param name="key"></param>
         /// <param name="data"></param>
-        private void AddLoadedConfig(string id, string key, object data)
-        {
-            if (!allLoadedConfigs.ContainsKey(id))
-                allLoadedConfigs.Add(id,new ());
+        //private void AddLoadedConfig(string id, string key, object data)
+        //{
+        //    if (!allLoadedConfigs.ContainsKey(id))
+        //        allLoadedConfigs.Add(id,new ());
 
-            if (!allLoadedConfigs[id].ContainsKey(key))
-                allLoadedConfigs[id].Add(key, data);
-            else
-                allLoadedConfigs[id][key] = data;
-        }
+        //    if (!allLoadedConfigs[id].ContainsKey(key))
+        //        allLoadedConfigs[id].Add(key, data);
+        //    else
+        //        allLoadedConfigs[id][key] = data;
+        //}
 
-        private const string BuffSplit = "<BuB>";
-        private const string BuffIdSplit = "<BuBI>";
+        internal const string BuffSplit = "<BuB>";
+        internal const string BuffIdSplit = "<BuBI>";
 
-        private const string ParameterSplit = "<BuC>";
-        private const string ParameterIdSplit = "<BuCI>";
+        internal const string ParameterSplit = "<BuC>";
+        internal const string ParameterIdSplit = "<BuCI>";
     }
 
     /// <summary>

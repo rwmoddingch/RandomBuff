@@ -32,7 +32,6 @@ namespace BuffTest
         [JsonProperty]
         public int count;
 
-        [CustomStaticConfig]
         public int TestConfig { get; }
     }
     public class TestBuff : Buff<TestBuff,TestBuffData>

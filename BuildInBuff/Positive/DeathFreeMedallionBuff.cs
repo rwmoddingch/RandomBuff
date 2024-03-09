@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
@@ -43,12 +44,22 @@ namespace BuiltinBuffs.Positive
     internal class DeathFreeMedallionBuffData : BuffData
     {
         public override BuffID ID => DeathFreeMedallionIBuffEntry.deathFreeMedallionBuffID;
+
+        [CustomBuffConfigEnum(typeof(CreatureTemplate.Type),"Slugcat")]
+        public CreatureTemplate.Type WawaTest
+        {
+            get;
+        }
+
+        public DeathFreeMedallionBuffData()
+        {
+            BuffPlugin.Log($"Get wawaTest : {WawaTest}");
+        }
     }
 
     internal class DeathFreeMedallionIBuffEntry : IBuffEntry
     {
         public static BuffID deathFreeMedallionBuffID = new BuffID("DeathFreeMedallion", true);
-
 
         public static void HookOn()
         {

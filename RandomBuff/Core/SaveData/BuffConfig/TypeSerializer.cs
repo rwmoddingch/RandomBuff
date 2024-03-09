@@ -52,7 +52,16 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 return SerializerDic[type];
             else
             {
-                var re = new DefaultTypeSerializer(type);
+                TypeSerializer re;
+                if (type.IsSubclassOf(typeof(ExtEnumBase)))
+                {
+                    re = new ExtEnumSerializer(type);
+                }
+                else
+                {
+                    re = new DefaultTypeSerializer(type);
+                }
+                BuffPlugin.Log($"Missing serializer for {type},now registing {re}");
                 Register(type,re);
                 return re;
             }
@@ -90,6 +99,27 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         public override object Deserialize(string value)
         {
             return JsonConvert.DeserializeObject(value, type);
+        }
+    }
+
+    public class ExtEnumSerializer : TypeSerializer
+    {
+        Type type;
+        ExtEnumType enumType;
+        public ExtEnumSerializer(Type type)
+        {
+            this.type = type;
+            enumType = ExtEnumBase.GetExtEnumType(type);
+        }
+
+        public override string Serialize(object value)
+        {
+            return (value as ExtEnumBase).value;
+        }
+
+        public override object Deserialize(string value)
+        {
+            return Activator.CreateInstance(type, value, false);
         }
     }
 }

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
  using Newtonsoft.Json;
  using RandomBuff.Core.Entry;
  using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 
- namespace RandomBuff.Core.Buff
+namespace RandomBuff.Core.Buff
 {
     /// <summary>
     /// Buff的数据类，包括动态数据（单一猫存档内数据）
@@ -21,6 +22,8 @@ using System.Threading.Tasks;
 
         [JsonProperty]
         public int StackLayer { get; set; }
+
+        internal Dictionary<string,BuffConfigurable> bindConfigurables = new();
 
         protected BuffData() { }
 
@@ -75,20 +78,20 @@ using System.Threading.Tasks;
         /// <typeparam name="T"></typeparam>
         /// <param name="name"></param>
         /// <returns></returns>
-        public T GetConfig<T>(string name)
-        {
-            if (BuffConfigManager.Instance.TryGet<T>(ID, name, out var data))
-                return data;
-            return default;
-        }
+        //public T GetConfig<T>(string name)
+        //{
+        //    if (BuffConfigManager.Instance.TryGet<T>(ID, name, out var data))
+        //        return data;
+        //    return default;
+        //}
 
 
-        internal object GetConfig(string name,Type type)
-        {
-            if (BuffConfigManager.Instance.TryGet(ID, name,type, out var data))
-                return data;
-            return default;
-        }
+        //internal object GetConfig(string name,Type type)
+        //{
+        //    if (BuffConfigManager.Instance.TryGet(ID, name,type, out var data))
+        //        return data;
+        //    return default;
+        //}
     }
 
 
