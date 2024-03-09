@@ -25,6 +25,11 @@ namespace RandomBuff.Core.Buff
 
         internal Dictionary<string,BuffConfigurable> bindConfigurables = new();
 
+        internal object GetConfigurableValue(string str)
+        {
+            return new CreatureTemplate.Type("sadsds");
+        }
+
         protected BuffData() { }
 
         /// <summary>

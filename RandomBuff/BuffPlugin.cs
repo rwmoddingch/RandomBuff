@@ -35,7 +35,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff
 {
-    [BepInPlugin("randombuff", "Random Buff", "1.0.0")]
+    [BepInPlugin(ModId, "Random Buff", "1.0.0")]
     internal class BuffPlugin : BaseUnityPlugin
     {
         public static BuffFormatVersion saveVersion = new ("a-0.0.5");
@@ -46,6 +46,7 @@ namespace RandomBuff
 
         internal static BuffPlugin Instance { get; private set; }
 
+        public const string ModId = "randombuff";
 
         public void OnEnable()
         {
@@ -159,7 +160,7 @@ namespace RandomBuff
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
-                    BuffPoolManager.Instance.CreateBuff(new BuffID("Gambler"));
+                    BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
                 }
                 if (Input.GetKeyDown(KeyCode.L))
                 {

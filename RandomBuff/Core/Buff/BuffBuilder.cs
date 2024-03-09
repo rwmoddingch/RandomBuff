@@ -101,6 +101,21 @@ namespace RandomBuff.Core.Buff
             return method;
         }
 
+
+        public static MethodDefinition DefineMethodOverride(this TypeDefinition type, string methodName
+            , TypeReference returnType, TypeReference[] argTypes, MethodAttributes extAttr, Action<ILProcessor> builder = null)
+        {
+            var method = new MethodDefinition(methodName, MethodAttributes.HideBySig | MethodAttributes.Virtual | extAttr,
+                returnType);
+            type.Methods.Add(method);
+            foreach (var arg in argTypes)
+                method.Parameters.Add(new ParameterDefinition(arg));
+
+            if(builder != null)
+                builder(method.Body.GetILProcessor());
+            return method;
+        }
+
         public static MethodDefinition DefineConstructor(this TypeDefinition type,
             [NotNull] MethodReference baseConstructor, Action<ILProcessor> builder)
         {
