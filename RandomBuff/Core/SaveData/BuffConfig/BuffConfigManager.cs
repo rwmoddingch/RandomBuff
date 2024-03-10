@@ -249,6 +249,11 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     public partial class BuffConfigManager
     {
+        public bool StaticDataLoaded(BuffID buffID)
+        {
+            return staticDatas.ContainsKey(buffID);
+        }
+
         private static Dictionary<BuffID, BuffStaticData> staticDatas = new();
         private static Dictionary<string,TemplateStaticData> templateDatas = new();
 
