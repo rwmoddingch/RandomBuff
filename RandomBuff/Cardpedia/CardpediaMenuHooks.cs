@@ -61,8 +61,9 @@ namespace RandomBuff.Cardpedia
             }
         }
 
-        public static void LoadAsset(RainWorld rainWorld)
+        public static void LoadAsset()
         {
+            RainWorld rainWorld = Custom.rainWorld;
             Futile.atlasManager.LoadImage("buffassets/illustrations/BlankScreen");
             Futile.atlasManager.LoadImage("buffassets/illustrations/Negative_Flat");
             Futile.atlasManager.LoadImage("buffassets/illustrations/Negative_Fill");
