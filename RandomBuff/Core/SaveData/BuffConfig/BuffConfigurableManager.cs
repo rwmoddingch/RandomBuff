@@ -14,11 +14,12 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         public static List<BuffConfigurable> buffConfigurables = new List<BuffConfigurable>();
         public static Dictionary<BuffID, Dictionary<string, BuffConfigurable>> configurablesMapper = new();
 
-        public static BuffConfigurable TryGetConfigurable(BuffID id, string key, bool addIfMissing = true, Type newType = null, object defaultValue = null)
+        public static (BuffConfigurable configurable, bool createNew) TryGetConfigurable(BuffID id, string key, bool addIfMissing = false, Type newType = null, object defaultValue = null)
         {
             BuffPlugin.Log($"Try get configurables: id-{id}, key-{key}, addIfMissing-{addIfMissing}");
             BuffConfigurable result = null;
             bool missingResult = false;
+            bool creatingNew = false; ;
             if (configurablesMapper.ContainsKey(id))
             {
                 if (configurablesMapper[id].ContainsKey(key))
@@ -38,9 +39,10 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 result = new BuffConfigurable(id, key, newType, defaultValue);
                 configurablesMapper[id].Add(key, result);
                 buffConfigurables.Add(result);
+                creatingNew = true;
             }
-
-            return result;
+            BuffPlugin.Log($"Created result : {result}, creatingNew : {creatingNew}");
+            return (result, creatingNew);
         }
 
         public static void FetchAllConfigs()
@@ -53,7 +55,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 {
                     if (BuffConfigManager.Instance.allConfigs[config.id.value].ContainsKey(config.key))
                     {
-                        config.LoadConfig(config.key);
+                        config.LoadConfig(BuffConfigManager.Instance.allConfigs[config.id.value][config.key]);
                     }
                     else
                         missingConfig = true;
@@ -77,10 +79,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             BuffPlugin.Log($"Pushing configurables: {buffConfigurables.Count}");
             foreach (var config in buffConfigurables)
             {
-                if (config.valueDirty)
-                {
-                    BuffConfigManager.Instance.allConfigs[config.id.value][config.key] = config.PushString();
-                }
+                BuffConfigManager.Instance.allConfigs[config.id.value][config.key] = config.PushString();
             }
         }
     }

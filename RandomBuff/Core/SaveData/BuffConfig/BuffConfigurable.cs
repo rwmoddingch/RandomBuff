@@ -29,6 +29,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 if(_boxedValue != value)
                 {
                     _boxedValue = value;
+                    BuffPlugin.Log($"Set BoxedValue to {value}");
                     valueDirty = value != lastSavedValue;
                 }
             }
@@ -50,13 +51,14 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         {
             valueDirty = false;
             object val = serializer.Deserialize(value);
-            _boxedValue = val;
+            val = acceptable.Clamp(val);
             lastSavedValue = val;
+            BoxedValue = val;
         }
 
         public void Set(string value)
         {
-            BoxedValue = serializer.Deserialize(value);
+            BoxedValue = acceptable.Clamp(serializer.Deserialize(value));
         }
 
         public void SaveConfig(StringBuilder builder)

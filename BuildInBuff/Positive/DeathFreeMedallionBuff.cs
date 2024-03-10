@@ -48,21 +48,19 @@ namespace BuiltinBuffs.Positive
         [CustomBuffConfigEnum(typeof(CreatureTemplate.Type),"Slugcat")]
         public CreatureTemplate.Type WawaTest
         {
-            get
-            {
-                BuffPlugin.Log("orig");
-                return null;
-            }
-            set
-            {
-                BuffPlugin.Log("orig");
+            get;
+        }
 
-            }
+        [CustomBuffConfigRange(1f, 0f, 3f)]
+        [CustomBuffConfigInfo("RangeTest", "this is a range value test")]
+        public float WawaValueRangeTest
+        {
+            get;
         }
 
         public DeathFreeMedallionBuffData()
         {
-            BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}");
+            BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
             WawaTest = CreatureTemplate.Type.BigEel;
 
         }

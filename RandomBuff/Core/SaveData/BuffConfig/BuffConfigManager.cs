@@ -24,6 +24,7 @@ namespace RandomBuff.Core.SaveData
 
         internal static void LoadConfig(string config, BuffFormatVersion formatVersion)
         {
+            BuffPlugin.Log($"Load config : {config}");
             Instance = new BuffConfigManager(config, formatVersion);
             BuffConfigurableManager.FetchAllConfigs();
         }
