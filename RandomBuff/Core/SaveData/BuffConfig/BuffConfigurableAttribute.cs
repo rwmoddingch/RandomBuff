@@ -29,7 +29,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             BuffPlugin.Log($"CustomBuffConfigEnumAttribute : {enumType}, {defaultValue}");
 
             if(!(enumType.IsEnum) && !(enumType.IsSubclassOf(typeof(ExtEnumBase))))
-                throw new ArgumentException("param type mismatch!");
+                throw new ArgumentException("CustomBuffConfigEnumAttribute param type mismatch!");
             this.defaultValue = Activator.CreateInstance(enumType, defaultValue, false);
             valueType = enumType;
         }
@@ -48,7 +48,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         public CustomBuffConfigTwoValueAttribute(object defaultValue, object valueB)
         {
             if(defaultValue.GetType() != valueB.GetType())
-                throw new ArgumentException("param type mismatch!");
+                throw new ArgumentException("CustomBuffConfigTwoValueAttribute param type mismatch!");
 
             this.valueA = defaultValue;
             this.valueB = valueB;
@@ -74,10 +74,10 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             var typeMax = maxValue.GetType();   
 
             if(typeMax != typeDefault || typeMin != typeDefault || typeMin != typeMax)
-                throw new ArgumentException("param type mismatch!");
+                throw new ArgumentException("CustomBuffConfigRangeAttribute param type mismatch!");
 
             if (!Helper.DynamicImitator.SupportAndCreate(typeDefault))
-                throw new ArgumentException($"{typeDefault} not supported!");
+                throw new ArgumentException($"CustomBuffConfigRangeAttribute {typeDefault} not supported!");
 
 
             this.defaultValue = defaultValue;
@@ -86,10 +86,10 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             
 
             if(Helper.DynamicImitator.GreaterOrEqual(minValue, maxValue))
-                throw new ArgumentException("minValue has to be lower than maxValue");
+                throw new ArgumentException("CustomBuffConfigRangeAttribute minValue has to be lower than maxValue");
 
             if (Helper.DynamicImitator.Smaller(defaultValue, minValue) || Helper.DynamicImitator.Greater(defaultValue,maxValue))
-                throw new ArgumentException("default value must be inside range");
+                throw new ArgumentException("CustomBuffConfigRangeAttribute default value must be inside range");
         }
     }
 
@@ -105,7 +105,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         public CustomBuffConfigListAttribute(object defaultValue, object[] values)
         {
             if (!values.Contains(defaultValue))
-                throw new ArgumentException("Default value must be contained in values!");
+                throw new ArgumentException("CustomBuffConfigListAttribute default value must be contained in values!");
             this.defaultValue = defaultValue;
             this.values = values;
 

@@ -1,6 +1,7 @@
 ﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
  using Newtonsoft.Json;
@@ -25,9 +26,56 @@ namespace RandomBuff.Core.Buff
 
         internal Dictionary<string,BuffConfigurable> bindConfigurables = new();
 
-        internal object GetConfigurableValue(string str)
+        internal object GetConfigurableValue(string propertyName)
         {
-            return new CreatureTemplate.Type("sadsds");
+            if(bindConfigurables.TryGetValue(propertyName, out var value))
+            {
+                BuffPlugin.Log($"Get property {propertyName} configurable : {value.valueType}-{value.BoxedValue}");
+                return value.BoxedValue;
+            }
+            else
+            {
+                var result = BuffConfigurableManager.TryGetConfigurable(ID, propertyName);
+
+                if(result.configurable == null)
+                {
+                    foreach (var property in GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                    {
+                        if (property.Name != propertyName)
+                            continue;
+
+                        var configAttribute = property.GetCustomAttribute<CustomBuffConfigAttribute>(true);
+                        var infoAttribute = property.GetCustomAttribute<CustomBuffConfigInfoAttribute>();
+                        result = BuffConfigurableManager.TryGetConfigurable(ID, propertyName, true, property.PropertyType, configAttribute.defaultValue);
+
+                        if (infoAttribute != null)
+                        {
+                            result.configurable.name = infoAttribute.name;
+                            result.configurable.description = infoAttribute.description;
+                        }
+                        else
+                        {
+                            result.configurable.name = propertyName;
+                            result.configurable.description = "";
+                        }
+                        BuffPlugin.Log($"New configurable name : {result.configurable.name}, description : {result.configurable.description}");
+
+                        var acceptable = BuffConfigurableManager.GetProperAcceptable(configAttribute);
+                        result.configurable.acceptable = acceptable;
+                        bindConfigurables.Add(propertyName, result.configurable);
+                        break;
+                    }
+                }
+                else
+                {
+                    bindConfigurables.Add(propertyName, result.configurable);
+                }
+                
+                if (result.configurable == null)
+                    throw new NotSupportedException($"{propertyName} not supported!");
+                else
+                    return result.configurable.BoxedValue;
+            }
         }
 
         protected BuffData() { }

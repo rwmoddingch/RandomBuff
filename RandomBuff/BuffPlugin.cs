@@ -102,13 +102,18 @@ namespace RandomBuff
             OnModsInit();
         }
 
-
         private void OnModsInit()
         {
             try
             {
                 if (!isLoaded)
                 {
+                    float a = 1f;
+                    float b = 2f;
+
+                    int c = 1;
+                    int d = 2;
+
                     Log($"[Random Buff], version: {saveVersion}");
 
                     if (File.Exists(AssetManager.ResolveFilePath("buff.dev")))
@@ -125,11 +130,19 @@ namespace RandomBuff
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
                     BuffRegister.InitAllBuffPlugin();
+                    Helper.DynamicImitator.SupportAndCreate(typeof(float));
+                    Log($"Helper.DynamicImitator add : {Helper.DynamicImitator.Addition(1f, 2f)}");
+
                     BuffUtils.OnEnable();
                     if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
                     isLoaded = true;
 
+                    var result = a * b;
+                    var result1 = a + b;
+
+                    var result2 = c + d;
+                    var result3 = c * d;
                     //TODO : 测试用
                     //TestTypeSerializer();
                     DevEnabled = true;
@@ -150,7 +163,6 @@ namespace RandomBuff
         //    Log(TypeSerializer.GetSerializer<IntVector2>().Serialize(new IntVector2(1,2)));
 
         //}
-
 
         private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {

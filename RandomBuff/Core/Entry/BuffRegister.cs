@@ -268,7 +268,6 @@ namespace RandomBuff.Core.Entry
 
         internal static void InitAllBuffPlugin()
         {
-       
             foreach (var mod in ModManager.ActiveMods)
             {
                 var resolver = new DefaultAssemblyResolver();
@@ -419,18 +418,25 @@ namespace RandomBuff.Core.Entry
                     //读取特性
                     var configAttribute = property.GetCustomAttribute<CustomBuffConfigAttribute>();
                     var infoAttribute = property.GetCustomAttribute<CustomBuffConfigInfoAttribute>();//可为null
-                    var bindConfigurable = BuffConfigurableManager.TryGetConfigurable(dataType.Key, property.Name, true, property.PropertyType, configAttribute.defaultValue);
-                    bindConfigurable.acceptable = BuffConfigurableManager.GetProperAcceptable(configAttribute);
+                    var result = BuffConfigurableManager.TryGetConfigurable(dataType.Key, property.Name, true, property.PropertyType, configAttribute.defaultValue);
 
-                    if (infoAttribute != null)
+                    if (result.createNew)
                     {
-                        bindConfigurable.name = infoAttribute.name;
-                        bindConfigurable.description = infoAttribute.description;
-                    }
-                    else
-                    {
-                        bindConfigurable.name = property.Name;
-                        bindConfigurable.description = "";
+                        var bindConfigurable = result.configurable;
+
+                        bindConfigurable.acceptable = BuffConfigurableManager.GetProperAcceptable(configAttribute);
+
+                        if (infoAttribute != null)
+                        {
+                            bindConfigurable.name = infoAttribute.name;
+                            bindConfigurable.description = infoAttribute.description;
+                        }
+                        else
+                        {
+                            bindConfigurable.name = property.Name;
+                            bindConfigurable.description = "";
+                        }
+                        BuffPlugin.Log($"New configurable name : {bindConfigurable.name}, description : {bindConfigurable.description}");
                     }
                 }
             }

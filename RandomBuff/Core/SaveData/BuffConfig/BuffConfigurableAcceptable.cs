@@ -25,13 +25,14 @@ namespace RandomBuff.Core.SaveData.BuffConfig
 
     internal class BuffConfigurableAcceptableRange : BuffConfigurableAcceptableBase
     {
-        public object minValue;
-        public object maxValue;
+        public readonly object minValue;
+        public readonly object maxValue;
 
         public BuffConfigurableAcceptableRange(object defaultValue, object minValue, object maxValue) : base(defaultValue)
         {
             this.minValue = minValue;
             this.maxValue = maxValue;
+            BuffPlugin.Log($"Create BuffConfigurableAcceptableRange, default : {defaultValue}, min : {minValue}, max : {maxValue}");
         }
 
         public override object Clamp(object value)
@@ -56,22 +57,24 @@ namespace RandomBuff.Core.SaveData.BuffConfig
 
     internal class BuffConfigurableAcceptableList : BuffConfigurableAcceptableBase
     {
-        public object defaultValueString;
-        public object[] values;
+        public readonly object[] values;
 
-        public BuffConfigurableAcceptableList(object defaultValues, object[] values) : base(defaultValues)
+        public BuffConfigurableAcceptableList(object defaultValue, object[] values) : base(defaultValue)
         {
-            this.defaultValueString = defaultValues;
             this.values = values;
-
-            BuffPlugin.Log($"Create BuffConfigurableAcceptableList of {defaultValue.GetType()}, default : {defaultValue}");
+            string debugString = $"Create BuffConfigurableAcceptableList of {base.defaultValue.GetType()}, default : {base.defaultValue}, values:";
+            foreach(object value in values)
+            {
+                debugString = string.Concat(debugString, $"\n{value}");
+            }
+            BuffPlugin.Log(debugString);
         }
 
         public override object Clamp(object value)
         {
             if(values.Contains(value))
                 return value;
-            return values.First();
+            return defaultValue;
         }
 
         public override bool IsValid(object value)
@@ -82,21 +85,24 @@ namespace RandomBuff.Core.SaveData.BuffConfig
 
     internal class BuffConfigurableAcceptableKeyCode : BuffConfigurableAcceptableBase
     {
-        public KeyCode defaultkey;
+        public readonly KeyCode defaultkey;
 
         public BuffConfigurableAcceptableKeyCode(KeyCode defaultkey) : base(defaultkey)
         {
             this.defaultkey = defaultkey;
+            BuffPlugin.Log($"Create BuffConfigurableAcceptableKeyCode, default : {defaultkey}");
         }
 
         public override object Clamp(object value)
         {
-            return null;
+            if (!(value is KeyCode))
+                return defaultkey;
+            return value;
         }
 
         public override bool IsValid(object value)
         {
-            return true;
+            return value is KeyCode;
         }
     }
 
@@ -109,6 +115,8 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         {
             this.valueA = valueA;
             this.valueB = valueB;
+
+            BuffPlugin.Log($"Create BuffConfigurableAcceptableKeyCode, valueA : {valueA}, valueB : {valueB}");
         }
 
         public override object Clamp(object value)
