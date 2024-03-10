@@ -815,4 +815,41 @@ namespace RandomBuff.Render.UI
             }
         }
     }
+
+    internal class CardpediaSlotScrollingAnimator : BuffCardAnimator
+    {
+        public bool displayMode;
+        public Vector2 offDisplayPos;
+        public CardpediaSlotScrollingAnimator( BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.DisplayAllGraphTexts = false;
+            buffCard.Highlight = false;
+        }
+        
+        public bool MouseOver
+        {
+            get
+            {
+                Vector2 screenPos = buffCard.Position;
+                Vector2 mousePos = Cardpedia.CardpediaMenu.Instance.mousePosition;
+                return mousePos.x > screenPos.x - 160f * buffCard.Scale && mousePos.y > screenPos.y - 335f * buffCard.Scale && 
+                    mousePos.x < screenPos.x + 160f * buffCard.Scale && mousePos.y < screenPos.y + 335f * buffCard.Scale;
+            }
+        }
+
+        public override void Update()
+        {
+            
+        }
+    }
+
+    internal class CardpediaSlotDisplayAnimator : BuffCardAnimator
+    {
+        public CardpediaSlotDisplayAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.DisplayAllGraphTexts = false;
+        }
+
+
+    }
 }

@@ -28,6 +28,14 @@ namespace RandomBuff.Render.UI
         public BuffID ID { get; private set; }
         public BuffStaticData StaticData => BuffConfigManager.GetStaticData(ID);
 
+        public FTexture CardTexture
+        {
+            get
+            {
+                return _ftexture;
+            }
+        }
+
         public Vector3 Rotation
         {
             get => new Vector3(_cardRenderer.Rotation.x, _cardRenderer.Rotation.y, _ftexture.rotation);
@@ -334,6 +342,10 @@ namespace RandomBuff.Render.UI
             {
                 currentAnimator = new BuffTimerAnimSlotShowAnimator(this, Position, Rotation, Scale);
             }
+            else if(newState == AnimatorState.CardpediaSlot_Scrolling)
+            {
+                currentAnimator = new CardpediaSlotScrollingAnimator(this, Position, Rotation, Scale);
+            }
             else
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
@@ -415,7 +427,11 @@ namespace RandomBuff.Render.UI
             TriggerBuffAnimSlot_Trigger,
 
             //计时器卡槽动画状态
-            BuffTimerAnimSlot_Show
+            BuffTimerAnimSlot_Show,
+
+            //图鉴界面卡槽动画状态
+            CardpediaSlot_Scrolling,
+            CardpediaSlot_Displaying
         }
     }
 }
