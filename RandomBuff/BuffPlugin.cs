@@ -9,6 +9,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 using BepInEx;
+using RandomBuff.Cardpedia;
 using BepInEx.Logging;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -146,6 +147,9 @@ namespace RandomBuff
                     //TODO : 测试用
                     //TestTypeSerializer();
                     DevEnabled = true;
+
+                    Cardpedia.CardpediaMenuHooks.Hook();
+                    CardpediaMenuHooks.LoadAsset();                                      
                 }
             }
             catch (Exception e)
