@@ -294,6 +294,7 @@ namespace RandomBuff.Core.SaveData
             foreach (var mod in ModManager.ActiveMods)
             {
                 string path = mod.path + Path.DirectorySeparatorChar + "buffassets";
+                BuffPlugin.Log($"{path} | {Directory.Exists(path)}");
                 if (!Directory.Exists(path))
                     continue;
 

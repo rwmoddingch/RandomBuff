@@ -11,13 +11,13 @@ using RandomBuff.Core.Buff;
 
 namespace RandomBuff.Cardpedia
 {
-    public class TextBoxManager
+    internal class TextBoxManager
     {
         public bool textSetted;
         public bool inited;
         public BuffType currentType;
 
-        public CardpediaMenu owner;
+        //public CardpediaMenu owner;
         public List<CardpediaTextBox> textBoxes;
         public CardpediaTextBox titleBox;
         public List<float> yOffSet;
@@ -31,6 +31,10 @@ namespace RandomBuff.Cardpedia
         public List<FSprite> shadowSprites;
         public FSprite titleBack;
         public FContainer Container;
+        public FContainer ownerContainer;
+
+        public float alpha;
+
         public float Y_upLimit = 723f;
         public float Y_downLimit = 243f;
         public float gap = 15f;
@@ -38,10 +42,10 @@ namespace RandomBuff.Cardpedia
         public float scrollSpeed = 0.05f;
         public float scrollLength;
 
-        public TextBoxManager(CardpediaMenu menu) 
+        public TextBoxManager(/*CardpediaMenu menu, */FContainer ownerContainer) 
         {
             currentType = BuffType.Negative;
-            owner = menu;
+            this.ownerContainer = ownerContainer;
             textBoxes = new List<CardpediaTextBox>();
             yOffSet = new List<float>();
             origScaleX = new List<float>();
@@ -66,17 +70,17 @@ namespace RandomBuff.Cardpedia
             titleBack.scaleY = 80f;
             titleBack.SetPosition(new Vector2(203f, Y_downLimit + 40f));
             titleBack.alpha = 0f;
-            owner.cursorContainer.AddChild(titleBack);
+            ownerContainer.AddChild(titleBack);
 
             var renderer = ScruffyPool.GetRenderer(5);
             titleBox = new CardpediaTextBox(renderer, true, Color.white, 1, 5);
-            titleBox.textTexture.SetPosition(new Vector2(203f,298f));           
-            owner.cursorContainer.AddChild(titleBox.textTexture);
+            titleBox.textTexture.SetPosition(new Vector2(203f,298f));
+            ownerContainer.AddChild(titleBox.textTexture);
 
             scrollLength -= Y_upLimit - Y_downLimit;
 
             inited = true;
-
+            //InitEmptyInfo();
         }
 
         public CardpediaTextBox SetupTextBox(int id)
@@ -89,7 +93,7 @@ namespace RandomBuff.Cardpedia
             {
                 blurSprite.scaleX = 2.1f;
                 blurSprite.scaleY = 1.6f;
-                blurSprite.SetPosition(owner.blurSprite.GetPosition() + new Vector2(gap + 50f * blurSprite.scaleX + 130f + id * (100f * blurSprite.scaleX + 5f), 0.5f * (Y_upLimit - Y_downLimit - 100f * blurSprite.scaleY)));
+                blurSprite.SetPosition(CardpediaStatics.leftBlurSpritePos + new Vector2(gap + 50f * blurSprite.scaleX + 130f + id * (100f * blurSprite.scaleX + 5f), 0.5f * (Y_upLimit - Y_downLimit - 100f * blurSprite.scaleY)));
             }
             else
             {
@@ -102,14 +106,14 @@ namespace RandomBuff.Cardpedia
                 {
                     blurSprite.scaleY = 2f;
                 }
-                blurSprite.SetPosition(new Vector2(owner.blurSprite.GetPosition().x + gap + 50f * blurSprite.scaleX + 130f, yOffSet[2] - 10f - 0.5f * (100f * blurSprite.scaleY + 160f) - (id < 4? 0f : 10f + origScaleY[id - 1]))) ;
+                blurSprite.SetPosition(new Vector2(CardpediaStatics.leftBlurSpritePos.x + gap + 50f * blurSprite.scaleX + 130f, yOffSet[2] - 10f - 0.5f * (100f * blurSprite.scaleY + 160f) - (id < 4? 0f : 10f + origScaleY[id - 1]))) ;
             }
-            blurSprite.shader = owner.manager.rainWorld.Shaders["UIBlurFoldable"];
+            blurSprite.shader = Custom.rainWorld.Shaders["UIBlurFoldable"];
             blurSprite.alpha = 0f;
             textBox.blurSprite = blurSprite;
             textBox.Container.AddChild(textBox.blurSprite);
             textBox.Container.AddChild(textBox.uselessSprite);
-            owner.cursorContainer.AddChild(textBox.textTexture);
+            ownerContainer.AddChild(textBox.textTexture);
             yOffSet.Add(blurSprite.GetPosition().y);
             textYOffset.Add(yOffSet[id]);
             origScaleX.Add(100f * blurSprite.scaleX);
@@ -133,8 +137,8 @@ namespace RandomBuff.Cardpedia
                 shadowSprites.Add(shadowSprite);
                 subtitleSprite.alpha = 0f;
                 shadowSprite.alpha = 0f;
-                owner.cursorContainer.AddChild(subtitleSprite);
-                owner.cursorContainer.AddChild(shadowSprite);
+                ownerContainer.AddChild(subtitleSprite);
+                ownerContainer.AddChild(shadowSprite);
             }
             else
             {
@@ -148,8 +152,8 @@ namespace RandomBuff.Cardpedia
                 shadowSprites.Add(shadowSprite);
                 subtitleSprite.alpha = 0f;
                 shadowSprite.alpha = 0f;
-                owner.cursorContainer.AddChild(subtitleSprite);
-                owner.cursorContainer.AddChild(shadowSprite);
+                ownerContainer.AddChild(subtitleSprite);
+                ownerContainer.AddChild(shadowSprite);
             }
             //subtitleSprites[id].scale = 0.8f;
             //shadowSprites[id].scale = 0.8f;
@@ -159,14 +163,14 @@ namespace RandomBuff.Cardpedia
              
         public void RefreshInformation(string cardLife, string stackability, string trigger, string description, string title, BuffID id)
         {
-            owner.cardSheetManager.displayingCard.element = Futile.atlasManager.GetElementWithName(id.GetStaticData().FaceName);
-            owner.cardSheetManager.displayingCard.scale = 0.35f * (600f / owner.cardSheetManager.displayingCard.element.sourcePixelSize.x);
+            //owner.cardSheetManager.displayingCard.element = Futile.atlasManager.GetElementWithName(id.GetStaticData().FaceName);
+            //owner.cardSheetManager.displayingCard.scale = 0.35f * (600f / owner.cardSheetManager.displayingCard.element.sourcePixelSize.x);
 
-            textBoxes[0].RefreshTextTexture(owner.cursorContainer, cardLife, textBoxes[0].blurSprite.GetPosition());
-            textBoxes[1].RefreshTextTexture(owner.cursorContainer, stackability, textBoxes[1].blurSprite.GetPosition());
-            textBoxes[2].RefreshTextTexture(owner.cursorContainer, trigger, textBoxes[2].blurSprite.GetPosition());            
-            textBoxes[3].RefreshTextTexture(owner.cursorContainer, description, textBoxes[3].blurSprite.GetPosition() + new Vector2(0, 80f));
-            titleBox.RefreshTextTexture(owner.cursorContainer, title, new Vector2(203f, 298f));
+            textBoxes[0].RefreshTextTexture(ownerContainer, cardLife, textBoxes[0].blurSprite.GetPosition());
+            textBoxes[1].RefreshTextTexture(ownerContainer, stackability, textBoxes[1].blurSprite.GetPosition());
+            textBoxes[2].RefreshTextTexture(ownerContainer, trigger, textBoxes[2].blurSprite.GetPosition());            
+            textBoxes[3].RefreshTextTexture(ownerContainer, description, textBoxes[3].blurSprite.GetPosition() + new Vector2(0, 80f));
+            titleBox.RefreshTextTexture(ownerContainer, title, new Vector2(203f, 298f));
             
         }
 
@@ -189,7 +193,7 @@ namespace RandomBuff.Cardpedia
                 }
             }
 
-            if(!textSetted)
+            if (!textSetted && textBoxes != null && textBoxes[0] != null && textBoxes[0].textTexture != null && textBoxes[0].textTexture._renderLayer != null)
             {
                 InitEmptyInfo();
                 textSetted = true;
@@ -198,21 +202,21 @@ namespace RandomBuff.Cardpedia
 
         public void InitEmptyInfo()
         {
-            textBoxes[0].RefreshTextTexture(owner.cursorContainer, "? ? ?", textBoxes[0].blurSprite.GetPosition());
-            textBoxes[1].RefreshTextTexture(owner.cursorContainer, "? ? ?", textBoxes[1].blurSprite.GetPosition());
-            textBoxes[2].RefreshTextTexture(owner.cursorContainer, "? ? ?", textBoxes[2].blurSprite.GetPosition());
+            textBoxes[0].RefreshTextTexture(ownerContainer, "? ? ?", textBoxes[0].blurSprite.GetPosition());
+            textBoxes[1].RefreshTextTexture(ownerContainer, "? ? ?", textBoxes[1].blurSprite.GetPosition());
+            textBoxes[2].RefreshTextTexture(ownerContainer, "? ? ?", textBoxes[2].blurSprite.GetPosition());
             string str = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
                 "（点击下方卡牌以查看详细信息）" : "(Click the cards below to view the detail information)";
-            textBoxes[3].RefreshTextTexture(owner.cursorContainer, str, textBoxes[3].blurSprite.GetPosition() + new Vector2(0, 80f));
+            textBoxes[3].RefreshTextTexture(ownerContainer, str, textBoxes[3].blurSprite.GetPosition() + new Vector2(0, 80f));
             string str2 = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
                 "（无）" : "(None)";
-            textBoxes[4].RefreshTextTexture(owner.cursorContainer, str2, textBoxes[4].blurSprite.GetPosition());
-            titleBox.RefreshTextTexture(owner.cursorContainer, "? ? ?", new Vector2(203f, 298f));           
+            textBoxes[4].RefreshTextTexture(ownerContainer, str2, textBoxes[4].blurSprite.GetPosition());
+            titleBox.RefreshTextTexture(ownerContainer, "? ? ?", new Vector2(203f, 298f));           
         }
 
         public void Draw(float timeStacker)
         {
-            if (!inited) return;
+            if (!inited || !textSetted) return;
             for (int i = 0; i < textBoxes.Count; i++)
             {
                 //白框框更新
@@ -224,10 +228,10 @@ namespace RandomBuff.Cardpedia
                     shadowSprites[i].y = textBoxes[i].blurSprite.y - 1f;                   
                 }
 
-                textBoxes[i].blurSprite.alpha = owner.blurSprite.alpha;
-                textBoxes[i].textTexture.alpha = owner.blurSprite.alpha;
-                subtitleSprites[i].alpha = owner.blurSprite.alpha;
-                shadowSprites[i].alpha = 0.3f * owner.blurSprite.alpha;
+                textBoxes[i].blurSprite.alpha = alpha;
+                textBoxes[i].textTexture.alpha = alpha;
+                subtitleSprites[i].alpha = alpha;
+                shadowSprites[i].alpha = 0.3f * alpha;
                 
                 float lastUp = textBoxes[i].blurSprite._renderLayer._meshRenderer.material.GetFloat("_UpAlpha");
                 float lastDown = textBoxes[i].blurSprite._renderLayer._meshRenderer.material.GetFloat("_DownAlpha");
@@ -292,8 +296,18 @@ namespace RandomBuff.Cardpedia
                 textBoxes[i].textTexture._renderLayer._meshRenderer.material.SetFloat("_DownAlpha", Mathf.Lerp(lastDown, downAlpha, timeStacker));
                 
             }
-            titleBack.alpha = 0.25f * owner.blurSprite.alpha;
-            titleBox.textTexture.alpha = owner.blurSprite.alpha;
+            titleBack.alpha = 0.25f * alpha;
+            titleBox.textTexture.alpha = alpha;
+        }
+    
+        public void Destroy()
+        {
+            ScruffyPool.RecycleRenderer(titleBox.pediaTextRenderer);
+            for (int i = 0; i < textBoxes.Count; i++)
+            {
+                ScruffyPool.RecycleRenderer(textBoxes[i].pediaTextRenderer);
+                textBoxes[i].pediaTextRenderer = null;
+            }
         }
     }
 }

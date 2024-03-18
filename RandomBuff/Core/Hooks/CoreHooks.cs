@@ -44,7 +44,7 @@ namespace RandomBuff.Core.Hooks
 
             On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
             On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
-            IL.ModManager.ModApplyer.ApplyModsThread += ModApplyer_ApplyModsThread;
+            //IL.ModManager.ModApplyer.ApplyModsThread += ModApplyer_ApplyModsThread;
 
             InGameHooksInit();
 

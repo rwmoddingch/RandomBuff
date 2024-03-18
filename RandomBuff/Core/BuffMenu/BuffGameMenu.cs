@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using JollyCoop.JollyMenu;
 using BepInEx;
 using Object = UnityEngine.Object;
+using RandomBuff.Render.CardRender;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -112,6 +113,23 @@ namespace RandomBuff.Core.BuffMenu
             //detailPage.Container.MoveToFront();
 
             UpdateSlugcatAndPage();
+
+            TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, "Wawa test Label", new Vector2(400f, 30f))
+            {
+                Pivot = new Vector2(0f, 1f),
+                color = Color.green,
+                alpha = 0.5f,
+                Alignment = TMPro.TextAlignmentOptions.Left
+            };
+            container.AddChild(label);
+
+
+            FSprite redDot = new FSprite("pixel") { color = Color.red, scale = 2f };
+            
+            container.AddChild(redDot);
+            label.SetPosition(new Vector2(100f, 150f));
+            redDot.SetPosition(new Vector2(100f, 150f));
+            //label.scale = 12.5f;
         }
         //
 

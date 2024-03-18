@@ -11,16 +11,19 @@ using System.ComponentModel;
 using RandomBuff.Cardpedia.Elements;
 using RandomBuff.Core.Buff;
 using System.Runtime.CompilerServices;
+using RandomBuff.Cardpedia.PediaPage;
 
 namespace RandomBuff.Cardpedia
 {
-    public class CardpediaMenu : Menu.Menu, CheckBox.IOwnCheckBox
+    internal class CardpediaMenu : Menu.Menu, CheckBox.IOwnCheckBox
     {
         public static CardpediaMenu Instance;
 
-        public TextBoxManager textBoxManager;
-        public CardSheetManager cardSheetManager;
+        //public TextBoxManager textBoxManager;
+        //public CardSheetManager cardSheetManager;
         public ConfigManager configManager;
+
+        public CardSheetPage sheetPage;
 
         private FSprite loadingSprite_Main;
         private FSprite loadingSprite_UI;
@@ -52,15 +55,17 @@ namespace RandomBuff.Cardpedia
         {
             set
             {
-                textBoxManager.currentType = value;
-                textBoxManager.titleBack.color = textBoxManager.currentType == BuffType.Negative ? new Color(0.6f, 0f, 0.05f) :
-                (textBoxManager.currentType == BuffType.Positive ? new Color(0f, 0.6f, 0.4f) : new Color(0.5f, 0.5f, 0.5f));
-                textBoxManager.InitEmptyInfo();
+                sheetPage.RefreshSheet(value);
+                sheetPage.Show = true;
+                //textBoxManager.currentType = value;
+                //textBoxManager.titleBack.color = textBoxManager.currentType == BuffType.Negative ? new Color(0.6f, 0f, 0.05f) :
+                //(textBoxManager.currentType == BuffType.Positive ? new Color(0f, 0.6f, 0.4f) : new Color(0.5f, 0.5f, 0.5f));
+                //textBoxManager.InitEmptyInfo();
 
-                cardSheetManager.currentType = value;
-                cardSheetManager.displayingCard.element = Futile.atlasManager.GetElementWithName("buffassets/cardbacks/" +
-                    (cardSheetManager.currentType == BuffType.Negative ? "fpback" : (cardSheetManager.currentType == BuffType.Positive ? "moonback" : "slugback")));
-                cardSheetManager.displayingCard.scale = 0.35f * (600f / cardSheetManager.displayingCard.element.sourcePixelSize.x);
+                //cardSheetManager.currentType = value;
+                //cardSheetManager.displayingCard.element = Futile.atlasManager.GetElementWithName("buffassets/cardbacks/" +
+                //    (cardSheetManager.currentType == BuffType.Negative ? "fpback" : (cardSheetManager.currentType == BuffType.Positive ? "moonback" : "slugback")));
+                //cardSheetManager.displayingCard.scale = 0.35f * (600f / cardSheetManager.displayingCard.element.sourcePixelSize.x);
             }
         }
         public bool inited;
@@ -78,7 +83,6 @@ namespace RandomBuff.Cardpedia
 
         public CardpediaMenu(ProcessManager manager) : base(manager, CardpediaMenuHooks.Cardpedia)
         {
-
             BrowsingCards = false;
             switchCount = 1f;
 
@@ -219,7 +223,7 @@ namespace RandomBuff.Cardpedia
 
             blurSprite = new FSprite("pixel");
             blurSprite.scaleX = 0.1f;
-            blurSprite.SetPosition(new Vector2(203, 483));
+            blurSprite.SetPosition(CardpediaStatics.leftBlurSpritePos);
             blurSprite.shader = manager.rainWorld.Shaders["UIBlur"];
             pages[0].Container.AddChild(blurSprite);
 
@@ -234,6 +238,9 @@ namespace RandomBuff.Cardpedia
             titleFlat_Cardpedia.SetPosition(new Vector2(683, 443));
             titleFlat_Cardpedia.shader = manager.rainWorld.Shaders["MenuText"];
             pages[0].Container.AddChild(titleFlat_Cardpedia);
+
+            sheetPage = new CardSheetPage(this, pages[0], Vector2.zero);
+            pages[0].subObjects.Add(sheetPage);
 
             Instance = this;
             inited = true;
@@ -278,8 +285,8 @@ namespace RandomBuff.Cardpedia
                 SetScale = Vector2.Lerp(new Vector2(220f, 360f), new Vector2(260, 480), SetAlpha);
                 SetTitlePos = Vector2.Lerp(new Vector2(683, 443), new Vector2(683, 563), SetAlpha);
 
-                textBoxManager.Update();
-                cardSheetManager.Update();
+                //textBoxManager.Update();
+                //cardSheetManager.Update();
             }
         }
 
@@ -291,8 +298,8 @@ namespace RandomBuff.Cardpedia
                 darkSprite_Upper.alpha = 0.85f * Mathf.Lerp(lastAlpha, SetAlpha, timeStacker);
                 blurSprite.alpha = Mathf.Lerp(lastAlpha, SetAlpha, timeStacker);
                 //Vector2 vec = Vector2.Lerp(lastScale, SetScale, timeStacker);
-                blurSprite.scaleX = 260;
-                blurSprite.scaleY = 480;
+                blurSprite.scaleX = CardpediaStatics.narrowBlurSpriteScale.x;
+                blurSprite.scaleY = CardpediaStatics.narrowBlurSpriteScale.y;
                 titleShadow_Cardpedia.SetPosition(Vector2.Lerp(lastTitlePos, SetTitlePos, timeStacker));
                 titleFlat_Cardpedia.SetPosition(Vector2.Lerp(lastTitlePos, SetTitlePos, timeStacker));
 
@@ -300,24 +307,24 @@ namespace RandomBuff.Cardpedia
                 leftFlipButton.pos.y = Mathf.Lerp(leftFlipButton.lastPos.y, Mathf.Lerp(-300f, 120f, SetAlpha), timeStacker);
                 rightFlipButton.pos.y = Mathf.Lerp(leftFlipButton.lastPos.y, Mathf.Lerp(-300f, 120f, SetAlpha), timeStacker);
 
-                textBoxManager.Draw(timeStacker);
-                cardSheetManager.GrafUpdate(timeStacker);
+                //textBoxManager.Draw(timeStacker);
+                //cardSheetManager.GrafUpdate(timeStacker);
                 configManager.GrafUpdate(timeStacker);
             }
         }
 
         public void LoadManagers()
         {
-            textBoxManager = new TextBoxManager(this);
-            pages[0].Container.AddChild(textBoxManager.Container);
-            textBoxLoaded = true;
+            //textBoxManager = new TextBoxManager(this);
+            //pages[0].Container.AddChild(textBoxManager.Container);
+            //textBoxLoaded = true;
 
             configManager = new ConfigManager(this);
             loadingSprite_UI.alpha = 0f;
 
             loadingSprite_Cards.alpha = 1f;
-            cardSheetManager = new CardSheetManager(this, BuffType.Negative);
-            cardSheetLoaded = true;
+            //cardSheetManager = new CardSheetManager(this, BuffType.Negative);
+            //cardSheetLoaded = true;
 
             fullyLoaded = true;
         }
@@ -380,58 +387,60 @@ namespace RandomBuff.Cardpedia
             {
                 if (!BrowsingCards)
                 {
-                    for (int i = 0; i < textBoxManager.textBoxes.Count; i++)
-                    {
-                        ScruffyPool.RecycleRenderer(textBoxManager.textBoxes[i].pediaTextRenderer);
-                        textBoxManager.textBoxes[i].pediaTextRenderer = null;
-                    }
+                    //for (int i = 0; i < textBoxManager.textBoxes.Count; i++)
+                    //{
+                    //    ScruffyPool.RecycleRenderer(textBoxManager.textBoxes[i].pediaTextRenderer);
+                    //    textBoxManager.textBoxes[i].pediaTextRenderer = null;
+                    //}
 
-                    ScruffyPool.RecycleRenderer(textBoxManager.titleBox.pediaTextRenderer);
-                    textBoxManager.titleBox.pediaTextRenderer = null;
+                    //ScruffyPool.RecycleRenderer(textBoxManager.titleBox.pediaTextRenderer);
+                    //textBoxManager.titleBox.pediaTextRenderer = null;
 
-                    for (int j = 0; j < 3; j++)
-                    {
-                        for (int k = 0; k < cardSheetManager.pediaCardSheets[j].cards.Count; k++)
-                        {
-                            cardSheetManager.pediaCardSheets[j].cards[k].Destroy();
-                        }
+                    //for (int j = 0; j < 3; j++)
+                    //{
+                    //    for (int k = 0; k < cardSheetManager.pediaCardSheets[j].cards.Count; k++)
+                    //    {
+                    //        cardSheetManager.pediaCardSheets[j].cards[k].Destroy();
+                    //    }
 
-                    }
+                    //}
 
                     OnExit();
                 }
                 else
                 {
                     BrowsingCards = false;
+                    sheetPage.Show = false;
                 }
             }
             else if (message == "LEFTFLIP")
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    if (cardSheetManager.pediaCardSheets[i].sheetBuffType != textBoxManager.currentType) continue;
+                sheetPage.SwitchPage(-1);
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    if (cardSheetManager.pediaCardSheets[i].sheetBuffType != textBoxManager.currentType) continue;
 
-                    if (cardSheetManager.pediaCardSheets[i].flipCounter < 0.05f)
-                    {
-                        if (cardSheetManager.pediaCardSheets[i].sheetPage > 0)
-                        {
-                            cardSheetManager.pediaCardSheets[i].sheetPage--;
-                            cardSheetManager.pediaCardSheets[i].flipCounter = 1f;
-                        }
-                    }
-                }
+                //    if (cardSheetManager.pediaCardSheets[i].flipCounter < 0.05f)
+                //    {
+                //        if (cardSheetManager.pediaCardSheets[i].sheetPage > 0)
+                //        {
+                //            cardSheetManager.pediaCardSheets[i].sheetPage--;
+                //            cardSheetManager.pediaCardSheets[i].flipCounter = 1f;
+                //        }
+                //    }
+                //}
             }
             else if (message == "RIGHTFLIP")
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    if (cardSheetManager.pediaCardSheets[i].sheetPage + 1 < cardSheetManager.pediaCardSheets[i].maxPage && cardSheetManager.pediaCardSheets[i].flipCounter < 0.05f)
-                    {
-                        cardSheetManager.pediaCardSheets[i].sheetPage++;
-                        cardSheetManager.pediaCardSheets[i].flipCounter = 1f;
-                    }
-                }
-
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    if (cardSheetManager.pediaCardSheets[i].sheetPage + 1 < cardSheetManager.pediaCardSheets[i].maxPage && cardSheetManager.pediaCardSheets[i].flipCounter < 0.05f)
+                //    {
+                //        cardSheetManager.pediaCardSheets[i].sheetPage++;
+                //        cardSheetManager.pediaCardSheets[i].flipCounter = 1f;
+                //    }
+                //}
+                sheetPage.SwitchPage(1);
             }
         }
 
@@ -451,5 +460,40 @@ namespace RandomBuff.Cardpedia
         {
 
         }
+    }
+
+    internal static class CardpediaStatics
+    {
+        public static float tinyGap = 4f;
+        public static float smallGap = 10f;
+        public static float cosmeticRectHeight = 40f;
+
+        public static Vector2 leftBlurSpritePos = new Vector2(200f, 483f);
+        public static Vector2 rightBlurSpritePos = new Vector2(1150f, 483f);
+        public static Vector2 narrowBlurSpriteScale = new Vector2(260f, 480f);
+
+        public static Vector2 infoDisplayWindowScale = new Vector2(670f, 480f);
+        public static Vector2 infoDisplayWindowPos = new Vector2(leftBlurSpritePos.x + narrowBlurSpriteScale.x / 2f + smallGap, leftBlurSpritePos.y - narrowBlurSpriteScale.y / 2f);
+
+        public static Vector2 displayCardTexturePos = (new Vector2(203, 503));
+
+        public static int sheetNumPerPage = 8;
+
+        public static Color negativeColor = new Color(0.6f, 0f, 0.05f);
+        public static Color positiveColor = new Color(0f, 0.6f, 0.4f);
+        public static Color dualityColor = new Color(0.5f, 0.5f, 0.5f);
+
+        public static Color pediaUILightGrey = new Color(0.6f, 0.6f, 0.6f);
+        public static Color pediaUIDarkGrey = new Color(0.15f, 0.15f, 0.15f);
+
+
+        public static float dropBox_dropButtonHeight = 30f;
+
+        public static float slider_sliderSpan = 60f;
+        public static float slider_lineHeight = 4f;
+        public static float slider_sliderRectWidth = 8f;
+        public static float slider_sliderRectHeight = 20f;
+
+        public static float chainBox_cosmeticRectHeight = 30f;
     }
 }

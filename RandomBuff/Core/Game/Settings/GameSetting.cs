@@ -136,6 +136,7 @@ namespace RandomBuff.Core.Game.Settings
             {
                 BuffPlugin.LogFatal($"Unknown template: {name}, use default");
                 gachaTemplate = new NormalGachaTemplate();
+                return;
             }
 
             var data = BuffConfigManager.GetTemplateData(name);

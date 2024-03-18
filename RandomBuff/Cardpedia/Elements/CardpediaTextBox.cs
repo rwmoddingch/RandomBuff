@@ -85,6 +85,10 @@ namespace RandomBuff.Cardpedia.Elements
             }
             else
             {
+                //BuffPlugin.Log($"{textTexture}");
+                //BuffPlugin.Log($"{textTexture._renderLayer}");
+                //BuffPlugin.Log($"{textTexture._renderLayer._meshRenderer}");
+                //BuffPlugin.Log($"{textTexture._renderLayer._meshRenderer.material}");
                 //textTexture._renderLayer._meshRenderer.material.SetFloat("_UpAlpha", 1f);
                 //textTexture._renderLayer._meshRenderer.material.SetFloat("_DownAlpha", 1f);
                 textTexture._renderLayer._meshRenderer.material.SetColor("_SetColor", textCol);

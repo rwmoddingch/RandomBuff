@@ -816,6 +816,7 @@ namespace RandomBuff.Render.UI
         }
     }
 
+    #region CardPedia
     internal class CardpediaSlotScrollingAnimator : BuffCardAnimator
     {
         public bool displayMode;
@@ -852,4 +853,44 @@ namespace RandomBuff.Render.UI
 
 
     }
+
+    internal class CardpediaSlotStaticShowAnimator : BuffCardAnimator
+    {
+        public static float sheetYOffset = 120f;
+        CardpediaSlot cardpediaSlot;
+
+        public CardpediaSlotStaticShowAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
+        {
+            buffCard.Highlight = false;
+            buffCard.DisplayDescription = false;
+            buffCard.DisplayTitle = false;
+            buffCard.DisplayAllGraphTexts = false;
+            buffCard.Highlight = false;
+            buffCard.Grey = false;
+
+            cardpediaSlot = buffCard.interactionManager.BaseSlot as CardpediaSlot;
+
+            buffCard.Scale = BuffCard.normalScale * 0.5f;
+            buffCard.Alpha = 0f;
+
+            int index = cardpediaSlot.BuffCards.IndexOf(buffCard);
+            Vector2 position = new Vector2(350f + (300f * buffCard.Scale + 20f) * index, sheetYOffset);
+
+            this.initPosition = buffCard.Position = position;
+        }
+
+        public override void Update()
+        {
+            if (buffCard.CurrentFocused && !buffCard.Highlight)
+                buffCard.Highlight = true;
+            else if (!buffCard.CurrentFocused && buffCard.Highlight)
+                buffCard.Highlight = false;
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            buffCard.Alpha = cardpediaSlot.alpha;
+        }
+    }
+    #endregion
 }

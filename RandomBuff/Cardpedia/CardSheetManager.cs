@@ -8,11 +8,11 @@ using RandomBuff.Cardpedia.Elements;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.CardRender;
 
 namespace RandomBuff.Cardpedia
 {
-
-    public class CardSheetManager
+    internal class CardSheetManager
     {
         public bool inited;
         public FTexture displayingCard;
@@ -24,13 +24,13 @@ namespace RandomBuff.Cardpedia
         public Vector2 XRange;
         public Vector2 displayingPos = (new Vector2(203, 503));
 
-        public TextBoxManager textBoxManager
-        {
-            get
-            {
-                return owner.textBoxManager;
-            }
-        }
+        //public TextBoxManager textBoxManager
+        //{
+        //    get
+        //    {
+        //        return owner.textBoxManager;
+        //    }
+        //}
 
         public CardSheetManager(CardpediaMenu menu, BuffType buffType)
         {
@@ -54,6 +54,7 @@ namespace RandomBuff.Cardpedia
             string path = "buffassets/cardbacks/";
             string backname = currentType == BuffType.Negative ? "fpback" : (currentType == BuffType.Positive ? "moonback" : "slugback");
             displayingCard = new FTexture(Futile.atlasManager.LoadImage(path + backname).texture);
+
             displayingCard.scale = 0.35f * (600f/displayingCard.element.sourcePixelSize.x);
             displayingCard.alpha = 0f;
             displayingCard.SetPosition(displayingPos);
