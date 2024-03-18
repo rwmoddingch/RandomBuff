@@ -346,6 +346,10 @@ namespace RandomBuff.Render.UI
             {
                 currentAnimator = new CardpediaSlotScrollingAnimator(this, Position, Rotation, Scale);
             }
+            else if(newState == AnimatorState.CardpediaSlot_StaticShow)
+            {
+                currentAnimator = new CardpediaSlotStaticShowAnimator(this, Position, Rotation, Scale);
+            }
             else
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
@@ -431,7 +435,8 @@ namespace RandomBuff.Render.UI
 
             //图鉴界面卡槽动画状态
             CardpediaSlot_Scrolling,
-            CardpediaSlot_Displaying
+            CardpediaSlot_Displaying,
+            CardpediaSlot_StaticShow
         }
     }
 }

@@ -179,6 +179,56 @@ namespace RandomBuff.Render.UI
         }
     }
 
+    internal class ClickSignalInteractionManager<T> : CardInteractionManager where T : BuffCardSlot
+    {
+        public T Slot { get => BaseSlot as T; protected set => BaseSlot = value; }
+
+        public event Action<BuffCard> OnBuffCardSingleClick;
+        public event Action<BuffCard> OnBuffCardDoubleClick;
+
+        public ClickSignalInteractionManager(T slot) : base(slot)
+        {
+        }
+
+        protected override void UpdateFocusCard()
+        {
+            if (overrideDisabled)
+            {
+                if (CurrentFocusCard != null)
+                    CurrentFocusCard = null;
+                return;
+            }
+
+            foreach (var card in managedCards)
+            {
+                if (card.LocalMousePos.x > 0 &&
+                    card.LocalMousePos.x < 1f &&
+                    card.LocalMousePos.y > 0f &&
+                    card.LocalMousePos.y < 1f)
+                {
+                    CurrentFocusCard = card;
+                    return;
+                }
+            }
+
+            if (CurrentFocusCard != null)
+                CurrentFocusCard = null;
+        }
+
+        protected override void OnMouseSingleClick()
+        {
+            if(CurrentFocusCard != null)
+                OnBuffCardSingleClick.Invoke(CurrentFocusCard);
+        }
+
+        protected override void OnMouseDoubleClick()
+        {
+            if(CurrentFocusCard != null)
+                OnBuffCardDoubleClick.Invoke(CurrentFocusCard);
+        }
+
+    }
+
     internal class InGameSlotInteractionManager : CardInteractionManager
     {
         //静态信息

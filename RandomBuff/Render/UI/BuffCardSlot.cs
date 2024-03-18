@@ -1,4 +1,5 @@
-﻿using RandomBuff.Core.Buff;
+﻿using RandomBuff.Cardpedia;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
@@ -960,6 +961,39 @@ namespace RandomBuff.Render.UI
                     slot.RemoveCard(id, true);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// 卡牌收藏的卡槽
+    /// </summary>
+    internal class CardpediaSlot : BuffCardSlot
+    {
+        public CardpediaMenu cardpediaMenu;
+        public float alpha;
+
+        public CardpediaSlot(CardpediaMenu cardpediaMenu)
+        {
+            this.cardpediaMenu = cardpediaMenu;
+            BaseInteractionManager = new ClickSignalInteractionManager<CardpediaSlot>(this);
+        }
+
+        public void SwitchPage(params BuffID[] newPageIDs)
+        {
+            for(int i = BuffCards.Count - 1; i >= 0; i--)
+            {
+                RemoveCard(BuffCards[i], true);
+            }
+            foreach(var id in newPageIDs)
+            {
+                var card = AppendCard(id);
+                card.SetAnimatorState(BuffCard.AnimatorState.CardpediaSlot_StaticShow);
+            }
+        }
+
+        public void AddListener(Action<BuffCard> mouseEvent)
+        {
+            (BaseInteractionManager as ClickSignalInteractionManager<CardpediaSlot>).OnBuffCardSingleClick += mouseEvent; 
         }
     }
 }

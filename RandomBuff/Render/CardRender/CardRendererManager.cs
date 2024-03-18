@@ -56,7 +56,7 @@ namespace RandomBuff.Render.CardRender
             BuffCardRenderer mostInavtiveRenderer = null;
             foreach (var renderer in inactiveCardRenderers)//使用最先回收的渲染器
             {
-                if (renderer.inactiveTimer > maxTimer)
+                if (renderer.inactiveTimer >= maxTimer)
                 {
                     maxTimer = renderer.inactiveTimer;
                     mostInavtiveRenderer = renderer;
@@ -296,6 +296,8 @@ namespace RandomBuff.Render.CardRender
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
             TextBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/textback").texture;
+
+            BuffPlugin.Log($"tex name : {FPBack.name}, {FPBack.texelSize}");
         }
 
         public static TMP_Settings TMP_Settings_instance_get(Func<TMP_Settings> orig)
@@ -315,7 +317,7 @@ namespace RandomBuff.Render.CardRender
             FontEngine.InitializeFontEngine();
             if (FontEngine.LoadFontFace(font, samplingPointSize) != 0)
             {
-                Debug.LogWarning("Unable to load font face for [" + font.name + "]. Make sure \"Include Font Data\" is enabled in the Font Import Settings.", font);
+                Debug.LogWarningFormat("Unable to load font face for [" + font.name + "]. Make sure \"Include Font Data\" is enabled in the Font Import Settings.", font);
                 return null;
             }
 

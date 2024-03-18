@@ -179,6 +179,9 @@ namespace RandomBuff.Render.CardRender
                 _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
 
                 cardHighlightFrontController.Init(this, _cardTextureFront);
+
+                BuffPlugin.Log($"_test : {_cardTextureBack}");
+
                 cardHighlightBackController.Init(this, _cardTextureBack);
             }
             catch(Exception e)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -142,12 +143,12 @@ namespace RandomBuff.Core.SaveData
 
         public void LoadFile()
         {
-            if (rainWorld?.playerHandler?.profile != null)
+            if (Profiles.ActiveProfiles.Count > 0)
             {
                 UserData.OnFileMounted += UserData_OnFileMounted;
                 BuffPlugin.Log($"Loading save data, Slot : {UsedSlot = CurrentSlot}, " +
                                $"Main game slot: {Custom.rainWorld.options.saveSlot}");
-                UserData.Mount(rainWorld.playerHandler.profile, $"buffsave{UsedSlot}");
+                UserData.Mount(Profiles.ActiveProfiles[0], $"buffsave{UsedSlot}");
                 return;
             }
 
@@ -161,14 +162,25 @@ namespace RandomBuff.Core.SaveData
         {
             if (buffCoreFile != null)
             {
-                BuffPlugin.Log($"Saving buff data at slot {Instance.UsedSlot}");
-                buffCoreFile.Set("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                buffCoreFile.Set("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                buffCoreFile.Set("buff-player", BuffPlayerData.Instance.ToStringData(), UserData.WriteMode.Immediate);
-                buffCoreFile.Set("buff-version", BuffPlugin.saveVersion.ToString());
-                return;
+                BuffPlugin.Instance.StartCoroutine(InternalSaveFile());
             }
             BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
+        }
+
+        IEnumerator InternalSaveFile()
+        {
+            BuffPlugin.Log($"Saving buff data at slot {Instance.UsedSlot}");
+            buffCoreFile.Set("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Deferred);
+            yield return null;
+            yield return null;
+            buffCoreFile.Set("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
+            yield return null;
+            yield return null;
+            buffCoreFile.Set("buff-player", BuffPlayerData.Instance.ToStringData(), UserData.WriteMode.Immediate);
+            yield return null;
+            yield return null;
+            buffCoreFile.Set("buff-version", BuffPlugin.saveVersion.ToString());
+            yield break;
         }
 
         /// <summary>
@@ -228,7 +240,7 @@ namespace RandomBuff.Core.SaveData
                 {
                     LoadFailedFallBack();
                 }
-                var fileVersion = new BuffFormatVersion(buffCoreFile.Get<string>("buff-version"));
+                var fileVersion = new BuffFormatVersion(buffCoreFile.Get("buff-version"));
 
                 if (fileVersion < BuffPlugin.outDateVersion)
                 {
@@ -236,9 +248,9 @@ namespace RandomBuff.Core.SaveData
                     LoadFailedFallBack(true);
                 }
                 BuffPlugin.Log($"Buff file version : [{fileVersion}], current version : [{BuffPlugin.saveVersion}]");
-                BuffConfigManager.LoadConfig(buffCoreFile.Get<string>("buff-config"), fileVersion);
-                BuffDataManager.LoadData(buffCoreFile.Get<string>("buff-data"), fileVersion);
-                BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get<string>("buff-player"), fileVersion);
+                BuffConfigManager.LoadConfig(buffCoreFile.Get("buff-config"), fileVersion);
+                BuffDataManager.LoadData(buffCoreFile.Get("buff-data"), fileVersion);
+                BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get("buff-player"), fileVersion);
 
                 Platform.NotifyUserDataReadCompleted(this);
             }
@@ -271,13 +283,13 @@ namespace RandomBuff.Core.SaveData
             if (buffCoreFile == null)
                 return;
             if (!buffCoreFile.Contains("buff-version") || forceDelete)
-                buffCoreFile.Set<string>("buff-version", BuffPlugin.saveVersion.ToString());
+                buffCoreFile.Set("buff-version", BuffPlugin.saveVersion.ToString());
             if (!buffCoreFile.Contains("buff-config") || forceDelete)
-                buffCoreFile.Set<string>("buff-config", "");
+                buffCoreFile.Set("buff-config", "");
             if (!buffCoreFile.Contains("buff-data") || forceDelete)
-                buffCoreFile.Set<string>("buff-data", "");
+                buffCoreFile.Set("buff-data", "");
             if (!buffCoreFile.Contains("buff-player") || forceDelete)
-                buffCoreFile.Set<string>("buff-player", "");
+                buffCoreFile.Set("buff-player", "");
 
         }
     }
@@ -300,25 +312,14 @@ namespace RandomBuff.Core.SaveData
 
         public static void OnModsInit()
         {
-            On.PlayerProgression.ctor += PlayerProgression_ctor;
+            On.PlayerProgression.ctor_RainWorld_bool_bool_string += PlayerProgression_ctor_RainWorld_bool_bool_string;
             On.PlayerProgression.Update += PlayerProgression_Update;
             BuffPlugin.Log("Buff File Hook Loaded");
         }
 
-        private static void PlayerProgression_Update(On.PlayerProgression.orig_Update orig, PlayerProgression self)
+        private static void PlayerProgression_ctor_RainWorld_bool_bool_string(On.PlayerProgression.orig_ctor_RainWorld_bool_bool_string orig, PlayerProgression self, RainWorld rainWorld, bool tryLoad, bool saveAfterLoad, string overrideBaseDir)
         {
-            orig(self);
-            if (waitLoad.Contains(self) && self.progressionLoaded)
-            {
-                OnFileReadCompleted?.Invoke();
-                waitLoad.Remove(self);
-            }
-        }
-
-        private static void PlayerProgression_ctor(On.PlayerProgression.orig_ctor orig, PlayerProgression self, RainWorld rainWorld, bool tryLoad, bool saveAfterLoad)
-        {
-            
-            orig(self,rainWorld, tryLoad, saveAfterLoad);
+            orig.Invoke(self, rainWorld, tryLoad, saveAfterLoad, overrideBaseDir);
             if (Instance?.UsedSlot != CurrentSlot)
             {
                 if (Instance != null)
@@ -341,11 +342,17 @@ namespace RandomBuff.Core.SaveData
                 OnFileReadCompleted?.Invoke();
             else
                 waitLoad.Add(self);
-
         }
 
- 
-
+        private static void PlayerProgression_Update(On.PlayerProgression.orig_Update orig, PlayerProgression self)
+        {
+            orig(self);
+            if (waitLoad.Contains(self) && self.progressionLoaded)
+            {
+                OnFileReadCompleted?.Invoke();
+                waitLoad.Remove(self);
+            }
+        }
 
         private static event Action OnFileReadCompleted;
         private static event Action OnBuffReadCompleted;
