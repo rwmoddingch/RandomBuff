@@ -25,6 +25,7 @@ using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using RandomBuff.Core.Game.Settings.Missions;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -119,7 +120,7 @@ namespace RandomBuff
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
                     BuffRegister.BuildAllDataStaticWarpper();
-                    BuffConfigManager.InitTemplateStaticData();
+                    BuffConfigManager.InitTemplateStaticData();                    
                     isPostLoaded = true;
                 }
             }
@@ -182,6 +183,7 @@ namespace RandomBuff
 
                     Cardpedia.CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
+                    MissionRegister.RegisterAllMissions(null, true);
                     BuffPlugin.Log("OnModsInit 3");
                 }
             }
@@ -257,6 +259,7 @@ namespace RandomBuff
                     BuffConfigManager.InitBuffStaticData();
                     BuffRegister.BuildAllDataStaticWarpper();
                     BuffConfigManager.InitTemplateStaticData();
+                    
                     isPostLoaded = true;
                 }
             }
