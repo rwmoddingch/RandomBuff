@@ -13,6 +13,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override ConditionID ID => ConditionID.Cycle;
         public override float Exp => cycle * 40;
 
+        public int SetCycle
+        {
+            set
+            {
+                cycle = value;
+            }
+        }
+
         public override void EnterGame(RainWorldGame game)
         {
             currentCycle = game.GetStorySession.saveState.cycleNumber;
