@@ -25,7 +25,6 @@ using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using RandomBuff.Core.Game.Settings.Missions;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -57,31 +56,12 @@ namespace RandomBuff
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
-                //On.RainWorld.PostModsInit += RainWorld_PostModsInit;
-
-                try
-                {
-                    if (!isLoaded)
-                    {
-                        if (File.Exists(Application.streamingAssetsPath + Path.DirectorySeparatorChar + "randombuff.log"))
-                            File.Delete("randombuff.log");
-
-                        File.Create(Application.streamingAssetsPath + Path.DirectorySeparatorChar + "buffcore.log").Close();
-                    }
-
-                }
-                catch (Exception e)
-                {
-                    canAccessLog = false;
-                    Logger.LogFatal(e.ToString() + "\n" + e.StackTrace);
-                    Debug.LogException(e);
-                }
-                OnModsInit();
+                On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+           
             }
             catch (Exception e)
             {
-                Logger.LogFatal(e.ToString() + "\n" + e.StackTrace);
-                Debug.LogException(e);
+                Logger.LogFatal(e.ToString());
             }
         }
 
@@ -92,7 +72,25 @@ namespace RandomBuff
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
-            BuffPlugin.Log("RainWorld_OnModsInit 1");
+
+            try
+            {
+                if (!isLoaded)
+                {
+                    if(File.Exists(AssetManager.ResolveFilePath("randombuff.log")))
+                        File.Delete("randombuff.log");
+                     
+                    File.Create(AssetManager.ResolveFilePath("buffcore.log")).Close();
+                }
+
+            }
+            catch (Exception e)
+            {
+                canAccessLog = false;
+                Logger.LogFatal(e.ToString());
+                Debug.LogException(e);
+            }
+          
             try
             {
                 orig(self);
@@ -101,54 +99,23 @@ namespace RandomBuff
             {
                 LogException(e);
             }
-            BuffPlugin.Log("RainWorld_OnModsInit 2");
 
-            try
-            {
-                if (!isPostLoaded)
-                {
-                    if (!isLoaded)
-                    {
-                        LogError("Fallback Call OnModsInit");
-                        OnModsInit();
-                        if (!isLoaded)
-                        {
-                            LogFatal("Can't call OnModsInit !!!!!!");
-                            return;
-                        }
-                    }
-                    //延迟加载以保证其他plugin的注册完毕后再加载
-                    BuffConfigManager.InitBuffStaticData();
-                    BuffRegister.BuildAllDataStaticWarpper();
-                    BuffConfigManager.InitTemplateStaticData();                    
-                    isPostLoaded = true;
-                }
-            }
-            catch (Exception e)
-            {
-                LogException(e);
-            }
-
-            BuffPlugin.Log("RainWorld_OnModsInit 3");
-
-
+            OnModsInit();
         }
 
         private void OnModsInit()
         {
-            BuffPlugin.Log("OnModsInit 1");
             try
             {
                 if (!isLoaded)
                 {
-                    BuffPlugin.Log("OnModsInit 2");
                     float a = 1f;
                     float b = 2f;
 
                     int c = 1;
                     int d = 2;
 
-                    Log($"[Random Buff], version: {saveVersion}, {System.DateTime.Now}");
+                    Log($"[Random Buff], version: {saveVersion}");
 
                     if (File.Exists(AssetManager.ResolveFilePath("buff.dev")))
                     {
@@ -182,16 +149,13 @@ namespace RandomBuff
                     DevEnabled = true;
 
                     Cardpedia.CardpediaMenuHooks.Hook();
-                    CardpediaMenuHooks.LoadAsset();
-                    MissionRegister.RegisterAllMissions(null, true);
-                    BuffPlugin.Log("OnModsInit 3");
+                    CardpediaMenuHooks.LoadAsset();                                      
                 }
             }
             catch (Exception e)
             {
                 LogException(e);
             }
-            BuffPlugin.Log("OnModsInit 4");
         }
 
         //private void TestTypeSerializer()
@@ -259,7 +223,6 @@ namespace RandomBuff
                     BuffConfigManager.InitBuffStaticData();
                     BuffRegister.BuildAllDataStaticWarpper();
                     BuffConfigManager.InitTemplateStaticData();
-                    
                     isPostLoaded = true;
                 }
             }
@@ -325,7 +288,7 @@ namespace RandomBuff
         {
             Debug.LogException(e);
             if (canAccessLog)
-                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.ToString()}/*\n{e.StackTrace}*/\n");
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.Message}\n");
           
         }
 
