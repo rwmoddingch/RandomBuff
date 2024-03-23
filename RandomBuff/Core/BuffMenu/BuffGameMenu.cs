@@ -133,13 +133,20 @@ namespace RandomBuff.Core.BuffMenu
         }
         //
 
+        
         BuffContinueGameDetialPage continueDetailPage;
         BuffNewGameDetailPage newGameDetailPage;
+        //--------------测试-----------------
+        BuffNewGameMissionPage missionPage;
+        ModeSelectPage modeSelectPage;
+
         void InitGameDetailPage(Page page)
         {
             page.subObjects.Add(continueDetailPage = new BuffContinueGameDetialPage(this, page, Vector2.zero));
             page.subObjects.Add(newGameDetailPage = new BuffNewGameDetailPage(this, page, Vector2.zero));
-
+            //--------------测试-----------------
+            page.subObjects.Add(modeSelectPage = new ModeSelectPage(this, page, Vector2.zero));
+            page.subObjects.Add(missionPage = new BuffNewGameMissionPage(this, page, Vector2.zero)) ;           
         }
 
 
@@ -266,7 +273,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public override void Singal(MenuObject sender, string message)
         {
-            if(message == "BACK")
+            if (message == "BACK")
             {
                 manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
                 PlaySound(SoundID.MENU_Switch_Page_Out);
@@ -275,6 +282,7 @@ namespace RandomBuff.Core.BuffMenu
             {
                 //quedSideInput = Math.Max(-3, quedSideInput - 1);
                 targetScrolledPageIndex--;
+                modeSelectPage.SetShow(false);
                 PlaySound(SoundID.MENU_Next_Slugcat);
                 //UpdateSlugcat();
             }
@@ -282,6 +290,7 @@ namespace RandomBuff.Core.BuffMenu
             {
                 //quedSideInput = Math.Min(3, quedSideInput + 1);
                 targetScrolledPageIndex++;
+                modeSelectPage.SetShow(false);
                 PlaySound(SoundID.MENU_Next_Slugcat);
                 //UpdateSlugcat();
             }
@@ -299,11 +308,14 @@ namespace RandomBuff.Core.BuffMenu
                 }
                 else
                 {
-                    continueDetailPage.SetShow(false);
-                    newGameDetailPage.SetShow(true);
+                    //--------------测试-----------------
+                    modeSelectPage.SetShow(true);
+
+                    //continueDetailPage.SetShow(false);
+                    //newGameDetailPage.SetShow(true);
                 }
             }
-            else if(message == "CONTINUE_DETAIL_RESTART")
+            else if (message == "CONTINUE_DETAIL_RESTART")
             {
                 manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         CurrentName;
@@ -336,6 +348,20 @@ namespace RandomBuff.Core.BuffMenu
                 PlaySound(SoundID.MENU_Player_Join_Game);
                 manager.ShowDialog(dialog);
             }
+            //--------------测试-----------------
+            else if (message == "DEFAULTMODE") 
+            {
+                modeSelectPage.SetShow(false);
+                continueDetailPage.SetShow(false);
+                newGameDetailPage.SetShow(true);
+            }
+            else if (message == "MISSIONMODE")
+            {
+                modeSelectPage.SetShow(false);
+                continueDetailPage.SetShow(false);
+                missionPage.SetShow(true);
+            }
+
         }
 
         float testDifficulty;
