@@ -7,6 +7,7 @@ using RandomBuff.Render.CardRender;
 using RandomBuff.Render.UI;
 using RWCustom;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -72,10 +73,14 @@ namespace RandomBuff.Cardpedia.PediaPage
             ResetCardTexture();
         }
 
-        void ResetCardTexture()
+        void ResetCardTexture(Texture texture = null)
         {
             displayingCard?.RemoveFromContainer();
+
             var tex = currentType == BuffType.Negative ? CardBasicAssets.FPBack : (currentType == BuffType.Positive ? CardBasicAssets.MoonBack : CardBasicAssets.SlugBack);
+            if (texture != null)
+                tex = texture;
+
             displayingCard = new FTexture(tex);
             sheetPageContainer.AddChild(displayingCard);
             displayingCard.SetPosition(CardpediaStatics.displayCardTexturePos);
@@ -129,6 +134,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             }
             pageIndex = 0;
             SwitchPage(0);
+            infoDisplay.SetText(null, null, null, null, null);
             //textBoxManager.currentType = buffType;
             //textBoxManager.titleBack.color = textBoxManager.currentType == BuffType.Negative ? CardpediaStatics.negativeColor : (textBoxManager.currentType == BuffType.Positive ? CardpediaStatics.positiveColor : CardpediaStatics.dualityColor);
             //textBoxManager.InitEmptyInfo();
@@ -163,31 +169,25 @@ namespace RandomBuff.Cardpedia.PediaPage
                 var data = card.ID.GetBuffData();
                 if (data is CountableBuffData)
                 {
-                    life = (data as CountableBuffData).MaxCycleCount.ToString() + (language == InGameTranslator.LanguageID.Chinese ? "循环" : " Cycles");
+                    life = (data as CountableBuffData).MaxCycleCount.ToString() + BuffResourceString.Get("CardSheetPage_Life_Countable");
                 }
-                else life = language == InGameTranslator.LanguageID.Chinese ? "永久" : "Everlasting";
+                else life = BuffResourceString.Get("CardSheetPage_Life_Uncountable");
             }
             else
             {
-                life = language == InGameTranslator.LanguageID.Chinese ? "永久" : "Everlasting";
+                life = BuffResourceString.Get("CardSheetPage_Life_Uncountable");
             }
 
             var staticData = card.StaticData;
-            if (language == InGameTranslator.LanguageID.Chinese)
-            {
-                stack = staticData.Stackable ? "可叠加" : "不可叠加";
-                trigger = staticData.Triggerable ? "主动点击触发" : "自动触发";
-            }
-            else
-            {
-                stack = staticData.Stackable ? "Stackable" : "Unstackable";
-                trigger = staticData.Triggerable ? "Manually" : "Automatically";
-            }
+            stack = staticData.Stackable ? BuffResourceString.Get("CardSheetPage_Stack_Stackable") : BuffResourceString.Get("CardSheetPage_Stack_Unstackable");
+            trigger = staticData.Triggerable ? BuffResourceString.Get("CardSheetPage_Stack_Triggerable") : BuffResourceString.Get("CardSheetPage_Stack_Untriggerable");
             description = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.Description;
             title = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName;
-
+            infoDisplay.SetText(life, trigger, stack, description, "None");
+            ResetCardTexture(staticData.GetFaceTexture());
             //sheetManager.owner.configManager.OnCardPick(card);
             //textBoxManager.RefreshInformation(life, stack, trigger, description, title, card.ID);
+            cardpediaMenu.configManager.OnCardPick(card);
         }
     }
 }

@@ -467,6 +467,7 @@ namespace RandomBuff.Cardpedia
         public static float tinyGap = 4f;
         public static float smallGap = 10f;
         public static float cosmeticRectHeight = 40f;
+        public static float infoDisplay_BigRectHeight = 100f;
 
         public static Vector2 leftBlurSpritePos = new Vector2(200f, 483f);
         public static Vector2 rightBlurSpritePos = new Vector2(1150f, 483f);

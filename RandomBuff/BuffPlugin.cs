@@ -24,6 +24,7 @@ using RandomBuff.Render.CardRender;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
+using UDebug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 #pragma warning disable CS0618
@@ -73,15 +74,27 @@ namespace RandomBuff
                 {
                     canAccessLog = false;
                     Logger.LogFatal(e.ToString() + "\n" + e.StackTrace);
-                    Debug.LogException(e);
+                    UDebug.LogException(e);
                 }
                 OnModsInit();
+                On.RWCustom.Custom.Log += Custom_Log;
+                On.RWCustom.Custom.LogImportant += Custom_LogImportant;
             }
             catch (Exception e)
             {
                 Logger.LogFatal(e.ToString() + "\n" + e.StackTrace);
-                Debug.LogException(e);
+                UDebug.LogException(e);
             }
+        }
+
+        private void Custom_Log(On.RWCustom.Custom.orig_Log orig, string[] values)
+        {
+            BuffPlugin.Log(string.Concat("[RainWorld]",values));
+        }
+
+        private void Custom_LogImportant(On.RWCustom.Custom.orig_LogImportant orig, string[] values)
+        {
+            BuffPlugin.Log(string.Concat("[RainWorld]", values));
         }
 
         private void Update()
@@ -155,6 +168,7 @@ namespace RandomBuff
                         LogWarning("Debug Enable");
                     }
                     CardBasicAssets.LoadAssets();
+                    BuffResourceString.Init();
 
                     GachaTemplate.Init();
                     Condition.Init();

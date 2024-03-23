@@ -1,0 +1,19 @@
+//CardSheetPage:
+CardSheetPage_Life_Countable|Cycles
+CardSheetPage_Life_Uncountable|Everlasting
+CardSheetPage_Stack_Stackable|Stackable
+CardSheetPage_Stack_Unstackable|Unstackable
+CardSheetPage_Stack_Triggerable|Manually
+CardSheetPage_Stack_Untriggerable|Automatically
+
+
+//CardInfoDisplay:
+CardInfoDisplay_Missing|???
+CardInfoDisplay_MissingDescription|Select a buff to view description
+CardInfoDisplay_MissingConflict|Select a buff to view conflict
+
+CardInfoDisplay_TypeTitle|Type:
+CardInfoDisplay_TriggerTitle|Trigger:
+CardInfoDisplay_StackTitle|Stack:
+CardInfoDisplay_DescriptionTitle|Description:
+CardInfoDisplay_ConflictTitle|Conflict:

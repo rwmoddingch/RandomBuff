@@ -18,6 +18,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
         public OpCardpediaChainBox chainTarget;
         public readonly MouseEvent mouseEvent;
         public string title;
+        protected IScrollBoxHandler scrollBoxHandler;
 
         FLabel titleLabel;
         FSprite cosmeticRect;
@@ -27,7 +28,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
         public Vector2 defaultPos;
         public Vector2 defaultRectSize;
 
-        protected Vector2 setRectSize;
+        public Vector2 setRectSize { get; protected set; }
         protected Vector2 rectSize;
         protected Vector2 lastRectSize;
 
@@ -43,6 +44,18 @@ namespace RandomBuff.Cardpedia.Elements.Config
                 return result;
             }
         }
+        public Vector2 TargetChainedOffset
+        {
+            get
+            {
+                Vector2 result;
+                if (chainTarget == null)
+                    result = Vector2.zero;
+                else
+                    result = new Vector2(0f, -CardpediaStatics.tinyGap - chainTarget.setRectSize.y) + chainTarget.TargetChainedOffset;
+                return result;
+            }
+        }
         public Vector2 ChainedPos => InScrollBox ? RawChainedPos + scrollBox._childOffset : RawChainedPos;
 
 
@@ -55,7 +68,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
         /// <param name="defaultPos"></param>
         /// <param name="size"></param>
         /// <param name="autoSetPosInScrollBox">自动反向计算坐标（适应scrollBox）</param>
-        public OpCardpediaChainBox(string title, Vector2 defaultPos, Vector2 size, bool autoInitSprites = true) : base(defaultPos, Vector2.zero)
+        public OpCardpediaChainBox(string title, Vector2 defaultPos, Vector2 size, bool autoInitSprites = true, IScrollBoxHandler scrollBoxHandler = null) : base(defaultPos, Vector2.zero)
         {
             this.defaultPos = defaultPos;
             setRectSize = this.defaultRectSize = size;
@@ -64,6 +77,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
             if(autoInitSprites) 
                 InitSprites();
 
+            this.scrollBoxHandler = scrollBoxHandler;
             mouseEvent = new MouseEvent(this);
             //mouseEvent.AddEvent(() => Vector2.zero, () => rectSize, () => setRectSize = new Vector2(defaultRectSize.x, defaultRectSize.y + 100f), () => setRectSize = defaultRectSize, ()=> rectSize += new Vector2(0, 200f), null, null);
         }
@@ -311,6 +325,11 @@ namespace RandomBuff.Cardpedia.Elements.Config
 
                 return Color.Lerp(Color.Lerp(normalColor, animColor, sAnim), flashColor, sFlash);
             }
+        }
+    
+        public interface IScrollBoxHandler
+        {
+            public void ResetScrollBoxSize();
         }
     }
 }

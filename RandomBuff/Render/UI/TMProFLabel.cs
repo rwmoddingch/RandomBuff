@@ -50,10 +50,35 @@ namespace RandomBuff.Render.UI
             set => tmpText.enableWordWrapping = value;
         }
 
+        float fontSize;
         public float FontSize
         {
-            get => tmpText.fontSize;
-            set => tmpText.fontSize = value;
+            get => fontSize;
+            set
+            {
+                if(value != fontSize)
+                {
+                    fontSize = value;
+                    _isMatrixDirty = true;
+                }
+            }
+        }
+
+        Vector2 realRect;
+        Vector2 scaledRealRect;
+        public Vector2 TextRect
+        {
+            get
+            {
+                var renderValue = tmpText.GetRenderedValues();
+                if (realRect != renderValue)
+                {
+                    realRect = renderValue;
+                    float t = Camera.main.orthographicSize;
+                    scaledRealRect = new Vector2(renderValue.x * (_scaleX * t), renderValue.y * (_scaleY * t));
+                }
+                return scaledRealRect;
+            }
         }
 
         float SizeFactor => Camera.main.orthographicSize;
@@ -71,11 +96,12 @@ namespace RandomBuff.Render.UI
 
             tmpText.alignment = TextAlignmentOptions.Center;
             tmpText.font = font;
-            tmpText.fontSize = 1;
+            FontSize = fontSize;
             tmpText.text = text;
 
             tmproObject.transform.localEulerAngles = Vector3.zero;
-            FontSize = fontSize;
+
+            tmpText.GetRenderedHeight();
 
             Init(tmproObject, true, true, false);
         }
@@ -109,7 +135,7 @@ namespace RandomBuff.Render.UI
             {
                 float t = Camera.main.orthographicSize;
                 rectTransform.localScale = new Vector3(_scaleX * t, _scaleY * t, 1f);
-                tmpText.fontSize = scale;
+                tmpText.fontSize = fontSize;
             }
             if(isAlphaDirty)tmpText.alpha = alpha;
         }
