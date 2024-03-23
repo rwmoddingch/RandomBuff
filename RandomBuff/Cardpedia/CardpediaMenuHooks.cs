@@ -90,6 +90,7 @@ namespace RandomBuff.Cardpedia
             Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Main");
             Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Cards");
             Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_UI");
+            Futile.atlasManager.LoadImage("buffassets/missionicons/missionicon_general");
             string path = AssetManager.ResolveFilePath("buffassets/assetbundles/shadertest");           
             AssetBundle ab = AssetBundle.LoadFromFile(path);
             InvertColor = ab.LoadAsset<Shader>("Assets/InvertColor.shader");
