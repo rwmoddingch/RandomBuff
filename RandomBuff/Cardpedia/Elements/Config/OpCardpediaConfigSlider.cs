@@ -36,7 +36,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
 
         AnimBehaviour currentLabelBehaviour;
 
-        public OpCardpediaConfigSlider(string title, Vector2 pos, float width, float leftValue, float rightValue) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false)
+        public OpCardpediaConfigSlider(string title, Vector2 pos, float width, float leftValue, float rightValue, IScrollBoxHandler scrollBoxHandler = null) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false, scrollBoxHandler)
         {
             this.left = leftValue;
             this.right = rightValue;

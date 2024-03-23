@@ -91,4 +91,7 @@
       <LastGenOutput>BuffResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Core\BuffMenu\MenuObjects\" />
+  </ItemGroup>
 </Project>

@@ -45,6 +45,18 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             return (result, creatingNew);
         }
 
+        /// <summary>
+        /// 获取该buff下所有的configurable，如果没有会返回空数组
+        /// </summary>
+        /// <param name="buffID"></param>
+        /// <returns></returns>
+        public static BuffConfigurable[] GetAllConfigurableForID(BuffID buffID)
+        {
+            if (configurablesMapper.ContainsKey(buffID))
+                return configurablesMapper[buffID].Values.ToArray();
+            return new BuffConfigurable[0];
+        }
+
         public static void FetchAllConfigs()
         {
             BuffPlugin.Log($"Fetching configurables: {buffConfigurables.Count}");
@@ -84,7 +96,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         }
     }
 
-    //
+    //Acceptable部分
     internal static partial class BuffConfigurableManager
     {
         public static BuffConfigurableAcceptableBase GetProperAcceptable(CustomBuffConfigAttribute attribute)

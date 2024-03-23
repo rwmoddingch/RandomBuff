@@ -30,9 +30,9 @@ namespace RandomBuff.Cardpedia.Elements.Config
         public Vector2 DropButtonStartPos => new Vector2(rectSize.x - dropButtonWidth, -CardpediaStatics.tinyGap * 2f - CardpediaStatics.chainBox_cosmeticRectHeight);
         public float additionalHeight => (CardpediaStatics.tinyGap + CardpediaStatics.dropBox_dropButtonHeight) * dropButtons.Length;
 
-        public OpCardpediaDropBox(string title, Vector2 pos, float width, string[] list) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false)
+        public OpCardpediaDropBox(string title, Vector2 pos, float width, string[] list, IScrollBoxHandler scrollBoxHandler = null) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false, scrollBoxHandler)
         {
-            dropButtonWidth = width / 2f;
+            dropButtonWidth = width;
             
             defaultRectEventInstance = mouseEvent.AddEvent(
                 () => DropButtonStartPos,
@@ -121,12 +121,14 @@ namespace RandomBuff.Cardpedia.Elements.Config
         {
             targetDrop = 1f;
             setRectSize = defaultRectSize + new Vector2(0f, additionalHeight);
+            scrollBoxHandler?.ResetScrollBoxSize();
         }
 
         public void UnDrop()
         {
             targetDrop = 0f;
             setRectSize = defaultRectSize;
+            scrollBoxHandler?.ResetScrollBoxSize();
         }
 
         class DropButton

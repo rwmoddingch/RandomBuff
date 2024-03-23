@@ -10,10 +10,12 @@ using Menu.Remix.MixedUI;
 using Random = UnityEngine.Random;
 using RandomBuff.Render.UI;
 using RandomBuff.Cardpedia.Elements.Config;
+using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 
 namespace RandomBuff.Cardpedia.Elements
 {
-    internal class ConfigManager
+    internal class ConfigManager : OpCardpediaChainBox.IScrollBoxHandler
     {
         public CardpediaMenu cardpediaMenu;
         public FSprite blurSprite;
@@ -24,6 +26,8 @@ namespace RandomBuff.Cardpedia.Elements
 
         public OpScrollBox scrollBox;
         float alpha;
+
+        List<OpCardpediaChainBox> activeConfigs = new List<OpCardpediaChainBox>();
 
         public ConfigManager(CardpediaMenu menu)
         {
@@ -44,34 +48,34 @@ namespace RandomBuff.Cardpedia.Elements
             new UIelementWrapper(wrapper, scrollBox);
 
             Vector2 pos = new Vector2(CardpediaStatics.tinyGap, contentSize - CardpediaStatics.tinyGap);
-            Vector2 fullRectScale = new Vector2(CardpediaStatics.narrowBlurSpriteScale.x - CardpediaStatics.tinyGap * 2, 200f);
-            var chainBosA = new OpCardpediaChainBox("ChainBoxTestA", pos, new Vector2(fullRectScale.x, 100f));
-            var chainBoxB = new OpCardpediaChainBox("ChainBoxTestB", pos, new Vector2(fullRectScale.x, 100f));
-            var chainDropBox = new OpCardpediaDropBox("DropBoxTest", pos, fullRectScale.x, SlugcatStats.Name.values.entries.ToArray());
-            var chainSlider = new OpCardpediaConfigSlider("SliderTest", pos, fullRectScale.x, 0f, 1f);
-            chainDropBox.chainTarget = chainBosA;
-            chainSlider.chainTarget = chainDropBox;
-            chainBoxB.chainTarget = chainSlider;
-            scrollBox.AddItems(chainBosA, chainBoxB, chainDropBox, chainSlider);
+            //Vector2 fullRectScale = new Vector2(CardpediaStatics.narrowBlurSpriteScale.x - CardpediaStatics.tinyGap * 2, 200f);
+            //var chainBosA = new OpCardpediaChainBox("ChainBoxTestA", pos, new Vector2(fullRectScale.x, 100f));
+            //var chainBoxB = new OpCardpediaChainBox("ChainBoxTestB", pos, new Vector2(fullRectScale.x, 100f));
+            //var chainDropBox = new OpCardpediaDropBox("DropBoxTest", pos, fullRectScale.x, SlugcatStats.Name.values.entries.ToArray());
+            //var chainSlider = new OpCardpediaConfigSlider("SliderTest", pos, fullRectScale.x, 0f, 1f);
+            //chainDropBox.chainTarget = chainBosA;
+            //chainSlider.chainTarget = chainDropBox;
+            //chainBoxB.chainTarget = chainSlider;
+            //scrollBox.AddItems(chainBosA, chainBoxB, chainDropBox, chainSlider);
 
             scrollBox.ScrollToTop();
 
             return;
-            string str = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
-                "当前卡牌无\n自定义设置。" : "Current card doesn't\nhave custom settings.";
-            noConfigLabel = new FLabel(Custom.GetFont(), str);
-            noConfigLabel.alignment = FLabelAlignment.Center;
-            noConfigLabel.scale = 1.2f;
-            noConfigLabel.alpha = 0f;
-            noConfigLabel.SetPosition(blurSprite.GetPosition());
-            cardpediaMenu.cursorContainer.AddChild(noConfigLabel);
+            //string str = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
+            //    "当前卡牌无\n自定义设置。" : "Current card doesn't\nhave custom settings.";
+            //noConfigLabel = new FLabel(Custom.GetFont(), str);
+            //noConfigLabel.alignment = FLabelAlignment.Center;
+            //noConfigLabel.scale = 1.2f;
+            //noConfigLabel.alpha = 0f;
+            //noConfigLabel.SetPosition(blurSprite.GetPosition());
+            //cardpediaMenu.cursorContainer.AddChild(noConfigLabel);
 
-            Futile.atlasManager.LoadAtlas("Atlases/sleep");
-            sleepySlug = new FSprite("sleep_020");
-            sleepySlug.element = Futile.atlasManager.GetElementWithName("sleep_" + ((int)13).ToString("000"));
-            sleepySlug.alpha = 0f;
-            sleepySlug.SetPosition(blurSprite.GetPosition() - new Vector2(0f, 80f));
-            cardpediaMenu.cursorContainer.AddChild(sleepySlug);
+            //Futile.atlasManager.LoadAtlas("Atlases/sleep");
+            //sleepySlug = new FSprite("sleep_020");
+            //sleepySlug.element = Futile.atlasManager.GetElementWithName("sleep_" + ((int)13).ToString("000"));
+            //sleepySlug.alpha = 0f;
+            //sleepySlug.SetPosition(blurSprite.GetPosition() - new Vector2(0f, 80f));
+            //cardpediaMenu.cursorContainer.AddChild(sleepySlug);
         }
 
         public void GrafUpdate(float timeStacker)
@@ -91,13 +95,48 @@ namespace RandomBuff.Cardpedia.Elements
         {
             wrapper._tab.RemoveItems(scrollBox.items.ToArray());
             scrollBox.items.Clear();
+            activeConfigs.Clear();
 
-            List<UIelement> lst = new List<UIelement>();
-            for (int i = 0; i < Random.Range(5, 20); i++)
+            Vector2 pos = new Vector2(CardpediaStatics.tinyGap, scrollBox.contentSize - CardpediaStatics.tinyGap);
+            Vector2 fullRectScale = new Vector2(CardpediaStatics.narrowBlurSpriteScale.x - CardpediaStatics.tinyGap * 2, 200f);
+            foreach(var configurable in BuffConfigurableManager.GetAllConfigurableForID(card.ID))
             {
-                lst.Add(new OpSimpleButton(new Vector2(40f, scrollBox.contentSize - 40f * (i + 1)), new Vector2(100f, 30f), "Wawa Test " + i.ToString()));
+                if(configurable.acceptable is BuffConfigurableAcceptableRange range)
+                {
+                    activeConfigs.Add(new OpCardpediaConfigSlider(configurable.name, pos, fullRectScale.x, (float)range.minValue, (float)range.maxValue, this));
+                }
+                else if(configurable.acceptable is BuffConfigurableAcceptableList lst)
+                {
+                    activeConfigs.Add(new OpCardpediaDropBox(configurable.name, pos, fullRectScale.x, lst.values.Select((x) => x.ToString()).ToArray(), this));
+                }
             }
-            scrollBox.AddItems(lst.ToArray());
+
+            for(int i = 1; i < activeConfigs.Count; i++)
+            {
+                activeConfigs[i].chainTarget = activeConfigs[i - 1];
+            }
+            if(activeConfigs.Count > 0)
+            {
+                scrollBox.AddItems(activeConfigs.ToArray());
+            }
+        }
+
+        public void ResetScrollBoxSize()
+        {
+            float newContentSize = Mathf.Max(-activeConfigs.Last().TargetChainedOffset.y + activeConfigs.Last().setRectSize.y + CardpediaStatics.tinyGap * 2, CardpediaStatics.narrowBlurSpriteScale.y);
+
+            float currentScroll = scrollBox.scrollOffset;
+            scrollBox.contentSize = newContentSize;
+            scrollBox.targetScrollOffset = currentScroll;
+            scrollBox.scrollOffset = scrollBox.targetScrollOffset;
+
+            //BuffPlugin.Log($"config box new content size : {newContentSize}");
+
+            activeConfigs.First().SetPos(new Vector2(CardpediaStatics.tinyGap, newContentSize - CardpediaStatics.tinyGap));
+            foreach(var config in activeConfigs)
+            {
+                config.defaultPos = new Vector2(CardpediaStatics.tinyGap, newContentSize - CardpediaStatics.tinyGap);
+            }
         }
     }
 }
