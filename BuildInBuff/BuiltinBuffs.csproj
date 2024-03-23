@@ -19,7 +19,7 @@
       <HintPath>..\..\RandomGains\includings\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
-      <HintPath>..\..\RandomGains\includings\HOOKS-Assembly-CSharp.dll</HintPath>
+      <HintPath>..\include\HOOKS-Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="HOOKS-RandomBuff">
       <HintPath>..\include\HOOKS-RandomBuff.dll</HintPath>
@@ -41,6 +41,9 @@
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\include\PUBLIC-Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>..\include\Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\include\UnityEngine.dll</HintPath>

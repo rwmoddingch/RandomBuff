@@ -80,7 +80,7 @@ namespace RandomBuff.Cardpedia
             int totalTitleCount = 3;
             Vector2 titleRectScale = new Vector2((CardpediaStatics.infoDisplayWindowScale.x - CardpediaStatics.tinyGap * (totalTitleCount + 1)) / totalTitleCount, CardpediaStatics.infoDisplay_BigRectHeight);
 
-            typeTitleLabel = CreateLabel(BuffResourceString.Get("CardInfoDisplay_TypeTitle"), titleRectScale);
+            typeTitleLabel = CreateLabel(BuffResourceString.Get("CardInfoDisplay_TypeTitle") + "懑", titleRectScale);
             Vector2 pos = new Vector2(CardpediaStatics.tinyGap, contentSize - CardpediaStatics.tinyGap);
             typeRect = CreateAndWrapCosmeticRect(pos, titleRectScale);
             typeInfoLabel = CreateInfoLabel("???", titleRectScale, 0.8f);

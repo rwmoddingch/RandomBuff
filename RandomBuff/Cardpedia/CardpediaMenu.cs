@@ -25,10 +25,10 @@ namespace RandomBuff.Cardpedia
 
         public CardSheetPage sheetPage;
 
-        private FSprite loadingSprite_Main;
-        private FSprite loadingSprite_UI;
-        private FSprite loadingSprite_Cards;
-        private FSprite loadingSprite_Dark;
+        //private FSprite loadingSprite_Main;
+        //private FSprite loadingSprite_UI;
+        //private FSprite loadingSprite_Cards;
+        //private FSprite loadingSprite_Dark;
 
         private FSprite darkSprite;
         private FSprite darkSprite_Upper;
@@ -94,21 +94,21 @@ namespace RandomBuff.Cardpedia
             //加载画面
             Vector2 centerPos = new Vector2(683, 393);
             string path = "buffassets/illustrations/SlugLoading_";
-            loadingSprite_Dark = new FSprite("pixel");
-            loadingSprite_Dark.scale = 2000f;
-            loadingSprite_Dark.color = new Color(0.01f, 0.01f, 0.01f);
-            loadingSprite_Dark.SetPosition(centerPos);
-            cursorContainer.AddChild(loadingSprite_Dark);
-            loadingSprite_Main = new FSprite(path + "Main");
-            loadingSprite_UI = new FSprite(path + "UI");
-            loadingSprite_Cards = new FSprite(path + "Cards");
-            loadingSprite_Cards.alpha = 0f;
-            loadingSprite_Main.SetPosition(centerPos);
-            loadingSprite_UI.SetPosition(centerPos);
-            loadingSprite_Cards.SetPosition(centerPos);
-            cursorContainer.AddChild(loadingSprite_Main);
-            cursorContainer.AddChild(loadingSprite_UI);
-            cursorContainer.AddChild(loadingSprite_Cards);
+            //loadingSprite_Dark = new FSprite("pixel");
+            //loadingSprite_Dark.scale = 2000f;
+            //loadingSprite_Dark.color = new Color(0.01f, 0.01f, 0.01f);
+            //loadingSprite_Dark.SetPosition(centerPos);
+            //cursorContainer.AddChild(loadingSprite_Dark);
+            ////loadingSprite_Main = new FSprite(path + "Main");
+            //loadingSprite_UI = new FSprite(path + "UI");
+            //loadingSprite_Cards = new FSprite(path + "Cards");
+            //loadingSprite_Cards.alpha = 0f;
+            ////loadingSprite_Main.SetPosition(centerPos);
+            //loadingSprite_UI.SetPosition(centerPos);
+            //loadingSprite_Cards.SetPosition(centerPos);
+            //cursorContainer.AddChild(loadingSprite_Main);
+            //cursorContainer.AddChild(loadingSprite_UI);
+            //cursorContainer.AddChild(loadingSprite_Cards);
         }
 
         public void InitMenuElements()
@@ -260,12 +260,12 @@ namespace RandomBuff.Cardpedia
                     LoadManagers();
                 }
 
-                if (fullyLoaded && loadingSprite_Dark.alpha > 0f)
-                {
-                    loadingSprite_Dark.alpha -= 0.025f;
-                    loadingSprite_Cards.alpha -= 0.025f;
-                    loadingSprite_Main.alpha -= 0.025f;
-                }
+                //if (fullyLoaded && loadingSprite_Dark.alpha > 0f)
+                //{
+                //    loadingSprite_Dark.alpha -= 0.025f;
+                //    loadingSprite_Cards.alpha -= 0.025f;
+                //    loadingSprite_Main.alpha -= 0.025f;
+                //}
 
                 if (!fullyLoaded) return;
 
@@ -320,9 +320,9 @@ namespace RandomBuff.Cardpedia
             //textBoxLoaded = true;
 
             configManager = new ConfigManager(this);
-            loadingSprite_UI.alpha = 0f;
+            //loadingSprite_UI.alpha = 0f;
 
-            loadingSprite_Cards.alpha = 1f;
+            //loadingSprite_Cards.alpha = 1f;
             //cardSheetManager = new CardSheetManager(this, BuffType.Negative);
             //cardSheetLoaded = true;
 

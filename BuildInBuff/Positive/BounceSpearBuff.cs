@@ -43,12 +43,13 @@ namespace BuiltinBuffs.Positive
 
         public static void HookOn()
         {
-            On.Spear.LodgeInCreature += Spear_LodgeInCreature;
+            On.Spear.LodgeInCreature_CollisionResult_bool_bool += Spear_LodgeInCreature_CollisionResult_bool_bool;
             On.Spear.PickedUp += Spear_PickedUp;
             On.Spear.Update += Spear_Update;
             On.Spear.ChangeMode += Spear_ChangeMode;
         }
 
+        
         private static void Spear_ChangeMode(On.Spear.orig_ChangeMode orig, Spear self, Weapon.Mode newMode)
         {
             orig.Invoke(self, newMode);
@@ -87,9 +88,9 @@ namespace BuiltinBuffs.Positive
             module.PickedUp();
         }
 
-        private static void Spear_LodgeInCreature(On.Spear.orig_LodgeInCreature orig, Spear self, SharedPhysics.CollisionResult result, bool eu)
+        private static void Spear_LodgeInCreature_CollisionResult_bool_bool(On.Spear.orig_LodgeInCreature_CollisionResult_bool_bool orig, Spear self, SharedPhysics.CollisionResult result, bool eu, bool isJellyFish)
         {
-            orig.Invoke(self, result, eu);
+            orig.Invoke(self, result, eu, isJellyFish);
 
             if (!modules.TryGetValue(self, out var module))
                 return;
