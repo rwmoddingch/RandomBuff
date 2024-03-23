@@ -25,6 +25,7 @@ using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using RandomBuff.Core.Game.Settings.Missions;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -149,7 +150,8 @@ namespace RandomBuff
                     DevEnabled = true;
 
                     Cardpedia.CardpediaMenuHooks.Hook();
-                    CardpediaMenuHooks.LoadAsset();                                      
+                    CardpediaMenuHooks.LoadAsset();
+                    MissionRegister.RegisterAllMissions(null, true);
                 }
             }
             catch (Exception e)

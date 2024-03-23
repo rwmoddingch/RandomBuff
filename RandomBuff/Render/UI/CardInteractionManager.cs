@@ -160,6 +160,18 @@ namespace RandomBuff.Render.UI
         {
             CurrentFocusCard?.OnMouseDoubleClick();
         }
+
+        public void DestroyManagedCard()
+        {
+            if (managedCards.Count > 0)
+            {
+                foreach (var card in managedCards)
+                {
+                    card.Destroy();
+                }
+                managedCards.Clear();
+            }
+        }
     }
 
     internal class DoNotingInteractionManager<T> : CardInteractionManager where T : BuffCardSlot
