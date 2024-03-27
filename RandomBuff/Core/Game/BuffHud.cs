@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using HUD;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
@@ -27,6 +29,8 @@ namespace RandomBuff.Core.Game
                ProcessManager.MenuSetup.StoryGameInitCondition.New)
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
+
+           
         }
 
         public void NewGame(SlugcatStats.Name saveName)
@@ -91,7 +95,6 @@ namespace RandomBuff.Core.Game
         {
             base.Draw(timeStacker);
             inGameSlot.GrafUpdate(timeStacker);
-
         }
 
         public void TriggerCard(BuffID id)
