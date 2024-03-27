@@ -18,6 +18,7 @@ using JollyCoop.JollyMenu;
 using BepInEx;
 using Object = UnityEngine.Object;
 using RandomBuff.Render.CardRender;
+using RandomBuff.Core.BuffMenu.Test;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -50,6 +51,9 @@ namespace RandomBuff.Core.BuffMenu
 
         private BuffFile.BuffFileCompletedCallBack callBack;
 
+        public RandomBuffFlag testFlag;
+        public TestFlagRenderer testFlagRenderer;
+
 
         public BuffGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, ID)
         {
@@ -66,6 +70,7 @@ namespace RandomBuff.Core.BuffMenu
                 manager.rainWorld.progression.Destroy(lastSlot);
                 manager.rainWorld.progression = new PlayerProgression(manager.rainWorld, true, false);
             }
+            
         }
 
         void OnDataLoaded()
@@ -114,21 +119,23 @@ namespace RandomBuff.Core.BuffMenu
 
             UpdateSlugcatAndPage();
 
-            TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, "Wawa test Label", new Vector2(400f, 30f))
-            {
-                Pivot = new Vector2(0f, 1f),
-                color = Color.green,
-                alpha = 0.5f,
-                Alignment = TMPro.TextAlignmentOptions.Left
-            };
-            container.AddChild(label);
-
-
-            FSprite redDot = new FSprite("pixel") { color = Color.red, scale = 2f };
             
-            container.AddChild(redDot);
-            label.SetPosition(new Vector2(100f, 150f));
-            redDot.SetPosition(new Vector2(100f, 150f));
+
+            //TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, "Wawa test Label", new Vector2(400f, 30f))
+            //{
+            //    Pivot = new Vector2(0f, 1f),
+            //    color = Color.green,
+            //    alpha = 0.5f,
+            //    Alignment = TMPro.TextAlignmentOptions.Left
+            //};
+            //container.AddChild(label);
+
+
+            //FSprite redDot = new FSprite("pixel") { color = Color.red, scale = 2f };
+
+            //container.AddChild(redDot);
+            //label.SetPosition(new Vector2(100f, 150f));
+            //redDot.SetPosition(new Vector2(100f, 150f));
             //label.scale = 12.5f;
         }
         //
@@ -382,12 +389,10 @@ namespace RandomBuff.Core.BuffMenu
         {
             if (!loaded)
                 return;
-
             base.Update();
             menuSlot.Update();
 
-            lastScroll = scroll; 
-            
+            lastScroll = scroll;
             //testLabel.text = $"\ntarget:{targetScrolledPageIndex} scrolledPageIndex : {scrolledPageIndex}\nintScrolledPageIndex : {intScrolledPageIndex}\nscroll:{scroll}";
             if (scrolledPageIndex != targetScrolledPageIndex)
             {
@@ -436,6 +441,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public override void RawUpdate(float dt)
         {
+            
             if (!loaded)
             {
                 manager.blackDelay = 0.1f;
@@ -448,6 +454,7 @@ namespace RandomBuff.Core.BuffMenu
         {
             base.GrafUpdate(timeStacker);
             menuSlot.GrafUpdate(timeStacker);
+            
         }
 
         public override void ShutDownProcess()

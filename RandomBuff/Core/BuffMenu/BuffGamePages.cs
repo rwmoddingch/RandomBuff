@@ -4,6 +4,7 @@ using Menu.Remix;
 using Menu.Remix.MixedUI;
 using RandomBuff.Cardpedia.InfoPageRender;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
@@ -95,6 +96,7 @@ namespace RandomBuff.Core.BuffMenu
         //菜单元素
         FSprite dark;
 
+
         OpHoldButton restartButton;
         List<MenuLabel> conditionLabels = new();
         List<BigSimpleButton> conditionRects = new();
@@ -116,8 +118,7 @@ namespace RandomBuff.Core.BuffMenu
             myContainer = new FContainer();
 
             owner.Container.AddChild(myContainer);
-            Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
-
+            //Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
             SetupContinueGamePageItems();
         }
 
@@ -146,11 +147,11 @@ namespace RandomBuff.Core.BuffMenu
         {
             currentGameSetting = BuffDataManager.Instance.GetGameSetting(name);
 
-            Show = menu.manager.rainWorld.progression.IsThereASavedGame(name);
+            SetShow(menu.manager.rainWorld.progression.IsThereASavedGame(name));
             if (Show)
             {
                 RefreshMenuItemsForSlugcat();
-                Show = true;
+                SetShow(true);
             }
         }
 
@@ -206,18 +207,21 @@ namespace RandomBuff.Core.BuffMenu
 
                 pos = Vector2.Lerp(HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
                 gameMenu.menuSlot.basePos = pos;
-                dark.alpha = ShowFactor * 0.5f;
+                //dark.alpha = ShowFactor * 0.5f;
             }
             else if (showToggleFinishCallBack != null)
             {
                 showToggleFinishCallBack();
                 showToggleFinishCallBack = null;
             }
+
+           
         }
 
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -257,6 +261,12 @@ namespace RandomBuff.Core.BuffMenu
         ConditionInstance[] conditionInstances = new ConditionInstance[5];
         GameSetting currentGameSetting;
 
+        RandomBuffFlag flag;
+        RandomBuffFlagRenderer flagRenderer;
+
+        Vector2 flagHangPos;
+        Vector2 flagHidePos;
+
         //状态变量
         int _showCounter = -1;
         int _targetShowCounter;
@@ -277,6 +287,13 @@ namespace RandomBuff.Core.BuffMenu
             owner.Container.AddChild(myContainer);
 
             Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
+
+            flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1000f, 450f));
+            flagRenderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.Square, RandomBuffFlagRenderer.FlagColorType.Grey);
+            flagHangPos = new Vector2(Custom.rainWorld.screenSize.x / 2f - flag.rect.x / 2f, 800f);
+            flagHidePos = flagHangPos + Vector2.up * 800f;
+            flagRenderer.pos = flagHidePos;
+            Container.AddChild(flagRenderer.container);
             SetupNewGamePageItems();
         }
 
@@ -348,7 +365,7 @@ namespace RandomBuff.Core.BuffMenu
                 InitConditions();
             else
                 QuitToSelectSlug();
-
+            flagRenderer.Show = show;
         }
 
         public override void Update()
@@ -364,6 +381,23 @@ namespace RandomBuff.Core.BuffMenu
                 pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
                 //gameMenu.menuSlot.basePos = pos;
                 dark.alpha = ShowFactor;
+                flagRenderer.pos = Vector2.Lerp(flagHidePos, flagHangPos, Helper.LerpEase(ShowFactor));
+            }
+            if (Show || flagRenderer.NeedRenderUpdate)
+            {
+                flag.Update();
+                flagRenderer.Update();
+
+            }
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+
+            if (Show || flagRenderer.NeedRenderUpdate)
+            {
+                flagRenderer.GrafUpdate(timeStacker);
             }
         }
 
