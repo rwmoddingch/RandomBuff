@@ -1309,8 +1309,8 @@ namespace RandomBuff.Core.BuffMenu
             };
             Container.AddChild(modeIntroduction);
 
-            subObjects.Add(defaultmodeButton = new SimpleButton(menu, this, "FREE MODE", "DEFAULTMODE", new Vector2(400f, 900f), new Vector2(160f, 200f)));
-            subObjects.Add(missionmodeButton = new SimpleButton(menu, this, "MISSION MODE", "MISSIONMODE", new Vector2(640f, 900f), new Vector2(160f, 200f)));
+            subObjects.Add(defaultmodeButton = new SimpleButton(menu, this, "FREE MODE", "DEFAULTMODE", new Vector2(493f, 900f), new Vector2(160f, 200f)));
+            subObjects.Add(missionmodeButton = new SimpleButton(menu, this, "MISSION MODE", "MISSIONMODE", new Vector2(733f, 900f), new Vector2(160f, 200f)));
         }
 
         public void SetShow(bool show)
@@ -1318,12 +1318,7 @@ namespace RandomBuff.Core.BuffMenu
             Show = show;
         }
 
-        public string UpdateIntroText(string text)
-        {
-            int num = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? 25 : 45;
-            return Custom.rainWorld.inGameTranslator.Translate(text);
-        }
-
+        
         public override void Update()
         {
             base.Update();
@@ -1365,11 +1360,11 @@ namespace RandomBuff.Core.BuffMenu
 
             if (defaultmodeButton.MouseOver)
             {
-                modeIntroduction.text = UpdateIntroText(freeModeIntro);
+                modeIntroduction.text = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? freeModeIntro_Chi : freeModeIntro;
             }
             else if (missionmodeButton.MouseOver)
             {
-                modeIntroduction.text = UpdateIntroText(missionModeIntro);
+                modeIntroduction.text = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? missionModeIntro_Chi : missionModeIntro;
             }
         }
         public override void GrafUpdate(float timeStacker)
@@ -1377,7 +1372,7 @@ namespace RandomBuff.Core.BuffMenu
             base.GrafUpdate(timeStacker);
             float num = Mathf.Lerp(lastY, y, timeStacker);
             darkSprite.alpha = 0.5f * num;
-            modeIntroduction.y = Mathf.Lerp(900f, 393f, num);
+            modeIntroduction.y = Mathf.Lerp(900f, 80f, num);
             modeIntroduction.alpha = Mathf.Lerp(lastAlpha, showTextCounter, timeStacker);
             defaultmodeButton.pos.y = Mathf.Lerp(900f, 400f, num);
             missionmodeButton.pos.y = Mathf.Lerp(900f, 400f, num);
@@ -1386,7 +1381,9 @@ namespace RandomBuff.Core.BuffMenu
         //模式说明内容
         #region
         public static readonly string freeModeIntro = "You can customize the game's difficulty,\nmode and goals freely before starting a new game,\nand can only get cards through card gachas.";
+        public static readonly string freeModeIntro_Chi = "你可以在开始新一局游戏之前自由决定游戏难度、模式和目标，\n但只能通过抽卡来获得卡牌。";
         public static readonly string missionModeIntro = "Choose a mission to start a new game.\nYour goals and initial cards are decided by which mission you chose,\nand you can't change the game's difficulty and mode.";
+        public static readonly string missionModeIntro_Chi = "选择一个使命以开始一局新游戏。\n你的游戏目标和初始携带卡牌由选择的任务决定，\n且无法自行决定游戏难度和模式。";
         #endregion
     }
 
