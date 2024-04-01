@@ -12,7 +12,6 @@ namespace RandomBuff.Cardpedia
     public static class CardpediaMenuHooks
     {
         private static MainMenu menu;
-        public static ProcessManager.ProcessID Cardpedia = new ProcessManager.ProcessID("Cardpedia", true);
         public static Shader InvertColor;
         public static Shader SquareBlinking;
         public static Shader UIBlur;
@@ -28,7 +27,6 @@ namespace RandomBuff.Cardpedia
         public static void Hook()
         {
             On.Menu.MainMenu.ctor += MainMenu_ctor;
-            On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess;
         }
 
         private static void MainMenu_ctor(On.Menu.MainMenu.orig_ctor orig, MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
@@ -42,21 +40,11 @@ namespace RandomBuff.Cardpedia
             self.AddMainMenuButton(collectionButton, new Action(CollectionButtonPressed), 0);
         }
 
-        private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
-        {
-            if (ID == Cardpedia)
-            {
-                self.currentMainLoop = new CardpediaMenu(self);
-            }
-            orig(self, ID);
-        }
-
-
         public static void CollectionButtonPressed()
         {
             if (menu != null)
             {
-                menu.manager.RequestMainProcessSwitch(Cardpedia);
+                menu.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.Cardpedia);
                 menu.PlaySound(SoundID.MENU_Switch_Page_In);
             }
         }

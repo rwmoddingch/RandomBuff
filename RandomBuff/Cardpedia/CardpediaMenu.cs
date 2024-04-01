@@ -81,7 +81,7 @@ namespace RandomBuff.Cardpedia
         public Vector2 lastTitlePos;
         public Vector2 SetTitlePos;
 
-        public CardpediaMenu(ProcessManager manager) : base(manager, CardpediaMenuHooks.Cardpedia)
+        public CardpediaMenu(ProcessManager manager) : base(manager, BuffEnums.ProcessID.Cardpedia)
         {
             BrowsingCards = false;
             switchCount = 1f;

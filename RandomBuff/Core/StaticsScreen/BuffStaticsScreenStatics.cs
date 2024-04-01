@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RandomBuff.Core.BuffMenu
+namespace RandomBuff.Core.StaticsScreen
 {
-    internal class BuffGallary
+    internal class BuffStaticsScreenStatics
     {
+        
     }
 }
