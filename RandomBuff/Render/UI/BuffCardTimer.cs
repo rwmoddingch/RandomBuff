@@ -68,6 +68,12 @@ namespace RandomBuff.Render.UI
             }
         }
 
+        public void HardSetNumber()
+        {
+            floatCounter = owner.Second;
+            lastFloatCounter = floatCounter;
+        }
+
         public void DrawSprites(float timeStacker)
         {
             UpdateNumberText();
@@ -169,8 +175,8 @@ namespace RandomBuff.Render.UI
             public void DrawSprites(float timeStacker)
             {
                 Vector2 center = Vector2.Lerp(timer.lastPos, timer.pos, timeStacker);
-                Vector2 anchorPosCurrent = new Vector2(((timer.effectiveCurrentCount - 1) / 2f - digit) * timer.width + center.x, center.y);
-                Vector2 anchirPosNext = new Vector2(((timer.effectiveNextCount - 1) / 2f - digit) * timer.width + center.x, center.y);
+                Vector2 anchorPosCurrent = new Vector2(((timer.effectiveCurrentCount - 1) / 2f - digit) * timer.width * (timer.scale / 0.6f) + center.x, center.y);
+                Vector2 anchirPosNext = new Vector2(((timer.effectiveNextCount - 1) / 2f - digit) * timer.width * (timer.scale / 0.6f) + center.x, center.y);
 
                 float decimalPart = Mathf.Lerp(timer.lastFloatCounter, timer.floatCounter, timeStacker) - timer.NextNumber;
 
@@ -183,12 +189,12 @@ namespace RandomBuff.Render.UI
                 if (num_1.text == num_2.text)
                     decimalPart = 0f;//两数相同的时候该位没有变化。
 
-                num_1.SetPosition(anchorPosCurrent + new Vector2(0f, -Mathf.Sin(decimalPart * Mathf.PI / 2f) * timer.width));
+                num_1.SetPosition(anchorPosCurrent + new Vector2(0f, -Mathf.Sin(decimalPart * Mathf.PI / 2f) * timer.width * (timer.scale / 0.6f)));
                 num_1.scaleY = Mathf.Cos(decimalPart * Mathf.PI / 2f) * timer.scale;
                 num_1.alpha = Mathf.Cos(decimalPart * Mathf.PI / 2f) * alpha;
                 num_1.scaleX = timer.scale;
 
-                num_2.SetPosition(anchirPosNext + new Vector2(0f, Mathf.Sin((decimalPart + 1) * Mathf.PI / 2f) * timer.width));
+                num_2.SetPosition(anchirPosNext + new Vector2(0f, Mathf.Sin((decimalPart + 1) * Mathf.PI / 2f) * timer.width * (timer.scale / 0.6f)));
                 num_2.scaleY = Mathf.Cos((decimalPart - 1) * Mathf.PI / 2f) * timer.scale;
                 num_2.scaleX = timer.scale;
                 num_2.alpha = Mathf.Cos((decimalPart - 1) * Mathf.PI / 2f) * alpha;

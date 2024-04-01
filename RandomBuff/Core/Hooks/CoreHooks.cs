@@ -9,12 +9,14 @@ using Menu;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
+using RandomBuff.Cardpedia;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.StaticsScreen;
 using RWCustom;
 using UnityEngine;
 using static RandomBuff.Core.BuffMenu.BuffGameMenu;
@@ -139,15 +141,23 @@ namespace RandomBuff.Core.Hooks
 
         private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
-            if (ID == TestStartGameMenu)
+            if (ID == BuffEnums.ProcessID.TestStartGameMenu)
             {
                 self.currentMainLoop = new BuffGameMenu(self, ID);
+            }
+            else if(ID == BuffEnums.ProcessID.Cardpedia)
+            {
+                self.currentMainLoop = new CardpediaMenu(self);
+            }
+            else if(ID == BuffEnums.ProcessID.BuffGameWinScreen)
+            {
+                self.currentMainLoop = new BuffGameWinScreen(self);
             }
             orig(self, ID);
       
         }
 
-        public static ProcessManager.ProcessID TestStartGameMenu = new ("TestStartGameMenu");
+        
         private static void MainMenu_ctor(On.Menu.MainMenu.orig_ctor orig, Menu.MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
         {
             orig(self, manager, showRegionSpecificBkg);
@@ -157,7 +167,7 @@ namespace RandomBuff.Core.Hooks
             Vector2 size = new Vector2(buttonWidth, 30f);
             self.AddMainMenuButton(new SimpleButton(self, self.pages[0], "BUFF", "BUFF", pos, size), () =>
             {
-                self.manager.RequestMainProcessSwitch(TestStartGameMenu);
+                self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.TestStartGameMenu);
                 self.PlaySound(SoundID.MENU_Switch_Page_In);
             }, 0);
         }

@@ -10,6 +10,10 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;
+using RandomBuff.Core.StaticsScreen;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
+using Menu;
 
 namespace RandomBuff.Core.Hooks
 {
@@ -21,6 +25,7 @@ namespace RandomBuff.Core.Hooks
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
             On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
+            //IL.RainWorldGame.CommunicateWithUpcomingProcess += RainWorldGame_CommunicateWithUpcomingProcess;
             On.StoryGameSession.ctor += StoryGameSession_ctor;
             On.SaveState.setDenPosition += SaveState_setDenPosition;
             On.SaveState.ctor += SaveState_setup;

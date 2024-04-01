@@ -4,7 +4,9 @@ using System.Linq;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
+using UnityEngine;
 
 namespace RandomBuff.Core.Game
 {
@@ -200,12 +202,19 @@ namespace RandomBuff.Core.Game
             return new BuffPoolManager(game);
         }
 
-   
 
+        bool lastbuttonPressed;
         internal void Update(RainWorldGame game)
         {
             if (game.GamePaused)
                 return;
+
+            if(!lastbuttonPressed && Input.GetKey(KeyCode.P))
+            {
+                game.Win(false);
+            }
+            lastbuttonPressed = Input.GetKey(KeyCode.P);
+            
 
             foreach (var buff in buffList)
             {
@@ -277,12 +286,12 @@ namespace RandomBuff.Core.Game
             BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
             BuffFile.Instance.SaveFile();
 
-            if (GameSetting.Win)
+            if (GameSetting.Win || Input.GetKey(KeyCode.P))
             {
-                Game.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Statistics,0.6f);
-                Game.manager.upcomingProcess = ProcessManager.ProcessID.Statistics;
+                CreateWinGamePackage();
+                Game.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameWinScreen,0.6f);
+                //Game.manager.upcomingProcess = ProcessManager.ProcessID.Statistics;
             }
-
         }
 
 
@@ -334,8 +343,6 @@ namespace RandomBuff.Core.Game
                 cycleDatas.Remove(id);
                 return null;
             }
-
-
         }
 
 
@@ -411,5 +418,43 @@ namespace RandomBuff.Core.Game
         /// 轮回内的临时数据
         private readonly Dictionary<BuffID, BuffData> cycleDatas = new();
         internal GameSetting GameSetting { get; private set; }
+    }
+
+    /// <summary>
+    /// 游戏局内逻辑控制
+    /// 每局游戏会重新创建
+    /// 
+    /// 游戏结算的数据传递
+    /// </summary>
+    internal sealed partial class BuffPoolManager
+    {
+        public WinGamePackage winGamePackage;
+
+        private void CreateWinGamePackage()
+        {
+            winGamePackage = new WinGamePackage();
+
+            foreach (var buff in buffDictionary.Keys)
+                winGamePackage.winWithBuffs.Add(buff);
+
+            winGamePackage.sessionRecord = Game.GetStorySession.playerSessionRecords[0];
+            if (ModManager.CoopAvailable)
+            {
+                for (int i = 1; i < Game.GetStorySession.playerSessionRecords.Length; i++)
+                {
+                    if (Game.GetStorySession.playerSessionRecords[i].kills != null && Game.GetStorySession.playerSessionRecords[i].kills.Count > 0)
+                    {
+                        winGamePackage.sessionRecord.kills.AddRange(Game.GetStorySession.playerSessionRecords[i].kills);
+                    }
+                }
+            }
+        }
+
+        internal class WinGamePackage
+        {
+            public List<BuffID> winWithBuffs = new List<BuffID>();
+            public List<Condition> winWithConditions = new List<Condition>();
+            public PlayerSessionRecord sessionRecord;
+        }
     }
 }

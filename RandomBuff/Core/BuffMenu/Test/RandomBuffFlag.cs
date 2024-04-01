@@ -739,7 +739,7 @@ namespace RandomBuff.Core.BuffMenu.Test
             golden = new MetalColorModule(Helper.GetRGBColor(51, 38, 36), Helper.GetRGBColor(151, 71, 10), Helper.GetRGBColor(255, 251, 131), Helper.GetRGBColor(240, 240, 255));
             silver = new MetalColorModule(Helper.GetRGBColor(44, 42, 54), Helper.GetRGBColor(94, 100, 110), Helper.GetRGBColor(157, 182, 212), Helper.GetRGBColor(219, 235, 255));
             blackSilk = new NormalColorModule(Color.black, Helper.GetRGBColor(5, 6, 7), Helper.GetRGBColor(35, 35, 44));
-            whiteSilk = new NormalColorModule(Helper.GetRGBColor(44, 47, 51), Helper.GetRGBColor(163, 170, 178), Helper.GetRGBColor(197, 204, 212));
+            whiteSilk = new NormalColorModule(Helper.GetRGBColor(84, 87, 101), Helper.GetRGBColor(163, 170, 178), Helper.GetRGBColor(197, 204, 212));
         }
 
         public class ColorModule
