@@ -12,6 +12,7 @@ using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.BuffCondition;
+using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -264,6 +265,8 @@ namespace RandomBuff.Core.BuffMenu
         RandomBuffFlag flag;
         RandomBuffFlagRenderer flagRenderer;
 
+        BuffLevelBarDynamic buffLevelBarDynamic;
+
         Vector2 flagHangPos;
         Vector2 flagHidePos;
 
@@ -294,6 +297,10 @@ namespace RandomBuff.Core.BuffMenu
             flagHidePos = flagHangPos + Vector2.up * 800f;
             flagRenderer.pos = flagHidePos;
             Container.AddChild(flagRenderer.container);
+
+            buffLevelBarDynamic = new BuffLevelBarDynamic(Container, new Vector2(200f, 200f), 300f, 1238, 1000);
+            buffLevelBarDynamic.HardSet();
+            buffLevelBarDynamic.setAlpha = 1f;
             SetupNewGamePageItems();
         }
 
@@ -371,6 +378,7 @@ namespace RandomBuff.Core.BuffMenu
         public override void Update()
         {
             base.Update();
+            buffLevelBarDynamic.Update();
             if (_showCounter != _targetShowCounter)
             {
                 if (_showCounter < _targetShowCounter)
@@ -394,7 +402,7 @@ namespace RandomBuff.Core.BuffMenu
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
-
+            buffLevelBarDynamic.GrafUpdate(timeStacker);
             if (Show || flagRenderer.NeedRenderUpdate)
             {
                 flagRenderer.GrafUpdate(timeStacker);

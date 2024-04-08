@@ -5,6 +5,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.BuffCondition;
+using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;

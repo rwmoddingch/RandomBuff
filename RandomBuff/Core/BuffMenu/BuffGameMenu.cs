@@ -19,6 +19,7 @@ using BepInEx;
 using Object = UnityEngine.Object;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Core.BuffMenu.Test;
+using RandomBuff.Render.UI.Notification;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -34,6 +35,7 @@ namespace RandomBuff.Core.BuffMenu
         private bool loaded = false;
 
         private MenuLabel testLabel;
+        NotificationManager testNotification;
 
         internal BuffGameMenuSlot menuSlot;
         internal SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
@@ -50,10 +52,6 @@ namespace RandomBuff.Core.BuffMenu
         public float NextScroll => scroll;
 
         private BuffFile.BuffFileCompletedCallBack callBack;
-
-        public RandomBuffFlag testFlag;
-        public TestFlagRenderer testFlagRenderer;
-
 
         public BuffGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, ID)
         {
@@ -88,13 +86,14 @@ namespace RandomBuff.Core.BuffMenu
             }
        
             menuSlot.SetupBuffs(slugNameOrders);
-       
+            testNotification = new NotificationManager(this, container, 3);
             pages = new List<Page>()
             {
+                
                 new(this, null, "WawaButtonPage", 0),
                 new(this, null, "GameDetailPage", 1),
                 new (this, null, "WawaSlugcatPage", 2),
-                
+                testNotification
             };
            
             for (int i = 0; i < slugNameOrders.Count; i++)
@@ -118,9 +117,6 @@ namespace RandomBuff.Core.BuffMenu
             //detailPage.Container.MoveToFront();
 
             UpdateSlugcatAndPage();
-
-            
-
             //TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, "Wawa test Label", new Vector2(400f, 30f))
             //{
             //    Pivot = new Vector2(0f, 1f),
@@ -394,6 +390,7 @@ namespace RandomBuff.Core.BuffMenu
 
             lastScroll = scroll;
             //testLabel.text = $"\ntarget:{targetScrolledPageIndex} scrolledPageIndex : {scrolledPageIndex}\nintScrolledPageIndex : {intScrolledPageIndex}\nscroll:{scroll}";
+            testNotification.Update();
             if (scrolledPageIndex != targetScrolledPageIndex)
             {
                 scrolledPageIndex = Mathf.Lerp(scrolledPageIndex, targetScrolledPageIndex, 0.15f);
@@ -454,7 +451,7 @@ namespace RandomBuff.Core.BuffMenu
         {
             base.GrafUpdate(timeStacker);
             menuSlot.GrafUpdate(timeStacker);
-            
+            testNotification.GrafUpdate(timeStacker);
         }
 
         public override void ShutDownProcess()

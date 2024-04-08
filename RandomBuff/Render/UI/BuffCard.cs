@@ -94,7 +94,7 @@ namespace RandomBuff.Render.UI
         }
 
         //卡牌效果控制
-        BuffCardRenderer _cardRenderer;
+        internal BuffCardRenderer _cardRenderer;
 
         public bool Highlight
         {

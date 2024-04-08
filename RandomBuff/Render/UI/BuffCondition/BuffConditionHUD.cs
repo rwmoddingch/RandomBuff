@@ -1,6 +1,7 @@
 ﻿using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Render.UI.Notification;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace RandomBuff.Render.UI.BuffCondition
 
         public Vector2 TopLeft => new Vector2(0, Custom.rainWorld.screenSize.y);
         public Mode currentMode = Mode.Refresh;
+
         
         public BuffConditionHUD()
         {

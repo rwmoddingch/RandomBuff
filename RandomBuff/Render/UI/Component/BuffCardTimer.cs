@@ -7,11 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace RandomBuff.Render.UI
+namespace RandomBuff.Render.UI.Component
 {
     internal class BuffCardTimer
     {
         public readonly float width = 8f;
+        public static readonly float defaultScale = 0.6f;
 
         public FContainer container;
         public IOwnBuffTimer owner;
@@ -30,7 +31,11 @@ namespace RandomBuff.Render.UI
         public Vector2 lastPos;
         public Vector2 pos;
 
-        public float scale = 0.6f;
+        public Alightment alightment = Alightment.Center;
+
+        public float scale = defaultScale;
+        public bool largeStepMode;
+        public int largeStepDigit;
 
         public float setAlpha;
         public float lastAlpha;
@@ -61,6 +66,17 @@ namespace RandomBuff.Render.UI
             else if (lastNumber > Number)
                 adder = 1;
             lastNumber = Number;
+
+            if (largeStepMode)
+            {
+                largeStepDigit = 0;
+                float deltaPerSec = Mathf.Abs(floatCounter - lastFloatCounter) * 40;
+                while (deltaPerSec > 10)
+                {
+                    deltaPerSec /= 10;
+                    largeStepDigit++;
+                }
+            }
 
             foreach (var number in numbers)
             {
@@ -175,26 +191,64 @@ namespace RandomBuff.Render.UI
             public void DrawSprites(float timeStacker)
             {
                 Vector2 center = Vector2.Lerp(timer.lastPos, timer.pos, timeStacker);
-                Vector2 anchorPosCurrent = new Vector2(((timer.effectiveCurrentCount - 1) / 2f - digit) * timer.width * (timer.scale / 0.6f) + center.x, center.y);
-                Vector2 anchirPosNext = new Vector2(((timer.effectiveNextCount - 1) / 2f - digit) * timer.width * (timer.scale / 0.6f) + center.x, center.y);
+                Vector2 anchorPosCurrent;
+                Vector2 anchorPosNext;
+
+                if(timer.alightment == Alightment.Center)
+                {
+                    anchorPosCurrent = new Vector2(((timer.effectiveCurrentCount - 1) / 2f - digit) * timer.width * (timer.scale / defaultScale) + center.x, center.y);
+                    anchorPosNext = new Vector2(((timer.effectiveNextCount - 1) / 2f - digit) * timer.width * (timer.scale / defaultScale) + center.x, center.y);
+                }
+                else if(timer.alightment == Alightment.Right)
+                {
+                    anchorPosCurrent = new Vector2(-digit * timer.width * (timer.scale / defaultScale) + center.x, center.y);
+                    anchorPosNext = new Vector2(- digit * timer.width * (timer.scale / defaultScale) + center.x, center.y);
+                }
+                else
+                {
+                    anchorPosCurrent = new Vector2(((timer.effectiveCurrentCount - 1)- digit) * timer.width * (timer.scale / defaultScale) + center.x, center.y);
+                    anchorPosNext = new Vector2(((timer.effectiveNextCount - 1) - digit) * timer.width * (timer.scale / defaultScale) + center.x, center.y);
+                }
 
                 float decimalPart = Mathf.Lerp(timer.lastFloatCounter, timer.floatCounter, timeStacker) - timer.NextNumber;
+                if(timer.largeStepMode && digit != 0 && digit <= timer.largeStepDigit)
+                {
+                    float divisor = 1;
+                    for (int i = 0; i < digit; i++)
+                        divisor *= 10f;
+
+                    float lastDecimalPart = timer.lastFloatCounter / divisor;
+                    lastDecimalPart = lastDecimalPart - Mathf.Floor(lastDecimalPart);
+
+                    float currentDecimalPart = timer.floatCounter / divisor;
+                    currentDecimalPart = currentDecimalPart - Mathf.Floor(currentDecimalPart);
+
+                    decimalPart = currentDecimalPart;
+                }
+                
 
                 while (decimalPart > 1)
                     decimalPart--;
                 while (decimalPart < 0)
                     decimalPart++;
 
+             
+
                 float alpha = Mathf.Lerp(timer.lastAlpha, timer.alpha, timeStacker);
-                if (num_1.text == num_2.text)
+                if (num_1.text == num_2.text && !(timer.largeStepMode && digit != 0 && digit <= timer.largeStepDigit))
                     decimalPart = 0f;//两数相同的时候该位没有变化。
+
+                if (timer.largeStepMode)
+                {
+                    BuffPlugin.Log($"{digit}-{timer.floatCounter}-{decimalPart}");
+                }
 
                 num_1.SetPosition(anchorPosCurrent + new Vector2(0f, -Mathf.Sin(decimalPart * Mathf.PI / 2f) * timer.width * (timer.scale / 0.6f)));
                 num_1.scaleY = Mathf.Cos(decimalPart * Mathf.PI / 2f) * timer.scale;
                 num_1.alpha = Mathf.Cos(decimalPart * Mathf.PI / 2f) * alpha;
                 num_1.scaleX = timer.scale;
 
-                num_2.SetPosition(anchirPosNext + new Vector2(0f, Mathf.Sin((decimalPart + 1) * Mathf.PI / 2f) * timer.width * (timer.scale / 0.6f)));
+                num_2.SetPosition(anchorPosNext + new Vector2(0f, Mathf.Sin((decimalPart + 1) * Mathf.PI / 2f) * timer.width * (timer.scale / 0.6f)));
                 num_2.scaleY = Mathf.Cos((decimalPart - 1) * Mathf.PI / 2f) * timer.scale;
                 num_2.scaleX = timer.scale;
                 num_2.alpha = Mathf.Cos((decimalPart - 1) * Mathf.PI / 2f) * alpha;
@@ -210,6 +264,13 @@ namespace RandomBuff.Render.UI
         internal interface IOwnBuffTimer
         {
             public int Second { get; }
+        }
+
+        internal enum Alightment
+        {
+            Center,
+            Left,
+            Right,
         }
     }
 }

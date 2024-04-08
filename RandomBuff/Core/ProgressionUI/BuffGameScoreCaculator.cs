@@ -3,6 +3,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using static RandomBuff.Core.StaticsScreen.BuffGameScoreCaculator.ScoreBoard;
-using static RandomBuff.Render.UI.BuffCardTimer;
+using static RandomBuff.Render.UI.Component.BuffCardTimer;
 using static UnityEngine.GUI;
 
 namespace RandomBuff.Core.StaticsScreen
@@ -24,11 +25,20 @@ namespace RandomBuff.Core.StaticsScreen
 
         public BuffPoolManager.WinGamePackage winPackage;
         public ScoreBoard scoreBoard;
+        public BuffLevelBarDynamic expBar;
         public List<ScoreInstance> activeInstances = new();
 
         public ScoreCaculatorState state = ScoreCaculatorState.Prepare;
 
         public int indexInCurrentState = 0;
+
+        //分数预计算结果
+        //0:scoreindex, 1:count 2:intData
+        //Dictionary<CreatureTemplate.Type, int[]> killsAndCounts = new();
+        //CreatureTemplate.Type[] kills;
+
+        List<KeyValuePair<CreatureTemplate.Type, int[]>> killsAndCounts = new();
+        int[] defaultScores;
 
         public BuffGameScoreCaculator(Menu.Menu menu, MenuObject owner, Vector2 pos, BuffPoolManager.WinGamePackage winGamePackage) : base(menu, owner, pos)
         {
@@ -36,13 +46,48 @@ namespace RandomBuff.Core.StaticsScreen
             menu.container.AddChild(myContainer);
             this.winPackage = winGamePackage;
             scoreBoard = new ScoreBoard(this);
+            expBar = new BuffLevelBarDynamic(myContainer, pos + new Vector2(0f, 40f), width, 1230, 100)
+            {
+                alpha = 0f,
+                setAlpha = 0f
+            };
+            expBar.HardSet();
 
+            PreCaculateScores();
+        }
+
+        public void PreCaculateScores()
+        {
+            defaultScores = new int[MultiplayerUnlocks.SandboxUnlockID.values.entries.Count];
+            SandboxSettingsInterface.DefaultKillScores(ref defaultScores);
+
+            foreach(var kill in winPackage.sessionRecord.kills)
+            {
+                var unlock = MultiplayerUnlocks.SandboxUnlockForSymbolData(kill.symbolData).index;
+
+                bool matched = false;
+                foreach(var element in killsAndCounts)
+                {
+                    if(element.Key == kill.symbolData.critType && element.Value[2] == kill.symbolData.intData)
+                    {
+                        element.Value[1]++;
+                        matched = true;
+                    }
+                }
+                if (!matched)
+                {
+                    killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(kill.symbolData.critType, new int[3] { unlock, 1, kill.symbolData.intData }));
+                }
+
+            }
         }
 
         public override void Update()
         {
             base.Update();
             scoreBoard.Update();
+            expBar.Update();
+
             for(int i = activeInstances.Count - 1; i >= 0; i--)
                 activeInstances[i].Update();
 
@@ -58,12 +103,33 @@ namespace RandomBuff.Core.StaticsScreen
                     AddNextScore();
                 }
             }
+            else if(state == ScoreCaculatorState.WaitScoreDeletion)
+            {
+                BuffPlugin.Log(activeInstances.Count);
+                if(activeInstances.Count == 0)
+                {
+                    expBar.setAlpha = 1f;
+                    state = ScoreCaculatorState.ShowLevelProgression;
+                }
+            }
+            else if(state == ScoreCaculatorState.ShowLevelProgression)
+            {
+                if (Mathf.Approximately(expBar.alpha, 1f))
+                {
+                    state = ScoreCaculatorState.AddScoreToLevel;
+                    expBar.Exp += scoreBoard.score;
+                    scoreBoard.score = 0;
+                }
+            }
+            else if(state == ScoreCaculatorState.AddScoreToLevel)
+            {
+                if(expBar.FinishState)
+                {
+                    state = ScoreCaculatorState.Finish;
+                }
+            }
             else if(state == ScoreCaculatorState.Finish)
             {
-                if(scoreBoard.state == ScoreBoardState.Finish)
-                {
-
-                }
             }
         }
 
@@ -71,15 +137,20 @@ namespace RandomBuff.Core.StaticsScreen
         {
             if(state == ScoreCaculatorState.AddKillScore)
             {
-                if(indexInCurrentState == winPackage.sessionRecord.kills.Count)
+                if(indexInCurrentState == killsAndCounts.Count)
                 {
                     state = ScoreCaculatorState.AddBuffScore;
                     indexInCurrentState = 0;
                     return;
                 }
 
-                var kill = winPackage.sessionRecord.kills[indexInCurrentState];
-                activeInstances.Insert(0, new KillScoreInstance(this, 1));
+                var keyValuePair = killsAndCounts[indexInCurrentState];
+                var critType = keyValuePair.Key;
+                int count = keyValuePair.Value[1];
+                int defaultScore = defaultScores[keyValuePair.Value[0]];
+                int intData = keyValuePair.Value[2];
+
+                activeInstances.Insert(0, new KillScoreInstance(this, critType, count, count * defaultScore, intData));
                 foreach (var instance in activeInstances)
                     instance.UpdateInstancePos();
                 indexInCurrentState++;
@@ -88,8 +159,8 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 if (indexInCurrentState == winPackage.winWithBuffs.Count)
                 {
-                    state = ScoreCaculatorState.Finish;
-                    indexInCurrentState = 0;
+                    state = ScoreCaculatorState.WaitScoreDeletion;
+                    scoreBoard.state = ScoreBoardState.Finish;
                     return;
                 }
 
@@ -115,6 +186,7 @@ namespace RandomBuff.Core.StaticsScreen
         {
             base.GrafUpdate(timeStacker);
             scoreBoard.GrafUpdate(timeStacker);
+            expBar.GrafUpdate(timeStacker);
             for (int i = activeInstances.Count - 1; i >= 0; i--)
                 activeInstances[i].GrafUpdate(timeStacker);
         }
@@ -126,13 +198,16 @@ namespace RandomBuff.Core.StaticsScreen
             AddKillScore,
             AddBuffScore,
             AddConditionScore,
+            WaitScoreDeletion,
+            ShowLevelProgression,
+            AddScoreToLevel,
             Finish
         }
 
 
         public class ScoreInstance//buttom-left
         {
-            static int UpdateScoreTime = 40;
+            static int UpdateScoreTime = 10;
 
             public int score;
             public FLabel scoreLabel;
@@ -142,16 +217,16 @@ namespace RandomBuff.Core.StaticsScreen
 
             public ScoreInstanceState state;
 
-            float alpha = 0f;
-            float lastAlpha = 0f;
+            protected float alpha = 0f;
+            protected float lastAlpha = 0f;
 
-            Vector2 pos;
-            Vector2 lastPos;
+            protected Vector2 pos;
+            protected Vector2 lastPos;
 
-            int updateScoreCounter;
+            protected int updateScoreCounter;
 
-            Vector2 instanceShowPos;
-            Vector2 instanceHidePos;
+            protected Vector2 instanceShowPos;
+            protected Vector2 instanceHidePos;
          
             public ScoreInstance(BuffGameScoreCaculator caculator, int score)
             {
@@ -225,7 +300,7 @@ namespace RandomBuff.Core.StaticsScreen
                 lastPos = pos;
                 pos = Vector2.Lerp(pos, instanceShowPos, 0.25f);
 
-                if(caculator.activeInstances.IndexOf(this) >= BuffGameScoreCaculator.maxShowInstance || caculator.state == ScoreCaculatorState.Finish)
+                if(caculator.activeInstances.IndexOf(this) >= BuffGameScoreCaculator.maxShowInstance || caculator.state == ScoreCaculatorState.WaitScoreDeletion)
                 {
                     state = ScoreInstanceState.Delete;
                 }
@@ -235,7 +310,7 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 lastAlpha = alpha;
                 alpha = Mathf.Lerp(alpha, 0f, 0.15f);
-                if (Mathf.Approximately(alpha, 0f))
+                if (alpha < 0.01f)
                 {
                     ClearSprites();
                 }
@@ -265,8 +340,6 @@ namespace RandomBuff.Core.StaticsScreen
                 }
                 instanceShowPos = new Vector2(caculator.pos.x, caculator.pos.y + heightBias);
                 instanceHidePos = instanceShowPos + Vector2.right * BuffGameScoreCaculator.width;
-
-                BuffPlugin.Log($"{indexInList}, {instanceShowPos}");
             }
 
             public enum ScoreInstanceState
@@ -280,17 +353,83 @@ namespace RandomBuff.Core.StaticsScreen
 
         public class KillScoreInstance : ScoreInstance
         {
-            public KillScoreInstance(BuffGameScoreCaculator buffGameScoreCaculator, int score) : base(buffGameScoreCaculator, score)
-            {
+            FLabel countLabel;
+            FSprite creatureSymbol;
+            float span;
 
+            public KillScoreInstance(BuffGameScoreCaculator buffGameScoreCaculator, CreatureTemplate.Type type, int count, int score, int intData) : base(buffGameScoreCaculator, score)
+            {
+                countLabel = new FLabel(Custom.GetDisplayFont(), $"x{count}")
+                {
+                    anchorX = 0f,
+                    anchorY = 0f,
+                };
+                var iconData = new IconSymbol.IconSymbolData(type, AbstractPhysicalObject.AbstractObjectType.Creature, intData);
+                string spriteName = CreatureSymbol.SpriteNameOfCreature(iconData);
+                Color color = CreatureSymbol.ColorOfCreature(iconData);
+                span = Futile.atlasManager.GetElementWithName(spriteName).sourcePixelSize.x + 5f;
+
+                creatureSymbol = new FSprite(spriteName)
+                {
+                    color = color,
+                    anchorX = 0f,
+                    anchorY = 0f
+                };
+
+                buffGameScoreCaculator.Container.AddChild(countLabel);
+                buffGameScoreCaculator.Container.AddChild(creatureSymbol);
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+                Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
+
+                countLabel.alpha = smoothAlpha;
+                countLabel.SetPosition(smoothPos + new Vector2(span, 0f));
+
+                creatureSymbol.alpha = smoothAlpha;
+                creatureSymbol.SetPosition(smoothPos + new Vector2(0f, 5f));
+            }
+
+            public override void ClearSprites()
+            {
+                base.ClearSprites();
+                countLabel.RemoveFromContainer();
+                creatureSymbol.RemoveFromContainer();
             }
         }
 
         public class BuffScoreInstance : ScoreInstance
         {
+            BuffCard card;//偷个懒，就不用完整的流程来处理动画了（跪下
+
             public BuffScoreInstance(BuffGameScoreCaculator buffGameScoreCaculator, int score, BuffID buffID) : base(buffGameScoreCaculator, score)
             {
+                height = 80f;
+                card = new BuffCard(buffID);
+                BuffPlugin.Log($"BuffScoreInstance - {buffID}-{card._cardRenderer._id}");
+                card.Scale = 0.1f;
+                card.DisplayTitle = false;
+                card.DisplayDescription = false;
+                buffGameScoreCaculator.Container.AddChild(card.Container);
+                card.Rotation = new Vector3(0f, 180f, 0f);
+            }
 
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                card.Position = Vector2.Lerp(lastPos, pos, timeStacker) + new Vector2(15f, 30f);
+                float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+                card.Rotation = Vector3.Lerp(new Vector3(0f, 180f, 0f), Vector3.zero, smoothAlpha * (state == ScoreInstanceState.Prepare ? 1f : 2f));
+                card.Alpha = smoothAlpha;
+            }
+
+            public override void ClearSprites()
+            {
+                base.ClearSprites();
+                card.Destroy();
             }
         }
 
@@ -298,7 +437,7 @@ namespace RandomBuff.Core.StaticsScreen
         {
             public int score = -1;
             public BuffGameScoreCaculator caculator;
-            public BuffCardTimer scoreDisplay;
+            public BuffCountDisplay scoreDisplay;
             public FSprite lineSprite;
 
             public ScoreBoardState state = ScoreBoardState.Prepare;
@@ -311,7 +450,7 @@ namespace RandomBuff.Core.StaticsScreen
             public ScoreBoard(BuffGameScoreCaculator caculator)
             {
                 this.caculator = caculator;
-                scoreDisplay = new BuffCardTimer(caculator.Container, this);
+                scoreDisplay = new BuffCountDisplay(caculator.Container, this) { alightment = BuffCountDisplay.Alightment.Right};
                 lineSprite = new FSprite("pixel") 
                 { 
                     anchorX = 0f, 
@@ -335,16 +474,14 @@ namespace RandomBuff.Core.StaticsScreen
                 {
                     lastAlpha = alpha;
                     alpha = Mathf.Lerp(alpha, 1f, 0.15f);
-                    scoreDisplay.setAlpha = alpha;
                     scoreDisplay.alpha = alpha;
                     score = 0;
-                    scoreDisplay.pos = caculator.pos + new Vector2(BuffGameScoreCaculator.width, -40f);
+                    scoreDisplay.pos = caculator.pos + new Vector2(BuffGameScoreCaculator.width - 5f, -40f);
 
                     if (Mathf.Approximately(alpha, 1f))
                     {
                         alpha = 1f;
                         lastAlpha = 1f;
-                        scoreDisplay.setAlpha = 1f;
                         scoreDisplay.alpha = alpha;
                         state = ScoreBoardState.UpdateScore;
                     }
@@ -361,7 +498,7 @@ namespace RandomBuff.Core.StaticsScreen
 
             public void GrafUpdate(float timeStacker)
             {
-                scoreDisplay.DrawSprites(timeStacker);
+                scoreDisplay.GrafUpdate(timeStacker);
                 lineSprite.alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
             }
 
