@@ -63,9 +63,11 @@ namespace RandomBuff.Render.CardRender
                 }
             }
 
+            
             mostInavtiveRenderer.gameObject.SetActive(true);
             mostInavtiveRenderer.Init(mostInavtiveRenderer._id, BuffConfigManager.GetStaticData(buffID));
             inactiveCardRenderers.Remove(mostInavtiveRenderer);
+            BuffPlugin.Log($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
             return mostInavtiveRenderer;
 
             BuffCardRenderer GetNewRenderer(BuffID buffID)
@@ -94,7 +96,8 @@ namespace RandomBuff.Render.CardRender
         {
             buffCardRenderer.gameObject.SetActive(false);
             buffCardRenderer.inactiveTimer = 0f;
-            inactiveCardRenderers.Add(buffCardRenderer);
+            if(!inactiveCardRenderers.Contains(buffCardRenderer))//不知道为什么，但有时候会出现重复回收的情况
+                inactiveCardRenderers.Add(buffCardRenderer);
         }
 
         /// <summary>

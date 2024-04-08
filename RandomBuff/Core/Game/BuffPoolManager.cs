@@ -290,7 +290,6 @@ namespace RandomBuff.Core.Game
             {
                 CreateWinGamePackage();
                 Game.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameWinScreen,0.6f);
-                //Game.manager.upcomingProcess = ProcessManager.ProcessID.Statistics;
             }
         }
 
