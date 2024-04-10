@@ -12,22 +12,20 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
     {
         public override MissionID ID => MissionID.Druid;
 
-        public override Color textCol => Color.yellow;
+        public override Color TextCol => Color.yellow;
 
-        public override SlugcatStats.Name bindSlug => SlugcatStats.Name.Yellow;
+        public override SlugcatStats.Name BindSlug => SlugcatStats.Name.Yellow;
 
-        public override string missionName => "DANCES WITH DRAGONS";
+        public override string MissionName => "DANCES WITH DRAGONS";
 
         public DruidMission()
         {
-            conditions.Add(new AchievementCondition()
+            gameSetting = new (BindSlug)
             {
-                achievementID = WinState.EndgameID.Friend
-            });
-            conditions.Add(new AchievementCondition()
-            {
-                achievementID = WinState.EndgameID.Chieftain
-            });
+                conditions = new()
+                    {new AchievementCondition() { achievementID = WinState.EndgameID.Friend },
+                    new AchievementCondition() { achievementID = WinState.EndgameID.Chieftain }}
+            };
 
             startBuffSet.Add(new Buff.BuffID("Upgradation"));
             startBuffSet.Add(new Buff.BuffID("MobileAssault"));

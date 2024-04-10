@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using UnityEngine;
 using static MonoMod.InlineRT.MonoModRule;
 
@@ -651,24 +652,24 @@ namespace RandomBuff.Core.BuffMenu
             else if (message.StartsWith("MISSIONPICK_"))
             {
                 var missionID = Regex.Split(message, "_")[1] ;
-                foreach (var key in MissionRegister.registeredMissions.Keys)
+                foreach (var key in MissionRegister.GetAllUnlockedMissions())
                 {
                     if (key.value == missionID)
                     {
-                        MissionRegister.registeredMissions.TryGetValue(key, out var mission);
+                        MissionRegister.TryGetMission(key, out var mission);
                         string[] info = new string[5];
                         for (int i = 0; i < 5; i++)
                         {
-                            if (mission.conditions.Count > i)
+                            if (mission.GameSetting.conditions.Count > i)
                             {
-                                info[i] = mission.conditions[i].DisplayName(Custom.rainWorld.inGameTranslator);
+                                info[i] = mission.GameSetting.conditions[i].DisplayName(Custom.rainWorld.inGameTranslator);
                             }
                             else
                             {
                                 info[i] = "None";
                             }
                         }
-                        missionInfoBox.UpdateMissionInfo(mission.textCol ,Custom.rainWorld.inGameTranslator.Translate(mission.missionName), mission.bindSlug == null? "NOBINDSLUG" : mission.bindSlug.value,info, mission.startBuffSet.ToArray());
+                        missionInfoBox.UpdateMissionInfo(mission.TextCol ,Custom.rainWorld.inGameTranslator.Translate(mission.MissionName), mission.BindSlug == null? "NOBINDSLUG" : mission.BindSlug.value,info, mission.startBuffSet.ToArray());
                         pickedMission = mission;
                         break;
                     }
@@ -700,10 +701,7 @@ namespace RandomBuff.Core.BuffMenu
                 if (pickedMission == null) return;
                 currentGameSetting.ClearCondition();
                 BuffHookWarpper.CheckAndDisableAllHook();
-                for (int i = 0; i < pickedMission.conditions.Count; i++)
-                {
-                    currentGameSetting.conditions.Add(pickedMission.conditions[i]);
-                }
+                currentGameSetting = pickedMission.GameSetting.Clone();
                 gameMenu.manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         gameMenu.CurrentName;
                 gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);
@@ -750,12 +748,12 @@ namespace RandomBuff.Core.BuffMenu
                 }
                 for (int i = 0; i < 17; i++)
                 {
-                    this.roundedRect.sprites[i].color = bindMission.textCol;
+                    this.roundedRect.sprites[i].color = bindMission.TextCol;
                 }
-                this.menuLabel.label.color = bindMission.textCol;
+                this.menuLabel.label.color = bindMission.TextCol;
                 for (int j = 0; j < 8; j++)
                 {
-                    this.selectRect.sprites[j].color = bindMission.textCol;
+                    this.selectRect.sprites[j].color = bindMission.TextCol;
                 }
 
             }
@@ -839,19 +837,19 @@ namespace RandomBuff.Core.BuffMenu
             public void InitMissionButtons()
             {
                 int i = 0;
-                foreach (var key in MissionRegister.registeredMissions.Keys)
+                foreach (var key in MissionRegister.GetAllUnlockedMissions())
                 {
                     try
                     {
-                        MissionRegister.registeredMissions.TryGetValue(key, out var mission);
+                        MissionRegister.TryGetMission(key, out var mission);
                         if (mission == null) continue;
-                        if (mission.bindSlug != null && mission.bindSlug.value != gameMenu.CurrentName.value)
+                        if (mission.BindSlug != null && mission.BindSlug.value != gameMenu.CurrentName.value)
                         {
                             continue;
                         }
 
-                        var missionButton = new MissionButton(mission, menu, this, Custom.rainWorld.inGameTranslator.Translate(mission.missionName), "MISSIONPICK_" + mission.ID.value, new Vector2(533f + 170f * (i % 3), buttonDisplayY), new Vector2(160f, 120f));
-                        if (mission.bindSlug != null && mission.bindSlug.value == gameMenu.CurrentName.value)
+                        var missionButton = new MissionButton(mission, menu, this, Custom.rainWorld.inGameTranslator.Translate(mission.MissionName), "MISSIONPICK_" + mission.ID.value, new Vector2(533f + 170f * (i % 3), buttonDisplayY), new Vector2(160f, 120f));
+                        if (mission.BindSlug != null && mission.BindSlug.value == gameMenu.CurrentName.value)
                         {
                             exclusiveMission = missionButton;
                             exclusiveMission.pos = new Vector2(258f, buttonDisplayY);
@@ -887,16 +885,16 @@ namespace RandomBuff.Core.BuffMenu
             public void RefreshExclusiveMission()
             {
                 bool match = false;
-                foreach (var key in MissionRegister.registeredMissions.Keys)
+                foreach (var key in MissionRegister.GetAllUnlockedMissions())
                 {
-                    MissionRegister.registeredMissions.TryGetValue(key, out var mission);
+                    MissionRegister.TryGetMission(key, out var mission);
                     if (mission == null) continue;
-                    if (mission.bindSlug == null) continue;
-                    if (mission.bindSlug != null && mission.bindSlug.value == gameMenu.CurrentName.value)
+                    if (mission.BindSlug == null) continue;
+                    if (mission.BindSlug != null && mission.BindSlug.value == gameMenu.CurrentName.value)
                     {
 
                         exclusiveMission.bindMission = mission;
-                        exclusiveMission.menuLabel.text = Custom.rainWorld.inGameTranslator.Translate(mission.missionName);
+                        exclusiveMission.menuLabel.text = Custom.rainWorld.inGameTranslator.Translate(mission.MissionName);
                         exclusiveMission.signalText = "MISSIONPICK_" + mission.ID.value;
                         exclusiveMission.active = true ;
                         

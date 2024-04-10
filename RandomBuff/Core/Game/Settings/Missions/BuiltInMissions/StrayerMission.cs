@@ -9,34 +9,30 @@ using MoreSlugcats;
 
 namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
 {
-    public class StrayerMission : Mission, IMissionEntry
+    public sealed class StrayerMission : Mission, IMissionEntry
     {
         public override MissionID ID => new MissionID("Strayer",true);
 
-        public override SlugcatStats.Name bindSlug => null;
+        public override SlugcatStats.Name BindSlug => null;
 
-        public override Color textCol => Color.white;
+        public override Color TextCol => Color.white;
 
-        public override string missionName => "STRANGE LAND STRAYER";
+        public override string MissionName => "STRANGE LAND STRAYER";
 
         public StrayerMission()
         {
-            conditions.Add(new AchievementCondition()
+            gameSetting = new(BindSlug)
             {
-                achievementID = WinState.EndgameID.Traveller
-            });
-            conditions.Add(new AchievementCondition()
-            {
-                achievementID = WinState.EndgameID.Survivor
-            });
-            if (ModManager.MSC)
-            {
-                conditions.Add(new AchievementCondition()
+                conditions = new()
                 {
-                    achievementID = MoreSlugcatsEnums.EndgameID.Nomad
-                });
-            }           
-            
+                    new AchievementCondition() { achievementID = WinState.EndgameID.Traveller },
+                    new AchievementCondition() { achievementID = WinState.EndgameID.Survivor },
+                }
+            };
+
+            if(ModManager.MSC)
+                gameSetting.conditions.Add(new AchievementCondition() { achievementID = MoreSlugcatsEnums.EndgameID.Nomad });
+
             startBuffSet.Add(new Buff.BuffID("RandomRain"));
             startBuffSet.Add(new Buff.BuffID("ShortCircuitGate"));
             startBuffSet.Add(new Buff.BuffID("Armstron"));

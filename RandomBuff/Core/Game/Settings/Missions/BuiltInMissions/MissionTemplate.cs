@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
@@ -13,21 +15,31 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
         //偷懒用的模板示例，使用时需要继承接口: IMissionEntry
         
         //实际使用时请把false改为true，名字尽量独特避免撞车
-        public static readonly MissionID templateID = new MissionID("Template", false);
+        public static readonly MissionID templateID = new ("Template", false);
 
         public override MissionID ID => templateID;
 
-        public override SlugcatStats.Name bindSlug => null;
+        public override SlugcatStats.Name BindSlug => null;
 
-        public override Color textCol => Color.white;
+        public override Color TextCol => Color.white;
 
-        public override string missionName => "Nothing";
+        public override string MissionName => "Nothing";
 
-        public MissionTemplate() 
+
+        /// <summary>
+        /// 在构造函数里重新创建gameSetting,添加条件信息及抽卡信息
+        /// </summary>
+        public MissionTemplate()
         {
-            //记得往this.conditions和this.startBuffSet里分别加点Condition和BuffID
-            //conditions里的Condition不要超过5个，超过的部分会被忽略
-            //BuffID不要超过6个，超过的部分会被忽略
+            return;
+            //示例
+            gameSetting = new(BindSlug, "Normal" /*抽卡模版选择 会读取bufftemplates文件夹内的json文件做配置*/)
+            {
+                conditions = new ()
+                { new AchievementCondition() {achievementID = WinState.EndgameID.Chieftain} },
+                gachaTemplate = new NormalGachaTemplate(){ExpMultiply = 1.2f}, 
+                //如果想自己设定特殊抽卡模版但不想写json的话可以直接这样构建
+            };
         }
 
         public void RegisterMission()
