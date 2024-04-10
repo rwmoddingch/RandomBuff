@@ -189,8 +189,10 @@ namespace RandomBuff.Core.Hooks
         private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
         {
             orig(self);
-            if (self.rainWorld.BuffMode())
-                BuffDataManager.Instance.DeleteAll();
+            BuffDataManager.Instance.DeleteAll();
+            BuffPlayerData.LoadBuffPlayerData("",BuffPlugin.saveVersion);
+            BuffConfigManager.LoadConfig("", BuffPlugin.saveVersion);
+            BuffFile.Instance.DeleteAllFile();
 
         }
 

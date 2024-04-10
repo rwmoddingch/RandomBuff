@@ -699,9 +699,12 @@ namespace RandomBuff.Core.BuffMenu
             else if (message == "MISSION_START")
             {
                 if (pickedMission == null) return;
-                currentGameSetting.ClearCondition();
+             
                 BuffHookWarpper.CheckAndDisableAllHook();
-                currentGameSetting = pickedMission.GameSetting.Clone();
+
+                BuffDataManager.Instance.SetGameSetting(gameMenu.CurrentName, currentGameSetting = pickedMission.GameSetting.Clone());
+                currentGameSetting.MissionId = pickedMission.ID.value;
+         
                 gameMenu.manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         gameMenu.CurrentName;
                 gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);

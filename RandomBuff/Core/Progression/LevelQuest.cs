@@ -24,6 +24,12 @@ namespace RandomBuff.Core.Progression
                 return true;
             return false;
         }
+
+        public override bool VerifyData()
+        {
+            return level > 0;
+        }
+
         [JsonProperty("Level")]
         private int level;
     }

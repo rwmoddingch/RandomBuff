@@ -28,5 +28,20 @@ namespace RandomBuff.Core.Game.Settings.Missions
         protected GameSetting gameSetting = new(null);
 
 
+        /// <summary>
+        /// 验证依赖是否完整
+        /// </summary>
+        /// <returns></returns>
+        public bool VerifyId()
+        {
+            foreach (var id in startBuffSet)
+            {
+                if (!BuffID.values.entries.Contains(id.value))
+                    return false;
+            }
+
+            return gameSetting.IsValid;
+        }
+
     }
 }
