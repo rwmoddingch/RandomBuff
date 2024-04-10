@@ -101,10 +101,12 @@ namespace RandomBuff.Core.StaticsScreen
 
             //winPackage
             var winPackage = BuffPoolManager.Instance.winGamePackage;
-            BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}");
+            BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}");
 
             //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
             var newFinishQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
+            foreach(var quest in newFinishQuests)
+                BuffPlugin.Log($"accomplish quest: {quest.QuestName}");
             //TODO:新任务完成的提示
 
             pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(200f, 200f), winPackage));

@@ -27,6 +27,7 @@ using UnityEngine;
 using UDebug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.Progression;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -124,6 +125,7 @@ namespace RandomBuff
                     GachaTemplate.Init();
                     Condition.Init();
                     TypeSerializer.Init();
+                    BuffQuest.Init();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
@@ -140,7 +142,6 @@ namespace RandomBuff
 
                     CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
-                    MissionRegister.RegisterAllMissions(null, true);
                 }
             }
             catch (Exception e)
@@ -205,6 +206,9 @@ namespace RandomBuff
                     BuffConfigManager.InitTemplateStaticData();
                     BuffConfigManager.InitQuestData();
 
+                    //这个会用到template数据（嗯
+                    MissionRegister.RegisterAllMissions(null, true);
+
                     BuffRegister.BuildAllDataStaticWarpper();
                     isPostLoaded = true;
                 }
@@ -228,7 +232,7 @@ namespace RandomBuff
         /// <param name="message"></param>
         internal static void Log(object message)
         {
-            Debug.Log($"[RandomBuff] {message}");
+            UnityEngine.Debug.Log($"[RandomBuff] {message}");
             if(canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Message]\t{message}\n");
            
@@ -238,7 +242,7 @@ namespace RandomBuff
         {
             if (DevEnabled)
             {
-                Debug.Log($"[RandomBuff] {message}");
+                UnityEngine.Debug.Log($"[RandomBuff] {message}");
                 if (canAccessLog)
                     File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Debug]\t\t{message}\n");
             }
@@ -247,21 +251,21 @@ namespace RandomBuff
 
         internal static void LogWarning(object message)
         {
-            Debug.LogWarning($"[RandomBuff] {message}");
+            UnityEngine.Debug.LogWarning($"[RandomBuff] {message}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Warning]\t{message}\n");
         }
 
         internal static void LogError(object message)
         {
-            Debug.LogError($"[RandomBuff] {message}");
+            UnityEngine.Debug.LogError($"[RandomBuff] {message}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Error]\t\t{message}\n");
         }
 
         internal static void LogFatal(object message)
         {
-            Debug.Log($"[RandomBuff] {message}");
+            UnityEngine.Debug.LogError($"[RandomBuff] {message}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{message}\n");
 
@@ -269,7 +273,7 @@ namespace RandomBuff
 
         internal static void LogException(Exception e)
         {
-            Debug.LogException(e);
+            UnityEngine.Debug.LogException(e);
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.Message}\n{e.StackTrace}\n");
           
@@ -277,12 +281,13 @@ namespace RandomBuff
 
         internal static void LogException(Exception e,object m)
         {
-            Debug.LogException(e);
+            UnityEngine.Debug.LogException(e);
             if (canAccessLog)
             {
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.Message}\n");
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"       \t\t{m}\n");
             }
+            UnityEngine.Debug.LogError(m);
         }
     }
 

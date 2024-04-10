@@ -40,6 +40,11 @@ namespace RandomBuff.Core.Game.Settings
 
         public List<BuffID> fallbackPick = null;
 
+        public bool IsValid { get; private set; } = true;
+
+
+        public string MissionId { get; set; }
+
         public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal")
         {
             LoadTemplate("Normal");
@@ -137,6 +142,7 @@ namespace RandomBuff.Core.Game.Settings
             {
                 BuffPlugin.LogFatal($"Unknown template: {name}, use default");
                 gachaTemplate = new NormalGachaTemplate();
+                IsValid = false;
                 return;
             }
 
@@ -266,6 +272,9 @@ namespace RandomBuff.Core.Game.Settings
                                     BuffDataManager.Instance.GetOrCreateBuffData(name, fallback, true);
                             BuffPlugin.Log($"Load Fallback List, Count: {setting.fallbackPick.Count}");
                             break;
+                        case "MISSION":
+                            setting.MissionId = subs[1];
+                            break;
                     }
                 }
 
@@ -322,7 +331,10 @@ namespace RandomBuff.Core.Game.Settings
                 builder.Append($"CONDITION{SubSettingSplit}{condition.ID}{SubSettingSplit}{JsonConvert.SerializeObject(condition)}{SettingSplit}");
             }
             if(fallbackPick != null)
-                builder.Append($"FALLBACK{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}");
+                builder.Append($"FALLBACK{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}{SettingSplit}");
+            if(MissionId != null)
+                builder.Append($"MISSION{SubSettingSplit}{MissionId}");
+
             return builder.ToString();
         }
 

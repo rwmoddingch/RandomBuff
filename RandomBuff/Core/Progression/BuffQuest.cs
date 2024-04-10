@@ -23,9 +23,10 @@ namespace RandomBuff.Core.Progression
     /// <summary>
     /// 不要理会这个 偷懒拿名称用的
     /// </summary>
-
+    [JsonObject(MemberSerialization.OptIn)]
     struct BuffQuestJsonGetType
     {
+        [JsonProperty("Type")]
         public string TypeName;
     }
 
@@ -39,6 +40,7 @@ namespace RandomBuff.Core.Progression
         /// <summary>
         /// 类型名称
         /// </summary>
+        [JsonProperty("Type")]
         public abstract string TypeName { get; }
 
         /// <summary>
@@ -53,6 +55,12 @@ namespace RandomBuff.Core.Progression
         /// </summary>
         /// <returns></returns>
         public abstract bool UpdateUnlockedState(BuffPoolManager.WinGamePackage package);
+
+        /// <summary>
+        /// 在初始化时调用，验证数据是否有效
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool VerifyData();
 
         /// <summary>
         /// 任务名称
@@ -114,6 +122,7 @@ namespace RandomBuff.Core.Progression
         public static void Init()
         {
             buffQuestTypes.Add(nameof(LevelQuest),typeof(LevelQuest));
+            buffQuestTypes.Add(nameof(MissionQuest), typeof(MissionQuest));
         }
 
         public static bool TryGetType(string typeName, out Type type)

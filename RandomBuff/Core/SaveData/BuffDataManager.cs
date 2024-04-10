@@ -219,7 +219,19 @@ namespace RandomBuff.Core.SaveData
                 gameSettings.Add(name, new GameSetting(name));
             return gameSettings[name];
         }
-
+        /// <summary>
+        /// 设置setting信息
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        internal void SetGameSetting(SlugcatStats.Name name,GameSetting gameSetting)
+        {
+            if (gameSettings.ContainsKey(name))
+                gameSettings[name] = gameSetting;
+            else
+                gameSettings.Add(name,gameSetting);
+        }
     }
 
     /// <summary>

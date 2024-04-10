@@ -27,7 +27,7 @@ namespace BuiltinBuffs.Negative
         public static BuffID Gambler = new BuffID("Gambler",true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<GamblerBuff,GamblerBuffData,GamblerBuffEntry>(Gambler);
+            //BuffRegister.RegisterBuff<GamblerBuff,GamblerBuffData,GamblerBuffEntry>(Gambler);
         }
 
         public static void LongLifeCycleHookOn()

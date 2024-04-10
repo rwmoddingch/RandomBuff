@@ -289,6 +289,7 @@ namespace RandomBuff.Core.Game
             if (GameSetting.Win || Input.GetKey(KeyCode.P))
             {
                 CreateWinGamePackage();
+                
                 Game.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameWinScreen,0.6f);
             }
         }
@@ -432,7 +433,7 @@ namespace RandomBuff.Core.Game
         private void CreateWinGamePackage()
         {
             winGamePackage = new WinGamePackage();
-
+            winGamePackage.missionId = GameSetting.MissionId;
             foreach (var buff in buffDictionary.Keys)
                 winGamePackage.winWithBuffs.Add(buff);
 
@@ -454,6 +455,7 @@ namespace RandomBuff.Core.Game
             public List<BuffID> winWithBuffs = new List<BuffID>();
             public List<Condition> winWithConditions = new List<Condition>();
             public PlayerSessionRecord sessionRecord;
+            public string missionId;
         }
     }
 }

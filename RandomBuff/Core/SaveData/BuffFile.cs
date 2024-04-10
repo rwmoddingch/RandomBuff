@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -155,6 +156,16 @@ namespace RandomBuff.Core.SaveData
             LoadFailedFallBack();
         }
 
+        public void DeleteAllFile()
+        {
+            LoadFailedFallBack(true); 
+            if(File.Exists(Application.persistentDataPath + "/sav" + (CurrentSlot+1)))
+                File.Delete(Application.persistentDataPath + "/sav" + (CurrentSlot + 1));
+            BuffPlugin.Log($"Delete save data {Application.persistentDataPath + "/sav" + (CurrentSlot + 1)}");
+            SaveFile();
+            
+        }
+
         /// <summary>
         /// 保存数据
         /// </summary>
@@ -163,24 +174,48 @@ namespace RandomBuff.Core.SaveData
             if (buffCoreFile != null)
             {
                 BuffPlugin.Instance.StartCoroutine(InternalSaveFile());
+                return;
             }
             BuffPlugin.LogError($"Failed to save buff data at slot {Instance.UsedSlot}");
         }
 
         IEnumerator InternalSaveFile()
         {
-            BuffPlugin.Log($"Saving buff data at slot {Instance.UsedSlot}");
-            buffCoreFile.Set("buff-data", BuffDataManager.Instance.ToStringData(), UserData.WriteMode.Deferred);
-            yield return null;
-            yield return null;
-            buffCoreFile.Set("buff-config", BuffConfigManager.Instance.ToStringData(), UserData.WriteMode.Immediate);
-            yield return null;
-            yield return null;
-            buffCoreFile.Set("buff-player", BuffPlayerData.Instance.ToStringData(), UserData.WriteMode.Immediate);
-            yield return null;
-            yield return null;
-            buffCoreFile.Set("buff-version", BuffPlugin.saveVersion.ToString());
-            yield break;
+            int waitTimeOutCounter = 400;
+            BuffPlugin.Log($"!!Saving buff data at slot {Instance.UsedSlot}!!");
+
+            List<string> saveTitle = new()
+            {
+                "buff-data",
+                "buff-config",
+                "buff-player",
+                "buff-version"
+            };
+            List<string> saveData = new()
+            {
+                BuffDataManager.Instance.ToStringData(),
+                BuffConfigManager.Instance.ToStringData(),
+                BuffPlayerData.Instance.ToStringData(),
+                BuffPlugin.saveVersion.ToString()
+            };
+            for (int i = 0; i < saveTitle.Count; i++)
+            {
+                while (UserData.Busy)
+                {
+                    waitTimeOutCounter--;
+                    if (waitTimeOutCounter == 0)
+                    {
+                        BuffPlugin.LogError($"save buff data at slot {Instance.UsedSlot} TIME OUT");
+                        yield break;
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+                buffCoreFile.Set(saveTitle[i], saveData[i]);
+                BuffPlugin.Log($"saved buff data at slot {Instance.UsedSlot}, Title: {saveTitle[i]}");
+            }
+
+            BuffPlugin.Log($"!!Finish saved buff data at slot {Instance.UsedSlot}!!");
+
         }
 
         /// <summary>

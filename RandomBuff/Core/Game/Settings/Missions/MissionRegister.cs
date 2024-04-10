@@ -31,7 +31,10 @@ namespace RandomBuff.Core.Game.Settings.Missions
 
       public static void RegisterMission(MissionID ID, Mission mission)
         {
-            registeredMissions.Add(ID, mission);
+            if(mission.VerifyId())
+                registeredMissions.Add(ID, mission);
+            else
+                BuffPlugin.LogError($"Missing some dependence for Mission ID:{ID}");
         }
 
         public static void RegisterAllMissions(Assembly assembly, bool buitIn)

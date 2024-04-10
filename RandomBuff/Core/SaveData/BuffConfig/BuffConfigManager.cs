@@ -128,13 +128,7 @@ namespace RandomBuff.Core.SaveData
         private static Dictionary<string, TemplateStaticData> templateDatas = new();
         private static Dictionary<string, BuffQuest> questDatas = new();
 
-        private static Dictionary<QuestUnlockedType,Dictionary<string, string>> lockedMap = new()
-        {
-            {QuestUnlockedType.Card,new()},
-            {QuestUnlockedType.Flag,new()},
-            {QuestUnlockedType.Flag,new()},
-
-        };
+        private static Dictionary<QuestUnlockedType,Dictionary<string, string>> lockedMap = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool StaticDataLoaded(BuffID buffID) { return staticDatas.ContainsKey(buffID); }
@@ -169,15 +163,16 @@ namespace RandomBuff.Core.SaveData
         internal static List<string> GetQuestNameList() => questDatas.Keys.ToList();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => lockedMap.ContainsKey(unlockedType) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName]);
+        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => lockedMap[unlockedType].ContainsKey(itemName) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName]);
 
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 
         static BuffConfigManager()
         {
-            buffTypeTable.Add(BuffType.Duality, new List<BuffID>());
-            buffTypeTable.Add(BuffType.Negative, new List<BuffID>());
-            buffTypeTable.Add(BuffType.Positive, new List<BuffID>());
+            foreach(var value in Enum.GetValues(typeof(BuffType)))
+                buffTypeTable.Add((BuffType)value, new List<BuffID>());
+            foreach (var value in Enum.GetValues(typeof(QuestUnlockedType)))
+                lockedMap.Add((QuestUnlockedType)value,new ());
         }
 
         /// <summary>
@@ -258,16 +253,22 @@ namespace RandomBuff.Core.SaveData
                     try
                     {
                         var questType = JsonConvert.DeserializeObject<BuffQuestJsonGetType>(File.ReadAllText(file.FullName));
-                        if (BuffQuest.TryGetType(questType.TypeName, out var type))
+                        if(questType.TypeName == null)
+                            BuffPlugin.LogError($" BuffQuest TypeName ,Mod:{mod.name} ,Path:{file.FullName}");
+                        else if (BuffQuest.TryGetType(questType.TypeName, out var type))
                         {
                             var quest = (BuffQuest)JsonConvert.DeserializeObject(File.ReadAllText(file.FullName), type);
-                            if (questDatas.ContainsKey(quest.QuestId))
-                                BuffPlugin.LogError($"Conflict BuffQuest ID at:{quest.QuestId} ,Mod:{mod.name}");
+                            if(quest.QuestId == null || quest.QuestName == null)
+                                BuffPlugin.LogError($" BuffQuest Name or ID missing ,Mod:{mod.name} ,Path:{file.FullName}");
                             else if ((quest.UnlockItem?.Sum(i => i.Value.Length) ?? 0) == 0)
                                 BuffPlugin.LogError($"Null BuffQuest Unlocked Item at:{quest.QuestId} ,Mod:{mod.name}");
-
+                            else if (!quest.VerifyData())
+                                BuffPlugin.LogError($"BuffQuest VerifyData Error at:{quest.QuestId} ,Mod:{mod.name}");
+                            else if (questDatas.ContainsKey(quest.QuestId))
+                             BuffPlugin.LogError($"Conflict BuffQuest ID at:{quest.QuestId} ,Mod:{mod.name}");
                             else
                             {
+                           
                                 foreach (var dic in quest.UnlockItem)
                                 {
                                     foreach (var item in dic.Value)
@@ -276,16 +277,18 @@ namespace RandomBuff.Core.SaveData
                                             BuffPlugin.LogWarning(
                                                 $"Conflict BuffQuest unlocked item at ID:{quest.QuestId} ,Item:{item} ,Mod:{mod.name}");
                                         else
+                                        {
                                             lockedMap[dic.Key].Add(item, quest.QuestId);
+                                            BuffPlugin.LogDebug($"Lock Type:{dic.Key.ToString()} ItemValue:{item}");
+                                        }
                                     }
                                 }
-
                                 questDatas.Add(quest.QuestId, quest);
                             }
                         }
                         else
                         {
-                            BuffPlugin.LogError($"Unknown BuffQuest unlockedType! Mod:{mod.name} ,Path:{file.FullName}");
+                            BuffPlugin.LogError($"Unknown BuffQuest unlockedType! Mod:{mod.name} ,Path:{file.FullName}, Type:{questType.TypeName}");
                         }
                     }
                     catch (Exception e)
