@@ -138,7 +138,7 @@ namespace RandomBuff
                     //TestTypeSerializer();
                     DevEnabled = true;
 
-                    Cardpedia.CardpediaMenuHooks.Hook();
+                    CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
                     MissionRegister.RegisterAllMissions(null, true);
                 }
@@ -202,8 +202,10 @@ namespace RandomBuff
                     }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
-                    BuffRegister.BuildAllDataStaticWarpper();
                     BuffConfigManager.InitTemplateStaticData();
+                    BuffConfigManager.InitQuestData();
+
+                    BuffRegister.BuildAllDataStaticWarpper();
                     isPostLoaded = true;
                 }
             }

@@ -8,36 +8,31 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
 {
-    public class DodgeTheRockMission : Mission, IMissionEntry
+    public sealed class DodgeTheRockMission : Mission, IMissionEntry
     {
         public static readonly MissionID DodgeTheRock = new MissionID("DodgeTheRock", true);
 
         public override MissionID ID => DodgeTheRock;
 
-        public override SlugcatStats.Name bindSlug => null;
+        public override SlugcatStats.Name BindSlug => null;
 
-        public override Color textCol => Color.white;
+        public override Color TextCol => Color.white;
 
-        public override string missionName => "DODGE THE ROCKS";
+        public override string MissionName => "DODGE THE ROCKS";
 
         public DodgeTheRockMission()
         {
-            conditions.Add(new AchievementCondition
+            gameSetting = new(BindSlug)
             {
-                achievementID = WinState.EndgameID.Outlaw                
-            });
-            conditions.Add(new AchievementCondition
-            {
-                achievementID = WinState.EndgameID.Survivor
-            });
-            conditions.Add(new AchievementCondition
-            {
-                achievementID = WinState.EndgameID.DragonSlayer
-            });
-            conditions.Add(new CycleCondition
-            {
-                SetCycle = 10
-            });
+                conditions = new()
+                {
+                    new AchievementCondition { achievementID = WinState.EndgameID.Outlaw },
+                    new AchievementCondition { achievementID = WinState.EndgameID.Survivor },
+                    new AchievementCondition { achievementID = WinState.EndgameID.DragonSlayer },
+                    new CycleCondition { SetCycle = 10 }
+                }
+            };
+
             startBuffSet.Add(new Buff.BuffID("EjectionRock"));
             startBuffSet.Add(new Buff.BuffID("StoneThrower"));
             startBuffSet.Add(new Buff.BuffID("ThundThrow"));

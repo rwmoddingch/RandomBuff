@@ -2,6 +2,7 @@
 using RandomBuff.Core.Game.Settings.Conditions;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,33 +14,19 @@ namespace RandomBuff.Core.Game.Settings.Missions
     {
         public abstract MissionID ID { get; }
 
-        public abstract SlugcatStats.Name bindSlug { get; }
+        public abstract SlugcatStats.Name BindSlug { get; }
 
-        public abstract Color textCol { get; }
+        public abstract Color TextCol { get; }
 
-        public abstract string missionName { get; }
+        public abstract string MissionName { get; }
 
-        public List<Condition> conditions = new();
 
         public List<BuffID> startBuffSet = new();
 
-        public bool Finished
-        {
-            get
-            {
-                if (conditions.Count == 0) return true;
-                bool fin = true;
-                for (int i = 0; i < conditions.Count; i++)
-                {
-                    if (!conditions[i].Finished)
-                    {
-                        fin = false;
-                        break;
-                    }
-                }
-                return fin;
-            }
-        }
+        public GameSetting GameSetting => gameSetting;
+
+        protected GameSetting gameSetting = new(null);
+
 
     }
 }

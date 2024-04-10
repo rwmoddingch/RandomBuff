@@ -5,14 +5,31 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Progression;
+using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Core.Game.Settings.Missions
 {
     public static class MissionRegister
     {
-        public static Dictionary<MissionID, Mission> registeredMissions = new ();
+        private static readonly Dictionary<MissionID, Mission> registeredMissions = new ();
 
-        public static void RegisterMission(MissionID ID, Mission mission)
+
+        public static bool TryGetMission(MissionID id, out Mission mission)
+        {
+            if (!BuffConfigManager.IsItemLocked(QuestUnlockedType.Mission, id.value) && registeredMissions.TryGetValue(id,out mission))
+                return true;
+            
+            mission = null;
+            return false;
+        }
+
+        public static List<MissionID> GetAllUnlockedMissions()
+        {
+            return registeredMissions.Keys.Where(i => !BuffConfigManager.IsItemLocked(QuestUnlockedType.Mission, i.value)).ToList();
+        }
+
+      public static void RegisterMission(MissionID ID, Mission mission)
         {
             registeredMissions.Add(ID, mission);
         }

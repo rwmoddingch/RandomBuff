@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Progression;
 using RandomBuff.Core.SaveData.BuffConfig;
 using UnityEngine;
 
@@ -56,120 +59,8 @@ namespace RandomBuff.Core.SaveData
         }
 
 
-        /// <summary>
-        /// 尝试获取对应config
-        /// 如果不存在返回false
-        /// 存在则保存到loadedConfigs
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="buffName"></param>
-        /// <param name="key"></param>
-        /// <param name="type"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        //public bool TryGet(BuffID buffName, string key, Type type, out object data)
-        //{
-        //    if (allLoadedConfigs.ContainsKey(buffName.value) && allLoadedConfigs[buffName.value].ContainsKey(key))
-        //    {
-        //        data = allLoadedConfigs[buffName.value][key];
-        //        return true;
-        //    }
-
-        //    if (allConfigs.ContainsKey(buffName.value))
-        //    {
-        //        try
-        //        {
-        //            data = TypeSerializer.GetSerializer(type).Deserialize(allConfigs[buffName.value][key]);
-        //            AddLoadedConfig(buffName.value, key, data);
-        //            return true;
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            BuffPlugin.LogException(e);
-        //            BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{allConfigs[buffName.value][key]}");
-        //            data = default;
-        //            return false;
-        //        }
-        //    }
-
-        //    if (staticDatas.ContainsKey(buffName) &&
-        //        staticDatas[buffName].customParameterDefaultValues.ContainsKey(key))
-        //    {
-        //        try
-        //        {
-        //            data = TypeSerializer.GetSerializer(type).Deserialize(staticDatas[buffName].customParameterDefaultValues[key]);
-        //            AddLoadedConfig(buffName.value, key, data);
-        //            return true;
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            BuffPlugin.LogException(e);
-        //            BuffPlugin.LogError($"Corrupted Buff Config Data At : {buffName}:{key}:{staticDatas[buffName].customParameterDefaultValues[key]}");
-        //            data = default;
-        //            return false;
-        //        }
-
-        //    }
-
-        //    BuffPlugin.LogError($"Can't Find Config Data For : {buffName}:{key}");
-        //    data = default;
-        //    return false;
-        //}
-
-        //public bool TryGet<T>(BuffID buffName, string key, out T data)
-        //{
-        //    if (TryGet(buffName, key, typeof(T), out var obj))
-        //    {
-        //        data = (T)obj;
-        //        return true;
-        //    }
-        //    data = default;
-        //    return false;
-        //}
-
-        /// <summary>
-        /// 设置Config和loadedConfig
-        /// 为了速度优化 不会进行保存
-        ///
-        /// 务必手动调用BuffFile.SaveFile()!!!!!!
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="buffName"></param>
-        /// <param name="key"></param>
-        /// <param name="obj"></param>
-        //internal void Set<T>(BuffID buffName, string key,T obj)
-        //{
-        //    if(!allLoadedConfigs.ContainsKey(buffName.value))
-        //        allLoadedConfigs.Add(buffName.value,new ());
-
-        //    if (!allLoadedConfigs[buffName.value].ContainsKey(key))
-        //        allLoadedConfigs[buffName.value].Add(key, obj);
-        //    else
-        //        allLoadedConfigs[buffName.value][key] = obj;
-
-        //    string strData = "";
-        //    try
-        //    {
-        //       strData = TypeSerializer.GetSerializer(obj.GetType()).Serialize(obj);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        BuffPlugin.LogException(e);
-        //        BuffPlugin.LogError($"{buffName}:{key} data serialize failed !");
-        //        return;
-        //    }
-
-        //    if(!allConfigs.ContainsKey(buffName.value))
-        //        allConfigs.Add(buffName.value, new ());
-
-        //    if (!allConfigs[buffName.value].ContainsKey(key))
-        //        allConfigs[buffName.value].Add(key, strData);
-        //    else
-        //        allConfigs[buffName.value][key] = strData;
-        //}
-
+        
         public readonly Dictionary<string, Dictionary<string, string>> allConfigs = new();
-        //private readonly Dictionary<string, Dictionary<string, object>> allLoadedConfigs = new();
     }
 
     /// <summary>
@@ -220,22 +111,6 @@ namespace RandomBuff.Core.SaveData
         }
 
 
-        /// <summary>
-        /// 添加已读取config
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="key"></param>
-        /// <param name="data"></param>
-        //private void AddLoadedConfig(string id, string key, object data)
-        //{
-        //    if (!allLoadedConfigs.ContainsKey(id))
-        //        allLoadedConfigs.Add(id,new ());
-
-        //    if (!allLoadedConfigs[id].ContainsKey(key))
-        //        allLoadedConfigs[id].Add(key, data);
-        //    else
-        //        allLoadedConfigs[id][key] = data;
-        //}
 
         internal const string BuffSplit = "<BuB>";
         internal const string BuffIdSplit = "<BuBI>";
@@ -249,29 +124,52 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     public partial class BuffConfigManager
     {
-        public bool StaticDataLoaded(BuffID buffID)
-        {
-            return staticDatas.ContainsKey(buffID);
-        }
-
         private static Dictionary<BuffID, BuffStaticData> staticDatas = new();
-        private static Dictionary<string,TemplateStaticData> templateDatas = new();
+        private static Dictionary<string, TemplateStaticData> templateDatas = new();
+        private static Dictionary<string, BuffQuest> questDatas = new();
 
+        private static Dictionary<QuestUnlockedType,Dictionary<string, string>> lockedMap = new()
+        {
+            {QuestUnlockedType.Card,new()},
+            {QuestUnlockedType.Flag,new()},
+            {QuestUnlockedType.Flag,new()},
+
+        };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool StaticDataLoaded(BuffID buffID) { return staticDatas.ContainsKey(buffID); }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool ContainsId(BuffID id)
             => staticDatas.ContainsKey(id);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool ContainsProperty(BuffID id, string key)
             => staticDatas.ContainsKey(id) && staticDatas[id].customParameterDefaultValues.ContainsKey(key);
 
-        internal static BuffStaticData GetStaticData(BuffID id)
-            => staticDatas[id];
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static BuffStaticData GetStaticData(BuffID id) => staticDatas[id];
 
-        internal static bool ContainsTemplateName(string name)
-            => templateDatas.ContainsKey(name);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool ContainsTemplateName(string name) => templateDatas.ContainsKey(name);
 
-        internal static TemplateStaticData GetTemplateData(string name)
-            => templateDatas[name];
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static TemplateStaticData GetTemplateData(string name) => templateDatas[name];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static List<string> GetTemplateNameList() => templateDatas.Keys.ToList();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool ContainsQuestName(string name) => questDatas.ContainsKey(name);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static BuffQuest GetQuestData(string name) => questDatas[name];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static List<string> GetQuestNameList() => questDatas.Keys.ToList();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => lockedMap.ContainsKey(unlockedType) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName]);
 
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 
@@ -336,6 +234,65 @@ namespace RandomBuff.Core.SaveData
                 if (TemplateStaticData.TryLoadTemplateStaticData("FallBackNormalTemplate",BuffResource.NormalTemplate, out var data))
                 {
                     templateDatas.Add(data.Name, data);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 读取templateData
+        /// post init时调用
+        /// 文件格式 mod根目录/buffquests/
+        /// </summary>
+        public static void InitQuestData()
+        {
+            BuffPlugin.Log("Loading All BuffQuest Data!");
+            foreach (var mod in ModManager.ActiveMods)
+            {
+                string path = mod.path + Path.DirectorySeparatorChar + "buffquests";
+                if (!Directory.Exists(path))
+                    continue;
+                var info = new DirectoryInfo(path);
+                BuffPlugin.LogDebug($"Load file:{path}");
+                foreach (var file in info.GetFiles("*.json"))
+                {
+                    try
+                    {
+                        var questType = JsonConvert.DeserializeObject<BuffQuestJsonGetType>(File.ReadAllText(file.FullName));
+                        if (BuffQuest.TryGetType(questType.TypeName, out var type))
+                        {
+                            var quest = (BuffQuest)JsonConvert.DeserializeObject(File.ReadAllText(file.FullName), type);
+                            if (questDatas.ContainsKey(quest.QuestId))
+                                BuffPlugin.LogError($"Conflict BuffQuest ID at:{quest.QuestId} ,Mod:{mod.name}");
+                            else if ((quest.UnlockItem?.Sum(i => i.Value.Length) ?? 0) == 0)
+                                BuffPlugin.LogError($"Null BuffQuest Unlocked Item at:{quest.QuestId} ,Mod:{mod.name}");
+
+                            else
+                            {
+                                foreach (var dic in quest.UnlockItem)
+                                {
+                                    foreach (var item in dic.Value)
+                                    {
+                                        if (lockedMap[dic.Key].ContainsKey(item))
+                                            BuffPlugin.LogWarning(
+                                                $"Conflict BuffQuest unlocked item at ID:{quest.QuestId} ,Item:{item} ,Mod:{mod.name}");
+                                        else
+                                            lockedMap[dic.Key].Add(item, quest.QuestId);
+                                    }
+                                }
+
+                                questDatas.Add(quest.QuestId, quest);
+                            }
+                        }
+                        else
+                        {
+                            BuffPlugin.LogError($"Unknown BuffQuest unlockedType! Mod:{mod.name} ,Path:{file.FullName}");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                       BuffPlugin.LogException(e, $"Invalid BuffQuest file! Mod:{mod.name} ,Path:{file.FullName}");
+                    }
+             
                 }
             }
         }

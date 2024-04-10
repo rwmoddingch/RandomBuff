@@ -8,22 +8,22 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
 {
-    public class TestMission : Mission, IMissionEntry
+    public sealed class TestMission : Mission, IMissionEntry
     {
         public override MissionID ID => MissionID.Test;
 
-        public override SlugcatStats.Name bindSlug => null;
+        public override SlugcatStats.Name BindSlug => null;
 
-        public override Color textCol => Color.white;
+        public override Color TextCol => Color.white;
 
-        public override string missionName => "TEST MISSION";
+        public override string MissionName => "TEST MISSION";
 
         public TestMission()
         {
-            conditions.Add(new CycleCondition()
+            gameSetting = new GameSetting(BindSlug)
             {
-                SetCycle = 10
-            }) ;
+                conditions = new() { new CycleCondition() { SetCycle = 10 } }
+            };
             startBuffSet.Add(new Buff.BuffID("Hell"));
         }
 

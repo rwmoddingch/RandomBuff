@@ -16,7 +16,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings
 {
-    internal class GameSetting
+    public class GameSetting
     {
         private const string SettingSplit = "<GSA>";
         private const string SubSettingSplit = "<GSB>";
@@ -34,13 +34,13 @@ namespace RandomBuff.Core.Game.Settings
 
         public string TemplateName { get; private set; }
 
-        private SlugcatStats.Name name;
+        public SlugcatStats.Name name;
 
         public HashSet<ConditionID> cantAddMore = new();
 
         public List<BuffID> fallbackPick = null;
 
-        public GameSetting(SlugcatStats.Name name)
+        public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal")
         {
             LoadTemplate("Normal");
             this.name = name;
@@ -66,6 +66,7 @@ namespace RandomBuff.Core.Game.Settings
 
         public void EnterGame(RainWorldGame game)
         {
+            name ??= game.StoryCharacter;
             gachaTemplate.EnterGame(game);
         }
 

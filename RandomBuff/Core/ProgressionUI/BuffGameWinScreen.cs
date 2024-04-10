@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.SaveData;
 using UnityEngine;
 
 namespace RandomBuff.Core.StaticsScreen
@@ -101,6 +102,10 @@ namespace RandomBuff.Core.StaticsScreen
             //winPackage
             var winPackage = BuffPoolManager.Instance.winGamePackage;
             BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}");
+
+            //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
+            var newFinishQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
+            //TODO:新任务完成的提示
 
             pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(200f, 200f), winPackage));
             scoreCaculator.Container.MoveToFront();

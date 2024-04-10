@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Progression;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace RandomBuff.Core.Game
                 copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             copyUnique.RemoveAll(alreadyHas.Contains);
             copyUnique.RemoveAll(i => BuffConfigManager.GetStaticData(i).NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
-            //TODO: DEBUG
+            copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁
             if (copyUnique.Count < pickCount)
             {
                 return null;

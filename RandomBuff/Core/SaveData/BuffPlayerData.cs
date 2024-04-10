@@ -7,6 +7,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using UnityEngine;
+using System.Runtime.CompilerServices;
+using RandomBuff.Core.Game;
+using RandomBuff.Core.Progression;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -41,6 +44,9 @@ namespace RandomBuff.Core.SaveData
                     case "EXP":
                         playerTotExp = float.Parse(dataSplit[1]);
                         break;
+                    case "QUEST":
+                        finishedQuest = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
+                        break;
                     default:
                         unrecognizedSaveStrings.Add(item);
                         break;
@@ -58,8 +64,9 @@ namespace RandomBuff.Core.SaveData
             builder.Append($"COLLECT{PlayerDataSubSplit}{JsonConvert.SerializeObject(collectData)}{PlayerDataSplit}");
             builder.Append($"KEYBIND{PlayerDataSubSplit}{JsonConvert.SerializeObject(keyBindData)}{PlayerDataSplit}");
             builder.Append($"EXP{PlayerDataSubSplit}{playerTotExp}{PlayerDataSplit}");
+            builder.Append($"QUEST{PlayerDataSubSplit}{JsonConvert.SerializeObject(finishedQuest)}{PlayerDataSplit}");
 
-            foreach(var item in unrecognizedSaveStrings)
+            foreach (var item in unrecognizedSaveStrings)
                 builder.Append($"{item}{PlayerDataSplit}");
             return builder.ToString();
         }
@@ -128,10 +135,9 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="buffId"></param>
         /// <returns></returns>
-        public bool IsCollected(BuffID buffId)
-        {
-            return collectData.Contains(buffId.value);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        public bool IsCollected(BuffID buffId)=> collectData.Contains(buffId.value);
+        
 
         /// <summary>
         /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()
@@ -171,14 +177,47 @@ namespace RandomBuff.Core.SaveData
                 keyBindData.Add(id, keyBind);
         }
 
+        /// <summary>
+        /// 判断任务是否已经完成
+        /// </summary>
+        /// <param name="questId"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsQuestUnlocked(string questId) { return finishedQuest.Contains(questId); }
+
+
+
+        /// <summary>
+        /// 更新任务状态，并返回新完成的任务list
+        /// </summary>
+        public List<BuffQuest> UpdateQuestState(BuffPoolManager.WinGamePackage package)
+        {
+            List<BuffQuest> list = new ();
+            foreach (var questName in BuffConfigManager.GetQuestNameList())
+            {
+                if(IsQuestUnlocked(questName)) continue;
+                if (BuffConfigManager.GetQuestData(questName).UpdateUnlockedState(package))
+                {
+                    finishedQuest.Add(questName);
+                    list.Add(BuffConfigManager.GetQuestData(questName));
+                }
+
+            }
+
+            return list;
+        }
 
         private List<string> collectData = new();
 
         public float playerTotExp = 0;
 
+        //TODO : 改进等级算法
+        public int PlayerLevel => Mathf.RoundToInt(playerTotExp / 200);
+
         private Dictionary<string, string> keyBindData = new();
 
         private readonly List<string> unrecognizedSaveStrings = new();
+
+        private HashSet<string> finishedQuest = new();
 
         private const string PlayerDataSplit = "<Bpd>";
         private const string PlayerDataSubSplit = "<BpdI>";
