@@ -97,7 +97,7 @@ namespace RandomBuff.Core.SaveData
             if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
                 name = game.StoryCharacter;
             else
-                name = RainWorld.lastActiveSaveSlot;
+                name = Custom.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat;
             return GetOrCreateBuffData(name,id, createOrStack);
         }
 
@@ -122,6 +122,11 @@ namespace RandomBuff.Core.SaveData
                         var data = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
                         data.DataLoaded(true);
                         BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
+                        if (BuffFile.Instance.LoadState == BuffFile.BuffFileLoadState.AfterLoad)
+                        {
+                            BuffPlayerData.Instance.TotCardCount++;
+                            GetGameSetting(name).TotCardInGame++;
+                        }
                         BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
                         allDatas[name].Add(id, data);
 

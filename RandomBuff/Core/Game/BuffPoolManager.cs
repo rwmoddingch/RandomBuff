@@ -86,6 +86,8 @@ namespace RandomBuff.Core.Game
 
         private List<IBuff> buffList = new();
 
+        private int totCardThisCycle;
+
         private BuffPoolManager(RainWorldGame game)
         {
 
@@ -172,6 +174,8 @@ namespace RandomBuff.Core.Game
             {
                 BuffPlugin.Log($"Already contains BuffData {id} in {Game.StoryCharacter} game, stack More");
                 cycleDatas[id].Stack();
+                BuffPlayerData.Instance.TotCardCount++;
+                totCardThisCycle++;
                 return cycleDatas[id];
             }
 
@@ -180,6 +184,8 @@ namespace RandomBuff.Core.Game
                 var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
                 BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                 re.Stack();
+                BuffPlayerData.Instance.TotCardCount++;
+                totCardThisCycle++;
                 cycleDatas.Add(id, re);
                 return re;
             }
@@ -283,6 +289,8 @@ namespace RandomBuff.Core.Game
                 }
             }
             GameSetting.SessionEnd(Game);
+            GameSetting.TotCardInGame += totCardThisCycle;
+
             BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
             BuffFile.Instance.SaveFile();
 

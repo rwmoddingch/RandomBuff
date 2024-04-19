@@ -101,7 +101,7 @@ namespace RandomBuff.Core.StaticsScreen
 
             //winPackage
             var winPackage = BuffPoolManager.Instance.winGamePackage;
-            BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}");
+            BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}, Tot Card In Game : {BuffPoolManager.Instance.GameSetting.TotCardInGame}");
 
             //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
             var newFinishQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);

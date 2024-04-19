@@ -45,6 +45,8 @@ namespace RandomBuff.Core.Game.Settings
 
         public string MissionId { get; set; }
 
+        public int TotCardInGame { get; set; }
+
         public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal")
         {
             LoadTemplate("Normal");
@@ -275,6 +277,9 @@ namespace RandomBuff.Core.Game.Settings
                         case "MISSION":
                             setting.MissionId = subs[1];
                             break;
+                        case "TOTCARDS":
+                            setting.TotCardInGame = int.Parse(subs[1]);
+                            break;
                     }
                 }
 
@@ -326,11 +331,13 @@ namespace RandomBuff.Core.Game.Settings
             StringBuilder builder = new StringBuilder();
             builder.Append($"DIFFICULTY{SubSettingSplit}{Difficulty}{SettingSplit}");
             builder.Append($"TEMPLATE{SubSettingSplit}{gachaTemplate.ID}{SubSettingSplit}{JsonConvert.SerializeObject(gachaTemplate)}{SubSettingSplit}{TemplateName}{SettingSplit}");
+            builder.Append($"TOTCARDS{SubSettingSplit}{TotCardInGame}{SettingSplit}");
+
             foreach (var condition in conditions)
-            {
                 builder.Append($"CONDITION{SubSettingSplit}{condition.ID}{SubSettingSplit}{JsonConvert.SerializeObject(condition)}{SettingSplit}");
-            }
-            if(fallbackPick != null)
+            
+
+            if (fallbackPick != null)
                 builder.Append($"FALLBACK{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}{SettingSplit}");
             if(MissionId != null)
                 builder.Append($"MISSION{SubSettingSplit}{MissionId}");

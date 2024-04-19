@@ -701,22 +701,19 @@ namespace RandomBuff.Core.BuffMenu
                 if (pickedMission == null) return;
              
                 BuffHookWarpper.CheckAndDisableAllHook();
-
+                gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);
                 BuffDataManager.Instance.SetGameSetting(gameMenu.CurrentName, currentGameSetting = pickedMission.GameSetting.Clone());
                 currentGameSetting.MissionId = pickedMission.ID.value;
-         
                 gameMenu.manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
-                        gameMenu.CurrentName;
-                gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);
+                        gameMenu.CurrentName; 
                 gameMenu.manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
-                
+                currentGameSetting.NewGame();
+
                 for (int j = 0; j < pickedMission.startBuffSet.Count; j++)
-                {
                     BuffDataManager.Instance.GetOrCreateBuffData(pickedMission.startBuffSet[j], true);
-                }
+                
                 
                 gameMenu.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
-                currentGameSetting.NewGame();
                 gameMenu.PlaySound(SoundID.MENU_Start_New_Game);
             }
             
