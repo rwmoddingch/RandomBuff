@@ -17,3 +17,16 @@ CardInfoDisplay_TriggerTitle|Trigger:
 CardInfoDisplay_StackTitle|Stack:
 CardInfoDisplay_DescriptionTitle|Description:
 CardInfoDisplay_ConflictTitle|Conflict:
+
+
+//Notification:
+Notificaion_ConfirmButton|Confirm
+Notification_RewardTitle|Awards received:
+Notification_MissionReward|Unlock mission
+Notification_MissionReward_Unique|Unlock unique mission
+
+
+//BuffMenu:
+Survival|SURVIVAL
+Normal|NORMAL
+Quick|QUICK
