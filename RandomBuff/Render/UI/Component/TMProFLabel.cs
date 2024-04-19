@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-namespace RandomBuff.Render.UI
+namespace RandomBuff.Render.UI.Component
 {
     internal class TMProFLabel : FGameObjectNode
     {

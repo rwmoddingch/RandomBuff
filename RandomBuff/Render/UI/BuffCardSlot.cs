@@ -9,6 +9,7 @@ using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -575,6 +576,7 @@ namespace RandomBuff.Render.UI
             TimerAnimSlot.TryAddTimer(buffCard.ID);
         }
 
+        static string path = Application.streamingAssetsPath + Path.DirectorySeparatorChar + "DebugBuffID.txt";
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
@@ -585,13 +587,17 @@ namespace RandomBuff.Render.UI
             TimerAnimSlot.GrafUpdate(timeStacker);
             ConditionHUD.DrawSprites(timeStacker);
 
-            if (Input.GetKeyDown(KeyCode.C))
+            if (Input.GetKeyDown(KeyCode.C) && File.Exists(path))
             {
-                BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
-                AppendCard(new BuffID("DeathFreeMedallion"));
+                //BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
+                //AppendCard(new BuffID("DeathFreeMedallion"));
 
-                //BuffPoolManager.Instance.CreateBuff(new BuffID("EjectionRock"));
-                //AppendCard(new BuffID("EjectionRock"));
+                string[] lines = File.ReadAllLines(path);
+                foreach(var line in lines)
+                {
+                    BuffPoolManager.Instance.CreateBuff(new BuffID(line));
+                    AppendCard(new BuffID(line));
+                }
             }
         }
 

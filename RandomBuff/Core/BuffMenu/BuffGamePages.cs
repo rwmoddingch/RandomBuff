@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 using static MonoMod.InlineRT.MonoModRule;
+using System.ComponentModel;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -268,6 +269,9 @@ namespace RandomBuff.Core.BuffMenu
 
         BuffLevelBarDynamic buffLevelBarDynamic;
 
+        CardTitle cardTitle;
+        Vector2 titlePos;
+
         Vector2 flagHangPos;
         Vector2 flagHidePos;
 
@@ -302,6 +306,7 @@ namespace RandomBuff.Core.BuffMenu
             buffLevelBarDynamic = new BuffLevelBarDynamic(Container, new Vector2(200f, 200f), 300f, 1238, 1000);
             buffLevelBarDynamic.HardSet();
             buffLevelBarDynamic.setAlpha = 1f;
+
             SetupNewGamePageItems();
         }
 
@@ -361,6 +366,12 @@ namespace RandomBuff.Core.BuffMenu
                 page.subObjects.Add(jollyToggleConfigMenu = new SimpleButton(gameMenu, this, gameMenu.Translate("SHOW"), "JOLLY_TOGGLE_CONFIG",
                     new Vector2(1056f, gameMenu.manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
 
+
+            Vector2 screenCenter = menu.manager.rainWorld.options.ScreenSize / 2f;
+            titlePos = new Vector2(screenCenter.x, screenCenter.y + 300f);
+            cardTitle = new CardTitle(Container, BuffCard.normalScale * 0.3f, titlePos + pos);
+            cardTitle.RequestSwitchTitle(BuffResourceString.Get(gameSetting.TemplateName));
+
             Container.MoveToFront();
         }
 
@@ -374,12 +385,14 @@ namespace RandomBuff.Core.BuffMenu
             else
                 QuitToSelectSlug();
             flagRenderer.Show = show;
+            cardTitle.RequestSwitchTitle(show ? BuffResourceString.Get(BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName) : "");
         }
 
         public override void Update()
         {
             base.Update();
             buffLevelBarDynamic.Update();
+            cardTitle.Update();
             if (_showCounter != _targetShowCounter)
             {
                 if (_showCounter < _targetShowCounter)
@@ -388,7 +401,9 @@ namespace RandomBuff.Core.BuffMenu
                     _showCounter--;
 
                 pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
-                //gameMenu.menuSlot.basePos = pos;
+                buffLevelBarDynamic.pos = pos + new Vector2(200f, 200f);
+                cardTitle.pos = pos + titlePos;
+
                 dark.alpha = ShowFactor;
                 flagRenderer.pos = Vector2.Lerp(flagHidePos, flagHangPos, Helper.LerpEase(ShowFactor));
             }
@@ -404,6 +419,7 @@ namespace RandomBuff.Core.BuffMenu
         {
             base.GrafUpdate(timeStacker);
             buffLevelBarDynamic.GrafUpdate(timeStacker);
+            cardTitle.GrafUpdate(timeStacker);
             if (Show || flagRenderer.NeedRenderUpdate)
             {
                 flagRenderer.GrafUpdate(timeStacker);
@@ -422,6 +438,7 @@ namespace RandomBuff.Core.BuffMenu
                 gameSetting.LoadTemplate(list[index == list.Count ? 0 : index]);
 
                 settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
+                cardTitle.RequestSwitchTitle(BuffResourceString.Get(gameSetting.TemplateName));
                 ClearCurrentConditions();
                 InitConditions();
             }

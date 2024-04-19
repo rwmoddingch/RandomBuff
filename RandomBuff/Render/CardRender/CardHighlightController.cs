@@ -53,9 +53,9 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
-        BuffCardRenderer _renderer;
+        BuffCardRendererBase _renderer;
 
-        public void Init(BuffCardRenderer buffCardRenderer, Texture texture)
+        public void Init(BuffCardRendererBase buffCardRenderer, Texture texture)
         {
             _renderer = buffCardRenderer;
             float widthFactor = texture.width / 300f;

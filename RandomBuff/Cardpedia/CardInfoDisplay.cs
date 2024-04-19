@@ -5,6 +5,7 @@ using RandomBuff.Cardpedia.PediaPage;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
