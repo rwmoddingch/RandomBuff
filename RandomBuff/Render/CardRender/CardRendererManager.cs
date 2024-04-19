@@ -18,14 +18,11 @@ namespace RandomBuff.Render.CardRender
 {
     internal static class CardRendererManager
     {
-        public static Font titleFont;
-        public static Font discriptionFont;
-
         static float maxDestroyTime = 60f;
-        static List<BuffCardRenderer> totalRenderers = new List<BuffCardRenderer>();
+        static List<BuffCardRendererBase> totalRenderers = new List<BuffCardRendererBase>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
 
-        static int NextLegalID
+        public static int NextLegalID
         {
             get
             {
@@ -92,12 +89,32 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
-        public static void RecycleCardRenderer(BuffCardRenderer buffCardRenderer)
+        public static SingleTextCardRenderer GetSingleTextRenderer(string text)
         {
-            buffCardRenderer.gameObject.SetActive(false);
-            buffCardRenderer.inactiveTimer = 0f;
-            if(!inactiveCardRenderers.Contains(buffCardRenderer))//不知道为什么，但有时候会出现重复回收的情况
-                inactiveCardRenderers.Add(buffCardRenderer);
+            int id = NextLegalID;
+            var cardObj = new GameObject($"SingleTextCard_{id}");
+            cardObj.transform.position = new Vector3(id * 20, 0, 0);
+            SingleTextCardRenderer _cardRenderer = cardObj.AddComponent<SingleTextCardRenderer>();
+            _cardRenderer.Init(id, null);
+            BuffPlugin.LogDebug($"Get new SingleTextCardRenderer of id {id}");
+            totalRenderers.Add(_cardRenderer);
+
+            return _cardRenderer;
+        }
+
+        public static void RecycleCardRenderer(BuffCardRendererBase buffCardRenderer)
+        {
+            if (buffCardRenderer is BuffCardRenderer cardRenderer)
+            {
+                cardRenderer.gameObject.SetActive(false);
+                cardRenderer.inactiveTimer = 0f;
+                if (!inactiveCardRenderers.Contains(cardRenderer))//不知道为什么，但有时候会出现重复回收的情况
+                    inactiveCardRenderers.Add(cardRenderer);
+            }
+            else
+            {
+                GameObject.Destroy(buffCardRenderer);
+            }
         }
 
         /// <summary>
@@ -180,7 +197,7 @@ namespace RandomBuff.Render.CardRender
         public static Texture FPBack { get; private set; }
 
         /// <summary>
-        /// 
+        /// 中性增益的卡背
         /// </summary>
         public static Texture SlugBack { get; private set; }
 
@@ -189,7 +206,7 @@ namespace RandomBuff.Render.CardRender
         /// <summary>
         /// 卡牌渲染的贴图尺寸
         /// </summary>
-        public static Vector2Int RenderTextureSize = new Vector2Int(600, 1000);
+        public static readonly Vector2Int RenderTextureSize = new Vector2Int(600, 1000);
 
         static Dictionary<string, Shader> LoadedShaders = new Dictionary<string, Shader>();
 

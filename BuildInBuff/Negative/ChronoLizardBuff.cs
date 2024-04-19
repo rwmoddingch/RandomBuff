@@ -11,8 +11,6 @@ using RWCustom;
 
 namespace BuiltinBuffs.Negative
 {
-
-
     internal class ChronoLizardIBuffEntry : IBuffEntry
     {
         public static BuffID ChronoLizardBuffID = new BuffID("ChronoLizard", true);

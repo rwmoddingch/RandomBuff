@@ -84,6 +84,7 @@ namespace RandomBuff
                         File.Delete("randombuff.log");
                      
                     File.Create(AssetManager.ResolveFilePath("buffcore.log")).Close();
+
                 }
 
             }
@@ -130,7 +131,8 @@ namespace RandomBuff
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
                     BuffRegister.InitAllBuffPlugin();
-                   
+
+
                     BuffUtils.OnEnable();
                     if (DevEnabled)
                         On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
