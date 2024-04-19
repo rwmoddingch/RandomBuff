@@ -47,6 +47,9 @@ namespace RandomBuff.Core.SaveData
                     case "QUEST":
                         finishedQuest = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
                         break;
+                    case "TOTCARDS":
+                        TotCardCount = int.Parse(dataSplit[1]);
+                        break;
                     default:
                         unrecognizedSaveStrings.Add(item);
                         break;
@@ -54,7 +57,7 @@ namespace RandomBuff.Core.SaveData
             }
             Instance = this;
 
-            BuffPlugin.Log("Completed loaded player data");
+            BuffPlugin.Log($"Completed loaded player data, TotCardCount : {TotCardCount}");
 
         }
 
@@ -65,6 +68,7 @@ namespace RandomBuff.Core.SaveData
             builder.Append($"KEYBIND{PlayerDataSubSplit}{JsonConvert.SerializeObject(keyBindData)}{PlayerDataSplit}");
             builder.Append($"EXP{PlayerDataSubSplit}{playerTotExp}{PlayerDataSplit}");
             builder.Append($"QUEST{PlayerDataSubSplit}{JsonConvert.SerializeObject(finishedQuest)}{PlayerDataSplit}");
+            builder.Append($"TOTCARDS{PlayerDataSubSplit}{TotCardCount}{PlayerDataSplit}");
 
             foreach (var item in unrecognizedSaveStrings)
                 builder.Append($"{item}{PlayerDataSplit}");
@@ -182,9 +186,13 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="questId"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsQuestUnlocked(string questId) { return finishedQuest.Contains(questId); }
+        public bool IsQuestUnlocked(string questId) => finishedQuest.Contains(questId);
 
-
+        /// <summary>
+        /// 获取所有完成的任务，注意可能会包含卸载的mod内的任务
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetAllCompleteQuests() => finishedQuest.ToList();
 
         /// <summary>
         /// 更新任务状态，并返回新完成的任务list
@@ -205,10 +213,12 @@ namespace RandomBuff.Core.SaveData
 
             return list;
         }
+        public float playerTotExp = 0;
+        public int TotCardCount { get; set; }
 
         private List<string> collectData = new();
 
-        public float playerTotExp = 0;
+  
 
         //TODO : 改进等级算法
         public int PlayerLevel => Mathf.RoundToInt(playerTotExp / 200);
@@ -221,6 +231,7 @@ namespace RandomBuff.Core.SaveData
 
         private const string PlayerDataSplit = "<Bpd>";
         private const string PlayerDataSubSplit = "<BpdI>";
+
 
     }
 }

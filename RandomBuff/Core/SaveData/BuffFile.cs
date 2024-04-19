@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Kittehface.Framework20;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
@@ -128,6 +129,15 @@ namespace RandomBuff.Core.SaveData
     {
         public int UsedSlot { get; private set; } = -1;
 
+        public enum BuffFileLoadState
+        {
+            BeforeLoad,
+            Loading,
+            AfterLoad
+        }
+
+        public BuffFileLoadState LoadState { get; set; } = BuffFileLoadState.BeforeLoad;
+
         private UserData.File buffCoreFile;
 
         private BuffFile()
@@ -240,6 +250,7 @@ namespace RandomBuff.Core.SaveData
         private void UserData_OnFileMounted(UserData.File file, UserData.Result result)
         {
             UserData.OnFileMounted -= UserData_OnFileMounted;
+            LoadState = BuffFileLoadState.Loading;
             if (result.IsSuccess())
             {
                 buffCoreFile = file;
@@ -288,6 +299,7 @@ namespace RandomBuff.Core.SaveData
                 BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get("buff-player"), fileVersion);
 
                 Platform.NotifyUserDataReadCompleted(this);
+                LoadState = BuffFileLoadState.AfterLoad;
             }
             else
             {
@@ -325,7 +337,7 @@ namespace RandomBuff.Core.SaveData
                 buffCoreFile.Set("buff-data", "");
             if (!buffCoreFile.Contains("buff-player") || forceDelete)
                 buffCoreFile.Set("buff-player", "");
-
+            LoadState = BuffFileLoadState.AfterLoad;
         }
     }
 
