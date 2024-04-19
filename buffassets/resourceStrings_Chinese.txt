@@ -6,6 +6,7 @@ CardSheetPage_Stack_Unstackable|不可叠加
 CardSheetPage_Stack_Triggerable|手动
 CardSheetPage_Stack_Untriggerable|自动
 
+
 //CardInfoDisplay:
 CardInfoDisplay_Missing|???
 CardInfoDisplay_MissingDescription|选择一个buff来查看介绍
@@ -16,3 +17,16 @@ CardInfoDisplay_TriggerTitle|触发:
 CardInfoDisplay_StackTitle|堆叠:
 CardInfoDisplay_DescriptionTitle|介绍:
 CardInfoDisplay_ConflictTitle|冲突:
+
+
+//Notification:
+Notificaion_ConfirmButton|确认
+Notification_RewardTitle|已获得奖励:
+Notification_MissionReward|解锁使命
+Notification_MissionReward_Unique|解锁专属使命
+
+
+//BuffMenu:
+Survival|生存模式
+Normal|普通模式
+Quick|快速模式

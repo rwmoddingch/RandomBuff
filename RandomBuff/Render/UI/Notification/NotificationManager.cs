@@ -1,4 +1,5 @@
 ﻿using Menu;
+using RandomBuff.Core.Progression;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,13 @@ namespace RandomBuff.Render.UI.Notification
             base.Update();
             for(int i = banners.Count - 1;i >= 0; i--)
                 banners[i].Update();
+
+            if(Input.GetKey(KeyCode.K) && banners.Count == 0)
+            {
+                NewRewardNotification(QuestUnlockedType.Mission, "DodgeTheRock");
+                NewRewardNotification(QuestUnlockedType.Mission, "MidnightSnack");
+                NewRewardNotification(QuestUnlockedType.Mission, "Druid");
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -51,9 +59,28 @@ namespace RandomBuff.Render.UI.Notification
             menu.currentPage = index;
         }
 
-        public void NewNotification()
+        public void NewNotification(NotificationType notificationType)
         {
+            if (banners.Count > 0)
+                return;
 
+            if(notificationType == NotificationType.Reward)
+            {
+                banners.Add(new RewardBanner(this));
+            }
+            TakeFocus();
+        }
+
+        public void NewRewardNotification(QuestUnlockedType questUnlockedType, string itemName)
+        {
+            NewNotification(NotificationType.Reward);
+            (banners.First() as RewardBanner).AppendReward(questUnlockedType,itemName);
+        }
+
+        public enum NotificationType
+        {
+            Reward,
+            Info
         }
     }
 }

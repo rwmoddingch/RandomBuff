@@ -20,6 +20,8 @@ using Object = UnityEngine.Object;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Render.UI.Notification;
+using RandomBuff.Core.ProgressionUI;
+using RandomBuff.Render.UI.Component;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -86,13 +88,14 @@ namespace RandomBuff.Core.BuffMenu
             }
        
             menuSlot.SetupBuffs(slugNameOrders);
-            testNotification = new NotificationManager(this, container, 3);
+            testNotification = new NotificationManager(this, container, 4);
             pages = new List<Page>()
             {
-                
+
                 new(this, null, "WawaButtonPage", 0),
                 new(this, null, "GameDetailPage", 1),
                 new (this, null, "WawaSlugcatPage", 2),
+                new BuffProgressionPage(this, null, 3),
                 testNotification
             };
            
@@ -149,7 +152,9 @@ namespace RandomBuff.Core.BuffMenu
             page.subObjects.Add(newGameDetailPage = new BuffNewGameDetailPage(this, page, Vector2.zero));
             //--------------测试-----------------
             page.subObjects.Add(modeSelectPage = new ModeSelectPage(this, page, Vector2.zero));
-            page.subObjects.Add(missionPage = new BuffNewGameMissionPage(this, page, Vector2.zero)) ;           
+            page.subObjects.Add(missionPage = new BuffNewGameMissionPage(this, page, Vector2.zero));
+            pages[3].Container.MoveToFront();
+
         }
 
 
@@ -161,6 +166,7 @@ namespace RandomBuff.Core.BuffMenu
         //SimpleButton settingButton;
         //CheckBox restartCheckbox;
         SimpleButton jollyToggleConfigMenu;
+        SimpleButton progressionMenu;
 
         void InitButtonPage(Page page)
         {
@@ -175,6 +181,9 @@ namespace RandomBuff.Core.BuffMenu
             if (ModManager.JollyCoop)
                 page.subObjects.Add(jollyToggleConfigMenu = new SimpleButton(this, page, Translate("SHOW"), "JOLLY_TOGGLE_CONFIG",
                     new Vector2(1056f, manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
+            page.subObjects.Add(progressionMenu = new SimpleButton(this, page, "进度", "PROGRESSIONMENU_SHOW",
+                    new Vector2(1056f, manager.rainWorld.screenSize.y - 100f - 40f), new Vector2(110f, 30f)));
+
 
             page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));
             testLabel.label.alignment = FLabelAlignment.Center;
@@ -364,7 +373,10 @@ namespace RandomBuff.Core.BuffMenu
                 continueDetailPage.SetShow(false);
                 missionPage.SetShow(true);
             }
-
+            else if(message == "PROGRESSIONMENU_SHOW")
+            {
+                (pages[3] as BuffProgressionPage).ShowProgressionPage();
+            }
         }
 
         float testDifficulty;
