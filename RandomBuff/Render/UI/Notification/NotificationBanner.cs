@@ -1,4 +1,7 @@
 ﻿using Menu;
+using Menu.Remix.MixedUI;
+using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.Progression;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -14,7 +17,7 @@ namespace RandomBuff.Render.UI.Notification
         static Vector2 buttonSize = new Vector2(60f, 30f);
 
         protected NotificationManager notificationManager;
-        protected NotificationBannerButton notificationBannerButton;
+        protected List<NotificationBannerButton> buttons = new();
 
         protected FSprite blackBackground;
         protected FSprite blurSprite;
@@ -48,13 +51,14 @@ namespace RandomBuff.Render.UI.Notification
 
             InitSprites();
             SwitchState(State.ExpandBanner);
+            ActuallyAddButtons();
         }
 
         public virtual void InitSprites()
         {
             blackBackground = new FSprite("pixel") { anchorX = 0.5f, anchorY = 0.5f, color = Color.black };
             blurSprite = new FSprite("pixel") { shader = Custom.rainWorld.Shaders["UIBlur"], anchorX = 0.5f, anchorY = 0.5f };
-            titleLabel = new FLabel(Custom.GetDisplayFont(), "已获得奖励:") { shader = Custom.rainWorld.Shaders["MenuTextCustom"], anchorX = 0.5f, anchorY = 1f};
+            titleLabel = new FLabel(Custom.GetDisplayFont(), "") { shader = Custom.rainWorld.Shaders["MenuTextCustom"], anchorX = 0.5f, anchorY = 1f, scale = 1.5f};
             lineUp = new FSprite("pixel") { shader = Custom.rainWorld.Shaders["MenuTextCustom"], anchorX = 0.5f, anchorY = 0.5f };
             lineDown = new FSprite("pixel") { shader = Custom.rainWorld.Shaders["MenuTextCustom"], anchorX = 0.5f, anchorY = 0.5f };
 
@@ -64,7 +68,31 @@ namespace RandomBuff.Render.UI.Notification
             notificationManager.ownerContainer.AddChild(lineUp);
             notificationManager.ownerContainer.AddChild(lineDown);
 
-            notificationManager.subObjects.Add(notificationBannerButton = new NotificationBannerButton(notificationManager.menu, notificationManager, "确认", screenCenter + new Vector2(0f, -bannerScale.y / 2f + 30f) - buttonSize / 2f, buttonSize, Menu.MenuColorEffect.rgbMediumGrey, OnOkButtonClick));
+            AddButton(BuffResourceString.Get("Notificaion_ConfirmButton"), Menu.MenuColorEffect.rgbMediumGrey, OnOkButtonClick);
+            //AddButton("Wawa", Color.green, OnOkButtonClick);
+            //AddButton("Wawa2", Color.red, OnOkButtonClick);
+        }
+
+        List<Action<int, float>> buttonCreators = new(); 
+        public void AddButton(string text, Color color, Action callBack)
+        {
+            buttonCreators.Add((i, mid) =>
+            {
+                var button = new NotificationBannerButton(notificationManager.menu, notificationManager, text, screenCenter + new Vector2(0f, -bannerScale.y / 2f + 30f) - buttonSize / 2f + new Vector2((i - mid) * (buttonSize.x + 10), 0), buttonSize, color, callBack);
+                notificationManager.subObjects.Add(button);
+                buttons.Add(button);
+                BuffPlugin.Log($"Create notification button : {text}-{color}");
+            });
+        }
+
+        public void ActuallyAddButtons()
+        {
+            float mid = (buttonCreators.Count - 1) / 2f;
+            for(int i = 0; i < buttonCreators.Count; i++)
+            {
+                buttonCreators[i].Invoke(i, mid);
+            }
+            buttonCreators.Clear();
         }
 
         public virtual void Update()
@@ -120,7 +148,8 @@ namespace RandomBuff.Render.UI.Notification
                 if (stateCounter == maxStateCounter)
                     Destroy();
             }
-            notificationBannerButton.alpha = contentExpand;
+            foreach(var button in buttons)
+                button.alpha = contentExpand;
         }
 
         public virtual void SwitchState(State newState)
@@ -168,7 +197,7 @@ namespace RandomBuff.Render.UI.Notification
             blackBackground.scaleY = bannerScale.y;
             blackBackground.SetPosition(screenCenter);
 
-            titleLabel.scaleY = smoothContentExpand;
+            titleLabel.scaleY = smoothContentExpand * 1.5f;
             titleLabel.SetPosition(screenCenter + new Vector2(0, bannerScale.y / 2f - 10));
 
             lineUp.scaleX = lineDown.scaleX = bannerScale.x * smoothExpand;
@@ -180,13 +209,17 @@ namespace RandomBuff.Render.UI.Notification
 
         public virtual void Destroy()
         {
+            blackBackground.RemoveFromContainer();
             blurSprite.RemoveFromContainer();
             titleLabel.RemoveFromContainer();
             lineUp.RemoveFromContainer();
             lineDown.RemoveFromContainer();
             notificationManager.banners.Remove(this);
-            notificationManager.RemoveSubObject(notificationBannerButton);
-            notificationBannerButton.RemoveSprites();
+            foreach(var button in buttons)
+            {
+                notificationManager.RemoveSubObject(button);
+                button.RemoveSprites();
+            }
             notificationManager.RecoverFocus();
         }
 
@@ -208,6 +241,8 @@ namespace RandomBuff.Render.UI.Notification
         public RoundedRect selectRect;
         public HSLColor labelColor;
 
+        Color mediumColor;
+
         public float alpha;
         float lastAlpha;
 
@@ -215,13 +250,16 @@ namespace RandomBuff.Render.UI.Notification
             : base(menu, notificationManager, pos, size)
         {
             this.callBack = callBack;
-            labelColor = Menu.Menu.MenuColor(Menu.Menu.MenuColors.MediumGrey);
+            labelColor = new HSLColor(Custom.RGB2HSL(color).x, Custom.RGB2HSL(color).y, Custom.RGB2HSL(color).z);
             roundedRect = new RoundedRect(menu, this, new Vector2(0f, 0f), size, true);
             subObjects.Add(this.roundedRect);
             selectRect = new RoundedRect(menu, this, new Vector2(0f, 0f), size, false);
             subObjects.Add(this.selectRect);
             menuLabel = new MenuLabel(menu, this, displayText, new Vector2(0f, 0f), size, false, null);
             subObjects.Add(this.menuLabel);
+
+            rectColor = labelColor;
+            mediumColor = color;
         }
 
         public void SetSize(Vector2 newSize)
@@ -271,6 +309,178 @@ namespace RandomBuff.Render.UI.Notification
         public override void Clicked()
         {
             callBack?.Invoke();
+        }
+    }
+
+    internal class RewardBanner : NotificationBanner
+    {
+        public float rewardInstanceHeight;
+        List<RewardInstance> rewardInstances = new();
+        List<FSprite> splitLines = new();
+        List<Vector2> linePoses = new();
+
+        public RewardBanner(NotificationManager notificationManager) : base(notificationManager)
+        {
+            rewardInstanceHeight = bannerScale.y / 2f;
+        }
+
+        public void AppendReward(QuestUnlockedType questUnlockedType, string itemName)
+        {
+            if(questUnlockedType == QuestUnlockedType.Mission)
+            {
+                MissionID id = new MissionID(itemName);
+                var newInstance = new MissionReward(id, this);
+                newInstance.InitSprites();
+                rewardInstances.Add(newInstance);
+
+                if(rewardInstances.Count > 1)
+                {
+                    splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
+                    notificationManager.Container.AddChild(splitLines.Last());
+                    linePoses.Add(Vector2.zero);
+                }
+            }
+            RecaculateInstancePos();
+
+            void RecaculateInstancePos()
+            {
+                float totalWidth = rewardInstances.Sum((instance) => instance.width);
+                float mid = totalWidth / 2f;
+                for(int i = 0;i < rewardInstances.Count;i++)
+                {
+                    float deltaX = -mid;
+                    deltaX += rewardInstances[i].width / 2f;
+                    for(int k = 0;k < i; k++)
+                        deltaX += rewardInstances[k].width;
+
+                    rewardInstances[i].pos = new Vector2(deltaX + screenCenter.x, screenCenter.y);
+
+                    if(i < rewardInstances.Count - 1 && splitLines.Count > 0)
+                    {
+                        linePoses[i] = new Vector2(deltaX + rewardInstances[i].width / 2f +screenCenter.x, screenCenter.y);
+                    }
+                }
+            }
+        }
+
+        public override void InitSprites()
+        {
+            base.InitSprites();
+            titleLabel.text = BuffResourceString.Get("Notification_RewardTitle");
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            foreach(var instance in rewardInstances) 
+                instance.Update();
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+            foreach (var instance in rewardInstances)
+                instance.GrafUpdate(timeStacker);
+
+            float smoothExpand = Mathf.Lerp(lastExpand, expand, timeStacker);
+            for (int i = 0;i < splitLines.Count; i++)
+            {
+                splitLines[i].scaleY = Mathf.Lerp(0f, rewardInstanceHeight, smoothExpand);
+                splitLines[i].SetPosition(linePoses[i]);
+            }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            foreach (var instance in rewardInstances)
+                instance.Destroy();
+            rewardInstances.Clear();
+
+            foreach(var sprite in splitLines)
+                sprite.RemoveFromContainer();
+            splitLines.Clear();
+        }
+
+
+        public abstract class RewardInstance
+        {
+            public RewardBanner banner;
+            
+            public float width = 250;
+            public Vector2 pos;
+
+            public FLabel title;
+
+            public RewardInstance(RewardBanner banner)
+            {
+                this.banner = banner;
+            }
+
+            public virtual void InitSprites()
+            {
+                title = new FLabel(Custom.GetDisplayFont(), "") { anchorX = 0.5f, anchorY = 1f};
+                banner.notificationManager.Container.AddChild(title);
+                
+            }
+
+            public virtual void Update()
+            {
+            }
+
+            public virtual void GrafUpdate(float timeStacker)
+            {
+                float smoothContentExpand = Mathf.Lerp(banner.lastContentExpand, banner.contentExpand, timeStacker);
+                title.alpha = smoothContentExpand;
+
+                title.SetPosition(new Vector2(pos.x, pos.y + banner.rewardInstanceHeight / 2f));
+            }
+
+            public virtual void Destroy()
+            {
+                title.RemoveFromContainer();
+            }
+        }
+
+        public class MissionReward : RewardInstance
+        {
+            bool unique;
+            string missionName;
+
+            FLabel missionLabel;
+
+            public MissionReward(MissionID missionID, RewardBanner banner) : base(banner)
+            {
+                MissionRegister.TryGetMission(missionID, out var mission);
+                missionName = mission.MissionName;
+                unique = mission.BindSlug != null;
+                width = LabelTest.GetWidth(missionName, true) + 20f;
+
+            }
+
+            public override void InitSprites()
+            {
+                base.InitSprites();
+                title.text = unique ? BuffResourceString.Get("Notification_MissionReward_Unique")  : BuffResourceString.Get("Notification_MissionReward");
+
+                missionLabel = new FLabel(Custom.GetDisplayFont(), missionName) { anchorX = 0.5f, anchorY = 0.5f };
+                banner.notificationManager.Container.AddChild(missionLabel);
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float smoothContentExpand = Mathf.Lerp(banner.lastContentExpand, banner.contentExpand, timeStacker);
+                missionLabel.alpha = smoothContentExpand;
+
+                missionLabel.SetPosition(new Vector2(pos.x, pos.y));
+            }
+
+            public override void Destroy()
+            {
+                base.Destroy();
+                missionLabel.RemoveFromContainer();
+            }
         }
     }
 }
