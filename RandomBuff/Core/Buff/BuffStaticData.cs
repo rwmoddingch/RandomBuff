@@ -13,6 +13,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Kittehface.Framework20;
 using RandomBuff.Core.Entry;
 using RandomBuff.Render.CardRender;
+using RandomBuff.Render.UI.Component;
 
 namespace RandomBuff.Core.Buff
 {
@@ -266,6 +267,7 @@ namespace RandomBuff.Core.Buff
                 else
                     BuffPlugin.LogError($"Load json file failed! at {jsonFile.Name}");
                 BuffPlugin.LogException(e);
+                ExceptionTracker.TrackException(e, loadState == "" ? $"Load json file failed! at {jsonFile.Name}" : $"Load property failed: {loadState}! at {jsonFile.Name}");
 
                 newData = null;
                 return false;

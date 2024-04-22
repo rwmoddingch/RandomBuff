@@ -113,7 +113,8 @@ namespace RandomBuff.Render.CardRender
             }
             else
             {
-                GameObject.Destroy(buffCardRenderer);
+                totalRenderers.Remove(buffCardRenderer);
+                GameObject.Destroy(buffCardRenderer.gameObject);
             }
         }
 

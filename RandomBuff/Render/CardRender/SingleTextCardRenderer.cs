@@ -1,4 +1,5 @@
 ﻿using RandomBuff.Core.Buff;
+using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -42,18 +43,26 @@ namespace RandomBuff.Render.CardRender
             {
                 BuffPlugin.LogError($"Exception in SingleTextCardRenderer init : {_buffStaticData.BuffID}");
                 BuffPlugin.LogException(e);
+                ExceptionTracker.TrackException(e, $"Exception in SingleTextCardRenderer init : {_buffStaticData.BuffID}");
             }
         }
 
         protected override void FirstInit(int id, BuffStaticData buffStaticData)
         {
             base.FirstInit(id, buffStaticData);
+
+            _cardQuadFront.GetComponent<MeshRenderer>().enabled = false;
+            _cardQuadBack.GetComponent<MeshRenderer>().enabled = false;
+
+            cardHighlightFrontController.enabled = false;
+            cardHighlightBackController.enabled = false;
+
             textController = gameObject.AddComponent<SingleTextController>();
         }
 
         protected override void DuplicateInit(int id, BuffStaticData buffStaticData)
         {
-            base.DuplicateInit(id, buffStaticData);
+            //base.DuplicateInit(id, buffStaticData);
             textController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, Color.white, "W", Custom.rainWorld.inGameTranslator.currentLanguage);
         }
     }

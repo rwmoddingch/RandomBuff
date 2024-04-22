@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RandomBuff.Render.UI.Component;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,6 +36,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             {
                 BuffPlugin.LogError($"Load template json file failed! at {fileName}-{loadState}");
                 BuffPlugin.LogException(e);
+                ExceptionTracker.TrackException(e, $"Load template json file failed! at {fileName}-{loadState}");
                 return false;
             }
         }

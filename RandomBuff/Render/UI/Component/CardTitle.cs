@@ -1,4 +1,5 @@
 ﻿using RandomBuff.Render.CardRender;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,17 +19,19 @@ namespace RandomBuff.Render.UI.Component
         public Vector2 lastPos;
         public Vector2 pos;
 
+        public float spanShrink;
         bool readyForSwitch;
         int handlerCount;
         protected List<SingleCardHandler> currentActiveHandlers = new List<SingleCardHandler>();
 
         List<string> switchTitleRequest = new List<string>();
 
-        public CardTitle(FContainer container, float scale, Vector2 pos)
+        public CardTitle(FContainer container, float scale, Vector2 pos, float spanShrink = 1f)
         {
             this.scale = scale;
             lastPos = this.pos = pos;
             this.container = container;
+            this.spanShrink = spanShrink;
         }
 
         public void Update()
@@ -38,7 +41,8 @@ namespace RandomBuff.Render.UI.Component
             for (int i = currentActiveHandlers.Count - 1; i >= 0; i--)
             {
                 currentActiveHandlers[i].Update();
-                readyForSwitch &= currentActiveHandlers[i].ReadyForSwitch;
+                if(i < currentActiveHandlers.Count)
+                    readyForSwitch &= currentActiveHandlers[i].ReadyForSwitch;
             }
 
             if(switchTitleRequest.Count != 0)
@@ -95,8 +99,9 @@ namespace RandomBuff.Render.UI.Component
                 card = new SingleTextCard(text);
                 card.Scale = title.scale;
                 title.container.AddChild(card.Container);
+                card.CardTexture.shader = Custom.rainWorld.Shaders["MenuText"];
                 delay = index * -5;
-                deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f);
+                deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f);
 
                 SwitchMode(Mode.FlipIn);
             }

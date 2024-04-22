@@ -20,7 +20,7 @@ namespace RandomBuff.Core.StaticsScreen
 {
     internal class BuffGameScoreCaculator : PositionedMenuObject
     {
-        public static float width = 300f;
+        public float width = 300f;
         public static int maxShowInstance = 5;
 
         public BuffPoolManager.WinGamePackage winPackage;
@@ -40,8 +40,9 @@ namespace RandomBuff.Core.StaticsScreen
         List<KeyValuePair<CreatureTemplate.Type, int[]>> killsAndCounts = new();
         int[] defaultScores;
 
-        public BuffGameScoreCaculator(Menu.Menu menu, MenuObject owner, Vector2 pos, BuffPoolManager.WinGamePackage winGamePackage) : base(menu, owner, pos)
+        public BuffGameScoreCaculator(Menu.Menu menu, MenuObject owner, Vector2 pos, BuffPoolManager.WinGamePackage winGamePackage, float width = 300f) : base(menu, owner, pos)
         {
+            this.width = width;
             myContainer = new FContainer();
             menu.container.AddChild(myContainer);
             this.winPackage = winGamePackage;
@@ -321,7 +322,7 @@ namespace RandomBuff.Core.StaticsScreen
             public virtual void GrafUpdate(float timeStacker)
             {
                 scoreLabel.alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
-                scoreLabel.SetPosition(Vector2.Lerp(lastPos, pos, timeStacker) + Vector2.right * BuffGameScoreCaculator.width);
+                scoreLabel.SetPosition(Vector2.Lerp(lastPos, pos, timeStacker) + Vector2.right * caculator.width);
             }
 
             public virtual void ClearSprites()
@@ -339,7 +340,7 @@ namespace RandomBuff.Core.StaticsScreen
                     heightBias += caculator.activeInstances[i].height;
                 }
                 instanceShowPos = new Vector2(caculator.pos.x, caculator.pos.y + heightBias);
-                instanceHidePos = instanceShowPos + Vector2.right * BuffGameScoreCaculator.width;
+                instanceHidePos = instanceShowPos + Vector2.right * caculator.width;
             }
 
             public enum ScoreInstanceState
@@ -455,12 +456,12 @@ namespace RandomBuff.Core.StaticsScreen
                 { 
                     anchorX = 0f, 
                     anchorY = 1f,
-                    scaleX = BuffGameScoreCaculator.width,
+                    scaleX = caculator.width,
                     scaleY = 2f,
                     alpha = alpha,
                 };
                 lineSprite.SetPosition(caculator.pos);
-                scoreDisplay.pos = scoreDisplay.lastPos = caculator.pos + new Vector2(BuffGameScoreCaculator.width, -40f);
+                scoreDisplay.pos = scoreDisplay.lastPos = caculator.pos + new Vector2(caculator.width, -40f);
                 scoreDisplay.scale = 1f;
 
                 caculator.Container.AddChild(lineSprite);
@@ -476,7 +477,7 @@ namespace RandomBuff.Core.StaticsScreen
                     alpha = Mathf.Lerp(alpha, 1f, 0.15f);
                     scoreDisplay.alpha = alpha;
                     score = 0;
-                    scoreDisplay.pos = caculator.pos + new Vector2(BuffGameScoreCaculator.width - 5f, -40f);
+                    scoreDisplay.pos = caculator.pos + new Vector2(caculator.width - 5f, -40f);
 
                     if (Mathf.Approximately(alpha, 1f))
                     {

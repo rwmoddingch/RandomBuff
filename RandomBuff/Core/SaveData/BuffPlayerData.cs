@@ -142,7 +142,6 @@ namespace RandomBuff.Core.SaveData
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public bool IsCollected(BuffID buffId)=> collectData.Contains(buffId.value);
         
-
         /// <summary>
         /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()
         /// </summary>

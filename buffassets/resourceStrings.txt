@@ -30,3 +30,8 @@ Notification_MissionReward_Unique|Unlock unique mission
 Survival|SURVIVAL
 Normal|NORMAL
 Quick|QUICK
+
+
+//BuffConditionHUD
+BuffConditionHUD_WinInfo|sleep to finish game
+BuffConditionHUD_WinTitle|WIN

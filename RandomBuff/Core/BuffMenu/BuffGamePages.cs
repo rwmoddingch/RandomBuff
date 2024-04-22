@@ -4,7 +4,6 @@ using Menu.Remix;
 using Menu.Remix.MixedUI;
 using RandomBuff.Cardpedia.InfoPageRender;
 using RandomBuff.Core.Buff;
-using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
@@ -121,6 +120,7 @@ namespace RandomBuff.Core.BuffMenu
             myContainer = new FContainer();
 
             owner.Container.AddChild(myContainer);
+            lastPos = pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
             //Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
             SetupContinueGamePageItems();
         }
@@ -293,6 +293,7 @@ namespace RandomBuff.Core.BuffMenu
             gameMenu = menu as BuffGameMenu;
             myContainer = new FContainer();
             owner.Container.AddChild(myContainer);
+            lastPos = pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
 
             Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
 
@@ -884,6 +885,7 @@ namespace RandomBuff.Core.BuffMenu
                     }
                     catch (Exception e)
                     {
+                        ExceptionTracker.TrackException(e, "Exception in BUffGamePages.InitMissionButtons");
                         BuffPlugin.LogException(e);
                         BuffPlugin.LogError("Failed in creating mission button: " + key.value);
                     }

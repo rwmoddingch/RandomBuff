@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using RWCustom;
 using UnityEngine;
 using System.Linq;
+using RandomBuff.Render.UI.Component;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -114,6 +115,7 @@ namespace RandomBuff.Render.CardRender
             {
                 BuffPlugin.LogError($"Exception in BuffCardRendererBase init : {_buffStaticData.BuffID}");
                 BuffPlugin.LogException(e);
+                ExceptionTracker.TrackException(e, $"Exception in BuffCardRendererBase init : {_buffStaticData.BuffID}");
             }
         }
 

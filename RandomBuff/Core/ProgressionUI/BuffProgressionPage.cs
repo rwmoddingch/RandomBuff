@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Menu;
+using Menu.Remix;
+using Menu.Remix.MixedUI;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Render.UI;
@@ -15,6 +17,9 @@ namespace RandomBuff.Core.ProgressionUI
     internal class BuffProgressionPage : Page
     {
         public static float levelBarWidth = 800f;
+        public static Vector2 recordScrollBoxSize = new Vector2(levelBarWidth, 400f);
+        public static int pageCount = 2;
+        public static float pageSpan = 1400f;
 
         //页面元素
         FSprite blackSprite;
@@ -24,6 +29,14 @@ namespace RandomBuff.Core.ProgressionUI
         CardTitle recordTitle;
 
         SimpleButton backButton;
+        BigArrowButton prevRecordPageButton;
+        BigArrowButton nextRecordPageButton;
+
+        MenuTabWrapper tabWrapper;
+
+        string[] pageNames;
+        OpScrollBox[] pages;
+        Vector2[] pagePosesDelta;
 
         //状态变量
         int lastMenuPageIndex;
@@ -33,6 +46,11 @@ namespace RandomBuff.Core.ProgressionUI
 
         int _showCounter = -1;
         int _targetShowCounter;
+
+        float smoothPage;
+        int setPage;
+        float lastSmoothPage;
+
         bool Show
         {
             get => _targetShowCounter == BuffGameMenuStatics.MaxShowSwitchCounter;
@@ -45,6 +63,7 @@ namespace RandomBuff.Core.ProgressionUI
             screenSize = menu.manager.rainWorld.options.ScreenSize;
             myContainer = new FContainer();
             menu.container.AddChild(myContainer);
+            lastPos = pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
             InitPage();
         }
 
@@ -58,19 +77,42 @@ namespace RandomBuff.Core.ProgressionUI
             levelBar.setAlpha = 1f;
             levelBar.HardSet();
 
-            //
-            subObjects.Add(backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "PROGRESSIONPAGE_BACK", new Vector2(200f, 698f), new Vector2(110f, 30f)));
-
             recordTitlePos = new Vector2(screenSize.x / 2f, levelBarPos.y - 100f);
             recordTitle = new CardTitle(Container, BuffCard.normalScale * 0.3f, recordTitlePos);
+
+            //初始化按钮
+            subObjects.Add(backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "PROGRESSIONPAGE_BACK", new Vector2(200f, 698f), new Vector2(110f, 30f)));
+
+            subObjects.Add(tabWrapper = new MenuTabWrapper(menu, this));
+            subObjects.Add(prevRecordPageButton = new BigArrowButton(menu, this, "PROGRESSIONPAGE_PREV_RECORD", recordTitlePos + new Vector2(-recordScrollBoxSize.x / 2f, -20f),3));
+            subObjects.Add(nextRecordPageButton = new BigArrowButton(menu, this, "PROGRESSIONPAGE_NEXT_RECORD", recordTitlePos + new Vector2(recordScrollBoxSize.x / 2f - 50f, -20f), 1));
+
+
+            pages = new OpScrollBox[pageCount];
+            pageNames = new string[pageCount];
+            pagePosesDelta = new Vector2[pageCount];
+
+            var testPage = CreatePage("RECORD", 0);
+            var testPage2 = CreatePage("QUEST", 1);
+        }
+
+        OpScrollBox CreatePage(string pageName, int index)
+        {
+            pageNames[index] = pageName;
+            pagePosesDelta[index] = new Vector2(0, -recordScrollBoxSize.y - 140f - 40f);
+            var opScrollBox = new OpScrollBox(levelBarPos + pagePosesDelta[index], recordScrollBoxSize, 400f);
+            new UIelementWrapper(tabWrapper, opScrollBox);
+            pages[index] = opScrollBox;
+
+            return opScrollBox;
         }
 
         public void ShowProgressionPage()
         {
             lastMenuPageIndex = menu.currentPage;
             menu.currentPage = index;
-            Show = true;
-            recordTitle.RequestSwitchTitle("Record", true);
+            Show = true; 
+            recordTitle.RequestSwitchTitle(pageNames[setPage], true);
         }
 
         public void HideProgressionPage()
@@ -101,6 +143,20 @@ namespace RandomBuff.Core.ProgressionUI
                 blackSprite.alpha = ShowFactor * 0.8f;
                 blurSprite.alpha = ShowFactor;
             }
+
+            lastSmoothPage = smoothPage;
+            if(smoothPage != setPage)
+            {
+                smoothPage = Mathf.Lerp(smoothPage, setPage, 0.15f);
+                if(Mathf.Approximately(smoothPage, setPage))
+                    smoothPage = setPage;
+
+                for(int i = 0;i < pageCount; i++)
+                {
+                    float delta = i - smoothPage;
+                    pages[i].pos = pos + levelBarPos + pagePosesDelta[i] + new Vector2(pageSpan * delta, 0f);
+                }
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -116,6 +172,16 @@ namespace RandomBuff.Core.ProgressionUI
             if(message == "PROGRESSIONPAGE_BACK")
             {
                 HideProgressionPage();
+            }
+            else if(message == "PROGRESSIONPAGE_PREV_RECORD")
+            {
+                setPage = Mathf.Clamp(setPage - 1, 0, pageCount - 1);
+                recordTitle.RequestSwitchTitle(pageNames[setPage]);
+            }
+            else if (message == "PROGRESSIONPAGE_NEXT_RECORD")
+            {
+                setPage = Mathf.Clamp(setPage + 1, 0, pageCount - 1);
+                recordTitle.RequestSwitchTitle(pageNames[setPage]);
             }
         }
     }

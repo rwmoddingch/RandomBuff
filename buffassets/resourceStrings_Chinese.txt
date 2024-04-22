@@ -30,3 +30,8 @@ Notification_MissionReward_Unique|解锁专属使命
 Survival|生存模式
 Normal|普通模式
 Quick|快速模式
+
+
+//BuffConditionHUD
+BuffConditionHUD_WinInfo|雨眠以进行结算
+BuffConditionHUD_WinTitle|胜利
