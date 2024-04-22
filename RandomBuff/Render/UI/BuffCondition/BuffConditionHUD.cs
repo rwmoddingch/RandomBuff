@@ -1,6 +1,7 @@
 ﻿using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Render.UI.Component;
 using RandomBuff.Render.UI.Notification;
 using RWCustom;
 using System;
@@ -15,11 +16,14 @@ namespace RandomBuff.Render.UI.BuffCondition
     internal class BuffConditionHUD
     {
         public FContainer Container { get; } = new();
-        List<ConditionInstance> instances = new();
+        internal List<ConditionInstance> instances = new();
+        FlagBanner flagBanner;
 
         public Vector2 TopLeft => new Vector2(0, Custom.rainWorld.screenSize.y);
         public Mode currentMode = Mode.Refresh;
 
+        public bool flagMode;
+        Mode origMode = Mode.Refresh;
         
         public BuffConditionHUD()
         {
@@ -29,6 +33,8 @@ namespace RandomBuff.Render.UI.BuffCondition
                 condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh);
                 instances.Add(new ConditionInstance(this, condition, instances.Count));
             }
+            flagBanner = new FlagBanner(this);
+            UpdateFlagMode();
         }
 
         public void OnCompleted(Condition condition)
@@ -37,13 +43,16 @@ namespace RandomBuff.Render.UI.BuffCondition
             {
                 conditionalInstance.Complete(condition);
             }
+            UpdateFlagMode();
         }
+
         public void OnUncompleted(Condition condition)
         {
             foreach(var conditionalInstance in instances)
             {
                 conditionalInstance.Uncomplete(condition);
             }
+            UpdateFlagMode();
         }
 
         public void OnLabelRefresh(Condition condition)
@@ -54,41 +63,71 @@ namespace RandomBuff.Render.UI.BuffCondition
             }
         }
 
+        void UpdateFlagMode()
+        {
+            var gameSetting = BuffPoolManager.Instance.GameSetting;
+            bool allFinished = true;
+            foreach (var condition in gameSetting.conditions)
+            {
+                allFinished &= condition.Finished;
+            }
+
+            if(flagMode != allFinished)
+            {
+                flagMode = allFinished;
+                if (flagMode)
+                    ChangeMode(Mode.Refresh);
+                else
+                    ChangeMode(origMode);
+            }
+        }
+
         public void Update()
         {
             for(int i = instances.Count - 1; i >= 0; i--)
                 instances[i].Update();
+            flagBanner.Update();
         }
 
         public void DrawSprites(float timeStacker)
         {
             for (int i = instances.Count - 1; i >= 0; i--)
                 instances[i].DrawSprites(timeStacker);
+            flagBanner.DrawSprites(timeStacker);
         }
 
         public void Destroy()
         {
             for (int i = instances.Count - 1; i >= 0; i--)
                 instances[i].Destroy();
+            flagBanner.Destroy();
         }
 
         public void ChangeMode(Mode newMode)
         {
-            if (newMode == currentMode)
-                return;
-
-            if (currentMode == Mode.Refresh && newMode == Mode.Alway)
+            if (flagMode)
             {
-                foreach (var instance in instances)
-                {
-                    instance.SetShow();
-                }
+                origMode = newMode;
+                currentMode = Mode.Refresh;
             }
+            else
+            {
+                if (newMode == currentMode)
+                    return;
 
-            currentMode = newMode;
+                if (currentMode == Mode.Refresh && newMode == Mode.Alway)
+                {
+                    foreach (var instance in instances)
+                    {
+                        instance.SetShow();
+                    }
+                }
+
+                currentMode = newMode;
+            }
         }
 
-        class ConditionInstance
+        internal class ConditionInstance
         {
             static int MaxShowAnimTimer = 40;
             static int MaxStayDisplayTimer = 120;
@@ -368,6 +407,117 @@ namespace RandomBuff.Render.UI.BuffCondition
             public void Destroy()
             {
                 textLabel.RemoveFromContainer();
+            }
+        }
+
+        class FlagBanner
+        {
+            static int showCounter = 80;
+            static Vector2 flagRect = new Vector2(300f, 100f);
+
+            BuffConditionHUD hud;
+
+            RandomBuffFlag flag;
+            RandomBuffFlagRenderer renderer;
+
+            FLabel flagInfo;
+            CardTitle cardTitle;
+
+            int lastCounter;
+            int counter;
+            float ShowFactor => counter / (float)showCounter;
+            float LastShowFactor => lastCounter / (float)showCounter;
+
+            float textAlpha;
+            float lastTextAlpha;
+            float setTextAlpha;
+
+            Vector2 flagHangPos;
+
+            public FlagBanner(BuffConditionHUD hud)
+            {
+                this.hud = hud;
+
+                Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
+                Vector2 middleScreen = screenSize / 2f;
+                flagHangPos = new Vector2(middleScreen.x , screenSize.y) - new Vector2(flagRect.x / 2, 0);
+
+                flag = new RandomBuffFlag(new IntVector2(40, 20), flagRect);
+                renderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.OuterTriangle, RandomBuffFlagRenderer.FlagColorType.Golden) { pos = flagHangPos, customAlpha = true, alpha = 0f, lastAlpha = 0f};
+
+                hud.Container.AddChild(renderer.container);
+                flagInfo = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffConditionHUD_WinInfo")) { anchorX = 0.5f, anchorY = 1f, alpha = 0f };
+                hud.Container.AddChild(flagInfo);
+                cardTitle = new CardTitle(hud.Container, BuffCard.normalScale * 0.25f, flagHangPos + new Vector2(flagRect.x / 2f, -40f));
+            }
+
+            public void Update()
+            {
+                if(counter > 0)
+                {
+                    flag.Update();
+                    renderer.Update();
+                    cardTitle.Update();
+                }
+
+                bool lateFlagMode = hud.flagMode;
+                foreach(var conditionInstanec in hud.instances)
+                {
+                    lateFlagMode &= !conditionInstanec.show;
+                }
+
+                renderer.Show = lateFlagMode;
+                lastCounter = counter;
+                if (lateFlagMode && counter < showCounter)
+                {
+                    counter++;
+                    if (counter == showCounter)
+                    {
+                        cardTitle.RequestSwitchTitle(BuffResourceString.Get("BuffConditionHUD_WinTitle"));
+                        setTextAlpha = 1f;
+                    }
+                }
+                else if (!lateFlagMode && counter > 0)
+                {
+                    if(setTextAlpha != 0)
+                    {
+                        setTextAlpha = 0f;
+                        cardTitle.RequestSwitchTitle("");
+                    }
+                    counter--;
+                }
+
+                lastTextAlpha = textAlpha;
+                if(textAlpha != setTextAlpha)
+                {
+                    textAlpha = Mathf.Lerp(textAlpha, setTextAlpha, 0.15f);
+                    if(Mathf.Approximately(textAlpha, setTextAlpha))
+                        textAlpha = setTextAlpha;
+                }
+            }
+
+            public void DrawSprites(float timeStacker)
+            {
+                if(counter > 0 && (lastCounter > 0|| hud.flagMode))
+                {
+                    renderer.GrafUpdate(timeStacker);
+                    cardTitle.GrafUpdate(timeStacker);
+
+                    float smoothT = Mathf.Lerp(LastShowFactor, ShowFactor, timeStacker);
+
+                    Vector2 smoothHangPos = Vector2.Lerp(flagHangPos + Vector2.up * 300f, flagHangPos, Helper.LerpEase(smoothT));
+                    renderer.pos = smoothHangPos;
+                    renderer.alpha = ShowFactor;
+                    renderer.lastAlpha = LastShowFactor;
+
+                    flagInfo.SetPosition(smoothHangPos + new Vector2(flagRect.x / 2f, -60f));
+                    flagInfo.alpha = Mathf.Lerp(lastTextAlpha, textAlpha, timeStacker);
+                }
+            }
+
+            public void Destroy()
+            {
+                renderer.container.RemoveFromContainer();
             }
         }
 

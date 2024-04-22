@@ -6,6 +6,7 @@ using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI.Component;
 using UnityEngine;
 
 namespace RandomBuff.Core.Game
@@ -232,6 +233,7 @@ namespace RandomBuff.Core.Game
                 {
                     BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Exception happened when invoke gain Update of {buff.ID}");
+                    ExceptionTracker.TrackException(e, $"Exception happened when invoke gain Update of {buff.ID}");
                 }
             }
             GameSetting.InGameUpdate(game);
@@ -257,6 +259,7 @@ namespace RandomBuff.Core.Game
                 {
                     BuffPlugin.LogException(e);
                     BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
+                    ExceptionTracker.TrackException(e, $"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
             Instance = null;
@@ -285,7 +288,8 @@ namespace RandomBuff.Core.Game
                 catch (Exception e)
                 {
                     BuffPlugin.LogException(e);
-                    BuffPlugin.LogError($"Exception happened when invoke gain Destroy of {buff.ID}");
+                    BuffPlugin.LogError($"Exception happened when invoke buff Destroy of {buff.ID}");
+                    ExceptionTracker.TrackException(e, $"Exception happened when invoke buff Destroy of {buff.ID}");
                 }
             }
             GameSetting.SessionEnd(Game);

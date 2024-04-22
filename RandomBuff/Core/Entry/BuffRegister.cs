@@ -21,6 +21,7 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
+using RandomBuff.Render.UI.Component;
 using RandomBuffUtils;
 using UnityEngine;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -361,6 +362,7 @@ namespace RandomBuff.Core.Entry
                             {
                                 BuffPlugin.LogException(e);
                                 BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
+                                ExceptionTracker.TrackException(e, $"Invoke {type.Name}.OnEnable Failed!");
                             }
                         }
                     }

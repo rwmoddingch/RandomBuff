@@ -28,6 +28,7 @@ using UDebug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
+using RandomBuff.Render.UI.Component;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -71,6 +72,7 @@ namespace RandomBuff
         private void Update()
         {
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
+            ExceptionTracker.Singleton?.Update();
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
@@ -144,6 +146,8 @@ namespace RandomBuff
 
                     CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
+
+                    StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());
                 }
             }
             catch (Exception e)
@@ -278,7 +282,6 @@ namespace RandomBuff
             UnityEngine.Debug.LogException(e);
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Fatal]\t\t{e.Message}\n{e.StackTrace}\n");
-          
         }
 
         internal static void LogException(Exception e,object m)

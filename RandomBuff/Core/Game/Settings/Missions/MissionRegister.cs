@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI.Component;
 
 namespace RandomBuff.Core.Game.Settings.Missions
 {
@@ -60,6 +61,7 @@ namespace RandomBuff.Core.Game.Settings.Missions
                     {
                         BuffPlugin.LogException(ex);
                         BuffPlugin.LogError("Failed in registering mission: " + type.Name);
+                        ExceptionTracker.TrackException(ex, "Failed in registering mission: " + type.Name);
                     }
                     
                 }

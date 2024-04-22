@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using static RandomBuff.Core.BuffMenu.Test.TestFlagRenderer;
 
-namespace RandomBuff.Core.BuffMenu.Test
+namespace RandomBuff.Render.UI.Component
 {
     public class RandomBuffFlag
     {
@@ -548,8 +547,9 @@ namespace RandomBuff.Core.BuffMenu.Test
 
         public Vector3 lightDir;
 
-        float lastAlpha;
-        float alpha;
+        public bool customAlpha;
+        public float lastAlpha;
+        public float alpha;
         float setAlpha;
         public bool Show { get => setAlpha == 1f; set => setAlpha = value ? 1f : 0f; }
         public bool NeedRenderUpdate => setAlpha != alpha;
@@ -604,7 +604,7 @@ namespace RandomBuff.Core.BuffMenu.Test
             base.Update();
 
             lastAlpha = alpha;
-            if(alpha != setAlpha)
+            if(alpha != setAlpha && !customAlpha)
             {
                 alpha = Mathf.Lerp(alpha, setAlpha, 0.15f);
                 if(Mathf.Approximately(alpha, setAlpha))

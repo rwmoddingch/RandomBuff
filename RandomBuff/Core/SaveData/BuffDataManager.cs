@@ -12,6 +12,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using UnityEngine;
+using RandomBuff.Render.UI.Component;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -304,6 +305,7 @@ namespace RandomBuff.Core.SaveData
                     {
                         BuffPlugin.LogException(e);
                         BuffPlugin.LogError($"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
+                        ExceptionTracker.TrackException(e, $"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
                         continue;
                     }
                     builder.Append(buffData.Key);
@@ -495,6 +497,7 @@ namespace RandomBuff.Core.SaveData
                     {
                         BuffPlugin.LogException(e);
                         BuffPlugin.LogError($"Corrupted Buff Data At : {dataSplit[1]}");
+                        ExceptionTracker.TrackException(e, $"Corrupted Buff Data At : {dataSplit[1]}");
                         newData = GetOrCreateBuffData(dataType.id, true);
                         newData.DataLoaded(true);
                     }

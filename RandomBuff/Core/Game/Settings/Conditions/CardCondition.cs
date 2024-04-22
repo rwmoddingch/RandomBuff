@@ -77,8 +77,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 {
                     currentCard = count;
                     onLabelRefresh?.Invoke(this);
-                    Finished = count >= needCard;
+                    
                 }
+                Finished = count >= needCard;
                 timer = 0;
             }
         }

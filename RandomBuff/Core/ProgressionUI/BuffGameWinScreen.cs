@@ -1,6 +1,5 @@
 ﻿using Menu;
 using RandomBuff.Core.BuffMenu;
-using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game;
 using RWCustom;
 using System;
@@ -10,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
+using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI;
 
 namespace RandomBuff.Core.StaticsScreen
 {
@@ -17,13 +18,13 @@ namespace RandomBuff.Core.StaticsScreen
     {
         public SimpleButton continueButton;
 
-        public FSprite shadow;
-        public FSprite title;
+
         public FSprite gradient;
 
         public RandomBuffFlag flag;
         public RandomBuffFlagRenderer flagRenderer;
         public BuffGameScoreCaculator scoreCaculator;
+        public CardTitle title;
 
         public SleepScreenKills kills;
 
@@ -32,18 +33,14 @@ namespace RandomBuff.Core.StaticsScreen
         public MenuLabel bestMissionTime;
 
         public bool isShowingDialog;
-
         public bool evaluateExpedition;
-
         public int questsDisplayed;
-
         public int startingLevel;
-
         public bool showLevelUp;
-
         public float leftAnchor;
-
         public float rightAnchor;
+
+        int titleShowDelay = 20;
 
         public BuffGameWinScreen(ProcessManager manager) : base(manager, BuffEnums.ProcessID.BuffGameWinScreen)
         {
@@ -68,33 +65,18 @@ namespace RandomBuff.Core.StaticsScreen
             gradient.scaleX = 1500f;
             gradient.color = new Color(0f, 0f, 0f);
             pages[0].Container.AddChild(this.gradient);
-            shadow = new FSprite("expeditionshadow", true);
-            shadow.x = 10f;
-            shadow.y = 638f;
-            shadow.SetAnchor(0f, 0f);
-            shadow.shader = manager.rainWorld.Shaders["MenuText"];
-            pages[0].Container.AddChild(this.shadow);
-            title = new FSprite("expeditiontitle", true);
-            title.x = 10f;
-            title.y = 638f;
-            title.SetAnchor(0f, 0f);
-            pages[0].Container.AddChild(this.title);
-            FSprite fsprite = new FSprite("LinearGradient200", true);
-            fsprite.rotation = 90f;
-            fsprite.scaleY = 2.5f;
-            fsprite.scaleX = 2.5f;
-            fsprite.SetAnchor(new Vector2(0.5f, 0f));
-            fsprite.x = 40f;
-            fsprite.y = 646f;
-            fsprite.shader = manager.rainWorld.Shaders["MenuText"];
-            pages[0].Container.AddChild(fsprite);
+
+            float middleX = 400f;
+            float width = 460f;
+
+            title = new CardTitle(container, BuffCard.normalScale * 0.6f, new Vector2(middleX, 668f), 0.5f);
 
             continueButton = new SimpleButton(this, pages[0], Translate("CONTINUE"), "CONTINUE", new Vector2(rightAnchor - 150f, 40f), new Vector2(100f, 30f));
             pages[0].subObjects.Add(continueButton);
 
-            flag = new RandomBuffFlag(new IntVector2(40, 30), new Vector2(700f, 450f));
+            flag = new RandomBuffFlag(new IntVector2(40, 25), new Vector2(width + 200f, 500f));
             flagRenderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.InnerTriangle, RandomBuffFlagRenderer.FlagColorType.Golden);
-            flagRenderer.pos = new Vector2(40f, 800f);
+            flagRenderer.pos = new Vector2(middleX - (width + 200f) / 2f, 850f);
             flagRenderer.Show = true;
             pages[0].Container.AddChild(flagRenderer.container);
             flagRenderer.container.MoveBehindOtherNode(gradient);
@@ -109,7 +91,7 @@ namespace RandomBuff.Core.StaticsScreen
                 BuffPlugin.Log($"accomplish quest: {quest.QuestName}");
             //TODO:新任务完成的提示
 
-            pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(200f, 200f), winPackage));
+            pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(middleX - width / 2f, 200f), winPackage, width));
             scoreCaculator.Container.MoveToFront();
         }
 
@@ -126,12 +108,22 @@ namespace RandomBuff.Core.StaticsScreen
             base.Update();
             flag.Update();
             flagRenderer.Update();
+            title.Update();
+
+            if (titleShowDelay > 0)
+                titleShowDelay--;
+            else if(titleShowDelay == 0)
+            {
+                titleShowDelay--;
+                title.RequestSwitchTitle("Random Buff");
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
             flagRenderer.GrafUpdate(timeStacker);
+            title.GrafUpdate(timeStacker);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RandomBuff
@@ -48,17 +49,22 @@ namespace RandomBuff
                             continue;
 
                         var splited = lines[i].Split('|');
-                        currentLangMapper.Add(splited[0].Trim(), splited[1].Trim());
+                        currentLangMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
                         BuffPlugin.Log($"Load resource string : {splited[0].Trim()} | {splited[1].Trim()}, {languageID}");
 
                         if (!engLoaded && languageID == InGameTranslator.LanguageID.English)
-                            engMapper.Add(splited[0].Trim(), splited[1].Trim());
+                            engMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
                     }
                 }
             }
 
             if(!engLoaded && languageID == InGameTranslator.LanguageID.English)
                 engLoaded = true;
+        }
+
+        static string ReplaceLine(string orig)
+        {
+            return Regex.Replace(orig, "<LINE>", "\n");
         }
 
         public static string Get(string key)
