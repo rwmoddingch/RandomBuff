@@ -10,6 +10,7 @@ using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
+using RWCustom;
 using UnityEngine;
 
 namespace RandomBuff.Core.ProgressionUI
@@ -58,6 +59,7 @@ namespace RandomBuff.Core.ProgressionUI
         }
         float ShowFactor => (float)_showCounter / BuffGameMenuStatics.MaxShowSwitchCounter;
 
+        FLabel testLabel;
         public BuffProgressionPage(Menu.Menu menu, MenuObject owner, int index) : base(menu, owner, "ProgressionPage", index)
         {
             screenSize = menu.manager.rainWorld.options.ScreenSize;
@@ -94,6 +96,10 @@ namespace RandomBuff.Core.ProgressionUI
 
             var testPage = CreatePage("RECORD", 0);
             var testPage2 = CreatePage("QUEST", 1);
+
+            testLabel = new FLabel(Custom.GetDisplayFont(), "WA");
+            Container.AddChild(testLabel);
+            testLabel.SetPosition(200, 200);
         }
 
         OpScrollBox CreatePage(string pageName, int index)
@@ -159,6 +165,7 @@ namespace RandomBuff.Core.ProgressionUI
             }
         }
 
+        //TickAnimCmpnt animCmpnt = AnimMachine.GetTickAnimCmpnt(0, 100, autoStart:false).BindModifier(Helper.EaseInOutSine);
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);

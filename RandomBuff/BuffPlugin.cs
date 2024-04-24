@@ -147,6 +147,8 @@ namespace RandomBuff
                     CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
 
+                    AnimMachine.Init();
+
                     StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());
                 }
             }

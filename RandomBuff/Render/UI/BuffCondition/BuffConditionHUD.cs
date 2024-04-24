@@ -66,6 +66,9 @@ namespace RandomBuff.Render.UI.BuffCondition
         void UpdateFlagMode()
         {
             var gameSetting = BuffPoolManager.Instance.GameSetting;
+            if (gameSetting.conditions.Count == 0)
+                return;
+
             bool allFinished = true;
             foreach (var condition in gameSetting.conditions)
             {
