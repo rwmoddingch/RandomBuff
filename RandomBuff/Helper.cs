@@ -284,6 +284,11 @@ namespace RandomBuff
             return Mathf.Lerp(t, 1f, Mathf.Pow(t, 0.5f));
         }
 
+        public static float EaseInOutSine(float t) 
+        {
+            return -(Mathf.Cos(Mathf.PI* t) - 1) / 2;
+        }
+
         public static Color GetRGBColor(int r, int g, int b)
         {
             return new Color(r / 255f, g / 255f, b / 255f);

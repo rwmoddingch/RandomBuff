@@ -110,13 +110,14 @@ namespace RandomBuff.Core.BuffMenu
             pages[0].subObjects.Add(rainEffect = new RainEffect(this, pages[0]));
 
             InitButtonPage(pages[0]);
+            container.AddChild(menuSlot.Container);
             InitGameDetailPage(pages[0]);
             
             continueDetailPage.SetShow(false);
             newGameDetailPage.SetShow(false);
 
             //pages[0].Container.MoveToFront();
-            container.AddChild(menuSlot.Container);
+            
             //detailPage.Container.MoveToFront();
 
             UpdateSlugcatAndPage();
