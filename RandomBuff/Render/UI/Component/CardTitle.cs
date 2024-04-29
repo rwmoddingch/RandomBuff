@@ -11,10 +11,12 @@ namespace RandomBuff.Render.UI.Component
 {
     internal class CardTitle
     {
-        public static int flipCounter = 20;
+        public int flipCounter;
+        public int flipDelay;
 
         public FContainer container;
 
+        public float anchorX = 0.5f;
         public float scale;
         public Vector2 lastPos;
         public Vector2 pos;
@@ -26,12 +28,15 @@ namespace RandomBuff.Render.UI.Component
 
         List<string> switchTitleRequest = new List<string>();
 
-        public CardTitle(FContainer container, float scale, Vector2 pos, float spanShrink = 1f)
+        public CardTitle(FContainer container, float scale, Vector2 pos, float spanShrink = 1f, float anchorX = 0.5f, int flipCounter = 20, int flipDelay = 5)
         {
             this.scale = scale;
             lastPos = this.pos = pos;
             this.container = container;
             this.spanShrink = spanShrink;
+            this.anchorX = anchorX;
+            this.flipCounter = flipCounter;
+            this.flipDelay = flipDelay;
         }
 
         public void Update()
@@ -78,6 +83,12 @@ namespace RandomBuff.Render.UI.Component
             switchTitleRequest.Add(caspLock ? title.ToUpper() : title);
         }
 
+        public void Destroy()
+        {
+            for (int i = currentActiveHandlers.Count - 1; i >= 0; i--)
+                currentActiveHandlers[i].Destroy();
+        }
+
         protected class SingleCardHandler
         {
             CardTitle title;
@@ -91,7 +102,7 @@ namespace RandomBuff.Render.UI.Component
 
             Mode currentMode;
 
-            public bool ReadyForSwitch => (lastCounter == counter) && (counter == flipCounter) && currentMode == Mode.FlipIn;
+            public bool ReadyForSwitch => (lastCounter == counter) && (counter == title.flipCounter) && currentMode == Mode.FlipIn;
 
             public SingleCardHandler(CardTitle title, string text, int index)
             {
@@ -100,8 +111,8 @@ namespace RandomBuff.Render.UI.Component
                 card.Scale = title.scale;
                 title.container.AddChild(card.Container);
                 card.CardTexture.shader = Custom.rainWorld.Shaders["MenuText"];
-                delay = index * -5;
-                deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f);
+                delay = index * -title.flipDelay;
+                deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f) + new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (0.5f - title.anchorX) * title.handlerCount, 0f);
 
                 SwitchMode(Mode.FlipIn);
             }
@@ -109,7 +120,7 @@ namespace RandomBuff.Render.UI.Component
             public void Update()
             {
                 lastCounter = counter;
-                if (counter < flipCounter)
+                if (counter < title.flipCounter)
                     counter++;
 
                 if(currentMode == Mode.FlipIn)
@@ -118,15 +129,15 @@ namespace RandomBuff.Render.UI.Component
                 }
                 else if(currentMode == Mode.FlipOut)
                 {
-                    if (lastCounter == counter && counter == flipCounter)
+                    if (lastCounter == counter && counter == title.flipCounter)
                         Destroy();
                 }
             }
 
             public void GrafUpdate(float timeStacker)
             {
-                float flip = counter / (float)flipCounter;
-                float lastFlip = lastCounter / (float)flipCounter;
+                float flip = counter / (float)title.flipCounter;
+                float lastFlip = lastCounter / (float)title.flipCounter;
                 float smoothFlip = Mathf.Clamp01(Mathf.Lerp(lastFlip, flip, timeStacker));
 
                 Vector2 smoothPos = Vector2.Lerp(title.lastPos, title.pos, timeStacker) + deltaPos;

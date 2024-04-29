@@ -1,8 +1,6 @@
-﻿using JetBrains.Annotations;
-using Menu;
+﻿using Menu;
 using Menu.Remix;
 using Menu.Remix.MixedUI;
-using RandomBuff.Cardpedia.InfoPageRender;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
@@ -10,7 +8,6 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
-using RandomBuff.Render.UI.BuffCondition;
 using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
@@ -18,13 +15,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Reflection.Emit;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using UnityEngine;
-using static MonoMod.InlineRT.MonoModRule;
-using System.ComponentModel;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -264,7 +257,7 @@ namespace RandomBuff.Core.BuffMenu
         ConditionInstance[] conditionInstances = new ConditionInstance[5];
         GameSetting currentGameSetting;
 
-        RandomBuffFlag flag;
+        
         RandomBuffFlagRenderer flagRenderer;
 
         BuffLevelBarDynamic buffLevelBarDynamic;
@@ -278,6 +271,7 @@ namespace RandomBuff.Core.BuffMenu
         //状态变量
         int _showCounter = -1;
         int _targetShowCounter;
+        int flagControlIndex;
         bool Show
         {
             get => _targetShowCounter == BuffGameMenuStatics.MaxShowSwitchCounter;
@@ -297,9 +291,11 @@ namespace RandomBuff.Core.BuffMenu
 
             Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
 
-            flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1000f, 450f));
-            flagRenderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.Square, RandomBuffFlagRenderer.FlagColorType.Grey);
-            flagHangPos = new Vector2(Custom.rainWorld.screenSize.x / 2f - flag.rect.x / 2f, 800f);
+            flagControlIndex = gameMenu.flagNeedUpdate.Count;
+            gameMenu.flagNeedUpdate.Add(false);
+
+            flagRenderer = new RandomBuffFlagRenderer(menu.flag, RandomBuffFlagRenderer.FlagType.Square, RandomBuffFlagRenderer.FlagColorType.Grey);
+            flagHangPos = new Vector2(Custom.rainWorld.screenSize.x / 2f - menu.flag.rect.x / 2f, 850f);
             flagHidePos = flagHangPos + Vector2.up * 800f;
             flagRenderer.pos = flagHidePos;
             Container.AddChild(flagRenderer.container);
@@ -408,12 +404,15 @@ namespace RandomBuff.Core.BuffMenu
                 dark.alpha = ShowFactor;
                 flagRenderer.pos = Vector2.Lerp(flagHidePos, flagHangPos, Helper.LerpEase(ShowFactor));
             }
+
+            bool needUpdate = Show || flagRenderer.NeedRenderUpdate;
+            gameMenu.flagNeedUpdate[flagControlIndex] = needUpdate;
+
             if (Show || flagRenderer.NeedRenderUpdate)
             {
-                flag.Update();
                 flagRenderer.Update();
-
             }
+
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -608,16 +607,32 @@ namespace RandomBuff.Core.BuffMenu
         MissionInfoBox missionInfoBox;
         MissionSheetBox missionSheetBox;
 
+        RandomBuffFlagRenderer flagRenderer;
+
+        TickAnimCmpnt showAnim = AnimMachine.GetTickAnimCmpnt(0, 40, autoStart: false).AutoPause().BindModifier(Helper.EaseInOutCubic);
+
+        int flagControlIndex;
+        bool show;
+        Vector2 flagHangPos;
+        Vector2 flagHidePos;
+
         public BuffNewGameMissionPage(BuffGameMenu menu, MenuObject owner, Vector2 pos) : base(menu, owner, pos)
         {
             this.menu = menu;
             gameMenu = menu;
+
+            flagControlIndex = gameMenu.flagNeedUpdate.Count;
+            gameMenu.flagNeedUpdate.Add(false);
+
+          
+
             signalToValue = new Dictionary<string, string>();
             InitMenuElements();
             missionInfoBox = new MissionInfoBox(menu, this, Vector2.zero);
             subObjects.Add(missionInfoBox);
             missionSheetBox = new MissionSheetBox(menu, this, Vector2.zero);
             subObjects.Add(missionSheetBox);
+
             SetShow(false);
         }
 
@@ -633,24 +648,33 @@ namespace RandomBuff.Core.BuffMenu
             };
             Container.AddChild(blackSprite);
 
+            flagRenderer = new RandomBuffFlagRenderer(gameMenu.flag, RandomBuffFlagRenderer.FlagType.OuterTriangle, RandomBuffFlagRenderer.FlagColorType.Silver);
+            flagHangPos = new Vector2(Custom.rainWorld.screenSize.x / 2f - gameMenu.flag.rect.x / 2f, 820f);
+            flagHidePos = flagHangPos + Vector2.up * 800f;
+            flagRenderer.pos = flagHidePos;
+            Container.AddChild(flagRenderer.container);
+
             backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "NEWGAME_MISSION_BACK", new Vector2(1200f, 1400f), new Vector2(110f, 30f));
             subObjects.Add(backButton);
-
         }
 
         public void SetShow(bool show)
         {
+            this.show = show;
+            flagRenderer.Show = show;
             if (show)
             {
-                blackSprite.alpha = 1f;
-                backButton.pos.y = 698f;
+                showAnim.SetTickAndStart(1);
+                //blackSprite.alpha = 1f;
+                //backButton.pos.y = 698f;
                 pickedMission = null;
                 currentGameSetting = BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName);
             }
             else
             {
-                blackSprite.alpha = 0f;
-                backButton.pos.y = 1400f;
+                showAnim.SetTickAndStart(-1);
+                //blackSprite.alpha = 0f;
+                //backButton.pos.y = 1400f;
 
             }
             missionInfoBox.SetShow(show);
@@ -741,45 +765,107 @@ namespace RandomBuff.Core.BuffMenu
         {
             base.Update();
             backButton.buttonBehav.greyedOut = MissionInfoBox.hasCardOnDisplay;
+            backButton.pos = Vector2.Lerp(new Vector2(1200, 800), new Vector2(1200, 698), showAnim.Get());
+
+            bool needUpdate = show || flagRenderer.NeedRenderUpdate;
+            gameMenu.flagNeedUpdate[flagControlIndex] = needUpdate;
+
+            flagRenderer.pos = Vector2.Lerp(flagHidePos, flagHangPos, showAnim.Get());
+
+            if (show || flagRenderer.NeedRenderUpdate)
+            {
+                flagRenderer.Update();
+            }
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+            blackSprite.alpha = showAnim.Get();
+
+            if(show || flagRenderer.NeedRenderUpdate)
+            {
+                flagRenderer.GrafUpdate(timeStacker);
+            }
         }
 
         public class MissionButton : SimpleButton
         {
             public Mission bindMission;
             public bool active;
-            public MissionButton(Mission mission, Menu.Menu menu, MenuObject owner, string displayText, string signal, Vector2 pos, Vector2 size) : base(menu, owner, displayText, signal, pos, size)
+            AnimateComponentBase animCmpnt;
+            TickAnimCmpnt selfShow = AnimMachine.GetTickAnimCmpnt(0, 20, autoStart: false).AutoPause().BindModifier(Helper.EaseInOutCubic);
+
+            Vector2 showPos;
+            Vector2 hidePos;
+
+            public MissionButton(Mission mission, Menu.Menu menu, MenuObject owner, string displayText, string signal, Vector2 pos, Vector2 size, AnimateComponentBase animCmpnt = null) : base(menu, owner, displayText, signal, pos, size)
             {
                 bindMission = mission;
+                this.animCmpnt = animCmpnt;
+
+                SetPos(pos);
+            }
+
+            public void SetPos(Vector2 pos)
+            {
+                this.showPos = pos;
+                this.hidePos = pos + Vector2.up * 1000f;
             }
 
             public void SetShow(bool show)
             {
+                selfShow.SetTickAndStart(show ? 1 : -1);
+                active = show;
+                if (animCmpnt != null)
+                    return;
                 pos.y = show ? 450f : 1400f;
             }
+
 
             public override void GrafUpdate(float timeStacker)
             {
                 base.GrafUpdate(timeStacker);
-                if (bindMission == null)
+                //if (bindMission == null)
+                //{
+                //    return;
+                //}
+
+                float smoothAlpha = selfShow.Get();
+                if (animCmpnt != null)
+                    smoothAlpha *= animCmpnt.Get();
+
+                menuLabel.label.color = InterpColor(timeStacker, labelColor);
+                menuLabel.label.alpha = smoothAlpha;
+
+                Color color = Color.Lerp(Menu.Menu.MenuRGB(Menu.Menu.MenuColors.Black), Menu.Menu.MenuRGB(Menu.Menu.MenuColors.White), Mathf.Lerp(buttonBehav.lastFlash, buttonBehav.flash, timeStacker));
+                for (int i = 0; i < 9; i++)
                 {
-                    return;
+                    roundedRect.sprites[i].color = color;
                 }
-                for (int i = 0; i < 17; i++)
-                {
-                    this.roundedRect.sprites[i].color = bindMission.TextCol;
-                }
-                this.menuLabel.label.color = bindMission.TextCol;
+                float num = 0.5f + 0.5f * Mathf.Sin(Mathf.Lerp(buttonBehav.lastSin, buttonBehav.sin, timeStacker) / 30f * 3.1415927f * 2f);
+                num *= buttonBehav.sizeBump;
                 for (int j = 0; j < 8; j++)
                 {
-                    this.selectRect.sprites[j].color = bindMission.TextCol;
+                    selectRect.sprites[j].color = MyColor(timeStacker);
+                    selectRect.sprites[j].alpha = num * smoothAlpha;
                 }
 
+                for (int i = 0; i < 4; i++)
+                {
+                    roundedRect.sprites[roundedRect.SideSprite(i)].alpha = smoothAlpha;
+                    roundedRect.sprites[roundedRect.CornerSprite(i)].alpha = smoothAlpha;
+                }
             }
 
             public override void Update()
             {
                 base.Update();
                 this.buttonBehav.greyedOut = !active || MissionInfoBox.hasCardOnDisplay;
+                if(animCmpnt != null)
+                {
+                    pos = Vector2.Lerp(hidePos, showPos, animCmpnt.Get());
+                }
             }
         }
 
@@ -787,17 +873,34 @@ namespace RandomBuff.Core.BuffMenu
         {
             public float foldY;
             public float displayY;
-            public EmptyRoundRect(Menu.Menu menu, MenuObject owner, string text, Vector2 pos, Vector2 size, float displayY) : base(menu, owner, text, pos, size)
+            AnimateComponentBase animCmpnt;
+
+            public EmptyRoundRect(Menu.Menu menu, MenuObject owner, string text, Vector2 pos, Vector2 size, float displayY, AnimateComponentBase animCmpnt = null) : base(menu, owner, text, pos, size)
             {
                 darkSprite.RemoveFromContainer();
                 foldY = pos.y;
                 this.displayY = displayY;
+                this.animCmpnt = animCmpnt;
             }
 
             public void SetShow(bool show)
             {
+                if (animCmpnt != null)
+                    return;
+
                 roundedRect.fillAlpha = show ? 1 : 0;
                 roundedRect.pos.y = show ? displayY : foldY;
+            }
+
+            public override void Update()
+            {
+                base.Update();
+                if (animCmpnt != null)
+                {
+                    float show = animCmpnt.Get();
+                    roundedRect.fillAlpha = show;
+                    roundedRect.pos.y = Mathf.Lerp(foldY, displayY, show);
+                }
             }
         }
 
@@ -828,11 +931,11 @@ namespace RandomBuff.Core.BuffMenu
                 generalMissions = new List<MissionButton>();
                 currentPage = 0;
 
-                holdBox = new EmptyRoundRect(menu, owner, string.Empty, new Vector2(228f, 1400f), new Vector2(920f, 300f), 420f);
-                subObjects.Add(holdBox);
-                exclusiveHoldBox = new EmptyRoundRect(menu, owner, "", new Vector2(248f, 1440f), new Vector2(180f, 260f), 440f);
+                //holdBox = new EmptyRoundRect(menu, owner, string.Empty, new Vector2(228f, 1400f), new Vector2(920f, 300f), 420f);
+                //subObjects.Add(holdBox);
+                exclusiveHoldBox = new EmptyRoundRect(menu, owner, "", new Vector2(248f, 1440f), new Vector2(180f, 260f), 440f, missionPage.showAnim);
                 subObjects.Add(exclusiveHoldBox);
-                generalHoldBox = new EmptyRoundRect(menu, owner, "", new Vector2(448f, 1440f), new Vector2(660f, 260f), 440f);
+                generalHoldBox = new EmptyRoundRect(menu, owner, "", new Vector2(448f, 1440f), new Vector2(660f, 260f), 440f, missionPage.showAnim);
                 subObjects.Add(generalHoldBox);
 
                 title_exclusive = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? "专属使命":"EXCLUSIVE\nMISSION");
@@ -866,11 +969,11 @@ namespace RandomBuff.Core.BuffMenu
                             continue;
                         }
 
-                        var missionButton = new MissionButton(mission, menu, this, Custom.rainWorld.inGameTranslator.Translate(mission.MissionName), "MISSIONPICK_" + mission.ID.value, new Vector2(533f + 170f * (i % 3), buttonDisplayY), new Vector2(160f, 120f));
+                        var missionButton = new MissionButton(mission, menu, this, Custom.rainWorld.inGameTranslator.Translate(mission.MissionName), "MISSIONPICK_" + mission.ID.value, new Vector2(533f + 170f * (i % 3), buttonDisplayY), new Vector2(160f, 120f), missionPage.showAnim);
                         if (mission.BindSlug != null && mission.BindSlug.value == gameMenu.CurrentName.value)
                         {
                             exclusiveMission = missionButton;
-                            exclusiveMission.pos = new Vector2(258f, buttonDisplayY);
+                            exclusiveMission.SetPos(new Vector2(258f, buttonDisplayY));
                             exclusiveMission.active = true;
                             subObjects.Add(exclusiveMission);
                             
@@ -895,8 +998,9 @@ namespace RandomBuff.Core.BuffMenu
 
                 if (exclusiveMission == null)
                 {
-                    exclusiveMission = new MissionButton(null, menu, this, "NO EXCLUSIVE\nMISSION\nFOR THIS SLUG", "NOSIGNAL", new Vector2(258f, buttonDisplayY), new Vector2(160f, 120f));
+                    exclusiveMission = new MissionButton(null, menu, this, "NO EXCLUSIVE\nMISSION\nFOR THIS SLUG", "NOSIGNAL", new Vector2(258f, buttonDisplayY), new Vector2(160f, 120f), missionPage.showAnim);
                     exclusiveMission.active = false;
+                    exclusiveMission.SetShow(true);
                     subObjects.Add(exclusiveMission);
                 }
             }
@@ -936,8 +1040,8 @@ namespace RandomBuff.Core.BuffMenu
                 if (show)
                 {
                     RefreshExclusiveMission();
-                    leftFlipButton.pos.y = 470f;
-                    rightFlipButton.pos.y = 470f;
+                    //leftFlipButton.pos.y = 470f;
+                    //rightFlipButton.pos.y = 470f;
                     for (int i = 0; i < generalMissions.Count; i++)
                     {
                         if (i == currentPage * 3 || i == currentPage * 3 + 1 || i == currentPage * 3 + 2)
@@ -949,17 +1053,16 @@ namespace RandomBuff.Core.BuffMenu
                 }
                 else
                 {
-                    leftFlipButton.pos.y = 1400f;
-                    rightFlipButton.pos.y = 1400f;
+                    //leftFlipButton.pos.y = 1400f;
+                    //rightFlipButton.pos.y = 1400f;
                     for (int i = 0; i < generalMissions.Count; i++)
                     {
                         generalMissions[i].SetShow(false);
                     }
                 }
-                title_general.alpha = show? 1f : 0f;
-                title_exclusive.alpha = show? 1f : 0f;
+                
                 exclusiveMission.SetShow(show);
-                holdBox.SetShow(show);
+                //holdBox.SetShow(show);
                 exclusiveHoldBox.SetShow(show);
                 generalHoldBox.SetShow(show);
             }
@@ -1001,14 +1104,10 @@ namespace RandomBuff.Core.BuffMenu
                 else
                 {
                     if (slugName == "Yellow" || slugName == "White" || slugName == "Red")
-                    {
                         return "Kill_Slugcat";
-                    }
 
                     if (Futile.atlasManager.DoesContainElementWithName(path + slugName))
-                    {
                         return path + slugName;
-                    }
 
                     if (!Directory.Exists(AssetManager.ResolveFilePath(path + slugName)))
                     {
@@ -1030,12 +1129,27 @@ namespace RandomBuff.Core.BuffMenu
                 base.Update();
                 leftFlipButton.buttonBehav.greyedOut = currentPage == 0 || MissionInfoBox.hasCardOnDisplay;
                 rightFlipButton.buttonBehav.greyedOut = currentPage >= totalPages - 1 || MissionInfoBox.hasCardOnDisplay;
+
+                float show = missionPage.showAnim.Get();
+                leftFlipButton.pos.y = Mathf.Lerp(1400, 470, show);
+                rightFlipButton.pos.y = Mathf.Lerp(1400, 470, show);
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float show = missionPage.showAnim.Get();
+                title_general.alpha = show;
+                title_general.SetPosition(title_general.x, Mathf.Lerp(1400, 640, show));
+                title_exclusive.alpha = show;
+                title_exclusive.SetPosition(title_exclusive.x, Mathf.Lerp(1400, 640, show));
             }
         }
 
         public class MissionInfoBox : PositionedMenuObject
         {
-            public EmptyRoundRect holdBox;
+            public BuffNewGameMissionPage missionPage;
+            //public EmptyRoundRect holdBox;
             public FLabel missionTitle;
             public FLabel conditionTitle;
             public FLabel buffTitle;
@@ -1053,13 +1167,25 @@ namespace RandomBuff.Core.BuffMenu
             public static float lineH = 30f;
             public static float firstLineY = 260f;
 
+            public static float conditionHidePosY = -100f;
+
+            static Vector2 iconShowPos = new Vector2(688f, 360f);
+            static Vector2 iconHidePos = iconShowPos + Vector2.down * 1000f;
+            static Vector2 missionTitleShowPos = new Vector2(688f, 320f);
+            static Vector2 missionTitleHidePos = missionTitleShowPos + Vector2.down * 1000f;
+            static Vector2 conditionTitleShowPos = new Vector2(440f, 340f);
+            static Vector2 conditionTitleHidePos = conditionTitleShowPos + Vector2.down * 1000f;
+            static Vector2 buffTitleShowPos = new Vector2(960f, 340f);
+            static Vector2 buffTitleHidePos = buffTitleShowPos + Vector2.down * 1000f;
+
             public MissionInfoBox(Menu.Menu menu, MenuObject owner, Vector2 pos) : base(menu, owner, pos)
             {
+                missionPage = owner as BuffNewGameMissionPage;
                 conditionList = new List<FLabel>();
                 buffButtons = new List<CardTitleButton>();
                 interactionManager = new TestBasicInteractionManager(null);
-                holdBox = new EmptyRoundRect(menu, owner, string.Empty, new Vector2(228f, 1400f), new Vector2(920f, 380f), 20f);
-                subObjects.Add(holdBox);
+                //holdBox = new EmptyRoundRect(menu, owner, string.Empty, new Vector2(228f, 1400f), new Vector2(920f, 380f), 20f);
+                //subObjects.Add(holdBox);
                 for (int i = 0; i < 5; i++)
                 {
                     var label = new FLabel(Custom.GetDisplayFont(), "");
@@ -1071,24 +1197,24 @@ namespace RandomBuff.Core.BuffMenu
 
                 for (int j = 0; j < 6; j++)
                 {
-                    var button = new CardTitleButton(null, menu, this, new Vector2(840f,firstLineY - 36f * j));
+                    var button = new CardTitleButton(null, menu, this, new Vector2(840f,firstLineY - 36f * j), missionPage.showAnim);
                     buffButtons.Add(button);
                     subObjects.Add(button);
                 }
 
                 slugIcon = new FSprite("buffassets/missionicons/missionicon_general");
-                slugIcon.SetPosition(new Vector2(688f, 360f));
+                slugIcon.SetPosition(iconHidePos);
                 slugIcon.scale = 1.2f;
                 Container.AddChild(slugIcon);
 
                 missionTitle = new FLabel(Custom.GetDisplayFont(), "--");
-                missionTitle.SetPosition(new Vector2(688f, 320f));
+                missionTitle.SetPosition(missionTitleHidePos);
                 Container.AddChild(missionTitle);
 
                 conditionTitle = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? "使命目标":"MISSION GOALS");
                 buffTitle = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? "携带卡牌" : "MISSION BUFFS");
-                conditionTitle.SetPosition(440f,340f);
-                buffTitle.SetPosition(960f, 340f);
+                conditionTitle.SetPosition(conditionTitleHidePos);
+                buffTitle.SetPosition(buffTitleHidePos);
                 Container.AddChild(conditionTitle);
                 Container.AddChild(buffTitle);
 
@@ -1099,7 +1225,7 @@ namespace RandomBuff.Core.BuffMenu
                 darkSprite.alpha = 0f;
                 darkSprite.scale = 1400f;
                 darkSprite.color = new Color(0.1f, 0.1f, 0.1f);
-                darkSprite.SetPosition(new Vector2(693f, 393f));
+                darkSprite.SetPosition(Custom.rainWorld.screenSize / 2f);
                 menu.cursorContainer.AddChild(darkSprite);
 
                 quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "MISSION_QUITDISPLAY", new Vector2(638f, 1400f), new Vector2(110f, 30f));
@@ -1112,16 +1238,16 @@ namespace RandomBuff.Core.BuffMenu
             {
                 if (!show)
                 {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        conditionList[i].y = 1400f;
-                    }
+                    //for (int i = 0; i < 5; i++)
+                    //{
+                    //    conditionList[i].y = 1400f;
+                    //}
                     for (int j = 0; j < 6; j++)
                     {
                         buffButtons[j].SetShow(false);
                     }
                     quitDisplayButton.pos.y = 1800f;
-                    startButton.pos.y = 1400f;
+                    //startButton.pos.y = 1400f;
                 }
                 else
                 {
@@ -1137,13 +1263,10 @@ namespace RandomBuff.Core.BuffMenu
                     slugIcon.element = Futile.atlasManager.GetElementWithName("buffassets/missionicons/missionicon_general");
                     missionTitle.text = "--";
                     missionTitle.color = Color.white;
-                    startButton.pos.y = 160f;
+                    //startButton.pos.y = 160f;
                 }
-                conditionTitle.alpha = show? 1 : 0;
-                buffTitle.alpha = show? 1 : 0;
-                missionTitle.alpha = show? 1 : 0;
-                slugIcon.alpha = show ? 1 : 0;
-                holdBox.SetShow(show);
+                
+                //holdBox.SetShow(show);
             }
 
             public void UpdateMissionInfo(Color textCol ,string missionName, string bindSlug,string[] conditions, BuffID[] cardIDs)
@@ -1203,12 +1326,34 @@ namespace RandomBuff.Core.BuffMenu
                 base.Update();
                 interactionManager?.Update();
                 startButton.buttonBehav.greyedOut = hasCardOnDisplay || BuffNewGameMissionPage.pickedMission == null;
+
+                float anim = (owner as BuffNewGameMissionPage).showAnim.Get();
+                startButton.pos.y = Mathf.Lerp(-200f, 160f, anim);
+
             }
 
             public override void GrafUpdate(float timeStacker)
             {
                 base.GrafUpdate(timeStacker);
                 interactionManager?.GrafUpdate(timeStacker);
+
+                float anim = (owner as BuffNewGameMissionPage).showAnim.Get();
+                conditionTitle.alpha = anim;
+                conditionTitle.SetPosition(Vector2.Lerp(conditionTitleHidePos, conditionTitleShowPos, anim));
+
+                buffTitle.alpha = anim;
+                buffTitle.SetPosition(Vector2.Lerp(buffTitleHidePos, buffTitleShowPos, anim));
+
+                missionTitle.alpha = anim;
+                missionTitle.SetPosition(Vector2.Lerp(missionTitleHidePos, missionTitleShowPos, anim));
+                
+                slugIcon.alpha = anim;
+                slugIcon.SetPosition(Vector2.Lerp(iconHidePos, iconShowPos, anim));
+                for (int i = 0; i < 5; i++)
+                {
+                    conditionList[i].alpha = anim;
+                    conditionList[i].SetPosition(new Vector2(440f, firstLineY - lineH * i - 1000f * (1f - anim)));
+                }
             }
 
             public class CardTitleButton : SimpleButton
@@ -1217,11 +1362,22 @@ namespace RandomBuff.Core.BuffMenu
                 public BuffID bindBuff;
                 public Color buttonColor;
                 public bool active;
-                public float origY;
-                public CardTitleButton(BuffID bindBuff ,Menu.Menu menu, MenuObject owner, Vector2 pos) : base(menu,owner,"--","NOSIGNAL",pos,buttonSize)
+                float origY;
+                float hideY;
+
+                AnimateComponentBase animCmpnt;
+
+                public CardTitleButton(BuffID bindBuff ,Menu.Menu menu, MenuObject owner, Vector2 pos, AnimateComponentBase animCmpnt = null) : base(menu,owner,"--","NOSIGNAL",pos,buttonSize)
                 {
                     RefreshBuffInfo(bindBuff);
-                    origY = pos.y;
+                    this.animCmpnt = animCmpnt;
+                    SetPos(pos.y);
+                }
+
+                public void SetPos(float y)
+                {
+                    origY = y;
+                    hideY = y - 1000f;
                 }
 
                 public void RefreshBuffInfo(BuffID buffID)
@@ -1258,6 +1414,9 @@ namespace RandomBuff.Core.BuffMenu
 
                 public void SetShow(bool show)
                 {
+                    if (animCmpnt != null)
+                        return;
+
                     if (show)
                     {
                         this.pos.y = origY;
@@ -1266,7 +1425,6 @@ namespace RandomBuff.Core.BuffMenu
                     {
                         this.pos.y = 1400f;
                     }
-
                 }
 
                 public override void GrafUpdate(float timeStacker)
@@ -1274,22 +1432,52 @@ namespace RandomBuff.Core.BuffMenu
                     base.GrafUpdate(timeStacker);
                     this.menuLabel.label.color = this.buttonColor;
                     
-                    for (int i = 0; i < this.roundedRect.sprites.Length; i++)
+                    //for (int i = 0; i < this.roundedRect.sprites.Length; i++)
+                    //{
+                    //    this.roundedRect.sprites[i].color = this.buttonColor;
+                    //}
+
+                    //for (int j = 0; j < this.selectRect.sprites.Length; j++)
+                    //{
+                    //    this.selectRect.sprites[j].color = this.buttonColor;
+                    //}
+
+                    float smoothAlpha = 1f;
+                    if (animCmpnt != null)
+                        smoothAlpha *= animCmpnt.Get();
+
+                    menuLabel.label.color = InterpColor(timeStacker, labelColor);
+                    menuLabel.label.alpha = smoothAlpha;
+
+                    Color color = Color.Lerp(Menu.Menu.MenuRGB(Menu.Menu.MenuColors.Black), Menu.Menu.MenuRGB(Menu.Menu.MenuColors.White), Mathf.Lerp(buttonBehav.lastFlash, buttonBehav.flash, timeStacker));
+                    for (int i = 0; i < 9; i++)
                     {
-                        this.roundedRect.sprites[i].color = this.buttonColor;
+                        roundedRect.sprites[i].color = buttonColor;
+                        roundedRect.sprites[i].alpha = smoothAlpha;
+                    }
+                    float num = 0.5f + 0.5f * Mathf.Sin(Mathf.Lerp(buttonBehav.lastSin, buttonBehav.sin, timeStacker) / 30f * 3.1415927f * 2f);
+                    num *= buttonBehav.sizeBump;
+                    for (int j = 0; j < 8; j++)
+                    {
+                        selectRect.sprites[j].color = buttonColor;
+                        selectRect.sprites[j].alpha = num * smoothAlpha;
                     }
 
-                    for (int j = 0; j < this.selectRect.sprites.Length; j++)
+                    for (int i = 0; i < 4; i++)
                     {
-                        this.selectRect.sprites[j].color = this.buttonColor;
+                        roundedRect.sprites[roundedRect.SideSprite(i)].alpha = smoothAlpha;
+                        roundedRect.sprites[roundedRect.CornerSprite(i)].alpha = smoothAlpha;
                     }
-
                 }
 
                 public override void Update()
                 {
                     base.Update();
                     this.buttonBehav.greyedOut = !active || MissionInfoBox.hasCardOnDisplay;
+                    if(animCmpnt != null)
+                    {
+                        pos.y = Mathf.Lerp(hideY, origY, animCmpnt.Get());
+                    }
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Render.UI.Component;
 using RandomBuff.Render.UI.Notification;
 using RWCustom;
@@ -17,6 +18,7 @@ namespace RandomBuff.Render.UI.BuffCondition
     {
         public FContainer Container { get; } = new();
         internal List<ConditionInstance> instances = new();
+        internal MissionDisplay missionDisplay;
         FlagBanner flagBanner;
 
         public Vector2 TopLeft => new Vector2(0, Custom.rainWorld.screenSize.y);
@@ -28,10 +30,15 @@ namespace RandomBuff.Render.UI.BuffCondition
         public BuffConditionHUD()
         {
             var gameSetting = BuffPoolManager.Instance.GameSetting;
+            if (!string.IsNullOrEmpty(gameSetting.MissionId) && MissionRegister.TryGetMission(new MissionID(gameSetting.MissionId), out var mission))
+            {
+                missionDisplay = new MissionDisplay(this, mission, 0);
+            }
+            int indexIncreasement = missionDisplay == null ? 0 : 1;
             foreach (var condition in gameSetting.conditions)
             {
                 condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh);
-                instances.Add(new ConditionInstance(this, condition, instances.Count));
+                instances.Add(new ConditionInstance(this, condition, instances.Count + indexIncreasement));
             }
             flagBanner = new FlagBanner(this);
             UpdateFlagMode();
@@ -90,6 +97,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             for(int i = instances.Count - 1; i >= 0; i--)
                 instances[i].Update();
             flagBanner.Update();
+            missionDisplay?.Update();
         }
 
         public void DrawSprites(float timeStacker)
@@ -97,6 +105,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             for (int i = instances.Count - 1; i >= 0; i--)
                 instances[i].DrawSprites(timeStacker);
             flagBanner.DrawSprites(timeStacker);
+            missionDisplay?.GrafUpdate(timeStacker);
         }
 
         public void Destroy()
@@ -104,6 +113,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             for (int i = instances.Count - 1; i >= 0; i--)
                 instances[i].Destroy();
             flagBanner.Destroy();
+            missionDisplay?.Destroy();
         }
 
         public void ChangeMode(Mode newMode)
@@ -120,6 +130,7 @@ namespace RandomBuff.Render.UI.BuffCondition
 
                 if (currentMode == Mode.Refresh && newMode == Mode.Alway)
                 {
+                    missionDisplay?.SetShow();
                     foreach (var instance in instances)
                     {
                         instance.SetShow();
@@ -130,11 +141,89 @@ namespace RandomBuff.Render.UI.BuffCondition
             }
         }
 
+        internal class MissionDisplay
+        {
+            BuffConditionHUD conditionHUD;
+
+            CardTitle cardTitle;
+
+            Color currentColor;
+            Color targetColor;
+
+            Vector2 hoverPos;
+            Vector2 hidePos;
+            Vector2 pos;
+            Vector2 lastPos;
+
+            string mission;
+
+            bool _show;
+            bool Show
+            {
+                get => _show;
+                set
+                {
+                    if(value != _show)
+                    {
+                        _show = value;
+                        cardTitle.RequestSwitchTitle(_show ? mission : "");
+                    }
+                }
+            }
+            TickAnimCmpnt showAnim;
+
+            public MissionDisplay(BuffConditionHUD conditionHUD, Mission bindMission, int index)
+            {
+                this.conditionHUD = conditionHUD;
+                hoverPos = conditionHUD.TopLeft + new Vector2(20, -30 * index) + new Vector2(0f, - 20f);
+                mission = bindMission.MissionName;
+                showAnim = AnimMachine.GetTickAnimCmpnt(0, ConditionInstance.MaxShowAnimTimer + ConditionInstance.MaxStayDisplayTimer, autoStart: false).AutoPause().BindActions(OnAnimFinished: OnTickAnimFinish);
+
+                cardTitle = new CardTitle(conditionHUD.Container, 0.07f, hoverPos, 0.7f, 0f, 10, 2);
+                Show = true;
+            }
+
+            public void Update()
+            {
+                cardTitle.Update();
+                if(conditionHUD.currentMode == Mode.Alway && showAnim.enable)
+                {
+                    showAnim.current = ConditionInstance.MaxShowAnimTimer;
+                    showAnim.SetEnable(false);
+                }
+                else if(conditionHUD.currentMode == Mode.Refresh && !showAnim.enable)
+                {
+                    showAnim.SetEnable(true);
+                }
+            }
+
+            void OnTickAnimFinish(TickAnimCmpnt tickAnimCmpnt)
+            {
+                Show = false;
+            }
+
+            public void GrafUpdate(float timeStacker)
+            {
+                cardTitle.GrafUpdate(timeStacker);
+            }
+
+            public void SetShow()
+            {
+                showAnim.Reset();
+                Show = true;
+            }
+
+            public void Destroy()
+            {
+                cardTitle.Destroy();
+            }
+        }
+
         internal class ConditionInstance
         {
-            static int MaxShowAnimTimer = 40;
-            static int MaxStayDisplayTimer = 120;
-            static int MaxFlashTimer = 10;
+            public static int MaxShowAnimTimer = 40;
+            public static int MaxStayDisplayTimer = 120;
+            public static int MaxFlashTimer = 10;
             public static Color normalColor = Color.white * 0.6f + Color.black * 0.4f;
             public static Color completeColor = Color.green * 0.8f + Color.blue * 0.2f;
             public static Color uncompleteColor = Color.red * 0.8f + Color.yellow * 0.2f;

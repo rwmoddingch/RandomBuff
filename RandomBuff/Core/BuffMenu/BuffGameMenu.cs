@@ -37,6 +37,10 @@ namespace RandomBuff.Core.BuffMenu
         private bool loaded = false;
 
         private MenuLabel testLabel;
+
+        public List<bool> flagNeedUpdate = new();
+        public RandomBuffFlag flag;
+
         NotificationManager testNotification;
 
         internal BuffGameMenuSlot menuSlot;
@@ -86,7 +90,8 @@ namespace RandomBuff.Core.BuffMenu
                 } 
                 saveGameData.Add(name, SlugcatSelectMenu.MineForSaveData(manager, name));
             }
-       
+
+            flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1200f, 500f));
             menuSlot.SetupBuffs(slugNameOrders);
             testNotification = new NotificationManager(this, container, 4);
             pages = new List<Page>()
@@ -444,6 +449,15 @@ namespace RandomBuff.Core.BuffMenu
                 {
                     scroll = 0;
                     lastScroll = 0;
+                }
+            }
+            
+            foreach (var item in flagNeedUpdate)
+            {
+                if (item)
+                {
+                    flag.Update();
+                    break;
                 }
             }
         }
