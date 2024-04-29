@@ -59,7 +59,7 @@ namespace RandomBuff.Core.ProgressionUI
         }
         float ShowFactor => (float)_showCounter / BuffGameMenuStatics.MaxShowSwitchCounter;
 
-        FLabel testLabel;
+        //FLabel testLabel;
         public BuffProgressionPage(Menu.Menu menu, MenuObject owner, int index) : base(menu, owner, "ProgressionPage", index)
         {
             screenSize = menu.manager.rainWorld.options.ScreenSize;
@@ -97,9 +97,9 @@ namespace RandomBuff.Core.ProgressionUI
             var testPage = CreatePage("RECORD", 0);
             var testPage2 = CreatePage("QUEST", 1);
 
-            testLabel = new FLabel(Custom.GetDisplayFont(), "WA");
-            Container.AddChild(testLabel);
-            testLabel.SetPosition(200, 200);
+            //testLabel = new FLabel(Custom.GetDisplayFont(), "WA");
+            //Container.AddChild(testLabel);
+            //testLabel.SetPosition(200, 200);
         }
 
         OpScrollBox CreatePage(string pageName, int index)

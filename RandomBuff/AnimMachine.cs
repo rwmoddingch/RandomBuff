@@ -163,7 +163,7 @@ namespace RandomBuff
         public AnimateComponentBase lastCmpnt;
         public AnimateComponentBase nextCmpnt;
 
-        protected bool enable;
+        public bool enable { get; protected set; }
         protected bool autoDestroy;
 
         bool firstHandleInMachine = true;
@@ -309,6 +309,11 @@ namespace RandomBuff
             return AnimMachine.BindActions(this as T, OnAnimStart, OnAnimUpdate, OnAnimGrafUpdate, OnAnimFinished);
         }
 
+        public T AutoPause()
+        {
+            return BindActions(OnAnimFinished: (self) => self.SetEnable(false));
+        }
+
         public TickAnimCmpnt GetTickAnimCmpntAfterFinish(int lowBound, int highBound, int? initial = null, int tick = 1, bool autoDestroy = false)
         {
             var result = AnimMachine.GetTickAnimCmpnt(lowBound, highBound, initial, tick, false, autoDestroy);
@@ -418,6 +423,14 @@ namespace RandomBuff
         {
             current = last = value;
         }
+
+        public void SetTickAndStart(int tick)
+        {
+            Reset(current);
+            this.tick = tick;
+            SetEnable(true);
+        }
+
         public override string ToString()
         {
             return $"{base.ToString()}_{id}";

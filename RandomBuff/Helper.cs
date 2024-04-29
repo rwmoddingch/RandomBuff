@@ -60,8 +60,8 @@ namespace RandomBuff
                 state = tracker.Invoke();
                 triggleSingle = false;
                 triggleDouble = false;
-                
-                if(lastState == trackUp && state != trackUp)
+
+                if (lastState == trackUp && state != trackUp)
                 {
                     if (trackDouble)
                     {
@@ -78,11 +78,11 @@ namespace RandomBuff
                     else
                         triggleSingle = true;
                 }
-                
-                if(trackDouble && lastTriggleCounter < doubleThreashold)
+
+                if (trackDouble && lastTriggleCounter < doubleThreashold)
                 {
                     lastTriggleCounter++;
-                    if(lastTriggleCounter == doubleThreashold)
+                    if (lastTriggleCounter == doubleThreashold)
                     {
                         triggleSingle = true;
                     }
@@ -128,7 +128,7 @@ namespace RandomBuff
                 foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
                 {
                     BuffPlugin.Log(method.Name);
-                    if (method.Name.Contains("op_Addition")){
+                    if (method.Name.Contains("op_Addition")) {
                         matched++;
                         addition = method.CreateFastDelegate();
                         supportOperators += "addition ";
@@ -187,7 +187,7 @@ namespace RandomBuff
                     return dynamicMethod.Generate().CreateFastDelegate();
                 }
             }
-        
+
             public static object Addition(object a, object b)
             {
                 return Addition(a.GetType(), a, b);
@@ -273,7 +273,7 @@ namespace RandomBuff
             }
             page.lastPos = page.pos;
         }
-    
+
         /// <summary>
         /// 缓动函数
         /// </summary>
@@ -284,9 +284,14 @@ namespace RandomBuff
             return Mathf.Lerp(t, 1f, Mathf.Pow(t, 0.5f));
         }
 
-        public static float EaseInOutSine(float t) 
+        public static float EaseInOutSine(float t)
         {
-            return -(Mathf.Cos(Mathf.PI* t) - 1) / 2;
+            return -(Mathf.Cos(Mathf.PI * t) - 1) / 2;
+        }
+
+        public static float EaseInOutCubic(float f)
+        {
+            return f < 0.5 ? 4 * f * f * f : 1 - Mathf.Pow(-2 * f + 2, 3) / 2;
         }
 
         public static Color GetRGBColor(int r, int g, int b)
