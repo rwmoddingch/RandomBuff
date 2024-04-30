@@ -1,0 +1,17 @@
+{
+    "FaceName": "pointdischarge",
+    "BuffID" : "PointDischarge",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "90C0FF",
+    
+    "Chinese" : {
+        "BuffName" : "尖端放电",
+        "Description" : "较大体型的蜈蚣有几率在追击玩家时出现闪烁蓝白光的效果，几秒后会对所有靠近蜈蚣的手持有普通长矛/电矛的玩家造成电击眩晕，但普通长矛将会转化为电矛，未充能的电矛将完成充能"
+    },
+    "English": {
+        "BuffName" : "PointDischarge",
+        "Description" : "Larger centipedes have a chance to flash blue-white when chasing the player, and after a few seconds will stun all players who are close to the centipede holding a normal spear/electric spear, but the normal spear will be converted to an electric spear, and the uncharged electric spear will be fully charged"
+    }
+}
