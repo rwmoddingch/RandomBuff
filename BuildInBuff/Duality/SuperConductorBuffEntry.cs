@@ -13,13 +13,13 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class SuperConductorBuff : IBuffEntry
+    internal class SuperConductorBuffEntry : IBuffEntry
     {
         public static BuffID superConductorBuffID = new BuffID("SuperConductor", true);
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<SuperConductorBuff>(superConductorBuffID);
+            BuffRegister.RegisterBuff<SuperConductorBuffEntry>(superConductorBuffID);
         }
 
         public static void HookOn()
@@ -57,14 +57,18 @@ namespace BuiltinBuffs.Duality
                 if (ArcThrower.source2throwerMapper.ContainsKey(source))
                     return;
 
-                self.room.AddObject(new ArcThrower(self.room, source, self, Mathf.Max(damage, 1f)));
+                if(source.owner is Weapon weapon && weapon.thrownBy != null)
+                    self.room.AddObject(new ArcThrower(self.room, weapon.thrownBy.firstChunk, self, Mathf.Max(damage, 1f)));
+                else
+                    self.room.AddObject(new ArcThrower(self.room, source, self, Mathf.Max(damage, 1f)));
+
             }
         }
 
         internal class ArcThrower : UpdatableAndDeletable
         {
             public static Dictionary<BodyChunk, ArcThrower> source2throwerMapper = new Dictionary<BodyChunk, ArcThrower>();
-            public static float dmgAttenuation = 0.3f;
+            public float dmgAttenuation = 0.3f;
             static float LightningColorHue = 182f / 360f;
 
             List<PhysicalObject> excludeObjs = new List<PhysicalObject>();
@@ -80,6 +84,8 @@ namespace BuiltinBuffs.Duality
                 this.room = room;
                 this.source = source;
                 excludeObjs.Add(source.owner);
+                if (source.owner is Player)
+                    dmgAttenuation = 0.1f;
                 excludeObjs.Add(throwSource);
                 this.throwSource = throwSource;
                 this.currentDmg = startDmg;
@@ -148,6 +154,7 @@ namespace BuiltinBuffs.Duality
                 //room.PlaySound(SoundID.Zapper_Zap, closestTarget.firstChunk.pos, currentDmg, 1.4f - Random.value * 0.4f);
                 //room.PlaySound(SoundID.Bomb_Explode, closestTarget.firstChunk.pos, 1f, 1.4f - Random.value * 0.4f);
 
+                closestTarget.SetKillTag((source.owner as Creature).abstractCreature);
                 closestTarget.Violence(source, null, closestTarget.firstChunk, null, Creature.DamageType.Electric, currentDmg, currentDmg * 10);
                 throwSource = closestTarget;
             }

@@ -1,6 +1,7 @@
 ﻿using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace BuiltinBuffs.Positive
 
                 self.room.AddObject(Lightning);
                 self.room.AddObject(new ShockWave(self.firstChunk.pos, 80f, 0.01f, 10));
-                self.room.AddObject(new Explosion(self.room, self, self.firstChunk.pos, 7, 80f, 6.2f, 0.9f, 280f, 0.25f, self.thrownBy, 0.7f, 160f, 1f));
+                self.room.AddObject(new SimpleRangeDamage(self.room, Creature.DamageType.Electric, self.firstChunk.pos, 80f, 1.5f, 6.2f, self.thrownBy, 0.5f));
 
                 rock.room.AddObject(new Explosion.ExplosionLight(rock.firstChunk.pos, 180f, 1f, 7, LightningColor));
                 rock.room.AddObject(new Explosion.ExplosionLight(rock.firstChunk.pos, 130f, 1f, 3, new Color(1f, 1f, 1f)));
