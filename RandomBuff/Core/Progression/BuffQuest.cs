@@ -17,7 +17,7 @@ namespace RandomBuff.Core.Progression
     {
         Card,
         Mission,
-        Flag
+        Special
     }
 
     /// <summary>
