@@ -165,6 +165,9 @@ namespace RandomBuff.Core.SaveData
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => lockedMap[unlockedType].ContainsKey(itemName) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName]);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsSpecialItemLocked(string itemName) => IsItemLocked(QuestUnlockedType.Special,itemName);
+
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 
         static BuffConfigManager()

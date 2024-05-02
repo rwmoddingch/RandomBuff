@@ -11,6 +11,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
 using Random = UnityEngine.Random;
 
@@ -45,7 +46,7 @@ namespace RandomBuff.Core.Game.Settings
 
         public string MissionId { get; set; }
 
-        public int TotCardInGame { get; set; }
+        public InGameRecord inGameRecord = new ();
 
         public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal")
         {
@@ -278,7 +279,14 @@ namespace RandomBuff.Core.Game.Settings
                             setting.MissionId = subs[1];
                             break;
                         case "TOTCARDS":
-                            setting.TotCardInGame = int.Parse(subs[1]);
+                            try
+                            {
+                                setting.inGameRecord = JsonConvert.DeserializeObject<InGameRecord>(subs[1]);
+                            }
+                            catch (Exception e)
+                            {
+                                setting.inGameRecord = new InGameRecord();
+                            }
                             break;
                     }
                 }
@@ -331,7 +339,7 @@ namespace RandomBuff.Core.Game.Settings
             StringBuilder builder = new StringBuilder();
             builder.Append($"DIFFICULTY{SubSettingSplit}{Difficulty}{SettingSplit}");
             builder.Append($"TEMPLATE{SubSettingSplit}{gachaTemplate.ID}{SubSettingSplit}{JsonConvert.SerializeObject(gachaTemplate)}{SubSettingSplit}{TemplateName}{SettingSplit}");
-            builder.Append($"TOTCARDS{SubSettingSplit}{TotCardInGame}{SettingSplit}");
+            builder.Append($"TOTCARDS{SubSettingSplit}{JsonConvert.SerializeObject(inGameRecord)}{SettingSplit}");
 
             foreach (var condition in conditions)
                 builder.Append($"CONDITION{SubSettingSplit}{condition.ID}{SubSettingSplit}{JsonConvert.SerializeObject(condition)}{SettingSplit}");

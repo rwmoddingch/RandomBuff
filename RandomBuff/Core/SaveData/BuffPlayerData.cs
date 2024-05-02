@@ -10,6 +10,7 @@ using UnityEngine;
 using System.Runtime.CompilerServices;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Record;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -48,7 +49,15 @@ namespace RandomBuff.Core.SaveData
                         finishedQuest = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
                         break;
                     case "TOTCARDS":
-                        TotCardCount = int.Parse(dataSplit[1]);
+                        try
+                        {
+                            SlotRecord = JsonConvert.DeserializeObject<SlotRecord>(dataSplit[1]);
+                        }
+                        catch (Exception e)
+                        {
+                            SlotRecord = new SlotRecord();
+                        }
+                     
                         break;
                     default:
                         unrecognizedSaveStrings.Add(item);
@@ -57,8 +66,12 @@ namespace RandomBuff.Core.SaveData
             }
             Instance = this;
 
-            BuffPlugin.Log($"Completed loaded player data, TotCardCount : {TotCardCount}");
+            BuffPlugin.Log($"Completed loaded player data");
+            var str = "[RECORD]: ";
+            foreach (var item in SlotRecord.GetValueDictionary())
+                str += $"{{{item.Key},{item.Value}}},";
 
+            BuffPlugin.Log(str);
         }
 
         internal string ToStringData()
@@ -68,7 +81,7 @@ namespace RandomBuff.Core.SaveData
             builder.Append($"KEYBIND{PlayerDataSubSplit}{JsonConvert.SerializeObject(keyBindData)}{PlayerDataSplit}");
             builder.Append($"EXP{PlayerDataSubSplit}{playerTotExp}{PlayerDataSplit}");
             builder.Append($"QUEST{PlayerDataSubSplit}{JsonConvert.SerializeObject(finishedQuest)}{PlayerDataSplit}");
-            builder.Append($"TOTCARDS{PlayerDataSubSplit}{TotCardCount}{PlayerDataSplit}");
+            builder.Append($"TOTCARDS{PlayerDataSubSplit}{JsonConvert.SerializeObject(SlotRecord)}{PlayerDataSplit}");
 
             foreach (var item in unrecognizedSaveStrings)
                 builder.Append($"{item}{PlayerDataSplit}");
@@ -213,7 +226,7 @@ namespace RandomBuff.Core.SaveData
             return list;
         }
         public float playerTotExp = 0;
-        public int TotCardCount { get; set; }
+        public SlotRecord SlotRecord { get; set; } = new();
 
         private List<string> collectData = new();
 

@@ -83,9 +83,14 @@ namespace RandomBuff.Core.StaticsScreen
 
             //winPackage
             var winPackage = BuffPoolManager.Instance.winGamePackage;
-            BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}, Tot Card In Game : {BuffPoolManager.Instance.GameSetting.TotCardInGame}");
+            BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}");
+            var str = "[RECORD]: ";
+            foreach (var item in winPackage.buffRecord.GetValueDictionary())
+                str += $"{{{item.Key},{item.Value}}},";
 
-            //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
+            BuffPlugin.Log(str);
+
+           //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
             var newFinishQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
             foreach(var quest in newFinishQuests)
                 BuffPlugin.Log($"accomplish quest: {quest.QuestName}");

@@ -125,8 +125,8 @@ namespace RandomBuff.Core.SaveData
                         BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                         if (BuffFile.Instance.LoadState == BuffFile.BuffFileLoadState.AfterLoad)
                         {
-                            BuffPlayerData.Instance.TotCardCount++;
-                            GetGameSetting(name).TotCardInGame++;
+                            BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
+                            GetGameSetting(name).inGameRecord.AddCard(id.GetStaticData().BuffType);
                         }
                         BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
                         allDatas[name].Add(id, data);

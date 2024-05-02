@@ -5,6 +5,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.Component;
 using UnityEngine;
@@ -87,13 +88,13 @@ namespace RandomBuff.Core.Game
 
         private List<IBuff> buffList = new();
 
-        private int totCardThisCycle;
+        private InGameRecord totCardThisCycle;
 
         private BuffPoolManager(RainWorldGame game)
         {
 
             Game = game;
-
+            totCardThisCycle = new InGameRecord();
             BuffPlugin.Log("Clone all data to CycleData");
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 cycleDatas.Add(data.Key, data.Value.Clone());
@@ -175,8 +176,8 @@ namespace RandomBuff.Core.Game
             {
                 BuffPlugin.Log($"Already contains BuffData {id} in {Game.StoryCharacter} game, stack More");
                 cycleDatas[id].Stack();
-                BuffPlayerData.Instance.TotCardCount++;
-                totCardThisCycle++;
+                BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
+                totCardThisCycle.AddCard(id.GetStaticData().BuffType);
                 return cycleDatas[id];
             }
 
@@ -185,8 +186,8 @@ namespace RandomBuff.Core.Game
                 var re = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
                 BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                 re.Stack();
-                BuffPlayerData.Instance.TotCardCount++;
-                totCardThisCycle++;
+                BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
+                totCardThisCycle.AddCard(id.GetStaticData().BuffType);
                 cycleDatas.Add(id, re);
                 return re;
             }
@@ -293,7 +294,7 @@ namespace RandomBuff.Core.Game
                 }
             }
             GameSetting.SessionEnd(Game);
-            GameSetting.TotCardInGame += totCardThisCycle;
+            GameSetting.inGameRecord += totCardThisCycle;
 
             BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
             BuffFile.Instance.SaveFile();
@@ -446,10 +447,12 @@ namespace RandomBuff.Core.Game
         {
             winGamePackage = new WinGamePackage();
             winGamePackage.missionId = GameSetting.MissionId;
+            winGamePackage.saveState = Game.GetStorySession.saveState;
             foreach (var buff in buffDictionary.Keys)
                 winGamePackage.winWithBuffs.Add(buff);
 
             winGamePackage.sessionRecord = Game.GetStorySession.playerSessionRecords[0];
+            winGamePackage.buffRecord = GameSetting.inGameRecord;
             if (ModManager.CoopAvailable)
             {
                 for (int i = 1; i < Game.GetStorySession.playerSessionRecords.Length; i++)
@@ -467,6 +470,9 @@ namespace RandomBuff.Core.Game
             public List<BuffID> winWithBuffs = new List<BuffID>();
             public List<Condition> winWithConditions = new List<Condition>();
             public PlayerSessionRecord sessionRecord;
+            public SaveState saveState;
+            public InGameRecord buffRecord;
+
             public string missionId;
         }
     }
