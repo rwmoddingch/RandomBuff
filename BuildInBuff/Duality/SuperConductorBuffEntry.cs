@@ -3,23 +3,130 @@ using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
+using RandomBuffUtils.ParticleSystem;
+using RandomBuffUtils.ParticleSystem.EmitterModules;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static BuiltinBuffs.Duality.SuperConductorBuff;
+using static RandomBuffUtils.PlayerUtils;
 using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
+    internal class SuperConductorBuff : Buff<SuperConductorBuff, SuperConductorBuffData>
+    {
+        public override BuffID ID => SuperConductorBuffEntry.superConductorBuffID;
+
+        public SuperConductorBuff()
+        {
+            BuffUtils.Log("SuperConductorBuff", "ctor");
+        }
+
+        bool keyDown;
+        public override void Update(RainWorldGame game)
+        {
+            bool down = Input.GetKey(KeyCode.E);
+            if(down && !keyDown)
+            {
+                var emitter = new ParticleEmitter(game.cameras[0].room);
+                emitter.pos = game.Players[0].realizedCreature.DangerPos;
+
+                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 120, true));
+                emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 1));
+
+                emitter.ApplyParticleInit(new SetElement(emitter, "Futile_White"));
+                emitter.ApplyParticleInit(new SetShader(emitter, "FlatLight"));
+                emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
+                emitter.ApplyParticleInit(new SetRandomPos(emitter, 0f));
+                emitter.ApplyParticleInit(new SetRandomLife(emitter, 70, 80));
+                emitter.ApplyParticleInit(new SetRandomColor(emitter, 0f, 0.4f, 1f, 0.5f));
+                emitter.ApplyParticleInit(new SetRandomVelocity(emitter, new Vector2(-1f, 10f), new Vector2(1f, 10f)));
+                emitter.ApplyParticleInit(new SetRandomScale(emitter, 1f, 1.5f));
+
+                emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (particle, lifeParam) =>
+                {
+                    return particle.setScale * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f);
+                }));
+                emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (particle, lifeParam) =>
+                {
+                    return Color.Lerp(particle.setColor, Color.white, (Mathf.Sin(lifeParam * 10f) * 0.5f + 0.5f));
+                }));
+                emitter.ApplyParticleUpdate(new VelocityOverLife(emitter, (particle, lifeParam) =>
+                {
+                    float sin = Mathf.Sin(lifeParam * 10f);
+                    return new Vector2(particle.setVel.x + sin * (1f - lifeParam), particle.setVel.y * (1f - lifeParam));
+                }));
+                ParticleSystem.ApplyEmitterAndInit(emitter);
+
+                int range = 60;
+                for(int angle = 0; angle < 360; angle += range)
+                {
+                    CreateSubParticle(angle, range, 1f, 0f, emitter);
+                }
+            }
+            keyDown = down;
+        }
+
+        void CreateSubParticle(float angle, float range, float vel, float hue, ParticleEmitter owner)
+        {
+            Vector2 velA = Custom.DegToVec(angle) * vel;
+            Vector2 velB = Custom.DegToVec(range + angle) * vel;
+
+            owner.OnParticleDieEvent += CreateEmitter;
+
+            void CreateEmitter(Particle particle)
+            {
+                var emitter = new ParticleEmitter(particle.emitter.room);
+                emitter.pos = particle.pos;
+
+                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 100, false));
+                emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 5));
+
+                emitter.ApplyParticleInit(new SetElement(emitter, "Futile_White"));
+                emitter.ApplyParticleInit(new SetShader(emitter, "FlatLight"));
+                emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
+                emitter.ApplyParticleInit(new SetRandomPos(emitter, 0f));
+                emitter.ApplyParticleInit(new SetRandomLife(emitter, 40, 80));
+                emitter.ApplyParticleInit(new SetRandomColor(emitter, hue, hue + 0.4f, 1f, 0.5f));
+                emitter.ApplyParticleInit(new SetRandomVelocity(emitter, velA, velB));
+                emitter.ApplyParticleInit(new SetRandomScale(emitter, 0.5f, 0.8f));
+
+                emitter.ApplyParticleUpdate(new ConstantAcc(emitter, new Vector2(0f, -0.5f)));
+
+                emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (p, lifeParam) =>
+                {
+                    return Color.Lerp(p.setColor, Color.white, (Mathf.Sin(lifeParam * 3f) * 0.5f + 0.5f));
+                }));
+                emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (p, lifeParam) =>
+                {
+                    return p.setScale * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f) * (1f - lifeParam);
+                }));
+                ParticleSystem.ApplyEmitterAndInit(emitter);
+            }
+        }
+
+        public override void Destroy()
+        {
+        }
+    }
+
+    internal class SuperConductorBuffData : BuffData
+    {
+        public override BuffID ID => SuperConductorBuffEntry.superConductorBuffID;
+    }
+
     internal class SuperConductorBuffEntry : IBuffEntry
     {
         public static BuffID superConductorBuffID = new BuffID("SuperConductor", true);
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<SuperConductorBuffEntry>(superConductorBuffID);
+            BuffRegister.RegisterBuff<SuperConductorBuff, SuperConductorBuffData, SuperConductorBuffEntry >(superConductorBuffID);
         }
 
         public static void HookOn()

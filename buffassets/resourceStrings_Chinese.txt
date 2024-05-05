@@ -35,3 +35,14 @@ Quick|快速模式
 //BuffConditionHUD
 BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
+
+//BuffCardSlot
+InGameSlot_SlotTitle|Buff卡槽
+InGameSlot_CardDetail|Buff详情
+CardPickSlot_SlotTitle|抽取<Cards>张卡
+
+//Records
+totCard|获取的所有Buff数量：
+totPositiveCard|获取的正面Buff数量：
+totNegativeCard|获取的负面Buff数量：
+totDualityCard|获取的双向Buff数量：

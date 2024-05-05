@@ -32,11 +32,12 @@ namespace RandomBuff.Core.StaticsScreen
 
         public int indexInCurrentState = 0;
 
-        //分数预计算结果
-        //0:scoreindex, 1:count 2:intData
+
         //Dictionary<CreatureTemplate.Type, int[]> killsAndCounts = new();
         //CreatureTemplate.Type[] kills;
 
+        //分数预计算结果
+        //0:scoreindex, 1:count 2:intData
         List<KeyValuePair<CreatureTemplate.Type, int[]>> killsAndCounts = new();
         int[] defaultScores;
 
@@ -47,7 +48,7 @@ namespace RandomBuff.Core.StaticsScreen
             menu.container.AddChild(myContainer);
             this.winPackage = winGamePackage;
             scoreBoard = new ScoreBoard(this);
-            expBar = new BuffLevelBarDynamic(myContainer, pos + new Vector2(0f, 40f), width, 1230, 100)
+            expBar = new BuffLevelBarDynamic(myContainer, pos + new Vector2(0f, 40f), width, BuffPlayerData.Instance.playerTotExp, BuffPlayerData.Exp2Level, BuffPlayerData.Level2Exp)
             {
                 alpha = 0f,
                 setAlpha = 0f
@@ -57,30 +58,53 @@ namespace RandomBuff.Core.StaticsScreen
             PreCaculateScores();
         }
 
+        //提前计算所有得分并直接应用到存档
         public void PreCaculateScores()
         {
+            int totalScore = 0;
+            //获取生物的分数
             defaultScores = new int[MultiplayerUnlocks.SandboxUnlockID.values.entries.Count];
             SandboxSettingsInterface.DefaultKillScores(ref defaultScores);
 
-            foreach(var kill in winPackage.sessionRecord.kills)
+            foreach(var kill in winPackage.saveState.kills)
             {
-                var unlock = MultiplayerUnlocks.SandboxUnlockForSymbolData(kill.symbolData).index;
+                var unlock = MultiplayerUnlocks.SandboxUnlockForSymbolData(kill.Key).index;
 
                 bool matched = false;
                 foreach(var element in killsAndCounts)
                 {
-                    if(element.Key == kill.symbolData.critType && element.Value[2] == kill.symbolData.intData)
+                    if(element.Key == kill.Key.critType && element.Value[2] == kill.Key.intData)
                     {
-                        element.Value[1]++;
+                        element.Value[1] += kill.Value;
                         matched = true;
                     }
                 }
                 if (!matched)
                 {
-                    killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(kill.symbolData.critType, new int[3] { unlock, 1, kill.symbolData.intData }));
+                    killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(kill.Key.critType, new int[3] { unlock, kill.Value, kill.Key.intData }));
                 }
-
             }
+            foreach(var kill in killsAndCounts)
+            {
+                totalScore += defaultScores[kill.Value[0]] * kill.Value[1];
+            }
+
+            //获取卡牌分数
+            foreach(var buffID in winPackage.winWithBuffs)
+            {
+                var staticData = BuffConfigManager.GetStaticData(buffID);
+
+                int score;
+                if (staticData.BuffType == BuffType.Positive)
+                    score = 10;
+                else if (staticData.BuffType == BuffType.Negative)
+                    score = 20;
+                else
+                    score = 15;
+                totalScore += score;
+            }
+
+            BuffPlayerData.Instance.playerTotExp += totalScore;
         }
 
         public override void Update()

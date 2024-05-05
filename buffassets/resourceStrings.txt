@@ -35,3 +35,14 @@ Quick|QUICK
 //BuffConditionHUD
 BuffConditionHUD_WinInfo|sleep to finish game
 BuffConditionHUD_WinTitle|WIN
+
+//BuffCardSlot
+InGameSlot_SlotTitle|BuffSlot
+InGameSlot_CardDetail|BuffDetail
+CardPickSlot_SlotTitle|Pick <Cards> cards
+
+//Records
+totCard|Number of all buffs acquired:
+totPositiveCard|Number of positive buffs acquired:
+totNegativeCard|Number of negative buffs acquired:
+totDualityCard|Number of duality buffs acquired:
