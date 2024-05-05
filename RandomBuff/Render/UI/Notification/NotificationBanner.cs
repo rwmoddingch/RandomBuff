@@ -2,6 +2,7 @@
 using Menu.Remix.MixedUI;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
+using RandomBuff.Render.Quest;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static RandomBuff.Render.Quest.QuestRendererManager;
 
 namespace RandomBuff.Render.UI.Notification
 {
@@ -319,9 +321,12 @@ namespace RandomBuff.Render.UI.Notification
         List<FSprite> splitLines = new();
         List<Vector2> linePoses = new();
 
+        QuestRendererManager questRendererManager;
+
         public RewardBanner(NotificationManager notificationManager) : base(notificationManager)
         {
             rewardInstanceHeight = bannerScale.y / 2f;
+            questRendererManager = new QuestRendererManager(notificationManager.Container, QuestRendererManager.Mode.NotificationBanner);
         }
 
         public void AppendReward(QuestUnlockedType questUnlockedType, string itemName)
@@ -372,6 +377,7 @@ namespace RandomBuff.Render.UI.Notification
         public override void Update()
         {
             base.Update();
+            questRendererManager.Update();
             foreach(var instance in rewardInstances) 
                 instance.Update();
         }
@@ -379,6 +385,8 @@ namespace RandomBuff.Render.UI.Notification
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+            questRendererManager.GrafUpdate(timeStacker);
+
             foreach (var instance in rewardInstances)
                 instance.GrafUpdate(timeStacker);
 
@@ -393,6 +401,7 @@ namespace RandomBuff.Render.UI.Notification
         public override void Destroy()
         {
             base.Destroy();
+            questRendererManager.Destroy();
             foreach (var instance in rewardInstances)
                 instance.Destroy();
             rewardInstances.Clear();
@@ -448,6 +457,7 @@ namespace RandomBuff.Render.UI.Notification
             string missionName;
 
             FLabel missionLabel;
+            QuestLeaser quest;
 
             public MissionReward(MissionID missionID, RewardBanner banner) : base(banner)
             {
@@ -456,6 +466,8 @@ namespace RandomBuff.Render.UI.Notification
                 unique = mission.BindSlug != null;
                 width = LabelTest.GetWidth(missionName, true) + 20f;
 
+                quest = banner.questRendererManager.AddQuestToRender(mission);
+                width = quest.rect.x;
             }
 
             public override void InitSprites()
@@ -463,23 +475,23 @@ namespace RandomBuff.Render.UI.Notification
                 base.InitSprites();
                 title.text = unique ? BuffResourceString.Get("Notification_MissionReward_Unique")  : BuffResourceString.Get("Notification_MissionReward");
 
-                missionLabel = new FLabel(Custom.GetDisplayFont(), missionName) { anchorX = 0.5f, anchorY = 0.5f };
-                banner.notificationManager.Container.AddChild(missionLabel);
+                //missionLabel = new FLabel(Custom.GetDisplayFont(), missionName) { anchorX = 0.5f, anchorY = 0.5f };
+                //banner.notificationManager.Container.AddChild(missionLabel);
             }
 
             public override void GrafUpdate(float timeStacker)
             {
                 base.GrafUpdate(timeStacker);
                 float smoothContentExpand = Mathf.Lerp(banner.lastContentExpand, banner.contentExpand, timeStacker);
-                missionLabel.alpha = smoothContentExpand;
 
-                missionLabel.SetPosition(new Vector2(pos.x, pos.y));
+                quest.smoothAlpha = smoothContentExpand;
+                quest.smoothCenterPos = pos;
             }
 
             public override void Destroy()
             {
                 base.Destroy();
-                missionLabel.RemoveFromContainer();
+                //missionLabel.RemoveFromContainer();
             }
         }
     }

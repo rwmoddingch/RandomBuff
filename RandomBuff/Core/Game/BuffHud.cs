@@ -8,6 +8,7 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.UI.Component;
 using RWCustom;
 using UnityEngine;
 
@@ -15,10 +16,13 @@ namespace RandomBuff.Core.Game
 {
     internal class BuffHud : HudPart
     {
+
         public BuffHud(HUD.HUD hud) : base(hud)
         {
-            inGameSlot = new CommmmmmmmmmmmmmpleteInGameSlot();
+            slotTitle = new BuffSlotTitle();
+            inGameSlot = new CommmmmmmmmmmmmmpleteInGameSlot(slotTitle);
             hud.fContainers[1].AddChild(inGameSlot.Container);
+            hud.fContainers[1].AddChild(slotTitle.Container);
 
             foreach (var id in BuffPoolManager.Instance.GetAllBuffIds())
                 inGameSlot.AppendCardDirectly(id);
@@ -89,12 +93,14 @@ namespace RandomBuff.Core.Game
         public override void Update()
         {
             inGameSlot.Update();
+            slotTitle.Update();
         }
 
         public override void Draw(float timeStacker)
         {
             base.Draw(timeStacker);
             inGameSlot.GrafUpdate(timeStacker);
+            slotTitle.GrafUpdate(timeStacker);
         }
 
         public void TriggerCard(BuffID id)
@@ -110,12 +116,14 @@ namespace RandomBuff.Core.Game
         public override void ClearSprites()
         {
             inGameSlot.Destory();
+            slotTitle.Destroy();
             base.ClearSprites();
         }
 
 
         public static BuffHud Instance { get; private set; }
 
+        BuffSlotTitle slotTitle;
         private CommmmmmmmmmmmmmpleteInGameSlot inGameSlot;
     }
 

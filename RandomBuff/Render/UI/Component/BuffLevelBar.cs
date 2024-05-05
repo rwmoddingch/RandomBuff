@@ -22,9 +22,10 @@ namespace RandomBuff.Render.UI.Component
             set => _exp = value;
         }
         protected int level;
-        protected int expCurrentLevel;
+        protected int expNextLevelNeed;
 
-        public readonly int expPerLevel;
+        public readonly Func<int, int> exp2Level;
+        public readonly Func<int, int> level2Exp;
         protected readonly float width;      
 
         protected FContainer ownerContainer;
@@ -46,12 +47,13 @@ namespace RandomBuff.Render.UI.Component
         public virtual bool FinishState { get; }
 
 
-        public BuffLevelBar(FContainer container, Vector2 pos, float width, int exp, int expPerLevel)
+        public BuffLevelBar(FContainer container, Vector2 pos, float width, int exp, Func<int,int> exp2Level, Func<int,int> level2Exp)
         {
             this.ownerContainer = container;
             this.width = width;
             this.Exp = exp;
-            this.expPerLevel = expPerLevel;
+            this.exp2Level = exp2Level;
+            this.level2Exp = level2Exp;
             this.pos = pos;
             lastPos = pos;
 
@@ -121,6 +123,8 @@ namespace RandomBuff.Render.UI.Component
         //dynamicParam:
         int dynamic_animExpCurrentLevel;
         int dynamic_animCurrentExp;
+        int expInLevel;
+        int expCurrentLevelNeed;
 
         BuffCountDisplay dynamic_currentExp;
         BuffCountDisplay dynamic_currentLevel;
@@ -134,8 +138,10 @@ namespace RandomBuff.Render.UI.Component
 
         public override bool FinishState => dynamic_animCurrentExp == Exp;
 
-        public BuffLevelBarDynamic(FContainer container, Vector2 pos, float width, int exp, int expPerLevel) : base(container, pos, width, exp, expPerLevel)
+        public BuffLevelBarDynamic(FContainer container, Vector2 pos, float width, int exp, Func<int, int> exp2Level, Func<int, int>level2Exp) : base(container, pos, width, exp, exp2Level, level2Exp)
         {
+            UpdateLevel();
+
             dynamic_currentExpNum = new TimerOwner(() => dynamic_animCurrentExp);
             dynamic_currentExp = new BuffCountDisplay(ownerContainer, dynamic_currentExpNum)
             {
@@ -151,7 +157,7 @@ namespace RandomBuff.Render.UI.Component
                 //largeStepMode = true
             };
 
-            dynamic_nextExpNum = new TimerOwner(() => dynamic_animExpCurrentLevel + expPerLevel);
+            dynamic_nextExpNum = new TimerOwner(() => expNextLevelNeed);
             dynamic_nextExp = new BuffCountDisplay(ownerContainer, dynamic_nextExpNum)
             {
                 alightment = BuffCountDisplay.Alightment.Right,
@@ -201,7 +207,7 @@ namespace RandomBuff.Render.UI.Component
                 UpdateAnimExp();
             }
 
-            if(dynamic_animExpCurrentLevel != expCurrentLevel)
+            if(dynamic_animExpCurrentLevel != expNextLevelNeed)
             {
                 for (int i = 0; i < 10; i++)
                     StepAnimExpCurrentLevel();
@@ -217,9 +223,9 @@ namespace RandomBuff.Render.UI.Component
 
             void StepAnimExpCurrentLevel()
             {
-                if (dynamic_animExpCurrentLevel < expCurrentLevel)
+                if (dynamic_animExpCurrentLevel < expNextLevelNeed)
                     dynamic_animExpCurrentLevel++;
-                else if (dynamic_animExpCurrentLevel > expCurrentLevel)
+                else if (dynamic_animExpCurrentLevel > expNextLevelNeed)
                     dynamic_animExpCurrentLevel--;
             }
         }
@@ -228,7 +234,7 @@ namespace RandomBuff.Render.UI.Component
         {
             dynamic_animCurrentExp = Exp;
             UpdateAnimExp();
-            dynamic_animExpCurrentLevel = expCurrentLevel;
+            dynamic_animExpCurrentLevel = expNextLevelNeed;
 
             dynamic_currentExp.HardSet();
             dynamic_currentLevel.HardSet();
@@ -250,64 +256,28 @@ namespace RandomBuff.Render.UI.Component
 
             dynamic_levelLabel.alpha = smoothAlpha;
             dynamic_expLabel.alpha = smoothAlpha;
+
+            if (Input.GetKey(KeyCode.I))
+                Exp++;
         }
 
+        
         void UpdateAnimExp()
         {
-            int animLevel = dynamic_animCurrentExp / expPerLevel;
-            if (animLevel != level)
+            if (dynamic_animCurrentExp > expNextLevelNeed)
             {
-                level = animLevel;
-                expCurrentLevel = level * expPerLevel;
+                UpdateLevel();
             }
 
-            barProgress = (dynamic_animCurrentExp - expCurrentLevel) / (float)expPerLevel;
-        }
-    }
-
-    internal class BuffLevelBarStatic : BuffLevelBar
-    {
-        public override int Exp
-        {
-            get => base.Exp; 
-            set
-            {
-                if (value != _exp)
-                {
-                    _exp = value;
-                    UpdateExp();
-                }
-            }
-        }
-        //staticElements:
-        FLabel static_currentExp;
-        FLabel static_currentLevel;
-        FLabel static_nextExp;
-
-        public BuffLevelBarStatic(FContainer container, Vector2 pos, float width, int exp, int expPerLevel) : base(container, pos, width, exp, expPerLevel)
-        {
-            static_nextExp = new FLabel(Custom.GetDisplayFont(), "")
-            {
-                anchorX = 1f,
-                anchorY = 1f
-            };
-            ownerContainer.AddChild(static_nextExp);
+            barProgress = (dynamic_animCurrentExp - expCurrentLevelNeed) / (float)expInLevel;
         }
 
-
-        void UpdateExp()
+        void UpdateLevel()
         {
-            static_currentExp.text = $"exp:{Exp}";
-
-            int newLevel = Exp / expPerLevel;
-            if (newLevel == level)
-                return;
-
-            level = newLevel;
-            expCurrentLevel = expPerLevel * level;
-
-            static_currentLevel.text = $"Lv.{level}";
-            static_nextExp.text = $"{expCurrentLevel + expPerLevel}";
+            level = exp2Level(dynamic_animCurrentExp);
+            expCurrentLevelNeed = level2Exp(level);
+            expNextLevelNeed = level2Exp(level + 1);
+            expInLevel = expNextLevelNeed - level2Exp(level);
         }
     }
 }
