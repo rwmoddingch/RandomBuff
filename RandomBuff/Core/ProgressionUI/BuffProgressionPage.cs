@@ -8,6 +8,8 @@ using Menu.Remix;
 using Menu.Remix.MixedUI;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
+using RandomBuff.Core.Progression.Record;
+using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
 using RWCustom;
@@ -75,7 +77,7 @@ namespace RandomBuff.Core.ProgressionUI
             myContainer.AddChild(blurSprite = new FSprite("pixel") { scaleX = screenSize.x, scaleY = screenSize.y, x = screenSize.x / 2f, y = screenSize.y / 2f , shader = menu.manager.rainWorld.Shaders["UIBlur"] ,color = Color.black});
 
             levelBarPos = new Vector2(screenSize.x / 2f - levelBarWidth / 2f, screenSize.y - 110f);
-            levelBar = new BuffLevelBarDynamic(myContainer, levelBarPos, levelBarWidth, 1234, 100);
+            levelBar = new BuffLevelBarDynamic(myContainer, levelBarPos, levelBarWidth, BuffPlayerData.Instance.playerTotExp, BuffPlayerData.Exp2Level, BuffPlayerData.Level2Exp);
             levelBar.setAlpha = 1f;
             levelBar.HardSet();
 
@@ -95,6 +97,7 @@ namespace RandomBuff.Core.ProgressionUI
             pagePosesDelta = new Vector2[pageCount];
 
             var testPage = CreatePage("RECORD", 0);
+            CreateElementsForRecordPage(testPage, recordScrollBoxSize, BuffPlayerData.Instance.SlotRecord);
             var testPage2 = CreatePage("QUEST", 1);
 
             //testLabel = new FLabel(Custom.GetDisplayFont(), "WA");
@@ -102,11 +105,38 @@ namespace RandomBuff.Core.ProgressionUI
             //testLabel.SetPosition(200, 200);
         }
 
+        static void CreateElementsForRecordPage(OpScrollBox opScrollBox, Vector2 size, InGameRecord records)
+        {
+            float labelHeight = 30f;
+            float span = 30f;
+
+            int totalEntryCount = records.GetValueDictionary().Count;
+            int current = 0;
+            float currentHue = 0f;
+
+            float contentSize = opScrollBox.contentSize = Mathf.Max((totalEntryCount + 1) * labelHeight, size.y);
+            foreach(var pair in records.GetValueDictionary())
+            {
+                Color col = (new HSLColor(currentHue, 1f, 0.8f)).rgb;
+                
+                OpLabel entryLabel = new OpLabel(span, contentSize - (current + 1) * labelHeight,      BuffResourceString.Get(pair.Key), true) { color = col };
+                entryLabel.label.shader = Custom.rainWorld.Shaders["MenuTextCustom"];
+                OpLabel valueLabel = new OpLabel(size.x - span, contentSize - (current + 1) * labelHeight, pair.Value, true) { color = col };
+                valueLabel.label.shader = Custom.rainWorld.Shaders["MenuTextCustom"];
+
+                opScrollBox.AddItems(entryLabel, valueLabel);
+
+                current++;
+                currentHue += 0.05f;
+            }
+            opScrollBox.ScrollToTop(true);
+        }
+
         OpScrollBox CreatePage(string pageName, int index)
         {
             pageNames[index] = pageName;
             pagePosesDelta[index] = new Vector2(0, -recordScrollBoxSize.y - 140f - 40f);
-            var opScrollBox = new OpScrollBox(levelBarPos + pagePosesDelta[index], recordScrollBoxSize, 400f);
+            var opScrollBox = new OpScrollBox(levelBarPos + pagePosesDelta[index], recordScrollBoxSize, 400f, false, false ,false);
             new UIelementWrapper(tabWrapper, opScrollBox);
             pages[index] = opScrollBox;
 

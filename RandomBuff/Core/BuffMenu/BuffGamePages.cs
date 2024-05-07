@@ -260,7 +260,7 @@ namespace RandomBuff.Core.BuffMenu
         
         RandomBuffFlagRenderer flagRenderer;
 
-        BuffLevelBarDynamic buffLevelBarDynamic;
+        //BuffLevelBarDynamic buffLevelBarDynamic;
 
         CardTitle cardTitle;
         Vector2 titlePos;
@@ -300,9 +300,9 @@ namespace RandomBuff.Core.BuffMenu
             flagRenderer.pos = flagHidePos;
             Container.AddChild(flagRenderer.container);
 
-            buffLevelBarDynamic = new BuffLevelBarDynamic(Container, new Vector2(200f, 200f), 300f, 1238, 1000);
-            buffLevelBarDynamic.HardSet();
-            buffLevelBarDynamic.setAlpha = 1f;
+            //buffLevelBarDynamic = new BuffLevelBarDynamic(Container, new Vector2(200f, 200f), 300f, 1238, 1000);
+            //buffLevelBarDynamic.HardSet();
+            //buffLevelBarDynamic.setAlpha = 1f;
 
             SetupNewGamePageItems();
         }
@@ -388,7 +388,7 @@ namespace RandomBuff.Core.BuffMenu
         public override void Update()
         {
             base.Update();
-            buffLevelBarDynamic.Update();
+            //buffLevelBarDynamic.Update();
             cardTitle.Update();
             if (_showCounter != _targetShowCounter)
             {
@@ -398,7 +398,7 @@ namespace RandomBuff.Core.BuffMenu
                     _showCounter--;
 
                 pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
-                buffLevelBarDynamic.pos = pos + new Vector2(200f, 200f);
+                //buffLevelBarDynamic.pos = pos + new Vector2(200f, 200f);
                 cardTitle.pos = pos + titlePos;
 
                 dark.alpha = ShowFactor;
@@ -418,7 +418,7 @@ namespace RandomBuff.Core.BuffMenu
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
-            buffLevelBarDynamic.GrafUpdate(timeStacker);
+            //buffLevelBarDynamic.GrafUpdate(timeStacker);
             cardTitle.GrafUpdate(timeStacker);
             if (Show || flagRenderer.NeedRenderUpdate)
             {

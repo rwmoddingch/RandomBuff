@@ -34,10 +34,12 @@ namespace RandomBuffUtils
             }
 
             DeathPersistentSaveDataRx.HookOn();
+            PlayerUtils.OnEnable();
 
             BuffRoomReachEvent.OnEnable();
             BuffRegionGateEvent.OnEnable();
             BuffExtraDialogBoxEvent.OnEnable();
+
             everInit = true;
         }
 
