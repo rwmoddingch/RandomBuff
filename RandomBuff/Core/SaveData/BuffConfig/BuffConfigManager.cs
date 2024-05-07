@@ -168,11 +168,14 @@ namespace RandomBuff.Core.SaveData
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsSpecialItemLocked(string itemName) => IsItemLocked(QuestUnlockedType.Special,itemName);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsCosmeticCanUse(string id) => !IsItemLocked(QuestUnlockedType.Cosmetic, id) && BuffPlayerData.Instance.IsCosmeticEnable(id);
+
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 
         static BuffConfigManager()
         {
-            foreach(var value in Enum.GetValues(typeof(BuffType)))
+            foreach (var value in Enum.GetValues(typeof(BuffType)))
                 buffTypeTable.Add((BuffType)value, new List<BuffID>());
             foreach (var value in Enum.GetValues(typeof(QuestUnlockedType)))
                 lockedMap.Add((QuestUnlockedType)value,new ());

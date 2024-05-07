@@ -5,6 +5,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.Component;
@@ -88,6 +89,8 @@ namespace RandomBuff.Core.Game
 
         private List<IBuff> buffList = new();
 
+        private List<CosmeticUnlock> cosmeticList = new();
+
         private InGameRecord totCardThisCycle;
 
         private BuffPoolManager(RainWorldGame game)
@@ -106,6 +109,14 @@ namespace RandomBuff.Core.Game
 
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 CreateBuff(data.Key);
+
+            foreach (var value in CosmeticUnlockID.values.entries.Where(BuffConfigManager.IsCosmeticCanUse))
+            {
+                var unlock = CosmeticUnlock.CreateInstance(value,game);
+                if(unlock != null)
+                    cosmeticList.Add(unlock);
+            }
+
             Instance = this;
 
         }
@@ -233,8 +244,23 @@ namespace RandomBuff.Core.Game
                 catch (Exception e)
                 {
                     BuffPlugin.LogException(e);
-                    BuffPlugin.LogError($"Exception happened when invoke gain Update of {buff.ID}");
-                    ExceptionTracker.TrackException(e, $"Exception happened when invoke gain Update of {buff.ID}");
+                    BuffPlugin.LogError($"Exception happened when invoke buff Update of {buff.ID}");
+                    ExceptionTracker.TrackException(e, $"Exception happened when invoke buff Update of {buff.ID}");
+                }
+            }
+
+
+            foreach (var cosmetic in cosmeticList)
+            {
+                try
+                {
+                    cosmetic.Update(game);
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e);
+                    BuffPlugin.LogError($"Exception happened when invoke cosmeticUnlock Update of {cosmetic.UnlockID}");
+                    ExceptionTracker.TrackException(e, $"Exception happened when invoke cosmeticUnlock Update of {cosmetic.UnlockID}");
                 }
             }
             GameSetting.InGameUpdate(game);
@@ -465,15 +491,16 @@ namespace RandomBuff.Core.Game
             }
         }
 
-        internal class WinGamePackage
-        {
-            public List<BuffID> winWithBuffs = new List<BuffID>();
-            public List<Condition> winWithConditions = new List<Condition>();
-            public PlayerSessionRecord sessionRecord;
-            public SaveState saveState;
-            public InGameRecord buffRecord;
+       
+    }
+    public class WinGamePackage
+    {
+        public List<BuffID> winWithBuffs = new List<BuffID>();
+        public List<Condition> winWithConditions = new List<Condition>();
+        public PlayerSessionRecord sessionRecord;
+        public SaveState saveState;
+        public InGameRecord buffRecord;
 
-            public string missionId;
-        }
+        public string missionId;
     }
 }
