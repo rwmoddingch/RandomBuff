@@ -41,15 +41,24 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public class ScaleOverLife : ParticleUpdateModule
     {
-        Func<Particle, float, float> scaleFunc;
+        Func<Particle, float, Vector2> scaleFunc;
         public ScaleOverLife(ParticleEmitter emitter, Func<Particle, float, float> scaleFunc) : base(emitter)
+        {
+            this.scaleFunc = new Func<Particle, float, Vector2>((p, life) =>
+            {
+                float a = scaleFunc.Invoke(p, life);
+                return new Vector2(a, a);
+            });
+        }
+
+        public ScaleOverLife(ParticleEmitter emitter, Func<Particle, float , Vector2> scaleFunc) : base(emitter)
         {
             this.scaleFunc = scaleFunc;
         }
 
         public override void UpdateApply(Particle particle)
         {
-            particle.scale = scaleFunc.Invoke(particle, particle.LifeParam);
+            particle.scaleXY = scaleFunc.Invoke(particle, particle.LifeParam);
         }
     }
 
@@ -78,6 +87,21 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public override void UpdateApply(Particle particle)
         {
             particle.vel = velFunc.Invoke(particle, particle.LifeParam);
+        }
+    }
+
+    public class RotationOverLife : ParticleUpdateModule
+    {
+        Func<Particle, float, float> rotationFunc;
+
+        public RotationOverLife(ParticleEmitter emitter, Func<Particle, float, float> rotationFunc) : base(emitter)
+        {
+            this.rotationFunc = rotationFunc;
+        }
+
+        public override void UpdateApply(Particle particle)
+        {
+            particle.rotation = rotationFunc.Invoke(particle, particle.LifeParam);
         }
     }
 }

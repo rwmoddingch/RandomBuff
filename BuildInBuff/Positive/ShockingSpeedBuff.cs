@@ -2,6 +2,8 @@
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
+using RandomBuffUtils.ParticleSystem;
+using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -31,6 +33,7 @@ namespace BuiltinBuffs.Positive
 
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
         {
+            return null;
             return new ShockingSpeedGraphicModule();
         }
 
@@ -53,6 +56,7 @@ namespace BuiltinBuffs.Positive
             {
                 sLeaserInstance.sprites = new FSprite[1];
                 sLeaserInstance.sprites[0] = TriangleMesh.MakeLongMesh(this.savPoss - 1, false, true);
+                Reset(self);
             }
 
             public override void AddToContainer(SLeaserInstance sLeaserInstance, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -163,11 +167,44 @@ namespace BuiltinBuffs.Positive
                     origSpeedFactor = player.slugcatStats.runspeedFac;
                     player.slugcatStats.runspeedFac *= 3f;
 
-                    if (PlayerUtils.TryGetGraphicPart<ShockingSpeedGraphicModule>(player, ShockingSpeedBuff.Instance, out var module))
+                    //if (PlayerUtils.TryGetGraphicPart<ShockingSpeedGraphicModule>(player, ShockingSpeedBuff.Instance, out var module))
+                    //{
+                    //    module.Reset(player.graphicsModule as PlayerGraphics);
+                    //    module.shocked = true;
+                    //}
+                    if (player.room == null)
+                        return;
+                    var emitter = new ParticleEmitter(player.room);
+                    emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 160, false));
+                    emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, player));
+
+
+                    emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 30));
+
+
+                    emitter.ApplyParticleInit(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
+                    emitter.ApplyParticleInit(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 0.3f, 0.15f)));
+                    emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
+                    emitter.ApplyParticleInit(new SetRandomLife(emitter, 5, 10));
+                    emitter.ApplyParticleInit(new SetRandomColor(emitter, 0.5f, 0.6f, 1f, 0.5f));
+                    emitter.ApplyParticleInit(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
+                    emitter.ApplyParticleInit(new SetRandomRotation(emitter, 0f, 360f));
+                    emitter.ApplyParticleInit(new SetRandomPos(emitter, 30f));
+
+
+                    emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (p, a) =>
                     {
-                        module.Reset(player.graphicsModule as PlayerGraphics);
-                        module.shocked = true;
-                    }
+                        return p.setScaleXY * (1f - a);
+                    }));
+
+                    emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (p, a) =>
+                    {
+                        Color color = Color.Lerp(Color.white, p.setColor,  a);
+                        color.a = 1f - a;
+                        return color;
+                    }));
+
+                    ParticleSystem.ApplyEmitterAndInit(emitter);
                 }
                 counter = 160;
             }

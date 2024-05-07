@@ -151,6 +151,7 @@ namespace RandomBuff.Core.StaticsScreen
                 if(expBar.FinishState)
                 {
                     state = ScoreCaculatorState.Finish;
+                    (menu as BuffGameWinScreen).ShowRecords();
                 }
             }
             else if(state == ScoreCaculatorState.Finish)

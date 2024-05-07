@@ -227,17 +227,39 @@ namespace RandomBuff.Render.UI
             if(ID == InGame_OnMouseFocus)
             {
                 BuffID id = Params[0] as BuffID;
-                helpInfo = $"Single click to check {id} in detail\nPress tab to turn off hud";
+                helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnMouseFocus");
+                helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
+                
+                helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+
+
                 return true;
             }
             else if (ID == InGame_OnCardExclusiveShow)
             {
-                helpInfo = $"Single click to turn over the card\nRight click to exit detail mode\nPress tab to turn off hud";
+                BuffID id = Params[0] as BuffID;
+                helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnCardExclusiveShow");
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+
+                if(BuffConfigManager.GetStaticData(id).Triggerable)
+                {
+                    helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_BindKey");
+                    helpInfo = Regex.Replace(helpInfo, "<KEYBINDER_KEY>", KeyCode.CapsLock.ToString());
+                    helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
+                }
+
+                helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
                 return true;
             }
             else if (ID == InGame_NoCardFocus)
             {
-                helpInfo = $"Move mouse on one card and click to check it\nPress tab to turn off hud";
+                helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_NoCardFocus");
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+
+                helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
                 return true;
             }
             return false;

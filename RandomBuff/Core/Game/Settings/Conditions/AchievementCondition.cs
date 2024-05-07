@@ -31,7 +31,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override float Exp => 100;
 
-        public override bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions = null)
         {
             sameConditions ??= new List<Condition>();
@@ -55,7 +55,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
 
             achievementID = re[Random.Range(0, re.Count)];
-            return true;
+            return ConditionState.Ok_More;
         }
 
         public override string DisplayProgress(InGameTranslator translator)
@@ -65,7 +65,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayName(InGameTranslator translator)
         {
-            return string.Format(translator.Translate("Earn {0} passage"),
+            return string.Format(BuffResourceString.Get("DisplayName_Achievement"),
                 translator.Translate(WinState.PassageDisplayName(achievementID)));
         }
 

@@ -11,6 +11,9 @@ using RandomBuff.Core.SaveData;
 using UnityEngine;
 using RandomBuff.Render.UI.Component;
 using RandomBuff.Render.UI;
+using Menu.Remix;
+using Menu.Remix.MixedUI;
+using RandomBuff.Core.ProgressionUI;
 
 namespace RandomBuff.Core.StaticsScreen
 {
@@ -26,11 +29,12 @@ namespace RandomBuff.Core.StaticsScreen
         public BuffGameScoreCaculator scoreCaculator;
         public CardTitle title;
 
-        public SleepScreenKills kills;
+        public MenuTabWrapper wrapper;
+        public OpScrollBox recordBox;
 
-        public MenuLabel missionTime;
-
-        public MenuLabel bestMissionTime;
+        bool recordShowed;
+        Vector2 recordBoxHidePos;
+        Vector2 recordBoxShowPos;
 
         public bool isShowingDialog;
         public bool evaluateExpedition;
@@ -81,6 +85,10 @@ namespace RandomBuff.Core.StaticsScreen
             pages[0].Container.AddChild(flagRenderer.container);
             flagRenderer.container.MoveBehindOtherNode(gradient);
 
+            wrapper = new MenuTabWrapper(this, pages[0]);
+            pages[0].subObjects.Add(wrapper);
+
+            
             //winPackage
             var winPackage = BuffPoolManager.Instance.winGamePackage;
             BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}");
@@ -89,6 +97,15 @@ namespace RandomBuff.Core.StaticsScreen
                 str += $"{{{item.Key},{item.Value}}},";
 
             BuffPlugin.Log(str);
+
+            Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
+            Vector2 recordSize = new Vector2(400f, 300f);
+            recordBoxHidePos = new Vector2(screenSize.x + 10, screenSize.y - recordSize.y - 100f);
+            recordBoxShowPos = recordBoxHidePos + new Vector2(-40 - recordSize.x, 0);
+            recordBox = new OpScrollBox(new Vector2(screenSize.x + 10, screenSize.y - recordSize.y - 100f), recordSize, 100f, false, false, false);
+            new UIelementWrapper(wrapper, recordBox);
+            BuffProgressionPage.CreateElementsForRecordPage(recordBox, recordSize, winPackage.buffRecord);
+
 
            //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
             var newFinishQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
@@ -106,6 +123,26 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 this.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
             }
+        }
+
+        TickAnimCmpnt animCmpnt; 
+               
+        public void ShowRecords()
+        {
+            if (recordShowed)
+                return;
+
+            recordShowed = true;
+            animCmpnt = new TickAnimCmpnt(0, 60, autoStart: false, autoDestroy: true)
+                                  .BindModifier(Helper.EaseInOutCubic)
+                                  .BindActions(OnAnimGrafUpdate: UpdateRecordBox, OnAnimFinished: (_) => animCmpnt = null);
+            animCmpnt.SetEnable(true);
+        }
+
+        void UpdateRecordBox(TickAnimCmpnt tickAnimCmpnt, float a)
+        {
+            float p = tickAnimCmpnt.Get();
+            recordBox.pos = Vector2.Lerp(recordBoxHidePos, recordBoxShowPos, p);
         }
 
         public override void Update()

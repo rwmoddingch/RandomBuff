@@ -26,7 +26,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         }
 
 
-        public override bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions)
         {
             List<string> list = new() { "all", "Positive", "Negative", "Duality" };
@@ -47,7 +47,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
             needCard = (int)Random.Range(Mathf.Lerp(5, 10, difficulty), Mathf.Lerp(10, 15, difficulty)) / (all ? 1: 2);
             BuffPlugin.LogDebug($"Add Card Condition {needCard}:{current}");
-            return list.Count != 1;
+            if (list.Count != 1)
+                return ConditionState.Ok_More;
+            else
+                return ConditionState.Ok_NoMore;
         }
 
         public override string DisplayProgress(InGameTranslator translator)
@@ -57,8 +60,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayName(InGameTranslator translator)
         {
-            var type = all ? "all types" : this.type.ToString();
-            return string.Format(translator.Translate("Collect {0} {1} cards"), needCard, type);
+            var type = BuffResourceString.Get(all ? "all types" : this.type.ToString());
+            return string.Format(BuffResourceString.Get("DisplayName_Card"), needCard, type);
         }
 
         public override void InGameUpdate(RainWorldGame game)

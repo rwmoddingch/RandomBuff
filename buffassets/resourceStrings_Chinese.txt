@@ -36,13 +36,42 @@ Quick|快速模式
 BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
 
+
 //BuffCardSlot
 InGameSlot_SlotTitle|Buff卡槽
 InGameSlot_CardDetail|Buff详情
 CardPickSlot_SlotTitle|抽取<Cards>张卡
+
 
 //Records
 totCard|获取的所有Buff数量：
 totPositiveCard|获取的正面Buff数量：
 totNegativeCard|获取的负面Buff数量：
 totDualityCard|获取的双向Buff数量：
+
+
+//BasicInGameBuffCardSlot
+BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
+BasicInGameBuffCardSlot_OnCardExclusiveShow|单击左键以翻转卡牌<LINE>单击右键以退出详情浏览
+BasicInGameBuffCardSlot_NoCardFocus|将鼠标移至一个卡牌上并单击鼠标左键来查看卡牌
+BasicInGameBuffCardSlot_ExitHUD|<LINE>按下 <HUD_KEY> 来关闭 hud
+BasicInGameBuffCardSlot_BindKey|<LINE>按下 <KEYBINDER_KEY> 并按另一个按键来给 <BuffID> 绑定快捷键
+
+
+//BuffCondition
+DisplayName_Achievement|获取{0}通行证
+DisplayName_Cycle|生存至少{0}个雨循环
+DisplayName_Card|获取{0}张{1}的buff卡
+DisplayName_Like|与{0}达到最高好感
+DisplayName_MeetSS_SL|在{0}循环内见到五块卵石和仰望皎月
+
+//BuffCondition_BuffTypes
+all types|所有类型
+Negative|负面
+Positive|正面
+Duality|双向
+
+//BuffCondition_CommunityID
+Lizards|蜥蜴
+Scavengers|拾荒者
+Cicadas|蝉乌贼

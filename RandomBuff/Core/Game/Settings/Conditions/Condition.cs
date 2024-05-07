@@ -19,13 +19,20 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static ConditionID Card;
         public static ConditionID Hunt;
         public static ConditionID Achievement;
+        public static ConditionID Like;
+        public static ConditionID MeetSS_SL;
+        public static ConditionID SaveSL;
+
+
         static ConditionID()
         {
             Cycle = new ConditionID("Cycle", true);
             Card = new ConditionID("Card", true);
             //Hunt = new ConditionID("Hunt", true);
             Achievement = new ConditionID("Achievement", true);
-
+            Like = new ConditionID("Like", true);
+            MeetSS_SL = new ConditionID("MeetSS_SL", true);
+            //SaveSL = new ConditionID("SaveSL", true);
         }
 
         public ConditionID(string value, bool register = false) : base(value, register)
@@ -89,7 +96,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         //设置随机条件
         //如果可以重复第二项则为已有同类型的列表
         //返回true代表可以继续选择本类型
-        public abstract bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+        public abstract ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions);
 
         //获取进度
@@ -127,8 +134,17 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<CycleCondition>(ConditionID.Cycle, "Cycle Condition");
             BuffRegister.RegisterCondition<CardCondition>(ConditionID.Card, "Card Condition");
             BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement Condition");
+            BuffRegister.RegisterCondition<LikeCondition>(ConditionID.Like, "Like Condition");
+            BuffRegister.RegisterCondition<MeetSS_SLCondition>(ConditionID.MeetSS_SL, "Meet SS and SL");
             //BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
 
+        }
+
+        public enum ConditionState
+        {
+            Ok_More,
+            Ok_NoMore,
+            Fail
         }
     }
 }

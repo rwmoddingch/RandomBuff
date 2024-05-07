@@ -36,13 +36,42 @@ Quick|QUICK
 BuffConditionHUD_WinInfo|sleep to finish game
 BuffConditionHUD_WinTitle|WIN
 
+
 //BuffCardSlot
 InGameSlot_SlotTitle|BuffSlot
 InGameSlot_CardDetail|BuffDetail
 CardPickSlot_SlotTitle|Pick <Cards> cards
+
 
 //Records
 totCard|Number of all buffs acquired:
 totPositiveCard|Number of positive buffs acquired:
 totNegativeCard|Number of negative buffs acquired:
 totDualityCard|Number of duality buffs acquired:
+
+
+//BasicInGameBuffCardSlot
+BasicInGameBuffCardSlot_OnMouseFocus|Single click to check <BuffID> in detail
+BasicInGameBuffCardSlot_OnCardExclusiveShow|Single click to turn over the card<LINE>Right click to exit detail mode
+BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and click to check it
+BasicInGameBuffCardSlot_ExitHUD|<LINE>Press <HUD_KEY> to turn off hud
+BasicInGameBuffCardSlot_BindKey|<LINE>Hold <KEYBINDER_KEY> and press another key to bind shortcut key for <BuffID>
+
+
+//BuffCondition
+DisplayName_Achievement|Earn {0} passage
+DisplayName_Cycle|Survive {0} cycles
+DisplayName_Card|Collect {0} {1} buffcards
+DisplayName_Like|Maximize like with {0}
+DisplayName_MeetSS_SL|Meet Pebbles and Moon in {0} cycles
+
+//BuffCondition_BuffTypes
+all types|all types
+Negative|negative
+Positive|positive
+Duality|duality
+
+//BuffCondition_CommunityID
+Lizards|Lizards
+Scavengers|Scavengers
+Cicadas|Cicadas

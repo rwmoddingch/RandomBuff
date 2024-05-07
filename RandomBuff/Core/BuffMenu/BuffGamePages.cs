@@ -243,7 +243,7 @@ namespace RandomBuff.Core.BuffMenu
         SimpleButton settingButton;
         SimpleButton backButton;
         HoldButton startGameButton;
-        HorizontalSlider difficultySlider;
+        //HorizontalSlider difficultySlider;
 
         BigSimpleButton[] conditionButtons;
         SymbolButton[] hiddenToggles;
@@ -322,15 +322,15 @@ namespace RandomBuff.Core.BuffMenu
             subObjects.Add(nodeWrapper = new FNodeWrapper(gameMenu, this));
 
             //难度滑条
-            subObjects.Add(difficultySlider = new HorizontalSlider(gameMenu, this, "", new Vector2(470f, 600f), new Vector2(400f, 0f), BuffGameMenuStatics.DifficultySlider, false));
+            //subObjects.Add(difficultySlider = new HorizontalSlider(gameMenu, this, "", new Vector2(470f, 600f), new Vector2(400f, 0f), BuffGameMenuStatics.DifficultySlider, false));
 
-            var easySprite = new FSprite("SaintA", true);
-            easySprite.color = new Color(0.2f, 0.75f, 0.2f);
-            nodeWrapper.WrapNode(easySprite, new Vector2(680f - 250f, 620f));
+            //var easySprite = new FSprite("SaintA", true);
+            //easySprite.color = new Color(0.2f, 0.75f, 0.2f);
+            //nodeWrapper.WrapNode(easySprite, new Vector2(680f - 250f, 620f));
 
-            var hardSprite = new FSprite("OutlawA", true);
-            hardSprite.color = new Color(0.75f, 0.2f, 0.2f);
-            nodeWrapper.WrapNode(hardSprite, new Vector2(680f + 250f, 620f));
+            //var hardSprite = new FSprite("OutlawA", true);
+            //hardSprite.color = new Color(0.75f, 0.2f, 0.2f);
+            //nodeWrapper.WrapNode(hardSprite, new Vector2(680f + 250f, 620f));
 
             //条件选择按钮
             conditionButtons = new BigSimpleButton[5];

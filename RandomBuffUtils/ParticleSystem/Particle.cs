@@ -11,8 +11,8 @@ namespace RandomBuffUtils.ParticleSystem
     public class Particle
     {
         public ParticleEmitter emitter;
-        public string element;
-        public string shader;
+        
+        public List<SpriteInitParam> spriteInitParams = new List<SpriteInitParam>();
 
         public MoveType moveType;
         Vector2 _pos;
@@ -38,13 +38,27 @@ namespace RandomBuffUtils.ParticleSystem
         public Vector2 vel;
         public Vector2 setVel;
 
-        public float setScale;
-        public float scale;
-        public float lastScale;
+        public float scale
+        {
+            get => scaleXY.x;
+            set
+            {
+                scaleXY.x = value;
+                scaleXY.y = value;
+            }
+        }
+
+        public Vector2 scaleXY;
+        public Vector2 setScaleXY;
+        public Vector2 lastScaleXY;
 
         public Color setColor;
         public Color color;
         public Color lastColor;
+
+        public float rotation;
+        public float lastRotation;
+        public float setRotation;
 
         public int life;
         float setLife;
@@ -52,7 +66,7 @@ namespace RandomBuffUtils.ParticleSystem
         
         public bool inStage;
         public int spriteLayer = 8;
-        public FSprite sprite;
+        public FSprite[] sprites = new FSprite[0];
 
         public void Init(ParticleEmitter emitter)
         {
@@ -64,8 +78,7 @@ namespace RandomBuffUtils.ParticleSystem
             setLife = life = 1;
             inStage = false;
             spriteLayer = 8;
-            element = string.Empty;
-            shader = string.Empty;
+            spriteInitParams.Clear();
             moveType = MoveType.Relative;
         }
 
@@ -75,15 +88,28 @@ namespace RandomBuffUtils.ParticleSystem
                 return;
 
             inStage = true;
-            if (sprite == null)
-                sprite = new FSprite(element);
-            else
-                sprite.SetElementByName(element);
 
-            if(!string.IsNullOrEmpty(shader))
-                sprite.shader = Custom.rainWorld.Shaders[shader];
+            if (sprites.Length != spriteInitParams.Count)
+            {
+                Array.Resize(ref sprites, spriteInitParams.Count);
+                for(int i = 0; i< sprites.Length; i++)
+                {
+                    if (sprites[i] == null)
+                        sprites[i] = new FSprite("pixel");
+                }
+            }
 
-            emitter.system.Containers[spriteLayer].AddChild(sprite);
+            for(int i = 0;i < spriteInitParams.Count;i++)
+            {
+                sprites[i].SetElementByName(spriteInitParams[i].element);
+                if (!string.IsNullOrEmpty(spriteInitParams[i].shader))
+                    sprites[i].shader = Custom.rainWorld.Shaders[spriteInitParams[i].shader];
+                else
+                    sprites[i].shader = Custom.rainWorld.Shaders["Basic"];
+                emitter.system.Containers[spriteLayer].AddChild(sprites[i]);
+            }
+
+            
             //BuffUtils.Log("Particle", "InitSpritesAndAddToContainer");
         }
 
@@ -96,8 +122,9 @@ namespace RandomBuffUtils.ParticleSystem
 
             lastPos = pos;
             pos += vel;
-            lastScale = scale;
+            lastScaleXY = scaleXY;
             lastColor = color;
+            lastRotation = rotation;
         }
 
         public virtual void DrawSprites(RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -105,12 +132,19 @@ namespace RandomBuffUtils.ParticleSystem
             if(!inStage) return;
 
             Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
-            float smoothScale = Mathf.Lerp(lastScale, scale, timeStacker);
+            Vector2 smoothScaleXY = Vector2.Lerp(lastScaleXY, scaleXY, timeStacker);
             Color smoothColor = Color.Lerp(lastColor, color, timeStacker);
+            float smoothRotation = Mathf.Lerp(lastRotation, rotation, timeStacker);
 
-            sprite.SetPosition(smoothPos - camPos);
-            sprite.scale = smoothScale;
-            sprite.color = smoothColor;
+            for(int i = 0; i < sprites.Length; i++)
+            {
+                sprites[i].SetPosition(smoothPos - camPos);
+                sprites[i].scaleX = smoothScaleXY.x * spriteInitParams[i].scale;
+                sprites[i].scaleY = smoothScaleXY.y * spriteInitParams[i].scale;
+                sprites[i].color = smoothColor;
+                sprites[i].alpha = spriteInitParams[i].alpha;
+                sprites[i].rotation = smoothRotation;
+            }
         }
 
         public virtual void ClearSprites()
@@ -119,7 +153,8 @@ namespace RandomBuffUtils.ParticleSystem
                 return;
 
             inStage = false;
-            sprite.RemoveFromContainer();
+            for (int i = 0; i < sprites.Length; i++)
+                sprites[i].RemoveFromContainer();
         }
 
         public virtual void Die()
@@ -144,10 +179,21 @@ namespace RandomBuffUtils.ParticleSystem
         }
         public void HardSetScale(float scale)
         {
-            this.scale = scale;
-            lastScale = scale;
-            setScale = scale;
+            HardSetScale(new Vector2(scale, scale));
         }
+
+        public void HardSetScale(Vector2 scale)
+        {
+            setScaleXY = scale;
+            scaleXY = scale;
+            lastScaleXY = scale;
+        }
+
+        public void HardSetRotation(float rotation)
+        {
+            this.rotation = setRotation = lastRotation = rotation;
+        }
+
         public void SetLife(int life)
         {
             this.life = life;
@@ -165,6 +211,21 @@ namespace RandomBuffUtils.ParticleSystem
         {
             Relative,
             Global
+        }
+
+        public struct SpriteInitParam
+        {
+            public string element;
+            public string shader;
+            public float alpha;
+            public float scale;
+            public SpriteInitParam(string element, string shader, float alpha = 1f, float scale = 1f)
+            {
+                this.element = element;
+                this.shader = shader;
+                this.alpha = alpha;
+                this.scale = scale;
+            }
         }
     }
 }

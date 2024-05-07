@@ -178,9 +178,13 @@ namespace RandomBuff.Core.Game.Settings
         {
             var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
             var same = conditions.Where(i => i.ID == id);
-            if(!re.SetRandomParameter(name, Difficulty, same.ToList()))
+            var result = re.SetRandomParameter(name, Difficulty, same.ToList());
+            if (result == Condition.ConditionState.Ok_NoMore || result == Condition.ConditionState.Fail)
                 cantAddMore.Add(re.ID);
             conditions.Add(re);
+
+            if (result == Condition.ConditionState.Fail)
+                return null;
             return re;
         }
 
@@ -208,10 +212,17 @@ namespace RandomBuff.Core.Game.Settings
             var list = BuffRegister.GetAllConditionList();
             list.RemoveAll(i =>cantAddMore.Contains(i) ||
                                  !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
+
             if (list.Count == 0)
                 return (null, false);
-            return (CreateNewCondition(list[Random.Range(0, list.Count)]),
-                    cantAddMore.Count != BuffRegister.GetAllConditionList().Count);
+
+            Condition newCondition = null;
+            while(list.Count > 0 && (newCondition = CreateNewCondition(list[Random.Range(0, list.Count)])) == null) {}
+
+            if (newCondition == null)
+                return (null, false);
+
+            return (newCondition, cantAddMore.Count < BuffRegister.GetAllConditionList().Count);
         }
 
 
