@@ -18,7 +18,7 @@ namespace RandomBuff.Core.Progression
             return string.Format(Custom.rainWorld.inGameTranslator.Translate("Reach Level {} to Unlock"), level);
         }
 
-        public override bool UpdateUnlockedState(BuffPoolManager.WinGamePackage package)
+        public override bool UpdateUnlockedState(WinGamePackage package)
         {
             if (BuffPlayerData.Instance.PlayerLevel >= level)
                 return true;

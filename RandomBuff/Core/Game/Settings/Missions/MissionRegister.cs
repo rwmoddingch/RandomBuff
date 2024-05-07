@@ -16,7 +16,7 @@ namespace RandomBuff.Core.Game.Settings.Missions
         private static readonly Dictionary<MissionID, Mission> registeredMissions = new ();
 
 
-        public static bool TryGetMission(MissionID id, out Mission mission)
+        internal static bool TryGetMission(MissionID id, out Mission mission)
         {
             if (!BuffConfigManager.IsItemLocked(QuestUnlockedType.Mission, id.value) && registeredMissions.TryGetValue(id,out mission))
                 return true;
@@ -25,12 +25,12 @@ namespace RandomBuff.Core.Game.Settings.Missions
             return false;
         }
 
-        public static List<MissionID> GetAllUnlockedMissions()
+        internal static List<MissionID> GetAllUnlockedMissions()
         {
             return registeredMissions.Keys.Where(i => !BuffConfigManager.IsItemLocked(QuestUnlockedType.Mission, i.value)).ToList();
         }
 
-      public static void RegisterMission(MissionID ID, Mission mission)
+        public static void RegisterMission(MissionID ID, Mission mission)
         {
             if(mission.VerifyId())
                 registeredMissions.Add(ID, mission);
@@ -38,32 +38,28 @@ namespace RandomBuff.Core.Game.Settings.Missions
                 BuffPlugin.LogError($"Missing some dependence for Mission ID:{ID}");
         }
 
-        public static void RegisterAllMissions(Assembly assembly, bool buitIn)
+        internal static void RegisterAllMissions()
         {
-            Assembly _assembly;
-            if (!buitIn)
+            foreach (var _assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                _assembly = assembly;
-            }
-            else _assembly = System.Reflection.Assembly.GetExecutingAssembly();
-
-            foreach (var type in _assembly.GetTypes())
-            {
-                if (type.GetInterfaces().Contains(typeof(IMissionEntry)))
+                foreach (var type in _assembly.GetTypes())
                 {
-                    var obj = type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
-                    try
+                    if (type.GetInterfaces().Contains(typeof(IMissionEntry)))
                     {
-                        type.GetMethod("RegisterMission").Invoke(obj, Array.Empty<object>());
-                        BuffPlugin.Log("Registered mission: " + type.Name);
+                        var obj = type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
+                        try
+                        {
+                            type.GetMethod("RegisterMission").Invoke(obj, Array.Empty<object>());
+                            BuffPlugin.Log("Registered mission: " + type.Name);
+                        }
+                        catch (Exception ex)
+                        {
+                            BuffPlugin.LogException(ex);
+                            BuffPlugin.LogError("Failed in registering mission: " + type.Name);
+                            ExceptionTracker.TrackException(ex, "Failed in registering mission: " + type.Name);
+                        }
+
                     }
-                    catch (Exception ex) 
-                    {
-                        BuffPlugin.LogException(ex);
-                        BuffPlugin.LogError("Failed in registering mission: " + type.Name);
-                        ExceptionTracker.TrackException(ex, "Failed in registering mission: " + type.Name);
-                    }
-                    
                 }
             }
         }

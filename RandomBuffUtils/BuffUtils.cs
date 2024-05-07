@@ -43,28 +43,28 @@ namespace RandomBuffUtils
 
         public static void Log(object header, object m)
         {
-            Debug.Log($"[RandomBuffUtils - {header}] {m}");
+            UnityEngine.Debug.Log($"[RandomBuffUtils - {header}] {m}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Message - {header}]\t{m}\n");
         }
 
         public static void LogWarning(object header, object m)
         {
-            Debug.LogWarning($"[RandomBuffUtils - {header}] {m}");
+            UnityEngine.Debug.LogWarning($"[RandomBuffUtils - {header}] {m}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Warning - {header}]\t{m}\n");
         }
         public static void LogError(object header, object m)
         {
-            Debug.LogError($"[RandomBuffUtils - {header}] {m}");
+            UnityEngine.Debug.LogError($"[RandomBuffUtils - {header}] {m}");
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Error - {header}]\t{m}\n");
         }
 
         public static void LogException(object header, Exception m)
         {
-            Debug.LogError($"[RandomBuffUtils - {header}] {m.Message}");
-            Debug.LogException(m);
+            UnityEngine.Debug.LogError($"[RandomBuffUtils - {header}] {m.Message}");
+            UnityEngine.Debug.LogException(m);
             if (canAccessLog)
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcustom.log"), $"[Fatal - {header}]\t{m.Message}\n");
             

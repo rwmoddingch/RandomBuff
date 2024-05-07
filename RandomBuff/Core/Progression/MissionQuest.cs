@@ -22,7 +22,7 @@ namespace RandomBuff.Core.Progression
                 Custom.rainWorld.inGameTranslator.Translate(missionName));
         }
 
-        public override bool UpdateUnlockedState(BuffPoolManager.WinGamePackage package)
+        public override bool UpdateUnlockedState(WinGamePackage package)
         {
             return package.missionId == missionId;
 
