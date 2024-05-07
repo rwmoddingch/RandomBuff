@@ -35,12 +35,12 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         }
 
-        public override bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions = null)
         {
             cycle = (int)Random.Range(Mathf.Lerp(5, 15, difficulty), Mathf.Lerp(10, 30, difficulty));
             BuffPlugin.LogDebug($"Add Cycle Condition {cycle}");
-            return false;
+            return ConditionState.Ok_NoMore;
         }
 
         public override string DisplayProgress(InGameTranslator translator)
@@ -50,7 +50,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayName(InGameTranslator translator)
         {
-            return string.Format(translator.Translate("Survive {0} cycles"), cycle);
+            return string.Format(BuffResourceString.Get("DisplayName_Cycle"), cycle);
         }
 
 

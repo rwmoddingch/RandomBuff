@@ -105,7 +105,7 @@ namespace RandomBuff.Core.ProgressionUI
             //testLabel.SetPosition(200, 200);
         }
 
-        static void CreateElementsForRecordPage(OpScrollBox opScrollBox, Vector2 size, InGameRecord records)
+        public static void CreateElementsForRecordPage(OpScrollBox opScrollBox, Vector2 size, InGameRecord records)
         {
             float labelHeight = 30f;
             float span = 30f;

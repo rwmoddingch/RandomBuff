@@ -39,8 +39,8 @@ namespace BuiltinBuffs.Duality
                 emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 120, true));
                 emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 1));
 
-                emitter.ApplyParticleInit(new SetElement(emitter, "Futile_White"));
-                emitter.ApplyParticleInit(new SetShader(emitter, "FlatLight"));
+                emitter.ApplyParticleInit(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight")));
+                //emitter.ApplyParticleInit(new SetShader(emitter, "FlatLight"));
                 emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
                 emitter.ApplyParticleInit(new SetRandomPos(emitter, 0f));
                 emitter.ApplyParticleInit(new SetRandomLife(emitter, 70, 80));
@@ -50,7 +50,7 @@ namespace BuiltinBuffs.Duality
 
                 emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (particle, lifeParam) =>
                 {
-                    return particle.setScale * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f);
+                    return particle.setScaleXY * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f);
                 }));
                 emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (particle, lifeParam) =>
                 {
@@ -87,8 +87,7 @@ namespace BuiltinBuffs.Duality
                 emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 100, false));
                 emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 5));
 
-                emitter.ApplyParticleInit(new SetElement(emitter, "Futile_White"));
-                emitter.ApplyParticleInit(new SetShader(emitter, "FlatLight"));
+                emitter.ApplyParticleInit(new AddElement(emitter,new Particle.SpriteInitParam("pixel", "")));
                 emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
                 emitter.ApplyParticleInit(new SetRandomPos(emitter, 0f));
                 emitter.ApplyParticleInit(new SetRandomLife(emitter, 40, 80));
@@ -104,7 +103,7 @@ namespace BuiltinBuffs.Duality
                 }));
                 emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (p, lifeParam) =>
                 {
-                    return p.setScale * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f) * (1f - lifeParam);
+                    return p.setScaleXY * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f) * (1f - lifeParam);
                 }));
                 ParticleSystem.ApplyEmitterAndInit(emitter);
             }

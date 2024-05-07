@@ -14,7 +14,8 @@ namespace RandomBuffUtils.ParticleSystem
 
         public Action<Particle> OnParticleDieEvent;
         public Action<Particle> OnParticleInitEvent;
-        
+
+        public Action<ParticleEmitter> OnEmitterDie; 
 
         public List<Particle> Particles { get; } = new List<Particle>();
 
@@ -23,16 +24,14 @@ namespace RandomBuffUtils.ParticleSystem
         public List<ParticleInitModule> PInitModules { get; private set; } = new List<ParticleInitModule>();
         public List<ParticleUpdateModule> PUpdateModules { get; private set; } = new List<ParticleUpdateModule>();
 
-
         public Room room;
         public Vector2 pos;
         public Vector2 lastPos;
-
+        public bool slateForDeletion;
 
         public ParticleEmitter(Room room)
         {
             this.room = room;
-            ParticleSystem.ApplyEmitterAndInit(this);
         }
 
         public virtual void Init()
@@ -43,17 +42,29 @@ namespace RandomBuffUtils.ParticleSystem
 
         public virtual void Die()
         {
+            BuffUtils.Log("ParticleEmitter", "Die");
+            slateForDeletion = true;
+            room = null;
             ClearSprites();
+            Particles.Clear();
             system.managedEmitter.Remove(this);
+            OnEmitterDie?.Invoke(this);
         }
 
         #region Draw&Update
         public void Update(bool eu)
         {
+            if (slateForDeletion)
+                return;
+
             lastPos = pos;
 
             foreach (var module in EmitterModules)
+            {
                 module.Update();
+                if (slateForDeletion)
+                    return;
+            }
             foreach (var module in PInitModules)
                 module.Update();
             foreach(var module in PUpdateModules)   
@@ -69,6 +80,9 @@ namespace RandomBuffUtils.ParticleSystem
 
         public void InitSpritesAndAddToContainer()
         {
+            if (slateForDeletion)
+                return;
+
             for (int i = Particles.Count - 1; i >= 0; i--)
             {
                 Particles[i].InitSpritesAndAddToContainer();
@@ -77,6 +91,9 @@ namespace RandomBuffUtils.ParticleSystem
 
         public void DrawSprites(RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            if (slateForDeletion)
+                return;
+
             for (int i = Particles.Count - 1; i >= 0; i--)
             {
                 Particles[i].DrawSprites(rCam, timeStacker, camPos);

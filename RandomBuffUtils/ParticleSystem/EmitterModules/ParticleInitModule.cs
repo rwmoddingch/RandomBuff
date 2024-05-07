@@ -111,10 +111,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public class SetRandomScale : ParticleInitModule
     {
-        float a;
-        float b;
+        Vector2 a;
+        Vector2 b;
 
-        public SetRandomScale(ParticleEmitter emitter, float a, float b) : base(emitter)
+        public SetRandomScale(ParticleEmitter emitter, float a, float b) : this(emitter, new Vector2(a, a), new Vector2(b, b))
+        {
+        }
+
+        public SetRandomScale(ParticleEmitter emitter, Vector2 a, Vector2 b) : base(emitter)
         {
             this.a = a;
             this.b = b;
@@ -122,36 +126,54 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
         public override void Apply(Particle particle)
         {
-            float scale = Random.Range(a, b);
+            Vector2 scale = Vector2.Lerp(a, b, Random.value);
             particle.HardSetScale(scale);
         }
     }
 
-    public class SetElement : ParticleInitModule
+    public class SetRandomRotation : ParticleInitModule
     {
-        string element;
-        public SetElement(ParticleEmitter emitter, string element) : base(emitter)
+        float a;
+        float b;
+        public SetRandomRotation(ParticleEmitter emitter, float rotationA, float rotationB) : base(emitter)
         {
-            this.element = element;
+            this.a = rotationA;
+            this.b = rotationB;
         }
 
         public override void Apply(Particle particle)
         {
-            particle.element = element;
+            float r = Mathf.Lerp(a, b, Random.value);
+            particle.rotation = r;
         }
     }
 
-    public class SetShader : ParticleInitModule
+    public class AddElement : ParticleInitModule
     {
-        string shader;
-        public SetShader(ParticleEmitter emitter, string shader) : base(emitter)
+        Particle.SpriteInitParam spriteInitParam;
+
+        public AddElement(ParticleEmitter emitter, Particle.SpriteInitParam spriteInitParam) : base(emitter)
         {
-            this.shader = shader;
+            this.spriteInitParam = spriteInitParam;
         }
 
         public override void Apply(Particle particle)
         {
-            particle.shader = shader;
+            particle.spriteInitParams.Add(spriteInitParam);
         }
     }
+
+    //public class SetShader : ParticleInitModule
+    //{
+    //    string shader;
+    //    public SetShader(ParticleEmitter emitter, string shader) : base(emitter)
+    //    {
+    //        this.shader = shader;
+    //    }
+
+    //    public override void Apply(Particle particle)
+    //    {
+    //        particle.shader = shader;
+    //    }
+    //}
 }

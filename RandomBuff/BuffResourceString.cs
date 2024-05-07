@@ -67,7 +67,7 @@ namespace RandomBuff
             return Regex.Replace(orig, "<LINE>", "\n");
         }
 
-        public static string Get(string key)
+        public static string Get(string key, bool returnOrig = false)
         {
             if(currentLangMapper.ContainsKey(key))
                 return currentLangMapper[key];
@@ -75,6 +75,8 @@ namespace RandomBuff
             if(engMapper.ContainsKey(key))
                 return engMapper[key];
 
+            if (returnOrig)
+                return key;
             return $"ERROR!MISSING KEY {key}";
         }
     }

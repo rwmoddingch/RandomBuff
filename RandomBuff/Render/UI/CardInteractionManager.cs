@@ -356,7 +356,7 @@ namespace RandomBuff.Render.UI
                     exclusiveShowCard.LocalMousePos.y < 1f)
                 {
                     CurrentFocusCard = exclusiveShowCard;
-                    Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnCardExclusiveShow);
+                    Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnCardExclusiveShow, false, CurrentFocusCard.ID);
                     return;
                 }
 

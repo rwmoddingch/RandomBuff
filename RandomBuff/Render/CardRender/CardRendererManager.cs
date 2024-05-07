@@ -13,6 +13,7 @@ using Object = UnityEngine.Object;
 using System.Linq;
 using Font = UnityEngine.Font;
 using RWCustom;
+using RandomBuff.Render.UI;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -21,6 +22,7 @@ namespace RandomBuff.Render.CardRender
         static float maxDestroyTime = 60f;
         static List<BuffCardRendererBase> totalRenderers = new List<BuffCardRendererBase>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
+        static List<SingleTextCardRenderer> inactiveSingleTextCardRenderer = new List<SingleTextCardRenderer>();
 
         public static int NextLegalID
         {
@@ -91,15 +93,30 @@ namespace RandomBuff.Render.CardRender
 
         public static SingleTextCardRenderer GetSingleTextRenderer(string text)
         {
-            int id = NextLegalID;
-            var cardObj = new GameObject($"SingleTextCard_{id}");
-            cardObj.transform.position = new Vector3(id * 20, 0, 0);
-            SingleTextCardRenderer _cardRenderer = cardObj.AddComponent<SingleTextCardRenderer>();
-            _cardRenderer.Init(id, null);
-            BuffPlugin.LogDebug($"Get new SingleTextCardRenderer of id {id}");
-            totalRenderers.Add(_cardRenderer);
+            SingleTextCardRenderer result;
+            if(inactiveSingleTextCardRenderer.Count > 0)
+            {
+                result = inactiveSingleTextCardRenderer.Pop();
+                result.gameObject.SetActive(true);
+                result.Init(result._id, null);
+            }
+            else
+                result = GetNewRenderer(text);
 
-            return _cardRenderer;
+            return result;
+
+            SingleTextCardRenderer GetNewRenderer(string text)
+            {
+                int id = NextLegalID;
+                var cardObj = new GameObject($"SingleTextCard_{id}");
+                cardObj.transform.position = new Vector3(id * 20, 0, 0);
+                SingleTextCardRenderer _cardRenderer = cardObj.AddComponent<SingleTextCardRenderer>();
+                _cardRenderer.Init(id, null);
+                BuffPlugin.LogDebug($"Get new SingleTextCardRenderer of id {id}");
+                totalRenderers.Add(_cardRenderer);
+
+                return _cardRenderer;
+            }
         }
 
         public static void RecycleCardRenderer(BuffCardRendererBase buffCardRenderer)
@@ -111,10 +128,11 @@ namespace RandomBuff.Render.CardRender
                 if (!inactiveCardRenderers.Contains(cardRenderer))//不知道为什么，但有时候会出现重复回收的情况
                     inactiveCardRenderers.Add(cardRenderer);
             }
-            else
+            else if(buffCardRenderer is SingleTextCardRenderer singleTextCardRenderer)
             {
-                totalRenderers.Remove(buffCardRenderer);
-                GameObject.Destroy(buffCardRenderer.gameObject);
+                singleTextCardRenderer.gameObject.SetActive(false);
+                if(!inactiveSingleTextCardRenderer.Contains(singleTextCardRenderer))
+                    inactiveSingleTextCardRenderer.Add(singleTextCardRenderer);
             }
         }
 

@@ -32,10 +32,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             
         }
 
-        public override bool SetRandomParameter(SlugcatStats.Name name, float difficulty,
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions = null)
         {
-            return false;
+            return ConditionState.Fail;
         }
 
         public override string DisplayProgress(InGameTranslator translator)
