@@ -504,6 +504,7 @@ namespace RandomBuff.Render.UI
 
                 if (SubManager != null) SubManager.overrideDisabled = false;
                 if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
+                Slot.completeSlot.Title?.ChangeTitle("", true);
             }
             else if(newState == State.Show)
             {
@@ -513,12 +514,14 @@ namespace RandomBuff.Render.UI
                     card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
                 if (SubManager != null) SubManager.overrideDisabled = true;
                 if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
+                Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
             }
             else if(newState == State.ExclusiveShow)
             {
                 Slot.FrontDark = true;
                 exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Exclusive_Show);
 
+                Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_CardDetail"), true);
                 if (SubManager != null) SubManager.overrideDisabled = true;
             }
         }

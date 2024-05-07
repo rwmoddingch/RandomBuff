@@ -1,5 +1,6 @@
 ﻿using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Render.Quest;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Text;
@@ -10,7 +11,7 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Missions
 {
-    public abstract class Mission
+    public abstract class Mission : IQuestRenderer
     {
         public abstract MissionID ID { get; }
 
@@ -25,8 +26,15 @@ namespace RandomBuff.Core.Game.Settings.Missions
 
         public GameSetting GameSetting => gameSetting;
 
+        MissionQuestRenderer questRenderer;
+        public virtual QuestRenderer Renderer => questRenderer;
+
         protected GameSetting gameSetting = new(null);
 
+        public Mission()
+        {
+            questRenderer = new MissionQuestRenderer(this);
+        }
 
         /// <summary>
         /// 验证依赖是否完整

@@ -19,6 +19,7 @@ namespace RandomBuff.Core.GachaMenu
         public static ProcessManager.ProcessID GachaMenuID = new ("GachaMenu", true);
 
         private List<BuffID> picked = new ();
+        BuffSlotTitle slotTitle;
 
         public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, GachaMenuID)
         {
@@ -31,6 +32,8 @@ namespace RandomBuff.Core.GachaMenu
             foreach(var id in BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter))
                 inGameSlot.AppendCard(id);
             container.AddChild(inGameSlot.Container);
+            slotTitle = new BuffSlotTitle();
+            container.AddChild(slotTitle.Container);
 
             currentPacket = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket;
             if(currentPacket.positive.pickTimes == 0)
@@ -118,7 +121,7 @@ namespace RandomBuff.Core.GachaMenu
                 pickerSlot = new CardPickerSlot(inGameSlot, Select,
                     positiveCards.Select(i => i.BuffID).ToArray(),
                     negativeCards,
-                    currentPacket.positive.selectCount);
+                    currentPacket.positive.selectCount, slotTitle);
             }
             else
             {
@@ -134,7 +137,7 @@ namespace RandomBuff.Core.GachaMenu
 
                 pickerSlot = new CardPickerSlot(inGameSlot, Select,
                     pickList.Select(i => i.BuffID).ToArray(),
-                    new BuffID[currentPacket.negative.showCount], currentPacket.negative.selectCount);
+                    new BuffID[currentPacket.negative.showCount], currentPacket.negative.selectCount, slotTitle, true);
             }
             pickerSlots.Add(pickerSlot);
             container.AddChild(pickerSlot.Container);
@@ -164,6 +167,7 @@ namespace RandomBuff.Core.GachaMenu
             for (int i = 0; i < pickerSlots.Count; i++)
                 pickerSlots[i]?.Update();
             inGameSlot?.Update();
+            slotTitle.Update();
 
             if (exitCounter != -1)
                 exitCounter++;
@@ -177,6 +181,7 @@ namespace RandomBuff.Core.GachaMenu
             for(int i=0;i<pickerSlots.Count;i++)
                 pickerSlots[i]?.GrafUpdate(timeStacker);
             inGameSlot?.GrafUpdate(timeStacker);
+            slotTitle.GrafUpdate(timeStacker);
 
             //一个很笨的淡入
             if (exitCounter < 40)

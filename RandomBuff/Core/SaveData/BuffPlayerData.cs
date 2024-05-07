@@ -43,7 +43,7 @@ namespace RandomBuff.Core.SaveData
                         keyBindData = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataSplit[1]);
                         break;
                     case "EXP":
-                        playerTotExp = float.Parse(dataSplit[1]);
+                        playerTotExp = int.Parse(dataSplit[1]);
                         break;
                     case "QUEST":
                         finishedQuest = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
@@ -265,7 +265,7 @@ namespace RandomBuff.Core.SaveData
 
 
         //TODO : 改进等级算法
-        public int PlayerLevel => Mathf.RoundToInt(playerTotExp / 200);
+        public int PlayerLevel => Exp2Level(playerTotExp);
 
         private Dictionary<string, string> keyBindData = new();
 
@@ -276,6 +276,22 @@ namespace RandomBuff.Core.SaveData
         private const string PlayerDataSplit = "<Bpd>";
         private const string PlayerDataSubSplit = "<BpdI>";
 
+        static int expBeforeConstDelta = 295 * 10 + 5 * (10 * 10);
+        public static int Exp2Level(int exp)
+        {
+            if (exp > expBeforeConstDelta)
+            {
+                return (exp - expBeforeConstDelta) / 400 + 10;
+            }
+            return Mathf.FloorToInt((-295 + Mathf.Sqrt(295f * 295f + 4f * 5f * exp)) / (2f * 5f));
+        }
 
+        public static int Level2Exp(int level)
+        {
+            if (level <= 10)//等差
+                return /*(300 + 300 + 10 * (level - 1)) * level / 2;*/ 295 * level + 5 * (level * level);
+            else
+                return expBeforeConstDelta + (level - 10) * 400;
+        }
     }
 }
