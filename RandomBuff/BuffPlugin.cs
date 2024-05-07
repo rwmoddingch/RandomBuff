@@ -28,6 +28,7 @@ using UDebug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.CosmeticUnlocks;
 using RandomBuff.Render.UI.Component;
 
 #pragma warning disable CS0618
@@ -94,7 +95,7 @@ namespace RandomBuff
             {
                 canAccessLog = false;
                 Logger.LogFatal(e.ToString());
-                Debug.LogException(e);
+                UnityEngine.Debug.LogException(e);
             }
           
             try
@@ -129,6 +130,7 @@ namespace RandomBuff
                     Condition.Init();
                     TypeSerializer.Init();
                     BuffQuest.Init();
+                    CosmeticUnlock.Init();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
@@ -165,21 +167,9 @@ namespace RandomBuff
             {
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    BuffPoolManager.Instance.GameSetting.SaveGameSettingToPath("Debug/gameSetting.txt");
-                    BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
-                }
-                if (Input.GetKeyDown(KeyCode.L))
-                {
-                    var gameSetting = new GameSetting(self.StoryCharacter);
-                    var template = new MissionGachaTemplate();
-                    gameSetting.gachaTemplate = template;
-                    gameSetting.GetRandomCondition();
-                    gameSetting.GetRandomCondition();
-
-                    var re = BuffConfigManager.buffTypeTable.Values.ToList();
-                    template.cardPick.Add(0,new List<string>{ re[0][Random.Range(0, re[0].Count)].value , re[0][Random.Range(0, re[0].Count)].value });
-                    template.cardPick.Add(1, new List<string>{ re[1][Random.Range(0, re[1].Count)].value, re[1][Random.Range(0, re[1].Count)].value });
-                    gameSetting.SaveGameSettingToPath("Debug/MissionSetting.txt");
+                    BuffPlayerData.Instance.SetCosmeticEnable(CosmeticUnlockID.Test.value,
+                        !BuffPlayerData.Instance.IsCosmeticEnable(CosmeticUnlockID.Test.value));
+                    BuffPlugin.LogDebug($"Enable Test Cosmetic {BuffPlayerData.Instance.IsCosmeticEnable(CosmeticUnlockID.Test.value)}, {BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, CosmeticUnlockID.Test.value)}");
                 }
             }
         
@@ -215,8 +205,7 @@ namespace RandomBuff
                     BuffConfigManager.InitQuestData();
 
                     //这个会用到template数据（嗯
-                    MissionRegister.RegisterAllMissions(null, true);
-
+                    MissionRegister.RegisterAllMissions();
                     BuffRegister.BuildAllDataStaticWarpper();
                     isPostLoaded = true;
                 }

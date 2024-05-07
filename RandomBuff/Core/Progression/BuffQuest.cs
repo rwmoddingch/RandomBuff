@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RandomBuff.Core.Game;
@@ -13,10 +14,11 @@ using UnityEngine;
 namespace RandomBuff.Core.Progression
 {
 
-    enum QuestUnlockedType
+    public enum QuestUnlockedType
     {
         Card,
         Mission,
+        Cosmetic,
         Special
     }
 
@@ -24,7 +26,7 @@ namespace RandomBuff.Core.Progression
     /// 不要理会这个 偷懒拿名称用的
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    struct BuffQuestJsonGetType
+    public struct BuffQuestJsonGetType
     {
         [JsonProperty("Type")]
         public string TypeName;
@@ -35,7 +37,7 @@ namespace RandomBuff.Core.Progression
     /// 但是不存存档变化，不储存数据（数据请到BuffPlayerData）
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    abstract partial class BuffQuest
+    public abstract partial class BuffQuest
     {
         /// <summary>
         /// 类型名称
@@ -54,7 +56,7 @@ namespace RandomBuff.Core.Progression
         /// 在结算时调用，返回更新后的任务解锁状态
         /// </summary>
         /// <returns></returns>
-        public abstract bool UpdateUnlockedState(BuffPoolManager.WinGamePackage package);
+        public abstract bool UpdateUnlockedState(WinGamePackage package);
 
         /// <summary>
         /// 在初始化时调用，验证数据是否有效
@@ -115,17 +117,31 @@ namespace RandomBuff.Core.Progression
         protected Color color;
     }
 
-    abstract partial class BuffQuest
+    public abstract partial class BuffQuest
     {
         private static Dictionary<string, Type> buffQuestTypes = new();
 
-        public static void Init()
+        public static void Register<T>() where T : BuffQuest, new()
         {
-            buffQuestTypes.Add(nameof(LevelQuest),typeof(LevelQuest));
-            buffQuestTypes.Add(nameof(MissionQuest), typeof(MissionQuest));
+            Register(typeof(T));
+        }
+        internal static void Register(Type type)
+        {
+
+            if (buffQuestTypes.ContainsKey(type.Name))
+                BuffPlugin.LogError($"BuffQuests: same buff quest {type.Name}.");
+            else
+                buffQuestTypes.Add(type.Name, type);
+
         }
 
-        public static bool TryGetType(string typeName, out Type type)
+        internal static void Init()
+        {
+            Register<LevelQuest>();
+            Register<MissionQuest>();
+        }
+
+        internal static bool TryGetType(string typeName, out Type type)
         {
             return buffQuestTypes.TryGetValue(typeName, out type);
         }

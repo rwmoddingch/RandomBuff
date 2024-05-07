@@ -23,7 +23,7 @@ namespace RandomBuff.Core.StaticsScreen
         public float width = 300f;
         public static int maxShowInstance = 5;
 
-        public BuffPoolManager.WinGamePackage winPackage;
+        public WinGamePackage winPackage;
         public ScoreBoard scoreBoard;
         public BuffLevelBarDynamic expBar;
         public List<ScoreInstance> activeInstances = new();
@@ -40,7 +40,7 @@ namespace RandomBuff.Core.StaticsScreen
         List<KeyValuePair<CreatureTemplate.Type, int[]>> killsAndCounts = new();
         int[] defaultScores;
 
-        public BuffGameScoreCaculator(Menu.Menu menu, MenuObject owner, Vector2 pos, BuffPoolManager.WinGamePackage winGamePackage, float width = 300f) : base(menu, owner, pos)
+        public BuffGameScoreCaculator(Menu.Menu menu, MenuObject owner, Vector2 pos, WinGamePackage winGamePackage, float width = 300f) : base(menu, owner, pos)
         {
             this.width = width;
             myContainer = new FContainer();
