@@ -256,7 +256,7 @@ namespace RandomBuff.Core.SaveData
         }
 
 
-        public float playerTotExp = 0;
+        public int playerTotExp = 0;
         public SlotRecord SlotRecord { get; set; } = new();
 
         private List<string> collectData = new();
