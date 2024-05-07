@@ -19,6 +19,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Progression;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuff.Render.UI.Component;
@@ -140,8 +141,24 @@ namespace RandomBuff.Core.Entry
             }
       
         }
+        /// <summary>
+        /// 注册新的任务种类
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public static void RegisterQuestType<T>() where T : BuffQuest, new()
+        {
+            BuffQuest.Register<T>();
+        }
 
-      
+        /// <summary>
+        /// 注册新的装饰解锁要素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public static void RegisterCosmeticUnlock<T>() where T : CosmeticUnlock, new()
+        {
+            CosmeticUnlock.Register<T>();
+        }
+
         /// <summary>
         /// 注册新的抽卡模式
         /// </summary>
@@ -365,6 +382,7 @@ namespace RandomBuff.Core.Entry
                                 ExceptionTracker.TrackException(e, $"Invoke {type.Name}.OnEnable Failed!");
                             }
                         }
+                        
                     }
                 }
 

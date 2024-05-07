@@ -59,6 +59,9 @@ namespace RandomBuff.Core.SaveData
                         }
                      
                         break;
+                    case "COSMETIC":
+                        enableCosmetics = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
+                        break;
                     default:
                         unrecognizedSaveStrings.Add(item);
                         break;
@@ -82,6 +85,7 @@ namespace RandomBuff.Core.SaveData
             builder.Append($"EXP{PlayerDataSubSplit}{playerTotExp}{PlayerDataSplit}");
             builder.Append($"QUEST{PlayerDataSubSplit}{JsonConvert.SerializeObject(finishedQuest)}{PlayerDataSplit}");
             builder.Append($"TOTCARDS{PlayerDataSubSplit}{JsonConvert.SerializeObject(SlotRecord)}{PlayerDataSplit}");
+            builder.Append($"COSMETIC{PlayerDataSubSplit}{JsonConvert.SerializeObject(enableCosmetics)}{PlayerDataSplit}");
 
             foreach (var item in unrecognizedSaveStrings)
                 builder.Append($"{item}{PlayerDataSplit}");
@@ -209,7 +213,7 @@ namespace RandomBuff.Core.SaveData
         /// <summary>
         /// 更新任务状态，并返回新完成的任务list
         /// </summary>
-        public List<BuffQuest> UpdateQuestState(BuffPoolManager.WinGamePackage package)
+        public List<BuffQuest> UpdateQuestState(WinGamePackage package)
         {
             List<BuffQuest> list = new ();
             foreach (var questName in BuffConfigManager.GetQuestNameList())
@@ -225,12 +229,40 @@ namespace RandomBuff.Core.SaveData
 
             return list;
         }
+
+        /// <summary>
+        /// 获取是否启用了解锁的装饰
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool IsCosmeticEnable(string id) => enableCosmetics.Contains(id);
+
+
+        /// <summary>
+        /// 设置解锁装置的启用状态
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="newEnable"></param>
+        public void SetCosmeticEnable(string id, bool newEnable)
+        {
+            if (enableCosmetics.Contains(id))
+            {
+                if(!newEnable) enableCosmetics.Remove(id);
+            }
+            else
+            {
+                if(newEnable) enableCosmetics.Add(id);
+            }
+        }
+
+
         public int playerTotExp = 0;
         public SlotRecord SlotRecord { get; set; } = new();
 
         private List<string> collectData = new();
 
-  
+        private HashSet<string> enableCosmetics = new();
+
 
         //TODO : 改进等级算法
         public int PlayerLevel => Exp2Level(playerTotExp);
