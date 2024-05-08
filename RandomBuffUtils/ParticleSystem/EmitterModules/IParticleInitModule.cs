@@ -9,18 +9,8 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuffUtils.ParticleSystem.EmitterModules
 {
-    public class ParticleInitModule : EmitterModule
-    {
-        public ParticleInitModule(ParticleEmitter emitter) : base(emitter)
-        {
-        }
-
-        public virtual void Apply(Particle particle)
-        {
-        }
-    }
-
-    public class SetRandomVelocity : ParticleInitModule
+ 
+    public class SetRandomVelocity : EmitterModule, IParticleInitModule
     {
         Vector2 a;
         Vector2 b;
@@ -31,14 +21,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.b = b;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             Vector2 vel = Vector2.Lerp(a, b, Random.value);
             particle.SetVel(vel);
         }
     }
 
-    public class SetRandomPos : ParticleInitModule
+    public class SetRandomPos : EmitterModule, IParticleInitModule
     {
         float rad;
         public SetRandomPos(ParticleEmitter emitter, float rad) : base(emitter)
@@ -46,14 +36,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.rad = rad;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             Vector2 pos = Custom.RNV() * rad * Random.value + emitter.pos;
             particle.HardSetPos(pos);
         }
     }
 
-    public class SetMoveType : ParticleInitModule
+    public class SetMoveType : EmitterModule, IParticleInitModule
     {
         Particle.MoveType moveType;
         public SetMoveType(ParticleEmitter emitter, Particle.MoveType moveType) : base(emitter) 
@@ -61,13 +51,13 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.moveType = moveType;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             particle.moveType = moveType;
         }
     }
 
-    public class SetRandomLife : ParticleInitModule
+    public class SetRandomLife : EmitterModule, IParticleInitModule
     {
         int a;
         int b;
@@ -78,14 +68,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.b = b;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             int life = Random.Range(a, b);
             particle.SetLife(life);
         }
     }
 
-    public class SetRandomColor : ParticleInitModule
+    public class SetRandomColor : EmitterModule, IParticleInitModule
     {
         float hueA;
         float hueB;
@@ -102,14 +92,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.saturation = saturation;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             Color color = Custom.HSL2RGB(Random.Range(hueA, hueB), saturation, lightness);
             particle.HardSetColor(color);
         }
     }
 
-    public class SetRandomScale : ParticleInitModule
+    public class SetRandomScale : EmitterModule, IParticleInitModule
     {
         Vector2 a;
         Vector2 b;
@@ -124,14 +114,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.b = b;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             Vector2 scale = Vector2.Lerp(a, b, Random.value);
             particle.HardSetScale(scale);
         }
     }
 
-    public class SetRandomRotation : ParticleInitModule
+    public class SetRandomRotation : EmitterModule, IParticleInitModule
     {
         float a;
         float b;
@@ -141,14 +131,14 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.b = rotationB;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             float r = Mathf.Lerp(a, b, Random.value);
             particle.rotation = r;
         }
     }
 
-    public class AddElement : ParticleInitModule
+    public class AddElement : EmitterModule, IParticleInitModule
     {
         Particle.SpriteInitParam spriteInitParam;
 
@@ -157,7 +147,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             this.spriteInitParam = spriteInitParam;
         }
 
-        public override void Apply(Particle particle)
+        public void ApplyInit(Particle particle)
         {
             particle.spriteInitParams.Add(spriteInitParam);
         }

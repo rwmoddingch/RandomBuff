@@ -48,7 +48,6 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         {
             if (life > 0)
             {
-                BuffUtils.Log("SetEmitterLife", $"{life}");
                 life--;
                 if(life == 0)
                 {

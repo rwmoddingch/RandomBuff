@@ -34,6 +34,10 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public override void Update()
         {
             base.Update();
+
+            if (emitter.slateForDeletion)
+                return;
+
             counter += framePerSec;
             while(counter > freq)
             {

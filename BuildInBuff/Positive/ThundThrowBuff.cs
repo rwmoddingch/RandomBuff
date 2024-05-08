@@ -13,8 +13,6 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Positive
 {
-
-
     internal class ThundThrowBuffEntry : IBuffEntry
     {
         static float LightningColorHue = 255f / 360f;

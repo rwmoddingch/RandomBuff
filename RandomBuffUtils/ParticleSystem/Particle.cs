@@ -1,4 +1,5 @@
-﻿using RWCustom;
+﻿using RandomBuffUtils.ParticleSystem.EmitterModules;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace RandomBuffUtils.ParticleSystem
         public ParticleEmitter emitter;
         
         public List<SpriteInitParam> spriteInitParams = new List<SpriteInitParam>();
+        public Dictionary<IOwnParticleUniqueData, ParticleUniqueData> uniqueDatas = new Dictionary<IOwnParticleUniqueData, ParticleUniqueData>();
 
         public MoveType moveType;
         Vector2 _pos;
@@ -66,9 +68,10 @@ namespace RandomBuffUtils.ParticleSystem
         
         public bool inStage;
         public int spriteLayer = 8;
-        public FSprite[] sprites = new FSprite[0];
+        public FNode[] fNodes = new FNode[0];
+        int index;
 
-        public void Init(ParticleEmitter emitter)
+        public void Init(ParticleEmitter emitter, int index)
         {
             this.emitter = emitter;
             setVel = vel = Vector2.zero;
@@ -80,6 +83,15 @@ namespace RandomBuffUtils.ParticleSystem
             spriteLayer = 8;
             spriteInitParams.Clear();
             moveType = MoveType.Relative;
+
+            foreach (var module in emitter.PInitModules)
+                module.ApplyInit(this);
+
+            foreach(var module in emitter.PUniqueDatas)
+                uniqueDatas.Add(module, module.GetUniqueData(this));
+
+            this.index = index;
+            fNodes = new FNode[spriteInitParams.Count];
         }
 
         public virtual void InitSpritesAndAddToContainer()
@@ -89,25 +101,28 @@ namespace RandomBuffUtils.ParticleSystem
 
             inStage = true;
 
-            if (sprites.Length != spriteInitParams.Count)
-            {
-                Array.Resize(ref sprites, spriteInitParams.Count);
-                for(int i = 0; i< sprites.Length; i++)
-                {
-                    if (sprites[i] == null)
-                        sprites[i] = new FSprite("pixel");
-                }
-            }
+            foreach (var iIniSpriteAndAddToContainer in emitter.PInitSpritesAndAddToContainerModules)
+                iIniSpriteAndAddToContainer.ApplyInitSpritesAndAddToContainer(this);
 
-            for(int i = 0;i < spriteInitParams.Count;i++)
-            {
-                sprites[i].SetElementByName(spriteInitParams[i].element);
-                if (!string.IsNullOrEmpty(spriteInitParams[i].shader))
-                    sprites[i].shader = Custom.rainWorld.Shaders[spriteInitParams[i].shader];
-                else
-                    sprites[i].shader = Custom.rainWorld.Shaders["Basic"];
-                emitter.system.Containers[spriteLayer].AddChild(sprites[i]);
-            }
+            //if (fNodes.Length != spriteInitParams.Count)
+            //{
+            //    Array.Resize(ref fNodes, spriteInitParams.Count);
+            //    for(int i = 0; i< fNodes.Length; i++)
+            //    {
+            //        if (fNodes[i] == null)
+            //            fNodes[i] = new FSprite("pixel");
+            //    }
+            //}
+
+            //for(int i = 0;i < spriteInitParams.Count;i++)
+            //{
+            //    fNodes[i].SetElementByName(spriteInitParams[i].element);
+            //    if (!string.IsNullOrEmpty(spriteInitParams[i].shader))
+            //        fNodes[i].shader = Custom.rainWorld.Shaders[spriteInitParams[i].shader];
+            //    else
+            //        fNodes[i].shader = Custom.rainWorld.Shaders["Basic"];
+            //    emitter.system.Containers[spriteLayer].AddChild(fNodes[i]);
+            //}
 
             
             //BuffUtils.Log("Particle", "InitSpritesAndAddToContainer");
@@ -125,26 +140,18 @@ namespace RandomBuffUtils.ParticleSystem
             lastScaleXY = scaleXY;
             lastColor = color;
             lastRotation = rotation;
+
+            foreach (var pModule in emitter.PUpdateModules)
+                pModule.ApplyUpdate(this);
         }
 
         public virtual void DrawSprites(RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             if(!inStage) return;
 
-            Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
-            Vector2 smoothScaleXY = Vector2.Lerp(lastScaleXY, scaleXY, timeStacker);
-            Color smoothColor = Color.Lerp(lastColor, color, timeStacker);
-            float smoothRotation = Mathf.Lerp(lastRotation, rotation, timeStacker);
 
-            for(int i = 0; i < sprites.Length; i++)
-            {
-                sprites[i].SetPosition(smoothPos - camPos);
-                sprites[i].scaleX = smoothScaleXY.x * spriteInitParams[i].scale;
-                sprites[i].scaleY = smoothScaleXY.y * spriteInitParams[i].scale;
-                sprites[i].color = smoothColor;
-                sprites[i].alpha = spriteInitParams[i].alpha;
-                sprites[i].rotation = smoothRotation;
-            }
+            foreach (var iDraw in emitter.PDrawModules)
+                iDraw.ApplyDrawSprites(this, rCam, timeStacker, camPos);
         }
 
         public virtual void ClearSprites()
@@ -153,59 +160,75 @@ namespace RandomBuffUtils.ParticleSystem
                 return;
 
             inStage = false;
-            for (int i = 0; i < sprites.Length; i++)
-                sprites[i].RemoveFromContainer();
+
+            //for (int i = 0; i < fNodes.Length; i++)
+            //    fNodes[i].RemoveFromContainer();
+
+            foreach (var iClearSprites in emitter.PClearSpritesModules)
+                iClearSprites.ApplyClearSprites(this);
         }
 
         public virtual void Die()
         {
             ClearSprites();
             emitter.OnParticleDieEvent?.Invoke(this);
+
+            foreach (var iDie in emitter.PDieModules)
+                iDie.ApplyDie(this);
+
             emitter.Particles.Remove(this);
+            uniqueDatas.Clear();
+            fNodes = null;
 
             ParticlePool.RecycleParticle(this);
         }
 
-        public void HardSetPos(Vector2 pos)
+        public virtual void HardSetPos(Vector2 pos)
         {
             this.pos = pos;
             lastPos = this.pos;
         }
-        public void HardSetColor(Color color)
+        public virtual void HardSetColor(Color color)
         {
             this.color = color;
             lastColor = color;
             setColor = color;
         }
-        public void HardSetScale(float scale)
+        public virtual void HardSetScale(float scale)
         {
             HardSetScale(new Vector2(scale, scale));
         }
 
-        public void HardSetScale(Vector2 scale)
+        public virtual void HardSetScale(Vector2 scale)
         {
             setScaleXY = scale;
             scaleXY = scale;
             lastScaleXY = scale;
         }
 
-        public void HardSetRotation(float rotation)
+        public virtual void HardSetRotation(float rotation)
         {
             this.rotation = setRotation = lastRotation = rotation;
         }
 
-        public void SetLife(int life)
+        public virtual void SetLife(int life)
         {
             this.life = life;
             setLife = life;
         }
 
-        public void SetVel(Vector2 vel)
+        public virtual void SetVel(Vector2 vel)
         {
             this.vel = vel;
             this.setVel = vel;
         }
 
+        public T GetUniqueData<T>(IOwnParticleUniqueData owner) where T : ParticleUniqueData
+        {
+            if (uniqueDatas.TryGetValue(owner, out var data))
+                return data as T;
+            return null;
+        }
 
         public enum MoveType
         {
@@ -219,13 +242,19 @@ namespace RandomBuffUtils.ParticleSystem
             public string shader;
             public float alpha;
             public float scale;
-            public SpriteInitParam(string element, string shader, float alpha = 1f, float scale = 1f)
+            public int layer;
+            public SpriteInitParam(string element, string shader, int layer = 8, float alpha = 1f, float scale = 1f)
             {
                 this.element = element;
                 this.shader = shader;
                 this.alpha = alpha;
                 this.scale = scale;
+                this.layer = layer;
             }
+        }
+    
+        public abstract class ParticleUniqueData
+        {
         }
     }
 }
