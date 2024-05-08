@@ -182,22 +182,22 @@ namespace BuiltinBuffs.Positive
                     emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 30));
 
 
-                    emitter.ApplyParticleInit(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
-                    emitter.ApplyParticleInit(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 0.3f, 0.15f)));
-                    emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
-                    emitter.ApplyParticleInit(new SetRandomLife(emitter, 5, 10));
-                    emitter.ApplyParticleInit(new SetRandomColor(emitter, 0.5f, 0.6f, 1f, 0.5f));
-                    emitter.ApplyParticleInit(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
-                    emitter.ApplyParticleInit(new SetRandomRotation(emitter, 0f, 360f));
-                    emitter.ApplyParticleInit(new SetRandomPos(emitter, 30f));
+                    emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
+                    emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f)));
+                    emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                    emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
+                    emitter.ApplyParticleModule(new SetRandomColor(emitter, 0.5f, 0.6f, 1f, 0.5f));
+                    emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
+                    emitter.ApplyParticleModule(new SetRandomRotation(emitter, 0f, 360f));
+                    emitter.ApplyParticleModule(new SetRandomPos(emitter, 30f));
 
 
-                    emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (p, a) =>
+                    emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
                     {
                         return p.setScaleXY * (1f - a);
                     }));
 
-                    emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (p, a) =>
+                    emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, a) =>
                     {
                         Color color = Color.Lerp(Color.white, p.setColor,  a);
                         color.a = 1f - a;

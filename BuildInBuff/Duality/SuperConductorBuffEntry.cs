@@ -39,34 +39,45 @@ namespace BuiltinBuffs.Duality
                 emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 120, true));
                 emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 1));
 
-                emitter.ApplyParticleInit(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight")));
-                //emitter.ApplyParticleInit(new SetShader(emitter, "FlatLight"));
-                emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
-                emitter.ApplyParticleInit(new SetRandomPos(emitter, 0f));
-                emitter.ApplyParticleInit(new SetRandomLife(emitter, 70, 80));
-                emitter.ApplyParticleInit(new SetRandomColor(emitter, 0f, 0.4f, 1f, 0.5f));
-                emitter.ApplyParticleInit(new SetRandomVelocity(emitter, new Vector2(-1f, 10f), new Vector2(1f, 10f)));
-                emitter.ApplyParticleInit(new SetRandomScale(emitter, 1f, 1.5f));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight")));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White","")));
 
-                emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (particle, lifeParam) =>
+                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                emitter.ApplyParticleModule(new SetRandomPos(emitter, 0f));
+                emitter.ApplyParticleModule(new SetRandomLife(emitter, 70, 80));
+                emitter.ApplyParticleModule(new SetRandomColor(emitter, 0f, 0.4f, 1f, 0.5f));
+                emitter.ApplyParticleModule(new SetRandomVelocity(emitter, new Vector2(-1f, 10f), new Vector2(1f, 10f)));
+                emitter.ApplyParticleModule(new SetRandomScale(emitter, 1f, 1.5f));
+
+                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (particle, lifeParam) =>
                 {
                     return particle.setScaleXY * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f);
                 }));
-                emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (particle, lifeParam) =>
+                emitter.ApplyParticleModule(new ColorOverLife(emitter, (particle, lifeParam) =>
                 {
                     return Color.Lerp(particle.setColor, Color.white, (Mathf.Sin(lifeParam * 10f) * 0.5f + 0.5f));
                 }));
-                emitter.ApplyParticleUpdate(new VelocityOverLife(emitter, (particle, lifeParam) =>
+                emitter.ApplyParticleModule(new VelocityOverLife(emitter, (particle, lifeParam) =>
                 {
                     float sin = Mathf.Sin(lifeParam * 10f);
                     return new Vector2(particle.setVel.x + sin * (1f - lifeParam), particle.setVel.y * (1f - lifeParam));
                 }));
+
+                emitter.ApplyParticleModule(new DefaultDrawer(emitter, new int[1] { 0 }));
+                emitter.ApplyParticleModule(new TrailDrawer(emitter, 1, 20)
+                {
+                    alpha = (p, i, a) => 1f - i / (float)a,
+                    gradient = (p, i, a) => Color.Lerp(Color.white, p.setColor, i / (float)a),
+                    width = (p, i, a) => (1f - i / (float)a) * p.setScaleXY.x
+                });
+
+
                 ParticleSystem.ApplyEmitterAndInit(emitter);
 
                 int range = 60;
-                for(int angle = 0; angle < 360; angle += range)
+                for (int angle = 0; angle < 360; angle += range)
                 {
-                    CreateSubParticle(angle, range, 1f, 0f, emitter);
+                    CreateSubParticle(angle, range, 3f, 0f, emitter);
                 }
             }
             keyDown = down;
@@ -84,27 +95,43 @@ namespace BuiltinBuffs.Duality
                 var emitter = new ParticleEmitter(particle.emitter.room);
                 emitter.pos = particle.pos;
 
-                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 100, false));
+                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 10, false));
                 emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 5));
 
-                emitter.ApplyParticleInit(new AddElement(emitter,new Particle.SpriteInitParam("pixel", "")));
-                emitter.ApplyParticleInit(new SetMoveType(emitter, Particle.MoveType.Global));
-                emitter.ApplyParticleInit(new SetRandomPos(emitter, 0f));
-                emitter.ApplyParticleInit(new SetRandomLife(emitter, 40, 80));
-                emitter.ApplyParticleInit(new SetRandomColor(emitter, hue, hue + 0.4f, 1f, 0.5f));
-                emitter.ApplyParticleInit(new SetRandomVelocity(emitter, velA, velB));
-                emitter.ApplyParticleInit(new SetRandomScale(emitter, 0.5f, 0.8f));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight")));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
 
-                emitter.ApplyParticleUpdate(new ConstantAcc(emitter, new Vector2(0f, -0.5f)));
+                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                emitter.ApplyParticleModule(new SetRandomPos(emitter, 0f));
+                emitter.ApplyParticleModule(new SetRandomLife(emitter, 200, 400));
+                emitter.ApplyParticleModule(new SetRandomColor(emitter, hue, hue + 0.2f, 1f, 0.5f));
+                emitter.ApplyParticleModule(new SetRandomVelocity(emitter, velA, velB));
+                emitter.ApplyParticleModule(new SetRandomScale(emitter, 1f, 1.2f));
 
-                emitter.ApplyParticleUpdate(new ColorOverLife(emitter, (p, lifeParam) =>
+                emitter.ApplyParticleModule(new ConstantAcc(emitter, new Vector2(0f, -2f)));
+                emitter.ApplyParticleModule(new SimpleParticlePhysic(emitter, true, false));
+                emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, lifeParam) =>
                 {
-                    return Color.Lerp(p.setColor, Color.white, (Mathf.Sin(lifeParam * 3f) * 0.5f + 0.5f));
+                    Color result = Color.Lerp(p.setColor, Color.white, (Mathf.Sin(lifeParam * 3f) * 0.5f + 0.5f));
+                    result.a = 1f - lifeParam;
+                    return result;
                 }));
-                emitter.ApplyParticleUpdate(new ScaleOverLife(emitter, (p, lifeParam) =>
+                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, lifeParam) =>
                 {
                     return p.setScaleXY * (Mathf.Sin(lifeParam * 10f) * 0.3f + 0.7f) * (1f - lifeParam);
                 }));
+
+
+                emitter.ApplyParticleModule(new DefaultDrawer(emitter, new int[1] { 0 }));
+                emitter.ApplyParticleModule(new TrailDrawer(emitter, 1, 20)
+                {
+                    alpha = (p, i, a) => 1f - i / (float)a,
+                    alphaModifyOverLife = (p, l) => 1f - l,
+                    gradient = (p, i, a) => Color.Lerp(Color.white, p.setColor, i / (float)a),
+                    width = (p, i, a) => (1f - i / (float)a) * p.setScaleXY.x
+                });
+
+
                 ParticleSystem.ApplyEmitterAndInit(emitter);
             }
         }

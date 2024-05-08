@@ -17,8 +17,6 @@ namespace RandomBuffUtils.ParticleSystem
                 result = pool.Dequeue();
             else
                 result = new Particle();
-            result.Init(emitter);
-
             return result;
         }
 
