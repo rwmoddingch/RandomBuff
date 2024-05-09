@@ -139,7 +139,7 @@ namespace RandomBuff.Core.ProgressionUI
         public static void CreateElementsForCosmeticPage(OpScrollBox opScrollBox, Vector2 size)
         {
             //参数
-            Vector2 buttonSize = new Vector2(60, 60);
+            Vector2 buttonSize = new Vector2(70, 70);
             Vector2 smallGap = new Vector2(5, 5);
             float bigGap = 20f;
             int buttonsOneLine = 5;

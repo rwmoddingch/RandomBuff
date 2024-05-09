@@ -124,6 +124,7 @@ namespace RandomBuff
                         LogWarning("Debug Enable");
                     }
                     CardBasicAssets.LoadAssets();
+                    CosmeticUnlock.LoadIconSprites();
                     BuffResourceString.Init();
 
                     GachaTemplate.Init();
