@@ -6,18 +6,12 @@ using System.Threading.Tasks;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
-    internal class TestCosmeticUnlock : CosmeticUnlock
+    internal class CrownCosmetic : CosmeticUnlock
     {
-        public override CosmeticUnlockID UnlockID => CosmeticUnlockID.Test;
+        public override CosmeticUnlockID UnlockID => CosmeticUnlockID.Crown;
 
         public override string IconElement => "Futile_White";
 
         public override SlugcatStats.Name BindCat => null;
-
-        public override void StartGame(RainWorldGame game)
-        {
-            base.StartGame(game);
-            BuffPlugin.LogDebug("Test Start");
-        }
     }
 }
