@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Menu;
@@ -8,6 +9,7 @@ using Menu.Remix;
 using Menu.Remix.MixedUI;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
+using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
@@ -21,7 +23,7 @@ namespace RandomBuff.Core.ProgressionUI
     {
         public static float levelBarWidth = 800f;
         public static Vector2 recordScrollBoxSize = new Vector2(levelBarWidth, 400f);
-        public static int pageCount = 2;
+        public static int pageCount = 3;
         public static float pageSpan = 1400f;
 
         //页面元素
@@ -50,7 +52,7 @@ namespace RandomBuff.Core.ProgressionUI
         int _showCounter = -1;
         int _targetShowCounter;
 
-        float smoothPage;
+        float smoothPage = 0.001f;
         int setPage;
         float lastSmoothPage;
 
@@ -82,7 +84,7 @@ namespace RandomBuff.Core.ProgressionUI
             levelBar.HardSet();
 
             recordTitlePos = new Vector2(screenSize.x / 2f, levelBarPos.y - 100f);
-            recordTitle = new CardTitle(Container, BuffCard.normalScale * 0.3f, recordTitlePos);
+            recordTitle = new CardTitle(Container, BuffCard.normalScale * 0.3f, recordTitlePos , flipCounter: 10);
 
             //初始化按钮
             subObjects.Add(backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "PROGRESSIONPAGE_BACK", new Vector2(200f, 698f), new Vector2(110f, 30f)));
@@ -97,9 +99,11 @@ namespace RandomBuff.Core.ProgressionUI
             pagePosesDelta = new Vector2[pageCount];
 
             var testPage = CreatePage("RECORD", 0);
-            CreateElementsForRecordPage(testPage, recordScrollBoxSize, BuffPlayerData.Instance.SlotRecord);
             var testPage2 = CreatePage("QUEST", 1);
+            var testPage3 = CreatePage("COSMETIC", 2);
 
+            CreateElementsForRecordPage(testPage, recordScrollBoxSize, BuffPlayerData.Instance.SlotRecord);
+            CreateElementsForCosmeticPage(testPage3, recordScrollBoxSize);
             //testLabel = new FLabel(Custom.GetDisplayFont(), "WA");
             //Container.AddChild(testLabel);
             //testLabel.SetPosition(200, 200);
@@ -130,6 +134,114 @@ namespace RandomBuff.Core.ProgressionUI
                 currentHue += 0.05f;
             }
             opScrollBox.ScrollToTop(true);
+        }
+
+        public static void CreateElementsForCosmeticPage(OpScrollBox opScrollBox, Vector2 size)
+        {
+            //参数
+            Vector2 buttonSize = new Vector2(60, 60);
+            Vector2 smallGap = new Vector2(5, 5);
+            float bigGap = 20f;
+            int buttonsOneLine = 5;
+
+            //初始化cosmetic
+            List<CosmeticUnlock> noBindCosmetics = new List<CosmeticUnlock>();
+            Dictionary<SlugcatStats.Name, List<CosmeticUnlock>> nameForCosmetics = new Dictionary<SlugcatStats.Name, List<CosmeticUnlock>>();
+
+            var buffData = BuffPlayerData.Instance;
+            var configManager = BuffConfigManager.Instance;
+
+            foreach(var idValue in CosmeticUnlockID.values.entries)
+            {
+                var id = new CosmeticUnlockID(idValue);
+                if((BuffConfigManager.IsCosmeticCanUse(idValue) || true/*目前先跳过*/) && CosmeticUnlock.cosmeticUnlocks.ContainsKey(id))
+                {
+                    var cosmetic = Activator.CreateInstance(CosmeticUnlock.cosmeticUnlocks[id]) as CosmeticUnlock;
+                    if(cosmetic.BindCat == null)
+                        noBindCosmetics.Add(cosmetic);
+                    else
+                    {
+                        if (nameForCosmetics.ContainsKey(cosmetic.BindCat))
+                            nameForCosmetics[cosmetic.BindCat].Add(cosmetic);
+                        else
+                            nameForCosmetics.Add(cosmetic.BindCat, new List<CosmeticUnlock>() { cosmetic });
+                    }
+                }
+            }
+
+            //计算contentSize
+            float contentSize = 0f;
+            contentSize += CaculateBlockHeight(noBindCosmetics.Count);
+            foreach(var pair in nameForCosmetics)
+                contentSize += CaculateBlockHeight(pair.Value.Count);
+            contentSize += bigGap;
+            contentSize = Mathf.Max(contentSize, size.y);
+
+            opScrollBox.contentSize = contentSize;
+
+            //创建元素
+            float yPointer = contentSize;
+            yPointer -= smallGap.y;
+
+            yPointer -= CreateSingleBlock(new Color(0.5f, 0.5f, 0.5f), noBindCosmetics, yPointer, true);
+            foreach(var pair in nameForCosmetics)
+            {
+                Color col = PlayerGraphics.SlugcatColor(pair.Key);
+                yPointer -= CreateSingleBlock(col, pair.Value, yPointer);
+            }
+
+
+            float CaculateBlockHeight(int totalCount)
+            {
+                int line = Mathf.CeilToInt(totalCount / (float)buttonsOneLine);
+                return line * buttonSize.y + Mathf.Max(line - 1, 0) * smallGap.y + bigGap;
+            }
+
+            float CreateSingleBlock(Color color, List<CosmeticUnlock> unlocks, float startY, bool first = false)
+            {
+                //Color disableColor = color * 0.5f;
+                //disableColor.a = 1f;
+
+                float yDecrease = buttonSize.y;
+                if (!first)
+                    yDecrease += bigGap;
+
+                float x = smallGap.x;
+                int lineButtonCount = 0;
+
+                OpImage icon = new OpImage(new Vector2(x, startY - yDecrease), "Kill_Slugcat") { color = color };
+                opScrollBox.AddItems(icon);
+                x += 40f;
+
+                foreach(var unlock in unlocks)
+                {
+                    CosmeticButton cosmeticButton = new CosmeticButton(new Vector2(x, startY - yDecrease), buttonSize, unlock.IconElement, unlock.UnlockID.value, Color.green, color, OnCosmeticButtonClick);
+                    cosmeticButton.SetEnable(buffData.IsCosmeticEnable(unlock.UnlockID.value));
+
+                    opScrollBox.AddItems(cosmeticButton);
+                    
+                    lineButtonCount++;
+                    if(lineButtonCount >= buttonsOneLine)
+                    {
+                        lineButtonCount = 0;
+                        yDecrease += smallGap.y + buttonSize.y;
+                        x = smallGap.x + 40f;
+                    }
+                    else
+                    {
+                        x += smallGap.x + buttonSize.x;
+                    }
+                }
+                return yDecrease;
+            }
+        }
+
+        static void OnCosmeticButtonClick(CosmeticButton button)
+        {
+            BuffPlugin.Log($"{button.id}, {BuffPlayerData.Instance.IsCosmeticEnable(button.id)}");
+            bool newEnable = !BuffPlayerData.Instance.IsCosmeticEnable(button.id);
+            BuffPlayerData.Instance.SetCosmeticEnable(button.id, newEnable);
+            button.SetEnable(newEnable);
         }
 
         OpScrollBox CreatePage(string pageName, int index)
@@ -220,6 +332,67 @@ namespace RandomBuff.Core.ProgressionUI
                 setPage = Mathf.Clamp(setPage + 1, 0, pageCount - 1);
                 recordTitle.RequestSwitchTitle(pageNames[setPage]);
             }
+        }
+
+        public override void RemoveSprites()
+        {
+            base.RemoveSprites();
+            subObjects.Remove(tabWrapper);
+            tabWrapper.RemoveSprites();
+        }
+    }
+
+    public class CosmeticButton : OpSimpleImageButton
+    {
+        
+
+        public string id;
+        string element;
+
+        Action<CosmeticButton> clickCallBack;
+
+        Color enabledCol;
+        Color disabledCol;
+
+        public static FieldInfo OnClickField = typeof(OpSimpleButton).GetField("OnClick", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+        public CosmeticButton(Vector2 pos, Vector2 size, string element, string id, Color enableCol, Color disableCol, Action<CosmeticButton> clickCallBack) : base(pos, size, element)
+        {
+            this.id = id;
+            this.clickCallBack = clickCallBack;
+            this.sprite = new FSprite(element, true);
+            this.myContainer.AddChild(this.sprite);
+            this.sprite.SetAnchor(0.5f, 0.5f);
+            this.sprite.SetPosition(base.size.x / 2f, base.size.y / 2f);
+
+            this.enabledCol = enableCol;
+            this.disabledCol = disableCol;
+            isTexture = true;
+
+            var OnClick = OnClickField.GetValue(this) as OnSignalHandler;
+            OnClick += OnClickCallBack;
+            OnClickField.SetValue(this, OnClick);
+        }
+
+        void OnClickCallBack(UIfocusable uIfocusable)
+        {
+            if(uIfocusable == this)
+            {
+                clickCallBack?.Invoke(this);
+            }
+        }
+
+        public void SetEnable(bool enable)
+        {
+            if (enable)
+                colorEdge = enabledCol;
+            else
+                colorEdge = disabledCol;
+        }
+
+        public override void Unload()
+        {
+            isTexture = false;
+            base.Unload();
         }
     }
 }

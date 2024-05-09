@@ -28,6 +28,23 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
+    public class SetSphericalVelocity : EmitterModule, IParticleInitModule
+    {
+        float a;
+        float b;
+
+        public SetSphericalVelocity(ParticleEmitter emitter, float vA, float vB) : base(emitter)
+        {
+            a = vA;
+            b = vB;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.SetVel(Custom.RNV() * Random.Range(a, b));
+        }
+    }
+
     public class SetRandomPos : EmitterModule, IParticleInitModule
     {
         float rad;
@@ -95,6 +112,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public void ApplyInit(Particle particle)
         {
             Color color = Custom.HSL2RGB(Random.Range(hueA, hueB), saturation, lightness);
+            particle.HardSetColor(color);
+        }
+    }
+
+    public class SetConstColor : EmitterModule, IParticleInitModule
+    {
+        Color color;
+        public SetConstColor(ParticleEmitter emitter, Color color) : base(emitter)
+        {
+            this.color = color;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
             particle.HardSetColor(color);
         }
     }

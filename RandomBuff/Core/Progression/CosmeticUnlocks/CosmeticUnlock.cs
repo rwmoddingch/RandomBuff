@@ -12,8 +12,10 @@ namespace RandomBuff.Core.Progression
         public CosmeticUnlockID(string value, bool register = false) : base(value, register)
         {
         }
-        public static readonly CosmeticUnlockID FireWork = new(nameof(FireWork), true);
-        public static readonly CosmeticUnlockID Test = new(nameof(Test), true);
+        public static readonly CosmeticUnlockID FireWork = new("FireWork", true);//炸猫
+        public static readonly CosmeticUnlockID Test = new("Test", true);
+        public static readonly CosmeticUnlockID Crown = new("Crown", true);//全部
+        public static readonly CosmeticUnlockID GlowingLeaf = new CosmeticUnlockID("GlowingLeaf", true);
 
     }
 
@@ -21,6 +23,8 @@ namespace RandomBuff.Core.Progression
     {
         protected CosmeticUnlock() { }
         public abstract CosmeticUnlockID UnlockID { get; }
+        public abstract string IconElement { get; }
+        public abstract SlugcatStats.Name BindCat { get; }
 
         public virtual void StartGame(RainWorldGame game) { }
 
@@ -52,6 +56,7 @@ namespace RandomBuff.Core.Progression
         internal static void Init()
         {
             Register<TestCosmeticUnlock>();
+            Register<FireworkCosmetic>();
         }
 
         internal static CosmeticUnlock CreateInstance(string name,RainWorldGame game)
@@ -69,6 +74,6 @@ namespace RandomBuff.Core.Progression
 
             return re;
         }
-        private static readonly Dictionary<CosmeticUnlockID, Type> cosmeticUnlocks = new ();
+        internal static readonly Dictionary<CosmeticUnlockID, Type> cosmeticUnlocks = new ();
     }
 }
