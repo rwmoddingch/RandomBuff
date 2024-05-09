@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
+using UnityEngine;
 
 namespace RandomBuff.Core.Progression
 {
@@ -57,6 +60,7 @@ namespace RandomBuff.Core.Progression
         {
             Register<TestCosmeticUnlock>();
             Register<FireworkCosmetic>();
+            Register<CrownCosmetic>();
         }
 
         internal static CosmeticUnlock CreateInstance(string name,RainWorldGame game)
@@ -74,6 +78,29 @@ namespace RandomBuff.Core.Progression
 
             return re;
         }
+
+        internal static void LoadIconSprites()
+        {
+            string path = AssetManager.ResolveDirectory("");
+
+            LoadImgOfName("BuffCosmetic_Crown");
+            LoadImgOfName("BuffCosmetic_Firework");
+
+            void LoadImgOfName(string imgName)
+            {
+                string imgPath = $"buffassets/BuffCosmeticIcons/{imgName}";
+                string totPath = AssetManager.ResolveFilePath(imgPath + ".png").Replace('/', Path.DirectorySeparatorChar);
+
+                Texture2D texture2D = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                texture2D = AssetManager.SafeWWWLoadTexture(ref texture2D, totPath, false, true);
+
+                FAtlas fAtlas = new FAtlas(imgName, texture2D, FAtlasManager._nextAtlasIndex++, false);
+                Futile.atlasManager.AddAtlas(fAtlas);
+
+                BuffPlugin.Log($"FAtlasElement : {Futile.atlasManager.GetElementWithName(imgName).sourcePixelSize}");
+            }
+        }
+
         internal static readonly Dictionary<CosmeticUnlockID, Type> cosmeticUnlocks = new ();
     }
 }

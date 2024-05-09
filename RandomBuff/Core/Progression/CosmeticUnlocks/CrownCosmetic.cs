@@ -10,7 +10,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
     {
         public override CosmeticUnlockID UnlockID => CosmeticUnlockID.Crown;
 
-        public override string IconElement => "Futile_White";
+        public override string IconElement => "BuffCosmetic_Crown";
 
         public override SlugcatStats.Name BindCat => null;
     }
