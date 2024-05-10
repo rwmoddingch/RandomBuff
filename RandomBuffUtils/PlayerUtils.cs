@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace RandomBuffUtils
@@ -23,8 +24,11 @@ namespace RandomBuffUtils
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+            On.PlayerGraphics.Reset += PlayerGraphics_Reset;
             On.RoomCamera.SpriteLeaser.CleanSpritesAndRemove += SpriteLeaser_CleanSpritesAndRemove;
         }
+
+   
 
         #region PlayerHooks
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
@@ -51,6 +55,14 @@ namespace RandomBuffUtils
         #endregion
 
         #region PlayerGraphicHooks
+
+        private static void PlayerGraphics_Reset(On.PlayerGraphics.orig_Reset orig, PlayerGraphics self)
+        {
+            orig.Invoke(self);
+            if (weakTable.TryGetValue(self.player, out var module))
+                foreach (var playerModuleGraphicPart in module.graphicParts)
+                    playerModuleGraphicPart.Value.Reset(self);
+        }
         private static void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             orig.Invoke(self, sLeaser, rCam);
@@ -319,6 +331,11 @@ namespace RandomBuffUtils
             }
 
 
+            public virtual void Reset(PlayerGraphics playerGraphics)
+            {
+
+            }
+
             public class SLeaserInstance
             {
                 public FSprite[] sprites;
@@ -339,8 +356,8 @@ namespace RandomBuffUtils
 
         public interface IOWnPlayerUtilsPart
         {
-            PlayerModulePart InitPart(PlayerModule module);
-            PlayerModuleGraphicPart InitGraphicPart(PlayerModule module);
+            [CanBeNull] PlayerModulePart InitPart(PlayerModule module);
+            [CanBeNull] PlayerModuleGraphicPart InitGraphicPart(PlayerModule module);
         }
     }
 }

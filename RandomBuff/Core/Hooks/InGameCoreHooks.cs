@@ -25,26 +25,27 @@ namespace RandomBuff.Core.Hooks
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
             On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
-            //IL.RainWorldGame.CommunicateWithUpcomingProcess += RainWorldGame_CommunicateWithUpcomingProcess;
             On.StoryGameSession.ctor += StoryGameSession_ctor;
             On.SaveState.setDenPosition += SaveState_setDenPosition;
             On.SaveState.ctor += SaveState_setup;
             On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
 
             On.SaveState.ctor += SaveState_ctor;
-            On.MoreSlugcats.MSCRoomSpecificScript.SI_SAINTINTRO_tut.ctor += SI_SAINTINTRO_tut_ctor;
+            On.Room.Loaded += Room_Loaded;
         }
 
-        private static void SI_SAINTINTRO_tut_ctor(On.MoreSlugcats.MSCRoomSpecificScript.SI_SAINTINTRO_tut.orig_ctor orig, MSCRoomSpecificScript.SI_SAINTINTRO_tut self, Room room)
+        private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
-            if (room.game.rainWorld.BuffMode())
+            if (Custom.rainWorld.BuffMode())
             {
-                self.Destroy();
-                return;
+                self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
+                self.roomSettings.roomSpecificScript = false;
             }
 
-            orig(self,room);
+            orig(self);
         }
+
+   
 
         private static void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
         {
@@ -79,20 +80,20 @@ namespace RandomBuff.Core.Hooks
                 self.deathPersistentSaveData.DangleFruitInWaterMessage = true;
                 self.deathPersistentSaveData.GateStandTutorial = true;
                 self.deathPersistentSaveData.GoExploreMessage = true;
-                self.miscWorldSaveData.SLOracleState.neuronGiveConversationCounter = 1;
+                //self.miscWorldSaveData.SLOracleState.neuronGiveConversationCounter = 1;
                 if (saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Rivulet || saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Saint)
                 {
                     self.miscWorldSaveData.moonHeartRestored = true;
                     self.miscWorldSaveData.pebblesEnergyTaken = true;
                 }
-                self.deathPersistentSaveData.karma = ExpeditionGame.tempKarma;
+                self.deathPersistentSaveData.karma = SlugcatStats.SlugcatStartingKarma(saveStateNumber);
                 self.deathPersistentSaveData.karmaCap = 4;
                 self.deathPersistentSaveData.theMark = true;
                 self.miscWorldSaveData.SLOracleState.playerEncountersWithMark = ((saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear) ? 5 : 2);
                 self.miscWorldSaveData.SLOracleState.neuronsLeft = 5;
-                self.miscWorldSaveData.SSaiConversationsHad = 1;
-                self.miscWorldSaveData.cyclesSinceSSai = 10;
-                self.miscWorldSaveData.SSaiThrowOuts = -1;
+                //self.miscWorldSaveData.SSaiConversationsHad = 1;
+                //self.miscWorldSaveData.cyclesSinceSSai = 10;
+                //self.miscWorldSaveData.SSaiThrowOuts = -1;
                 progression.miscProgressionData.beaten_Gourmand = true;
             }
         }

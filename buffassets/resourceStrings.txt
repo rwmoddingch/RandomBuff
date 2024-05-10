@@ -64,6 +64,8 @@ DisplayName_Cycle|Survive {0} cycles
 DisplayName_Card|Collect {0} {1} buffcards
 DisplayName_Like|Maximize like with {0}
 DisplayName_MeetSS_SL|Meet Pebbles and Moon in {0} cycles
+DisplayName_Gourmand|Complete Gourmand Feast
+
 
 //BuffCondition_BuffTypes
 all types|all types

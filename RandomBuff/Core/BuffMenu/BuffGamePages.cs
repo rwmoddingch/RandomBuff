@@ -378,7 +378,10 @@ namespace RandomBuff.Core.BuffMenu
             gameMenu.SetButtonsActive(!show);
             currentGameSetting = BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName);
             if (show)
+            {
                 InitConditions();
+                settingButton.menuLabel.text = gameMenu.Translate(currentGameSetting.TemplateName);
+            }
             else
                 QuitToSelectSlug();
             flagRenderer.Show = show;

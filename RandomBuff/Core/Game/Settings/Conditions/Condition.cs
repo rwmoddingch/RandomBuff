@@ -20,6 +20,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static ConditionID Hunt;
         public static ConditionID Achievement;
         public static ConditionID Like;
+        public static ConditionID Gourmand;
         public static ConditionID MeetSS_SL;
         public static ConditionID SaveSL;
 
@@ -32,6 +33,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             Achievement = new ConditionID("Achievement", true);
             Like = new ConditionID("Like", true);
             MeetSS_SL = new ConditionID("MeetSS_SL", true);
+            Gourmand = new ConditionID("Gourmand", true);
             //SaveSL = new ConditionID("SaveSL", true);
         }
 
@@ -136,6 +138,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement Condition");
             BuffRegister.RegisterCondition<LikeCondition>(ConditionID.Like, "Like Condition");
             BuffRegister.RegisterCondition<MeetSS_SLCondition>(ConditionID.MeetSS_SL, "Meet SS and SL");
+            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand Feast");
+
             //BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
 
         }

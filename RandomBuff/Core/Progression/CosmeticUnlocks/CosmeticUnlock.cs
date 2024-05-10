@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
+using RandomBuffUtils.FutileExtend;
 using UnityEngine;
 
 namespace RandomBuff.Core.Progression
@@ -61,6 +62,8 @@ namespace RandomBuff.Core.Progression
             Register<TestCosmeticUnlock>();
             Register<FireworkCosmetic>();
             Register<CrownCosmetic>();
+
+            grown = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
         }
 
         internal static CosmeticUnlock CreateInstance(string name,RainWorldGame game)
@@ -102,5 +105,8 @@ namespace RandomBuff.Core.Progression
         }
 
         internal static readonly Dictionary<CosmeticUnlockID, Type> cosmeticUnlocks = new ();
+
+
+        internal static FMesh.Mesh3DAsset grown;
     }
 }

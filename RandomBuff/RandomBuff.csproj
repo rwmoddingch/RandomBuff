@@ -7,10 +7,13 @@
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Core\BuffMenu\MenuObjects\**" />
     <Compile Remove="Render\UI\BuffCard\**" />
     <Compile Remove="Resources\**" />
+    <EmbeddedResource Remove="Core\BuffMenu\MenuObjects\**" />
     <EmbeddedResource Remove="Render\UI\BuffCard\**" />
     <EmbeddedResource Remove="Resources\**" />
+    <None Remove="Core\BuffMenu\MenuObjects\**" />
     <None Remove="Render\UI\BuffCard\**" />
     <None Remove="Resources\**" />
   </ItemGroup>
@@ -97,8 +100,5 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>BuffResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\BuffMenu\MenuObjects\" />
   </ItemGroup>
 </Project>
