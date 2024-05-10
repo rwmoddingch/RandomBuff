@@ -115,6 +115,8 @@ namespace RandomBuff.Core.StaticsScreen
 
             pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(middleX - width / 2f, 200f), winPackage, width));
             scoreCaculator.Container.MoveToFront();
+            manager.rainWorld.progression.WipeSaveState(winPackage.saveState.saveStateNumber);
+
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -122,6 +124,9 @@ namespace RandomBuff.Core.StaticsScreen
             if (message == "CONTINUE")
             {
                 this.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+                if (manager.musicPlayer != null)
+                    manager.musicPlayer.FadeOutAllSongs(50f);
+                
             }
         }
 
