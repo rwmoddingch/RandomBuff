@@ -35,6 +35,7 @@ namespace RandomBuffUtils.ParticleSystem
         public Room room;
         public Vector2 pos;
         public Vector2 lastPos;
+        public Vector2 vel;
         public bool slateForDeletion;
 
         public ParticleEmitter(Room room)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace RandomBuffUtils.ParticleSystem
 {
@@ -65,6 +66,8 @@ namespace RandomBuffUtils.ParticleSystem
         public int life;
         float setLife;
         public float LifeParam => 1f - life / setLife;
+
+        public float randomParam;
         
         public bool inStage;
         public int spriteLayer = 8;
@@ -83,6 +86,7 @@ namespace RandomBuffUtils.ParticleSystem
             spriteLayer = 8;
             spriteInitParams.Clear();
             moveType = MoveType.Relative;
+            randomParam = Random.value;
 
             foreach (var module in emitter.PInitModules)
                 module.ApplyInit(this);
@@ -243,13 +247,16 @@ namespace RandomBuffUtils.ParticleSystem
             public float alpha;
             public float scale;
             public int layer;
-            public SpriteInitParam(string element, string shader, int layer = 8, float alpha = 1f, float scale = 1f)
+            public Color? constCol;
+
+            public SpriteInitParam(string element, string shader, int layer = 8, float alpha = 1f, float scale = 1f, Color? constCol = null)
             {
                 this.element = element;
                 this.shader = shader;
                 this.alpha = alpha;
                 this.scale = scale;
                 this.layer = layer;
+                this.constCol = constCol;
             }
         }
     

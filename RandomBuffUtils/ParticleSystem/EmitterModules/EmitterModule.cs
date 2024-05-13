@@ -80,7 +80,10 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
                 if (physicalObject.room == null)
                     emitter.Die();
                 else
+                {
                     emitter.pos = emitter.lastPos = physicalObject.bodyChunks[chunk].pos;
+                    emitter.vel = physicalObject.bodyChunks[chunk].vel;
+                }
             }
             else
                 emitter.Die();
@@ -93,7 +96,10 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
                 if (physicalObject.room == null)
                     emitter.Die();
                 else
+                {
                     emitter.pos = physicalObject.bodyChunks[chunk].pos;
+                    emitter.vel = physicalObject.bodyChunks[chunk].vel;
+                }
             }
             else
                 emitter.Die();

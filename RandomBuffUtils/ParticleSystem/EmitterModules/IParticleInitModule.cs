@@ -171,16 +171,33 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public class AddElement : EmitterModule, IParticleInitModule
     {
-        Particle.SpriteInitParam spriteInitParam;
+        Particle.SpriteInitParam[] spriteInitParam;
 
-        public AddElement(ParticleEmitter emitter, Particle.SpriteInitParam spriteInitParam) : base(emitter)
+        public AddElement(ParticleEmitter emitter, params Particle.SpriteInitParam[] spriteInitParam) : base(emitter)
         {
             this.spriteInitParam = spriteInitParam;
         }
 
         public void ApplyInit(Particle particle)
         {
-            particle.spriteInitParams.Add(spriteInitParam);
+            int index = (int)(particle.randomParam * spriteInitParam.Length - 1);
+            particle.spriteInitParams.Add(spriteInitParam[index]);
+        }
+    }
+
+    public class SetVelociyFromEmitter : EmitterModule, IParticleInitModule
+    {
+        float t;
+
+        public SetVelociyFromEmitter(ParticleEmitter emitter, float t) : base(emitter)
+        {
+            this.t = t;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            Vector2 vel = particle.emitter.vel * t;
+            particle.SetVel(vel);
         }
     }
 

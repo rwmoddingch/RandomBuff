@@ -17,18 +17,18 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public sealed class RateSpawnerModule : SpawnModule
     {
-        static float framePerSec = 1 / 40f;
-        float freq;
+        static float secPerFrame = 1 / 40f;
+        float secNeed;
         float counter;
 
         public RateSpawnerModule(ParticleEmitter emitter, int maxParticleCount, int ratePerSec) : base(emitter, maxParticleCount)
         {
-            freq = 1f / ratePerSec;
+            secNeed = 1f / ratePerSec;
         }
 
         public override void Init()
         {
-            counter = 0f;
+            counter = 0;
         }
 
         public override void Update()
@@ -38,10 +38,10 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             if (emitter.slateForDeletion)
                 return;
 
-            counter += framePerSec;
-            while(counter > freq)
+            counter += secPerFrame;
+            while(counter > secNeed)
             {
-                counter -= framePerSec;
+                counter -= secNeed;
                 if(emitter.Particles.Count < maxParitcleCount)
                 {
                     emitter.SpawnParticle();
