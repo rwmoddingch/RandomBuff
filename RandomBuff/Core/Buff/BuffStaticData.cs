@@ -37,6 +37,11 @@ namespace RandomBuff.Core.Buff
         public int MaxCycleCount { get; private set; } = -1;
         public bool Countable => MaxCycleCount != -1;
 
+        public bool MultiLayerFace { get; private set;} = false;
+        public int FaceLayer { get; private set; } = 1;
+        public float MaxFaceDepth { get; private set; } = 1f;
+        public Color FaceBackgroundColor { get; private set; } = Color.black;
+
         public Dictionary<string, object> ExtProperty { get; private set; } = new ();
 
 
@@ -99,9 +104,10 @@ namespace RandomBuff.Core.Buff
             }
             BuffPlugin.Log($"try load static data at {dirPath}");
 
+            Dictionary<string, object> rawData = null;
             try
             {
-                var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
+                rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(jsonFile.FullName));
                 newData = new BuffStaticData();
 
                 if (rawData.ContainsKey("BuffID"))
@@ -191,6 +197,21 @@ namespace RandomBuff.Core.Buff
                     newData.NeedUnlocked = (bool)rawData[loadState];
                 }
 
+                if (rawData.ContainsKey(loadState = "MultiLayerFace"))
+                    if (rawData[loadState] is bool)
+                        newData.MultiLayerFace = (bool)rawData[loadState];
+                    else
+                        newData.MultiLayerFace = bool.Parse(rawData[loadState] as string);
+
+                if (rawData.ContainsKey(loadState = "FaceLayer"))
+                    newData.FaceLayer = LoadAsInt(rawData[loadState]);
+
+                if (rawData.ContainsKey(loadState = "MaxFaceDepth"))
+                    newData.MaxFaceDepth = LoadAsFloat(rawData[loadState]);
+
+                if (rawData.ContainsKey(loadState = "FaceBackgroundColor"))
+                    newData.FaceBackgroundColor = Custom.hexToColor((string)rawData[loadState]);
+
                 bool hasMutli = false;
                 foreach (var language in ExtEnumBase.GetNames(typeof(InGameTranslator.LanguageID)))
                 {
@@ -259,11 +280,33 @@ namespace RandomBuff.Core.Buff
                 GetCustomStaticBuffData(rdata, newData, rawData);
                 //BuffPlugin.LogDebug(newData.ToDebugString());
                 return true;
+
+                int LoadAsInt(object input)
+                {
+                    if (input is int)
+                        return (int)input;
+                    else if (input is long)
+                        return  (int)(long)input;
+                    else if (input is short)
+                        return (int)(short)input;
+                    else
+                        return int.Parse(input as string);
+                }
+
+                float LoadAsFloat(object input)
+                {
+                    if(input is float)
+                        return (float)input;
+                    else if(input is double)
+                        return (float)(double)input;
+                    else
+                        return float.Parse(input as string); 
+                }
             }
             catch (Exception e)
             {
                 if(loadState != "")
-                    BuffPlugin.LogError($"Load property failed: {loadState}! at {jsonFile.Name}");
+                    BuffPlugin.LogError($"Load property failed: {loadState}! at {jsonFile.Name}. current data : {rawData[loadState]}, {rawData[loadState].GetType()}");
                 else
                     BuffPlugin.LogError($"Load json file failed! at {jsonFile.Name}");
                 BuffPlugin.LogException(e);

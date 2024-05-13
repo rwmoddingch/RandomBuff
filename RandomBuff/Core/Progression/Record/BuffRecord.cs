@@ -45,6 +45,9 @@ namespace RandomBuff.Core.Progression.Record
         [JsonProperty]
         public int totDualityCard;
 
+        [JsonProperty]
+        public int totTriggerCount;
+
         public static InGameRecord operator+(InGameRecord self, InGameRecord record)
         {
             return new InGameRecord()
@@ -53,7 +56,7 @@ namespace RandomBuff.Core.Progression.Record
                 totDualityCard = self.totDualityCard + record.totDualityCard,
                 totNegativeCard = self.totNegativeCard + record.totNegativeCard,
                 totPositiveCard = self.totPositiveCard + record.totPositiveCard,
-
+                totTriggerCount = self.totTriggerCount + record.totTriggerCount
             };
         }
 
@@ -72,6 +75,11 @@ namespace RandomBuff.Core.Progression.Record
                     break;
             }
             totCard++;
+        }
+
+        public void ActiveCard()
+        {
+            totTriggerCount++;
         }
     }
 

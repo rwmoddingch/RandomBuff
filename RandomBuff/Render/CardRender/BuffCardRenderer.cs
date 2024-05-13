@@ -142,7 +142,7 @@ namespace RandomBuff.Render.CardRender
             _cardQuadBack.transform.localPosition = new Vector3(0, 0, 0);
             _cardQuadBack.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
             cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
-            cardHighlightBackController.Init(this, _cardTextureBack);
+            cardHighlightBackController.Init(this, _cardTextureBack, false);
 
             Depth = 8.5f;
             Rotation = Vector2.zero;
@@ -158,11 +158,11 @@ namespace RandomBuff.Render.CardRender
             _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
             _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
 
-            cardHighlightFrontController.Init(this, _cardTextureFront);
+            cardHighlightFrontController.Init(this, _cardTextureFront, true);
 
             //BuffPlugin.Log($"_test : {_cardTextureBack}");
 
-            cardHighlightBackController.Init(this, _cardTextureBack);
+            cardHighlightBackController.Init(this, _cardTextureBack, false);
         }
 
         protected List<Vector3> GetVertexs(MeshFilter meshFilter)

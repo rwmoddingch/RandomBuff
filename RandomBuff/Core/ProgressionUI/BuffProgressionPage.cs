@@ -98,9 +98,9 @@ namespace RandomBuff.Core.ProgressionUI
             pageNames = new string[pageCount];
             pagePosesDelta = new Vector2[pageCount];
 
-            var testPage = CreatePage("RECORD", 0);
-            var testPage2 = CreatePage("QUEST", 1);
-            var testPage3 = CreatePage("COSMETIC", 2);
+            var testPage = CreatePage(BuffResourceString.Get("ProgressionUI_Record"), 0);
+            var testPage2 = CreatePage(BuffResourceString.Get("ProgressionUI_Quest"), 1);
+            var testPage3 = CreatePage(BuffResourceString.Get("ProgressionUI_Cosmetic"), 2);
 
             CreateElementsForRecordPage(testPage, recordScrollBoxSize, BuffPlayerData.Instance.SlotRecord);
             CreateElementsForCosmeticPage(testPage3, recordScrollBoxSize);

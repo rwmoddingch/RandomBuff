@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
 using RandomBuffUtils.FutileExtend;
 using UnityEngine;
@@ -62,6 +63,7 @@ namespace RandomBuff.Core.Progression
             Register<TestCosmeticUnlock>();
             Register<FireworkCosmetic>();
             Register<CrownCosmetic>();
+            Register<GlowingLeafCosmetic>();
 
             grown = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
         }
@@ -88,6 +90,7 @@ namespace RandomBuff.Core.Progression
 
             LoadImgOfName("BuffCosmetic_Crown");
             LoadImgOfName("BuffCosmetic_Firework");
+            LoadImgOfName("BuffCosmetic_GlowingLeaf");
 
             void LoadImgOfName(string imgName)
             {

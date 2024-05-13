@@ -166,13 +166,16 @@ namespace RandomBuffUtils.BuffEvents
                                               bool.Parse(array[4]));
             }
         }
+    
+        public static bool IsFakeGateRoom(Room room)
+        {
+            return room.abstractRoom.name.StartsWith("GATE") || room.roomSettings.GetEffectAmount(RoomSettings.RoomEffect.Type.FakeGate) > 0f;
+        }
     }
 
 
     public static partial class BuffRegionGateEvent
     {
- 
-
         private static RegionGateSaveDataTx saveData;
         internal static List<RegionGateInstance> loadedInstance = new List<RegionGateInstance>();
 
@@ -237,6 +240,9 @@ namespace RandomBuffUtils.BuffEvents
         private static void RegionGate_ctor(On.RegionGate.orig_ctor orig, RegionGate self, Room room)
         {
             orig.Invoke(self, room);
+
+            if (IsFakeGateRoom(room))
+                return;
 
             RegionGateInstance gateInstance = CreateInstanceForGate(self);
             

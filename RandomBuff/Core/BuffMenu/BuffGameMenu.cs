@@ -187,7 +187,7 @@ namespace RandomBuff.Core.BuffMenu
             if (ModManager.JollyCoop)
                 page.subObjects.Add(jollyToggleConfigMenu = new SimpleButton(this, page, Translate("SHOW"), "JOLLY_TOGGLE_CONFIG",
                     new Vector2(1056f, manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
-            page.subObjects.Add(progressionMenu = new SimpleButton(this, page, "进度", "PROGRESSIONMENU_SHOW",
+            page.subObjects.Add(progressionMenu = new SimpleButton(this, page, BuffResourceString.Get("ProgressionMenu_Show"), "PROGRESSIONMENU_SHOW",
                     new Vector2(1056f, manager.rainWorld.screenSize.y - 100f - 40f), new Vector2(110f, 30f)));
 
 

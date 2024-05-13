@@ -55,7 +55,7 @@ namespace RandomBuff.Render.CardRender
 
         BuffCardRendererBase _renderer;
 
-        public void Init(BuffCardRendererBase buffCardRenderer, Texture texture)
+        public void Init(BuffCardRendererBase buffCardRenderer, Texture texture, bool isFront)
         {
             _renderer = buffCardRenderer;
             float widthFactor = texture.width / 300f;
@@ -66,6 +66,20 @@ namespace RandomBuff.Render.CardRender
             _MeshRenderer.material.SetFloat("_EdgeHighLightStrength", _EdgeHighLightStrength);
             _MeshRenderer.material.SetFloat("_EdgeHighLightTimeFactor", _EdgeHighLightTimeFactor);
             _MeshRenderer.material.SetFloat("_Saturation", _saturation);
+
+            if(buffCardRenderer._buffStaticData != null && buffCardRenderer._buffStaticData.MultiLayerFace && isFront)
+            {
+                BuffPlugin.Log($"Enable key world : {"MultiLayer"}");
+                _MeshRenderer.material.EnableKeyword("MultiLayer");
+                _MeshRenderer.material.SetInt("_LayerCount", buffCardRenderer._buffStaticData.FaceLayer);
+                _MeshRenderer.material.SetFloat("_MaxLayerDepth", buffCardRenderer._buffStaticData.MaxFaceDepth);
+                _MeshRenderer.material.SetColor("_BackgroundCol", buffCardRenderer._buffStaticData.FaceBackgroundColor);
+            }
+            else
+            {
+                _MeshRenderer.material.DisableKeyword("MultiLayer");
+            }
+
         }
 
         void Update()

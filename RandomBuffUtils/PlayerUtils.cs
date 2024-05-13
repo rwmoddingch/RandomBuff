@@ -291,6 +291,16 @@ namespace RandomBuffUtils
             {
                 PlayerRef = new WeakReference<Player>(player);
                 Name = player.slugcatStats.name;
+
+                foreach(var owner in owners)
+                {
+                    var part = owner.InitPart(this);
+                    var graphicPart = owner.InitGraphicPart(this);
+                    if(part != null)
+                        moduleParts.Add(owner, part);
+                    if(graphicPart != null)
+                        graphicParts.Add(owner, graphicPart);
+                }
             }
         }
 

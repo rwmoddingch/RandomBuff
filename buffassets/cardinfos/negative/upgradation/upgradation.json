@@ -5,6 +5,13 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "FF019F",
+
+    "MultiLayerFace" : true,
+    "FaceLayer" : 3,
+    "MaxFaceDepth" : 1.0,
+    "FaceBackgroundColor" : "170A0F",
+
+
     "Chinese" : {
         "BuffName" : "提升",
         "Description" : "每过一段时间提升一个房间内可以提升的生物"

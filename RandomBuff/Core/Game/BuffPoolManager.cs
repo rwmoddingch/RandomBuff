@@ -91,13 +91,13 @@ namespace RandomBuff.Core.Game
 
         private List<CosmeticUnlock> cosmeticList = new();
 
-        private InGameRecord totCardThisCycle;
+        private InGameRecord record;
 
         private BuffPoolManager(RainWorldGame game)
         {
 
             Game = game;
-            totCardThisCycle = new InGameRecord();
+            record = new InGameRecord();
             BuffPlugin.Log("Clone all data to CycleData");
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 cycleDatas.Add(data.Key, data.Value.Clone());
@@ -188,7 +188,7 @@ namespace RandomBuff.Core.Game
                 BuffPlugin.Log($"Already contains BuffData {id} in {Game.StoryCharacter} game, stack More");
                 cycleDatas[id].Stack();
                 BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
-                totCardThisCycle.AddCard(id.GetStaticData().BuffType);
+                record.AddCard(id.GetStaticData().BuffType);
                 return cycleDatas[id];
             }
 
@@ -198,7 +198,7 @@ namespace RandomBuff.Core.Game
                 BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                 re.Stack();
                 BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
-                totCardThisCycle.AddCard(id.GetStaticData().BuffType);
+                record.AddCard(id.GetStaticData().BuffType);
                 cycleDatas.Add(id, re);
                 return re;
             }
@@ -320,7 +320,7 @@ namespace RandomBuff.Core.Game
                 }
             }
             GameSetting.SessionEnd(Game);
-            GameSetting.inGameRecord += totCardThisCycle;
+            GameSetting.inGameRecord += record;
 
             BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
             BuffFile.Instance.SaveFile();
@@ -401,6 +401,7 @@ namespace RandomBuff.Core.Game
                 }
 
                 BuffHud.Instance.TriggerCard(buff.ID);
+                record.totTriggerCount++;
                 if (re)
                 {
                     return UnstackBuff(buff.ID);
