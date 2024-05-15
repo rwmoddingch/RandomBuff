@@ -13,7 +13,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public override ConditionID ID => ConditionID.Like;
 
-        public override float Exp => 100;
+        public override int Exp => 200;
 
         List<CreatureCommunities.CommunityID> exclusiveIDs = new();
 

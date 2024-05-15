@@ -477,6 +477,8 @@ namespace RandomBuff.Core.Game
             winGamePackage.saveState = Game.GetStorySession.saveState;
             foreach (var buff in buffDictionary.Keys)
                 winGamePackage.winWithBuffs.Add(buff);
+            foreach(var condition in GameSetting.conditions) 
+                winGamePackage.winWithConditions.Add(condition);
 
             winGamePackage.sessionRecord = Game.GetStorySession.playerSessionRecords[0];
             winGamePackage.buffRecord = GameSetting.inGameRecord;

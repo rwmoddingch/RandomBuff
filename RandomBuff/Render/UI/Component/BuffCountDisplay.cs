@@ -44,10 +44,15 @@ namespace RandomBuff.Render.UI.Component
         public float lastAlpha;
         public float alpha;
 
-        public BuffCountDisplay(FContainer container, BuffCardTimer.IOwnBuffTimer owner)
+        public Color color;
+        public string shader = "";
+
+        public BuffCountDisplay(FContainer container, BuffCardTimer.IOwnBuffTimer owner, Color? color = null, string shader = "")
         {
             this.owner = owner;
             this.container = container;
+            this.color = color ?? Color.white;
+            this.shader = shader;
             numbers.Add(new SingleNumber(this, 0));
         }
 
@@ -146,8 +151,13 @@ namespace RandomBuff.Render.UI.Component
 
             public void InitiateSprite()
             {
-                num_1 = new FLabel(Custom.GetDisplayFont(), "") { isVisible = true, anchorX = 0.5f, anchorY = 0.5f };
-                num_2 = new FLabel(Custom.GetDisplayFont(), "") { isVisible = true, anchorX = 0.5f, anchorY = 0.5f };
+                num_1 = new FLabel(Custom.GetDisplayFont(), "") { isVisible = true, anchorX = 0.5f, anchorY = 0.5f ,color = countDisplay.color};
+                num_2 = new FLabel(Custom.GetDisplayFont(), "") { isVisible = true, anchorX = 0.5f, anchorY = 0.5f ,color = countDisplay.color};
+                if (!string.IsNullOrEmpty(countDisplay.shader))
+                {
+                    num_1.shader = Custom.rainWorld.Shaders[countDisplay.shader];
+                    num_2.shader = Custom.rainWorld.Shaders[countDisplay.shader];
+                }
 
                 countDisplay.container.AddChild(num_1);
                 countDisplay.container.AddChild(num_2);
