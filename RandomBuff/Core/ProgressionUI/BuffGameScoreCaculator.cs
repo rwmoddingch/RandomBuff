@@ -1,6 +1,7 @@
 ﻿using Menu;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
@@ -104,9 +105,15 @@ namespace RandomBuff.Core.StaticsScreen
                 totalScore += score;
             }
 
+            //获取条件分数
+            foreach(var condition in winPackage.winWithConditions)
+            {
+                totalScore += condition.Exp;
+            }
             BuffPlayerData.Instance.playerTotExp += totalScore;
         }
 
+        DelayCmpnt waitScoreDeletionDelay;
         public override void Update()
         {
             base.Update();
@@ -185,8 +192,8 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 if (indexInCurrentState == winPackage.winWithBuffs.Count)
                 {
-                    state = ScoreCaculatorState.WaitScoreDeletion;
-                    scoreBoard.state = ScoreBoardState.Finish;
+                    state = ScoreCaculatorState.AddConditionScore;
+                    indexInCurrentState = 0;
                     return;
                 }
 
@@ -203,6 +210,29 @@ namespace RandomBuff.Core.StaticsScreen
 
                 activeInstances.Insert(0, new BuffScoreInstance(this, score, buffID));
                 foreach (var instance in activeInstances)
+                    instance.UpdateInstancePos();
+                indexInCurrentState++;
+            }
+            else if(state == ScoreCaculatorState.AddConditionScore)
+            {
+                if(indexInCurrentState == winPackage.winWithConditions.Count)
+                {
+                    if (waitScoreDeletionDelay != null)
+                        return;
+
+                    waitScoreDeletionDelay = AnimMachine.GetDelayCmpnt(80, autoDestroy: true).BindActions(OnAnimFinished: (d) =>
+                    {
+                        state = ScoreCaculatorState.WaitScoreDeletion;
+                        scoreBoard.state = ScoreBoardState.Finish;
+                        waitScoreDeletionDelay = null;
+                    });
+                    return;
+                }
+
+                var condition = winPackage.winWithConditions[indexInCurrentState];
+
+                activeInstances.Insert(0, new BuffConditionScoreInstance(this, condition));
+                foreach(var instance in activeInstances)
                     instance.UpdateInstancePos();
                 indexInCurrentState++;
             }
@@ -288,20 +318,53 @@ namespace RandomBuff.Core.StaticsScreen
                 }
             }
 
+            TickAnimCmpnt alphaAnim;
+            float param;
             public virtual void PrepareUpdate()
             {
-                lastAlpha = alpha;
-                alpha = Mathf.Lerp(alpha, 1f, 0.15f);
+                if (state != ScoreInstanceState.Prepare)
+                    return;
 
-                if (Mathf.Approximately(alpha, 1f))
+                if (alphaAnim == null && state == ScoreInstanceState.Prepare)
                 {
-                    alpha = 1f;
-                    lastAlpha = 1f;
-                    state = ScoreInstanceState.UpdateScore;
-                    caculator.scoreBoard.score += score;
+                    alphaAnim = AnimMachine.GetTickAnimCmpnt(0, 60, autoDestroy: true).BindModifier(Helper.EaseInOutCubic)
+                        .BindActions(OnAnimGrafUpdate: (t, f) =>
+                        {
+                            param = t.Get();
+                        }, OnAnimFinished: (t) =>
+                        {
+                            param = 1f;
+                            state = ScoreInstanceState.UpdateScore;
+                            caculator.scoreBoard.score += score;
+                            alphaAnim = null;
+
+                            lastAlpha = param;
+                            alpha = param;
+
+                            lastPos = pos;
+                            pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
+                        });
+                    alphaAnim.SetEnable(true);
                 }
+
+                lastAlpha = param;
+                alpha = param;
+
                 lastPos = pos;
                 pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
+
+                //lastAlpha = alpha;
+                //alpha = Mathf.Lerp(alpha, 1f, 0.15f);
+
+                //if (Mathf.Approximately(alpha, 1f))
+                //{
+                //    alpha = 1f;
+                //    lastAlpha = 1f;
+                //    state = ScoreInstanceState.UpdateScore;
+                //    caculator.scoreBoard.score += score;
+                //}
+                //lastPos = pos;
+                //pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
             }
 
             public virtual void UpdateScoreUpdate()
@@ -456,6 +519,36 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 base.ClearSprites();
                 card.Destroy();
+            }
+        }
+
+        public class BuffConditionScoreInstance : ScoreInstance
+        {
+            FLabel conditionLabel;
+            public BuffConditionScoreInstance(BuffGameScoreCaculator caculator, Condition condition) : base(caculator, condition.Exp)
+            {
+                conditionLabel = new FLabel(Custom.GetDisplayFont(), condition.DisplayName(Custom.rainWorld.inGameTranslator))
+                {
+                    anchorX = 0f,
+                    anchorY = 0f,
+                };
+                caculator.Container.AddChild(conditionLabel);
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+                Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
+
+                conditionLabel.alpha = smoothAlpha;
+                conditionLabel.SetPosition(smoothPos);
+            }
+
+            public override void ClearSprites()
+            {
+                base.ClearSprites();
+                conditionLabel.RemoveFromContainer();
             }
         }
 

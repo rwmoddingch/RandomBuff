@@ -29,7 +29,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override ConditionID ID => ConditionID.Achievement;
 
-        public override float Exp => 100;
+        public override int Exp => 100;
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions = null)

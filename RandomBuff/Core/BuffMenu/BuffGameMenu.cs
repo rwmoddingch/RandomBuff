@@ -117,9 +117,11 @@ namespace RandomBuff.Core.BuffMenu
             InitButtonPage(pages[0]);
             container.AddChild(menuSlot.Container);
             InitGameDetailPage(pages[0]);
-            
             continueDetailPage.SetShow(false);
             newGameDetailPage.SetShow(false);
+
+            foreach (var page in pages)
+                page.mouseCursor?.BumToFront();
 
             //pages[0].Container.MoveToFront();
             

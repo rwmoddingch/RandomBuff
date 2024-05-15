@@ -50,7 +50,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         /// <summary>
         /// 完成获取的经验值
         /// </summary>
-        public abstract float Exp { get; }
+        public abstract int Exp { get; }
 
         /// <summary>
         /// 条件种类名

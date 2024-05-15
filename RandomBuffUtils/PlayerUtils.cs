@@ -264,6 +264,23 @@ namespace RandomBuffUtils
             return false;
         }
 
+        public static bool TryGetModulePart<T, OwnerT>(Player player, out T modulePart) where T : PlayerModulePart where OwnerT : IOWnPlayerUtilsPart
+        {
+            if (weakTable.TryGetValue(player, out var module))
+            {
+                foreach(var pair in module.moduleParts)
+                {
+                    if (pair.Key.GetType() == typeof(OwnerT))
+                    {
+                        modulePart = pair.Value as T;
+                        return true;
+                    }
+                }
+            }
+            modulePart = null;
+            return false;
+        }
+
         public static bool TryGetGraphicPart<T>(Player player, IOWnPlayerUtilsPart owner, out T modulePart) where T : PlayerModuleGraphicPart
         {
             if (weakTable.TryGetValue(player, out var module) && module.graphicParts.TryGetValue(owner, out var part))

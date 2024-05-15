@@ -11,7 +11,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     internal class GourmandCondition : Condition
     {
         public override ConditionID ID => ConditionID.Gourmand;
-        public override float Exp => 700;
+        public override int Exp => 700;
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
         {
             if (name != MoreSlugcatsEnums.SlugcatStatsName.Gourmand)
