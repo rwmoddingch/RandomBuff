@@ -21,12 +21,6 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override string IconElement => "BuffCosmetic_Firework";
 
         public override SlugcatStats.Name BindCat => MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Artificer;
-
-        static FireworkCosmetic()
-        {
-            IL.Player.ClassMechanicsArtificer += Player_ClassMechanicsArtificer;
-        }
-
         private static void Player_ClassMechanicsArtificer(MonoMod.Cil.ILContext il)
         {
             ILCursor c = new ILCursor(il);
@@ -46,7 +40,14 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
+            IL.Player.ClassMechanicsArtificer += Player_ClassMechanicsArtificer;
             BuffPlugin.Log("FireworkCosmetic enabled");
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            IL.Player.ClassMechanicsArtificer -= Player_ClassMechanicsArtificer;
         }
 
         public static void PyroJumped(Player player)

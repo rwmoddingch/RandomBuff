@@ -289,6 +289,9 @@ namespace RandomBuff.Core.Game
                     ExceptionTracker.TrackException(e, $"Exception happened when invoke gain Destroy of {buff.ID}");
                 }
             }
+            foreach (var cosmetic in cosmeticList)
+                cosmetic.Destroy();
+            cosmeticList.Clear();
             Instance = null;
         }
 

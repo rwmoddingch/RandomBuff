@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
+using RandomBuff.Render.Quest;
 using RandomBuffUtils.FutileExtend;
 using UnityEngine;
 
@@ -28,7 +29,10 @@ namespace RandomBuff.Core.Progression
 
     public abstract partial class CosmeticUnlock
     {
-        protected CosmeticUnlock() { }
+        protected CosmeticUnlock()
+        {
+            questRenderer = new CosmeticQuestRenderer(this);
+        }
         public abstract CosmeticUnlockID UnlockID { get; }
         public abstract string IconElement { get; }
         public abstract SlugcatStats.Name BindCat { get; }
@@ -37,6 +41,7 @@ namespace RandomBuff.Core.Progression
 
         public virtual void Update(RainWorldGame game) {}
 
+        public virtual void Destroy() {}
     }
 
     public abstract partial class CosmeticUnlock
@@ -74,14 +79,17 @@ namespace RandomBuff.Core.Progression
         internal static CosmeticUnlock CreateInstance(string name,RainWorldGame game)
         {
             var re = Activator.CreateInstance(cosmeticUnlocks[new CosmeticUnlockID(name)]) as CosmeticUnlock;
-            try
+            if(game != null)
             {
-                re.StartGame(game);
-            }
-            catch (Exception e)
-            {
-                BuffPlugin.LogException(e,$"CosmeticUnlock: {name} StartGame Error!");
-                return null;
+                try
+                {
+                    re.StartGame(game);
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e, $"CosmeticUnlock: {name} StartGame Error!");
+                    return null;
+                }
             }
 
             return re;
@@ -115,5 +123,12 @@ namespace RandomBuff.Core.Progression
 
 
         internal static FMesh.Mesh3DAsset grown;
+    }
+
+    public abstract partial class CosmeticUnlock : IQuestRenderer
+    {
+        CosmeticQuestRenderer questRenderer;
+        public QuestRenderer Renderer => questRenderer;
+
     }
 }

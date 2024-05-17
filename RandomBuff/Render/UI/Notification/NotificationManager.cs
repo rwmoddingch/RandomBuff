@@ -27,12 +27,16 @@ namespace RandomBuff.Render.UI.Notification
             for(int i = banners.Count - 1;i >= 0; i--)
                 banners[i].Update();
 
-            if(Input.GetKey(KeyCode.K) && banners.Count == 0)
-            {
-                NewRewardNotification(QuestUnlockedType.Mission, "DodgeTheRock");
-                NewRewardNotification(QuestUnlockedType.Mission, "MidnightSnack");
-                NewRewardNotification(QuestUnlockedType.Mission, "Druid");
-            }
+            //if(Input.GetKey(KeyCode.K) && banners.Count == 0)
+            //{
+            //    //NewRewardNotification(QuestUnlockedType.Mission, "DodgeTheRock");
+               
+            //    NewRewardNotification(QuestUnlockedType.Mission, "Druid");
+            //    NewRewardNotification(QuestUnlockedType.Cosmetic, "HoloScore");
+            //    NewRewardNotification(QuestUnlockedType.Cosmetic, "FireWork");
+            //    NewRewardNotification(QuestUnlockedType.Mission, "MidnightSnack");
+            //    NewRewardNotification(QuestUnlockedType.Cosmetic, "Crown");
+            //}
         }
 
         public override void GrafUpdate(float timeStacker)
