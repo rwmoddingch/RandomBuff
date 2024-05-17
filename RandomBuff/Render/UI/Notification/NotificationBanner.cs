@@ -9,7 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using UnityEngine;
+using static Expedition.ExpeditionProgression;
 using static RandomBuff.Render.Quest.QuestRendererManager;
 
 namespace RandomBuff.Render.UI.Notification
@@ -345,6 +347,21 @@ namespace RandomBuff.Render.UI.Notification
                     linePoses.Add(Vector2.zero);
                 }
             }
+            else if(questUnlockedType == QuestUnlockedType.Cosmetic)
+            {
+                CosmeticUnlockID cosmeticUnlockID = new CosmeticUnlockID(itemName);
+                var instance = new CosmeticReward(cosmeticUnlockID, this);
+                instance.InitSprites();
+                rewardInstances.Add(instance);
+
+                if (rewardInstances.Count > 1)
+                {
+                    splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
+                    notificationManager.Container.AddChild(splitLines.Last());
+                    linePoses.Add(Vector2.zero);
+                }
+            }
+
             RecaculateInstancePos();
 
             void RecaculateInstancePos()
@@ -456,7 +473,6 @@ namespace RandomBuff.Render.UI.Notification
             bool unique;
             string missionName;
 
-            FLabel missionLabel;
             QuestLeaser quest;
 
             public MissionReward(MissionID missionID, RewardBanner banner) : base(banner)
@@ -474,9 +490,6 @@ namespace RandomBuff.Render.UI.Notification
             {
                 base.InitSprites();
                 title.text = unique ? BuffResourceString.Get("Notification_MissionReward_Unique")  : BuffResourceString.Get("Notification_MissionReward");
-
-                //missionLabel = new FLabel(Custom.GetDisplayFont(), missionName) { anchorX = 0.5f, anchorY = 0.5f };
-                //banner.notificationManager.Container.AddChild(missionLabel);
             }
 
             public override void GrafUpdate(float timeStacker)
@@ -491,7 +504,39 @@ namespace RandomBuff.Render.UI.Notification
             public override void Destroy()
             {
                 base.Destroy();
-                //missionLabel.RemoveFromContainer();
+            }
+        }
+
+        public class CosmeticReward : RewardInstance
+        {
+            CosmeticUnlock cosmeticUnlock;
+            QuestLeaser quest;
+
+            public CosmeticReward(CosmeticUnlockID cosmeticID, RewardBanner banner) : base(banner)
+            {
+                cosmeticUnlock = CosmeticUnlock.CreateInstance(cosmeticID.value, null);
+
+                quest = banner.questRendererManager.AddQuestToRender(cosmeticUnlock);
+            }
+
+            public override void InitSprites()
+            {
+                base.InitSprites();
+                title.text = BuffResourceString.Get("Notification_CosmeticReward");
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float smoothContentExpand = Mathf.Lerp(banner.lastContentExpand, banner.contentExpand, timeStacker);
+
+                quest.smoothAlpha = smoothContentExpand;
+                quest.smoothCenterPos = pos;
+            }
+
+            public override void Destroy()
+            {
+                base.Destroy();
             }
         }
     }

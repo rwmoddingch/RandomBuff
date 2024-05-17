@@ -15,11 +15,6 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public override SlugcatStats.Name BindCat => SlugcatStats.Name.Red;
 
-        static HoloScoreCosmetic()
-        {
-            On.SocialEventRecognizer.Killing += SocialEventRecognizer_Killing;
-        }
-
         private static void SocialEventRecognizer_Killing(On.SocialEventRecognizer.orig_Killing orig, SocialEventRecognizer self, Creature killer, Creature victim)
         {
             orig.Invoke(self, killer, victim);
@@ -42,7 +37,14 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
+            On.SocialEventRecognizer.Killing += SocialEventRecognizer_Killing;
             PlayerUtils.AddPart(this);
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            On.SocialEventRecognizer.Killing -= SocialEventRecognizer_Killing;
         }
 
 

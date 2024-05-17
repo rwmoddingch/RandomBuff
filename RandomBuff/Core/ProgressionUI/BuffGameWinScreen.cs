@@ -14,6 +14,8 @@ using RandomBuff.Render.UI;
 using Menu.Remix;
 using Menu.Remix.MixedUI;
 using RandomBuff.Core.ProgressionUI;
+using RandomBuff.Render.UI.Notification;
+using RandomBuff.Core.Progression;
 
 namespace RandomBuff.Core.StaticsScreen
 {
@@ -32,7 +34,13 @@ namespace RandomBuff.Core.StaticsScreen
         public MenuTabWrapper wrapper;
         public OpScrollBox recordBox;
 
+        public NotificationManager notificationManager;
+
+        List<BuffQuest> newFinishedQuests;
+
         bool recordShowed;
+        bool questShow;
+
         Vector2 recordBoxHidePos;
         Vector2 recordBoxShowPos;
 
@@ -50,6 +58,7 @@ namespace RandomBuff.Core.StaticsScreen
         {
             pages = new List<Page>();
             pages.Add(new Page(this, null, "Main", 0));
+            pages.Add(notificationManager = new NotificationManager(this, container, 1));
             scene = new InteractiveMenuScene(this, pages[0], MenuScene.SceneID.SleepScreen);
             scene.camPos.x = scene.camPos.x - 400f;
             pages[0].subObjects.Add(scene);
@@ -107,9 +116,9 @@ namespace RandomBuff.Core.StaticsScreen
             BuffProgressionPage.CreateElementsForRecordPage(recordBox, recordSize, winPackage.buffRecord);
 
 
-           //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
-            var newFinishQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
-            foreach(var quest in newFinishQuests)
+            //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
+            newFinishedQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
+            foreach(var quest in newFinishedQuests)
                 BuffPlugin.Log($"accomplish quest: {quest.QuestName}");
             //TODO:新任务完成的提示
 
@@ -132,15 +141,19 @@ namespace RandomBuff.Core.StaticsScreen
 
         TickAnimCmpnt animCmpnt; 
                
-        public void ShowRecords()
+        public void OnScoreCaculateFinish()
         {
             if (recordShowed)
                 return;
 
             recordShowed = true;
             animCmpnt = new TickAnimCmpnt(0, 60, autoStart: false, autoDestroy: true)
-                                  .BindModifier(Helper.EaseInOutCubic)
-                                  .BindActions(OnAnimGrafUpdate: UpdateRecordBox, OnAnimFinished: (_) => animCmpnt = null);
+            .BindModifier(Helper.EaseInOutCubic)
+            .BindActions(OnAnimGrafUpdate: UpdateRecordBox, OnAnimFinished: (_) =>
+            {
+                animCmpnt = null;
+                questShow = true;
+            });
             animCmpnt.SetEnable(true);
         }
 
@@ -163,6 +176,18 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 titleShowDelay--;
                 title.RequestSwitchTitle("Random Buff");
+            }
+
+            if(questShow && newFinishedQuests.Count > 0 && notificationManager.banners.Count == 0)
+            {
+                var quest = newFinishedQuests.Pop();
+                foreach (var pair in quest.UnlockItem)
+                {
+                    foreach (var item in pair.Value)
+                    {
+                        notificationManager.NewRewardNotification(pair.Key, item);
+                    }
+                }
             }
         }
 

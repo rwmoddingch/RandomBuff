@@ -202,7 +202,7 @@ namespace BuiltinBuffs.Duality
             headLight.pos = self.firstChunk.pos;
             tailLight.pos = self.bodyChunks.Last().pos;
 
-            testLabel.text = $"interest:{interest}\ncharge:{charge}\nchargeCoolDown:{chargeCoolDown}\ndischargeCounter:{dischargeCounter}";
+            //testLabel.text = $"interest:{interest}\ncharge:{charge}\nchargeCoolDown:{chargeCoolDown}\ndischargeCounter:{dischargeCounter}";
         }
 
         public void ApplyPalette(CentipedeGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)

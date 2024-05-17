@@ -169,7 +169,7 @@ namespace RandomBuffUtils.BuffEvents
     
         public static bool IsFakeGateRoom(Room room)
         {
-            return room.abstractRoom.name.StartsWith("GATE") || room.roomSettings.GetEffectAmount(RoomSettings.RoomEffect.Type.FakeGate) > 0f;
+            return !room.abstractRoom.name.StartsWith("GATE") || room.roomSettings.GetEffectAmount(RoomSettings.RoomEffect.Type.FakeGate) > 0f;
         }
     }
 
