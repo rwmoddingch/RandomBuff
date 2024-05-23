@@ -24,6 +24,8 @@ namespace RandomBuff.Core.Progression
         public static readonly CosmeticUnlockID GlowingLeaf = new CosmeticUnlockID("GlowingLeaf", true);//黄猫
 
         public static readonly CosmeticUnlockID HoloScore = new CosmeticUnlockID("HoloScore", true);//红猫
+        public static readonly CosmeticUnlockID FateRain = new CosmeticUnlockID("FateRain", true);//白猫
+        public static readonly CosmeticUnlockID FoodBag = new CosmeticUnlockID("FoodBag", true);//胖猫
 
     }
 
@@ -72,6 +74,8 @@ namespace RandomBuff.Core.Progression
             Register<CrownCosmetic>();
             Register<GlowingLeafCosmetic>();
             Register<HoloScoreCosmetic>();
+            Register<FateRainCosmetic>();
+            Register<FoodBagCosmetic>();
 
             grown = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
         }
@@ -103,6 +107,8 @@ namespace RandomBuff.Core.Progression
             LoadImgOfName("BuffCosmetic_Firework");
             LoadImgOfName("BuffCosmetic_GlowingLeaf");
             LoadImgOfName("BuffCosmetic_HoloScore");
+            LoadImgOfName("BuffCosmetic_FateRain");
+            LoadImgOfName("BuffCosmetic_FoodBag");
 
             void LoadImgOfName(string imgName)
             {
