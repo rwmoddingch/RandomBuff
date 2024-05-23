@@ -22,6 +22,7 @@ namespace RandomBuff.Cardpedia
         public static Shader FoldableTextVertical;
         public static Shader UIBlurFoldable;
         public static Shader FoldablePicVertical;
+        public static Shader FateRain;
         public static Texture2D RBNoiseTex;
 
         public static void Hook()
@@ -62,22 +63,26 @@ namespace RandomBuff.Cardpedia
             Futile.atlasManager.LoadImage("buffassets/illustrations/TitleShadow_Cardpedia");
             Futile.atlasManager.LoadImage("buffassets/illustrations/TitleFlat_Cardpedia");
             Futile.atlasManager.LoadImage("buffassets/illustrations/UIBlock");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Chi");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Stack_Chi");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Chi");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Description_Chi");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Confliction_Chi");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Eng");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Stack_Eng");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Eng");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Description_Eng");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Confliction_Eng");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/SmallShadow");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/LongShadow");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/LongShadow_200");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Main");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Cards");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_UI");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/EmoCloud");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/TinySplash");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/FoodBag");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Chi");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Stack_Chi");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Chi");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Description_Chi");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Confliction_Chi");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Eng");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Stack_Eng");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Eng");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Description_Eng");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Confliction_Eng");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/SmallShadow");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/LongShadow");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/LongShadow_200");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Main");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Cards");
+            //Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_UI");
+
             Futile.atlasManager.LoadImage("buffassets/missionicons/missionicon_general");
             string path = AssetManager.ResolveFilePath("buffassets/assetbundles/shadertest");           
             AssetBundle ab = AssetBundle.LoadFromFile(path);
@@ -91,6 +96,7 @@ namespace RandomBuff.Cardpedia
             FoldableTextVertical = ab.LoadAsset<Shader>("Assets/FoldableTextVertical.shader");
             UIBlurFoldable = ab.LoadAsset<Shader>("Assets/UIBlurFoldable.shader");
             FoldablePicVertical = ab.LoadAsset<Shader>("Assets/FoldablePicVertical.shader");
+            FateRain = ab.LoadAsset<Shader>("Assets/FateRain.shader"); 
             RBNoiseTex = (ab.LoadAsset("Assets/Textures/RBNoiseTex.png")) as Texture2D;           
             if (SquareBlinking != null && RBNoiseTex != null)
             {
@@ -108,6 +114,7 @@ namespace RandomBuff.Cardpedia
             rainWorld.Shaders.Add("FoldableTextVertical", FShader.CreateShader("FoldableTextVertical", CardpediaMenuHooks.FoldableTextVertical));
             rainWorld.Shaders.Add("UIBlurFoldable", FShader.CreateShader("UIBlurFoldable", CardpediaMenuHooks.UIBlurFoldable));
             rainWorld.Shaders.Add("FoldablePicVertical", FShader.CreateShader("FoldablePicVertical", CardpediaMenuHooks.FoldablePicVertical));
+            rainWorld.Shaders.Add("FateRain", FShader.CreateShader("FateRain", CardpediaMenuHooks.FateRain));
             Shader.SetGlobalColor("_BlurColor",Color.white);
             Shader.SetGlobalFloat("_ColorBias",0.10f);
             Shader.SetGlobalFloat("_BlurSize",5f);
