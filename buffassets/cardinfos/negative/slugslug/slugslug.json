@@ -1,0 +1,17 @@
+{
+    "FaceName": "slugslug",
+    "BuffID" : "SlugSlug",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "蛞蝓蛞蝓",
+        "Description" : "变成失去双手的真·蛞蝓，无法拾取物品而只能用嘴叼食物吃，管道内爬行速度变为原来的3倍。"
+    },
+    "English" : {
+        "BuffName" : "SlugSlug",
+        "Description" : "Become a handless real slug. Can't grab objects by hands, can only hold food with mouth, and creep 3 times faster in tubes."
+    }
+}
