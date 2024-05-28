@@ -28,6 +28,8 @@ namespace RandomBuffUtils
             On.RoomCamera.SpriteLeaser.CleanSpritesAndRemove += SpriteLeaser_CleanSpritesAndRemove;
         }
 
+        
+
         #region PlayerHooks
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
