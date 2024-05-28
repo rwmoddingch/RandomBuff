@@ -1,0 +1,17 @@
+{
+    "FaceName": "pooraim",
+    "BuffID" : "PoorAim",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "描边大师",
+        "Description" : "武器的投掷方向会随机产生一定程度的偏移。"
+    },
+    "English" : {
+        "BuffName" : "PoorAim",
+        "Description" : "A random bias (within a limitation) will be added to the throwing direction of weapons."
+    }
+}
