@@ -37,6 +37,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             orig.Invoke(self);
             var oracles = self.updateList.Where((u) => u is Oracle).Select((u) => u as Oracle).ToList();
+            if (self.game.IsArenaSession) return;
             if (self.game.rainWorld.progression.currentSaveState.cycleNumber > cycleRequirement)
                 return;
             foreach(var o in oracles)
