@@ -74,6 +74,9 @@ namespace RandomBuff
         {
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
             ExceptionTracker.Singleton?.Update();
+            
+            SoapBubblePool.UpdateInactiveItems();
+            FakeFoodPool.UpdateInactiveItems();
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
@@ -149,6 +152,7 @@ namespace RandomBuff
 
                     CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
+                    SoapBubblePool.Hook();
 
                     AnimMachine.Init();
 
