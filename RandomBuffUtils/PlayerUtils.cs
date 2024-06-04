@@ -281,14 +281,31 @@ namespace RandomBuffUtils
             return false;
         }
 
-        public static bool TryGetGraphicPart<T>(Player player, IOWnPlayerUtilsPart owner, out T modulePart) where T : PlayerModuleGraphicPart
+        public static bool TryGetGraphicPart<T>(Player player, IOWnPlayerUtilsPart owner, out T graphicPart) where T : PlayerModuleGraphicPart
         {
             if (weakTable.TryGetValue(player, out var module) && module.graphicParts.TryGetValue(owner, out var part))
             {
-                modulePart = part as T;
+                graphicPart = part as T;
                 return true;
             }
-            modulePart = null;
+            graphicPart = null;
+            return false;
+        }
+
+        public static bool TryGetGraphicPart<T, OwnerT>(Player player, out T graphicPart) where T : PlayerModuleGraphicPart where OwnerT : IOWnPlayerUtilsPart
+        {
+            if (weakTable.TryGetValue(player, out var module))
+            {
+                foreach (var pair in module.graphicParts)
+                {
+                    if (pair.Key.GetType() == typeof(OwnerT))
+                    {
+                        graphicPart = pair.Value as T;
+                        return true;
+                    }
+                }
+            }
+            graphicPart = null;
             return false;
         }
 
