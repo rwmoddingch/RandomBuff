@@ -9,6 +9,7 @@ using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.Component;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace RandomBuff.Core.Game
@@ -293,6 +294,14 @@ namespace RandomBuff.Core.Game
                 cosmetic.Destroy();
             cosmeticList.Clear();
             Instance = null;
+            if (PlayerUtils.owners.Count > 0)
+            {
+                int num = PlayerUtils.owners.Count;
+                for (int i = 0; i < num; i++)
+                {
+                    PlayerUtils.RemovePart(PlayerUtils.owners[0]);
+                }
+            }
         }
 
 

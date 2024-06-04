@@ -13,7 +13,7 @@ namespace RandomBuffUtils
     public class PlayerUtils
     {
         static ConditionalWeakTable<Player, PlayerModule> weakTable = new ConditionalWeakTable<Player, PlayerModule>();
-        static List<IOWnPlayerUtilsPart> owners = new List<IOWnPlayerUtilsPart>();
+        public static List<IOWnPlayerUtilsPart> owners = new List<IOWnPlayerUtilsPart>();
 
         public static void OnEnable()
         {
@@ -28,17 +28,15 @@ namespace RandomBuffUtils
             On.RoomCamera.SpriteLeaser.CleanSpritesAndRemove += SpriteLeaser_CleanSpritesAndRemove;
         }
 
-   
-
         #region PlayerHooks
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-            if(weakTable.TryGetValue(self, out var module))
+            if (weakTable.TryGetValue(self, out var module))
             {
-                foreach(var owner in owners)
+                foreach (var owner in owners)
                 {
-                    if(module.moduleParts.TryGetValue(owner, out var part))
+                    if (module.moduleParts.TryGetValue(owner, out var part))
                         part.Update(self, eu);
                 }
             }
@@ -46,8 +44,8 @@ namespace RandomBuffUtils
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
-            orig.Invoke(self, abstractCreature , world);
-            if(!weakTable.TryGetValue(self, out var _))
+            orig.Invoke(self, abstractCreature, world);
+            if (!weakTable.TryGetValue(self, out var _))
             {
                 weakTable.Add(self, new PlayerModule(self));
             }
@@ -66,10 +64,10 @@ namespace RandomBuffUtils
         private static void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             orig.Invoke(self, sLeaser, rCam);
-            if(weakTable.TryGetValue(self.player, out var module))
+            if (weakTable.TryGetValue(self.player, out var module))
             {
                 module.graphicsInited = false;
-                foreach(var owner in owners)
+                foreach (var owner in owners)
                 {
                     if (module.graphicParts.TryGetValue(owner, out var part))
                     {
@@ -100,9 +98,9 @@ namespace RandomBuffUtils
         private static void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
             orig.Invoke(self, sLeaser, rCam, newContatiner);
-            if(weakTable.TryGetValue(self.player,out var module) && module.graphicsInited)
+            if (weakTable.TryGetValue(self.player, out var module) && module.graphicsInited)
             {
-                foreach(var owner in owners)
+                foreach (var owner in owners)
                 {
                     if (module.graphicParts.TryGetValue(owner, out var part))
                         part.AddToContainer(part.sleaserInstance, self, sLeaser, rCam, newContatiner);
@@ -113,10 +111,10 @@ namespace RandomBuffUtils
         private static void SpriteLeaser_CleanSpritesAndRemove(On.RoomCamera.SpriteLeaser.orig_CleanSpritesAndRemove orig, RoomCamera.SpriteLeaser self)
         {
             orig.Invoke(self);
-            if(self.drawableObject is PlayerGraphics graphics && graphics.player != null && weakTable.TryGetValue(graphics.player, out var module))
+            if (self.drawableObject is PlayerGraphics graphics && graphics.player != null && weakTable.TryGetValue(graphics.player, out var module))
             {
                 module.graphicsInited = false;
-                foreach(var owner in owners)
+                foreach (var owner in owners)
                 {
                     if (module.graphicParts.TryGetValue(owner, out var part))
                         part.sleaserInstance.ClearOutSprites();
@@ -161,12 +159,12 @@ namespace RandomBuffUtils
         #endregion
 
         public static void AddPart(IOWnPlayerUtilsPart owner)
-        {
+        {           
             if (owners.Contains(owner))
                 return;
-            owners.Add(owner);
-
-            if(Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
+            owners.Add(owner);    
+            
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
             {
                 foreach (var abPlayer in game.Players)
                 {
@@ -178,16 +176,16 @@ namespace RandomBuffUtils
                     if (weakTable.TryGetValue(player, out var module))
                     {
                         var part = owner.InitPart(module);
-                        if(part != null)
+                        if (part != null)
                         {
                             module.moduleParts.Add(owner, part);
                             //BuffUtils.Log("PlayerUtils", $"");
                         }
 
-                        if(pGraphic != null)
+                        if (pGraphic != null)
                         {
                             var graphicPart = owner.InitGraphicPart(module);
-                            if(graphicPart != null)
+                            if (graphicPart != null)
                             {
                                 module.graphicParts.Add(owner, graphicPart);
 
@@ -221,17 +219,17 @@ namespace RandomBuffUtils
                     Player player = abPlayer.realizedCreature as Player;
                     PlayerGraphics pGraphic = player.graphicsModule as PlayerGraphics;
 
-                    if(weakTable.TryGetValue(player, out var module))
+                    if (weakTable.TryGetValue(player, out var module))
                     {
-                        if(module.moduleParts.TryGetValue(owner, out var part))
+                        if (module.moduleParts.TryGetValue(owner, out var part))
                         {
                             part.Destroy();
                             module.moduleParts.Remove(owner);
                         }
 
-                        if(module.graphicParts.TryGetValue(owner, out var graphicPart))
+                        if (module.graphicParts.TryGetValue(owner, out var graphicPart))
                         {
-                            if(pGraphic != null)
+                            if (pGraphic != null)
                             {
                                 var rCam = game.cameras[0];
                                 var sLearser = rCam.spriteLeasers.Find((s) => s.drawableObject == pGraphic);
@@ -239,7 +237,7 @@ namespace RandomBuffUtils
                                 int decrease = graphicPart.sleaserInstance.realIndex.Length;
                                 int lastIndex = graphicPart.sleaserInstance.realIndex.Last() + 1;
 
-                                for(int i = lastIndex; i < sLearser.sprites.Length; i++)
+                                for (int i = lastIndex; i < sLearser.sprites.Length; i++)
                                 {
                                     sLearser.sprites[i - decrease] = sLearser.sprites[i];
                                 }
@@ -255,7 +253,7 @@ namespace RandomBuffUtils
 
         public static bool TryGetModulePart<T>(Player player, IOWnPlayerUtilsPart owner, out T modulePart) where T : PlayerModulePart
         {
-            if(weakTable.TryGetValue(player, out var module) && module.moduleParts.TryGetValue(owner, out var part))
+            if (weakTable.TryGetValue(player, out var module) && module.moduleParts.TryGetValue(owner, out var part))
             {
                 modulePart = part as T;
                 return true;
@@ -268,7 +266,7 @@ namespace RandomBuffUtils
         {
             if (weakTable.TryGetValue(player, out var module))
             {
-                foreach(var pair in module.moduleParts)
+                foreach (var pair in module.moduleParts)
                 {
                     if (pair.Key.GetType() == typeof(OwnerT))
                     {
@@ -315,7 +313,7 @@ namespace RandomBuffUtils
             public WeakReference<Player> PlayerRef { get; private set; }
             public SlugcatStats.Name Name { get; private set; }
 
-            
+
             public readonly Dictionary<IOWnPlayerUtilsPart, PlayerModulePart> moduleParts = new Dictionary<IOWnPlayerUtilsPart, PlayerModulePart>();
 
             internal bool graphicsInited = false;
@@ -326,13 +324,13 @@ namespace RandomBuffUtils
                 PlayerRef = new WeakReference<Player>(player);
                 Name = player.slugcatStats.name;
 
-                foreach(var owner in owners)
+                foreach (var owner in owners)
                 {
                     var part = owner.InitPart(this);
                     var graphicPart = owner.InitGraphicPart(this);
-                    if(part != null)
+                    if (part != null)
                         moduleParts.Add(owner, part);
-                    if(graphicPart != null)
+                    if (graphicPart != null)
                         graphicParts.Add(owner, graphicPart);
                 }
             }
