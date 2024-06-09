@@ -109,6 +109,11 @@ namespace RandomBuff.Core.Buff
         {
             Instance = (TBuff)this;
         }
+
+        public TemporaryBuffPool GetTemporaryBuffPool()
+        {
+            return BuffPoolManager.Instance.GetTemporaryBuffPool(ID);
+        }
     }
 
     /// <summary>

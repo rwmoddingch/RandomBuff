@@ -16,7 +16,6 @@ namespace RandomBuff.Core.Game
 {
     internal class BuffHud : HudPart
     {
-
         public BuffHud(HUD.HUD hud) : base(hud)
         {
             slotTitle = new BuffSlotTitle();
@@ -33,8 +32,6 @@ namespace RandomBuff.Core.Game
                ProcessManager.MenuSetup.StoryGameInitCondition.New)
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
-
-           
         }
 
         public void NewGame(SlugcatStats.Name saveName)
@@ -83,17 +80,24 @@ namespace RandomBuff.Core.Game
         public void AppendNewCard(BuffID id)
         {
             inGameSlot.AppendCard(id);
+            HandleAddBuffHUD(id);
         }
 
         public void AppendCardDirectly(BuffID id)
         {
             inGameSlot.AppendCardDirectly(id);
+            HandleAddBuffHUD(id);
         }
 
         public override void Update()
         {
             inGameSlot.Update();
             slotTitle.Update();
+
+            for (int i = hudParts.Count - 1; i >= 0; i--)
+            {
+                hudParts[i].Update(hud);
+            }
         }
 
         public override void Draw(float timeStacker)
@@ -101,6 +105,10 @@ namespace RandomBuff.Core.Game
             base.Draw(timeStacker);
             inGameSlot.GrafUpdate(timeStacker);
             slotTitle.GrafUpdate(timeStacker);
+            for (int i = hudParts.Count - 1; i >= 0; i--)
+            {
+                hudParts[i].Draw(hud, timeStacker);
+            }
         }
 
         public void TriggerCard(BuffID id)
@@ -111,6 +119,7 @@ namespace RandomBuff.Core.Game
         public void RemoveCard(BuffID id)
         {
             inGameSlot.BasicSlot.RemoveCard(id);
+            HandleRemoveBuffHUD(id);
         }
 
         public override void ClearSprites()
@@ -118,6 +127,36 @@ namespace RandomBuff.Core.Game
             inGameSlot.Destory();
             slotTitle.Destroy();
             base.ClearSprites();
+
+            foreach(var part in hudParts)
+            {
+                part.ClearSprites();
+            }
+            hudParts.Clear();
+            id2hudParts.Clear();
+        }
+
+        public void HandleAddBuffHUD(BuffID id)
+        {
+            if(BuffPoolManager.Instance.GetBuff(id) is BuffHudPart.IOwnBuffHudPart owner)
+            {
+                var part = owner.CreateHUDPart();
+                part.InitSprites(hud);
+
+                id2hudParts.Add(id, part);
+                hudParts.Add(part);
+            }
+        }
+
+        public void HandleRemoveBuffHUD(BuffID id)
+        {
+            if (id2hudParts.TryGetValue(id, out var part))
+            {
+                part.ClearSprites();
+
+                id2hudParts.Remove(id);
+                hudParts.Remove(part);
+            }
         }
 
 
@@ -125,6 +164,32 @@ namespace RandomBuff.Core.Game
 
         BuffSlotTitle slotTitle;
         private CommmmmmmmmmmmmmpleteInGameSlot inGameSlot;
+
+        Dictionary<BuffID, BuffHudPart> id2hudParts = new Dictionary<BuffID, BuffHudPart>();
+        List<BuffHudPart> hudParts = new List<BuffHudPart>();
     }
 
+    public abstract class BuffHudPart
+    {
+        public virtual void InitSprites(HUD.HUD hud)
+        {
+        }
+
+        public virtual void Update(HUD.HUD hud)
+        {
+        }
+
+        public virtual void Draw(HUD.HUD hud, float timeStacker)
+        {
+        }
+
+        public virtual void ClearSprites()
+        {
+        }
+
+        public interface IOwnBuffHudPart
+        {
+            BuffHudPart CreateHUDPart();
+        }
+    }
 }

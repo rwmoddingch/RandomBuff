@@ -78,6 +78,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
+    public class PositionOverLife : EmitterModule, IParticleUpdateModule
+    {
+        Func<Particle, float, Vector2> posFunc;
+        public PositionOverLife(ParticleEmitter emitter, Func<Particle, float, Vector2> posFunc) : base(emitter)
+        {
+            this.posFunc = posFunc;
+        }
+
+        public void ApplyUpdate(Particle particle)
+        {
+            particle.pos = posFunc.Invoke(particle, particle.LifeParam);
+        }
+    }
+
     public class RotationOverLife : EmitterModule, IParticleUpdateModule
     {
         Func<Particle, float, float> rotationFunc;
@@ -90,6 +104,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public void ApplyUpdate(Particle particle)
         {
             particle.rotation = rotationFunc.Invoke(particle, particle.LifeParam);
+        }
+    }
+
+    public class AlphaOverLife : EmitterModule, IParticleUpdateModule
+    {
+        Func<Particle, float, float> aFunc;
+        public AlphaOverLife(ParticleEmitter emitter, Func<Particle, float, float> aFunc) : base(emitter)
+        {
+            this.aFunc = aFunc;
+        }
+
+        public void ApplyUpdate(Particle particle)
+        {
+            particle.alpha = aFunc.Invoke(particle, particle.LifeParam);
         }
     }
 

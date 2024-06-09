@@ -786,6 +786,7 @@ namespace RandomBuff.Render.UI
             buffCard.Alpha = 0f;
 
             slot = buffCard.interactionManager.BaseSlot as CommmmmmmmmmmmmmpleteInGameSlot.BuffTimerAnimSlot;
+            buffCard._cardRenderer.cardCameraController.CardDirty = true;
         }
 
         public override void Update()

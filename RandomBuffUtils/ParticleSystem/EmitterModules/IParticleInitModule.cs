@@ -180,7 +180,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
         public void ApplyInit(Particle particle)
         {
-            int index = (int)(particle.randomParam * spriteInitParam.Length - 1);
+            int index = (int)(particle.randomParam1 * spriteInitParam.Length - 1);
             particle.spriteInitParams.Add(spriteInitParam[index]);
         }
     }

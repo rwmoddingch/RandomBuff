@@ -92,6 +92,8 @@ namespace RandomBuff.Core.Game
 
         private List<CosmeticUnlock> cosmeticList = new();
 
+        internal readonly Dictionary<BuffID, TemporaryBuffPool> temporaryBuffPools = new Dictionary<BuffID, TemporaryBuffPool>();
+
         private InGameRecord record;
 
         private BuffPoolManager(RainWorldGame game)
@@ -316,6 +318,13 @@ namespace RandomBuff.Core.Game
 
             BuffPlugin.Log("------Win Game & Cycle End------");
 
+            BuffPlugin.Log("Clear out temporary buff pools");
+            foreach(var pool in temporaryBuffPools.Values)
+            {
+                pool.Destroy();
+            }
+            temporaryBuffPools.Clear();
+
             foreach (var buff in buffList)
             {
                 try
@@ -426,7 +435,7 @@ namespace RandomBuff.Core.Game
         /// 游戏进行中删除Buff
         /// </summary>
         /// <param name="id"></param>
-        private void RemoveBuff(BuffID id)
+        internal void RemoveBuff(BuffID id)
         {
             if (!buffDictionary.ContainsKey(id))
             {
@@ -455,16 +464,27 @@ namespace RandomBuff.Core.Game
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private void RemoveBuffAndData(BuffID id)
+        internal void RemoveBuffAndData(BuffID id)
         {
             RemoveBuff(id);
             RemoveData(id);
+            BuffHud.Instance.RemoveCard(id);
         }
 
         private void RemoveData(BuffID id)
         {
             BuffPlugin.Log($"Remove buff data : {Game.StoryCharacter}-{id}");
             cycleDatas.Remove(id);
+        }
+
+        internal TemporaryBuffPool GetTemporaryBuffPool(BuffID id)
+        {
+            if(temporaryBuffPools.ContainsKey(id))
+                return temporaryBuffPools[id];
+
+            TemporaryBuffPool result = new TemporaryBuffPool(this);
+            temporaryBuffPools.Add(id, result);
+            return result;
         }
 
         /// 轮回内的临时数据
@@ -505,9 +525,48 @@ namespace RandomBuff.Core.Game
                 }
             }
         }
-
-       
     }
+
+    public class TemporaryBuffPool
+    {
+        internal BuffPoolManager poolManager;
+        public List<BuffID> managedIDs = new List<BuffID>();
+        public List<BuffID> allBuffIDs => poolManager.GetAllBuffIds();
+
+        internal TemporaryBuffPool(BuffPoolManager poolManager)
+        {
+            this.poolManager = poolManager;
+        }
+
+        public bool CreateTemporaryBuff(BuffID id, bool needStack = false)
+        {
+            if (allBuffIDs.Contains(id))
+                return false;
+
+            poolManager.CreateBuff(id, needStack);
+            BuffHud.Instance.AppendNewCard(id);
+            managedIDs.Add(id);
+
+            return true;
+        }
+
+        public void RemoveTemporaryBuffAndData(BuffID id)
+        {
+            if (!managedIDs.Contains(id))
+                return;
+            managedIDs.Remove(id);
+            poolManager.RemoveBuffAndData(id);
+        }
+
+        internal void Destroy()
+        {
+            for(int i = managedIDs.Count - 1; i >= 0; i--)
+            {
+                RemoveTemporaryBuffAndData(managedIDs[i]);
+            }
+        }
+    }
+
     public class WinGamePackage
     {
         public List<BuffID> winWithBuffs = new List<BuffID>();

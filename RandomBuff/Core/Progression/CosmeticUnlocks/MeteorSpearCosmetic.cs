@@ -124,7 +124,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             dust.ApplyParticleModule(new ScaleOverLife(dust, (particle, lifeParam) =>
             {
                 float t = Mathf.Max(0f, Mathf.Min(lifeParam * 5f, 1f - lifeParam));
-                return Mathf.Lerp(1f, 1.5f, particle.randomParam) * t;
+                return Mathf.Lerp(1f, 1.5f, particle.randomParam1) * t;
             }));
             dust.ApplyParticleModule(new VelocityOverLife(dust, (particle, lifeParam) =>
             {
@@ -148,7 +148,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             fallingStar.ApplyParticleModule(new ScaleOverLife(fallingStar, (particle, lifeParam) =>
             {
                 float t = Mathf.Max(0f, Mathf.Min(lifeParam * 4f, 1f - lifeParam));
-                return Mathf.Lerp(0.5f, 0.75f, particle.randomParam) * t;
+                return Mathf.Lerp(0.5f, 0.75f, particle.randomParam1) * t;
             }));
             fallingStar.ApplyParticleModule(new VelocityOverLife(fallingStar, (particle, lifeParam) =>
             {
@@ -160,7 +160,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             }));
             fallingStar.ApplyParticleModule(new ColorOverLife(fallingStar, (particle, lifeParam) =>
             {
-                return Custom.HSL2RGB((particle.randomParam + 0.25f * lifeParam)%1, 1f, 0.8f);
+                return Custom.HSL2RGB((particle.randomParam1 + 0.25f * lifeParam)%1, 1f, 0.8f);
             }));
             ParticleSystem.ApplyEmitterAndInit(fallingStar);
         }

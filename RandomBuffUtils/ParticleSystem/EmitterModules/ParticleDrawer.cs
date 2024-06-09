@@ -44,7 +44,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
                 particle.fNodes[index].scaleX = smoothScaleXY.x * particle.spriteInitParams[index].scale;
                 particle.fNodes[index].scaleY = smoothScaleXY.y * particle.spriteInitParams[index].scale;
                 (particle.fNodes[index] as FSprite).color = particle.spriteInitParams[index].constCol ?? smoothColor;
-                particle.fNodes[index].alpha = particle.spriteInitParams[index].alpha;
+                particle.fNodes[index].alpha = particle.alpha * particle.spriteInitParams[index].alpha;
                 particle.fNodes[index].rotation = smoothRotation;
             }
         }

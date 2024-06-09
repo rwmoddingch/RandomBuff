@@ -248,9 +248,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             //Vector2 pos = new Vector2(bindPlayerGraphics.rubberMarkX + bindPlayerGraphics.rubberMouseX, bindPlayerGraphics.rubberMarkY + 60f + bindPlayerGraphics.rubberMouseY) + emitter.room.game.cameras[0].pos;
             Vector2 pos = new Vector2(bindPlayerGraphics.player.mainBodyChunk.pos.x + bindPlayerGraphics.player.burstX, bindPlayerGraphics.player.mainBodyChunk.pos.y + bindPlayerGraphics.player.burstY + 60f);
 
-            if (particle.randomParam < 0.5f)
+            if (particle.randomParam1 < 0.5f)
             {
-                float p = particle.randomParam * 2f;
+                float p = particle.randomParam1 * 2f;
 
                 float x = Mathf.Cos(p * Mathf.PI * 2f) * rad;
                 float y = Mathf.Sin(p * Mathf.PI * 2f) * rad;
@@ -259,9 +259,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
                 particle.HardSetPos(pos + radDir + Custom.RNV() * Random.value * 5f);
                 particle.SetVel(radDir.normalized * vel);
             }
-            else if(particle.randomParam >= 0.5f && particle.randomParam < 0.75f)
+            else if(particle.randomParam1 >= 0.5f && particle.randomParam1 < 0.75f)
             {
-                float p = (particle.randomParam - 0.5f) * 4f;
+                float p = (particle.randomParam1 - 0.5f) * 4f;
                 p = p * 2f - 1f;
 
                 float x = 0.707f * p * rad;
@@ -271,9 +271,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
                 particle.HardSetPos(pos + radDir + Custom.RNV() * Random.value * 2f);
                 particle.SetVel(radDir.normalized * Mathf.Abs(p) * vel);
             }
-            else if (particle.randomParam >= 0.75f)
+            else if (particle.randomParam1 >= 0.75f)
             {
-                float p = (particle.randomParam - 0.75f) * 4f;
+                float p = (particle.randomParam1 - 0.75f) * 4f;
                 p = p * 2f - 1f;
 
                 float x = 0.707f * p * rad;
