@@ -31,7 +31,7 @@ namespace RandomBuffUtils.ParticleSystem
             set
             {
                 if(moveType == MoveType.Relative)
-                    _pos = value - emitter.pos;
+                    _pos = value /*- emitter.pos*/;
                 else
                     _pos = value;
             }
@@ -59,6 +59,8 @@ namespace RandomBuffUtils.ParticleSystem
         public Color color;
         public Color lastColor;
 
+        public float alpha = 1f;
+
         public float rotation;
         public float lastRotation;
         public float setRotation;
@@ -67,7 +69,9 @@ namespace RandomBuffUtils.ParticleSystem
         float setLife;
         public float LifeParam => 1f - life / setLife;
 
-        public float randomParam;
+        public float randomParam1;
+        public float randomParam2;
+        public float randomParam3;
         
         public bool inStage;
         public int spriteLayer = 8;
@@ -86,7 +90,9 @@ namespace RandomBuffUtils.ParticleSystem
             spriteLayer = 8;
             spriteInitParams.Clear();
             moveType = MoveType.Relative;
-            randomParam = Random.value;
+            randomParam1 = Random.value;
+            randomParam2 = Random.value;
+            randomParam3 = Random.value;
 
             foreach (var module in emitter.PInitModules)
                 module.ApplyInit(this);

@@ -636,8 +636,10 @@ namespace RandomBuff.Render.UI
                 string[] lines = File.ReadAllLines(path);
                 foreach(var line in lines)
                 {
-                    BuffPoolManager.Instance.CreateBuff(new BuffID(line));
-                    AppendCard(new BuffID(line));
+                    var id = new BuffID(line);
+                    BuffPoolManager.Instance.CreateBuff(id);
+                    AppendCard(id);
+                    BuffHud.Instance.HandleAddBuffHUD(id);
                 }
             }
         }
@@ -890,10 +892,13 @@ namespace RandomBuff.Render.UI
                 BuffTimerAnimSlot slot;
 
                 BuffCardTimer cardTimer;
+                //BuffCountDisplay countDisplay;
                 
 
                 public int Second { get; private set; }
                 internal bool Show { get; private set; }
+                internal bool ActuallyShow => counter > 0 || Show;
+
                 bool destroyAfterHide;
 
                 public float ShowTimerFactor => counter / 40f;
@@ -932,7 +937,7 @@ namespace RandomBuff.Render.UI
                     {
                         Show = false;
                         destroyAfterHide = true;
-                    }    
+                    }
 
                     cardTimer?.Update();
                     lastCounter = counter;
@@ -949,6 +954,7 @@ namespace RandomBuff.Render.UI
                         if(cardTimer == null)
                         {
                             cardTimer = new BuffCardTimer(slot.timerContainer, this);
+                            cardTimer.HardSetNumber();
                             slot.buffCard2TimerInstanceMapper.Add(slot.AppendCard(id), this);
                         }
 
@@ -986,7 +992,7 @@ namespace RandomBuff.Render.UI
                     {
                         if (timerInstance == this)
                             break;
-                        if (timerInstance.Show)
+                        if (timerInstance.ActuallyShow)
                             newIndex++;
                     }
                     index = newIndex;
@@ -997,10 +1003,7 @@ namespace RandomBuff.Render.UI
 
                 public void GrafUpdate(float timeStacker)
                 {
-                    if(cardTimer != null)
-                    {
-                        cardTimer.DrawSprites(timeStacker);
-                    }
+                    cardTimer?.DrawSprites(timeStacker);
                 }
 
                 public void Destroy()

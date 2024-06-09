@@ -84,7 +84,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
                 emitter.ApplyParticleModule(new ScaleOverLife(emitter, (particle, lifeParam) =>
                 {
                     float t = Mathf.Max(0f, Mathf.Min(lifeParam * 5f, 1f - lifeParam));
-                    return Mathf.Lerp(1f, 1.5f, particle.randomParam) * t;
+                    return Mathf.Lerp(1f, 1.5f, particle.randomParam1) * t;
                 }));
 
                 emitter.ApplyParticleModule(new ColorOverLife(emitter, (particle, lifeParam) =>
@@ -102,7 +102,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
                 emitter.ApplyParticleModule(new RotationOverLife(emitter, (p, l) =>
                 {
-                    return p.setRotation + l * 180f * (p.randomParam * 2f - 1f);
+                    return p.setRotation + l * 180f * (p.randomParam1 * 2f - 1f);
                 }));
 
                 ParticleSystem.ApplyEmitterAndInit(emitter);
