@@ -1,0 +1,17 @@
+{
+    "FaceName": "rj250",
+    "BuffID" : "RJ250",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFAC00",
+
+    "Chinese" : {
+        "BuffName" : "RJ250",
+        "Description" : "极大降低炸弹的爆炸伤害，修改炸弹的投掷方式并稳定爆炸的冲击力，让你可以跳的更高。"
+    },
+    "English": {
+        "BuffName" : "RJ250",
+        "Description" : "Greatly reduce the explosion damage of bombs, modify the way bombs are thrown and stabilize the impact of the explosion so you can jump higher."
+    }
+}
