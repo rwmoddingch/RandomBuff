@@ -201,6 +201,21 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
+    public class SetConstVelociy : EmitterModule, IParticleInitModule
+    {
+        Vector2 vel;
+
+        public SetConstVelociy(ParticleEmitter emitter, Vector2 vel) : base(emitter)
+        {
+            this.vel = vel;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.SetVel(vel);
+        }
+    }
+
     //public class SetShader : ParticleInitModule
     //{
     //    string shader;

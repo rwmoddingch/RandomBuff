@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuffTest", "BuffTest\BuffTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuiltinBuffs", "BuildInBuff\BuiltinBuffs.csproj", "{87A10DD2-89F9-46F9-BA59-39E5AE589DE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomBuffUtils", "RandomBuffUtils\RandomBuffUtils.csproj", "{41F723CA-B0DF-4FBA-BFE2-CE0BFAB0E9CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RandomBuffUtils", "RandomBuffUtils\RandomBuffUtils.csproj", "{41F723CA-B0DF-4FBA-BFE2-CE0BFAB0E9CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
