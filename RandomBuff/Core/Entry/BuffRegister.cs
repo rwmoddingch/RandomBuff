@@ -269,14 +269,14 @@ namespace RandomBuff.Core.Entry
 
         private static readonly HashSet<string> currentRuntimeBuffName = new ();
 
-        private static bool IsDerivedType(this TypeReference checkType, TypeReference baseType)
+        private static bool IsDerivedType(this Type checkType, Type baseType)
         {
-            var aType = checkType.SafeResolve()?.BaseType;
+            var aType = checkType?.BaseType;
             while (aType != null)
             {
                 if (aType.FullName == baseType.FullName)
                     return true;
-                aType = aType.SafeResolve()?.BaseType;
+                aType = aType?.BaseType;
             }
 
             return false;
@@ -303,70 +303,60 @@ namespace RandomBuff.Core.Entry
         
                 foreach (var file in info.GetFiles("*.dll"))
                 {
-                    var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName, 
-                        new ReaderParameters(){ AssemblyResolver = resolver});
-                    var module = assemblyDef.MainModule;
-                    var dataType = module.ImportReference(typeof(BuffData));
-                    var attrType = module.ImportReference(typeof(CustomBuffConfigAttribute));
-                    foreach (var type in module.Types)
-                    {
-                        if (type.IsDerivedType(dataType))
-                        {
-                            foreach (var property in type.Properties)
-                            {
-                                if (property.HasCustomAttributes &&
-                                    property.CustomAttributes.Any(i =>i.AttributeType.IsDerivedType(attrType)))
-                                {
-                                    BuffPlugin.Log($"Find Property {type.Name}:{property.Name}");
 
-                                    if (property.SetMethod != null)
-                                    {
-                                        BuffPlugin.LogWarning($"{type.Name}:{property.Name} has set method!");
-                                        property.SetMethod.Body.Instructions.Clear();
-                                        var setIl = property.SetMethod.Body.GetILProcessor();
-                                        setIl.Emit(OpCodes.Ldarg_0);
-                                        setIl.Emit(OpCodes.Callvirt, typeof(BuffData).GetProperty(nameof(BuffData.ID)).GetGetMethod());
-                                        setIl.Emit(OpCodes.Ldstr, $"Try to set config:{property.Name}");
-                                        setIl.Emit(OpCodes.Call, typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
-                                        setIl.Emit(OpCodes.Ret);
-                                    }
-
-                                    if (property.GetMethod == null)
-                                    {
-                                        property.GetMethod = type.DefineMethodOverride($"get_{property.Name}", property.PropertyType, Array.Empty<TypeReference>(),
-                                            MethodAttributes.SpecialName | MethodAttributes.HideBySig |
-                                            MethodAttributes.Virtual | MethodAttributes.Public);
-                                    }
-
-                             
-                                    property.GetMethod.Body.Instructions.Clear();
-                                    var il = property.GetMethod.Body.GetILProcessor();
-                                    
-                                    il.Emit(OpCodes.Ldarg_0);
-                                    il.Emit(OpCodes.Ldstr,property.Name);
-                                    il.Emit(OpCodes.Call,module.ImportReference(typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
-                                        BindingFlags.NonPublic | BindingFlags.Instance)));
-                                    if (property.PropertyType.IsValueType)
-                                        il.Emit(OpCodes.Unbox_Any, property.PropertyType);
-                                    else
-                                        il.Emit(OpCodes.Castclass, property.PropertyType); 
-                                    il.Emit(OpCodes.Ret);
-
-                                    BuffPlugin.LogDebug($"Warp config property for {dataType.Name} : {property.Name} : {property.PropertyType}");
-                                }
-                            }
-                        }
-                    }
-
-                    Assembly assembly = null;
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        assemblyDef.Write(ms);
-                        assembly = Assembly.Load(ms.GetBuffer());
-                    }
+                    Assembly assembly = Assembly.LoadFile(file.FullName);
 
                     foreach (var type in assembly.GetTypes())
                     {
+                        if (type.IsDerivedType(typeof(BuffData)))
+                        {
+                            foreach (var property in type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance))
+                            {
+                                if (property.CustomAttributes.Any(i =>
+                                        i.AttributeType.IsDerivedType(typeof(CustomBuffConfigAttribute))))
+                                {
+                                    BuffPlugin.Log($"Find Property {type.Name}:{property.Name}");
+                                    if (property.SetMethod != null)
+                                    {
+                                        BuffPlugin.LogWarning($"{type.Name}:{property.Name} has set method!");
+                                        _ = new ILHook(property.SetMethod, (il) =>
+                                        {
+                                            il.Instrs.Clear();
+                                            var setIl = il.Body.GetILProcessor();
+                                            setIl.Emit(OpCodes.Ldarg_0);
+                                            setIl.Emit(OpCodes.Callvirt,
+                                                typeof(BuffData).GetProperty(nameof(BuffData.ID)).GetGetMethod());
+                                            setIl.Emit(OpCodes.Ldstr, $"Try to set config:{property.Name}");
+                                            setIl.Emit(OpCodes.Call,
+                                                typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
+                                            setIl.Emit(OpCodes.Ret);
+                                        });
+                                    }
+
+                                    if (property.GetMethod != null)
+                                    {
+                                        _ = new ILHook(property.GetMethod, (il) =>
+                                        {
+                                            il.Instrs.Clear();
+                                            var getIl = il.Body.GetILProcessor();
+                                            getIl.Emit(OpCodes.Ldarg_0);
+                                            getIl.Emit(OpCodes.Ldstr, property.Name);
+                                            getIl.Emit(OpCodes.Call, typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
+                                                BindingFlags.NonPublic | BindingFlags.Instance));
+                                            getIl.Emit(property.PropertyType.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, property.PropertyType);
+                                            getIl.Emit(OpCodes.Ret);
+                                            BuffPlugin.LogDebug($"Warp config property for {type.Name} : {property.Name} : {property.PropertyType}");
+
+                                        });
+                                    }
+                                    else
+                                    {
+                                        BuffPlugin.LogError($"{type.Name} : {property.Name} Has NO Get Method");
+                                    }
+                                }
+                            }
+                        }
+
                         if (type.GetInterfaces().Contains(typeof(IBuffEntry)))
                         {
                             var obj = type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
