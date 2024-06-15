@@ -49,6 +49,7 @@ namespace BuiltinBuffs.Positive
         public CreatureTemplate.Type WawaTest
         {
             get;
+            set;
         }
 
         [CustomBuffConfigRange(1f, 0f, 3f)]
@@ -60,8 +61,18 @@ namespace BuiltinBuffs.Positive
 
         public DeathFreeMedallionBuffData()
         {
-            BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
             WawaTest = CreatureTemplate.Type.BigEel;
+            BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
+
+            //try
+            //{
+            //    throw new Exception("Sdsdsd");
+            //}
+            //catch (Exception e)
+            //{
+
+            //    BuffPlugin.LogError(e);
+            //}
 
         }
 
