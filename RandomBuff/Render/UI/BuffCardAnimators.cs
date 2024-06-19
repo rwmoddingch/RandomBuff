@@ -783,7 +783,7 @@ namespace RandomBuff.Render.UI
             buffCard.Grey = false;
 
             buffCard.Scale = BuffCard.normalScale * 0.3f;
-            buffCard.Alpha = 0f;
+            buffCard.Alpha = 0f;            
 
             slot = buffCard.interactionManager.BaseSlot as CommmmmmmmmmmmmmpleteInGameSlot.BuffTimerAnimSlot;
             buffCard._cardRenderer.cardCameraController.CardDirty = true;
@@ -873,6 +873,7 @@ namespace RandomBuff.Render.UI
 
             buffCard.Scale = BuffCard.normalScale * 0.5f;
             buffCard.Alpha = 0f;
+            buffCard.Rotation = Vector3.zero;
 
             int index = cardpediaSlot.BuffCards.IndexOf(buffCard);
             Vector2 position = new Vector2(350f + (300f * buffCard.Scale + 20f) * index, sheetYOffset);

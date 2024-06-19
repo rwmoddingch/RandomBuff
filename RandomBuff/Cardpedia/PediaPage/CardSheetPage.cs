@@ -31,7 +31,7 @@ namespace RandomBuff.Cardpedia.PediaPage
         List<List<BuffID>> sheetIDPages = new();
 
         //页面元素
-        FTexture displayingCard;
+        BuffCard displayingCard;
 
         //状态变量
         public bool Show
@@ -73,21 +73,24 @@ namespace RandomBuff.Cardpedia.PediaPage
             ResetCardTexture();
         }
 
-        void ResetCardTexture(Texture texture = null)
+        void ResetCardTexture(BuffID id = null)
         {
-            displayingCard?.RemoveFromContainer();
+            displayingCard?.Destroy();
 
-            var tex = currentType == BuffType.Negative ? CardBasicAssets.FPBack : (currentType == BuffType.Positive ? CardBasicAssets.MoonBack : CardBasicAssets.SlugBack);
-            if (texture != null)
-                tex = texture;
+            string tex;
+            if (id == null)
+                tex = currentType == BuffType.Negative ? "Hell" : (currentType == BuffType.Positive ? "Dozer" : "PixieSlug");
+            else
+                tex = id.value;
 
-            displayingCard = new FTexture(tex);
-            sheetPageContainer.AddChild(displayingCard);
-            displayingCard.SetPosition(CardpediaStatics.displayCardTexturePos);
+            displayingCard = new BuffCard(new BuffID(tex));
+            sheetPageContainer.AddChild(displayingCard.Container);
+            displayingCard.Position = CardpediaStatics.displayCardTexturePos;
             //BuffPlugin.Log($"tex name : {tex.name}, {tex == null}, {tex.texelSize}");
-            displayingCard.scale = 0.35f * (600f / displayingCard.element.sourcePixelSize.x);
-            displayingCard.alpha = alpha;
-            displayingCard.MoveToFront();
+            displayingCard.Scale = 0.8f;
+            displayingCard.Alpha = alpha;
+            displayingCard.Rotation = id == null? new Vector3(0f, 180f, 0f) : Vector3.zero;
+            displayingCard.Container.MoveToFront();
         }
 
         public override void Update()
@@ -112,7 +115,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             infoDisplay.GrafUpdate(timeStacker);
 
             cardpediaSlot.alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
-            displayingCard.alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+            displayingCard.Alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
             infoDisplay.alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
         }
 
@@ -184,7 +187,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             description = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.Description;
             title = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName;
             infoDisplay.SetText(life, trigger, stack, description, "None");
-            ResetCardTexture(staticData.GetFaceTexture());
+            ResetCardTexture(staticData.BuffID);
             //sheetManager.owner.configManager.OnCardPick(card);
             //textBoxManager.RefreshInformation(life, stack, trigger, description, title, card.ID);
             cardpediaMenu.configManager.OnCardPick(card);
