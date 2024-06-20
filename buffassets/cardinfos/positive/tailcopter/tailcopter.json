@@ -1,0 +1,13 @@
+{
+    "FaceName": "Tailcopter",
+    "ID": "TailcopterID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "ffe351",
+    "Chinese":{
+        "BuffName":"尾翼直升机",
+        "Description":"在连续跳跃可以让尾巴转动起来飞行"
+    }
+}

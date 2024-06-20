@@ -1,0 +1,13 @@
+{
+    "FaceName": "byebyeweapon",
+    "ID": "ByeByeWeaponID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "7f1e1e",
+    "Chinese":{
+        "BuffName":"再见武器",
+        "Description":"没法扔武器了"
+    }
+}

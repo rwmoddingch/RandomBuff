@@ -1,0 +1,13 @@
+{
+    "FaceName": "HandAche",
+    "ID": "HandAcheID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "da792f",
+    "Chinese":{
+        "BuffName":"我手疼疼",
+        "Description":"握持5秒就会松手"
+    }
+}

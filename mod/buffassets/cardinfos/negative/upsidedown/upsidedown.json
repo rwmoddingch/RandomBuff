@@ -1,0 +1,17 @@
+{
+    "FaceName": "upsidedown",
+    "BuffID" : "UpsideDown",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "000000",
+
+    "Chinese" : {
+        "BuffName" : "本末倒置",
+        "Description" : "玩家头尾位置颠倒，拖在身后的脑袋会轻微拖累行动"
+    },
+    "English" : {
+        "BuffName" : "Upside Down",
+        "Description" : "Swap the positions of players' heads and tails. The heads dragged behind will somehow nerf players' mobilities."
+    }
+}

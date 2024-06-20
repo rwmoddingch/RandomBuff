@@ -1,0 +1,13 @@
+{
+    "FaceName": "ChewSlowly",
+    "ID": "ChewSlowlyID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#282a36",
+    "Chinese":{
+        "BuffName":"细嚼慢咽",
+        "Description":"增加进食时间"
+    }
+}

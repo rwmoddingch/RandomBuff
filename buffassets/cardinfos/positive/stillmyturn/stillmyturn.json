@@ -1,0 +1,13 @@
+{
+    "FaceName": "StillMyTurn",
+    "ID": "StillMyTurnID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "dbdbdb",
+    "Chinese":{
+        "BuffName":"还是我的回合",
+        "Description":"矛对生物造成伤害并且停止飞行后会立刻回到手里,石头命中生物后就会立刻回到手里"
+    }
+}

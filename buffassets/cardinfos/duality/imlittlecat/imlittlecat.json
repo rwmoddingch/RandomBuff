@@ -1,0 +1,12 @@
+{
+  "ID": "ImLittleCatID",
+  "FaceName": "ImLittleCat",
+  "Color": "5444b7",
+  "BuffType": "Duality",
+  "Chinese": {
+    "BuffName": "我是小猫",
+    "Description": "玩家变为猫仔"
+  },
+  "Stackable": false
+  
+}

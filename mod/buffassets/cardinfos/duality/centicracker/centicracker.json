@@ -1,0 +1,17 @@
+{
+    "FaceName": "centicracker",
+    "ID" : "CentiCracker",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "E80000",
+    
+    "Chinese" : {
+        "BuffName" : "蜈蚣爆竹",
+        "Description" : "蜈蚣甲受击掉落时会引发其余甲壳的连锁爆炸与脱落，这种爆炸不会伤害到蜈蚣。"
+    },
+    "English": {
+        "BuffName" : "CentipedeCracker",
+        "Description" : "Centipede shells will trigger a series of chain explosions of other shells, and this type of explosions won't hurt centipedes."
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "FaceName": "desolatedive",
+    "BuffID" : "DesolateDive",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "CDD6E4",
+
+    "Chinese" : {
+        "BuffName" : "荒芜俯冲",
+        "Description" : "玩家从高处砸地时，造成一次房间的颤动，并对撞击点附近一定范围的生物造成眩晕效果"
+    },
+    "English" : {
+        "BuffName" : "DesolateDive",
+        "Description" : "When a player smashes into the ground from a high place, it causes a tremor in the room and a stun effect on a certain range of creatures near the point of impact"
+    }
+}

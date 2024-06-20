@@ -1,0 +1,16 @@
+{
+    "FaceName": "gambler",
+    "BuffID" : "Gambler",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+    "Chinese" : {
+        "BuffName" : "赌徒",
+        "Description" : "后续抽卡时卡牌信息不再可见"
+    },
+    "English" : {
+        "BuffName" : "Gambler",
+        "Description" : "No Description"
+    }
+}

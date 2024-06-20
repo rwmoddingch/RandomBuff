@@ -1,0 +1,17 @@
+{
+    "FaceName": "parrotfashion",
+    "BuffID" : "ParrotFashion",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FF8B33",
+    
+    "Chinese" : {
+        "BuffName" : "+1",
+        "Description" : "复读所有的对话"
+    },
+    "English": {
+        "BuffName" : "ParrotFashion",
+        "Description" : "Repeat all conversations once."
+    }
+}

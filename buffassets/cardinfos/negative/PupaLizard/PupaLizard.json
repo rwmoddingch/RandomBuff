@@ -1,0 +1,13 @@
+{
+    "FaceName": "PupaLizard",
+    "ID": "PupaLizardID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#0e5299",
+    "Chinese":{
+        "BuffName":"蓝色蛹蜥",
+        "Description":"蓝果脱离藤曼有概率变成篮蜥蜴"
+    }
+}

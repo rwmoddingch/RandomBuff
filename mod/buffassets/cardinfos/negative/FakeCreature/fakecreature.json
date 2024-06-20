@@ -1,0 +1,13 @@
+{
+    "FaceName": "fakecreature",
+    "BuffID" : "FakeCreature",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+
+    "English" : {
+        "BuffName" : "Fake Creature",
+        "Description" : "Fake creature in shortcut."
+    }
+}

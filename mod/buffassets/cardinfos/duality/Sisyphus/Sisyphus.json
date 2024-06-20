@@ -1,0 +1,13 @@
+{
+    "FaceName": "Sisyphus",
+    "ID": "SisyphusID",
+    "BuffType": "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#c9ab75",
+    "Chinese":{
+        "BuffName":"西西弗斯",
+        "Description":"放下石头后会回到拾取时的位置(跨区域不奏效)"
+    }
+}

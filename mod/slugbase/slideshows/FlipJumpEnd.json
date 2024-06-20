@@ -1,0 +1,66 @@
+{
+    "id": "flip_jump_end",
+    "slideshow_folder": "slugbase/slideshows/FlipJumpEnd",
+    "next_process": "DeathScreen",
+    "music": {
+      "name": "clownSong",
+      "fade_in": 2
+    },
+    "scenes": [
+      {
+        "name": "FlipJump1",
+        "fade_in_start": 0,
+        "fade_out_start": 1,
+        "images": [
+          {"name": "FlipJump1", "pos": [0,0], "depth": 20, "shader": "Basic"}
+        ],
+        "camera_path": [ [10, 15, 1], [8.7, 5, 1] ]
+      },
+      {
+        "name": "FlipJump2",
+        "fade_in_start": 1,
+        "fade_out_start": 2,
+        "images": [
+          {"name": "FlipJump2", "pos": [0,0], "depth": 20, "shader": "Basic"}
+        ],
+        "camera_path": [ [10, 15, 1], [8.7, 5, 1] ]
+      },
+      {
+        "name": "FlipJump3",
+        "fade_in_start": 2,
+        "fade_out_start": 3,
+        "images": [
+          {"name": "FlipJump3", "pos": [0,0], "depth": 20, "shader": "Basic"}
+        ],
+        "camera_path": [ [10, 15, 1], [8.7, 5, 1] ]
+      },
+      {
+        "name": "FlipJump4",
+        "fade_in_start": 3,
+        "fade_out_start": 4,
+        "images": [
+          {"name": "FlipJump4", "pos": [0,0], "depth": 20, "shader": "Basic"}
+        ],
+        "camera_path": [ [10, 15, 1], [8.7, 5, 1] ]
+      },
+      {
+        "name": "FlipJump5",
+        "fade_in_start": 4,
+        "fade_out_start": 5,
+        "images": [
+          {"name": "FlipJump5", "pos": [0,0], "depth": 20, "shader": "Basic"}
+        ],
+        "camera_path": [ [10, 15, 1], [8.7, 5, 1] ]
+      },
+      {
+        "name": "FlipJump6",
+        "fade_in_start": 5,
+        "fade_out_start": 9,
+        "images": [
+          {"name": "FlipJump6", "pos": [0,0], "depth": 20, "shader": "Basic"}
+        ],
+        "camera_path": [ [10, 15, 1], [8.7, 5, 1] ]
+      }
+
+    ]
+  }

@@ -1,0 +1,13 @@
+{
+    "FaceName": "Temblor",
+    "ID": "TemblorID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#ff730f",
+    "Chinese":{
+        "BuffName":"地震",
+        "Description":"该循环内地面一直在震颤晃动站不稳"
+    }
+}

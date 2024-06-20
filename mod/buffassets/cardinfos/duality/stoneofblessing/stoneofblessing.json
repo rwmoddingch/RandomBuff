@@ -1,0 +1,17 @@
+{
+    "FaceName": "stoneofblessing",
+    "BuffID" : "StoneofBlessing",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "7E0A00",
+    
+    "Chinese" : {
+        "BuffName" : "祝福之石",
+        "Description" : "玩家所在房间内生物血量+100%（玩家除外）离开房间的生物血量重置"
+    },
+    "English": {
+        "BuffName" : "StoneofBlessing",
+        "Description" : "Creatures in the room the player is in have +100% hp (except the player). Creatures that leave the room have their hp value reset"
+    }
+}
