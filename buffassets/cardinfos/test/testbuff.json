@@ -1,0 +1,10 @@
+{
+    "BuffName" : "Test",
+    "Description" :"Just for test",
+    "Custom":{
+        "TestConfig" : 1
+    },
+    "Stackable" : true,
+    "ID" : "TestBuff",
+    "Color" : "FFFFFF"
+}
