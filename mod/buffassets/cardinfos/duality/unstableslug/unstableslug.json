@@ -1,0 +1,13 @@
+{
+    "FaceName": "UnstableSlug",
+    "ID": "UnstableSlugID",
+    "BuffType": "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "9c292b",
+    "Chinese":{
+        "BuffName":"不稳蛞蝓",
+        "Description":"每隔随机一段时间在玩家身上执行大爆炸,炸晕玩家并对其他生物造成大量伤害"
+    }
+}

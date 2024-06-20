@@ -1,0 +1,18 @@
+{
+    "FaceName": "eatmore",
+    "BuffID" : "EatMore",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+    "Stackable" : true,
+
+    "Chinese" : {
+        "BuffName" : "多吃一口",
+        "Description" : "+N睡眠饱食度上限(若已至饱食度上限则同时+N饱食度上限)"    
+    },
+    "English" : {
+        "BuffName" : "EatMore",
+        "Description" : "+N sleep foodpoint requirement (or both if already at foodpoint max value)"
+    }
+}

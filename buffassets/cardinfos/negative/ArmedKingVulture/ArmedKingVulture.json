@@ -1,0 +1,13 @@
+{
+    "FaceName": "ArmedKingVulture",
+    "ID": "ArmedKingVultureID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Special",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#a59fc4",
+    "Chinese":{
+        "BuffName":"武装直升鹫",
+        "Description":"魔王秃鹫的弹载量提升10倍率,并显著提高射速"
+    }
+}

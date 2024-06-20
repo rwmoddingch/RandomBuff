@@ -1,0 +1,13 @@
+{
+    "FaceName": "Neurodegenerative",
+    "ID": "NeurodegenerativeID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "5444b7",
+    "Chinese":{
+        "BuffName":"神经退行",
+        "Description":"进入房间时,不可操作5秒"
+    }
+}

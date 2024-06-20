@@ -1,0 +1,13 @@
+{
+    "FaceName": "testStory0",
+    "ID": "testStory0ID",
+    "BuffType": "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  true,
+    "Stackable" :  false,
+    "Color" : "#282a36",
+    "Chinese":{
+        "BuffName":"测试故事起源",
+        "Description":"卡牌的故事从这里开始(点击)"
+    }
+}

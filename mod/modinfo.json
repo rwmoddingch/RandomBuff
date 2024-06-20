@@ -1,0 +1,9 @@
+﻿{
+	"id": "randombuff",
+	"name": "Random Buff",
+	"version": "1.0.0",
+	"authors": "",
+	"description": "",
+	"requirements": ["moreslugcats"],
+	"requirements_names": ["More Slugcats Expansion"]
+}

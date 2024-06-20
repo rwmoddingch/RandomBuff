@@ -1,0 +1,13 @@
+{
+    "FaceName": "Mirror",
+    "ID": "MirrorID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "5444b7",
+    "Chinese":{
+        "BuffName":"镜像",
+        "Description":"交换左右"
+    }
+}

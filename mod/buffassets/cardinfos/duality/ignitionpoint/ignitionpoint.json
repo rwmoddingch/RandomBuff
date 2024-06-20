@@ -1,0 +1,17 @@
+{
+    "FaceName": "ignitionpoint",
+    "BuffID" : "IgnitionPoint",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FF7300",
+
+    "Chinese" : {
+        "BuffName" : "燃点",
+        "Description" : "添加新的机制，每个生物有独立的高温条，当达到一定的阈值时会触发燃烧。部分伤害具有高温属性。"
+    },
+    "English": {
+        "BuffName" : "IgnitionPoint",
+        "Description" : "Add a new mechanic where each creature has a separate heat bar that triggers burning when a certain threshold is reached. Some damage has a high temperature property."
+    }
+}

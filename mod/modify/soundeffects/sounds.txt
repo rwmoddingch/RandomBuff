@@ -1,0 +1,2 @@
+[ADD]sisyphus : sisyphus/vol=0.3
+[ADD]snail_missile : snailmissile/vol=0.3
