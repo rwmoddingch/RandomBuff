@@ -8,10 +8,18 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using HotDogGains.Positive;
 using RandomBuff;
+using BuiltinBuffs;
+using RandomBuffUtils;
+using BuiltinBuffs.Positive;
 
 namespace TemplateGains
 {
     //尾巴直升机
+    public class Tail : PlayerUtils.PlayerModulePart
+    {
+        public bool HaveTail = true;
+    }
+
     class TailcopterBuff : Buff<TailcopterBuff, TailcopterBuffData> { public override BuffID ID => TailcopterBuffEntry.TailcopterID; }
     class TailcopterBuffData : BuffData { public override BuffID ID => TailcopterBuffEntry.TailcopterID; }
     class TailcopterBuffEntry : IBuffEntry
@@ -24,8 +32,6 @@ namespace TemplateGains
         public static ConditionalWeakTable<Player, Tailcopter> modules = new ConditionalWeakTable<Player, Tailcopter>();
         public static void HookOn()
         {
-            //On.Player.Update += Player_Update;
-
             On.Player.MovementUpdate += Player_MovementUpdate;
         }
 
@@ -34,7 +40,20 @@ namespace TemplateGains
         {
             orig.Invoke(self, eu);
 
+            if (!self.GetExPlayerData().HaveTail) return;
+
+            //if (PlayerUtils.TryGetModulePart<Tail,TailcopterBuffEntry>(self,out var modulePart))
+            //{
+            //    if (!modulePart.HaveTail) return;
+            //}
+
             if (CatNeuroBuffEntry.CatNeuroID.GetBuffData() != null) return;
+            if (GeckoStrategyBuffEntry.geckoModule.TryGetValue(self, out var module) &&!( module.escapeCount >= 0 && !self.playerState.permaDead))
+            {
+                return;
+            }
+
+
 
             var copter = self.copter();
 
@@ -162,7 +181,6 @@ namespace TemplateGains
 
 
         }
-
     }
     public static class ExPlaye
     {

@@ -1,0 +1,17 @@
+{
+    "FaceName": "delayedexplosion",
+    "ID" : "DelayedExplosion",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "E90000",
+    
+    "Chinese" : {
+        "BuffName" : "延时炸弹",
+        "Description" : "炸弹撞击到目标后，大约过两秒才会爆炸。"
+    },
+    "English": {
+        "BuffName" : "Delayed Explosion",
+        "Description" : "Bombs' explosion will delay for around 2s after colliding with targets."
+    }
+}

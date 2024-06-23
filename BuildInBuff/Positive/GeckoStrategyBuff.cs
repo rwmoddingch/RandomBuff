@@ -75,7 +75,7 @@ namespace BuiltinBuffs.Positive
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
         {
             orig(self);
-            if (geckoModule.TryGetValue(self.player, out var module) && module.tailCut)
+            if (geckoModule.TryGetValue(self.player, out var module) && !self.player.GetExPlayerData().HaveTail)
             {
                 for (int i = 0; i < self.tail.Length; i++)
                 {
@@ -378,14 +378,19 @@ namespace BuiltinBuffs.Positive
                     if (!GeckoStrategyBuff.collisionChecked)
                     {
                         var tempPool = BuffPoolManager.Instance.GetTemporaryBuffPool(GeckoStrategy);
-                        for (int i = 0; i < tempPool.allBuffIDs.Count; i++)
-                        {
-                            if (tempPool.allBuffIDs[i].value == "CatNeuroID" || tempPool.allBuffIDs[i].value == "TailcopterID")
-                            {
-                                GeckoStrategyBuff.discoveredCollision = true;
-                                break;
-                            }
-                        }
+                        //闪卡改了的部分
+
+                        //for (int i = 0; i < tempPool.allBuffIDs.Count; i++)
+                        //{
+                        //    if (tempPool.allBuffIDs[i].value == "CatNeuroID" || tempPool.allBuffIDs[i].value == "TailcopterID")
+                        //    {
+                        //        GeckoStrategyBuff.discoveredCollision = true;
+                        //        break;
+                        //    }
+                        //}
+
+                        //if(!self.GetExPlayerData().HaveTail)GeckoStrategyBuff.discoveredCollision = true;
+
                         GeckoStrategyBuff.collisionChecked = true;
                     }
                     
@@ -397,7 +402,7 @@ namespace BuiltinBuffs.Positive
                 {
                     if (geckoModule.TryGetValue(self, out var module))
                     {                        
-                        if (!module.tailCut)
+                        if (self.GetExPlayerData().HaveTail)
                         {
                             for (int i = 0; i < self.grabbedBy.Count; i++)
                             {
@@ -423,13 +428,15 @@ namespace BuiltinBuffs.Positive
                                 }
                                 (tail.realizedObject as GeckoTail).tailColor = self.ShortCutColor();
                                 grabber.Grab(tail.realizedObject, num, 0, Creature.Grasp.Shareability.CanOnlyShareWithNonExclusive, 1f, false, false);
-                                module.tailCut = true;
+                                //module.tailCut = true;
+                                self.GetExPlayerData().HaveTail = false;
                                 break;
                             }
                         }
                         else
                         {
                             if (module.escapeCount > -1) module.escapeCount--;
+
                         }
                     }                   
                 }
@@ -610,12 +617,12 @@ namespace BuiltinBuffs.Positive
 
     public class GeckoModule
     {
-        public bool tailCut;
+        //public bool tailCut;
         public int escapeCount;
 
         public GeckoModule()
         {
-            tailCut = false;
+            //tailCut = false;
             escapeCount = 40;
         }
     }
