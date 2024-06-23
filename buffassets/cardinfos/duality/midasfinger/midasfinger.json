@@ -1,0 +1,17 @@
+{
+    "FaceName": "midasfinger",
+    "BuffID" : "MidasFinger",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "524b43",
+
+    "Chinese" : {
+        "BuffName" : "点石成金",
+        "Description" : "玩家拿起的石头都会变成普通珍珠。"
+    },
+    "English": {
+        "BuffName" : "Wealth Finger",
+        "Description" : "Rocks in players' hands will turn into faded pearls. "
+    }
+}
