@@ -1,0 +1,18 @@
+{
+  "FaceName": "HomingShots",
+  "BuffID": "HomingShots",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "追踪法术",
+    "Description": "你的所有投掷物现在会轻微追踪敌人。"
+  },
+  "English": {
+    "BuffName": "HomingShots",
+    "Description": "All of your projectiles will now slightly track the enemy."
+  }
+}

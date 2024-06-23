@@ -1,0 +1,18 @@
+{
+  "FaceName": "DivisibleSpear",
+  "BuffID": "DivisibleSpear",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "分裂矛",
+    "Description": "你投出的矛伤害增加50%，速度增加25%。"
+  },
+  "English": {
+    "BuffName": "DivisibleSpear",
+    "Description": "The spear you throw increases damage by 50% and speed by 25%."
+  }
+}

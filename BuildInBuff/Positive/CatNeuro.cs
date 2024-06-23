@@ -11,6 +11,7 @@ using UnityEngine;
 using MoreSlugcats;
 using RandomBuff.Core.Game;
 using RandomBuff;
+using BuiltinBuffs;
 
 namespace HotDogGains.Positive
 {
@@ -40,6 +41,13 @@ namespace HotDogGains.Positive
         {
             On.PlayerGraphics.DrawSprites+= HideTail;
             On.PlayerGraphics.Update += CatNeuroLight;
+            On.Player.Update += Player_Update;
+        }
+
+        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            orig.Invoke(self, eu);
+            self.GetExPlayerData().HaveTail = false;
         }
 
         private static void HideTail(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)

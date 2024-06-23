@@ -11,7 +11,7 @@
         "Description" : "大面条虫死亡后，可以通过投掷尸体的方式将其当作矛来使用"
     },
     "English" : {
-        "BuffName" : "NeedleSpear",
-        "Description" : "When the big Needle Worm dies, you can use it as a spear by throwing the corpse"
+        "BuffName" : "NeedleWormSpear",
+        "Description" : "When the big Needle Worm dies, you can throw its corpse as a spear."
     }
 }
