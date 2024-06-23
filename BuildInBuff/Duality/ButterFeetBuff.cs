@@ -57,7 +57,7 @@ namespace BuiltinBuffs.Duality
             butterModule.Add(self, new ButterSpeedModule());
             self.slugcatStats.runspeedFac *= 1.5f;
             //self.slugcatStats.poleClimbSpeedFac *= 1.5f;
-            //self.slugcatStats.corridorClimbSpeedFac *= 1.5f;
+            //self.slugcatStats.corridorClimbSpeedFac *= 1.5f;            
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
