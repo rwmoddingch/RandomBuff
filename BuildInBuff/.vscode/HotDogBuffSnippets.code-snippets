@@ -1,0 +1,43 @@
+{
+	// Place your HotDogGainsPool 工作区 snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	"Add new buff": {
+		"scope": "csharp",
+		"prefix": "buffTemplate",
+		"body": [
+			
+			"class $1Buff : Buff<$1Buff, $1BuffData>{public override BuffID  ID => $1BuffEntry.$1ID;}",
+			"class $1BuffData :BuffData{public override BuffID ID => $1BuffEntry.$1ID;}",
+			"class $1BuffEntry : IBuffEntry",
+			"{",
+			"	public static BuffID $1ID = new BuffID(\"$1ID\", true);"
+			"	public void OnEnable()"
+			"	{"
+			"		BuffRegister.RegisterBuff<$1Buff,$1BuffData,$1BuffEntry>($1ID);"
+			"	}"
+			"		public static void HookOn()"
+			"	{"
+			"		$2"
+			"	}"
+			"}"
+		],
+		"description": "buff template"
+	},
+	"Using BuffClass": {
+		"scope": "csharp",
+		"prefix": "buffclass",
+		"body": [
+			"using Mono.Cecil.Cil;"
+			"using MonoMod.Cil;"
+			"using MoreSlugcats;"
+			"using RandomBuff.Core.Buff;"
+			"using RandomBuff.Core.Entry;"
+		],
+		"description": "using buff class"
+	}
+}
