@@ -1,0 +1,7 @@
+{
+    "dotnet.preferCSharpExtension": true,
+    "csproj.itemType": {
+        "*": "Content",
+        ".ts": "TypeScriptCompile"
+    }
+}

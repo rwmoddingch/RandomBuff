@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"csproj.itemType": {
+			"*": "Content",
+			".ts": "TypeScriptCompile"
+		}
+	}
+}
