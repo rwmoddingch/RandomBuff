@@ -11,7 +11,7 @@
         "Description" : "玩家被其他生物抓住时会自动舍弃尾巴来摆脱抓取，每循环只会生效一次。已获得尾巴直升机或猫经元增益时，该增益不会生效。"
     },
     "English" : {
-        "BuffName" : "Tail Cut",
-        "Description" : "When caught by other creatures, the player has one chance per cycle to escape by cutting off its tail. However, this won't work when Cat Neuro or Tailcopter buff is acquired. "
+        "BuffName" : "Gecko Strategy",
+        "Description" : "When caught by other creatures, the player has one chance per cycle to escape by cutting off its tail. However, this won't work when Neuron Slug or Tailcopter buff is acquired. "
     }
 }

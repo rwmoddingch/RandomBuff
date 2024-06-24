@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"不稳蛞蝓",
         "Description":"每隔随机一段时间在玩家身上执行大爆炸,炸晕玩家并对其他生物造成大量伤害"
-    }
+    },
+    "English":{
+        "BuffName":"Unstable Slug",
+        "Description":"Players' bodies will violently explode fitfully, which can stun players and deal massive damage to other creatures"
+    }	
 }

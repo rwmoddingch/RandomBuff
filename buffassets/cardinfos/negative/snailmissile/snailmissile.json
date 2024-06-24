@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"波动龟导弹",
         "Description":"波动龟在玩家一定范围内时,会飞向玩家并触发波动"
+    },
+    "English":{
+        "BuffName":"Snail Missile",
+        "Description":"Snails will fly towards players and pop if close enough"
     }
 }

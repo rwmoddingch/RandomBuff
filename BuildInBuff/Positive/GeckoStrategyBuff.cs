@@ -59,9 +59,11 @@ namespace BuiltinBuffs.Positive
             IL.BigSpiderAI.Update += BigSpiderAI_Update;
             On.Player.Update += Player_Update;
             On.Player.Die += Player_Die;
-            On.PlayerGraphics.Update += PlayerGraphics_Update;           
+            On.TailSegment.Update += TailSegment_Update;
+            On.PlayerGraphics.TailSpeckles.DrawSprites += TailSpeckles_DrawSprites;
+            On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
         }
-        
+
         private static void Player_Die(On.Player.orig_Die orig, Player self)
         {
             if (geckoModule.TryGetValue(self, out var module) && module.escapeCount >= 0 && !self.playerState.permaDead)
@@ -71,21 +73,6 @@ namespace BuiltinBuffs.Positive
             orig(self);           
         }
 
-
-        private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
-        {
-            orig(self);
-            if (geckoModule.TryGetValue(self.player, out var module) && !self.player.GetExPlayerData().HaveTail)
-            {
-                for (int i = 0; i < self.tail.Length; i++)
-                {
-                    self.tail[i].Reset(self.legs.pos);
-                    self.tail[i].rad = 0f;
-                    self.tail[i].stretched = 0f;
-                    self.tail[i].connectionRad = 0f;                   
-                }
-            }
-        }
 
         private static void Creature_Update(On.Creature.orig_Update orig, Creature self, bool eu)
         {
@@ -447,6 +434,50 @@ namespace BuiltinBuffs.Positive
             }
 
         }
+
+        private static void TailSegment_Update(On.TailSegment.orig_Update orig, TailSegment self)
+        {
+            if (self.owner is PlayerGraphics && geckoModule.TryGetValue((self.owner as PlayerGraphics).player, out var geckoData) && geckoData.tailCut)
+            {
+                self.Reset(self.owner.owner.bodyChunks[1].pos);
+                return;
+            }
+            orig(self);
+        }
+
+        private static void TailSpeckles_DrawSprites(On.PlayerGraphics.TailSpeckles.orig_DrawSprites orig, PlayerGraphics.TailSpeckles self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            if (geckoModule.TryGetValue(self.pGraphics.player, out var geckoData) && geckoData.tailCut)
+            {
+                sLeaser.sprites[self.startSprite + self.rows * self.lines].rotation = Custom.VecToDeg(Custom.PerpendicularVector(self.pGraphics.drawPositions[0, 0] - self.pGraphics.drawPositions[1, 0]));
+                Vector2 pos = Vector2.Lerp(self.pGraphics.drawPositions[1, 1], self.pGraphics.drawPositions[1, 0], timeStacker);
+                for (int i = 0; i < self.rows; i++)
+                {
+                    for (int j = 0; j < self.lines; j++)
+                    {
+                        sLeaser.sprites[self.startSprite + i * self.lines + j].isVisible = false;
+
+                    }
+                }
+                Vector2 pos2 = Vector2.Lerp(self.pGraphics.drawPositions[1, 1], self.pGraphics.drawPositions[1, 0], timeStacker);
+                sLeaser.sprites[self.startSprite + self.rows * self.lines].SetPosition(Vector2.Lerp(pos2, pos, 0.2f) - camPos);
+            }
+        }
+
+        private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            if (geckoModule.TryGetValue(self.player, out var geckoData) && geckoData.tailCut)
+            {
+                Vector2 pos = Vector2.Lerp(self.drawPositions[1, 1], self.drawPositions[1, 0], timeStacker);
+                for (int i = 0; i < (sLeaser.sprites[2] as TriangleMesh).vertices.Length; i++)
+                {
+                    (sLeaser.sprites[2] as TriangleMesh).MoveVertice(i, pos - camPos);
+                }
+            }
+        }
+
     }
 
     public class GeckoTail : PhysicalObject
@@ -617,12 +648,12 @@ namespace BuiltinBuffs.Positive
 
     public class GeckoModule
     {
-        //public bool tailCut;
+        public bool tailCut;
         public int escapeCount;
 
         public GeckoModule()
         {
-            //tailCut = false;
+            tailCut = false;
             escapeCount = 40;
         }
     }
