@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"细嚼慢咽",
         "Description":"增加进食时间"
+    },
+    "English":{
+        "BuffName":"Chew Slowly",
+        "Description":"Slows down the eating speed"
     }
 }

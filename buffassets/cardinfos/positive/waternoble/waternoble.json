@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"水中贵族",
         "Description":"水中获得这张卡数量倍的攻击力"
+    },
+    "English":{
+        "BuffName":"Aquatic Noble",
+        "Description":"When under water, your weapon damage will be multiplied by the stack amount"
     }
 }

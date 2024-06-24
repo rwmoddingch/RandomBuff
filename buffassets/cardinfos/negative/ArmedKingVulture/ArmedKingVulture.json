@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"武装直升鹫",
         "Description":"魔王秃鹫的弹载量提升10倍率,并显著提高射速"
+    },
+    "English":{
+        "BuffName":"Armed King Vulture",
+        "Description":"Increases king vultures' load capacity of tusks by 10 times and significantly rises their shooting frequency"
     }
 }

@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"不会空翻",
         "Description":"你现在不会空翻了,空翻的风险希望你能了解"
+    },
+    "English":{
+        "BuffName":"Noob of Flipping",
+        "Description":"You are a noob of flipping now. We hope you can be aware of the risk of flipping."
     }
 }

@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"奇点龟",
         "Description":"波动龟爆炸将变为奇点爆炸"
+    },
+    "English":{
+        "BuffName":"Singularity Snail",
+        "Description":"Snail's popping will turn into explosion of singularity bomb"
     }
 }
