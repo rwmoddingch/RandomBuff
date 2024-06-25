@@ -799,7 +799,7 @@ namespace BuiltinBuffs.Duality
             }
             if (self.Consious)
             {
-                if (TileAccessibleToPlayer()) //self.room.aimap.TileAccessibleToCreature(self.bodyChunks[0].pos, self.Template) || self.room.aimap.TileAccessibleToCreature(self.bodyChunks[0].pos, self.Template)
+                if (self.room.aimap.TileAccessibleToCreature(self.bodyChunks[0].pos, self.Template) || self.room.aimap.TileAccessibleToCreature(self.bodyChunks[0].pos, self.Template)) //
                 {
                     this.footingCounter++;
                 }

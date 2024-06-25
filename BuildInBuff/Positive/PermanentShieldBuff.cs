@@ -13,6 +13,8 @@ using Mono.Cecil.Cil;
 using RWCustom;
 using Random = UnityEngine.Random;
 using BuiltinBuffs.Duality;
+using RandomBuffUtils.ParticleSystem.EmitterModules;
+using RandomBuffUtils.ParticleSystem;
 
 namespace BuiltinBuffs.Positive
 {
@@ -24,15 +26,19 @@ namespace BuiltinBuffs.Positive
         {
             if (BuffCustom.TryGetGame(out var game))
             {
-                if (PermanentShieldBuffEntry.permanentShieldList == null)
-                    PermanentShieldBuffEntry.permanentShieldList = new List<PermanentShield> { };
-                else if (PermanentShieldBuffEntry.permanentShieldList.Count > 0)
+                foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
+                             .Where(i => i != null && i.graphicsModule != null))
                 {
-                    foreach (var permanentShield in PermanentShieldBuffEntry.permanentShieldList)
+                    var permanentShieldList = new PermanentShieldList(player);
+                    PermanentShieldBuffEntry.PermanentShieldFeatures.Add(player, permanentShieldList);
+                    if (permanentShieldList.permanentShieldList.Count > 0)
                     {
-                        permanentShield.Destroy();
+                        foreach (var permanentShield in permanentShieldList.permanentShieldList)
+                        {
+                            permanentShield.Destroy();
+                        }
+                        permanentShieldList.permanentShieldList.Clear();
                     }
-                    PermanentShieldBuffEntry.permanentShieldList.Clear();
                 }
             }
         }
@@ -47,13 +53,16 @@ namespace BuiltinBuffs.Positive
     {
         public static BuffID PermanentShield = new BuffID("PermanentShield", true);
 
-        public static List<PermanentShield> permanentShieldList;
+        public static ConditionalWeakTable<Player, PermanentShieldList> PermanentShieldFeatures = new ConditionalWeakTable<Player, PermanentShieldList>();
+
+        public static int inputCount = 0;
+
 
         public static int StackLayer
         {
             get
             {
-                return PermanentShieldBuffEntry.PermanentShield.GetBuffData().StackLayer;
+                return PermanentShield.GetBuffData().StackLayer;
             }
         }
 
@@ -64,39 +73,57 @@ namespace BuiltinBuffs.Positive
         
         public static void HookOn()
         {
+            On.Player.ctor += Player_ctor;
             On.Player.NewRoom += Player_NewRoom;
             On.Player.Update += Player_Update;
+        }
+
+        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
+        {
+            orig(self, abstractCreature, world);
+            if (!PermanentShieldFeatures.TryGetValue(self, out _))
+                PermanentShieldFeatures.Add(self, new PermanentShieldList(self));
         }
 
         private static void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
         {
             orig(self, newRoom);
 
-            if (permanentShieldList == null)
-                permanentShieldList = new List<PermanentShield>();
-            else if (permanentShieldList.Count > 0)
+            if (PermanentShieldFeatures.TryGetValue(self, out var list))
             {
-                foreach (var permanentShield in permanentShieldList)
+                if (list.permanentShieldList.Count > 0)
                 {
-                    permanentShield.Destroy();
+                    foreach (var permanentShield in list.permanentShieldList)
+                    {
+                        permanentShield.Destroy();
+                    }
+                    list.permanentShieldList.Clear();
                 }
-                permanentShieldList.Clear();
             }
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-
-            if (permanentShieldList.Count != StackLayer)
+            if (inputCount > 0)
+                inputCount--;
+            if (Input.GetKey(KeyCode.M) && inputCount == 0)
             {
-                if (self != null && self.room != null)
+                inputCount = 40;
+                PermanentShieldBuffEntry.PermanentShield.GetBuffData().Stack();
+            }
+            if (PermanentShieldFeatures.TryGetValue(self, out var list))
+            {
+                if (list.permanentShieldList.Count != StackLayer)
                 {
-                    for (int j = permanentShieldList.Count; j < StackLayer; j++)
+                    if (self != null && self.room != null)
                     {
-                        var permanentShield = new PermanentShield(self, j, self.room);
-                        permanentShieldList.Add(permanentShield);
-                        self.room.AddObject(permanentShield);
+                        for (int j = list.permanentShieldList.Count; j < StackLayer; j++)
+                        {
+                            var permanentShield = new PermanentShield(self, j, self.room);
+                            list.permanentShieldList.Add(permanentShield);
+                            self.room.AddObject(permanentShield);
+                        }
                     }
                 }
             }
@@ -105,11 +132,12 @@ namespace BuiltinBuffs.Positive
 
     internal class PermanentShield : CosmeticSprite
     {
-        public Player owner;
-        public int stackIndex;
-        public int disappearCount;
-        public float averageVoice;
-        public Color color;
+        Player owner;
+        int stackIndex;
+        int disappearCount;
+        int emitterCount;
+        float averageVoice;
+        Color color;
 
         int firstSprite;
         int totalSprites;
@@ -140,6 +168,7 @@ namespace BuiltinBuffs.Positive
             this.totalSprites = 1;
             this.getToExpand = 1f;
             this.getToPush = 1f;
+            this.emitterCount = 30;
         }
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -174,7 +203,8 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[this.firstSprite + k].scale = this.Radius(stackIndex, timeStacker) / 8f;
                 sLeaser.sprites[this.firstSprite + k].alpha = 3f / this.Radius(stackIndex, timeStacker);
             }
-
+            //有粒子就先不要贴图了
+            sLeaser.sprites[this.firstSprite + 0].isVisible = false;
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         } 
 
@@ -187,20 +217,6 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[firstSprite + i].color = this.color;
             }
         }
-        /*
-        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-        {
-            var foregroundContainer = rCam.ReturnFContainer("Foreground");
-            var midgroundContainer = rCam.ReturnFContainer("Midground");
-            for (int i = 0; i < totalSprites; i++)
-            {
-                var sprite = sLeaser.sprites[firstSprite + i];
-                foregroundContainer.RemoveChild(sprite);
-                midgroundContainer.AddChild(sprite);
-                sprite.MoveBehindOtherNode((owner.room.game.cameras[0].spriteLeasers.
-                    First(k => k.drawableObject == owner.graphicsModule)).sprites[0]);
-            }
-        }*/
 
         public override void Update(bool eu)
         {
@@ -228,9 +244,13 @@ namespace BuiltinBuffs.Positive
 
             if (disappearCount > 0)
                 disappearCount--;
-            
+            if (emitterCount > 0)
+                emitterCount--;
+
             if (IsExisting && owner.room != null)
             {
+                EmitterUpdate();
+
                 List<PhysicalObject>[] physicalObjects = owner.room.physicalObjects;
                 for (int i = 0; i < physicalObjects.Length; i++)
                 {
@@ -240,7 +260,8 @@ namespace BuiltinBuffs.Positive
                         if (physicalObject is Weapon)
                         {
                             Weapon weapon = physicalObject as Weapon;
-                            if (weapon.mode == Weapon.Mode.Thrown && Custom.Dist(weapon.firstChunk.pos, owner.firstChunk.pos) < this.Radius(stackIndex, 0f))
+                            if (weapon.mode == Weapon.Mode.Thrown && !(weapon.thrownBy is Player) &&
+                                Custom.Dist(weapon.firstChunk.pos, owner.firstChunk.pos) < this.Radius(stackIndex, 0f))
                             {
                                 weapon.ChangeMode(Weapon.Mode.Free);
                                 weapon.SetRandomSpin();
@@ -260,6 +281,54 @@ namespace BuiltinBuffs.Positive
             }
         }
 
+        private void EmitterUpdate()
+        {
+            if (emitterCount == 0)
+            {
+                emitterCount = 240;
+                var emitter = new ParticleEmitter(this.room);
+                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 240, false));
+                emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, this.owner));
+
+                emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, Mathf.FloorToInt(4f * Radius(this.stackIndex, 0f)), Mathf.FloorToInt(4f * Radius(this.stackIndex, 0f))));
+
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "", 11 , 1f, 1f, this.color)));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f, this.color)));
+                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                emitter.ApplyParticleModule(new SetRandomLife(emitter, 20, 40));
+                emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 3f), new Vector2(6f, 4f)));
+                emitter.ApplyParticleModule(new SetRingPos(emitter, Radius(this.stackIndex, 0f)));
+                emitter.ApplyParticleModule(new SetRingRotation(emitter, emitter.pos, 0f));
+                emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0f));
+
+                emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, a) =>
+                {
+                    if (Custom.Dist(emitter.pos, this.owner.mainBodyChunk.pos) > 10f)
+                        return Mathf.Max(0f, p.alpha - 0.05f);
+                    if (a < 0.2f)
+                        return Mathf.Min(1f, p.alpha + 0.02f);
+                    else if (a > 0.5f)
+                        return Mathf.Max(0f, p.alpha - 0.01f);
+                    else
+                        return Mathf.Min(1f, p.alpha + 0.05f);
+                }));
+                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
+                {
+                    return p.setScaleXY * 4f * a * (1f - a);
+                }));
+                emitter.ApplyParticleModule(new PositionOverLife(emitter, (p, a) =>
+                {
+                    return (p.pos - emitter.pos).normalized * Radius(this.stackIndex, 0f) + emitter.pos;
+                }));
+                emitter.ApplyParticleModule(new RotationOverLife(emitter, (p, a) =>
+                {
+                    return Custom.VecToDeg(p.pos - emitter.pos);
+                }));
+
+                ParticleSystem.ApplyEmitterAndInit(emitter);
+            }
+        }
+
         public override void Destroy()
         {
             base.Destroy();
@@ -274,6 +343,82 @@ namespace BuiltinBuffs.Positive
         private float Radius(float ring, float timeStacker)
         {
             return (3f + ring + Mathf.Lerp(this.lastPush, this.push, timeStacker) - 0.5f * this.averageVoice) * Mathf.Lerp(this.lastExpand, this.expand, timeStacker) * 10f;
+        }
+    }
+
+    internal class PermanentShieldList
+    {
+        WeakReference<Player> ownerRef;
+
+        public List<PermanentShield> permanentShieldList;
+
+        public PermanentShieldList(Player player)
+        {
+            this.ownerRef = new WeakReference<Player>(player);
+            this.permanentShieldList = new List<PermanentShield>();
+        }
+    }
+
+    public class SetRingPos : EmitterModule, IParticleInitModule
+    {
+        float rad;
+        public SetRingPos(ParticleEmitter emitter, float rad) : base(emitter)
+        {
+            this.rad = rad;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            Vector2 pos = Custom.RNV() * rad + emitter.pos;
+            particle.HardSetPos(pos);
+        }
+    }
+
+    public class SetRingRotation : EmitterModule, IParticleInitModule
+    {
+        Vector2 center; 
+        float rotation;
+        public SetRingRotation(ParticleEmitter emitter, Vector2 center, float rotation) : base(emitter)
+        {
+            this.center = center;
+            this.rotation = rotation;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.rotation = Custom.VecToDeg(particle.pos - center) + rotation;
+        }
+    }
+
+    public class SetRingVelocity : EmitterModule, IParticleInitModule
+    {
+        Vector2 center;
+        float rotation;
+
+        public SetRingVelocity(ParticleEmitter emitter, Vector2 center, float rotation) : base(emitter)
+        {
+            this.center = center;
+            this.rotation = rotation;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            Vector2 vel = (particle.pos - center).normalized * Custom.DegToVec(Custom.VecToDeg(particle.pos - center) + rotation);
+            particle.SetVel(vel);
+        }
+    }
+
+    public class SetOriginalAlpha : EmitterModule, IParticleInitModule
+    {
+        public float alpha;
+        public SetOriginalAlpha(ParticleEmitter emitter, float alpha) : base(emitter)
+        {
+            this.alpha = alpha;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.alpha = alpha;
         }
     }
 }

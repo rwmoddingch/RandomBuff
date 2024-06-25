@@ -9,10 +9,10 @@
 
   "Chinese": {
     "BuffName": "分裂矛",
-    "Description": "你投出的矛伤害增加50%，速度增加25%。"
+    "Description": "你投出的矛将在两侧分裂出两支新矛，这两支矛具有散射角度。"
   },
   "English": {
     "BuffName": "DivisibleSpear",
-    "Description": "The spear you throw increases damage by 50% and speed by 25%."
+    "Description": "The spear you throw will split into two new spears on both sides, which have scattering angles."
   }
 }

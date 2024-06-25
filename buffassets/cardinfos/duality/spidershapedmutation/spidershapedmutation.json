@@ -8,8 +8,8 @@
   "Color": "FFFFE8",
 
   "MultiLayerFace": true,
-  "FaceLayer": 3,
-  "MaxFaceDepth": 1.0,
+  "FaceLayer": 4,
+  "MaxFaceDepth": 2.0,
   "FaceBackgroundColor": "170A0F",
 
   "Chinese": {
