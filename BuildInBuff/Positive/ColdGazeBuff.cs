@@ -70,6 +70,7 @@ namespace BuiltinBuffs.Positive
         {
             IL.Room.Update += Room_UpdateIL;
             On.AbstractCreature.ctor += AbstractCreature_ctor;
+            On.AbstractCreature.Update += AbstractCreature_Update;
             On.RoomCamera.SpriteLeaser.Update += RoomCamera_SpriteLeaser_Update;
 
             On.Player.ctor += Player_ctor;
@@ -133,6 +134,16 @@ namespace BuiltinBuffs.Positive
             }
         }
 
+        private static void AbstractCreature_Update(On.AbstractCreature.orig_Update orig, AbstractCreature self, int time)
+        {
+            orig(self, time);
+            if (!FreezeFeatures.TryGetValue(self, out _))
+            {
+                Freeze freeze = new Freeze(self);
+                FreezeFeatures.Add(self, freeze);
+            }
+        }
+
         private static void Room_UpdateIL(ILContext il)
         {
             try
@@ -174,23 +185,7 @@ namespace BuiltinBuffs.Positive
                     c.Emit(OpCodes.Ldloc_S, (byte)10);
                     c.EmitDelegate<Func<bool, Room, UpdatableAndDeletable, bool>>((flag, self, updatableAndDeletable) =>
                     {
-                        flag = self.ShouldBeDeferred(updatableAndDeletable);/*
-                        if ((updatableAndDeletable as PhysicalObject).graphicsModule != null && !flag)
-                        {
-                            if ((updatableAndDeletable is Creature creature) &&
-                                FreezeFeatures.TryGetValue(creature, out var freeze) &&
-                                freeze.ShouldSkipUpdate())
-                            {
-                                IDrawable drawable = creature is IDrawable ? creature as IDrawable : creature.graphicsModule;
-                                foreach (RoomCamera.SpriteLeaser sLeaser in self.game.cameras[0].spriteLeasers)
-                                {
-                                    if (sLeaser.drawableObject == drawable)
-                                    {
-                                        freeze.DrawSprites(sLeaser, self.game.cameras[0]);
-                                    }
-                                }
-                            }
-                        }*/
+                        flag = self.ShouldBeDeferred(updatableAndDeletable);
                         return flag;
                     });
                     c.Emit(OpCodes.Stloc_S, (byte)11);
@@ -211,11 +206,7 @@ namespace BuiltinBuffs.Positive
                 (self.drawableObject is Creature creature2 &&
                  FreezeFeatures.TryGetValue(creature2.abstractCreature, out freeze));
             if (canFind)
-            {/*
-                Creature creature = self.drawableObject is GraphicsModule ?
-                    (self.drawableObject as GraphicsModule).owner as Creature :
-                    (self.drawableObject as Creature);
-                BuffPlugin.Log("ID: " + creature.abstractCreature);*/
+            {
                 if (freeze.ShouldSkipUpdate())
                 {
                     timeStacker = 0;
@@ -386,13 +377,14 @@ namespace BuiltinBuffs.Positive
             {
                 sLeaser.sprites[0].isVisible = true;
             }
-            this.alpha = (owner.graphicsModule as PlayerGraphics).blink <= 0 ? 0.5f : 0f;
+            AlphaChange();
+            this.alpha *= (owner.graphicsModule as PlayerGraphics).blink <= 0 ? 1f : 0f;
             float num = (float)Mathf.FloorToInt(this.alpha * 3f);//float num = (float)Mathf.FloorToInt(this.alpha * 3f);
             float num2 = Mathf.InverseLerp(0.33333334f * num, 0.33333334f * (num + 1f), this.alpha);
             num2 *= Mathf.Pow(Mathf.InverseLerp(-0.2f, 0f, -1f), 1.2f);//num2 *= Mathf.Pow(Mathf.InverseLerp(-0.2f, 0f, rCam.room.world.rainCycle.ShaderLight), 1.2f);
             num2 = Mathf.Lerp(0.33333334f * num, 0.33333334f * (num + 1f), num2);
             num2 = (num2 - 0.33333334f * num) * this.nightFade * this.BlinkFade() + 0.33333334f * num;
-            num2 *= this.alpha * (1f - rCam.room.darkenLightsFactor);
+            num2 *= 0.5f * this.alpha * (1f - rCam.room.darkenLightsFactor);
             if (num2 != this.lastAlpha)
             {
                 this.UpdateColor(sLeaser, rCam, num2);
@@ -454,6 +446,27 @@ namespace BuiltinBuffs.Positive
                 result = (Mathf.Sin((float)this.blinkTicker % num / num * 3.1415927f * 2f) + 1f) / 2f;
             }
             return result;
+        }
+
+        private void AlphaChange()
+        {
+            bool shouldHide = true;
+            foreach(List<PhysicalObject> physicalObjectsList in owner.room.physicalObjects)
+            {
+                foreach (PhysicalObject physicalObject in physicalObjectsList)
+                {
+                    if (physicalObject is Creature)
+                    {
+                        if (ColdGazeBuffEntry.FreezeFeatures.TryGetValue((physicalObject as Creature).abstractCreature, out var freeze) &&
+                            freeze.ShouldBeFired())
+                            shouldHide = false;
+                    }
+                }
+            }
+            if(shouldHide)
+                this.alpha = Mathf.Max(0f, this.alpha - 0.005f);
+            else 
+                this.alpha = Mathf.Min(1f, this.alpha + 0.05f);
         }
 
         private void UpdateColor(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float alpha)
@@ -561,21 +574,30 @@ namespace BuiltinBuffs.Positive
             oldMeshColor = new Dictionary<FSprite, Color[]>();
             newMeshColor = new Dictionary<FSprite, Color[]>();
         }
-        
+
         public void Update()
         {
-
             if (!ownerRef.TryGetTarget(out var abstractCreature) ||
                 abstractCreature.realizedCreature == null ||
                 abstractCreature.realizedCreature.room == null)
                 return;
             var creature = abstractCreature.realizedCreature;
+
+            if (isRecorded && creature.room != creature.room.game.cameras[0].room)
+            {
+                oldColor.Clear();
+                newColor.Clear();
+                oldMeshColor.Clear();
+                newMeshColor.Clear();
+                isRecorded = false;
+            }
+
             //石化直接让生物即死
             if (IsPermanentPetrified)
                 creature.Die();
             //没有石化则逐渐解除冻结
             else if (freezeCount > 0)
-                    freezeCount--;
+                freezeCount--;
 
             if (IsPetrified)
             {

@@ -322,7 +322,7 @@ namespace BuiltinBuffs.Positive
                 emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f, this.color)));
                 emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
                 emitter.ApplyParticleModule(new SetRandomLife(emitter, 20, 40));
-                emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(4f, 4f), new Vector2(3f, 3f)));
+                emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(2f, 2f), new Vector2(1f, 1f)));
                 emitter.ApplyParticleModule(new SetRingPos(emitter, Radius(this.level, 0f)));
                 emitter.ApplyParticleModule(new SetRingRotation(emitter, emitter.pos, 0f));
                 emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0f));
