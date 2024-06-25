@@ -38,7 +38,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return HomingShotsBuffEntry.HomingShots.GetBuffData().StackLayer;
+                return HomingShots.GetBuffData().StackLayer;
             }
         }
 
@@ -66,7 +66,7 @@ namespace BuiltinBuffs.Positive
         {
             orig.Invoke(self, eu);
 
-            if(self.abstractCreature == self.room.game.Players[0])
+            if(self.room != null && self.abstractCreature == self.room.game.Players[0])
             {
                 List<PhysicalObject>[] physicalObjects = self.room.physicalObjects;
                 List<AbstractCreature> abstractCreature = self.room.abstractRoom.creatures;
@@ -75,7 +75,7 @@ namespace BuiltinBuffs.Positive
                     for (int j = 0; j < physicalObjects[i].Count; j++)
                     {
                         PhysicalObject physicalObject = physicalObjects[i][j];
-                        if (physicalObject is Weapon && (physicalObject as Weapon).thrownBy is Player)
+                        if (physicalObject is Weapon && (physicalObject as Weapon).thrownBy == self)
                         {
                             Weapon weapon = physicalObject as Weapon;
                             Creature target = null;
@@ -86,7 +86,7 @@ namespace BuiltinBuffs.Positive
                                 for (int k = 0; k < self.room.abstractRoom.creatures.Count; k++)
                                 {
                                     if (self.room.abstractRoom.creatures[k].realizedCreature != null &&
-                                        !(self.room.abstractRoom.creatures[k].realizedCreature == self))
+                                        !(self.room.abstractRoom.creatures[k].realizedCreature is Player))
                                     {
                                         Creature creature = self.room.abstractRoom.creatures[k].realizedCreature;
                                         shouldFire = true;
@@ -102,7 +102,6 @@ namespace BuiltinBuffs.Positive
                                                 if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
                                                     shouldFire = false;
                                             }
-
                                         }
                                         if (creature is Scavenger && 
                                             (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
