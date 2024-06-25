@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"金钱就是力量",
         "Description":"持有珍珠数量越多,臂力和跳跃能力就越强"
+    },
+    "English":{
+        "BuffName":"Wealth is Power",
+        "Description":"More pearls you carry, more powerful your jumping and throwing are"
     }
 }

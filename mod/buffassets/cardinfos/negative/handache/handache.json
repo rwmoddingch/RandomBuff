@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"我手疼疼",
         "Description":"握持5秒就会松手"
+    },
+    "English":{
+        "BuffName":"Handache",
+        "Description":"Players will release their hands when holding items for up to 5s"
     }
 }

@@ -1,0 +1,18 @@
+{
+  "FaceName": "WallNutBowling",
+  "BuffID": "WallNutBowling",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "坚果保龄球",
+    "Description": "你可以持续不断地翻滚，并碾压生物造成伤害，直到松开方向键。"
+  },
+  "English": {
+    "BuffName": "WallNutBowling",
+    "Description": "You can continuously roll and crush creatures to cause damage until you release the directional key."
+  }
+}

@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"蓝色蛹蜥",
         "Description":"蓝果脱离藤曼有概率变成篮蜥蜴"
+    },
+    "English":{
+        "BuffName":"Pupa Lizard",
+        "Description":"Blue fruits have a chance turning into blue lizards when picked from the vines"
     }
 }

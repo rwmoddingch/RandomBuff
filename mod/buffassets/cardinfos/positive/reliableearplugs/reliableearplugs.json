@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"可靠的耳塞",
         "Description":"不会被鞭炮草和炸弹导致耳鸣"
+    },
+    "English":{
+        "BuffName":"Reliable Earplugs",
+        "Description":"Won't get deafened by explosions"
     }
 }

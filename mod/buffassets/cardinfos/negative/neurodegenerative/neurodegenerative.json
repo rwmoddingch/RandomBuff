@@ -5,9 +5,13 @@
     "BuffProperty" : "Normal",
     "Triggerable" :  false,
     "Stackable" :  false,
-    "Color" : "5444b7",
+    "Color" : "FFE7B0",
     "Chinese":{
         "BuffName":"神经退行",
         "Description":"进入房间时,不可操作5秒"
+    },
+    "English":{
+        "BuffName":"Neurodegeneration",
+        "Description":"When entering a new room, your controlling will freeze for 5s"
     }
 }
