@@ -7,6 +7,10 @@
     "BuffName": "我是小猫",
     "Description": "玩家变为猫仔"
   },
+   "English": {
+    "BuffName": "I'm Little Cat",
+    "Description": "Turning players into slug pups"
+  },
   "Stackable": false
   
 }

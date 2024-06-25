@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"再见武器",
         "Description":"没法扔武器了"
+    },
+    "English":{
+        "BuffName":"Bye Bye Weapons",
+        "Description":"Players can't throw weapons now"
     }
 }

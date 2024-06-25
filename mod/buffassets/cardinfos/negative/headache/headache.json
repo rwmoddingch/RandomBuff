@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"我脑袋疼",
         "Description":"间歇性眩晕2秒"
+    },
+    "English":{
+        "BuffName":"Headache",
+        "Description":"Players will faint away for 2s fitfully"
     }
 }

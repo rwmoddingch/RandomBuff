@@ -1,0 +1,13 @@
+{
+    "FaceName": "ColorEater",
+    "ID": "ColorEaterID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  true,
+    "Stackable" :  false,
+    "Color" : "#ff004d",
+    "Chinese":{
+        "BuffName":"食色性也",
+        "Description":"可以通过点击卡牌取色来改变自身颜色减少饱食度需求,越接近指定的色相饱食度需求越低"
+    }
+}
