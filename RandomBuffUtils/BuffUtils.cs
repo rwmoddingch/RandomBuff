@@ -1,5 +1,6 @@
 ﻿using CustomSaveTx;
 using RandomBuffUtils.BuffEvents;
+using RandomBuffUtils.ObjectExtend;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,7 +31,7 @@ namespace RandomBuffUtils
             catch (Exception e)
             {
                 canAccessLog = false;
-                Debug.LogException(e);
+                UnityEngine.Debug.LogException(e);
             }
 
             DeathPersistentSaveDataRx.HookOn();
@@ -39,7 +40,7 @@ namespace RandomBuffUtils
             BuffRoomReachEvent.OnEnable();
             BuffRegionGateEvent.OnEnable();
             BuffExtraDialogBoxEvent.OnEnable();
-
+            ObjectExtendHooks.OnEnable();
             everInit = true;
         }
 
