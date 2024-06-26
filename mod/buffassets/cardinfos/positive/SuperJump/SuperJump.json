@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"超级跳",
         "Description":"根据此卡的拥有数来额外提示跳跃高度"
+    },
+    "English":{
+        "BuffName":"Super Jump",
+        "Description":"Increases the jumping power depending on the stack amount"
     }
 }

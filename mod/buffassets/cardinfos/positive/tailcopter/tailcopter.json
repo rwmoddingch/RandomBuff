@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"尾翼直升机",
         "Description":"在连续跳跃可以让尾巴转动起来飞行"
+    },
+    "English":{
+        "BuffName":"Tailcopter",
+        "Description":"By keeping hitting jump buttom quickly, you can fly up with your tail rotating like a helicopter."
     }
 }

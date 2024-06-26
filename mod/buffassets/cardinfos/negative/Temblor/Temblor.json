@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"地震",
         "Description":"该循环内地面一直在震颤晃动站不稳"
+    },
+    "English":{
+        "BuffName":"Earthquake",
+        "Description":"The ground will be shaking, making it hard to stand"
     }
 }

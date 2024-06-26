@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"还是我的回合",
         "Description":"矛对生物造成伤害并且停止飞行后会立刻回到手里,石头命中生物后就会立刻回到手里"
+    },
+    "English":{
+        "BuffName":"Still My Turn",
+        "Description":"Spears and rocks will get back to players' hands instantly after hitting creatures"
     }
 }
