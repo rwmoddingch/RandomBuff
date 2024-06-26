@@ -41,6 +41,8 @@ namespace RandomBuff.Core.Buff
         public int FaceLayer { get; private set; } = 1;
         public float MaxFaceDepth { get; private set; } = 1f;
         public Color FaceBackgroundColor { get; private set; } = Color.black;
+        public HashSet<string> Conflict { get; private set; } = new();
+        public HashSet<string> Tag { get; private set; } = new();
 
         public Dictionary<string, object> ExtProperty { get; private set; } = new ();
 
@@ -212,6 +214,26 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "FaceBackgroundColor"))
                     newData.FaceBackgroundColor = Custom.hexToColor((string)rawData[loadState]);
 
+                if (rawData.ContainsKey(loadState = "Tag"))
+                {
+                    JArray tagObj = (JArray)rawData[loadState];
+                    foreach (var obj in tagObj)
+                    {
+                        newData.Tag.Add((string)obj);
+                        BuffPlugin.LogDebug($"Tag:{obj}");
+                    }
+                }
+
+                if (rawData.ContainsKey(loadState = "Conflict"))
+                {
+                    JArray conflictObj = (JArray)rawData[loadState];
+                    foreach (var obj in conflictObj)
+                    {
+                        newData.Conflict.Add((string)obj);
+                        BuffPlugin.LogDebug($"Conflict:{obj}");
+                    }
+                }
+
                 bool hasMutli = false;
                 foreach (var language in ExtEnumBase.GetNames(typeof(InGameTranslator.LanguageID)))
                 {
@@ -343,6 +365,21 @@ namespace RandomBuff.Core.Buff
             builder.AppendLine($"Color : {Color}");
             builder.AppendLine($"BuffType : {BuffType}");
             builder.AppendLine($"BuffProperty : {BuffProperty}");
+
+            if (Conflict.Count > 0)
+            {
+                builder.AppendLine($"Conflict :");
+                foreach (var conflict in Conflict)
+                    builder.AppendLine($"---{conflict}");
+            }
+
+            if (Tag.Count > 0)
+            {
+                builder.AppendLine($"Tag :");
+                foreach (var tag in Tag)
+                    builder.AppendLine($"---{tag}");
+            }
+
             builder.AppendLine("Infos :");
             foreach (var info in CardInfos)
             {

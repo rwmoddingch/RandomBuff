@@ -22,27 +22,35 @@ namespace RandomBuff.Core.Game
         public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
         {
             IEnumerable<BuffID> alreadyHas;
+            IEnumerable<string> conflict = new List<string>();
             if (BuffPoolManager.Instance == null)
             {
                 alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.Where(i =>
-                    types.Contains(BuffConfigManager.GetStaticData(i).BuffType) &&
-                    !BuffConfigManager.GetStaticData(i).Stackable);
+                    types.Contains(i.GetStaticData().BuffType) &&
+                    !i.GetStaticData().Stackable);
             }
             else
             {
                 alreadyHas = BuffPoolManager.Instance.GetDataDictionary().Keys.Where(i =>
-                    types.Contains(BuffConfigManager.GetStaticData(i).BuffType) &&
-                    !BuffConfigManager.GetStaticData(i).Stackable);
+                    types.Contains(i.GetStaticData().BuffType) &&
+                    !i.GetStaticData().Stackable);
             }
 
-            var list = new List<BuffStaticData>();
+            foreach (var id in alreadyHas)
+                conflict = conflict.Concat(id.GetStaticData().Conflict);
+            
 
+            var list = new List<BuffStaticData>();
             var copyUnique = new List<BuffID>();
             foreach(var type in types)
                 copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             copyUnique.RemoveAll(alreadyHas.Contains);
-            copyUnique.RemoveAll(i => BuffConfigManager.GetStaticData(i).NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
+      
+            copyUnique.RemoveAll(i =>i.GetStaticData().NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
             copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁
+
+            copyUnique.RemoveAll(i => conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j)));//去除冲突
+
             if (copyUnique.Count < pickCount)
             {
                 return null;
