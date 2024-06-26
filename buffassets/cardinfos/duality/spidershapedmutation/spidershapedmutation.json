@@ -2,10 +2,12 @@
   "FaceName": "spidershapedmutation",
   "BuffID": "SpiderShapedMutation",
   "BuffType": "Duality",
-  "BuffProperty": "Special",
+  "BuffProperty": "Normal",
   "Triggerable": false,
   "Stackable": false,
   "Color": "FFFFE8",
+  "Tag": [ "ShapedMutation" ],
+  "Conflict": [ "ShapedMutation" ],
 
   "MultiLayerFace": true,
   "FaceLayer": 4,
