@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"西西弗斯",
         "Description":"放下石头后会回到拾取时的位置(跨区域不奏效)"
-    }
+    },
+    "English": {
+    "BuffName": "Sisyphus",
+    "Description": "After putting down the rock, players will be teleported to where they picked it up (won't work across different regions)"
+  }
 }
