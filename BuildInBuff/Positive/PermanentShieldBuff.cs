@@ -55,9 +55,6 @@ namespace BuiltinBuffs.Positive
 
         public static ConditionalWeakTable<Player, PermanentShieldList> PermanentShieldFeatures = new ConditionalWeakTable<Player, PermanentShieldList>();
 
-        public static int inputCount = 0;
-
-
         public static int StackLayer
         {
             get
@@ -105,13 +102,6 @@ namespace BuiltinBuffs.Positive
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-            if (inputCount > 0)
-                inputCount--;
-            if (Input.GetKey(KeyCode.M) && inputCount == 0)
-            {
-                inputCount = 40;
-                PermanentShieldBuffEntry.PermanentShield.GetBuffData().Stack();
-            }
             if (PermanentShieldFeatures.TryGetValue(self, out var list))
             {
                 if (list.permanentShieldList.Count != StackLayer)

@@ -300,7 +300,10 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, eu);
             if (SpiderFeatures.TryGetValue(self, out var spider))
+            {
                 spider.Update();
+                self.GetExPlayerData().HaveHands = false;
+            }
         }
 
         private static void Player_Jump(On.Player.orig_Jump orig, Player self)

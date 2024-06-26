@@ -98,7 +98,10 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, eu);
             if (FlyFeatures.TryGetValue(self, out var fly))
+            {
                 fly.Update();
+                self.GetExPlayerData().HaveHands = false;
+            }
         }
 
         private static void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)

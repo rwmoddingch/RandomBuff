@@ -1,0 +1,18 @@
+{
+  "FaceName": "SporePuff_sCrest",
+  "BuffID": "SporePuff_sCrest",
+  "BuffType": "Positive",
+  "BuffProperty": "Special",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "烟雾果纹章",
+    "Description": "玩家身体周围不断产生孢子烟雾。"
+  },
+  "English": {
+    "BuffName": "Spore Puff's Crest",
+    "Description": "Spore smoke constantly generates around your body."
+  }
+}
