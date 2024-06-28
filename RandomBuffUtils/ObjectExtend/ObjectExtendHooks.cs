@@ -38,8 +38,8 @@ namespace RandomBuffUtils.ObjectExtend
                     }
                     catch (Exception e)
                     {
-                        BuffUtils.LogException("Object Extend", e);
-                        BuffUtils.LogError("Object Extend", $"Try serialize field for Type: {self.GetType().Name}, Field Name: {field.Name} FAILED!");
+                        BuffUtils.LogException("ObjectExtend", e);
+                        BuffUtils.LogError("ObjectExtend", $"Try serialize field for Type: {self.GetType().Name}, Field Name: {field.Name} FAILED!");
                     }
                 }
 
@@ -52,13 +52,13 @@ namespace RandomBuffUtils.ObjectExtend
                     }
                     catch (Exception e)
                     {
-                        BuffUtils.LogException("Object Extend", e);
-                        BuffUtils.LogError("Object Extend", $"Try serialize property for Type: {self.GetType().Name}, Property Name: {property.Name} FAILED!");
+                        BuffUtils.LogException("ObjectExtend", e);
+                        BuffUtils.LogError("ObjectExtend", $"Try serialize property for Type: {self.GetType().Name}, Property Name: {property.Name} FAILED!");
                     }
                 }
 
                 re += $"<oA>BUFFTYPE-{self.GetType().AssemblyQualifiedName}";
-                BuffUtils.Log("Object Extend", re);
+                BuffUtils.Log("ObjectExtend", re);
             }
 
             return re;
@@ -77,6 +77,8 @@ namespace RandomBuffUtils.ObjectExtend
             var ctorIndex = (byte)(index + 1);
 
             var abType = il.Module.ImportReference(typeof(AbstractPhysicalObject));
+            var ctorInvokeRef =
+                il.Module.ImportReference(typeof(ConstructorInfo).GetMethod(nameof(ConstructorInfo.Invoke),new[] { typeof(object[])}));
             while (c.TryGotoNext(i => i.MatchNewobj(out var method)&& 
                                       method.DeclaringType.IsDerivedType(abType)))
             {
@@ -85,7 +87,7 @@ namespace RandomBuffUtils.ObjectExtend
                 c.Emit(OpCodes.Ldloc_0);
                 c.EmitDelegate<Func<string[], ConstructorInfo>>((split) =>
                 {
-                    BuffUtils.Log("Object Extend", split[split.Length - 1]);
+                    BuffUtils.Log("ObjectExtend", split[split.Length - 1]);
                     if (IsBuffAbstractObject(split, out var name) && 
                         Type.GetType(name) is { } type &&
                         type.GetCustomAttribute<BuffAbstractPhysicalObjectAttribute>() != null)
@@ -117,14 +119,9 @@ namespace RandomBuffUtils.ObjectExtend
                 c.Emit(OpCodes.Brfalse, label);
 
                 EmitArray(c, method, index);
-                c.Emit(OpCodes.Ldloc_S, index);
                 c.Emit(OpCodes.Ldloc_S, ctorIndex);
-                c.EmitDelegate<Func<object[], ConstructorInfo, AbstractPhysicalObject>>((param, ctor) =>
-                {
-                    var re = ctor.Invoke(param) as AbstractPhysicalObject;
-                    BuffUtils.Log("Object Extend",re?.type?.ToString() ?? "NULL");
-                    return re;
-                });
+                c.Emit(OpCodes.Ldloc_S, index);
+                c.Emit(OpCodes.Callvirt, ctorInvokeRef);
                 c.Emit(OpCodes.Br, label2);
                 c.MarkLabel(label);
 
@@ -139,21 +136,25 @@ namespace RandomBuffUtils.ObjectExtend
                 c.Emit(OpCodes.Ldc_I4, method.Parameters.Count);
                 c.Emit(OpCodes.Newarr, c.Module.TypeSystem.Object);
                 c.Emit(OpCodes.Stloc_S, index);
+                var methodRef = il.Module.ImportReference(typeof(ObjectExtendHooks).GetMethod(nameof(IL_SetArray),
+                    BindingFlags.NonPublic | BindingFlags.Static));
                 for (int i = method.Parameters.Count-1; i >= 0; i--)
                 {
                     EmitCastToReference(c, method.Parameters[i].ParameterType);
                     c.Emit(OpCodes.Ldloc_S, index);
                     c.Emit(OpCodes.Ldc_I4, i);
-                    c.EmitDelegate<Action<object, object[], int>>(((o, objects, j) => objects[j] = o));
+                    c.Emit(OpCodes.Call, methodRef);
                 }
             }
+
+
             void EmitCastToReference(ILCursor c, TypeReference type)
             {
                 if(type.IsValueType)
                     c.Emit(OpCodes.Box, type);
             }
         }
-
+        private static void IL_SetArray(object o, object[] objects, int j) => objects[j] = o;
         private static bool IsBuffAbstractObject(string[] array, out string typeName)
         {
             var re = array.Where(i => i.StartsWith("BUFFTYPE-"));
@@ -181,18 +182,27 @@ namespace RandomBuffUtils.ObjectExtend
                 Type.GetType(name) is {} type &&
                 type.GetCustomAttribute<BuffAbstractPhysicalObjectAttribute>() != null)
             {
-                BuffUtils.Log("Object Extend",pos.SaveToString());
+                BuffUtils.Log("ObjectExtend",pos.SaveToString());
 
                 if (re?.GetType() != type)
                 {
-                    BuffUtils.LogWarning("Object Extend", $"{type.Name} don't have same ctor as base type");
-                    re = (AbstractPhysicalObject)FormatterServices.GetSafeUninitializedObject(type);
-                    re.pos = pos;
-                    re.world = world;
-                    re.ID = id;
-                    re.type = abstractObjectType;
-                    re.stuckObjects = new List<AbstractPhysicalObject.AbstractObjectStick>();
-                    re.unrecognizedAttributes = split.Skip(3).Where(i => !i.StartsWith("BUFF-") && !i.StartsWith("BUFFTYPE-")).ToArray();
+                    if (type.GetInterface(nameof(IBuffAbstractPhysicalObjectInitialization)) != null)
+                    {
+            
+                        re = ((IBuffAbstractPhysicalObjectInitialization)FormatterServices.GetSafeUninitializedObject(type)).Initialize(world, abstractObjectType, pos, id,
+                            split.Skip(3).Where(i => !i.StartsWith("BUFF-") && !i.StartsWith("BUFFTYPE-")).ToArray());
+                    }
+                    else
+                    {
+                        BuffUtils.LogWarning("ObjectExtend", $"{type.Name} don't have same ctor as base type");
+                        re = (AbstractPhysicalObject)FormatterServices.GetSafeUninitializedObject(type);
+                        re.pos = pos;
+                        re.world = world;
+                        re.ID = id;
+                        re.type = abstractObjectType;
+                        re.stuckObjects = new List<AbstractPhysicalObject.AbstractObjectStick>();
+                        re.unrecognizedAttributes = split.Skip(3).Where(i => !i.StartsWith("BUFF-") && !i.StartsWith("BUFFTYPE-")).ToArray();
+                    }
                 }
                 else
                 {
@@ -213,8 +223,8 @@ namespace RandomBuffUtils.ObjectExtend
                         }
                         catch (Exception e)
                         {
-                            BuffUtils.LogException("Object Extend", e);
-                            BuffUtils.LogError("Object Extend", $"Try set custom field for Type: {abstractObjectType}, Field Name: {attrSplit[0]} FAILED!");
+                            BuffUtils.LogException("ObjectExtend", e);
+                            BuffUtils.LogError("ObjectExtend", $"Try set custom field for Type: {abstractObjectType}, Field Name: {attrSplit[0]} FAILED!");
                         }
                     }
                     else if (re.GetType().GetProperty(attrSplit[0],
@@ -228,13 +238,13 @@ namespace RandomBuffUtils.ObjectExtend
                         }
                         catch (Exception e)
                         {
-                            BuffUtils.LogException("Object Extend", e);
-                            BuffUtils.LogError("Object Extend", $"Try set custom property for Type: {abstractObjectType}, Property Name: {attrSplit[0]} FAILED!");
+                            BuffUtils.LogException("ObjectExtend", e);
+                            BuffUtils.LogError("ObjectExtend", $"Try set custom property for Type: {abstractObjectType}, Property Name: {attrSplit[0]} FAILED!");
                         }
                     }
                     else
                     {
-                        BuffUtils.LogError("Object Extend", $"Can't find field or property for Type: {abstractObjectType}, Name: {attrSplit[0]}!");
+                        BuffUtils.LogError("ObjectExtend", $"Can't find field or property for Type: {abstractObjectType}, Name: {attrSplit[0]}!");
 
                     }
                 }

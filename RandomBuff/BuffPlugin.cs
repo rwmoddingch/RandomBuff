@@ -170,12 +170,7 @@ namespace RandomBuff
             orig(self, dt);
             if (self.rainWorld.BuffMode() && Directory.Exists("Debug") && DevEnabled)
             {
-                if (Input.GetKeyDown(KeyCode.K))
-                {
-                    BuffPlayerData.Instance.SetCosmeticEnable(CosmeticUnlockID.Test.value,
-                        !BuffPlayerData.Instance.IsCosmeticEnable(CosmeticUnlockID.Test.value));
-                    BuffPlugin.LogDebug($"Enable Test Cosmetic {BuffPlayerData.Instance.IsCosmeticEnable(CosmeticUnlockID.Test.value)}, {BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, CosmeticUnlockID.Test.value)}");
-                }
+     
             }
         
         }
@@ -208,7 +203,7 @@ namespace RandomBuff
                     BuffConfigManager.InitBuffStaticData();
                     BuffConfigManager.InitTemplateStaticData();
                     BuffConfigManager.InitQuestData();
-
+                    BuffRegister.LoadBuffPluginAsset();
                     //这个会用到template数据（嗯
                     MissionRegister.RegisterAllMissions();
                     BuffRegister.BuildAllDataStaticWarpper();

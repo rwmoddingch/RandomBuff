@@ -143,6 +143,8 @@ namespace RandomBuffUtils.ParticleSystem
             EmitterModules.Add(emitterModule);
         }
 
+   
+
         public void ApplyParticleModule(EmitterModule particleModule)
         {
             EmitterModules.Add(particleModule);

@@ -41,6 +41,7 @@ namespace RandomBuffUtils
             BuffRegionGateEvent.OnEnable();
             BuffExtraDialogBoxEvent.OnEnable();
             ObjectExtendHooks.OnEnable();
+            BuffSounds.OnEnable();
             everInit = true;
         }
 
@@ -74,6 +75,10 @@ namespace RandomBuffUtils
 
         }
 
+
+
+   
+
         public static string Compress(string str)
         {
             var bytes = Encoding.UTF8.GetBytes(str);
@@ -101,5 +106,7 @@ namespace RandomBuffUtils
                 return Encoding.UTF8.GetString(memoryStream.ToArray());
             }
         }
+
+      
     }
 }
