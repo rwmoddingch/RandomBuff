@@ -269,6 +269,8 @@ namespace RandomBuff.Core.Entry
 
         private static readonly HashSet<string> currentRuntimeBuffName = new ();
 
+        private static readonly List<Type> allEntry = new();
+
         private static bool IsDerivedType(this Type checkType, Type baseType)
         {
             var aType = checkType?.BaseType;
@@ -282,10 +284,25 @@ namespace RandomBuff.Core.Entry
             return false;
         }
 
+        internal static void LoadBuffPluginAsset()
+        {
+            foreach (var type in allEntry)
+            {
+                if (type.GetMethod("LoadAssets", BindingFlags.Static | BindingFlags.Public) is { } method &&
+                    method.GetParameters().Length == 0)
+                {
+                    method.Invoke(null, null);
+                    BuffPlugin.LogDebug($"Load Assets for {type.Name}");
+                }
+            }
+            allEntry.Clear();
+        }
+
 
 
         internal static void InitAllBuffPlugin()
         {
+            allEntry.Clear();
             foreach (var mod in ModManager.ActiveMods)
             {
                 var resolver = new DefaultAssemblyResolver();
@@ -371,6 +388,7 @@ namespace RandomBuff.Core.Entry
                                 BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
                                 ExceptionTracker.TrackException(e, $"Invoke {type.Name}.OnEnable Failed!");
                             }
+                            allEntry.Add(type);
                         }
                         
                     }

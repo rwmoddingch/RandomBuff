@@ -23,7 +23,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
         public void ApplyInit(Particle particle)
         {
-            Vector2 vel = Vector2.Lerp(a, b, Random.value);
+            Vector2 vel = Vector3.Slerp(a, b, Random.value).normalized * Mathf.Lerp(a.magnitude,b.magnitude,Random.value);
             particle.SetVel(vel);
         }
     }

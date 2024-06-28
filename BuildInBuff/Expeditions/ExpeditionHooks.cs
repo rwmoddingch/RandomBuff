@@ -15,6 +15,7 @@ using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Reflection.Emit;
+using BuiltinBuffs.Positive;
 
 namespace BuiltinBuffs.Expeditions
 {
@@ -25,7 +26,7 @@ namespace BuiltinBuffs.Expeditions
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
-            if (Input.GetKey(KeyCode.I))
+            if (Input.GetKey(KeyCode.Y))
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
                 {
@@ -69,11 +70,11 @@ namespace BuiltinBuffs.Expeditions
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L))
                 {
-                    var ab = new TestAb(self.world, null, self.Players[0].pos, self.GetNewID(),false);
-                    self.Players[0].Room.AddEntity(ab);
-                    ab.RealizeInRoom();
-                    ab.realizedObject.firstChunk.HardSetPosition(self.Players[0].realizedCreature.DangerPos);
-                    self.Players[0].realizedCreature.room.AddObject(ab.realizedObject);
+                    BuffPoolManager.Instance.CreateBuff(OrbitalRailcannonStrikeEntry.OrbitalRailcannonStrike);
+                    BuffHud.Instance.AppendNewCard(OrbitalRailcannonStrikeEntry.OrbitalRailcannonStrike);
+                    //self.Players[0].realizedCreature.room.PlaySound(OrbitalRailcannonStrikeEntry.OrbitalStrike,
+                    //    self.Players[0].realizedCreature.mainBodyChunk);
+                    //BuffUtils.Log("tEST","play sound");
 
                 }
 
@@ -81,7 +82,7 @@ namespace BuiltinBuffs.Expeditions
 
         }
         [BuffAbstractPhysicalObject]
-        public class TestAb : AbstractSpear
+        public class TestAb : AbstractSpear , IBuffAbstractPhysicalObjectInitialization
         {
             [BuffAbstractPhysicalObjectProperty]
             public int test1 = -1;
@@ -103,19 +104,18 @@ namespace BuiltinBuffs.Expeditions
                 return base.ToString();
             }
 
+            public AbstractPhysicalObject Initialize(World world, AbstractObjectType type, WorldCoordinate pos, EntityID Id,
+                string[] unrecognizedAttributes)
+            {
+                BuffUtils.Log("tEST","sdsdsd");
+                return new TestAb(world, pos, ID);
+            }
 
 
-            public TestAb(World world, Spear realizedObject, WorldCoordinate pos, EntityID ID, bool explosive) : base(world, realizedObject, pos, ID, explosive)
+            public TestAb(World world, WorldCoordinate pos, EntityID ID) : base(world,null, pos, ID, false)
             {
             }
 
-            public TestAb(World world, Spear realizedObject, WorldCoordinate pos, EntityID ID, bool explosive, float hue) : base(world, realizedObject, pos, ID, explosive, hue)
-            {
-            }
-
-            public TestAb(World world, Spear realizedObject, WorldCoordinate pos, EntityID ID, bool explosive, bool electric) : base(world, realizedObject, pos, ID, explosive, electric)
-            {
-            }
         }
 
         public class TestObject : PlayerCarryableItem, IDrawable
@@ -180,7 +180,7 @@ namespace BuiltinBuffs.Expeditions
             _ = new Hook(typeof(BuffPoolManager).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance,null,new Type[] { typeof(RainWorldGame) },Array.Empty<ParameterModifier>()),
                 typeof(ExpeditionHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
-            //On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+            On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
         }
 
     
