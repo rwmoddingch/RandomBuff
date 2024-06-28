@@ -271,7 +271,7 @@ namespace BuiltinBuffs.Positive
                         {
                             this.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Hard, creature.mainBodyChunk);
                             creature.SetKillTag(this.owner.abstractCreature);
-                            creature.firstChunk.vel *= 0.9f / Mathf.Pow(level, 0.3f);
+                            creature.mainBodyChunk.vel *= 0.9f / Mathf.Pow(level, 0.3f);
                             creature.Violence(this.owner.mainBodyChunk, 
                                               Custom.DirVec(this.owner.DangerPos, creature.DangerPos).normalized * Radius(level, 0f) / (Custom.Dist(this.owner.DangerPos, creature.DangerPos) + 0.5f * Radius(level, 0f)), 
                                               creature.firstChunk, null, Creature.DamageType.Blunt, 0.01f * level, 0f);
@@ -319,7 +319,7 @@ namespace BuiltinBuffs.Positive
                 emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, Mathf.FloorToInt(0.1f * Radius(this.level, 0f)), Mathf.FloorToInt(0.1f * Radius(this.level, 0f))));
 
                 emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("tinyStar", "", 11, 1f, 1f, this.color)));
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f, this.color)));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 2f, this.color)));
                 emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
                 emitter.ApplyParticleModule(new SetRandomLife(emitter, 20, 40));
                 emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(2f, 2f), new Vector2(1f, 1f)));

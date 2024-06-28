@@ -36,7 +36,7 @@ namespace RandomBuff.Core.Buff
 
         public int MaxCycleCount { get; private set; } = -1;
         public bool Countable => MaxCycleCount != -1;
-
+        public string AssetPath { get; private set; }
         public bool MultiLayerFace { get; private set;} = false;
         public int FaceLayer { get; private set; } = 1;
         public float MaxFaceDepth { get; private set; } = 1f;
@@ -298,6 +298,7 @@ namespace RandomBuff.Core.Buff
                     newData.CardInfos.Add(InGameTranslator.LanguageID.English,new CardInfo(){BuffName = newData.BuffID.value});
                 }
 
+                newData.AssetPath = dirPath.Remove(0,1);
                 var rdata = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(newData.BuffID));
                 GetCustomStaticBuffData(rdata, newData, rawData);
                 //BuffPlugin.LogDebug(newData.ToDebugString());

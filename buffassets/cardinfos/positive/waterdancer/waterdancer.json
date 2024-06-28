@@ -1,0 +1,18 @@
+{
+  "FaceName": "WaterDancer",
+  "BuffID": "WaterDancer",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "水中舞者",
+    "Description": "你的游泳速度和憋气时间增加30%。"
+  },
+  "English": {
+    "BuffName": "WaterDancer",
+    "Description": "Your swimming speed and breath-holding time have increased by 30%."
+  }
+}
