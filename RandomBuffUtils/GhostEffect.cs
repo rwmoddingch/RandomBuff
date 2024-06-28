@@ -62,38 +62,38 @@ namespace RandomBuffUtils
                 break;
             }
             AddToContainer(sLeaser, rCam, null);
+        }
 
-            FSprite[] ProcessSprites(FSprite[] origs, RoomCamera roomCamera)
+        FSprite[] ProcessSprites(FSprite[] origs, RoomCamera roomCamera)
+        {
+            Vector2 screenCenterPos = Vector2.zero;
+
+            int skipped = 0;
+            foreach (var sprite in origs)
             {
-                Vector2 screenCenterPos = Vector2.zero;
-
-                int skipped = 0;
-                foreach (var sprite in origs)
+                if (sprite.alpha == 0 || !sprite.isVisible)
                 {
-                    if (sprite.alpha == 0 || !sprite.isVisible)
-                    {
-                        skipped++;
-                        continue;
-                    }
-                    screenCenterPos += GetSpriteCenter(sprite);
+                    skipped++;
+                    continue;
                 }
-                screenCenterPos /= origs.Length - skipped;
-
-                var sprites = new FSprite[origs.Length];
-                deltas = new Vector2[origs.Length][];
-                origAlphas = new float[origs.Length][];
-
-                for (int i = 0; i < sprites.Length; i++)
-                {
-                    sprites[i] = CopySprite(origs[i]);
-                    deltas[i] = GetDeltas(sprites[i], screenCenterPos);
-                    origAlphas[i] = GetAlphas(sprites[i]);
-                }
-                center = screenCenterPos;
-                BuffUtils.Log("GhostEffect", $"center : {center}, pos : {graphicsModule.owner.firstChunk.pos}");
-
-                return sprites;
+                screenCenterPos += GetSpriteCenter(sprite);
             }
+            screenCenterPos /= origs.Length - skipped;
+
+            var sprites = new FSprite[origs.Length];
+            deltas = new Vector2[origs.Length][];
+            origAlphas = new float[origs.Length][];
+
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                sprites[i] = CopySprite(origs[i]);
+                deltas[i] = GetDeltas(sprites[i], screenCenterPos);
+                origAlphas[i] = GetAlphas(sprites[i]);
+            }
+            center = screenCenterPos;
+            BuffUtils.Log("GhostEffect", $"center : {center}, pos : {graphicsModule.owner.firstChunk.pos}");
+
+            return sprites;
         }
 
         public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -155,7 +155,7 @@ namespace RandomBuffUtils
             }
         }
 
-        Vector2 GetSpriteCenter(FSprite sprite)
+        public static Vector2 GetSpriteCenter(FSprite sprite)
         {
             Vector2 pos = Vector2.zero;
             if (sprite is CustomFSprite customFSprite)
@@ -179,7 +179,7 @@ namespace RandomBuffUtils
             return pos;
         }
 
-        FSprite CopySprite(FSprite orig)
+        public static FSprite CopySprite(FSprite orig)
         {
             FSprite result;
             if (orig is CustomFSprite customFSprite)
@@ -222,7 +222,7 @@ namespace RandomBuffUtils
             return result;
         }
 
-        Vector2[] GetDeltas(FSprite sprite, Vector2 center)
+        public static Vector2[] GetDeltas(FSprite sprite, Vector2 center)
         {
             Vector2[] result;
             if (sprite is CustomFSprite customFSprite)
@@ -248,7 +248,7 @@ namespace RandomBuffUtils
             }
             return result;
         }
-        float[] GetAlphas(FSprite sprite)
+        public static float[] GetAlphas(FSprite sprite)
         {
             float[] result;
             if (sprite is CustomFSprite customFSprite)
@@ -275,7 +275,7 @@ namespace RandomBuffUtils
             return result;
         }
 
-        void ApplyDeltas(FSprite sprite, Vector2[] deltas, Vector2 centerPos, Vector2 camPos)
+        public static void ApplyDeltas(FSprite sprite, Vector2[] deltas, Vector2 centerPos, Vector2 camPos)
         {
             if (sprite is CustomFSprite customFSprite)
             {
@@ -297,7 +297,7 @@ namespace RandomBuffUtils
             }
         }
 
-        void ApplyFade(FSprite sprite, float[] origAlpha, float alpha)
+        public static void ApplyFade(FSprite sprite, float[] origAlpha, float alpha)
         {
             if (sprite is CustomFSprite customFSprite)
             {

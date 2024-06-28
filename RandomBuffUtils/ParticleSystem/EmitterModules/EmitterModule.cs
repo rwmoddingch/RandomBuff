@@ -22,6 +22,10 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public virtual void Update()
         {
         }
+
+        public virtual void OnDie()
+        {
+        }
     }
 
     public sealed class SetEmitterLife : EmitterModule
@@ -30,6 +34,9 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         int life;
         bool loop;
         bool killOnFinish;
+
+        bool killed;
+
         public SetEmitterLife(ParticleEmitter emitter, int life, bool loop, bool killOnFinish = true) : base(emitter)
         {
             this.setLife = life;
@@ -46,6 +53,8 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
         public override void Update()
         {
+            if (killed)
+                return;
             if (life > 0)
             {
                 life--;
@@ -57,6 +66,12 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
                         emitter.Die();
                 }
             }
+        }
+
+        public override void OnDie()
+        {
+            killed = true;
+            BuffUtils.Log("SetEmitterLife", "Die");
         }
     }
 

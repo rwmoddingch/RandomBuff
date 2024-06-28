@@ -71,6 +71,8 @@ namespace RandomBuffUtils.ParticleSystem
             BuffUtils.Log("ParticleEmitter", "Die");
             slateForDeletion = true;
             OnEmitterDie?.Invoke(this);
+            foreach (var module in EmitterModules)
+                module.OnDie();
         }
 
         #region Draw&Update
