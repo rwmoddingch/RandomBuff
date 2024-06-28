@@ -60,7 +60,7 @@ namespace RandomBuffUtils.BuffEvents
             return null;
         }
 
-        public class RegionGateInstance
+        public class  RegionGateInstance
         {
             public string[] BindRegions { get; private set; }
 
