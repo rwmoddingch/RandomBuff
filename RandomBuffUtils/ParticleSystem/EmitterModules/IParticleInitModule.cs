@@ -111,7 +111,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
         public void ApplyInit(Particle particle)
         {
-            Color color = Custom.HSL2RGB(Random.Range(hueA, hueB), saturation, lightness);
+            Color color = Custom.HSL2RGB(Random.Range(hueA, hueB) % 1, saturation, lightness);
             particle.HardSetColor(color);
         }
     }

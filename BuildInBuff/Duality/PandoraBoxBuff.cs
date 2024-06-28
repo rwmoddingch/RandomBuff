@@ -12,8 +12,6 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
-
-
     internal class PandoraBoxIBuffEntry : IBuffEntry
     {
         public static BuffID PandoraBoxBuffID = new BuffID("PandoraBox", true);
