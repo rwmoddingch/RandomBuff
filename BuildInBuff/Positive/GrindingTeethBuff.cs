@@ -45,7 +45,6 @@ namespace BuiltinBuffs.Positive
     {
         public static BuffID GrindingTeeth = new BuffID("GrindingTeeth", true);
         public static ConditionalWeakTable<Player, GrindingTeeth> GrindingTeethFeatures = new ConditionalWeakTable<Player, GrindingTeeth>();
-        private static int inputCount = 0;
 
         public static int StackLayer
         {
@@ -84,13 +83,6 @@ namespace BuiltinBuffs.Positive
         {
             orig.Invoke(self, eu);
 
-            if (inputCount > 0)
-                inputCount--;
-            if (Input.GetKey(KeyCode.M) && inputCount == 0)
-            {
-                inputCount = 40;
-                GrindingTeeth.GetBuffData().Stack();
-            }
             if (GrindingTeethFeatures.TryGetValue(self, out var grindingTeeth))
             {
                 if(grindingTeeth.abilities.Count != StackLayer)
