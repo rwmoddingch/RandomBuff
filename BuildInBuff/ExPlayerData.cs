@@ -23,6 +23,7 @@ namespace BuiltinBuffs
 
         public bool HaveTail = true;
 
+        public bool HaveHands = true;
 
         public ExPlayerData(Player player)
         {

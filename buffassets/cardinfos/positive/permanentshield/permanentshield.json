@@ -6,6 +6,7 @@
   "Triggerable": false,
   "Stackable": true,
   "Color": "E3AB4E",
+  "Tag": [ "Shield" ],
 
   "Chinese": {
     "BuffName": "永久护盾",

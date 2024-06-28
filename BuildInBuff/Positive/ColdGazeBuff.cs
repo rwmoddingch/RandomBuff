@@ -51,7 +51,6 @@ namespace BuiltinBuffs.Positive
 
         public static ConditionalWeakTable<Player, ColdGaze> ColdGazeFeatures = new ConditionalWeakTable<Player, ColdGaze>();
         public static ConditionalWeakTable<AbstractCreature, Freeze> FreezeFeatures = new ConditionalWeakTable<AbstractCreature, Freeze>();
-        private static int inputCount = 0;
 
         public static int StackLayer
         {
@@ -75,7 +74,6 @@ namespace BuiltinBuffs.Positive
 
             On.Player.ctor += Player_ctor;
             On.Player.NewRoom += Player_NewRoom;
-            On.Player.Update += Player_Update;
         }
 
         #region 玩家
@@ -108,19 +106,6 @@ namespace BuiltinBuffs.Positive
                 self.room.AddObject(newColdGaze);
                 ColdGazeFeatures.Add(self, newColdGaze);
             }
-        }
-
-        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
-        {
-            orig.Invoke(self, eu);
-            if (inputCount > 0)
-                inputCount--;
-            if (Input.GetKey(KeyCode.M) && inputCount == 0)
-            {
-                inputCount = 40;
-                ColdGaze.GetBuffData().Stack();
-            }
-
         }
         #endregion
 
@@ -451,7 +436,9 @@ namespace BuiltinBuffs.Positive
         private void AlphaChange()
         {
             bool shouldHide = true;
-            foreach(List<PhysicalObject> physicalObjectsList in owner.room.physicalObjects)
+            if (owner.room == null)
+                return;
+            foreach (List<PhysicalObject> physicalObjectsList in owner.room.physicalObjects)
             {
                 foreach (PhysicalObject physicalObject in physicalObjectsList)
                 {
@@ -833,9 +820,9 @@ namespace BuiltinBuffs.Positive
         }
     }
     
+    //蛇发外观，暂未完成和使用
     internal class Medusa : GraphicsModule
     {
-        WeakReference<Creature> ownerRef;
         private Tentacle tentacle;
         private Vector2 lookPoint;
         private float sinWave;
