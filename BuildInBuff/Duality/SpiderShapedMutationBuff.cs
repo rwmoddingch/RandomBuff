@@ -445,7 +445,7 @@ namespace BuiltinBuffs.Duality
         {
             this.ownerRef = new WeakReference<Player>(player);
 
-            this.arthropodSpeed = 30f;
+            this.arthropodSpeed = 60f + SpiderShapedMutationBuff.spiderLevel * 20f;
             this.wantPos = player.bodyChunks[0].pos;
 
             this.legLength = 65f + SpiderShapedMutationBuff.spiderLevel * 20f;
@@ -530,7 +530,7 @@ namespace BuiltinBuffs.Duality
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            if (!ownerRef.TryGetTarget(out var player) || player.graphicsModule == null || sLeaser == null)
+            if (!ownerRef.TryGetTarget(out var player) || player.graphicsModule == null || sLeaser == null || player.room == null)
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             
@@ -772,8 +772,9 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return;
-            if (self.graphicsModule != null &&
-                self.room != null && self.Consious && 
+            if (self.room == null)
+                return;
+            if (self.graphicsModule != null && self.Consious && 
                 !self.room.aimap.TileAccessibleToCreature(self.mainBodyChunk.pos, self.Template) && 
                 !self.room.aimap.TileAccessibleToCreature(self.bodyChunks[1].pos, self.Template))
             {
@@ -783,7 +784,8 @@ namespace BuiltinBuffs.Duality
                     {
                         if (this.legs[l, m].reachedSnapPosition &&
                             (!TileAccessibleToPlayer() ||
-                            (Custom.DistLess(wantPos, self.bodyChunks[0].pos, 20f) &&
+                            (Custom.DistLess(wantPos, self.mainBodyChunk.pos, 20f) && 
+                            Vector2.Dot(wantPos - self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - self.mainBodyChunk.pos) < 0 &&
                             !Custom.DistLess(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
                             Custom.DistLess(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f))))
                         {
@@ -1031,9 +1033,9 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var self))
                 return false;
             int num = 0;
-            for (int l = 0; l < 2; l++)
+            for (int l = 0; l < this.legs.GetLength(0); l++)
             {
-                for (int m = 0; m < 4; m++)
+                for (int m = 0; m < this.legs.GetLength(1); m++)
                 {
                     if (this.legs[l, m].reachedSnapPosition &&
                         Custom.DistLess(self.bodyChunks[0].pos, this.legs[l, m].pos, 1.1f * this.legLength))

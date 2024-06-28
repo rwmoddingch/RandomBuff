@@ -1,0 +1,17 @@
+{
+  "FaceName": "ScorchingSun",
+  "BuffID": "ScorchingSun",
+  "BuffType": "Negative",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Color": "AB2323",
+
+  "Chinese": {
+    "BuffName": "烈日炎炎",
+    "Description": "室外环境变得灼热无比，你在室外会频繁昏倒。"
+  },
+  "English": {
+    "BuffName": "ScorchingSun",
+    "Description": "The outdoor environment becomes extremely hot, and you will frequently faint outdoors."
+  }
+}
