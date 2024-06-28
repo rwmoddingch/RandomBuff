@@ -32,7 +32,7 @@ namespace BuiltinBuffs.Negative
     internal class AmputationBuffData : CountableBuffData
     {
         public override BuffID ID => AmputationBuffEntry.Amputation;
-        public override int MaxCycleCount => 2;
+        public override int MaxCycleCount => 3;
     }
 
     internal class AmputationBuffEntry : IBuffEntry

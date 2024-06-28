@@ -2,10 +2,12 @@
   "FaceName": "birdshapedmutation",
   "BuffID": "BirdShapedMutation",
   "BuffType": "Duality",
-  "BuffProperty": "Special",
+  "BuffProperty": "Normal",
   "Triggerable": true,
   "Stackable": false,
   "Color": "FFFFE8",
+  "Tag": [ "ShapedMutation" ],
+  "Conflict": [ "ShapedMutation" ],
 
   "MultiLayerFace": true,
   "FaceLayer": 3,
