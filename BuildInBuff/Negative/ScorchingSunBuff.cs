@@ -122,19 +122,19 @@ namespace BuiltinBuffs.Negative
                         {
                             Creature creature = self.abstractRoom.creatures[k].realizedCreature;
 
-                            if (CreatureHeatModule.TryGetHeatModule(creature, out var heatModule))
+                            if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
                             {
-                                float heatAdd = heatModule.lowHeatRate * num / 3f;
+                                float heatAdd = heatModule.coolOffRate * num / 3f;
                                 float pow = 0.95f;
                                 if (IsBeingExposedToSunlight(self, creature))
                                     pow = 0.85f;
                                 heatAdd = (2.5f / Mathf.Pow(num, pow)) * heatAdd;
-                                heatModule.AddHeat(heatAdd / 40f);
+                                heatModule.AddTemperature(heatAdd / 40f);
                             }
                             else
                             {
                                 heatModule = new CreatureHeatModule(creature);
-                                CreatureHeatModule.heatModuleMapping.Add(creature, heatModule);
+                                TemperatrueModule.temperatureModuleMapping.Add(creature, heatModule);
                             }
                             creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.02f * num);
                         }
@@ -159,10 +159,10 @@ namespace BuiltinBuffs.Negative
                 }
 
                 float heatstroke = 0;
-                if (CreatureHeatModule.TryGetHeatModule(self, out var heatModule))
+                if (TemperatrueModule.TryGetTemperatureModule(self, out var heatModule))
                 {
-                    heatstroke = Mathf.Min(1f, heatModule.heat / heatModule.ignitedPoint);
-                    BuffPlugin.Log("heatModule.lowHeatRate : " + heatModule.lowHeatRate);
+                    heatstroke = Mathf.Min(1f, heatModule.temperature / heatModule.ignitingPoint);
+                    BuffPlugin.Log("heatModule.lowHeatRate : " + heatModule.coolOffRate);
                 }
 
                 BuffPlugin.Log("heatstroke : " + heatstroke);
@@ -247,8 +247,8 @@ namespace BuiltinBuffs.Negative
         {
             get
             {
-                if (CreatureHeatModule.TryGetHeatModule(obj, out var heatModule))
-                    return heatModule.heat / heatModule.ignitedPoint;
+                if (TemperatrueModule.TryGetTemperatureModule(obj, out var heatModule))
+                    return heatModule.temperature / heatModule.coolOffRate;
                 else 
                     return -1;
             }
@@ -343,9 +343,9 @@ namespace BuiltinBuffs.Negative
                 {
                     FSprite fSprite = fContainer.GetChildAt(0) as FSprite;
                     FLabel fLabel = fContainer.GetChildAt(1) as FLabel;
-                    if (obj is Creature && CreatureHeatModule.TryGetHeatModule(obj as Creature, out var heatModule))
+                    if (obj is Creature && TemperatrueModule.TryGetTemperatureModule(obj as Creature, out var heatModule))
                     {
-                        fLabel.text = (heatModule.heat / heatModule.ignitedPoint).ToString();
+                        fLabel.text = (heatModule.coolOffRate / heatModule.ignitingPoint).ToString();
                     }
                     float num = fLabel.textRect.xMax - fLabel.textRect.xMin;
                     fSprite.scaleX = num + 10f;
