@@ -13,7 +13,7 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
     {
         public override MissionID ID => new MissionID("Strayer",true);
 
-        public override SlugcatStats.Name BindSlug => null;
+        public override SlugcatStats.Name BindSlug => SlugcatStats.Name.White;
 
         public override Color TextCol => Color.white;
 
