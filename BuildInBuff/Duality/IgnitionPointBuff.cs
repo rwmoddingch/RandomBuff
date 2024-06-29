@@ -31,7 +31,7 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             //On.Creature.Update += Creature_Update;
-            On.GraphicsModule.ctor += GraphicsModule_ctor;
+            //On.GraphicsModule.ctor += GraphicsModule_ctor;
             On.Creature.Violence += Creature_Violence;
             On.Room.ShouldBeDeferred += Room_ShouldBeDeferred;
             On.RoomCamera.SpriteLeaser.Update += DeferredDrawUpdate;
@@ -766,9 +766,6 @@ namespace BuiltinBuffs.Duality
                     }
                     return 1f * (Random.value * 0.1f + 0.9f);
                 }));
-            //emitter.ApplyParticleModule(new KillInTerrain(emitter));
-            emitter.ApplyParticleModule(new StagnantForceFieldBlink(emitter, 0.005f));
-
             ParticleSystem.ApplyEmitterAndInit(emitter);
         }
     }

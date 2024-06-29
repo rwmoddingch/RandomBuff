@@ -3,6 +3,7 @@ using MonoMod.Cil;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RWCustom;
@@ -27,17 +28,25 @@ namespace BuiltinBuffs.Duality
             BuffRegister.RegisterBuff<LittleBoyNukeBuffEntry>(littelBoyNukeID);
         }
 
+        public static void LoadAssets()
+        {
+            BuffSounds.LoadSound(nukeSound, littelBoyNukeID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("littleboynuke1A", 0.4f));
+        }
+
         public static void HookOn()
         {
             IL.ScavengerBomb.Explode += ScavengerBomb_Explode1;
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
         }
+
+
         private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
         {
             self.explodeColor = RadiatCol;
             orig.Invoke(self, hitChunk);
             self.room.AddObject(new RadiationField(self.room, self.firstChunk.pos, self.thrownBy, 300f, 40 * 10, 3f));
-            //self.room.PlaySound(nukeSound, self.firstChunk.pos);
+            if (self.room.game.cameras[0].room == self.room)
+                BuffPostEffectManager.AddEffect(new BurstRadialBlurEffect(0, 0.17f, 0.05f, 0.075f, (self.firstChunk.pos - self.room.game.cameras[0].pos) / Custom.rainWorld.screenSize));
         }
         private static void ScavengerBomb_Explode1(MonoMod.Cil.ILContext il)
         {
