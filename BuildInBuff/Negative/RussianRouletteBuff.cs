@@ -61,6 +61,7 @@ namespace BuiltinBuffs.Negative
         private static void Weapon_Thrown(On.Weapon.orig_Thrown orig, Weapon self, Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             orig(self, thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
+            /*
             if (!(thrownBy is Player)) return;
             var playerStillHasHead = true;
             var tempPool = BuffPoolManager.Instance.GetTemporaryBuffPool(RussianRoulette);
@@ -75,12 +76,13 @@ namespace BuiltinBuffs.Negative
                 }
             }
             if (!playerStillHasHead) return;
+            */
             if (thrownBy != null && UnityEngine.Random.value < 0.16666667f)
             {
-                if(PlayerCuttingBuffManager.playerCuttingBuffs.TryGetValue(RussianRoulette, out var data))
+                //if(PlayerCuttingBuffManager.playerCuttingBuffs.TryGetValue(RussianRoulette, out var data))
                 {
                     //切掉该玩家的头部并记录被切掉头部的玩家编号
-                    data.headCut.cutPlayerNumber.Add((thrownBy as Player).playerState.playerNumber);
+                    //data.headCut.cutPlayerNumber.Add((thrownBy as Player).playerState.playerNumber);
                     var result = new SharedPhysics.CollisionResult(thrownBy, thrownBy.firstChunk, null, true, thrownBy.firstChunk.pos);
                     self.HitSomething(result, true);
                     if (self.room != null)

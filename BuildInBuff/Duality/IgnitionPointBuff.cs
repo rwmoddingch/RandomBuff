@@ -8,10 +8,14 @@ using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static BuiltinBuffs.Duality.LittleBoyNukeBuffEntry;
+using static BuiltinBuffs.Positive.StagnantForcefieldPlayerModule;
+using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
@@ -21,37 +25,77 @@ namespace BuiltinBuffs.Duality
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<IgnitionPointBuffEntry>(ignitionPointBuffID);
+            TemperatrueModule.AddProvider(new CreatureProvider());
         }
 
         public static void HookOn()
         {
-            On.Creature.Update += Creature_Update;
+            //On.Creature.Update += Creature_Update;
             //On.GraphicsModule.ctor += GraphicsModule_ctor;
             On.Creature.Violence += Creature_Violence;
-            //On.ScavengerBomb.Explode += ScavengerBomb_Explode;
+            On.Room.ShouldBeDeferred += Room_ShouldBeDeferred;
+            On.RoomCamera.SpriteLeaser.Update += DeferredDrawUpdate;
         }
 
-        private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
+        private static void DeferredDrawUpdate(On.RoomCamera.SpriteLeaser.orig_Update orig, RoomCamera.SpriteLeaser self, float timeStacker, RoomCamera rCam, Vector2 camPos)
         {
-            orig.Invoke(self, hitChunk);
-
-            int count = 10;
-            for(int i = 0; i < count; i++)
+            bool freeze = false;
+            TemperatrueModule module = null;
+            if(self.drawableObject is UpdatableAndDeletable updatable && TemperatrueModule.TryGetTemperatureModule(updatable, out module) && module.freeze)
             {
-                float angle = 360f * i / count;
-                Vector2 vel = Custom.RNV() * 10f;
-                Vector2 pos = self.room.MiddleOfTile(self.room.GetTilePosition(self.firstChunk.pos));
-                var newNapalm = new Napalm(self.room, 40 * 15, 60f, 2f, pos, vel);
-                self.room.AddObject(newNapalm);
+                freeze = true;
             }
+            else if(self.drawableObject is GraphicsModule graphics && TemperatrueModule.TryGetTemperatureModule(graphics.owner, out module) && module.freeze)
+            {
+                freeze = true;
+            }
+
+            if (freeze)
+                timeStacker = 0f;
+
+            orig.Invoke(self, timeStacker, rCam, camPos);
+
+            if (module != null && (module is CreatureHeatModule cModule) && cModule.freezeIce != null)
+            {
+                if(!cModule.freezeIce.melt)
+                {
+                    for (int i = 0; i < self.sprites.Length; i++)
+                    {
+                        FreezeIce.ApplyColor(self.sprites[i], cModule.freezeIce.origColors[i], cModule.freezeIce.iceColors[i], cModule.freezeIce.alpha);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < self.sprites.Length; i++)
+                    {
+                        FreezeIce.ApplyColor(self.sprites[i], cModule.freezeIce.origColors[i], cModule.freezeIce.iceColors[i], 0f);
+                    }
+                    cModule.DestroyIce();
+                }
+            }
+        }
+
+        private static bool Room_ShouldBeDeferred(On.Room.orig_ShouldBeDeferred orig, Room self, UpdatableAndDeletable obj)
+        {
+            var result = orig.Invoke(self, obj);
+            if (!result)
+            {
+                if(TemperatrueModule.TryGetTemperatureModule(obj, out var module))
+                {
+                    module.Update(obj);
+                    if (module.freeze)
+                        result = true;
+                }
+            }
+            return result;
         }
 
         private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
             orig.Invoke(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
-            if(type == Creature.DamageType.Explosion && CreatureHeatModule.TryGetHeatModule(self, out var module))
+            if(type == Creature.DamageType.Explosion && TemperatrueModule.TryGetTemperatureModule(self, out var module))
             {
-                module.AddHeat(damage * 0.3f);
+                module.AddTemperature(damage * 0.3f);
             }
         }
 
@@ -61,15 +105,6 @@ namespace BuiltinBuffs.Duality
             if(ow is Creature creature)
             {
                 creature.room.AddObject(new CreatureHeatTestGraphics(creature, creature.room));
-            }
-        }
-
-        private static void Creature_Update(On.Creature.orig_Update orig, Creature self, bool eu)
-        {
-            orig.Invoke(self, eu);
-            if(CreatureHeatModule.TryGetHeatModule(self, out var heatModule))
-            {
-                heatModule.Update(self);
             }
         }
 
@@ -163,9 +198,9 @@ namespace BuiltinBuffs.Duality
         {
             if(label != null)
             {
-                if (CreatureHeatModule.TryGetHeatModule(creature, out var module))
+                if (TemperatrueModule.TryGetTemperatureModule(creature, out var module))
                 {
-                    label.text = $"heat : {module.heat}\nignitedPoint : {module.ignitedPoint}\nextinguishPoint : {module.extinguishPoint}\nlowHeatRate : {module.lowHeatRate}\nburn : {module.burn}";
+                    label.text = $"temperature : {module.temperature}\nignitedPoint : {module.ignitingPoint}\nextinguishPoint : {module.extinguishPoint}\nlowHeatRate : {module.coolOffRate}\nburn : {module.burn}\n\nfreezePoint : {module.freezePoint}\nunfreezePoint:{module.unfreezePoint}\nwarmUpRate : {module.warmUpRate}\nfreeze : {module.freeze}";
                 }
                 else
                     label.text = "Not ignitable";
@@ -193,61 +228,148 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class CreatureHeatModule
+    public partial class TemperatrueModule
     {
-        public static ConditionalWeakTable<Creature, CreatureHeatModule> heatModuleMapping = new ConditionalWeakTable<Creature, CreatureHeatModule>();
+        public float temperature;
 
-        //public ParticleEmitter fireEmitter;
-
-        public float heat;
-        public float ignitedPoint;
+        public float ignitingPoint;
         public float extinguishPoint;
-        public float lowHeatRate;
+        public float coolOffRate;
         public bool burn;
 
+        public float freezePoint;//温度会降低到负数，但冰点不需要赋值为负数，运算时会自动判断
+        public float unfreezePoint;//负数
+        public float warmUpRate;
+        public bool freeze;
+
+        public Color lastFreezeCol = Color.blue * 0.3f + Color.white * 0.7f;
+
+        public virtual void Update(UpdatableAndDeletable updatableAndDeletable)
+        {
+        }
+
+        public virtual void AddTemperature(float temperature, Color? freezeCol = null)
+        {
+            this.temperature += temperature;
+            if(freezeCol != null)
+                lastFreezeCol = freezeCol.Value;
+        }
+    }
+
+    //静态部分
+    public partial class TemperatrueModule
+    {
+        public static ConditionalWeakTable<UpdatableAndDeletable, TemperatrueModule> temperatureModuleMapping = new ConditionalWeakTable<UpdatableAndDeletable, TemperatrueModule>();
+        public static List<ITemperatureModuleProvider> providers = new List<ITemperatureModuleProvider>();
+        
+        public static bool TryGetTemperatureModule(UpdatableAndDeletable target, out TemperatrueModule temperatrueModule)
+        {
+            if(temperatureModuleMapping.TryGetValue(target, out temperatrueModule))
+                return true;
+
+            foreach(var provider in providers)
+            {
+                if(provider.ProvideThisObject(target))
+                {
+                    temperatrueModule = provider.ProvideModule(target);
+                    temperatureModuleMapping.Add(target, temperatrueModule);
+                    return true;
+                }
+            }
+            temperatrueModule = null;
+            return false;
+        }
+
+        public static void AddProvider(ITemperatureModuleProvider provider)
+        {
+            providers.Add(provider);
+        }
+
+        public interface ITemperatureModuleProvider
+        {
+            bool ProvideThisObject(UpdatableAndDeletable target);
+            TemperatrueModule ProvideModule(UpdatableAndDeletable target);
+        }
+    }
+
+    public class CreatureHeatModule : TemperatrueModule
+    {
         public BurnFire fire;
+        public FreezeIce freezeIce;
 
         public CreatureHeatModule(Creature creature)
         {
             float explosiveDmgResist = (creature.Template.damageRestistances[(int)Creature.DamageType.Explosion, 0] > 0f ? creature.Template.damageRestistances[(int)Creature.DamageType.Explosion, 0] : 1f);
-            ignitedPoint = creature.TotalMass * explosiveDmgResist;
-            extinguishPoint = ignitedPoint * (0.6f + 0.2f * Mathf.InverseLerp(0f, 5f, creature.Template.bodySize));
-            lowHeatRate = creature.bodyChunks.Length * explosiveDmgResist * 0.6f * Mathf.Lerp(0.15f, 0.5f, creature.Template.bodySize / 10f);
+            ignitingPoint = creature.TotalMass * explosiveDmgResist;
+            extinguishPoint = ignitingPoint * (0.6f + 0.2f * Mathf.InverseLerp(0f, 5f, creature.Template.bodySize));
+            coolOffRate = creature.bodyChunks.Length * explosiveDmgResist * 0.6f * Mathf.Lerp(0.15f, 0.5f, creature.Template.bodySize / 10f);
+
+            freezePoint = creature.TotalMass * Mathf.Lerp(1f, 2f, Mathf.InverseLerp(0f, 10f, creature.Template.bodySize)) * (creature.Template.BlizzardAdapted ? 2f : 1f);
+            unfreezePoint = freezePoint * (0.6f + 0.2f * Mathf.InverseLerp(0f, 5f, creature.Template.bodySize));
+            warmUpRate = creature.bodyChunks.Length * 0.4f;
         }
 
-        public void Update(Creature creature)
+        public override void Update(UpdatableAndDeletable updateable)
         {
+            var creature = updateable as Creature;
+            if (creature.room == null)
+                return;
+
             //热量计算
             foreach (var heatSource in creature.room.updateList.Where((u) => u is IHeatingCreature).Select((u) => u as IHeatingCreature))
             {
-                AddHeat(heatSource.GetHeat(creature.mainBodyChunk.pos));
+                AddTemperature(heatSource.GetHeat(creature.mainBodyChunk.pos));
             }
 
-            if (heat > 0)
+            if (temperature > 0)
             {
-                float rateDecreaseHeat = heat - lowHeatRate / 40f;
-                float submersionDecreaseHeat = heat * (1f - creature.Submersion / 2f);
+                float rateDecreaseHeat = temperature - coolOffRate / 40f;
+                float submersionDecreaseHeat = temperature * (1f - creature.Submersion / 2f);
 
                 if (submersionDecreaseHeat < rateDecreaseHeat)
-                    heat = Mathf.Lerp(rateDecreaseHeat, submersionDecreaseHeat, creature.Submersion);
+                    temperature = Mathf.Lerp(rateDecreaseHeat, submersionDecreaseHeat, creature.Submersion);
                 else
-                    heat = rateDecreaseHeat;
+                    temperature = rateDecreaseHeat;
+
+                if (temperature < 0)
+                    temperature = 0f;
 
                 if (!burn)
                 {
-                    if(heat > ignitedPoint)
+                    if(temperature > ignitingPoint)
                         burn = true;
                 }
                 else
                 {
-                    if (heat < extinguishPoint)
+                    if (temperature < extinguishPoint)
                         burn = false;
                 }
             }
-            if (Input.GetKey(KeyCode.H))
+            else if(temperature < 0)
             {
-                heat += 0.1f;
+                float rateWarmUp = temperature + warmUpRate / 40f;
+
+                temperature = rateWarmUp;
+
+                if (temperature > 0)
+                    temperature = 0f;
+
+                if (!freeze)
+                {
+                    if (temperature < -freezePoint)
+                        freeze = true;
+                }
+                else
+                {
+                    if (temperature > -unfreezePoint)
+                        freeze = false;
+                }
             }
+
+            if (Input.GetKey(KeyCode.H))
+                temperature += 0.1f;
+            else if (Input.GetKey(KeyCode.J))
+                temperature -= 0.1f;
 
             if (burn)
             {
@@ -272,45 +394,102 @@ namespace BuiltinBuffs.Duality
                     fire = null;
                 }
             }
+
+            if (freeze)
+            {
+                if (freezeIce != null && freezeIce.slatedForDeletetion)
+                    freezeIce = null;
+
+                if(freezeIce == null && creature.room != null)
+                {
+                    freezeIce = new FreezeIce(creature, creature.DangerPos);
+                    creature.room.AddObject(freezeIce);
+                }
+            }
+            else
+            {
+                if(freezeIce != null)
+                {
+                    freezeIce.Destroy();
+                    freezeIce = null;
+                }
+            }
         }
 
-        public void AddHeat(float addHeat)
+        public void DestroyIce()
         {
-            heat += addHeat;
+            freezeIce.Destroy();
+            freezeIce = null;
         }
+
 
         void BurnBehaviour(Creature creature)
         {
             foreach(var crit in creature.room.updateList.Where((u) => (u is Creature) && u != creature).Select((u) => u as Creature))
             {
-                if (TryGetHeatModule(crit, out var module))
+                if (TryGetTemperatureModule(crit, out var module))
                 {
                     if (Mathf.Abs(creature.mainBodyChunk.pos.x - crit.mainBodyChunk.pos.x) + Mathf.Abs(creature.mainBodyChunk.pos.y - crit.mainBodyChunk.pos.y) < 40f)
                     {
-                        module.AddHeat(lowHeatRate / 40f);
+                        module.AddTemperature(coolOffRate / 40f);
                     }
                 }
             }
         }
+    }
 
-        public static bool TryGetHeatModule(Creature creature, out CreatureHeatModule heatModule)
+    public class CreatureProvider : TemperatrueModule.ITemperatureModuleProvider
+    {
+        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
         {
-            if(heatModuleMapping.TryGetValue(creature, out heatModule))
-            {
-                return true;
-            }
-
-            if(creature.State is HealthState)
-            {
-                heatModule = new CreatureHeatModule(creature);
-                heatModuleMapping.Add(creature, heatModule);
-                return true;
-            }
-
-            heatModule = null;
-            return false;
+            return new CreatureHeatModule(target as Creature);
         }
 
+        public bool ProvideThisObject(UpdatableAndDeletable target)
+        {
+            return (target is Creature creature && creature.State is HealthState);
+        }
+    }
+
+    public class PlayerHeatModule : CreatureHeatModule
+    {
+        int killCooldown;
+        public PlayerHeatModule(Creature creature) : base(creature)
+        {
+            if(!(creature.State as PlayerState).isPup)
+            {
+                ignitingPoint = 10f;
+                extinguishPoint = 9f;
+                coolOffRate = 0.5f;
+            }
+            else
+            {
+                ignitingPoint = 8f;
+                extinguishPoint = 7f;
+                coolOffRate = 0.3f;
+            }
+        }
+
+        public override void Update(UpdatableAndDeletable u)
+        {
+            base.Update(u);
+
+            var creature = u as Creature;
+            if (creature.room == null)
+                return;
+
+            if(temperature > ignitingPoint)
+            {
+                temperature = ignitingPoint;
+                if (creature.State.alive && killCooldown == 0)
+                {
+                    creature.Die();
+                    killCooldown = 40;
+                }
+            }
+            if (killCooldown > 0)
+                killCooldown--;
+        }
     }
 
     public class BurnFire : UpdatableAndDeletable
@@ -408,6 +587,186 @@ namespace BuiltinBuffs.Duality
             base.Destroy();
             for (int i = 0; i < lightSources.Length; i++)
                 lightSources[i].Destroy();
+        }
+    }
+
+    public class FreezeIce : CosmeticSprite
+    {
+        public UpdatableAndDeletable binder;
+        ParticleEmitter emitter;
+
+        Color color;
+        public Color[][] origColors;
+        public Color[][] iceColors;
+
+        public float alpha;
+        float lastAlpha;
+
+        public bool melt;
+        float rad;
+
+        public FreezeIce(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
+        {
+            room = updatableAndDeletable.room;
+            binder = updatableAndDeletable;
+            this.pos = pos;
+            if (updatableAndDeletable is PhysicalObject obj)
+                rad = obj.bodyChunks[0].rad * 3f;
+            if (TemperatrueModule.TryGetTemperatureModule(updatableAndDeletable, out var module))
+                color = module.lastFreezeCol;
+            CreateIceSparkle();
+            BuffUtils.Log("IgnitionPoint", "Create FreezeIce");
+        }
+
+        public override void Update(bool eu)
+        {
+            if (slatedForDeletetion)
+                return;
+
+            if (binder.slatedForDeletetion || binder.room != room)
+                Destroy();
+
+
+            if (emitter.slateForDeletion)
+                CreateIceSparkle();
+
+            lastAlpha = alpha;
+            if (TemperatrueModule.TryGetTemperatureModule(binder, out var temperature))
+            {
+                alpha = Mathf.InverseLerp(temperature.unfreezePoint, temperature.freezePoint, -temperature.temperature);
+            }
+            else
+                Destroy();
+        }
+
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            sLeaser.sprites = new FSprite[0];
+            foreach (var sleaser in rCam.spriteLeasers)
+            {
+                if(sleaser.drawableObject is GraphicsModule graphics && binder is PhysicalObject physicalObject && physicalObject.graphicsModule == graphics)
+                {
+                    BuffUtils.Log("IgnitionPoint", $"Create for {binder}");
+                    RecordColors(sleaser.sprites, rCam);
+                    break;
+                }
+                if (sleaser.drawableObject == binder)
+                {
+                    RecordColors(sleaser.sprites, rCam);
+                    break;
+                }   
+            }
+        }
+
+        void RecordColors(FSprite[] origs, RoomCamera roomCamera)
+        {
+            origColors = new Color[origs.Length][];
+
+            for (int i = 0; i < origs.Length; i++)
+            {
+                origColors[i] = GetColors(origs[i]);
+            }
+            iceColors = new Color[origColors.Length][];
+
+            if(TemperatrueModule.TryGetTemperatureModule(binder, out var temperature))
+            {
+                float hue = Custom.RGB2HSL(temperature.lastFreezeCol).x;
+                for (int i = 0; i < iceColors.Length; i++)
+                {
+                    iceColors[i] = new Color[origColors[i].Length];
+                    for (int t = 0; t < iceColors[i].Length; t++)
+                    {
+                        var orig = Custom.RGB2HSL(iceColors[i][t]);
+                        iceColors[i][t] = Color.Lerp(Custom.HSL2RGB(hue, orig.y, orig.z), temperature.lastFreezeCol, orig.z*0.5f + 0.5f);
+                    }
+                }
+            }
+        }
+
+        Color[] GetColors(FSprite sprite)
+        {
+            Color[] result;
+            if(sprite is CustomFSprite customFSprite)
+            {
+                result = new Color[4];
+                for(int i = 0;i < 4;i++)
+                    result[i] = customFSprite.verticeColors[i];
+            }
+            else if(sprite is  TriangleMesh triangleMesh && triangleMesh.customColor)
+            {
+                result = new Color[triangleMesh.verticeColors.Length];
+                for (int i = 0; i < triangleMesh.verticeColors.Length; i++)
+                {
+                    result[i] = triangleMesh.verticeColors[i];
+                }
+            }
+            else
+            {
+                result = new Color[1];
+                result[0] = sprite.color;
+            }
+            return result;
+        }
+
+        public static void ApplyColor(FSprite sprite, Color[] origs, Color[] colors,float alpha)
+        {
+            if (sprite is CustomFSprite customFSprite)
+            {
+                for (int i = 0; i < 4; i++)
+                    customFSprite.verticeColors[i] = Color.Lerp(origs[i], colors[i], alpha);
+            }
+            else if (sprite is TriangleMesh triangleMesh && triangleMesh.customColor)
+            {
+                for (int i = 0; i < triangleMesh.verticeColors.Length; i++)
+                {
+                    triangleMesh.verticeColors[i] = Color.Lerp(origs[i], colors[i], alpha);
+                }
+            }
+            else
+            {
+                sprite.color = Color.Lerp(origs[0], colors[0], alpha);
+            }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            binder = null;
+            emitter?.Die();
+            BuffUtils.Log("IgnitionPoint", "Die");
+        }
+
+        void CreateIceSparkle()
+        {
+            emitter = new ParticleEmitter(room);
+            
+            emitter.pos = pos;
+            emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 40, false));
+
+            emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 260, 20));
+
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", alpha: 0.5f)));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "", constCol: Color.white)));
+            emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 40 * 2 - 20, 40 * 2));
+            emitter.ApplyParticleModule(new SetConstColor(emitter, color));
+            emitter.ApplyParticleModule(new SetRandomScale(emitter, 2f, 2.5f));
+            emitter.ApplyParticleModule(new SetRandomPos(emitter, rad));
+
+            emitter.ApplyParticleModule(new AlphaOverLife(emitter,
+                (p, l) =>
+                {
+                    if (l < 0.2f)
+                    {
+                        return l * 5f;
+                    }
+                    else if (l > 0.8f)
+                    {
+                        return 1f - (l - 0.8f) * 5f;
+                    }
+                    return 1f * (Random.value * 0.1f + 0.9f);
+                }));
+            ParticleSystem.ApplyEmitterAndInit(emitter);
         }
     }
 
