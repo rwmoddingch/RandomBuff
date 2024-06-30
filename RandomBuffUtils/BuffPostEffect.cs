@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RWCustom;
 using UnityEngine;
 
 namespace RandomBuffUtils
@@ -35,9 +36,33 @@ namespace RandomBuffUtils
                 items.Insert(0,effect);
             else
                 items.Add(effect);
+            BuffUtils.Log("BuffPostEffect",$"Add new post effect: {effect.GetType().Name}");
             if (instance == null)
-                FindObjectOfType<Camera>().gameObject.AddComponent<BuffPostEffectManager>();
+                instance = Futile.instance._cameraHolder.AddComponent<BuffPostEffectManager>();
             
+        }
+
+        private void Update()
+        {
+            foreach (var item in allPostLayer.Values)
+            {
+                foreach (var effect in item)
+                {
+                    try
+                    {
+                        effect.Update();
+
+                    }
+                    catch (Exception e)
+                    {
+                        BuffUtils.LogException("BuffPostEffect", e);
+                        BuffUtils.LogError("BuffPostEffect", $"Exception in calling {effect.GetType().Name}.Update");
+                    }
+
+                }
+                item.RemoveAll(i => i.needDeletion);
+
+            }
         }
 
 
@@ -46,14 +71,15 @@ namespace RandomBuffUtils
             var tmp = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
             var a = source;
             var b = tmp;
-            foreach (var item in allPostLayer.Values)
+      
+            foreach (var item in allPostLayer.OrderBy(i => i.Key).Select(i => i.Value))
             {
                 foreach (var effect in item)
                 {
                     try
                     {
                         effect.OnRenderImage(a, b);
-                        Swap();
+                        (a, b) = (b, a);
 
                     }
                     catch (Exception e)
@@ -62,17 +88,11 @@ namespace RandomBuffUtils
                         BuffUtils.LogError("BuffPostEffect",$"Exception in calling {effect.GetType().Name}.OnRenderImage");
                     }
                 }
-                item.RemoveAll(i => i.needDeletion);
 
             }
 
             Graphics.Blit(a, destination);
             RenderTexture.ReleaseTemporary(tmp);
-            void Swap()
-            {
-                RenderTexture c;
-                c = a; a = b; b = c;
-            }
         }
 
 
@@ -93,10 +113,12 @@ namespace RandomBuffUtils
 
         public abstract void OnRenderImage(RenderTexture source, RenderTexture destination);
 
+        public virtual void Update(){}
 
         public virtual void Destroy()
         {
             needDeletion = true;
+            BuffUtils.Log("BuffPostEffect",$"Destroy {GetType().Name}");
             Material.Destroy(material);
         }
     }
@@ -117,11 +139,22 @@ namespace RandomBuffUtils
 
         protected virtual float LerpAlpha => Mathf.InverseLerp(0, enterTime, 1 - lifeTime) * Mathf.InverseLerp(0, fadeTime, lifeTime);
 
+        public override void Update()
+        {
+            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game &&
+                game.pauseMenu != null)
+            {
+            }
+            else
+                lifeTime -= Time.deltaTime * (Custom.rainWorld.processManager.currentMainLoop?.framesPerSecond ?? 40) / 40f / duringTime;
+            
+  
+            if (lifeTime <= 0)
+                Destroy();
+        }
+
         public override void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            lifeTime -= Time.deltaTime / duringTime;
-            if(lifeTime <= 0) 
-                Destroy();
         }
     }
 }

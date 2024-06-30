@@ -72,7 +72,7 @@ namespace RandomBuffUtils.FutileExtend
                     else
                     {
                         for (int j = 0; j < 3; j++)
-                            _renderLayer.colors[curIndex + startVert + j] = _color;
+                            _renderLayer.colors[curIndex + startVert + j] = _alphaColor;
                     }
                 }
             }
