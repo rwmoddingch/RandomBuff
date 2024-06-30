@@ -70,11 +70,9 @@ namespace BuiltinBuffs.Expeditions
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L))
                 {
-                    BuffPoolManager.Instance.CreateBuff(OrbitalRailcannonStrikeEntry.OrbitalRailcannonStrike);
-                    BuffHud.Instance.AppendNewCard(OrbitalRailcannonStrikeEntry.OrbitalRailcannonStrike);
-                    //self.Players[0].realizedCreature.room.PlaySound(OrbitalRailcannonStrikeEntry.OrbitalStrike,
-                    //    self.Players[0].realizedCreature.mainBodyChunk);
-                    //BuffUtils.Log("tEST","play sound");
+                    BuffPoolManager.Instance.CreateBuff(StormIsApproachingEntry.StormIsApproaching);
+                    BuffHud.Instance.AppendNewCard(StormIsApproachingEntry.StormIsApproaching);
+                   // self.Players[0].realizedCreature.room.AddObject(new JudgmentCut(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature as Player));
 
                 }
 

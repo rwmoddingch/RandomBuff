@@ -409,7 +409,7 @@ namespace BuiltinBuffs.Positive
         public override void Update(bool eu)
         {
             base.Update(eu);
-            if(MaxCd-cdCounter == 12)
+            if(MaxCd-cdCounter == 16)
                 room.PlaySound(OrbitalRailcannonStrikeEntry.OrbitalStrike, sourceObject.firstChunk);
             lastAimPos = aimPos;
             lastAlpha = alpha;
@@ -553,7 +553,6 @@ namespace BuiltinBuffs.Positive
             Graphics.Blit(source, destination, material, 1);
             RenderTexture.ReleaseTemporary(rt1);
             RenderTexture.ReleaseTemporary(rt2);
-
         }
     }
 }

@@ -111,6 +111,9 @@ namespace BuiltinBuffs.Expeditions
         {
             var ass = BuffBuilder.FinishGenerate("BuffExtend");
             var ctor = typeof(BuffStaticData).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic)[0];
+            Futile.atlasManager.LoadImage("buffassets/cardinfos/expedition/expeditionPositive");
+            Futile.atlasManager.LoadImage("buffassets/cardinfos/expedition/expeditionNegative");
+
             foreach (var group in ExpeditionProgression.perkGroups)
             {
                 foreach (var item in group.Value)
@@ -119,8 +122,14 @@ namespace BuiltinBuffs.Expeditions
                     var staticData = (BuffStaticData)ctor.Invoke(Array.Empty<object>());
                     SetProperty(staticData, "BuffID", new BuffID(item));
                     SetProperty(staticData, "BuffType", BuffType.Positive);
-                    SetProperty(staticData, "FaceName", "Futile_White");
-                    SetProperty(staticData, "Color", Color.black);
+                    SetProperty(staticData, "FaceName", "buffassets/cardinfos/expedition/expeditionPositive");
+                    SetProperty(staticData, "Color", Custom.hexToColor("2EFFFF"));
+                    SetProperty(staticData, "MultiLayerFace", true);
+                    SetProperty(staticData, "FaceLayer", 3);
+                    SetProperty(staticData, "MaxFaceDepth", 1.0f);
+                    SetProperty(staticData, "FaceBackgroundColor", Custom.hexToColor("020B0B"));
+
+
 
                     staticData.CardInfos.Add(Custom.rainWorld.inGameTranslator.currentLanguage, new BuffStaticData.CardInfo()
                     {
@@ -140,9 +149,12 @@ namespace BuiltinBuffs.Expeditions
                     var staticData = (BuffStaticData)ctor.Invoke(Array.Empty<object>());
                     SetProperty(staticData, "BuffID", new BuffID(item));
                     SetProperty(staticData, "BuffType", BuffType.Negative);
-                    SetProperty(staticData, "FaceName", "Futile_White");
-                    SetProperty(staticData, "Color", Color.black);
-
+                    SetProperty(staticData, "FaceName", "buffassets/cardinfos/expedition/expeditionNegative");
+                    SetProperty(staticData, "Color", Custom.hexToColor("FF462E"));
+                    SetProperty(staticData, "MultiLayerFace", true);
+                    SetProperty(staticData, "FaceLayer", 3);
+                    SetProperty(staticData, "MaxFaceDepth", 1.0f);
+                    SetProperty(staticData, "FaceBackgroundColor", Custom.hexToColor("0B0302"));
                     var name = ForceUnlockedAndLoad(ExpeditionProgression.BurdenName, item);
                     staticData.CardInfos.Add(OnlyEnglish(name) ? InGameTranslator.LanguageID.English :
                         Custom.rainWorld.inGameTranslator.currentLanguage, new BuffStaticData.CardInfo()
