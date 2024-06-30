@@ -369,9 +369,9 @@ namespace BuiltinBuffs.Positive
                         if (shouldFire)
                         {
                             creature.SetKillTag(this.bindCreature.abstractCreature);
-                            if (CreatureHeatModule.TryGetHeatModule(creature, out var heatModule))
+                            if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
                             {
-                                heatModule.AddHeat(0.1f + 0.03f * level);
+                                heatModule.AddTemperature(0.1f + 0.03f * level);
                             }
                         }
                         creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.05f - 0.01f * level);

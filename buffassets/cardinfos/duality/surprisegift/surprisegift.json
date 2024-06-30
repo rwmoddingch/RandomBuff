@@ -1,0 +1,17 @@
+{
+    "FaceName": "surprisegift",
+    "BuffID" : "SupriseGift",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "FF3B9B",
+
+    "Chinese" : {
+        "BuffName" : "惊喜礼盒",
+        "Description" : "拾荒者可能会携带礼盒，可以通过交换或击杀来获取，用矛戳后会变成各种物资或…扯线蜂窝"
+    },
+    "English": {
+        "BuffName" : "SurpriseGift",
+        "Description" : "Scavengers may carry gift boxes, which can be acquired by swapping or killing, and when poked with a spear turn into various supplies or...ripcord hive"
+    }
+}

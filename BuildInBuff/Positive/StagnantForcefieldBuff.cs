@@ -160,8 +160,10 @@ namespace BuiltinBuffs.Positive
 
         public class StagnantForceFieldBlink : EmitterModule, IParticleUpdateModule, IOwnParticleUniqueData
         {
-            public StagnantForceFieldBlink(ParticleEmitter emitter) : base(emitter)
+            float easeOutRate;
+            public StagnantForceFieldBlink(ParticleEmitter emitter, float easeOutRate = 0.02f) : base(emitter)
             {
+                this.easeOutRate = easeOutRate;
             }
 
             public void ApplyUpdate(Particle particle)
@@ -170,14 +172,14 @@ namespace BuiltinBuffs.Positive
                 if (uniqueData == null)
                     return;
 
-                if(Random.value < 0.01f)
+                if(Random.value < easeOutRate/ 2f)
                 {
                     uniqueData.blinkParam = 1f;
                 }
                 else
                 {
                     if (uniqueData.blinkParam > 0f)
-                        uniqueData.blinkParam -= 0.02f;
+                        uniqueData.blinkParam -= easeOutRate;
                 }
 
                 particle.alpha *= uniqueData.blinkParam;

@@ -5,7 +5,7 @@
     "BuffProperty" : "Normal",
     "Triggerable" :  false,
     "Stackable" :  true,
-    "Color" : "282a36",
+    "Color" : "ffffff",
     "Chinese":{
         "BuffName":"超级跳",
         "Description":"根据此卡的拥有数来额外提示跳跃高度"

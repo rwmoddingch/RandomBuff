@@ -393,7 +393,6 @@ namespace BuiltinBuffs.Positive
                 mesh.MoveVertice(2, toPos + exLength *dir + width * hDir - camPos);
                 mesh.MoveVertice(3, toPos + exLength * dir- width * hDir - camPos);
             }
-
         }
 
 
