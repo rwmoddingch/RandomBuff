@@ -1,12 +1,17 @@
 ﻿using BuiltinBuffs.Positive;
+using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
 using RandomBuffUtils;
+using RandomBuffUtils.FutileExtend;
+using RandomBuffUtils.ObjectExtend;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -15,26 +20,440 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static BuiltinBuffs.Duality.LittleBoyNukeBuffEntry;
 using static BuiltinBuffs.Positive.StagnantForcefieldPlayerModule;
+using static RandomBuffUtils.FutileExtend.FMesh;
 using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
+    internal class IgnitionPointBuff : Buff<IgnitionPointBuff, IgnitionPointBuffData>, BuffHudPart.IOwnBuffHudPart
+    {
+        public override BuffID ID => IgnitionPointBuffEntry.ignitionPointBuffID;
+
+        public BuffHudPart CreateHUDPart()
+        {
+            return new IgnitionPointHudPart();
+        }
+
+        bool lastKey;
+        public override void Update(RainWorldGame game)
+        {
+            base.Update(game);
+            bool keyDown = Input.GetKey(KeyCode.F);
+            if(keyDown && !lastKey)
+            {
+                var room = game.cameras[0].room;
+                var newFlame = new AbstractFlameThrower(game.world, null, game.Players[0].pos, game.GetNewID());
+                room.abstractRoom.AddEntity(newFlame);
+                newFlame.RealizeInRoom();
+            }
+            lastKey = keyDown;
+        }
+    }
+
+    
+
+    public class IgnitionPointHudPart : BuffHudPart
+    {
+        public Room Room => Camera.room;
+
+        Dictionary<Creature, TemperatrueBar> barMapper = new Dictionary<Creature, TemperatrueBar>();
+        List<TemperatrueBar> activeTempBars = new List<TemperatrueBar>();
+
+        public override void Update(HUD.HUD hud)
+        {
+            foreach(var u in Camera.room.updateList)
+            {
+                if (!u.slatedForDeletetion && (u is Creature creature) && TemperatrueModule.TryGetTemperatureModule(creature, out var module) && !barMapper.ContainsKey(creature) && creature.room != null)
+                {
+                    AddBarForCreature(creature);
+                }
+            }
+
+            for(int i = activeTempBars.Count - 1; i >= 0; i--)
+            {
+                activeTempBars[i].Update();
+            }
+        }
+
+        public override void Draw(HUD.HUD hud, float timeStacker)
+        {
+            for (int i = activeTempBars.Count - 1; i >= 0; i--)
+            {
+                activeTempBars[i].DrawSprites(timeStacker);
+            }
+        }
+        public override void ClearSprites()
+        {
+            for (int i = activeTempBars.Count - 1; i >= 0; i--)
+            {
+                RemoveBar(activeTempBars[i].bindCreature);
+            }
+        }
+
+        public void AddBarForCreature(Creature creature)
+        {
+            var bar = new TemperatrueBar(this, creature);
+            barMapper.Add(creature, bar);
+            activeTempBars.Add(bar);
+        }
+
+        public void RemoveBar(Creature creature)
+        {
+            var bar = barMapper[creature];
+            barMapper.Remove(creature);
+            activeTempBars.Remove(bar);
+            bar.Destroy();
+        }
+
+        class TemperatrueBar
+        {
+            static Color lineCol = Color.white;
+            static Color burnCol = Color.red;
+            static Color preBurnCol = Color.red * 0.4f + Color.white * 0.6f;
+            static Color freezeCol = Color.blue * 0.8f + Color.white * 0.2f;
+            static Color preFreezeCol = Color.blue * 0.3f + Color.white * 0.7f;
+            static Color normCol = Color.white * 0.8f + Color.black * 0.2f;
+
+            static float barHeight = 6f;
+            static float lineHeight = 10f;
+            static float lineWidth = 2f;
+            static float leftRightWidth = 40f;
+
+            IgnitionPointHudPart owner;
+            internal Creature bindCreature;
+            float extinguishFactor;
+            float unfreezeFactor;
+
+            Vector2 screenPos;
+            Vector2 lastScreenPos;
+
+            float setAlpha;
+            float alpha;
+            float lastAlpha;
+
+            float tempFac;
+            float lastTempFac;
+
+            bool burn;
+            bool freeze;
+
+            FSprite zeroTempLine;
+            FSprite ignitionPointLine;
+            FSprite extinguishPointLine;
+            FSprite freezePointLine;
+            FSprite unFreezePointLine;
+
+            FSprite tempBar;
+
+            public TemperatrueBar(IgnitionPointHudPart owner, Creature creature)
+            {
+                this.owner = owner;
+                this.bindCreature = creature;
+                InitSprites();
+
+                if (TemperatrueModule.TryGetTemperatureModule(bindCreature, out var module))
+                {
+                    extinguishFactor = module.extinguishPoint / module.ignitingPoint;
+                    unfreezeFactor = module.unfreezePoint / module.freezePoint;
+                }
+            }
+
+            public void InitSprites()
+            {
+                zeroTempLine = InternalCreateLine();
+                ignitionPointLine = InternalCreateLine();
+                extinguishPointLine = InternalCreateLine();
+                freezePointLine = InternalCreateLine();
+                unFreezePointLine = InternalCreateLine();
+                tempBar = InternalCreateLine();
+
+                tempBar = new FSprite("pixel")
+                {
+                    color = normCol,
+                    alpha = 0f,
+                    scaleY = barHeight,
+                    scaleX = 0f
+                };
+                owner.owner.hud.fContainers[0].AddChild(tempBar);
+
+                FSprite InternalCreateLine()
+                {
+                    FSprite result = new FSprite("pixel")
+                    {
+                        color = lineCol,
+                        alpha = 0f,
+                        scaleX = lineWidth,
+                        scaleY = lineHeight
+                    };
+                    owner.owner.hud.fContainers[0].AddChild(result);
+                    return result;
+                }
+            }
+
+            public void Update()
+            {
+                if (bindCreature.slatedForDeletetion || bindCreature.room != owner.Room)
+                {
+                    owner.RemoveBar(bindCreature);
+                    return;
+                }
+                if (TemperatrueModule.TryGetTemperatureModule(bindCreature, out var module))
+                {
+                    lastTempFac = tempFac;
+                    if (module.temperature > 0f)
+                        tempFac = Mathf.InverseLerp(0f, module.ignitingPoint, module.temperature);
+                    else
+                        tempFac = -Mathf.InverseLerp(0f, module.freezePoint, -module.temperature);
+
+                    setAlpha = Mathf.Abs(module.temperature) > 0.25f ? 1f : 0f;
+                }
+                else
+                    owner.RemoveBar(bindCreature);
+
+                lastAlpha = alpha;
+                alpha = Mathf.Lerp(alpha, setAlpha, 0.25f);
+                if (Mathf.Approximately(alpha, 0f) && setAlpha == 0f)
+                    alpha = 0f;
+
+
+                lastScreenPos = screenPos;
+                screenPos = bindCreature.DangerPos + Vector2.up * bindCreature.abstractCreature.creatureTemplate.bodySize * 6f - owner.Camera.pos;
+            }
+
+            public void DrawSprites(float timeStacker)
+            {
+                if (lastAlpha == alpha && alpha == 0f)
+                    return;
+
+                Vector2 smoothScreenPos = Vector2.Lerp(lastScreenPos, screenPos, timeStacker);
+                float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+
+                zeroTempLine.SetPosition(smoothScreenPos);
+                zeroTempLine.alpha = smoothAlpha;
+
+                ignitionPointLine.SetPosition(smoothScreenPos + Vector2.right * leftRightWidth);
+                ignitionPointLine.alpha = smoothAlpha;
+
+                extinguishPointLine.SetPosition(smoothScreenPos + Vector2.right * leftRightWidth * extinguishFactor);
+                extinguishPointLine.alpha = smoothAlpha;
+
+                freezePointLine.SetPosition(smoothScreenPos + Vector2.left * leftRightWidth);
+                freezePointLine.alpha = smoothAlpha;
+
+                unFreezePointLine.SetPosition(smoothScreenPos + Vector2.left * leftRightWidth * unfreezeFactor);
+                unFreezePointLine.alpha = smoothAlpha;
+
+                float smoothTempFac = Mathf.Lerp(lastTempFac, tempFac, timeStacker);
+                float barWidth = leftRightWidth * smoothTempFac;
+
+                tempBar.scaleX = barWidth;
+                tempBar.SetPosition(smoothScreenPos + Vector2.right * barWidth / 2f);
+
+                Color currentBarCol = normCol;
+                if (burn)
+                    currentBarCol = burnCol;
+                else if(freeze)
+                    currentBarCol = freezeCol;
+                else
+                {
+                    if (smoothTempFac > 0)
+                        currentBarCol = Color.Lerp(normCol, preBurnCol, smoothTempFac);
+                    else if (smoothTempFac < 0)
+                        currentBarCol = Color.Lerp(normCol, preFreezeCol, -smoothTempFac);
+                }
+                tempBar.color = currentBarCol;
+                tempBar.alpha = smoothAlpha;
+            }
+        
+            public void Destroy()
+            {
+                zeroTempLine.RemoveFromContainer();
+                ignitionPointLine.RemoveFromContainer();
+                extinguishPointLine.RemoveFromContainer();
+                freezePointLine.RemoveFromContainer();
+                unFreezePointLine.RemoveFromContainer();
+                tempBar.RemoveFromContainer();
+                bindCreature = null;
+            }
+        }
+    }
+
+
+    internal class IgnitionPointBuffData : BuffData
+    {
+        public override BuffID ID => IgnitionPointBuffEntry.ignitionPointBuffID;
+    }
+
+    [BuffAbstractPhysicalObject]
+    public class AbstractFlameThrower : AbstractPhysicalObject
+    {
+        public static AbstractObjectType flameThrowerType = new AbstractObjectType("FlameThrower", true);
+
+        public AbstractFlameThrower(World world, AbstractObjectType type, PhysicalObject realizedObject, WorldCoordinate pos, EntityID ID) : base(world, type, realizedObject, pos, ID)
+        {
+        }
+
+        public AbstractFlameThrower(World world, PhysicalObject realizedObject, WorldCoordinate pos, EntityID ID) : this(world, flameThrowerType, realizedObject, pos, ID)
+        {
+        }
+
+        public override void Realize()
+        {
+            base.Realize();
+            realizedObject = new FlameThrower(this, world);
+        }
+    }
+
+    public class FlameThrower : PlayerCarryableItem, IDrawable
+    {
+        static float flameDistance = 45f;
+        static int throwFlameCoolDown = 6;
+
+        Vector3 currentRotation3D;
+        Vector3 lastRotation3D;
+
+        Vector2 flamePosDelta;
+        int dir = 1;
+        
+        bool throwFlame;
+        int throwFlameCounter;
+
+        public FlameThrower(AbstractPhysicalObject abstractPhysicalObject, World world) : base(abstractPhysicalObject)
+        {
+            bodyChunks = new BodyChunk[1];
+            bodyChunks[0] = new BodyChunk(this, 0, new Vector2(0f, 0f), 10.5f, 0.3f);
+            bodyChunkConnections = new PhysicalObject.BodyChunkConnection[0];
+            airFriction = 0.9f;
+            gravity = 0.9f;
+            bounce = 0.4f;
+            surfaceFriction = 0.4f;
+            collisionLayer = 1;
+            waterFriction = 0.98f;
+            buoyancy = 0.4f;
+
+            currentRotation3D = lastRotation3D = new Vector3(180 + 70f, 0f, 0f);
+            BuffUtils.Log("FlameThrower", $"Init at {abstractPhysicalObject.pos}");
+        }
+
+        public override void PlaceInRoom(Room placeRoom)
+        {
+            base.PlaceInRoom(placeRoom);
+            base.firstChunk.HardSetPosition(placeRoom.MiddleOfTile(this.abstractPhysicalObject.pos));
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            lastRotation3D = currentRotation3D;
+            throwFlame = false;
+            if(grabbedBy != null && grabbedBy.Count > 0 && grabbedBy[0].grabber != null && grabbedBy[0].grabber is Player player)
+            {
+                if(player.input[0].x != 0)
+                {
+                    dir = player.input[0].x;
+                }
+                if (player.input[0].pckp)
+                {
+                    throwFlame = true;
+                }
+            }
+            currentRotation3D = Vector3.Lerp(currentRotation3D, new Vector3(180 + 70f * dir, 0f, 0f), 0.15f);
+            flamePosDelta = Vector2.Lerp(flamePosDelta, new Vector2(flameDistance * dir, 0f), 0.15f);
+            var fire = new HolyFire.HolyFireSprite(firstChunk.pos + Custom.RNV() * UnityEngine.Random.value * 3f + flamePosDelta);
+            if(!throwFlame)
+                fire.life = fire.lastLife = 0.5f;
+            room.AddObject(fire);
+
+            if (throwFlameCounter > 0)
+                throwFlameCounter--;
+            else if (throwFlame)
+            {
+                room.AddObject(new Napalm(room, 40 * 10, 30f, 4f, flamePosDelta + firstChunk.pos, new Vector2(28f * dir, 10f) + Custom.RNV() * 5f));
+                throwFlameCounter = throwFlameCoolDown;
+            }
+        }
+
+        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+
+            if (IgnitionPointBuffEntry.flameThrowerMesh == null)
+            {
+                IgnitionPointBuffEntry.LoadAssets();
+                BuffUtils.Log("FlameThrower", IgnitionPointBuffEntry.flameThrowerMesh.vertices == null ? "V Null" : "V NotNull");
+            }
+
+            sLeaser.sprites = new FSprite[1];
+            sLeaser.sprites[0] = new FMesh(IgnitionPointBuffEntry.flameThrowerMesh, IgnitionPointBuffEntry.flameThrowerTexture, false);
+            //sLeaser.sprites[1] = new FSprite("Futile_White");
+
+            AddToContainer(sLeaser, rCam, null);
+        }
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if (newContatiner == null)
+            {
+                newContatiner = rCam.ReturnFContainer("Items");
+            }
+
+            for (int num = sLeaser.sprites.Length - 1; num >= 0; num--)
+            {
+                sLeaser.sprites[num].RemoveFromContainer();
+                newContatiner.AddChild(sLeaser.sprites[num]);
+            }
+        }
+
+        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+        }
+
+        public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            Vector3 smoothRotation = Vector3.Lerp(lastRotation3D, currentRotation3D, timeStacker);
+            Vector2 pos = Vector2.Lerp(firstChunk.lastPos, firstChunk.pos, timeStacker) - camPos;
+            sLeaser.sprites[0].SetPosition(pos);
+            //sLeaser.sprites[1].SetPosition(pos);
+
+            var fmesh = sLeaser.sprites[0] as FMesh;
+            fmesh.rotation3D = smoothRotation;
+            fmesh.Scale3D = Vector3.one * 1.5f;
+        }
+
+    }
+
     internal class IgnitionPointBuffEntry : IBuffEntry
     {
         public static BuffID ignitionPointBuffID = new BuffID("IgnitionPoint", true);
+        public static Mesh3DAsset flameThrowerMesh;
+        public static string flameThrowerTexture;
+        public static Texture2D flameThrowerTex;
+
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<IgnitionPointBuffEntry>(ignitionPointBuffID);
+            BuffRegister.RegisterBuff<IgnitionPointBuff, IgnitionPointBuffData, IgnitionPointBuffEntry>(ignitionPointBuffID);
             TemperatrueModule.AddProvider(new CreatureProvider());
+            TemperatrueModule.AddProvider(new PlayerProvider());
+        }
+
+        public static void LoadAssets()
+        {
+            flameThrowerMesh = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrower.obj"));
+            flameThrowerTexture = Futile.atlasManager.LoadImage(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture").elements[0].name;
         }
 
         public static void HookOn()
         {
-            //On.Creature.Update += Creature_Update;
-            //On.GraphicsModule.ctor += GraphicsModule_ctor;
             On.Creature.Violence += Creature_Violence;
             On.Room.ShouldBeDeferred += Room_ShouldBeDeferred;
             On.RoomCamera.SpriteLeaser.Update += DeferredDrawUpdate;
+            On.Player.Grabability += Player_Grabability;
+        }
+
+        private static Player.ObjectGrabability Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
+        {
+            if (obj is FlameThrower)
+                return Player.ObjectGrabability.TwoHands;
+            return orig.Invoke(self, obj);
         }
 
         private static void DeferredDrawUpdate(On.RoomCamera.SpriteLeaser.orig_Update orig, RoomCamera.SpriteLeaser self, float timeStacker, RoomCamera rCam, Vector2 camPos)
@@ -55,7 +474,7 @@ namespace BuiltinBuffs.Duality
 
             orig.Invoke(self, timeStacker, rCam, camPos);
 
-            if (module != null && (module is CreatureHeatModule cModule) && cModule.freezeIce != null)
+            if (module != null && (module is CreatureTemperatureModule cModule) && cModule.freezeIce != null)
             {
                 if(!cModule.freezeIce.melt)
                 {
@@ -292,12 +711,12 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class CreatureHeatModule : TemperatrueModule
+    public class CreatureTemperatureModule : TemperatrueModule
     {
         public BurnFire fire;
         public FreezeIce freezeIce;
 
-        public CreatureHeatModule(Creature creature)
+        public CreatureTemperatureModule(Creature creature)
         {
             float explosiveDmgResist = (creature.Template.damageRestistances[(int)Creature.DamageType.Explosion, 0] > 0f ? creature.Template.damageRestistances[(int)Creature.DamageType.Explosion, 0] : 1f);
             ignitingPoint = creature.TotalMass * explosiveDmgResist;
@@ -371,7 +790,7 @@ namespace BuiltinBuffs.Duality
             else if (Input.GetKey(KeyCode.J))
                 temperature -= 0.1f;
 
-            if (burn)
+            if (burn && creature.State is HealthState)
             {
                 (creature.State as HealthState).health -= 0.0025f;
 
@@ -442,7 +861,7 @@ namespace BuiltinBuffs.Duality
     {
         public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
         {
-            return new CreatureHeatModule(target as Creature);
+            return new CreatureTemperatureModule(target as Creature);
         }
 
         public bool ProvideThisObject(UpdatableAndDeletable target)
@@ -451,22 +870,22 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class PlayerHeatModule : CreatureHeatModule
+    public class PlayerTemperatureModule : CreatureTemperatureModule
     {
         int killCooldown;
-        public PlayerHeatModule(Creature creature) : base(creature)
+        public PlayerTemperatureModule(Creature creature) : base(creature)
         {
             if(!(creature.State as PlayerState).isPup)
             {
-                ignitingPoint = 10f;
-                extinguishPoint = 9f;
-                coolOffRate = 0.5f;
+                freezePoint = ignitingPoint = 10f;
+                unfreezePoint = extinguishPoint = 9f;
+                warmUpRate = coolOffRate = 0.5f;
             }
             else
             {
-                ignitingPoint = 8f;
-                extinguishPoint = 7f;
-                coolOffRate = 0.3f;
+                freezePoint = ignitingPoint = 8f;
+                unfreezePoint = extinguishPoint = 7f;
+                warmUpRate = coolOffRate = 0.3f;
             }
         }
 
@@ -489,6 +908,19 @@ namespace BuiltinBuffs.Duality
             }
             if (killCooldown > 0)
                 killCooldown--;
+        }
+    }
+
+    public class PlayerProvider : TemperatrueModule.ITemperatureModuleProvider
+    {
+        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        {
+            return new PlayerTemperatureModule(target as Creature);
+        }
+
+        public bool ProvideThisObject(UpdatableAndDeletable target)
+        {
+            return target is Player;
         }
     }
 
