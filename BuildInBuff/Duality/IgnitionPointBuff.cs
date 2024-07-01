@@ -437,7 +437,7 @@ namespace BuiltinBuffs.Duality
 
         public static void LoadAssets()
         {
-            flameThrowerMesh = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrower.obj"));
+            flameThrowerMesh = MeshManager.LoadMesh("flameThrower", AssetManager.ResolveFilePath(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrower.obj"));
             flameThrowerTexture = Futile.atlasManager.LoadImage(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture").elements[0].name;
         }
 

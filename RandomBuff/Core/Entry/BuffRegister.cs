@@ -291,7 +291,15 @@ namespace RandomBuff.Core.Entry
                 if (type.GetMethod("LoadAssets", BindingFlags.Static | BindingFlags.Public) is { } method &&
                     method.GetParameters().Length == 0)
                 {
-                    method.Invoke(null, null);
+                    try
+                    {
+                        method.Invoke(null, null);
+
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e,$"{type.Name}.LoadAssets execute Failed!");
+                    }
                     BuffPlugin.LogDebug($"Load Assets for {type.Name}");
                 }
             }
