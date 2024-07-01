@@ -133,7 +133,7 @@ namespace BuiltinBuffs.Negative
                             }
                             else
                             {
-                                heatModule = new CreatureHeatModule(creature);
+                                heatModule = new CreatureTemperatureModule(creature);
                                 TemperatrueModule.temperatureModuleMapping.Add(creature, heatModule);
                             }
                             creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.02f * num);

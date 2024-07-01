@@ -75,8 +75,8 @@ namespace RandomBuff.Core.ProgressionUI
 
         void InitPage()
         {
+            myContainer.AddChild(blurSprite = new FSprite("pixel") { scaleX = screenSize.x, scaleY = screenSize.y, x = screenSize.x / 2f, y = screenSize.y / 2f, shader = menu.manager.rainWorld.Shaders["UIBlur"], color = Color.black });
             myContainer.AddChild(blackSprite = new FSprite("pixel") { scaleX = screenSize.x, scaleY = screenSize.y, x = screenSize.x / 2f, y = screenSize.y / 2f , color = Color.black});
-            myContainer.AddChild(blurSprite = new FSprite("pixel") { scaleX = screenSize.x, scaleY = screenSize.y, x = screenSize.x / 2f, y = screenSize.y / 2f , shader = menu.manager.rainWorld.Shaders["UIBlur"] ,color = Color.black});
 
             levelBarPos = new Vector2(screenSize.x / 2f - levelBarWidth / 2f, screenSize.y - 110f);
             levelBar = new BuffLevelBarDynamic(myContainer, levelBarPos, levelBarWidth, BuffPlayerData.Instance.playerTotExp, BuffPlayerData.Exp2Level, BuffPlayerData.Level2Exp);

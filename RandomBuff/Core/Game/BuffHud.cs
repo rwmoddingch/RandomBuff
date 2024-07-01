@@ -141,6 +141,7 @@ namespace RandomBuff.Core.Game
             if(BuffPoolManager.Instance.GetBuff(id) is BuffHudPart.IOwnBuffHudPart owner)
             {
                 var part = owner.CreateHUDPart();
+                part.owner = this;
                 part.InitSprites(hud);
 
                 id2hudParts.Add(id, part);
@@ -171,6 +172,9 @@ namespace RandomBuff.Core.Game
 
     public abstract class BuffHudPart
     {
+        internal BuffHud owner;
+        public RoomCamera Camera => (owner.hud.owner as Player).abstractCreature.Room.world.game.cameras[0];
+
         public virtual void InitSprites(HUD.HUD hud)
         {
         }
