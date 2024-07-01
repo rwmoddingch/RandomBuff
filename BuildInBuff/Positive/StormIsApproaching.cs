@@ -59,9 +59,11 @@ namespace BuiltinBuffs.Positive
             AddShader(bundle, "AdditiveDefault", "AdditiveDefault");
             AddShader(bundle, "SwordRing", "SwordRing");
 
-            radSword = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath(assetPath + Path.DirectorySeparatorChar + "CurveAbsorb.OBJ"));
-            StartFlare = Futile.atlasManager.LoadImage(assetPath + Path.DirectorySeparatorChar + "StartFlare");
+            MeshManager.LoadMesh("RawSword", assetPath + Path.DirectorySeparatorChar + "CurveAbsorb.OBJ");
+            //MeshManager.LoadMesh("T", assetPath + Path.DirectorySeparatorChar + "flameThrower.obj");
+            //Futile.atlasManager.LoadImage(assetPath + Path.DirectorySeparatorChar + "flameThrowerTexture");
 
+            Futile.atlasManager.LoadImage(assetPath + Path.DirectorySeparatorChar + "StartFlare");
             BuffSounds.LoadSound(StartSound1, assetPath, new BuffSoundGroupData(), new BuffSoundData("Efect03"));
             BuffSounds.LoadSound(StartSound2, assetPath, new BuffSoundGroupData(), new BuffSoundData("pl030_new_drive_s02"));
             BuffSounds.LoadSound(EndSound1, assetPath, new BuffSoundGroupData(), new BuffSoundData("hyakuretu_end"));
@@ -87,8 +89,6 @@ namespace BuiltinBuffs.Positive
         public static Shader StartShock;
         public static Shader HueSeparation;
         public static Shader SingleColor;
-        public static FAtlas StartFlare;
-        public static FMesh.Mesh3DAsset radSword;
 
     }
 
@@ -460,7 +460,7 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites = new FSprite[parDatas.Length];
             for (int i = 0; i < sLeaser.sprites.Length; i++)
             {
-                sLeaser.sprites[i] = new FMesh(StormIsApproachingEntry.radSword, "Futile_White", false)
+                sLeaser.sprites[i] = new FMesh("RawSword", "Futile_White", false)
                 {
                     shader = rCam.game.rainWorld.Shaders[$"{StormIsApproachingEntry.StormIsApproaching}.SwordRing"],
                     scale = Random.Range(0.8f,5f),

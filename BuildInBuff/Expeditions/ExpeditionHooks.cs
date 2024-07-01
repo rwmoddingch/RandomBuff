@@ -2,6 +2,7 @@
 using RandomBuffUtils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -16,6 +17,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Reflection.Emit;
 using BuiltinBuffs.Positive;
+using RandomBuffUtils.FutileExtend;
 
 namespace BuiltinBuffs.Expeditions
 {
@@ -72,13 +74,40 @@ namespace BuiltinBuffs.Expeditions
                 {
                     BuffPoolManager.Instance.CreateBuff(StormIsApproachingEntry.StormIsApproaching);
                     BuffHud.Instance.AppendNewCard(StormIsApproachingEntry.StormIsApproaching);
-                   // self.Players[0].realizedCreature.room.AddObject(new JudgmentCut(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature as Player));
+                    //self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
 
                 }
 
             }
 
         }
+
+        public class MeshTest : CosmeticSprite
+        {
+            public MeshTest(Room room, Vector2 pos)
+            {
+                this.room = room;
+                this.pos = pos;
+            }
+
+            public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+            {
+                sLeaser.sprites = new FSprite[1];
+                sLeaser.sprites[0] = new FMesh("T",StormIsApproachingEntry.StormIsApproaching.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture",false);
+                AddToContainer(sLeaser,rCam,null);
+            }
+
+            public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+            {
+                base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+                sLeaser.sprites[0].SetPosition(pos-camPos);
+                var mesh = sLeaser.sprites[0] as FMesh;
+                mesh.rotation3D = new Vector3(0, 90, 90);
+                mesh.scale = 3;
+                mesh.rotation = 90;
+            }
+        }
+
         [BuffAbstractPhysicalObject]
         public class TestAb : AbstractSpear , IBuffAbstractPhysicalObjectInitialization
         {

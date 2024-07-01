@@ -6,15 +6,19 @@ namespace RandomBuffUtils.FutileExtend
 {
     public class FMesh : FSprite
     {
-
+        public FMesh(string meshName, string imageName, bool customColor, bool customNormals = false) :
+            this(MeshManager.GetMeshByName(meshName),imageName, customColor, customNormals)
+        {
+        }
         public FMesh(Mesh3DAsset mesh, string imageName, bool customColor, bool customNormals = false)  : base()
         {
-            _mesh = mesh;
+            _mesh = mesh ?? throw new FutileException("MeshAsset is Null!");
+
             _customNormals = customNormals;
             _customColor = customColor;
-
+            
             ReImportVert();
-           if (customColor)
+            if (customColor)
             {
                 _verticeColors = new Color[_vertices.Length];
                 for (int k = 0; k < _verticeColors.Length; k++)
@@ -43,31 +47,34 @@ namespace RandomBuffUtils.FutileExtend
                     Array.Copy(_renderLayer._mesh.normals, tmp, _renderLayer._mesh.normals.Length);
                     _renderLayer._mesh.normals = tmp;
                 }
-                var sortFacet = _mesh.facets.OrderBy((i)  => _vertices[i.a].z + _vertices[i.b].z + _vertices[i.c].z).ToArray();
+                var sortFacet = _mesh.facets.OrderBy((i)  => _vertices[i.vertices.a].z + _vertices[i.vertices.b].z + _vertices[i.vertices.c].z).ToArray();
 
                 for (int i=0;i<sortFacet.Length;i++)
                 {
                     var curIndex = i * 3;
-                    _concatenatedMatrix.ApplyVector3FromLocalVector2(ref _renderLayer.vertices[curIndex + startVert], new Vector2(_vertices[sortFacet[i].a].x, _vertices[sortFacet[i].a].y), (_vertices[sortFacet[i].a].z + _maxMeshZ) );
-                    _concatenatedMatrix.ApplyVector3FromLocalVector2(ref _renderLayer.vertices[curIndex + startVert + 1], new Vector2(_vertices[sortFacet[i].b].x, _vertices[sortFacet[i].b].y), (_vertices[sortFacet[i].b].z + _maxMeshZ) );
-                    _concatenatedMatrix.ApplyVector3FromLocalVector2(ref _renderLayer.vertices[curIndex + startVert + 2], new Vector2(_vertices[sortFacet[i].c].x, _vertices[sortFacet[i].c].y), (_vertices[sortFacet[i].c].z + _maxMeshZ) );
+                    _concatenatedMatrix.ApplyVector3FromLocalVector2(ref _renderLayer.vertices[curIndex + startVert], 
+                        new Vector2(_vertices[sortFacet[i].vertices.a].x, _vertices[sortFacet[i].vertices.a].y), (_vertices[sortFacet[i].vertices.a].z + _maxMeshZ) );
+                    _concatenatedMatrix.ApplyVector3FromLocalVector2(ref _renderLayer.vertices[curIndex + startVert + 1],
+                        new Vector2(_vertices[sortFacet[i].vertices.b].x, _vertices[sortFacet[i].vertices.b].y), (_vertices[sortFacet[i].vertices.b].z + _maxMeshZ) );
+                    _concatenatedMatrix.ApplyVector3FromLocalVector2(ref _renderLayer.vertices[curIndex + startVert + 2], 
+                        new Vector2(_vertices[sortFacet[i].vertices.c].x, _vertices[sortFacet[i].vertices.c].y), (_vertices[sortFacet[i].vertices.c].z + _maxMeshZ) );
 
-                    _renderLayer.uvs[curIndex + startVert] = _mesh.uvs[sortFacet[i].a];
-                    _renderLayer.uvs[curIndex + startVert + 1] = _mesh.uvs[sortFacet[i].b];
-                    _renderLayer.uvs[curIndex + startVert + 2] = _mesh.uvs[sortFacet[i].c];
+                    _renderLayer.uvs[curIndex + startVert] = _mesh.uvs[sortFacet[i].uvs.a];
+                    _renderLayer.uvs[curIndex + startVert + 1] = _mesh.uvs[sortFacet[i].uvs.b];
+                    _renderLayer.uvs[curIndex + startVert + 2] = _mesh.uvs[sortFacet[i].uvs.c];
 
                     if (_customNormals)
                     {
-                        _renderLayer._mesh.normals[curIndex + startVert] = _mesh.normals[sortFacet[i].a];
-                        _renderLayer._mesh.normals[curIndex + startVert + 1] = _mesh.normals[sortFacet[i].b];
-                        _renderLayer._mesh.normals[curIndex + startVert + 2] = _mesh.normals[sortFacet[i].c];
+                        _renderLayer._mesh.normals[curIndex + startVert] = _mesh.normals[sortFacet[i].normals.a];
+                        _renderLayer._mesh.normals[curIndex + startVert + 1] = _mesh.normals[sortFacet[i].normals.b];
+                        _renderLayer._mesh.normals[curIndex + startVert + 2] = _mesh.normals[sortFacet[i].normals.c];
                     }
 
                     if (_customColor)
                     {
-                        _renderLayer.colors[curIndex + startVert] = _verticeColors[sortFacet[i].a];
-                        _renderLayer.colors[curIndex + startVert + 1] = _verticeColors[sortFacet[i].b];
-                        _renderLayer.colors[curIndex + startVert + 2] = _verticeColors[sortFacet[i].c];
+                        _renderLayer.colors[curIndex + startVert] = _verticeColors[sortFacet[i].vertices.a];
+                        _renderLayer.colors[curIndex + startVert + 1] = _verticeColors[sortFacet[i].vertices.b];
+                        _renderLayer.colors[curIndex + startVert + 2] = _verticeColors[sortFacet[i].vertices.c];
                     }
                     else
                     {
@@ -224,7 +231,7 @@ namespace RandomBuffUtils.FutileExtend
                 Array.Copy(facets,this.facets,facets.Length);
                 int i = 0;
                 foreach(var facet in facets)
-                    i = Mathf.Max(i, facet.a + 1, facet.b + 1, facet.c + 1);
+                    i = Mathf.Max(i, facet.vertices.a + 1, facet.vertices.b + 1, facet.vertices.c + 1);
 
                 vertices = new Vector3[i];
                 uvs = new Vector2[i];
@@ -246,13 +253,13 @@ namespace RandomBuffUtils.FutileExtend
                     normals[i] = Vector3.zero;
                 foreach (var face in facets)
                 {
-                    var v1 = vertices[face.a];
-                    var v2 = vertices[face.b];
-                    var v3 = vertices[face.c];
+                    var v1 = vertices[face.vertices.a];
+                    var v2 = vertices[face.vertices.b];
+                    var v3 = vertices[face.vertices.c];
                     var normal = Vector3.Cross(v2 - v1, v3 - v1).normalized;
-                    normals[face.a] += normal;
-                    normals[face.b] += normal;
-                    normals[face.c] += normal;
+                    normals[face.vertices.a] += normal;
+                    normals[face.vertices.b] += normal;
+                    normals[face.vertices.c] += normal;
                 }
                 for (int i = 0; i < normals.Length; i++)
                     normals[i].Normalize();
@@ -260,22 +267,42 @@ namespace RandomBuffUtils.FutileExtend
 
             public struct TriangleFacet
             {
-                public int a;
-                public int b;
-                public int c;
+                public TriangleArray vertices;
+                public TriangleArray normals;
+                public TriangleArray uvs;
 
-                public TriangleFacet(int a, int b, int c)
+
+
+                public TriangleFacet(TriangleArray vertices, TriangleArray uvs, TriangleArray normals)
                 {
-                    this.a = a; this.b = b; this.c = c;
+                    this.vertices = vertices;
+                    this.normals = normals;
+                    this.uvs = uvs;
                 }
 
-                public TriangleFacet(int[] s)
+
+                public struct TriangleArray
                 {
-                    a = s[0];
-                    b = s[1];
-                    c = s[2];
+                    public int a;
+                    public int b;
+                    public int c;
+
+                    public TriangleArray(int a, int b, int c)
+                    {
+                        this.a = a; this.b = b; this.c = c;
+                    }
+
+                    public TriangleArray(int[] s,int offset = 0)
+                    {
+                        a = s[0];
+                        b = s[1];
+                        c = s[2];
+                    }
                 }
+
             }
+
+
         }
 
     }

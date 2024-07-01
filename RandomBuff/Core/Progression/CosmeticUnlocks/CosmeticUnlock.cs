@@ -83,7 +83,7 @@ namespace RandomBuff.Core.Progression
             Register<SoapSlugCosmetic>();
             Register<MeteorSpearCosmetic>();
 
-            grown = MeshLoader.LoadMeshFromPath(AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
+            grown = MeshManager.LoadMesh("grown", AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
         }
 
         internal static CosmeticUnlock CreateInstance(string name,RainWorldGame game)
