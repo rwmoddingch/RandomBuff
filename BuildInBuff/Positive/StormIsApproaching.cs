@@ -58,6 +58,7 @@ namespace BuiltinBuffs.Positive
             AddShader(bundle, "SwordLeaser", "SwordLeaser");
             AddShader(bundle, "AdditiveDefault", "AdditiveDefault");
             AddShader(bundle, "SwordRing", "SwordRing");
+            //AddShader(bundle, "LevelColorRotation", "LevelColorRotation");
 
             MeshManager.LoadMesh("RawSword", assetPath + Path.DirectorySeparatorChar + "CurveAbsorb.OBJ");
             //MeshManager.LoadMesh("T", assetPath + Path.DirectorySeparatorChar + "flameThrower.obj");

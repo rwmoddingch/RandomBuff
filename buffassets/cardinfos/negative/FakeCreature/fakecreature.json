@@ -6,8 +6,14 @@
     "Triggerable" : false,
     "Color" : "FFFFFF",
 
+    "Chinese" : {
+        "BuffName" : "被害妄想症",
+        "Description" : "每隔一段时间会看见幻影生物。幻影生物不能实际伤害玩家，但玩家也分辨不了它们和真实生物。它们死亡后直接消失。"
+    },
+
+    
     "English" : {
-        "BuffName" : "Fake Creature",
-        "Description" : "Fake creature in shortcut."
+        "BuffName" : "Paranoia",
+        "Description" : "Phantom creatures can be seen from time to time. Phantom creatures cannot actually harm the player, but the player cannot distinguish between them and real creatures. They disappear immediately after death."
     }
 }

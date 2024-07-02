@@ -95,7 +95,7 @@ namespace RandomBuffUtils.ParticleSystem
             randomParam1 = Random.value;
             randomParam2 = Random.value;
             randomParam3 = Random.value;
-
+            alpha = 1f;
             foreach (var module in emitter.PInitModules)
                 module.ApplyInit(this);
 

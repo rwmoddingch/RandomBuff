@@ -8,7 +8,7 @@ namespace RandomBuffUtils.ParticleSystem
 {
     internal static class ParticlePool
     {
-        public static Queue<Particle> pool = new Queue<Particle>();
+        public static readonly Queue<Particle> pool = new Queue<Particle>();
 
         public static Particle GetParticle(ParticleEmitter emitter)
         {

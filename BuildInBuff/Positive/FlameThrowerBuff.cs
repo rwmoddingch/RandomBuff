@@ -73,6 +73,20 @@ namespace BuiltinBuffs.Positive
 
             flameVFX1 = Futile.atlasManager.LoadImage(flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameVFX1").elements[0].name;
         }
+
+        public static void HookOn()
+        {
+            On.Player.Grabability += Player_Grabability;
+        }
+
+ 
+
+        private static Player.ObjectGrabability Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
+        {
+            if (obj is FlameThrower)
+                return Player.ObjectGrabability.BigOneHand;
+            return orig(self, obj);
+        }
     }
 
     [BuffAbstractPhysicalObject]
@@ -442,9 +456,8 @@ namespace BuiltinBuffs.Positive
             fireIntensities = new float[room.Width,room.Height];
             fireIntensityDecrease = 1f / maxFireLife;
 
-            fireEmitter = CreateFireEmitter();
+            fireEmitter = CreateFireEmitter(); 
             sparkleEmitter = CreateSparkleEmitter();
-    
             particleMoniter = new FLabel(Custom.GetFont(), "")
             {
                 x = 100f,
@@ -453,11 +466,13 @@ namespace BuiltinBuffs.Positive
                 anchorX = 0f,
                 anchorY = 0f,
             };
+         
             Futile.stage.AddChild(particleMoniter);
         }
 
         public override void Update(bool eu)
         {
+            base.Update(eu);
             if (slatedForDeletetion)
                 return;
 
@@ -489,7 +504,7 @@ namespace BuiltinBuffs.Positive
             while (stacker > 0 && totalBurningTile > 0)
             {
                 stacker--;
-                var pos = burningTiles[(int)(Random.value * (burningTiles.Count - 1))];
+                var pos = burningTiles[Random.Range(0, burningTiles.Count)];
                 var middlePos = room.MiddleOfTile(pos);
                 //if(Random.value < fireIntensities[pos.x, pos.y])
                 //    room.AddObject(new HolyFire.HolyFireSprite(middlePos + Custom.DegToVec(360f * Random.value) * 10f * Random.value));
