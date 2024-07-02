@@ -169,15 +169,14 @@ namespace RandomBuffUtils.ParticleSystem
         public void SpawnParticle()
         {
             var result = ParticlePool.GetParticle(this);
-            result.Init(this, particleID);
             Particles.Add(result);
+            result.Init(this, particleID);
+            
             particleID++;
             
             OnParticleInitEvent?.Invoke(result);
-            //BuffUtils.Log("ParticleEmitter", $"spawn particle");
             if (system.IsOnStage)
             {
-                //BuffUtils.Log("ParticleEmitter", $"Successful init particle");
                 result.InitSpritesAndAddToContainer();
             }
         }

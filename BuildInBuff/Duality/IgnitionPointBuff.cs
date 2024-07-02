@@ -9,6 +9,7 @@ using RandomBuffUtils.ObjectExtend;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RWCustom;
+using Smoke;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,24 +34,7 @@ namespace BuiltinBuffs.Duality
         {
             return new IgnitionPointHudPart();
         }
-
-        bool lastKey;
-        public override void Update(RainWorldGame game)
-        {
-            base.Update(game);
-            bool keyDown = Input.GetKey(KeyCode.F);
-            if(keyDown && !lastKey)
-            {
-                var room = game.cameras[0].room;
-                var newFlame = new AbstractFlameThrower(game.world, null, game.Players[0].pos, game.GetNewID());
-                room.abstractRoom.AddEntity(newFlame);
-                newFlame.RealizeInRoom();
-            }
-            lastKey = keyDown;
-        }
-    }
-
-    
+    } 
 
     public class IgnitionPointHudPart : BuffHudPart
     {
@@ -278,155 +262,15 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-
     internal class IgnitionPointBuffData : BuffData
     {
         public override BuffID ID => IgnitionPointBuffEntry.ignitionPointBuffID;
     }
 
-    [BuffAbstractPhysicalObject]
-    public class AbstractFlameThrower : AbstractPhysicalObject
-    {
-        public static AbstractObjectType flameThrowerType = new AbstractObjectType("FlameThrower", true);
-
-        public AbstractFlameThrower(World world, AbstractObjectType type, PhysicalObject realizedObject, WorldCoordinate pos, EntityID ID) : base(world, type, realizedObject, pos, ID)
-        {
-        }
-
-        public AbstractFlameThrower(World world, PhysicalObject realizedObject, WorldCoordinate pos, EntityID ID) : this(world, flameThrowerType, realizedObject, pos, ID)
-        {
-        }
-
-        public override void Realize()
-        {
-            base.Realize();
-            realizedObject = new FlameThrower(this, world);
-        }
-    }
-
-    public class FlameThrower : PlayerCarryableItem, IDrawable
-    {
-        static float flameDistance = 45f;
-        static int throwFlameCoolDown = 6;
-
-        Vector3 currentRotation3D;
-        Vector3 lastRotation3D;
-
-        Vector2 flamePosDelta;
-        int dir = 1;
-        
-        bool throwFlame;
-        int throwFlameCounter;
-
-        public FlameThrower(AbstractPhysicalObject abstractPhysicalObject, World world) : base(abstractPhysicalObject)
-        {
-            bodyChunks = new BodyChunk[1];
-            bodyChunks[0] = new BodyChunk(this, 0, new Vector2(0f, 0f), 10.5f, 0.3f);
-            bodyChunkConnections = new PhysicalObject.BodyChunkConnection[0];
-            airFriction = 0.9f;
-            gravity = 0.9f;
-            bounce = 0.4f;
-            surfaceFriction = 0.4f;
-            collisionLayer = 1;
-            waterFriction = 0.98f;
-            buoyancy = 0.4f;
-
-            currentRotation3D = lastRotation3D = new Vector3(180 + 70f, 0f, 0f);
-            BuffUtils.Log("FlameThrower", $"Init at {abstractPhysicalObject.pos}");
-        }
-
-        public override void PlaceInRoom(Room placeRoom)
-        {
-            base.PlaceInRoom(placeRoom);
-            base.firstChunk.HardSetPosition(placeRoom.MiddleOfTile(this.abstractPhysicalObject.pos));
-        }
-
-        public override void Update(bool eu)
-        {
-            base.Update(eu);
-            lastRotation3D = currentRotation3D;
-            throwFlame = false;
-            if(grabbedBy != null && grabbedBy.Count > 0 && grabbedBy[0].grabber != null && grabbedBy[0].grabber is Player player)
-            {
-                if(player.input[0].x != 0)
-                {
-                    dir = player.input[0].x;
-                }
-                if (player.input[0].pckp)
-                {
-                    throwFlame = true;
-                }
-            }
-            currentRotation3D = Vector3.Lerp(currentRotation3D, new Vector3(180 + 70f * dir, 0f, 0f), 0.15f);
-            flamePosDelta = Vector2.Lerp(flamePosDelta, new Vector2(flameDistance * dir, 0f), 0.15f);
-            var fire = new HolyFire.HolyFireSprite(firstChunk.pos + Custom.RNV() * UnityEngine.Random.value * 3f + flamePosDelta);
-            if(!throwFlame)
-                fire.life = fire.lastLife = 0.5f;
-            room.AddObject(fire);
-
-            if (throwFlameCounter > 0)
-                throwFlameCounter--;
-            else if (throwFlame)
-            {
-                room.AddObject(new Napalm(room, 40 * 10, 30f, 4f, flamePosDelta + firstChunk.pos, new Vector2(28f * dir, 10f) + Custom.RNV() * 5f));
-                throwFlameCounter = throwFlameCoolDown;
-            }
-        }
-
-        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-        {
-
-            if (IgnitionPointBuffEntry.flameThrowerMesh == null)
-            {
-                IgnitionPointBuffEntry.LoadAssets();
-                BuffUtils.Log("FlameThrower", IgnitionPointBuffEntry.flameThrowerMesh.vertices == null ? "V Null" : "V NotNull");
-            }
-
-            sLeaser.sprites = new FSprite[1];
-            sLeaser.sprites[0] = new FMesh(IgnitionPointBuffEntry.flameThrowerMesh, IgnitionPointBuffEntry.flameThrowerTexture, false);
-            //sLeaser.sprites[1] = new FSprite("Futile_White");
-
-            AddToContainer(sLeaser, rCam, null);
-        }
-
-        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-        {
-            if (newContatiner == null)
-            {
-                newContatiner = rCam.ReturnFContainer("Items");
-            }
-
-            for (int num = sLeaser.sprites.Length - 1; num >= 0; num--)
-            {
-                sLeaser.sprites[num].RemoveFromContainer();
-                newContatiner.AddChild(sLeaser.sprites[num]);
-            }
-        }
-
-        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
-        {
-        }
-
-        public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            Vector3 smoothRotation = Vector3.Lerp(lastRotation3D, currentRotation3D, timeStacker);
-            Vector2 pos = Vector2.Lerp(firstChunk.lastPos, firstChunk.pos, timeStacker) - camPos;
-            sLeaser.sprites[0].SetPosition(pos);
-            //sLeaser.sprites[1].SetPosition(pos);
-
-            var fmesh = sLeaser.sprites[0] as FMesh;
-            fmesh.rotation3D = smoothRotation;
-            fmesh.Scale3D = Vector3.one * 1.5f;
-        }
-
-    }
-
     internal class IgnitionPointBuffEntry : IBuffEntry
     {
         public static BuffID ignitionPointBuffID = new BuffID("IgnitionPoint", true);
-        public static Mesh3DAsset flameThrowerMesh;
-        public static string flameThrowerTexture;
-        public static Texture2D flameThrowerTex;
+       
 
         public void OnEnable()
         {
@@ -435,11 +279,7 @@ namespace BuiltinBuffs.Duality
             TemperatrueModule.AddProvider(new PlayerProvider());
         }
 
-        public static void LoadAssets()
-        {
-            flameThrowerMesh = MeshManager.LoadMesh("flameThrower", AssetManager.ResolveFilePath(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrower.obj"));
-            flameThrowerTexture = Futile.atlasManager.LoadImage(ignitionPointBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture").elements[0].name;
-        }
+
 
         public static void HookOn()
         {
