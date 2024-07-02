@@ -76,11 +76,13 @@ namespace RandomBuffUtils.ParticleSystem
         public bool inStage;
         public int spriteLayer = 8;
         public FNode[] fNodes = new FNode[0];
-        int index;
+        public int index;
 
         public void Init(ParticleEmitter emitter, int index)
         {
             this.emitter = emitter;
+            this.index = index;
+
             setVel = vel = Vector2.zero;
             setColor = color = lastColor = Color.white;
             HardSetScale(0f);
@@ -100,7 +102,6 @@ namespace RandomBuffUtils.ParticleSystem
             foreach(var module in emitter.PUniqueDatas)
                 uniqueDatas.Add(module, module.GetUniqueData(this));
 
-            this.index = index;
             fNodes = new FNode[spriteInitParams.Count];
         }
 
@@ -108,7 +109,6 @@ namespace RandomBuffUtils.ParticleSystem
         {
             if (inStage)
                 return;
-
             inStage = true;
 
             foreach (var iIniSpriteAndAddToContainer in emitter.PInitSpritesAndAddToContainerModules)
@@ -158,7 +158,6 @@ namespace RandomBuffUtils.ParticleSystem
         public virtual void DrawSprites(RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             if(!inStage) return;
-
 
             foreach (var iDraw in emitter.PDrawModules)
                 iDraw.ApplyDrawSprites(this, rCam, timeStacker, camPos);

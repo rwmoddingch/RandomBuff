@@ -15,7 +15,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
-    public sealed class RateSpawnerModule : SpawnModule
+    public class RateSpawnerModule : SpawnModule
     {
         static float secPerFrame = 1 / 40f;
         float secNeed;
