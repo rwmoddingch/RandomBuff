@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuffUtils.FutileExtend;
 using UnityEngine;
 
 #pragma warning disable CS0618
@@ -42,6 +43,9 @@ namespace RandomBuffUtils
             BuffExtraDialogBoxEvent.OnEnable();
             ObjectExtendHooks.OnEnable();
             BuffSounds.OnEnable();
+            MeshManager.OnModsInit();
+
+            UniformLighting.OnModsInit();
             everInit = true;
         }
 

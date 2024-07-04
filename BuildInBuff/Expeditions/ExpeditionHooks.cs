@@ -83,7 +83,8 @@ namespace BuiltinBuffs.Expeditions
                 {
                     BuffPoolManager.Instance.CreateBuff(FlameThrowerBuffEntry.flameThrowerBuffID);
                     BuffHud.Instance.AppendNewCard(FlameThrowerBuffEntry.flameThrowerBuffID);
-                   
+                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+
 
                 }
             }
@@ -95,7 +96,12 @@ namespace BuiltinBuffs.Expeditions
             orig(self, timeStacker, timeSpeed);
             Futile.stage.RotateAroundPointRelative(self.sSize / 2f, Time.deltaTime * 20);
             var rect = Shader.GetGlobalVector(RainWorld.ShadPropSpriteRect);
-            
+            var xy = Custom.RotateAroundVector(new Vector2(rect.x, rect.y), Custom.rainWorld.screenSize / 2f,
+                Futile.stage.rotation);
+            var zw = Custom.RotateAroundVector(new Vector2(rect.z, rect.w), Custom.rainWorld.screenSize / 2f,
+                Futile.stage.rotation);
+            (rect.x, rect.y, rect.z, rect.w) = (xy.x, xy.y, zw.x, zw.y);
+            Shader.SetGlobalVector(RainWorld.ShadPropSpriteRect, rect);
         }
 
         private static bool isHooked = false;
@@ -162,17 +168,24 @@ namespace BuiltinBuffs.Expeditions
             public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
                 sLeaser.sprites = new FSprite[1];
-                sLeaser.sprites[0] = new FMesh("T",StormIsApproachingEntry.StormIsApproaching.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture",false);
+                sLeaser.sprites[0] = new FMesh("flameThrower", FlameThrowerBuffEntry.flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture", false,
+                    true)
+                {
+                    shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"],
+                };
+
                 AddToContainer(sLeaser,rCam,null);
             }
+
+            private float time;
 
             public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
             {
                 base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
                 sLeaser.sprites[0].SetPosition(pos-camPos);
                 var mesh = sLeaser.sprites[0] as FMesh;
-                mesh.rotation3D = new Vector3(0, 90, 90);
-                mesh.scale = 3;
+                mesh.rotation3D = new Vector3(0, 90, 90+ (time+=Time.deltaTime*50));
+                mesh.scale = 10;
                 mesh.rotation = 90;
             }
         }
