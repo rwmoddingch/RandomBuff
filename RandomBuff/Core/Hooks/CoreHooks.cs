@@ -46,7 +46,7 @@ namespace RandomBuff.Core.Hooks
 
             On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
             On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
-            //IL.ModManager.ModApplyer.ApplyModsThread += ModApplyer_ApplyModsThread;
+            On.ModManager.ModFolderHasDLLContent += ModManager_ModFolderHasDLLContent;
 
             InGameHooksInit();
 
@@ -55,6 +55,11 @@ namespace RandomBuff.Core.Hooks
 
             //TestStartGameMenu = new("TestStartGameMenu");
 
+        }
+
+        private static bool ModManager_ModFolderHasDLLContent(On.ModManager.orig_ModFolderHasDLLContent orig, string folder)
+        {
+            return orig(folder) || Directory.Exists(Path.Combine(folder, "buffplugins"));
         }
 
         private static void ModApplyer_ApplyModsThread(ILContext il)

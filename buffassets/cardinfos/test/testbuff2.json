@@ -1,8 +1,0 @@
-{
-    "BuffName" : "Test2",
-    "Description" :"Just for test2",
-    "Stackable" : false,
-    "ID" : "TestBuff2",
-    "Color" : "AAAAAA",
-    "BuffType": "Negative"
-}

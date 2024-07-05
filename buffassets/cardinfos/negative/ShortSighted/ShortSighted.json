@@ -1,0 +1,17 @@
+{
+    "FaceName": "ShortSighted",
+    "BuffID" : "ShortSighted",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "000000",
+
+    "Chinese" : {
+        "BuffName" : "鼠目寸光",
+        "Description" : "玩家的屏幕视野缩小，看见的景象会放大填充满屏幕"
+    },
+    "English" : {
+        "BuffName" : "Short-Sighted",
+        "Description" : "The player's screen field of view is reduced, and the scene seen will be enlarged to fill the screen"
+    }
+}

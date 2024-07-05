@@ -72,18 +72,18 @@ namespace BuiltinBuffs.Expeditions
                     }
 
                 }
-                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) && !isHooked)
+                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-                    isHooked = true;
-                    On.RoomCamera.DrawUpdate += RoomCamera_DrawUpdate;
-                    // self.Players[0].realizedCreature.room.AddObject(new ContainerTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+
+                    BuffPoolManager.Instance.CreateBuff(ShortSightedEntry.ShortSighted);
+                    BuffHud.Instance.AppendNewCard(ShortSightedEntry.ShortSighted);
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
                 {
-                    BuffPoolManager.Instance.CreateBuff(FlameThrowerBuffEntry.flameThrowerBuffID);
-                    BuffHud.Instance.AppendNewCard(FlameThrowerBuffEntry.flameThrowerBuffID);
-                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+                    BuffPoolManager.Instance.CreateBuff(PresbyopiaEntry.Presbyopia);
+                    BuffHud.Instance.AppendNewCard(PresbyopiaEntry.Presbyopia);
+                    //self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
 
 
                 }
@@ -91,72 +91,10 @@ namespace BuiltinBuffs.Expeditions
 
         }
 
-        private static void RoomCamera_DrawUpdate(On.RoomCamera.orig_DrawUpdate orig, RoomCamera self, float timeStacker, float timeSpeed)
-        {
-            orig(self, timeStacker, timeSpeed);
-            Futile.stage.RotateAroundPointRelative(self.sSize / 2f, Time.deltaTime * 20);
-            var rect = Shader.GetGlobalVector(RainWorld.ShadPropSpriteRect);
-            var xy = Custom.RotateAroundVector(new Vector2(rect.x, rect.y), Custom.rainWorld.screenSize / 2f,
-                Futile.stage.rotation);
-            var zw = Custom.RotateAroundVector(new Vector2(rect.z, rect.w), Custom.rainWorld.screenSize / 2f,
-                Futile.stage.rotation);
-            (rect.x, rect.y, rect.z, rect.w) = (xy.x, xy.y, zw.x, zw.y);
-            Shader.SetGlobalVector(RainWorld.ShadPropSpriteRect, rect);
-        }
-
-        private static bool isHooked = false;
-
-        public class ContainerTest : CosmeticSprite
-        {
-            private int counter = 0;
-            private float size;
-            public ContainerTest(Room room, Vector2 pos)
-            {
-                this.room = room;
-                this.pos = pos;
-                size = Futile.instance.camera.orthographicSize;
-            }
-
-            public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-            {
-                sLeaser.containers = new FContainer[1];
-                sLeaser.containers[0] = new FContainer();
-                sLeaser.sprites = new FSprite[5];
-                for (int i = 0; i < 5; i++)
-                {
-
-                    sLeaser.sprites[i] = new FSprite("Futile_White");
-                    sLeaser.containers[0].AddChild(sLeaser.sprites[i]);
-                    sLeaser.sprites[i].SetPosition(Custom.fourDirectionsAndZero[i].ToVector2()*20);
-                }
-                AddToContainer(sLeaser,rCam,null);
-            }
-
-            public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-            {
-                rCam.ReturnFContainer("HUD").AddChild(sLeaser.containers[0]);
-          
-            }
-
-            public override void Update(bool eu)
-            {
-                base.Update(eu);
-                counter++;
-            }
-
-            public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-            {
-                sLeaser.containers[0].SetPosition(pos - camPos);
-                sLeaser.containers[0].rotation = counter + timeStacker;
-                sLeaser.containers[0].scale = Custom.LerpMap(Mathf.Sin(counter / 40f * Mathf.PI), - 1, 1, 1, 2);
-
-     
+       
 
 
 
-
-            }
-        }
         public class MeshTest : CosmeticSprite
         {
             public MeshTest(Room room, Vector2 pos)
