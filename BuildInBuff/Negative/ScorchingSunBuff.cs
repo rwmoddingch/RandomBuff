@@ -115,6 +115,8 @@ namespace BuiltinBuffs.Negative
                     else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness).amount < 0.1f * num)
                         self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness).amount = 0.1f * num;
 
+                    //BuffPostEffectManager.AddEffect(new );
+
                     for (int k = 0; k < self.abstractRoom.creatures.Count; k++)
                     {
                         if (self.abstractRoom.creatures[k].realizedCreature != null &&
@@ -162,10 +164,8 @@ namespace BuiltinBuffs.Negative
                 if (TemperatrueModule.TryGetTemperatureModule(self, out var heatModule))
                 {
                     heatstroke = Mathf.Min(1f, heatModule.temperature / heatModule.ignitingPoint);
-                    BuffPlugin.Log("heatModule.lowHeatRate : " + heatModule.coolOffRate);
                 }
 
-                BuffPlugin.Log("heatstroke : " + heatstroke);
                 if (!self.Stunned && Random.Range(0, 800f + 10f * heatstroke) > 800f)
                 {
                     ScorchingSunBuff.Instance.TriggerSelf();
@@ -373,7 +373,6 @@ namespace BuiltinBuffs.Negative
 
     internal class HeatOverHeadFContainer : FContainer
     {
-        // Token: 0x17000013 RID: 19
         public FNode this[int i]
         {
             get
