@@ -65,10 +65,10 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             public override void Update(Player player, bool eu)
             {
                 base.Update(player, eu);
-                if (Input.GetKeyDown(KeyCode.W))
-                {
-                    player.room.AddObject(new HoloScore(player.room, player));
-                }
+                //if (Input.GetKeyDown(KeyCode.W))
+                //{
+                //    player.room.AddObject(new HoloScore(player.room, player));
+                //}
             }
         }
     

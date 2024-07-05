@@ -86,18 +86,18 @@ namespace BuiltinBuffs.Positive
             orig.Invoke(self, eu);
             if (countdown > 0)
                 countdown--;
-            if (Input.GetKey(KeyCode.LeftAlt) && countdown == 0)
-            {
-                AbstractPhysicalObject abstractPhysical = new AbstractSpear(self.room.world, null, new WorldCoordinate(self.room.abstractRoom.index, self.coord.x + 5, self.coord.y + 1, -1), self.room.game.GetNewID(), false);
-                self.room.abstractRoom.entities.Add(abstractPhysical);
-                abstractPhysical.RealizeInRoom();
+            //if (Input.GetKey(KeyCode.LeftAlt) && countdown == 0)
+            //{
+            //    AbstractPhysicalObject abstractPhysical = new AbstractSpear(self.room.world, null, new WorldCoordinate(self.room.abstractRoom.index, self.coord.x + 5, self.coord.y + 1, -1), self.room.game.GetNewID(), false);
+            //    self.room.abstractRoom.entities.Add(abstractPhysical);
+            //    abstractPhysical.RealizeInRoom();
 
-                var spear = abstractPhysical.realizedObject as Spear;
-                spear.firstChunk.HardSetPosition(self.DangerPos + new Vector2(20f * 8f, 5f));
+            //    var spear = abstractPhysical.realizedObject as Spear;
+            //    spear.firstChunk.HardSetPosition(self.DangerPos + new Vector2(20f * 8f, 5f));
 
-                spear.Shoot(null, spear.firstChunk.pos, Vector2.left, 1f, eu);
-                countdown = 10;
-            }
+            //    spear.Shoot(null, spear.firstChunk.pos, Vector2.left, 1f, eu);
+            //    countdown = 10;
+            //}
         }
 
         public static bool CheckIfMaskBounce(Player player, Spear spear, Vector2? directionAndMomentum)

@@ -103,10 +103,10 @@ namespace BuiltinBuffs.Positive
             if (!isChecked)
                 FireShieldBuff.Instance.FireShieldCheck();
 
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                FireShield.GetBuffData().Stack();
-            }
+            //if (Input.GetKeyDown(KeyCode.M))
+            //{
+            //    FireShield.GetBuffData().Stack();
+            //}
 
             orig(self, eu); 
 

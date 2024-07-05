@@ -40,13 +40,13 @@ namespace BuiltinBuffs.Duality
         public override void Update(RainWorldGame game)
         {
             base.Update(game);
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                foreach(var instance in currentextraDialogInstances)
-                {
-                    instance.NewMessage("wawa instance", 0f, 0f, 0);
-                }
-            }
+            //if (Input.GetKeyDown(KeyCode.M))
+            //{
+            //    foreach(var instance in currentextraDialogInstances)
+            //    {
+            //        instance.NewMessage("wawa instance", 0f, 0f, 0);
+            //    }
+            //}
         }
 
 
