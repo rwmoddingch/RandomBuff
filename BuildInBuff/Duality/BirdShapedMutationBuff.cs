@@ -960,11 +960,6 @@ namespace BuiltinBuffs.Duality
             {
                 preventGrabs--;
             }
-            /*
-            for (int i = 0; i < 2; i++)
-                this.SlugcatHandUpdate((self.graphicsModule as PlayerGraphics).hands[i]);
-
-            //self.craftingObject = true;*/
         }
 
         //调整姿势
@@ -998,24 +993,20 @@ namespace BuiltinBuffs.Duality
                     }
                 }
             }
-            /*
-            for (int i = 0; i < 2; i++)
-                this.SlugcatHandUpdate((self.graphicsModule as PlayerGraphics).hands[i]);
-            //self.craftingObject = true;*/
         }
 
         //飞行速度
         private void FlightSpeed(Player self)
         {
             wantPos += wingSpeed * new Vector2(self.input[0].x, self.input[0].y);
-            if (self.input[0].x == 0 && !wantPosIsSetX)
+            if (self.input[0].x == 0 && !wantPosIsSetX && self.bodyChunks[0].vel.magnitude < 1f)
             {
                 wantPosIsSetX = true;
                 self.bodyChunks[0].vel.x *= 0.3f;
                 self.bodyChunks[1].vel.x *= 0.3f;
                 wantPos.x = self.bodyChunks[0].pos.x;
             }
-            if (self.input[0].y == 0 && !wantPosIsSetY)
+            if (self.input[0].y == 0 && !wantPosIsSetY && self.bodyChunks[0].vel.magnitude < 1f)
             {
                 wantPosIsSetY = true;
                 self.bodyChunks[0].vel.y *= 0.3f;

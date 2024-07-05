@@ -118,6 +118,7 @@ namespace BuiltinBuffs.Positive
         float push;
         float lastPush;
         float getToPush;
+        float soundCount;
 
         public FlashShield(Player player, Room room)
         {
@@ -213,6 +214,9 @@ namespace BuiltinBuffs.Positive
 
             base.Update(eu);
 
+            this.soundCount++;
+            if (soundCount >= 15)
+                this.soundCount = 0;
             this.lastExpand = this.expand;
             this.lastPush = this.push;
             this.expand = Custom.LerpAndTick(this.expand, this.getToExpand, 0.05f, 0.0125f);
@@ -269,11 +273,12 @@ namespace BuiltinBuffs.Positive
                         }
                         if (shouldFire)
                         {
-                            this.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Hard, creature.mainBodyChunk);
+                            if (this.soundCount == 0)
+                                this.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Hard, creature.mainBodyChunk);
                             creature.SetKillTag(this.owner.abstractCreature);
-                            creature.mainBodyChunk.vel *= 0.9f / Mathf.Pow(level, 0.3f);
-                            creature.Violence(this.owner.mainBodyChunk, 
-                                              Custom.DirVec(this.owner.DangerPos, creature.DangerPos).normalized * Radius(level, 0f) / (Custom.Dist(this.owner.DangerPos, creature.DangerPos) + 0.5f * Radius(level, 0f)), 
+                            creature.mainBodyChunk.vel *= 0.8f / Mathf.Pow(level, 0.3f);
+                            creature.Violence(this.owner.mainBodyChunk,
+                                              Custom.DirVec(this.owner.DangerPos, creature.DangerPos).normalized,//* Radius(level, 0f) / (Custom.Dist(this.owner.DangerPos, creature.DangerPos) + 0.5f * Radius(level, 0f))
                                               creature.firstChunk, null, Creature.DamageType.Blunt, 0.01f * level, 0f);
                         }
                     }

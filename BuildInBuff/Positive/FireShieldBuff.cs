@@ -102,12 +102,12 @@ namespace BuiltinBuffs.Positive
         {
             if (!isChecked)
                 FireShieldBuff.Instance.FireShieldCheck();
-
+            /*
             if (Input.GetKeyDown(KeyCode.M))
             {
                 FireShield.GetBuffData().Stack();
             }
-
+            */
             orig(self, eu); 
 
             if (FireShieldFeatures.TryGetValue(self,out var fireShield))
@@ -239,7 +239,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    public class NoAttachedFire : UpdatableAndDeletable
+    public class NoAttachedFire : UpdatableAndDeletable, IHeatingCreature
     {
         Creature bindCreature;
         Vector2[] getToPositions;
@@ -255,6 +255,7 @@ namespace BuiltinBuffs.Positive
         int counter;
         bool kill;
         bool shouldFire;
+        float rad;
 
         public NoAttachedFire(Room room, Creature bindCreature, Vector2 relativePosition)
         {
@@ -264,6 +265,7 @@ namespace BuiltinBuffs.Positive
             this.level = FireShieldBuffEntry.StackLayer;
             this.pos = bindCreature.mainBodyChunk.pos + relativePosition;
             this.lifeTime = 40;
+            this.rad = 20f;
 
             lightSources = new LightSource[1];
             getToPositions = new Vector2[this.lightSources.Length];
@@ -274,6 +276,60 @@ namespace BuiltinBuffs.Positive
                 room.AddObject(this.lightSources[i]);
                 lightSources[i].setAlpha = 0f;
             }
+        }
+
+        public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
+        {
+            float dist = Vector2.Distance(this.pos, pos);
+            if (dist > rad)
+                return 0f;
+
+            if (updatableAndDeletable is Creature)
+            {
+                Creature creature = updatableAndDeletable as Creature;
+                shouldFire = true;
+                if (creature is Player)
+                    shouldFire = false;
+                if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(this.bindCreature.abstractCreature) > 0.5f)
+                    shouldFire = false;
+                if (creature is Lizard)
+                {
+                    foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Lizard).AI.relationshipTracker.relationships.
+                        Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == this.bindCreature.abstractCreature))
+                    {
+                        if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                            shouldFire = false;
+                    }
+                }
+                if (creature is Scavenger &&
+                    (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
+                    LikeOfPlayer(CreatureCommunities.CommunityID.Scavengers,
+                                (creature as Scavenger).abstractCreature.world.game.world.RegionNumber,
+                                (this.bindCreature as Player).playerState.playerNumber) > 0.5)
+                {
+                    shouldFire = false;
+                }
+                if (creature is Cicada)
+                {
+                    foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Cicada).AI.relationshipTracker.relationships.
+                        Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == this.bindCreature.abstractCreature))
+                    {
+                        if ((creature as Cicada).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                            shouldFire = false;
+                    }
+                }
+                if (shouldFire)
+                {
+                    creature.SetKillTag(this.bindCreature.abstractCreature);
+                    if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
+                    {
+                        return 0.1f + 0.03f * level;
+                    }
+                }
+                else
+                    return 0f;
+            }
+            return 0.1f + 0.03f * level;
         }
 
         public override void Update(bool eu)
@@ -324,59 +380,6 @@ namespace BuiltinBuffs.Positive
                 getToRads[i] = 40f;
                 lightSources[i].setPos = new Vector2?(Vector2.Lerp(lightSources[i].Pos, bindCreature.mainBodyChunk.pos + getToPositions[i], 0.2f));
                 lightSources[i].setRad = new float?(Mathf.Lerp(lightSources[i].Rad, this.getToRads[i], 0.2f));
-            }
-
-            if (bindCreature.room != null && bindCreature is Player)
-            {
-                for (int k = 0; k < this.room.abstractRoom.creatures.Count; k++)
-                {
-                    if (this.room.abstractRoom.creatures[k].realizedCreature != null &&
-                        !(this.room.abstractRoom.creatures[k].realizedCreature is Player) &&
-                        Custom.Dist(this.pos, this.room.abstractRoom.creatures[k].realizedCreature.DangerPos) < 20f)
-                    {
-                        Creature creature = this.room.abstractRoom.creatures[k].realizedCreature;
-                        shouldFire = true;
-                        if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(this.bindCreature.abstractCreature) > 0.5f)
-                        {
-                            shouldFire = false;
-                        }
-                        if (creature is Lizard)
-                        {
-                            foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Lizard).AI.relationshipTracker.relationships.
-                                Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == this.bindCreature.abstractCreature))
-                            {
-                                if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
-                                    shouldFire = false;
-                            }
-                        }
-                        if (creature is Scavenger &&
-                            (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
-                            LikeOfPlayer(CreatureCommunities.CommunityID.Scavengers,
-                                        (creature as Scavenger).abstractCreature.world.game.world.RegionNumber,
-                                        (this.bindCreature as Player).playerState.playerNumber) > 0.5)
-                        {
-                            shouldFire = false;
-                        }
-                        if (creature is Cicada)
-                        {
-                            foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Cicada).AI.relationshipTracker.relationships.
-                                Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == this.bindCreature.abstractCreature))
-                            {
-                                if ((creature as Cicada).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
-                                    shouldFire = false;
-                            }
-                        }
-                        if (shouldFire)
-                        {
-                            creature.SetKillTag(this.bindCreature.abstractCreature);
-                            if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
-                            {
-                                heatModule.AddTemperature(0.1f + 0.03f * level);
-                            }
-                        }
-                        creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.05f - 0.01f * level);
-                    }
-                }
             }
         }
 

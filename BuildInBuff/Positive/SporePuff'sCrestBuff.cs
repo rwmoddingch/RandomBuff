@@ -182,7 +182,7 @@ namespace BuiltinBuffs.Positive
 
         public float Radius(int level)
         {
-            return (3f + 1f * level) * 20f;
+            return (3f + 1f * level) * 10f;
         }
     }
 }

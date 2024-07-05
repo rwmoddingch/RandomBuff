@@ -33,6 +33,8 @@ namespace BuiltinBuffs.Duality
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.ArachnophobiaIBuffEntry.arachnophobiaID))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(HotDogGains.Positive.SpiderSenseBuffEntry.SpiderSenseID))
+                    num++; 
+                if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.PhotophobiaBuffEntry.Photophobia))
                     num++;
                 return num;
             }
@@ -49,7 +51,7 @@ namespace BuiltinBuffs.Duality
                 {
                     var spider = new SpiderCat(player);
                     SpiderShapedMutationBuffEntry.SpiderFeatures.Add(player, spider);
-                    spider.BirdArthropod(player.graphicsModule as PlayerGraphics);
+                    spider.SpiderArthropod(player.graphicsModule as PlayerGraphics);
                     spider.InitiateSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
@@ -87,9 +89,7 @@ namespace BuiltinBuffs.Duality
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.Player.BiteEdibleObject += Player_BiteEdibleObject;
 
-            On.BigSpiderAI.IUseARelationshipTracker_UpdateDynamicRelationship += BigSpiderAI_IUseARelationshipTracker_UpdateDynamicRelationship;
-            On.Spider.ConsiderPrey += Spider_ConsiderPrey;
-            On.Spider.Centipede.SeePrey += Spider_Centipede_SeePrey;
+            On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -263,29 +263,13 @@ namespace BuiltinBuffs.Duality
         }
         #endregion
         #region 生物关系
-        //修改生物关系（狼蛛不再攻击玩家）
-        private static CreatureTemplate.Relationship BigSpiderAI_IUseARelationshipTracker_UpdateDynamicRelationship(On.BigSpiderAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, BigSpiderAI self, RelationshipTracker.DynamicRelationship dRelation)
+        //修改生物关系（狼蛛、小蜘蛛不再攻击玩家）
+        private static void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)
         {
-            CreatureTemplate.Relationship result = orig(self, dRelation);
-            if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
-                result = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
-            return result;
-        }
+            orig();
 
-        //修改生物关系（小蜘蛛不再攻击玩家）
-        private static bool Spider_ConsiderPrey(On.Spider.orig_ConsiderPrey orig, Spider self, Creature crit)
-        {
-            bool result = orig(self, crit);
-            if (crit is Player)
-                result = true;
-            return result;
-        }
-
-        private static void Spider_Centipede_SeePrey(On.Spider.Centipede.orig_SeePrey orig, Spider.Centipede self, Creature creature)
-        {
-            orig(self, creature);
-            if(self.prey is Player)
-                self.prey = null;
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.BigSpider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Spider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
         }
         #endregion
 
@@ -348,7 +332,7 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, ow);
             if (SpiderFeatures.TryGetValue(self.player, out var spider))
-                spider.BirdArthropod(self);
+                spider.SpiderArthropod(self);
         }
 
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
@@ -417,7 +401,7 @@ namespace BuiltinBuffs.Duality
             return arthropodSprite + side * 12 + leg * 3 + part;
         }
 
-        public void BirdArthropod(PlayerGraphics self)
+        public void SpiderArthropod(PlayerGraphics self)
         {
             int num = 0;
             this.legs = new Limb[2, 4];
@@ -445,10 +429,10 @@ namespace BuiltinBuffs.Duality
         {
             this.ownerRef = new WeakReference<Player>(player);
 
-            this.arthropodSpeed = 60f + SpiderShapedMutationBuff.spiderLevel * 20f;
+            this.arthropodSpeed = 60f + SpiderShapedMutationBuff.spiderLevel * 10f;
             this.wantPos = player.bodyChunks[0].pos;
 
-            this.legLength = 65f + SpiderShapedMutationBuff.spiderLevel * 20f;
+            this.legLength = 65f + SpiderShapedMutationBuff.spiderLevel * 10f;
             this.legFlips = new float[2, 4, 2];
             this.legsTravelDirs = new Vector2[2, 4];
             this.legsThickness = Mathf.Lerp(0.7f, 1.1f, UnityEngine.Random.value);
