@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using RWCustom;
 using UnityEngine;
 using static RandomBuffUtils.FutileExtend.FMesh;
 
@@ -8,6 +11,50 @@ namespace RandomBuffUtils.FutileExtend
 {
     public static class MeshManager
     {
+
+        internal static FFacetType Mesh;
+
+        public static Mesh3DAsset Cube;
+        public static Mesh3DAsset Plane;
+        public static Mesh3DAsset Sphere;
+
+        internal static void OnModsInit()
+        {
+            IL.FFacetRenderLayer.UpdateMeshProperties += FFacetRenderLayer_UpdateMeshPropertiesIL;
+            On.FFacetRenderLayer.UpdateMeshProperties += FFacetRenderLayer_UpdateMeshProperties;
+            Mesh = FFacetType.CreateFacetType("RandomBuff.Pkuyo.Mesh", 16, 16, 64,
+                (stage, type, atlas, shader) => new FMeshRenderLayer(stage, type, atlas, shader));
+            Cube = LoadMesh("Cube", "buffassets/assetbundles/futileextend/Cube.obj");
+            Plane = LoadMesh("Plane", "buffassets/assetbundles/futileextend/Plane.obj");
+            Sphere = LoadMesh("Sphere", "buffassets/assetbundles/futileextend/Sphere.obj");
+
+        }
+
+        private static void FFacetRenderLayer_UpdateMeshProperties(On.FFacetRenderLayer.orig_UpdateMeshProperties orig, FFacetRenderLayer self)
+        {
+            orig(self);
+            if (self is FMeshRenderLayer { _didNormalsChange: true } layer)
+            {
+                layer._mesh.normals = layer._normals;
+                layer._didNormalsChange = false;
+            }
+        }
+
+        private static void FFacetRenderLayer_UpdateMeshPropertiesIL(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(MoveType.After, i => i.MatchCallOrCallvirt<Mesh>("set_colors"));
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Action<FFacetRenderLayer>>((self) =>
+            {
+                if (self is FMeshRenderLayer layer)
+                {
+                    layer._didNormalsChange = false;
+                    layer._mesh.normals = layer._normals;
+                }
+            });
+        }
+
         public static Mesh3DAsset LoadMesh(string name, string path)
         {
             if (MeshAssets.ContainsKey(name))
@@ -36,7 +83,6 @@ namespace RandomBuffUtils.FutileExtend
                     case "vt":
                         uvs.Add(new Vector2(float.Parse(chars[1]), float.Parse(chars[2])));
                         break;
-
                     case "vn":
                         normals.Add(new Vector3(float.Parse(chars[1]), float.Parse(chars[2]), float.Parse(chars[3])));
                         break;
@@ -75,6 +121,8 @@ namespace RandomBuffUtils.FutileExtend
                         break;
                 }
             }
+            BuffUtils.Log("FutileExtend", $"Import Mesh: name:{name}, vertices:{vertices.Count}, uvs:{uvs.Count}, normals:{normals.Count}, facets:{facets.Count}");
+
             var re = new Mesh3DAsset(vertices.ToArray(), uvs.ToArray(), facets.ToArray(), normals.ToArray());
             MeshAssets.Add(name,re);
             return re;

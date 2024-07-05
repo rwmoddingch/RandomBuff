@@ -1,0 +1,25 @@
+{
+  "FaceName": "jellyfishshapedmutation",
+  "BuffID": "JellyfishShapedMutation",
+  "BuffType": "Duality",
+  "BuffProperty": "Normal",
+  "Triggerable": true,
+  "Stackable": false,
+  "Color": "6ABFE5",
+  "Tag": [ "ShapedMutation" ],
+  "Conflict": [ "ShapedMutation" ],
+
+  "MultiLayerFace": true,
+  "FaceLayer": 4,
+  "MaxFaceDepth": 2.0,
+  "FaceBackgroundColor": "6ABFE5",
+
+  "Chinese": {
+    "BuffName": "鲊形突变",
+    "Description": "你长出水母的触须，在被生物抓出时会自动电击生物，也可以设置按键主动电击你的触须抓住的生物。你的每次电击减少1格饱食度，饱食度为0时无法触发。你开始对电击产生抵抗力，在水中不会再窒息，但游泳速度降低50%，并且超过2循环未接触水将干枯而死。水蛭和巨型水母不再对你有敌意。"
+  },
+  "English": {
+    "BuffName": "JellyfishShapedMutation",
+    "Description": "You grow the tentacles of jellyfish, which will automatically shock the creature when it is caught. You can also set the button to actively shock the creature caught by the tentacles. Each time you strike, your satiety is reduced by 1 grid. It cannot be triggered when satiety is 0. You begin to develop resistance to electric shock, no longer suffocating in water, but swimming speed decreases by 50%, and if you do not come into contact with water for more than 2 cycles, you will dry up and die. Leeches and giant jellyfish no longer have hostility towards you."
+  }
+}

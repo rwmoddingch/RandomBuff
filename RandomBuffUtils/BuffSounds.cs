@@ -141,7 +141,7 @@ namespace RandomBuffUtils
 
             }
 
-            BuffUtils.Log(nameof(BuffSounds), $"Loaded sound, ID:{sounds.Length}, Clips Count:{datas.Length}, folder:{soundPath}");
+            BuffUtils.Log(nameof(BuffSounds), $"Loaded sound, ID:{id}, Clips Count:{datas.Length}, folder:{soundPath}");
 
 
         }
@@ -152,7 +152,6 @@ namespace RandomBuffUtils
             for (int i = 0; i < clips.Length; i++)
             {
                 var fileName = AssetManager.ResolveFilePath(path + Path.DirectorySeparatorChar + name + (i == 0 ? "" : $"_{i - 1}") + ".wav");
-                BuffUtils.Log(nameof(BuffSounds),$"try load clip:{fileName}");
                 if (File.Exists(fileName))
                 {
                     WWW www = new WWW("file://" + fileName);

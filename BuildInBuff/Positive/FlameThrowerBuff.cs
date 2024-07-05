@@ -321,6 +321,16 @@ namespace BuiltinBuffs.Positive
                 FlameThrowerBuffEntry.LoadAssets();
             }
 
+            sLeaser.sprites = new FSprite[2];
+            sLeaser.sprites[1] = new FMesh(FlameThrowerBuffEntry.flameThrowerMesh, FlameThrowerBuffEntry.flameThrowerTexture, false)
+            {
+                shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"]
+            };
+
+            sLeaser.sprites[0] = new FMesh(FlameThrowerBuffEntry.flameThrowerTubeMesh, "Futile_White", false)
+            {
+                shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"]
+            };
             sLeaser.sprites = new FSprite[3];
             sLeaser.sprites[1] = new FMesh(FlameThrowerBuffEntry.flameThrowerMesh, FlameThrowerBuffEntry.flameThrowerTexture, false);
             sLeaser.sprites[0] = new FMesh(FlameThrowerBuffEntry.flameThrowerTubeMesh, "Futile_White", false);

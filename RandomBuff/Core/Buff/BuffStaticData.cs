@@ -220,7 +220,6 @@ namespace RandomBuff.Core.Buff
                     foreach (var obj in tagObj)
                     {
                         newData.Tag.Add((string)obj);
-                        BuffPlugin.LogDebug($"Tag:{obj}");
                     }
                 }
 

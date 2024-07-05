@@ -5,14 +5,14 @@
   "BuffProperty": "Normal",
   "Triggerable": true,
   "Stackable": false,
-  "Color": "FFFFE8",
+  "Color": "6ABFE5",
   "Tag": [ "ShapedMutation" ],
   "Conflict": [ "ShapedMutation" ],
 
   "MultiLayerFace": true,
   "FaceLayer": 3,
-  "MaxFaceDepth": 1.0,
-  "FaceBackgroundColor": "170A0F",
+  "MaxFaceDepth": 2.0,
+  "FaceBackgroundColor": "6ABFE5",
 
   "Chinese": {
     "BuffName": "鸟形突变",

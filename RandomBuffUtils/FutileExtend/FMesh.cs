@@ -6,11 +6,11 @@ namespace RandomBuffUtils.FutileExtend
 {
     public class FMesh : FSprite
     {
-        public FMesh(string meshName, string imageName, bool customColor, bool customNormals = false) :
+        public FMesh(string meshName, string imageName, bool customColor, bool customNormals = true) :
             this(MeshManager.GetMeshByName(meshName),imageName, customColor, customNormals)
         {
         }
-        public FMesh(Mesh3DAsset mesh, string imageName, bool customColor, bool customNormals = false)  : base()
+        public FMesh(Mesh3DAsset mesh, string imageName, bool customColor, bool customNormals = true)  : base()
         {
             _mesh = mesh ?? throw new FutileException("MeshAsset is Null!");
 
@@ -27,28 +27,25 @@ namespace RandomBuffUtils.FutileExtend
                 }
             }
 
-            Init(FFacetType.Triangle, Futile.atlasManager.GetElementWithName(imageName), mesh.facets.Length);
+            Init(MeshManager.Mesh, Futile.atlasManager.GetElementWithName(imageName), mesh.facets.Length);
             _isAlphaDirty = true;
             UpdateLocalVertices();
 
         }
 
+
         public override void PopulateRenderLayer()
         {
             if (_isOnStage && _firstFacetIndex != -1)
             {
+                var meshLayer = _renderLayer as FMeshRenderLayer;
                 _isMeshDirty = false;
                 UpdateVertices();
                 int startVert = _firstFacetIndex * 3;
 
-                if (_customNormals &&_renderLayer._mesh.normals.Length < _mesh.facets.Length * 3 + startVert)
-                {
-                    var tmp = new Vector3[_renderLayer._mesh.vertices.Length];
-                    Array.Copy(_renderLayer._mesh.normals, tmp, _renderLayer._mesh.normals.Length);
-                    _renderLayer._mesh.normals = tmp;
-                }
-                var sortFacet = _mesh.facets.OrderBy((i)  => _vertices[i.vertices.a].z + _vertices[i.vertices.b].z + _vertices[i.vertices.c].z).ToArray();
-
+          
+                var sortFacet = _mesh.facets;
+                
                 for (int i=0;i<sortFacet.Length;i++)
                 {
                     var curIndex = i * 3;
@@ -64,10 +61,12 @@ namespace RandomBuffUtils.FutileExtend
                     _renderLayer.uvs[curIndex + startVert + 2] = _mesh.uvs[sortFacet[i].uvs.c];
 
                     if (_customNormals)
-                    {
-                        _renderLayer._mesh.normals[curIndex + startVert] = _mesh.normals[sortFacet[i].normals.a];
-                        _renderLayer._mesh.normals[curIndex + startVert + 1] = _mesh.normals[sortFacet[i].normals.b];
-                        _renderLayer._mesh.normals[curIndex + startVert + 2] = _mesh.normals[sortFacet[i].normals.c];
+                    {    
+                        meshLayer._normals[curIndex + startVert] = _mesh.normals[sortFacet[i].normals.a];
+                        meshLayer._normals[curIndex + startVert + 1] = _mesh.normals[sortFacet[i].normals.b];
+                        meshLayer._normals[curIndex + startVert + 2] = _mesh.normals[sortFacet[i].normals.c];
+                
+              
                     }
 
                     if (_customColor)
@@ -95,7 +94,7 @@ namespace RandomBuffUtils.FutileExtend
         }
         private void UpdateVertices()
         {
-            _maxMeshZ = float.MinValue;
+            _maxMeshZ = float.MaxValue;
             for (int i = 0; i < _vertices.Length; i++)
             {
 
@@ -105,9 +104,10 @@ namespace RandomBuffUtils.FutileExtend
                 v = RotateRound(v, Vector3.forward, _rotation3d.y);
                 v = RotateRound(v, Vector3.right, _rotation3d.z);
                 _vertices[i] = v;
-                _maxMeshZ = Mathf.Max(_maxMeshZ,Mathf.Abs(v.z));
+                _maxMeshZ = Mathf.Min(_maxMeshZ,v.z,0);
             }
 
+            _maxMeshZ = -_maxMeshZ;
         }
 
 
@@ -245,10 +245,17 @@ namespace RandomBuffUtils.FutileExtend
                 this.uvs = uvs;
                 this.facets = facets;
                 this.normals = normals;
+                if (normals.Length == 0)
+                {
+                    this.normals = new Vector3[vertices.Length];
+                    BuildDefaultNormals();
+                }
+
             }
 
             public void BuildDefaultNormals()
             {
+                
                 for (int i = 0; i < normals.Length; i++)
                     normals[i] = Vector3.zero;
                 foreach (var face in facets)
@@ -276,8 +283,9 @@ namespace RandomBuffUtils.FutileExtend
                 public TriangleFacet(TriangleArray vertices, TriangleArray uvs, TriangleArray normals)
                 {
                     this.vertices = vertices;
-                    this.normals = normals;
                     this.uvs = uvs;
+                    this.normals = normals;
+
                 }
 
 
@@ -294,9 +302,9 @@ namespace RandomBuffUtils.FutileExtend
 
                     public TriangleArray(int[] s,int offset = 0)
                     {
-                        a = s[0];
-                        b = s[1];
-                        c = s[2];
+                        a = s[offset + 0];
+                        b = s[offset + 1];
+                        c = s[offset + 2];
                     }
                 }
 
@@ -306,4 +314,80 @@ namespace RandomBuffUtils.FutileExtend
         }
 
     }
+
+    public class FMeshRenderLayer : FFacetRenderLayer
+    {
+
+        public Vector3[] _normals = Array.Empty<Vector3>();
+
+        public bool _didNormalsChange = false;
+
+        public FMeshRenderLayer(FStage stage, FFacetType facetType, FAtlas atlas, FShader shader) : base(stage, facetType, atlas, shader)
+        {
+        }
+
+        public override void FillUnusedFacetsWithZeroes()
+        {
+            _lowestZeroIndex = Math.Max(_nextAvailableFacetIndex, Math.Min(_maxFacetCount, _lowestZeroIndex));
+            for (int i = _nextAvailableFacetIndex; i < _lowestZeroIndex; i++)
+            {
+                int num = i * 3;
+                _vertices[num].Set(50f, 0f, 1000000f);
+                _vertices[num + 1].Set(50f, 0f, 1000000f);
+                _vertices[num + 2].Set(50f, 0f, 1000000f);
+            }
+            _lowestZeroIndex = _nextAvailableFacetIndex;
+        }
+
+        public override void ShrinkMaxFacetLimit(int deltaDecrease)
+        {
+            if (deltaDecrease <= 0)
+            {
+                return;
+            }
+            _maxFacetCount = Math.Max(_facetType.initialAmount, _maxFacetCount - deltaDecrease);
+            Array.Resize(ref _vertices, _maxFacetCount * 3);
+            Array.Resize(ref _uvs, _maxFacetCount * 3);
+            Array.Resize(ref _colors, _maxFacetCount * 3);
+            Array.Resize(ref _triangles, _maxFacetCount * 3);
+            Array.Resize(ref _normals, _maxFacetCount * 3);
+            _didNormalsChange = true;
+            _didVertCountChange = true;
+            _didVertsChange = true;
+            _didUVsChange = true;
+            _didColorsChange = true;
+            _isMeshDirty = true;
+            _doesMeshNeedClear = true;
+        }
+
+        public override void ExpandMaxFacetLimit(int deltaIncrease)
+        {
+            if (deltaIncrease <= 0)
+            {
+                return;
+            }
+            int maxFacetCount = _maxFacetCount;
+            _maxFacetCount += deltaIncrease;
+            Array.Resize(ref _vertices, _maxFacetCount * 3);
+            Array.Resize(ref _uvs, _maxFacetCount * 3);
+            Array.Resize(ref _colors, _maxFacetCount * 3);
+            Array.Resize(ref _triangles, _maxFacetCount * 3);
+            Array.Resize(ref _normals, _maxFacetCount * 3);
+
+            for (int i = maxFacetCount; i < _maxFacetCount; i++)
+            {
+                int num = i * 3;
+                _triangles[num] = num;
+                _triangles[num + 1] = num + 1;
+                _triangles[num + 2] = num + 2;
+            }
+            _didNormalsChange = true;
+            _didVertCountChange = true;
+            _didVertsChange = true;
+            _didUVsChange = true;
+            _didColorsChange = true;
+            _isMeshDirty = true;
+        }
+    }
+
 }

@@ -577,7 +577,7 @@ namespace BuiltinBuffs.Duality
             //热量计算
             foreach (var heatSource in creature.room.updateList.Where((u) => u is IHeatingCreature).Select((u) => u as IHeatingCreature))
             {
-                AddTemperature(heatSource.GetHeat(creature.mainBodyChunk.pos));
+                AddTemperature(heatSource.GetHeat(creature, creature.mainBodyChunk.pos));
             }
 
             if (temperature > 0)
@@ -1044,7 +1044,7 @@ namespace BuiltinBuffs.Duality
 
     public interface IHeatingCreature
     {
-        float GetHeat(Vector2 pos);
+        float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos);
     }
 
     public class Napalm : UpdatableAndDeletable, IHeatingCreature
@@ -1227,7 +1227,7 @@ namespace BuiltinBuffs.Duality
             emitter.Die();
         }
 
-        public float GetHeat(Vector2 pos)
+        public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
         {
             float dist = Vector2.Distance(this.pos, pos);
             if (dist > rad)
