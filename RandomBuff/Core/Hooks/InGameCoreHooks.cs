@@ -101,12 +101,20 @@ namespace RandomBuff.Core.Hooks
         private static void SaveState_setDenPosition(On.SaveState.orig_setDenPosition orig, SaveState self)
         {
             orig(self);
-            if (self.progression.rainWorld.BuffMode() &&
-                BuffDataManager.Instance.GetGameSetting(self.saveStateNumber).gachaTemplate.NeedRandomStart)
+            if (self.progression.rainWorld.BuffMode())
             {
-                //TODO : 这里用了探险
-                string name = ExpeditionGame.ExpeditionRandomStarts(self.progression.rainWorld, self.saveStateNumber);
-                self.denPosition = self.lastVanillaDen = name;
+
+                if (BuffDataManager.Instance.GetGameSetting(self.saveStateNumber).gachaTemplate.NeedRandomStart)
+                {
+                    string name =
+                        ExpeditionGame.ExpeditionRandomStarts(self.progression.rainWorld, self.saveStateNumber);
+                    self.denPosition = self.lastVanillaDen = name;
+                }
+                else if (BuffDataManager.Instance.GetGameSetting(self.saveStateNumber).gachaTemplate.ForceStartPos is {} pos)
+                {
+                    BuffPlugin.LogDebug($"Force start pos:{pos}");
+                    self.denPosition = self.lastVanillaDen = pos;
+                }
             }
         }
 

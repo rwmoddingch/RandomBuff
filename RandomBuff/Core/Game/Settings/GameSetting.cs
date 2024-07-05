@@ -48,10 +48,11 @@ namespace RandomBuff.Core.Game.Settings
 
         public InGameRecord inGameRecord = new ();
 
-        public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal")
+        public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal", string startPos = null)
         {
             LoadTemplate(gachaTemplate);
             this.name = name;
+            this.gachaTemplate.ForceStartPos = startPos;
         }
 
         public bool Win
