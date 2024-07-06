@@ -725,5 +725,12 @@ namespace BuiltinBuffs.Positive
             flameMapper.Add(room, groundFlame);
             return groundFlame;
         }
+
+        public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
+        {
+            //TODO :接口
+            return 0;
+            //throw new NotImplementedException();
+        }
     }
 }

@@ -4,8 +4,8 @@
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "000000",
-
+    "Color" : "FFFFFF",
+    "Conflict": ["Presbyopia"],
     "Chinese" : {
         "BuffName" : "鼠目寸光",
         "Description" : "玩家的屏幕视野缩小，看见的景象会放大填充满屏幕"

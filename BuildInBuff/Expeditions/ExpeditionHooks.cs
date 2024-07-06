@@ -20,6 +20,7 @@ using BuiltinBuffs.Negative;
 using BuiltinBuffs.Positive;
 using RandomBuffUtils.FutileExtend;
 using Unity.Mathematics;
+using UnityEngine.Rendering;
 
 namespace BuiltinBuffs.Expeditions
 {
@@ -83,7 +84,7 @@ namespace BuiltinBuffs.Expeditions
                 {
                     BuffPoolManager.Instance.CreateBuff(FakeCreatureBuffData.FakeCreatureID);
                     BuffHud.Instance.AppendNewCard(FakeCreatureBuffData.FakeCreatureID);
-                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+                    //self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
 
                 }
             }
@@ -125,6 +126,8 @@ namespace BuiltinBuffs.Expeditions
                 //render.material = new Material(rCam.game.rainWorld.Shaders["UniformSimpleLighting"].shader);
                 //render.material.mainTexture = UniformLighting.TestTex;
                 //rCam.ReturnFContainer("HUD").AddChild(node = new FGameObjectNode(obj,true,false,false));
+                Futile.instance.camera.renderingPath = RenderingPath.Forward;
+                BuffPlugin.Log($"{  Futile.instance.camera.actualRenderingPath.ToString()}");
             }
 
             private float time;
