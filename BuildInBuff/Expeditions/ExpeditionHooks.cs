@@ -84,7 +84,7 @@ namespace BuiltinBuffs.Expeditions
                 {
                     BuffPoolManager.Instance.CreateBuff(FakeCreatureBuffData.FakeCreatureID);
                     BuffHud.Instance.AppendNewCard(FakeCreatureBuffData.FakeCreatureID);
-                    //self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
 
                 }
             }
