@@ -62,11 +62,11 @@ namespace RandomBuffUtils.FutileExtend
 
                     if (_customNormals)
                     {    
-                        meshLayer._normals[curIndex + startVert] = _mesh.normals[sortFacet[i].normals.a];
-                        meshLayer._normals[curIndex + startVert + 1] = _mesh.normals[sortFacet[i].normals.b];
-                        meshLayer._normals[curIndex + startVert + 2] = _mesh.normals[sortFacet[i].normals.c];
-                
-              
+                        meshLayer._normals[curIndex + startVert] = Rotate(_mesh.normals[sortFacet[i].normals.a]);
+                        meshLayer._normals[curIndex + startVert + 1] = Rotate(_mesh.normals[sortFacet[i].normals.b]);
+                        meshLayer._normals[curIndex + startVert + 2] = Rotate(_mesh.normals[sortFacet[i].normals.c]);
+
+
                     }
 
                     if (_customColor)
@@ -81,8 +81,12 @@ namespace RandomBuffUtils.FutileExtend
                             _renderLayer.colors[curIndex + startVert + j] = _alphaColor;
                     }
                 }
+
+                meshLayer._didNormalsChange = true;
+                _renderLayer.HandleVertsChange();
+
             }
-            _renderLayer.HandleVertsChange();
+
         }
 
 
@@ -111,6 +115,14 @@ namespace RandomBuffUtils.FutileExtend
         }
 
 
+        private Vector3 Rotate(Vector3 v)
+        {
+            v = RotateRound(v, Vector3.up, _rotation3d.x);
+            v = RotateRound(v, Vector3.forward, _rotation3d.y);
+            v = RotateRound(v, Vector3.right, _rotation3d.z);
+            return v;
+        }
+
         public void ResetVertices()
         {
             ReImportVert();
@@ -131,6 +143,7 @@ namespace RandomBuffUtils.FutileExtend
             {
                 if (value == _rotation3d) return;
                 _isMeshDirty = true;
+                
                 _rotation3d = value;
             }
         }

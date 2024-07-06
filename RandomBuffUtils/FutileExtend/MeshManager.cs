@@ -96,7 +96,7 @@ namespace RandomBuffUtils.FutileExtend
             List<Mesh3DAsset.TriangleFacet> facets = new List<Mesh3DAsset.TriangleFacet>();
             string[] lines = File.ReadAllLines(path);
             foreach (var line in lines)
-            {
+            {   
                
                 string[] chars = line.Split(' ');
                 switch (chars[0])
