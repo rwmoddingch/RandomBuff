@@ -1350,7 +1350,7 @@ namespace BuiltinBuffs.Duality
             }
         }
 
-        public float GetHeat(Vector2 pos)
+        public float GetHeat(UpdatableAndDeletable u, Vector2 pos)
         {
             var tile = room.GetTilePosition(pos);
             if (tile.x < 0 || tile.x >= room.Width || tile.y < 0 || tile.y >= room.Height)

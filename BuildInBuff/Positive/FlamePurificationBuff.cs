@@ -78,7 +78,7 @@ namespace BuiltinBuffs.Positive
                     {
                         var tile = patch.tiles[t];
                         Vector2 middleTile = wormGrass.room.MiddleOfTile(tile);
-                        float heat = heatSource.GetHeat(middleTile);
+                        float heat = heatSource.GetHeat(wormGrass, middleTile);
 
                         var cosmeticPos = patch.cosmeticWormPositions[t];
 
