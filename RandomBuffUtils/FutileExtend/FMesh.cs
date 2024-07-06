@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static RandomBuffUtils.FutileExtend.FMesh;
 
 namespace RandomBuffUtils.FutileExtend
 {
@@ -84,7 +86,6 @@ namespace RandomBuffUtils.FutileExtend
             }
             _renderLayer.HandleVertsChange();
         }
-
 
         void ReImportVert()
         {
@@ -389,5 +390,4 @@ namespace RandomBuffUtils.FutileExtend
             _isMeshDirty = true;
         }
     }
-
 }

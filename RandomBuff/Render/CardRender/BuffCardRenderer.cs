@@ -6,6 +6,7 @@ using RWCustom;
 using UnityEngine;
 using System.Linq;
 using RandomBuff.Render.UI.Component;
+using RandomBuffUtils.FutileExtend;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -251,7 +252,7 @@ namespace RandomBuff.Render.CardRender
         //        {
         //            cardCameraController.CardDirty = true;
         //        }
-                
+
 
         //        _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
         //        _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
@@ -269,6 +270,7 @@ namespace RandomBuff.Render.CardRender
         //    }
         //}
 
+        GameObject obj;
         protected override void FirstInit(int id, BuffStaticData buffStaticData)
         {
             base.FirstInit(id, buffStaticData);
@@ -281,6 +283,21 @@ namespace RandomBuff.Render.CardRender
             cardCycleCounterTextController = gameObject.AddComponent<CardNumberTextController>();
             cardKeyBinderTextController = gameObject.AddComponent<CardKeyBinderTextController>();
             cardCameraController.CardDirty = true;
+
+            //obj = new GameObject("flamethrower");
+            //obj.transform.parent = gameObject.transform;
+            //obj.transform.localPosition = Vector3.zero;
+            //var render = obj.AddComponent<MeshRenderer>();
+            //var filter = obj.AddComponent<MeshFilter>();
+            //filter.mesh = UniformLighting.TestMesh;
+            //render.material = new Material(Custom.rainWorld.Shaders["UniformSimpleLighting"].shader);
+            //render.material.mainTexture = UniformLighting.TestTexture;
+        }
+
+        public void Update()
+        {
+            //obj.transform.rotation = Quaternion.Euler(new Vector3(0f, Time.time * 30f, 0f));
+            //cardCameraController.CardDirty = true;
         }
 
         protected override void DuplicateInit(int id, BuffStaticData buffStaticData)

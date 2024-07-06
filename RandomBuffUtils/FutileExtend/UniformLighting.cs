@@ -39,8 +39,9 @@ namespace RandomBuffUtils.FutileExtend
             set => Shader.SetGlobalColor(ID_Ambient, value);
         }
 
-        //public static Mesh TestMesh;
-        //public static Texture2D TestTex;
+        public static Mesh TestMesh;
+        public static Texture2D TestTexture;
+
         internal static void OnModsInit()
         {
             On.RoomCamera.ApplyPalette += RoomCamera_ApplyPalette;
@@ -49,18 +50,20 @@ namespace RandomBuffUtils.FutileExtend
             Custom.rainWorld.Shaders.Add("UniformSimpleLighting", FShader.CreateShader("UniformSimpleLighting",
                 bundle.LoadAsset<Shader>("UniformSimpleLighting")));
 
+            TestMesh = bundle.LoadAsset<Mesh>("flameThrower.obj");
+            TestTexture = bundle.LoadAsset<Texture2D>("flameThrowerTextureTex.png");
+
             ID_LightDir = Shader.PropertyToID("uniformSimpleLighting_LightDir");
             ID_SpecularColor = Shader.PropertyToID("uniformSimpleLighting_SpecularCol");
             ID_LightColor = Shader.PropertyToID("uniformSimpleLighting_LightCol");
             ID_Ambient = Shader.PropertyToID("uniformSimpleLighting_Ambient");
 
-            Shader.SetGlobalVector(ID_LightDir,new Vector3(1,1,-1));
+            Shader.SetGlobalVector(ID_LightDir,new Vector3(1, 3,-2
+                ));
             Shader.SetGlobalColor(ID_SpecularColor, Color.white);
             Shader.SetGlobalColor(ID_LightColor, Color.white);
             Shader.SetGlobalColor(ID_Ambient, new Color(0,0,0,0.02F));
-
-            //TestMesh = bundle.LoadAsset<Mesh>("flameThrower");
-            //TestTex = bundle.LoadAsset<Texture2D>("flameThrowerTextureTex");
+            Camera.main.depthTextureMode |= DepthTextureMode.Depth;
         }
 
        
