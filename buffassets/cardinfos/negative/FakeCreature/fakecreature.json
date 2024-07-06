@@ -5,7 +5,11 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "9d0000",
-
+    
+    "MultiLayerFace":true,
+    "FaceLayer":10,
+    "MaxFaceDepth":0.8,
+    "FaceBackgroundColor": "000000",
     "Chinese" : {
         "BuffName" : "被害妄想症",
         "Description" : "每隔一段时间会看见幻影生物。幻影生物不能实际伤害玩家，但玩家也分辨不了它们和真实生物。它们死亡后直接消失。"

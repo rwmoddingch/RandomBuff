@@ -38,6 +38,9 @@ namespace RandomBuffUtils.FutileExtend
             get => Shader.GetGlobalColor(ID_Ambient);
             set => Shader.SetGlobalColor(ID_Ambient, value);
         }
+
+        //public static Mesh TestMesh;
+        //public static Texture2D TestTex;
         internal static void OnModsInit()
         {
             On.RoomCamera.ApplyPalette += RoomCamera_ApplyPalette;
@@ -56,6 +59,8 @@ namespace RandomBuffUtils.FutileExtend
             Shader.SetGlobalColor(ID_LightColor, Color.white);
             Shader.SetGlobalColor(ID_Ambient, new Color(0,0,0,0.02F));
 
+            //TestMesh = bundle.LoadAsset<Mesh>("flameThrower");
+            //TestTex = bundle.LoadAsset<Texture2D>("flameThrowerTextureTex");
         }
 
        

@@ -496,5 +496,12 @@ namespace BuiltinBuffs.Positive
                 }
             }
         }
+
+        public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
+        {
+            //TODO :接口
+            return 0;
+            //throw new NotImplementedException();
+        }
     }
 }

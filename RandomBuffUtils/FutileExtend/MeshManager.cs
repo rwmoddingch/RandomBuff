@@ -5,6 +5,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RWCustom;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static RandomBuffUtils.FutileExtend.FMesh;
 
 namespace RandomBuffUtils.FutileExtend
@@ -18,16 +19,39 @@ namespace RandomBuffUtils.FutileExtend
         public static Mesh3DAsset Plane;
         public static Mesh3DAsset Sphere;
 
+
         internal static void OnModsInit()
         {
             IL.FFacetRenderLayer.UpdateMeshProperties += FFacetRenderLayer_UpdateMeshPropertiesIL;
             On.FFacetRenderLayer.UpdateMeshProperties += FFacetRenderLayer_UpdateMeshProperties;
-            Mesh = FFacetType.CreateFacetType("RandomBuff.Pkuyo.Mesh", 16, 16, 64,
+            On.FFacetRenderLayer.Update += FFacetRenderLayer_Update;
+            Mesh = FFacetType.CreateFacetType("RandomBuff.Pkuyo.Mesh", 16, 64, 1000,
                 (stage, type, atlas, shader) => new FMeshRenderLayer(stage, type, atlas, shader));
             Cube = LoadMesh("Cube", "buffassets/assetbundles/futileextend/Cube.obj");
             Plane = LoadMesh("Plane", "buffassets/assetbundles/futileextend/Plane.obj");
             Sphere = LoadMesh("Sphere", "buffassets/assetbundles/futileextend/Sphere.obj");
 
+
+        }
+
+        private static void FFacetRenderLayer_Update(On.FFacetRenderLayer.orig_Update orig, FFacetRenderLayer self, int depth)
+        {
+            if (self is FMeshRenderLayer mesh)
+            {
+                if (self._depth != depth)
+                {
+                    self._depth = depth;
+                    self._material.renderQueue = 2000;
+                }
+                if (self._isMeshDirty)
+                    self.UpdateMeshProperties();
+                
+            }
+            else
+            {
+                orig(self, depth);
+
+            }
         }
 
         private static void FFacetRenderLayer_UpdateMeshProperties(On.FFacetRenderLayer.orig_UpdateMeshProperties orig, FFacetRenderLayer self)

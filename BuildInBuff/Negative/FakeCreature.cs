@@ -3,6 +3,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RWCustom;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -24,10 +25,13 @@ namespace BuiltinBuffs.Negative
     {
         public override BuffID ID => FakeCreatureBuffData.FakeCreatureID;
 
+        private int waitCounter = 0;
+
         public override void Update(RainWorldGame game)
         {
 
             base.Update(game);
+            waitCounter++;
             foreach (var player in game.Players)
             {
                 if (player.realizedCreature?.room != null &&
@@ -35,44 +39,43 @@ namespace BuiltinBuffs.Negative
                 {
                     foreach (var shortCut in player.realizedCreature.room.shortcuts.Where(i =>
                                  i.shortCutType == ShortcutData.Type.RoomExit &&
-                                 Custom.DistLess(i.StartTile.ToVector2() * 20f, player.realizedCreature.DangerPos,
-                                     200)))
+                                 ((Custom.Dist(i.StartTile.ToVector2() * 20f, player.realizedCreature.DangerPos) > 200 &&
+                                   Custom.Dist(i.StartTile.ToVector2() * 20f, player.realizedCreature.DangerPos) < 600) || Random.value > 0.5f)))
                     {
-                        var speed = player.realizedCreature.mainBodyChunk.vel.magnitude *
-                                    Custom.VecToDeg(Custom.DirVec(player.realizedCreature.DangerPos,
-                                        shortCut.StartTile.ToVector2() * 20f - new Vector2(10, 10)));
 
                         if (Random.value < Custom.LerpMap(Custom.Dist(
                                 shortCut.StartTile.ToVector2() * 20f - new Vector2(10, 10),
-                                player.realizedCreature.DangerPos), 60, 150, 0.08f, 0.02f, 0.4f) / 20f *
-                            Custom.LerpMap(speed, 0, 10, 1, 2.3f))
+                                player.realizedCreature.DangerPos), 60, 300, 0.06f, 0.02f, 0.4f) / 20f * 1.05f *
+                            Mathf.Clamp01(waitCounter - 80) *
+                            Custom.LerpMap(waitCounter, 80, 120, 0.1f, 1f) *
+                            Custom.LerpMap(waitCounter, 300, 500, 1f, 2f))
                         {
-                            if (Random.value < 0.5f)
+
+                            AbstractCreature acreature = new AbstractCreature(player.world,
+                                FakeCreatureEntry.templates[Random.Range(0, FakeCreatureEntry.templates.Length)],
+                                null, player.pos, game.GetNewID());
+                            acreature.Realize();
+                            var creature = acreature.realizedCreature;
+                            creature.inShortcut = true;
+                            if (Random.value > 0.025f)
                             {
-                                AbstractCreature acreature = new AbstractCreature(player.world,
-                                    FakeCreatureEntry.templates[Random.Range(0, FakeCreatureEntry.templates.Length)],
-                                    null, player.pos, game.GetNewID());
-                                acreature.Realize();
-                                var creature = acreature.realizedCreature;
-                                creature.inShortcut = true;
-                                if (Random.value > 0.01f)
-                                {
-                                    var module = new FakeCreatureModule(creature);
-                                    FakeCreatureHook.modules.Add(creature, module);
-                                    Debug.Log(
-                                        $"Create creature with fake module! {shortCut.destNode}, {acreature.creatureTemplate.type}, {module.maxCounter}");
-                                }
-                                else
-                                {
-                                    Debug.Log(
-                                        $"Wow! Create creature! {shortCut.destNode}, {acreature.creatureTemplate.type}");
-                                }
-
-                                game.shortcuts.CreatureEnterFromAbstractRoom(creature,
-                                    player.world.GetAbstractRoom(shortCut.destinationCoord.room),
-                                    shortCut.destNode);
-
+                                var module = new FakeCreatureModule(creature);
+                                FakeCreatureHook.modules.Add(creature, module);
+                                BuffUtils.Log(FakeCreatureBuffData.FakeCreatureID,
+                                    $"Create creature with fake module! {shortCut.destNode}, {acreature.creatureTemplate.type}, {module.maxCounter}");
                             }
+                            else
+                            {
+                                BuffUtils.Log(FakeCreatureBuffData.FakeCreatureID,
+                                    $"Wow! Create creature! {shortCut.destNode}, {acreature.creatureTemplate.type}");
+                            }
+
+                            waitCounter = 0;
+                            game.shortcuts.CreatureEnterFromAbstractRoom(creature,
+                                player.world.GetAbstractRoom(shortCut.destinationCoord.room),
+                                shortCut.destNode);
+
+
 
                         }
                     }
@@ -83,10 +86,22 @@ namespace BuiltinBuffs.Negative
 
     public class FakeCreatureEntry : IBuffEntry
     {
+        public static Shader displacementShader;
+        public static Texture2D defaultDisplacementTexture;
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<FakeCreatureBuff, FakeCreatureBuffData, FakeCreatureHook>(FakeCreatureBuffData.FakeCreatureID);
             On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
+        }
+
+        public static void LoadAssets()
+        {
+            AssetBundle bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath(Path.Combine(FakeCreatureBuffData.FakeCreatureID.GetStaticData().AssetPath, "fakecreature")));
+            Custom.rainWorld.Shaders.Add($"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain",
+                FShader.CreateShader($"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain", bundle.LoadAsset<Shader>("AlphaBehindTerrain")));
+            displacementShader = bundle.LoadAsset<Shader>("Displacement");
+            defaultDisplacementTexture = bundle.LoadAsset<Texture2D>("T_FX_Tile_0141");
+
         }
 
         private void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)
@@ -202,7 +217,9 @@ namespace BuiltinBuffs.Negative
         private static void Creature_SuckedIntoShortCut(On.Creature.orig_SuckedIntoShortCut orig, Creature self,
             IntVector2 entrancePos, bool carriedByOther)
         {
-            if (modules.TryGetValue(self, out var module))
+            var type = self.room.shortcutData(entrancePos).shortCutType;
+            if (modules.TryGetValue(self, out var module) && (
+                type == ShortcutData.Type.RoomExit || type == ShortcutData.Type.CreatureHole))
             {
                 module.SuckIntoShortCut(false);
                 return;
@@ -238,7 +255,7 @@ namespace BuiltinBuffs.Negative
         public FakeCreatureModule(Creature creature)
         {
             creatureRef = new WeakReference<Creature>(creature);
-            maxCounter = Random.Range(200, 600);
+            maxCounter = Random.Range(200, 500);
         }
 
         public void Update()
@@ -247,9 +264,16 @@ namespace BuiltinBuffs.Negative
                 return;
             if (counter >= 0)
             {
+                if (creature.inShortcut)
+                    return;
+
                 counter++;
                 if (counter == maxCounter)
+                {
+                    creature.room.AddObject(new GhostEffect(creature.graphicsModule, 40, 1, 0.4f, null,
+                        $"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain"));
                     creature.Destroy();
+                }
             }
 
             if (creature.room == null)
@@ -277,16 +301,20 @@ namespace BuiltinBuffs.Negative
             creature.Destroy();
         }
 
-        public void SuckIntoShortCut(bool createShadow = true)
+        public void SuckIntoShortCut(bool createEffect = true)
         {
             if (!creatureRef.TryGetTarget(out var creature))
                 return;
 
-            if (creature.graphicsModule != null && createShadow)
+            if (creature.graphicsModule != null)
             {
-                creature.room.AddObject(new GhostEffect(creature.graphicsModule, 40, 1, 0.4f));
-                creature.room.PlaySound(SoundID.SB_A14, 0f, 0.76f, 1f);
-
+                creature.room.AddObject(new GhostEffect(creature.graphicsModule, 40, 1, 0.4f, null,
+                    $"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain"));
+                if (createEffect)
+                {
+                    creature.room.PlaySound(SoundID.SB_A14, 0f, 0.76f, 1f);
+                    BuffPostEffectManager.AddEffect(new DisplacementEffect(0, 3, 0.3f, 1f, 1, 0.04f));
+                }
             }
 
             Destroy();
@@ -296,4 +324,34 @@ namespace BuiltinBuffs.Negative
 
         private int counter = -1;
     }
+    public class DisplacementEffect : BuffPostEffectLimitTime
+    {
+        private float speed;
+        private float maxInst;
+
+        public DisplacementEffect(int layer, float duringTime, float enterTime, float fadeTime, float speed, float inst, Vector4? dispSV = null, Texture2D texture = null) : base(layer, duringTime, enterTime, fadeTime)
+        {
+            this.speed = speed;
+            maxInst = inst;
+            material = new Material(FakeCreatureEntry.displacementShader);
+            material.SetVector("_DispSV", dispSV ?? new Vector4(0.24f, 0.114f, 0.149f, 0.184f));
+            material.SetTextureOffset("_DispTex", new Vector2(Random.value, Random.value));
+            material.SetTexture("_DispTex", texture ?? FakeCreatureEntry.defaultDisplacementTexture);
+        }
+
+        protected override float LerpAlpha => Mathf.Pow(base.LerpAlpha, 0.6f);
+
+        public override void OnRenderImage(RenderTexture source, RenderTexture destination)
+        {
+            base.OnRenderImage(source, destination);
+            material.SetFloat("_TimeSpeed", speed);
+            material.SetFloat("_DispInst", maxInst * LerpAlpha);
+
+
+            Graphics.Blit(source, destination, material);
+        }
+    }
 }
+
+
+

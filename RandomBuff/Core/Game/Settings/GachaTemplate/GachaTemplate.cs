@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
@@ -47,6 +48,15 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         /// </summary>
         public virtual bool NeedRandomStart => false;
 
+
+        /// <summary>
+        /// 固定出生点，null为无指定（继承对应猫默认）
+        /// </summary>
+        [CanBeNull]
+        [JsonProperty] 
+        public string ForceStartPos = null;
+
+
         public abstract GachaTemplateID ID { get; }
 
         /// <summary>
@@ -75,6 +85,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         /// </summary>
         /// <returns>返回false证明数据损坏</returns>
         public virtual bool TemplateLoaded() => true;
+
 
 
 

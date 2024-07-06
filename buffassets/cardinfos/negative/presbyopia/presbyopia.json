@@ -1,0 +1,17 @@
+{
+    "FaceName": "presbyopia",
+    "BuffID" : "Presbyopia",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+    "Conflict": ["ShortSighted"],
+    "Chinese" : {
+        "BuffName" : "老花眼",
+        "Description" : "在玩家一定范围内的画面变得模糊，离玩家越远越清晰"
+    },
+    "English" : {
+        "BuffName" : "Presbyopia",
+        "Description" : "The image becomes blurry within a certain range of the player, and becomes clearer as it gets farther away from the player."
+    }
+}

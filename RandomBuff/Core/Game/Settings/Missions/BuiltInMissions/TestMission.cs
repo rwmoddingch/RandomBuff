@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
@@ -20,9 +21,9 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
 
         public TestMission()
         {
-            gameSetting = new GameSetting(BindSlug)
+            gameSetting = new GameSetting(BindSlug,"Normal","SS_AI")
             {
-                conditions = new() { new CycleCondition() { SetCycle = 10 } }
+                conditions = new() { new CycleCondition() { SetCycle = 10 } },
             };
             startBuffSet.Add(new Buff.BuffID("Hell"));
         }

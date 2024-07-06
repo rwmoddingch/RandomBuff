@@ -14,6 +14,9 @@ namespace RandomBuffUtils
 {
     public class GhostEffect : CosmeticSprite
     {
+
+       string overrideLowLayerShader = null;
+
         Vector2 center;
         Vector2 lastCenter;
         Vector2[][] deltas;
@@ -33,6 +36,9 @@ namespace RandomBuffUtils
 
         Vector2? posDelta;
 
+
+
+
         /// <summary>
         /// 初始化
         /// </summary>
@@ -40,14 +46,20 @@ namespace RandomBuffUtils
         /// <param name="life">生命周期</param>
         /// <param name="alpha">初始透明度</param>
         /// <param name="velMulti">速度乘数，如果你不希望残影移动，那么请给0</param>
-        public GhostEffect(GraphicsModule graphicsModule, int life, float alpha, float velMulti, Vector2? posDelta = null)
+        public GhostEffect(GraphicsModule graphicsModule, int life, float alpha, float velMulti, Vector2? posDelta = null,string overrideLowLayerShader = null)
         {
+            if (graphicsModule?.owner?.firstChunk == null)
+            {
+                Destroy();
+                return;
+            }
             this.graphicsModule = graphicsModule;
 
             startVel = graphicsModule.owner.firstChunk.vel * velMulti;
             this.alpha = alpha;
             this.life = life;
             this.posDelta = posDelta;
+            this.overrideLowLayerShader = overrideLowLayerShader;
         }
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -61,7 +73,8 @@ namespace RandomBuffUtils
                 sLeaser.sprites = ProcessSprites(sleaser.sprites, rCam);
                 break;
             }
-            AddToContainer(sLeaser, rCam, null);
+         
+            AddToContainer(sLeaser,rCam,null);
         }
 
         FSprite[] ProcessSprites(FSprite[] origs, RoomCamera roomCamera)
@@ -83,10 +96,10 @@ namespace RandomBuffUtils
             var sprites = new FSprite[origs.Length];
             deltas = new Vector2[origs.Length][];
             origAlphas = new float[origs.Length][];
-
             for (int i = 0; i < sprites.Length; i++)
             {
-                sprites[i] = CopySprite(origs[i]);
+                sprites[i] = CopySprite(origs[i], overrideLowLayerShader, roomCamera);
+                
                 deltas[i] = GetDeltas(sprites[i], screenCenterPos);
                 origAlphas[i] = GetAlphas(sprites[i]);
             }
@@ -179,7 +192,7 @@ namespace RandomBuffUtils
             return pos;
         }
 
-        public static FSprite CopySprite(FSprite orig)
+        public static FSprite CopySprite(FSprite orig, string lowLayerShader, RoomCamera rCam)
         {
             FSprite result;
             if (orig is CustomFSprite customFSprite)
@@ -211,14 +224,17 @@ namespace RandomBuffUtils
                 result = new FSprite(orig.element.name, orig._facetTypeQuad);
                 result.SetAnchor(orig.GetAnchor());
                 result.SetPosition(orig.GetPosition());
-                result.rotation = orig.rotation;
                 result.color = orig.color;
-                result.alpha = orig.alpha;
-                result.scale = orig.scale;
-                result.scaleX = orig.scaleX;
-                result.scaleY = orig.scaleY;
             }
+            result.shader = orig.shader;
+            result.rotation = orig.rotation;
+            result.alpha = orig.alpha;
+            result.scale = orig.scale;
+            result.scaleX = orig.scaleX;
+            result.scaleY = orig.scaleY;
             result.isVisible = orig.isVisible;
+            if (lowLayerShader != null && rCam.SpriteLayers.IndexOf(orig.container) < rCam.SpriteLayerIndex["Foreground"])
+                result.shader = rCam.game.rainWorld.Shaders[lowLayerShader];
             return result;
         }
 
