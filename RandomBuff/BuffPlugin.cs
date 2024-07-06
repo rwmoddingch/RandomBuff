@@ -30,6 +30,7 @@ using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
 using RandomBuff.Render.UI.Component;
+using RandomBuffUtils.FutileExtend;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -77,6 +78,8 @@ namespace RandomBuff
             
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();
+
+            UniformLighting.TestUpdate();
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)

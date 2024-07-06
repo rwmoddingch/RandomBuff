@@ -339,7 +339,6 @@ namespace BuiltinBuffs.Positive
             AddToContainer(sLeaser, rCam, null);
         }
 
-        FGameObjectNode node;
         public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
             if (newContatiner == null)
@@ -354,18 +353,6 @@ namespace BuiltinBuffs.Positive
             }
             sLeaser.sprites[2].RemoveFromContainer();
             rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[2]);
-
-            //obj = new FMeshObj(FlameThrowerBuffEntry.flameThrowerMesh, Futile.atlasManager.GetElementWithName(FlameThrowerBuffEntry.flameThrowerTexture).atlas.texture, rCam.game.rainWorld.Shaders["UniformSimpleLighting"].shader);
-            //newContatiner.AddChild(obj);
-
-            var obj = new GameObject("flamethrower");
-            var render = obj.AddComponent<MeshRenderer>();
-            var filter = obj.AddComponent<MeshFilter>();
-            filter.mesh = UniformLighting.TestMesh;
-            render.material = new Material(rCam.game.rainWorld.Shaders["UniformSimpleLighting"].shader);
-            render.material.mainTexture = UniformLighting.TestTexture;
-            rCam.ReturnFContainer("HUD").AddChild(node = new FGameObjectNode(obj, true, false, false));
-
         }
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -392,11 +379,6 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[2].SetPosition(pos + flamePosDelta / 2f);
             sLeaser.sprites[2].rotation = Custom.VecToDeg(flamePosDelta) + 90f;
             sLeaser.sprites[2].alpha = currentHeat / maxHeat;
-
-            node.SetPosition(pos + Vector2.right * 120f);
-            //node.scale = 14f;
-            node.gameObject.transform.localScale = new Vector3(10f, 10f, 10f);
-            node.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0f, Time.time * 40f, 0f));
         }
 
         Color CaculateTubeCol(float l)

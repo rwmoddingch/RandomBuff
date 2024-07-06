@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,8 +66,20 @@ namespace RandomBuffUtils.FutileExtend
             Shader.SetGlobalColor(ID_Ambient, new Color(0,0,0,0.02F));
             Camera.main.depthTextureMode |= DepthTextureMode.Depth;
         }
+        static string path = Application.streamingAssetsPath + Path.DirectorySeparatorChar + "DebugLighting.txt";
+        public static void TestUpdate()
+        {
+            if (Input.GetKeyDown(KeyCode.T) && File.Exists(path))
+            {
+                string[] lines = File.ReadAllLines(path);
+                Vector3 vector3;
+                vector3.x = float.Parse(lines[0]);
+                vector3.y = float.Parse(lines[1]);
+                vector3.z = float.Parse(lines[2]);
 
-       
+                Shader.SetGlobalVector(ID_LightDir, vector3);
+            }
+        }       
 
         private static void RoomCamera_ApplyPalette(On.RoomCamera.orig_ApplyPalette orig, RoomCamera self)
         {
