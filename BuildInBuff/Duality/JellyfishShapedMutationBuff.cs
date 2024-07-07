@@ -64,10 +64,9 @@ namespace BuiltinBuffs.Duality
                     jellyfishCat.JellyfishMouthBeads();
                     jellyfishCat.JellyfishOralArm(player.graphicsModule as PlayerGraphics);
                     jellyfishCat.InitiateSprites(game.cameras[0].spriteLeasers.
-                        First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);/*
-                    jellyfishCat.AddToContainer(game.cameras[0].spriteLeasers.
-                        First(i => i.drawableObject == player.graphicsModule), game.cameras[0], null);*/
+                        First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
+                JellyfishShapedMutationBuffEntry.EstablishRelationship();
             }
         }
 
@@ -110,7 +109,7 @@ namespace BuiltinBuffs.Duality
             On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
 
-            On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
+            On.MoreSlugcats.BigJellyFish.ValidGrabCreature += BigJelly_ValidGrabCreature;
             On.JellyFish.Collide += JellyFish_Collide;
             On.Centipede.Shock += Centipede_Shock;
 
@@ -125,7 +124,7 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
             On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
-            //On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
+            On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
         }
         #region 额外特性
         //脱水致死
@@ -183,13 +182,20 @@ namespace BuiltinBuffs.Duality
         }
         #endregion
         #region 生物关系
-        //修改生物关系（巨型水母、水蛭不再攻击玩家）
-        private static void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)
+        //修改生物关系（水蛭不再攻击玩家）
+        public static void EstablishRelationship()
         {
-            orig();
-
             StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.BigJelly, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.SeaLeech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+        }
+
+        //修改生物关系（巨型水母不再攻击玩家）
+        private static bool BigJelly_ValidGrabCreature(On.MoreSlugcats.BigJellyFish.orig_ValidGrabCreature orig, BigJellyFish self, AbstractCreature abs)
+        {
+            bool result = orig(self, abs);
+            result = result && abs.creatureTemplate.type != CreatureTemplate.Type.Slugcat;
+            return result;
         }
 
         //玩家逐渐免疫小水母的攻击
@@ -209,6 +215,7 @@ namespace BuiltinBuffs.Duality
                JellyfishCatFeatures.TryGetValue(otherObject as Player, out jellyfishCat))
             {
                 Player player = (Player)otherObject;
+                player.AddQuarterFood();
                 player.stun = Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
             }
         }
@@ -236,6 +243,7 @@ namespace BuiltinBuffs.Duality
                 else
                     jellyfishCat.ImmuneShock = false;
                 player.stun = Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
+                player.AddQuarterFood();
             }
         }
         #endregion
@@ -244,17 +252,20 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, abstractCreature, world);
             if (!JellyfishCatFeatures.TryGetValue(self, out _))
+            {
                 JellyfishCatFeatures.Add(self, new JellyfishCat(self));
+                EstablishRelationship();
+            }
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
+
             if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
             {
                 jellyfishCat.Update();
                 self.GetExPlayerData().HaveHands = false;
-
                 //水下呼吸，但游泳速度降低50%
                 self.airInLungs = 1f; 
                 if (self.animation == Player.AnimationIndex.SurfaceSwim || self.animation == Player.AnimationIndex.DeepSwim)
@@ -306,6 +317,7 @@ namespace BuiltinBuffs.Duality
                 if (jellyfishCat.ImmuneShock)
                 {
                     jellyfishCat.ImmuneShock = false;
+                    self.AddFood(1);
                     return;
                 }
             }
@@ -521,10 +533,10 @@ namespace BuiltinBuffs.Duality
         public int TentaclesStart => OralArmsStart + oralArmOffsets.Length;
         //身体
         public int BodySpriteStart => TentaclesStart + tentacles.Length;
-        public int BodySpriteLength => 5;
+        public int BodySpriteLength => 0;//5;
         //伞盖
         private int hoodSpriteStart => BodySpriteStart + BodySpriteLength;
-        private int hoodSpriteLength => 2;
+        private int hoodSpriteLength => 0;//2;
         //口珠
         private int MouthSpriteStart => hoodSpriteStart + hoodSpriteLength;
 
@@ -542,13 +554,13 @@ namespace BuiltinBuffs.Duality
         #region 身体部件
         public void JellyfishBody(PlayerGraphics self)
         {
-            newBody = new BodyPart[7];
+            newBody = new BodyPart[2];//7
             newBody[0] = new GenericBodyPart(self, 12.1f, 0.7f, 0.999f, self.owner.firstChunk);
 
             CoreChunk = 1;
             newBody[CoreChunk] = new BodyPart(self);//new GenericBodyPart(self, 0.28f * newBody[0].rad, 0.7f, 0.999f, self.owner.bodyChunks[1]);
             newBody[CoreChunk].pos = self.tail[self.tail.Length - 1].pos;//newBody[0].pos + new Vector2(0f, -coreLength);
-
+            /*
             leftHoodChunk = CoreChunk + 1;
             newBody[leftHoodChunk] = new GenericBodyPart(self, 0f, 0.7f, 0.999f, self.owner.firstChunk);
 
@@ -561,18 +573,18 @@ namespace BuiltinBuffs.Duality
             newBody[5].pos = newBody[5].pos + new Vector2(-10f, 0f);
             newBody[6] = new GenericBodyPart(self, 0.28f * newBody[0].rad, 0.7f, 0.999f, self.owner.firstChunk);
             newBody[6].pos = newBody[6].pos + new Vector2(10f, 0f);
-
+            */
             JellyfishBodyConnectToPoint(self);
         }
 
         public void JellyfishBodyConnectToPoint(PlayerGraphics self)
         {
-            newBody[CoreChunk].ConnectToPoint(self.tail[self.tail.Length - 1].pos, coreLength, false, 0.4f, self.tail[self.tail.Length - 1].vel, 0.1f, 0.4f);
+            newBody[CoreChunk].ConnectToPoint(self.tail[self.tail.Length - 1].pos, coreLength, false, 0.4f, self.tail[self.tail.Length - 1].vel, 0.1f, 0.4f);/*
             newBody[4].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);
             newBody[5].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);
             newBody[6].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);
             newBody[leftHoodChunk].ConnectToPoint(newBody[0].pos, hoodLength, false, 0.1f, newBody[0].vel, 0.1f, 0.1f);
-            newBody[rightHoodChunk].ConnectToPoint(newBody[0].pos, hoodLength, false, 0.1f, newBody[0].vel, 0.1f, 0.1f);
+            newBody[rightHoodChunk].ConnectToPoint(newBody[0].pos, hoodLength, false, 0.1f, newBody[0].vel, 0.1f, 0.1f);*/
         }
 
         //触须
@@ -671,9 +683,10 @@ namespace BuiltinBuffs.Duality
 
             coreColor = new Color(0.82f, 0.42f, 0.24f);
             coreColorDark = new Color(0.64f, 0.14f, 0.09f);
+
             Random.state = state;
 
-            electricChargingTime = 1200;
+            electricChargingTime = 120;
             electricCounter = 0;
         }
 
@@ -698,6 +711,7 @@ namespace BuiltinBuffs.Duality
             sLeaser.sprites[CoreSpriteStart + 2] = new FSprite("Futile_White");
             sLeaser.sprites[CoreSpriteStart + 2].scale = 1.9230769f / 5f;
             sLeaser.sprites[CoreSpriteStart + 2].shader = rCam.room.game.rainWorld.Shaders["VectorCircle"];
+
             #region 口腕
             for (int i = 0; i < oralArmOffsets.GetLength(0); i++)
             {
@@ -735,7 +749,7 @@ namespace BuiltinBuffs.Duality
             for (int i = 0; i < tentacles.GetLength(0); i++)
                 for (int j = 0; j < tentacles.GetLength(1); j++)
                     sLeaser.sprites[TentacleSprite(i, j)] = TriangleMesh.MakeLongMesh(tentacles[i, j].GetLength(0), pointyTip: false, customColor: true);
-
+            /*
             sLeaser.sprites[BodySpriteStart] = new FSprite("Futile_White");
             sLeaser.sprites[BodySpriteStart].scale = newBody[0].rad / 20f;
             sLeaser.sprites[BodySpriteStart].shader = rCam.room.game.rainWorld.Shaders["VectorCircle"];
@@ -753,7 +767,7 @@ namespace BuiltinBuffs.Duality
 
             sLeaser.sprites[hoodSpriteStart] = TriangleMesh.MakeLongMesh(6, pointyTip: false, customColor: true);
             sLeaser.sprites[hoodSpriteStart + 1] = TriangleMesh.MakeLongMesh(6, pointyTip: false, customColor: true);
-
+            */
             for (int j = 0; j < mouthBeads.Length; j++)
             {
                 sLeaser.sprites[MouthSpriteStart + j] = new FSprite("DangleFruit0A");
@@ -761,8 +775,8 @@ namespace BuiltinBuffs.Duality
                 sLeaser.sprites[MouthSpriteStart + j].scale = 1.34f / 3f;
             }
 
-            //self.AddToContainer(sLeaser, rCam, null);
-            this.AddToContainer(sLeaser, rCam, null);
+            self.AddToContainer(sLeaser, rCam, null);
+            //this.AddToContainer(sLeaser, rCam, null);
         }
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -771,7 +785,12 @@ namespace BuiltinBuffs.Duality
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
 
-            Color color = new Color(0.87f, 0.78f, 0.55f);
+            coreColor = sLeaser.sprites[0].color;
+            Color.RGBToHSV(coreColor, out var h, out var s, out var v);
+            coreColorDark = Color.Lerp(coreColor,
+            Color.HSVToRGB(h, s, v > 0.5f ? v - 0.3f : v + 0.3f), 0.8f);
+
+            Color color = coreColor;//new Color(0.87f, 0.78f, 0.55f);
             float num = rCam.PaletteDarkness();
             Color a = Color.Lerp(Color.Lerp(palette.fogColor, color, 0.3f), palette.blackColor, Mathf.Pow(num, 2f));
             Color a2 = Color.Lerp(Color.Lerp(a, new Color(1f, 1f, 1f), 0.5f), palette.blackColor, Mathf.Pow(num, 2f));
@@ -779,11 +798,11 @@ namespace BuiltinBuffs.Duality
             color = Color.Lerp(color, palette.blackColor, darkness);
             a = Color.Lerp(a, palette.blackColor, darkness);
             a2 = Color.Lerp(a2, palette.blackColor, darkness);
-            a3 = Color.Lerp(a3, palette.blackColor, darkness);
+            a3 = Color.Lerp(a3, palette.blackColor, darkness);/*
             sLeaser.sprites[BodySpriteStart].color = a2;
             sLeaser.sprites[BodySpriteStart + 1].color = Color.Lerp(a2, coreColorDark, 0.2f);
             sLeaser.sprites[BodySpriteStart + 2].color = Color.Lerp(a2, coreColorDark, 0.2f);
-            sLeaser.sprites[BodySpriteStart + 3].color = Color.Lerp(a2, coreColorDark, 0.3f);
+            sLeaser.sprites[BodySpriteStart + 3].color = Color.Lerp(a2, coreColorDark, 0.3f);*/
             sLeaser.sprites[CoreSpriteStart + 1].color = coreColor;
             sLeaser.sprites[CoreSpriteStart + 2].color = coreColorDark;
             this.color = a;
@@ -796,6 +815,7 @@ namespace BuiltinBuffs.Duality
                     for (int k = 0; k < (sLeaser.sprites[TentacleSprite(i, j)] as TriangleMesh).verticeColors.Length; k++)
                         (sLeaser.sprites[TentacleSprite(i, j)] as TriangleMesh).verticeColors[k] = Color.Lerp(a, a3, (float)k / (float)((sLeaser.sprites[TentacleSprite(i, j)] as TriangleMesh).verticeColors.Length - 1));
             Color a4 = a2;
+            /*
             for (int k = 0; k < (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).verticeColors.Length; k++)
             {
                 (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).verticeColors[k] = Color.Lerp(a2, sLeaser.sprites[BodySpriteStart + 3].color, (float)k / (float)((sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).verticeColors.Length - 1));
@@ -808,7 +828,7 @@ namespace BuiltinBuffs.Duality
             {
                 (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).verticeColors[l] = Color.Lerp(a4, a, (float)l / (float)((sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).verticeColors.Length - 1));
                 (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).verticeColors[l] = Color.Lerp(a4, a, (float)l / (float)((sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).verticeColors.Length - 1));
-            }
+            }*/
             for (int m = 0; m < (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).verticeColors.Length; m++)
             {
                 (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).verticeColors[m] = Color.Lerp(a, coreColor, (float)m / (float)((sLeaser.sprites[CoreSpriteStart] as TriangleMesh).verticeColors.Length - 1));
@@ -830,7 +850,7 @@ namespace BuiltinBuffs.Duality
                 for (int i = 0; i < TotalSprites; i++)
                 {
                     sLeaser.sprites[firstSprite + i].RemoveFromContainer();
-                    midgroundContainer.AddChild(sLeaser.sprites[i]);
+                    midgroundContainer.AddChild(sLeaser.sprites[firstSprite + i]);
                 }
 
                 for (int i = 0; i < this.oralArm.GetLength(0); i++)
@@ -862,13 +882,15 @@ namespace BuiltinBuffs.Duality
                 for (int i = 4; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
             sLeaser.sprites[CoreSpriteStart].isVisible = false;//口珠的纽带，直接隐藏
-            
+            for (int j = 0; j < mouthBeads.Length; j++)
+                sLeaser.sprites[MouthSpriteStart + j].isVisible = false;
+            /*
             for (int i = 0; i < BodySpriteLength; i++)
             {
                 sLeaser.sprites[BodySpriteStart + i].isVisible = false;
-            }
+            }*/
 
-            Vector2 p = Vector2.Lerp(newBody[5].lastPos, newBody[5].pos, timeStacker);
+            Vector2 p = Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker);//Vector2.Lerp(newBody[5].lastPos, newBody[5].pos, timeStacker);
             Vector2 bodyPos = Vector2.Lerp(newBody[0].lastPos, newBody[0].pos, timeStacker);
             Vector2 corePos = Vector2.Lerp(newBody[CoreChunk].lastPos, newBody[CoreChunk].pos, timeStacker);
             Vector2 p2 = Vector3.Slerp(lastRotation, rotation, timeStacker);
@@ -878,10 +900,10 @@ namespace BuiltinBuffs.Duality
             if (darkness != lastDarkness)
             {
                 ApplyPalette(sLeaser, rCam, rCam.currentPalette);
-            }
+            }/*
             sLeaser.sprites[BodySpriteStart + 1].scale = newBody[4].rad / 10f;
             sLeaser.sprites[BodySpriteStart + 2].scale = newBody[5].rad / 10f;
-            sLeaser.sprites[BodySpriteStart + 3].scale = newBody[6].rad / 10f;
+            sLeaser.sprites[BodySpriteStart + 3].scale = newBody[6].rad / 10f;*/
             Vector2 mouthLeftPos = MouthLeftPos(timeStacker);
             Vector2 mouthRightPos = MouthRightPos(timeStacker);
             for (int i = 0; i < mouthBeads.Length; i++)
@@ -937,7 +959,7 @@ namespace BuiltinBuffs.Duality
                 }
                 num5 += num3;
                 vector7 = vector10 + vector8 * num3;
-            }
+            }/*
             for (int k = 0; k < BodySpriteLength - 1; k++)
             {
                 Vector2 vector12 = bodyPos;
@@ -971,6 +993,7 @@ namespace BuiltinBuffs.Duality
                 float num7 = Mathf.Sin(num5 / num4);
                 Vector2 vector16 = vector9 * (10f + 4f * num7); //vector9 * (50f + 20f * num7);
                 Vector2 vector17 = vector9 * (2f + 12f * num7);//vector9 * (10f + 60f * num7);
+                
                 (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4, Vector2.Lerp(vector15 - vector17, mouthLeftPos, t3) - camPos);
                 (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 1, Vector2.Lerp(vector15 + vector17, mouthRightPos, t3) - camPos);
                 (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 2, Vector2.Lerp(vector15 - vector17, mouthLeftPos, t3) - camPos);
@@ -996,7 +1019,7 @@ namespace BuiltinBuffs.Duality
             (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(8, vector19 + p2 * newBody[6].rad / 1.9f + Custom.PerpendicularVector(p2) * (newBody[5].rad * -0.4f) - camPos);
             (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(9, vector20 + p2 * newBody[5].rad / 1.9f + Custom.PerpendicularVector(p2) * (newBody[6].rad * 0.4f) - camPos);
             (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(10, vector18 + Custom.PerpendicularVector(p2) * (newBody[4].rad * -0.5f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(11, vector18 + Custom.PerpendicularVector(p2) * (newBody[4].rad * 0.5f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(11, vector18 + Custom.PerpendicularVector(p2) * (newBody[4].rad * 0.5f) - camPos);*/
             sLeaser.sprites[CoreSpriteStart + 1].x = corePos.x - camPos.x;
             sLeaser.sprites[CoreSpriteStart + 1].y = corePos.y - camPos.y;
             sLeaser.sprites[CoreSpriteStart + 2].x = corePos.x - camPos.x;
@@ -1216,7 +1239,7 @@ namespace BuiltinBuffs.Duality
                     {
                         Vector2 a = Custom.DegToVec(360f * UnityEngine.Random.value);
                         self.room.AddObject(new MouseSpark(self.firstChunk.pos + a * 18f, self.firstChunk.vel + a * 36f * UnityEngine.Random.value, 20f, new Color(0.7f, 1f, 1f)));
-                        self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Latch_On_Player, self.firstChunk.pos);
+                        self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Latch_On_Player, self.firstChunk.pos, 0.3f, 0f);
                     }
                 }
             }
@@ -1295,11 +1318,11 @@ namespace BuiltinBuffs.Duality
             newBody[0].pos = self.firstChunk.pos;
             PlayerGraphics g = self.graphicsModule as PlayerGraphics;
             newBody[CoreChunk].pos = g.tail[g.tail.Length - 1].pos;// newBody[0].pos + new Vector2(0f, -8f);
-            newBody[CoreChunk].vel *= 0f;
+            newBody[CoreChunk].vel *= 0f;/*
             newBody[leftHoodChunk].pos = newBody[0].pos + new Vector2(-4f, -2f);
             newBody[leftHoodChunk].vel *= 0f;
             newBody[rightHoodChunk].pos = newBody[0].pos + new Vector2(4f, -2f);
-            newBody[rightHoodChunk].vel *= 0f;
+            newBody[rightHoodChunk].vel *= 0f;*/
             if (canBeSurfaceMode)
             {/*
                 if (self.firstChunk.pos.y < StartPos.y)
@@ -1313,7 +1336,8 @@ namespace BuiltinBuffs.Duality
                 {
                     BodyChunk bodyChunk = newBody[0];
                     bodyChunk.vel.y = bodyChunk.vel.y * 0.4f;
-                }*//*
+                }*/
+                /*
                 Vector2 vector = Custom.DirVec(self.firstChunk.pos, newBody[0].pos);
                 vector.y *= 0f;
                 vector.x *= Mathf.InverseLerp(0f, 30f, Vector2.Distance(self.firstChunk.pos, newBody[0].pos)) / 2f;
@@ -1322,16 +1346,16 @@ namespace BuiltinBuffs.Duality
             }
             else
             {
-                newBody[CoreChunk].vel += new Vector2(0f, -0.28f);
+                newBody[CoreChunk].vel += new Vector2(0f, -0.28f);/*
                 newBody[0].vel += new Vector2(0f, (self.gravity * 1.95f + 1f) * 0.72f);
                 newBody[4].vel = new Vector2(0f, self.gravity * 3f * 0.72f);
                 newBody[5].vel = new Vector2(0f, self.gravity * 3f * 0.72f);
-                newBody[6].vel = new Vector2(0f, self.gravity * 3f * 0.72f);
-            }
+                newBody[6].vel = new Vector2(0f, self.gravity * 3f * 0.72f);*/
+            }/*
             newBody[4].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * 8f, 5f);
             Vector2 vector2 = Custom.PerpendicularVector(Custom.DirVec(newBody[4].pos, newBody[0].pos + rotation));
             newBody[5].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * -4f + vector2 * -27f, 5f);
-            newBody[6].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * -4f + vector2 * 27f, 5f);
+            newBody[6].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * -4f + vector2 * 27f, 5f);*/
             bool flag = true;/*
             if (!self.safariControlled)
             {
@@ -1437,13 +1461,14 @@ namespace BuiltinBuffs.Duality
                 hoodSwayingPulse = 0.1f + hoodSwayingPulse * 0.9f;
             }
             newBody[CoreChunk].vel += Custom.DirVec(newBody[CoreChunk].pos, newBody[0].pos) / 5f;
-            Custom.DirVec(newBody[CoreChunk].pos, self.firstChunk.pos);
+            /*Custom.DirVec(newBody[CoreChunk].pos, self.firstChunk.pos);
             Vector2 vector3 = self.firstChunk.pos + Custom.DirVec(self.firstChunk.pos, newBody[4].pos).normalized * 4f + Custom.DirVec(self.firstChunk.pos, newBody[CoreChunk].pos) * 26f * hoodSwayingPulse;
             float speed = 5.8f;
             Vector2 vector4 = Custom.PerpendicularVector(vector3) * 6f;
             newBody[leftHoodChunk].pos = Custom.MoveTowards(newBody[leftHoodChunk].pos, vector3 - vector4, speed);
-            newBody[rightHoodChunk].pos = Custom.MoveTowards(newBody[rightHoodChunk].pos, vector3 + vector4, speed);
-            tentaclesWithdrawn = 0f;/*
+            newBody[rightHoodChunk].pos = Custom.MoveTowards(newBody[rightHoodChunk].pos, vector3 + vector4, speed);*/
+            tentaclesWithdrawn = 0f;
+            /*
             if (!anyTentaclePulled)
             {
                 rotation = Vector3.Slerp(rotation, new Vector2(0f, 1f), (1f - 2f * Mathf.Abs(0.5f - self.firstChunk.submersion)) * 0.1f);
@@ -1483,8 +1508,8 @@ namespace BuiltinBuffs.Duality
                              creature.firstChunk, null, Creature.DamageType.Electric, 0.1f,
                              (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));//(creature is Player) ? 140f : (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));
             self.room.AddObject(new CreatureSpasmer(creature, false, creature.stun));
-            self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, self.firstChunk.pos);
             self.room.AddObject(new Explosion.ExplosionLight(self.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
+            self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, self.firstChunk.pos);
             this.electricCounter = this.electricChargingTime;
         }
 
@@ -1497,23 +1522,28 @@ namespace BuiltinBuffs.Duality
                 pressPckpTime++;
             else
                 pressPckpTime = 0;
-
+            /*身体几乎不再移动
             if (WantToMoveTentacle)
             {
-                //身体不再移动
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
-                    player.bodyChunks[i].pos = player.bodyChunks[i].lastPos;
-                    player.bodyChunks[i].vel *= 0;
+                    player.bodyChunks[i].vel *= 0.2f;
                 }
-                //设置触须移动位置
-                huntPos = player.bodyChunks[0].pos + 100f * new Vector2(player.input[0].x, player.input[0].y);
-            }
+            }*/
+
             anyTentaclePulled = false;
             for (int i = 0; i < tentacles.GetLength(0); i++)
             {
                 for (int j = 0; j < tentacles.GetLength(1); j++)
                 {
+                    if (WantToMoveTentacle)
+                    {
+                        if (latchOnToBodyChunks[i, j] != null)
+                            huntPos = latchOnToBodyChunks[i, j].pos;
+                        //设置触须移动位置
+                        else
+                            huntPos = player.bodyChunks[0].pos + 100f * new Vector2(player.input[0].x, player.input[0].y);
+                    }
                     float num2 = Mathf.Lerp(tentacleScaler[i, j], 1f, tentaclesWithdrawn);
                     for (int l = 0; l < tentacles[i, j].GetLength(0); l++)
                     {
@@ -1524,12 +1554,7 @@ namespace BuiltinBuffs.Duality
                         if (player.room.PointSubmerged(tentacles[i, j][l, 0]))
                         {
                             tentacles[i, j][l, 2] *= Custom.LerpMap(tentacles[i, j][l, 2].magnitude, 1f, 10f, 1f, 0.5f, Mathf.Lerp(1.4f, 0.4f, t));
-                            Vector2 vector5 = new Vector2(0f, 0f);
-                            if (huntPos.HasValue)
-                            {
-                                vector5 = Custom.DirVec(tentacles[i, j][l, 0], huntPos.Value);
-                            }
-                            tentacles[i, j][l, 2] += Custom.RNV() * 0.2f + vector5 * 0.2f;
+                            tentacles[i, j][l, 2] += Custom.RNV() * 0.2f;
                         }
                         else
                         {
@@ -1541,6 +1566,12 @@ namespace BuiltinBuffs.Duality
                             tentacles[i, j][l, 0] = cd2.pos;
                             tentacles[i, j][l, 2] = cd2.vel;
                         }
+                        Vector2 vector5 = new Vector2(0f, 0f);
+                        if (huntPos.HasValue)
+                        {
+                            vector5 = Custom.DirVec(tentacles[i, j][l, 0], huntPos.Value);
+                        }
+                        tentacles[i, j][l, 2] += vector5 * 1.2f;//Custom.RNV() * 0.2f + vector5 * 0.2f;
                     }
                     for (int m = 0; m < tentacles[i, j].GetLength(0); m++)
                     {
@@ -1587,7 +1618,7 @@ namespace BuiltinBuffs.Duality
                         {
                             flag3 = (latchOnToBodyChunks[i, j].owner as Player).GraspWiggle > 0.8f;
                         }
-                        if (!player.dead && player.room.PointSubmerged(tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]) &&
+                        if (!player.dead && WantToMoveTentacle &&//player.room.PointSubmerged(tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]) && 
                             !flag3 && !player.Stunned && !consumedCreatures.Contains(latchOnToBodyChunks[i, j].owner as Creature))
                         {
                             if (this.TryToAttack && this.TryElectricAttack(latchOnToBodyChunks[i, j].owner as Creature))
@@ -1599,9 +1630,9 @@ namespace BuiltinBuffs.Duality
                             float num6 = Mathf.InverseLerp(num5 - 10f, num5 + 10f, latchOnToBodyChunks[i, j].pos.y);
                             float num7 = Mathf.Sign(latchOnToBodyChunks[i, j].pos.x - newBody[0].pos.x) * Mathf.InverseLerp(num5 - 10f, num5 + 5f, latchOnToBodyChunks[i, j].pos.y) / 5f;
                             num7 *= Mathf.InverseLerp(50f, 0f, Mathf.Abs(latchOnToBodyChunks[i, j].pos.x - newBody[0].pos.x));
-                            Vector2 vector8 = Custom.DirVec(latchOnToBodyChunks[i, j].pos + rotation * (-40f * num6), new Vector2(newBody[0].pos.x, num5)) / 10f;
+                            Vector2 vector8 = Custom.DirVec(latchOnToBodyChunks[i, j].pos, tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]); //Custom.DirVec(latchOnToBodyChunks[i, j].pos + rotation * (-40f * num6), new Vector2(newBody[0].pos.x, num5)) / 10f;
                             vector8.x += num7;
-                            latchOnToBodyChunks[i, j].vel += vector8;
+                            latchOnToBodyChunks[i, j].vel += 1.5f * vector8;
                             if (latchOnToBodyChunks[i, j].pos.y > num5)
                             {
                                 timeAbove++;
@@ -1625,7 +1656,7 @@ namespace BuiltinBuffs.Duality
                             {
                                 latchOnToBodyChunks[i, j] = null;
                                 player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Release, tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]);
-                            }
+                            }/* 水下概率被动电击
                             else if (Random.value < 0.00045f && player.room.PointSubmerged(new Vector2(tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0].x, tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0].y + 30f)))
                             {
                                 if (latchOnToBodyChunks[i, j].owner is Creature)
@@ -1641,7 +1672,7 @@ namespace BuiltinBuffs.Duality
                                 }
                                 player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]);
                                 latchOnToBodyChunks[i, j] = null;
-                            }
+                            }*/
                             else if (!Custom.DistLess(player.firstChunk.pos, latchOnToBodyChunks[i, j].pos, (float)tentacles[i, j].GetLength(0) * num2 * 1.4f))
                             {
                                 normalized2 = (player.firstChunk.pos - latchOnToBodyChunks[i, j].pos).normalized;
@@ -1658,11 +1689,11 @@ namespace BuiltinBuffs.Duality
                             player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Release, tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]);
                         }
                     }
-                    if (latchOnToBodyChunks[i, j] != null || !player.room.PointSubmerged(tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]))
+                    if (latchOnToBodyChunks[i, j] != null || !WantToMoveTentacle)//|| !player.room.PointSubmerged(tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0])
                     {
                         continue;
                     }
-                    Vector2 vector9 = tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0];
+                    Vector2 tentacleTipPos = tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0];
                     int num11 = 0;
                     //寻找抓取的生物
                     while (latchOnToBodyChunks[i, j] == null && num11 < player.room.abstractRoom.creatures.Count)
@@ -1673,11 +1704,11 @@ namespace BuiltinBuffs.Duality
                             while (latchOnToBodyChunks[i, j] == null && num12 < player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks.Length)
                             {
                                 if (Custom.DistLess(player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12].pos,
-                                    vector9,
+                                    tentacleTipPos,
                                     player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12].rad * 1.15f))
                                 {
                                     latchOnToBodyChunks[i, j] = player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12];
-                                    //player.roomPlaySound((!(player.roomabstractplayer.roomcreatures[num11].realizedCreature is Player)) ? SoundID.Jelly_Fish_Tentacle_Latch_On_NPC : SoundID.Jelly_Fish_Tentacle_Latch_On_Player, vector9);
+                                    //player.roomPlaySound((!(player.roomabstractplayer.roomcreatures[num11].realizedCreature is Player)) ? SoundID.Jelly_Fish_Tentacle_Latch_On_NPC : SoundID.Jelly_Fish_Tentacle_Latch_On_Player, tentacleTipPos);
                                     PlayHorrifyingMoo();
                                 }
                                 num12++;
@@ -1815,11 +1846,8 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return false;
-            if (abs.creatureTemplate.type != MoreSlugcatsEnums.CreatureTemplateType.BigJelly && 
-                abs.creatureTemplate.type != CreatureTemplate.Type.Leech && 
+            if (abs.creatureTemplate.type != CreatureTemplate.Type.Leech && 
                 abs.creatureTemplate.type != CreatureTemplate.Type.SeaLeech && 
-                abs.creatureTemplate.type != CreatureTemplate.Type.BigEel && 
-                abs.creatureTemplate.type != MoreSlugcatsEnums.CreatureTemplateType.MirosVulture && 
                 abs.realizedCreature != null && 
                 abs.realizedCreature != player && 
                 !consumedCreatures.Contains(abs.realizedCreature) && 

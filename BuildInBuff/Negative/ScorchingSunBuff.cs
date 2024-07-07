@@ -25,6 +25,17 @@ namespace BuiltinBuffs.Negative
         {
         }
 
+        public override void Destroy()
+        {
+            if (ScorchingSunBuffEntry.Effect != null)
+            {
+                ScorchingSunBuffEntry.Effect.Destroy();
+                ScorchingSunBuffEntry.Effect = null;
+            }
+
+            base.Destroy();
+        }
+
         public void ScorchingSunCheck()
         {
             GetTemporaryBuffPool().CreateTemporaryBuff(IgnitionPointBuffEntry.ignitionPointBuffID);
@@ -41,6 +52,19 @@ namespace BuiltinBuffs.Negative
     {
         public static BuffID ScorchingSun = new BuffID("ScorchingSun", true);
         private static bool isChecked = false;
+        private static ScorchingSunSingleColorEffect effect;
+
+        public static ScorchingSunSingleColorEffect Effect 
+        {
+            get
+            {
+                return effect;
+            }
+            set
+            {
+                effect = value;
+            }
+        }
 
         public void OnEnable()
         {
@@ -107,15 +131,19 @@ namespace BuiltinBuffs.Negative
 
                     if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast) == null)
                         self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.Contrast, 0.1f * num, false));
-                    else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast).amount < 0.1f * num)
-                        self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast).amount = 0.1f * num;
+                    else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast).amount < 0.15f * num)
+                        self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast).amount = 0.15f * num;
 
                     if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness) == null)
                         self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.Brightness, 0.1f * num, false));
-                    else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness).amount < 0.1f * num)
-                        self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness).amount = 0.1f * num;
+                    else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness).amount < 0.15f * num)
+                        self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Brightness).amount = 0.15f * num;
 
-                    //BuffPostEffectManager.AddEffect(new );
+                    if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom) == null)
+                        self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.Bloom, 0.1f * num, false));
+                    else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom).amount < 0.15f * num)
+                        self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom).amount = 0.15f * num;
+
 
                     for (int k = 0; k < self.abstractRoom.creatures.Count; k++)
                     {
@@ -155,6 +183,21 @@ namespace BuiltinBuffs.Negative
             if (self.room != null)
             {
                 int num = OutdoorLevel(self.room);
+
+                if (effect != null)
+                {
+                    if (self.room != effect.Room)//self.room != null && 
+                    {
+                        effect.Reset(0.1f * num, self.room);
+                        BuffPlugin.Log($"Reset ScorchingSunSingleColorEffect, Level:{num}");
+                    }
+                }
+                if (effect == null)
+                {
+                    effect = new ScorchingSunSingleColorEffect(1, -1f, 1f, 1f, Custom.hexToColor("000000"), Custom.hexToColor("FF0000"), 0.1f * num, self.room);
+                    BuffPostEffectManager.AddEffect(effect);
+                }
+
                 if (!self.Stunned && num > 0)
                 {
                     self.AerobicIncrease(0.03f * num);
@@ -174,6 +217,7 @@ namespace BuiltinBuffs.Negative
             }
         }
 
+        #region 标签
         private static void Creature_Update(On.Creature.orig_Update orig, Creature self, bool eu)
         {
             orig.Invoke(self, eu);
@@ -229,8 +273,81 @@ namespace BuiltinBuffs.Negative
                 heatOverHead.Destroy();
             }
         }
+        #endregion
     }
 
+    internal class ScorchingSunSingleColorEffect : BuffPostEffectLimitTime
+    {
+        public ScorchingSunSingleColorEffect(int layer, float duringTime, float enterTime, float fadeTime, Color start, Color end, float maxInst, Room room) : base(layer, duringTime, enterTime, fadeTime)
+        {
+            this.start = start;
+            this.end = end; 
+            this.lastMaxInst = 0f;
+            this.maxInst = maxInst;
+            this.room = room;
+            material = new Material(StormIsApproachingEntry.SingleColor);
+        }
+
+        protected override float LerpAlpha => Mathf.InverseLerp(0, enterTime, 1 - lifeTime);
+
+        public override void OnRenderImage(RenderTexture source, RenderTexture destination)
+        {
+            base.OnRenderImage(source, destination);
+            material.SetColor("singleColorStart", start);
+            material.SetColor("singleColorEnd", end);
+            material.SetFloat("lerpValue", Mathf.Lerp(lastMaxInst, maxInst, LerpAlpha));
+
+            Graphics.Blit(source, destination, material);
+
+            if (this.Faded)
+                this.Fade();
+
+            if (this.room == null)
+                this.Destroy();
+        }
+
+        public void Fade()
+        {
+            maxInst = Mathf.Max(0f, maxInst - 0.01f);
+        }
+
+        public void Reset(float maxInst, Room room)
+        {
+            this.lifeTime = 1f;
+            this.lastMaxInst = this.maxInst;
+            this.maxInst = maxInst;
+            this.room = room;
+        }
+
+        private Room room;
+        private Color start;
+        private Color end;
+        private float maxInst;
+        private float lastMaxInst;
+        private bool faded;
+
+        public Room Room 
+        { 
+            get 
+            { 
+                return room; 
+            } 
+        }  
+
+        public bool Faded
+        {
+            get
+            {
+                 return faded;
+            }
+            set
+            {
+                faded = value;
+            }
+        }
+    }
+
+    #region 标签
     internal class HeatOverHead : CosmeticSprite
     {
         private Creature obj;
@@ -381,4 +498,5 @@ namespace BuiltinBuffs.Negative
             }
         }
     }
+    #endregion
 }
