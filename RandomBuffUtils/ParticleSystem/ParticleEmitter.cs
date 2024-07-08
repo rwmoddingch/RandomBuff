@@ -56,6 +56,7 @@ namespace RandomBuffUtils.ParticleSystem
             }
             foreach(var module in EmitterModules)
                 module.Init();
+            this.NewPool();
         }
 
         void ActualDie()
@@ -63,6 +64,7 @@ namespace RandomBuffUtils.ParticleSystem
             room = null;
             BuffUtils.Log("ParticleEmitter", "ActualDie");
             Particles.Clear();
+            this.RecyclePool();
             system.managedEmitter.Remove(this);
         }
 
@@ -168,7 +170,7 @@ namespace RandomBuffUtils.ParticleSystem
 
         public void SpawnParticle()
         {
-            var result = ParticlePool.GetParticle(this);
+            var result = this.GetParticle();
             Particles.Add(result);
             result.Init(this, particleID);
             
@@ -176,9 +178,8 @@ namespace RandomBuffUtils.ParticleSystem
             
             OnParticleInitEvent?.Invoke(result);
             if (system.IsOnStage)
-            {
                 result.InitSpritesAndAddToContainer();
-            }
+            
         }
     }
 }

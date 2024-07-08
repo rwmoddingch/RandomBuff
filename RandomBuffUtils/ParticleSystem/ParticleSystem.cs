@@ -27,7 +27,7 @@ namespace RandomBuffUtils.ParticleSystem
                     Containers[i] = new FContainer();
             }
 
-            sLeaser.sprites = new FSprite[0];
+            sLeaser.sprites = Array.Empty<FSprite>();
             sLeaser.containers = new FContainer[rCam.SpriteLayers.Length];
             for (int i = 0; i < sLeaser.containers.Length; i++)
                 sLeaser.containers[i] = Containers[i];
