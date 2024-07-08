@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using RandomBuff.Core.SaveData;
 
 namespace RandomBuff
 {
@@ -24,6 +25,7 @@ namespace RandomBuff
         {
             orig.Invoke(self);
             LoadResourceStrings(self.currentLanguage);
+         
         }
 
         internal static void LoadResourceStrings(InGameTranslator.LanguageID languageID)

@@ -75,8 +75,19 @@ namespace RandomBuffUtils.ParticleSystem
         
         public bool inStage;
         public int spriteLayer = 8;
-        public FNode[] fNodes = new FNode[0];
+        public FNode[] fNodes = Array.Empty<FNode>();
         public int index;
+
+        public bool IsNodeDirty => isNodeDirty;
+
+        private bool isNodeDirty = true;
+
+        public void SetDirty(bool isDirty = true)
+        {
+            isNodeDirty = isDirty;
+            if (isDirty)
+                fNodes = null;
+        }
 
         public void Init(ParticleEmitter emitter, int index)
         {
@@ -102,7 +113,9 @@ namespace RandomBuffUtils.ParticleSystem
             foreach(var module in emitter.PUniqueDatas)
                 uniqueDatas.Add(module, module.GetUniqueData(this));
 
-            fNodes = new FNode[spriteInitParams.Count];
+            if (IsNodeDirty)
+                fNodes = new FNode[spriteInitParams.Count];
+            
         }
 
         public virtual void InitSpritesAndAddToContainer()
@@ -112,31 +125,16 @@ namespace RandomBuffUtils.ParticleSystem
             inStage = true;
 
             foreach (var iIniSpriteAndAddToContainer in emitter.PInitSpritesAndAddToContainerModules)
-                iIniSpriteAndAddToContainer.ApplyInitSpritesAndAddToContainer(this);
+            {
+                if(IsNodeDirty)
+                    iIniSpriteAndAddToContainer.ApplyInitSprites(this);
+                iIniSpriteAndAddToContainer.AddToContainer(this);
+            }
 
-            //if (fNodes.Length != spriteInitParams.Count)
-            //{
-            //    Array.Resize(ref fNodes, spriteInitParams.Count);
-            //    for(int i = 0; i< fNodes.Length; i++)
-            //    {
-            //        if (fNodes[i] == null)
-            //            fNodes[i] = new FSprite("pixel");
-            //    }
-            //}
-
-            //for(int i = 0;i < spriteInitParams.Count;i++)
-            //{
-            //    fNodes[i].SetElementByName(spriteInitParams[i].element);
-            //    if (!string.IsNullOrEmpty(spriteInitParams[i].shader))
-            //        fNodes[i].shader = Custom.rainWorld.Shaders[spriteInitParams[i].shader];
-            //    else
-            //        fNodes[i].shader = Custom.rainWorld.Shaders["Basic"];
-            //    emitter.system.Containers[spriteLayer].AddChild(fNodes[i]);
-            //}
-
-            
-            //BuffUtils.Log("Particle", "InitSpritesAndAddToContainer");
+            SetDirty(false);
         }
+
+
 
         public void Update()
         {
@@ -170,9 +168,6 @@ namespace RandomBuffUtils.ParticleSystem
 
             inStage = false;
 
-            //for (int i = 0; i < fNodes.Length; i++)
-            //    fNodes[i].RemoveFromContainer();
-
             foreach (var iClearSprites in emitter.PClearSpritesModules)
                 iClearSprites.ApplyClearSprites(this);
         }
@@ -187,9 +182,8 @@ namespace RandomBuffUtils.ParticleSystem
 
             emitter.Particles.Remove(this);
             uniqueDatas.Clear();
-            fNodes = null;
 
-            ParticlePool.RecycleParticle(this);
+            emitter.RecycleParticle(this);
         }
 
         public virtual void HardSetPos(Vector2 pos)

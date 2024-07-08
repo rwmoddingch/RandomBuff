@@ -10,16 +10,17 @@ using System.Runtime.CompilerServices;
 using RWCustom;
 using Random = UnityEngine.Random;
 using System.Collections.Generic;
+using MoreSlugcats;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class BirdShapedMutationBuff : Buff<BirdShapedMutationBuff, BirdShapedMutationBuffData>
+    internal class VultureShapedMutationBuff : Buff<VultureShapedMutationBuff, VultureShapedMutationBuffData>
     {
         public override bool Triggerable => true;
 
-        public override BuffID ID => BirdShapedMutationBuffEntry.BirdShapedMutation;
+        public override BuffID ID => VultureShapedMutationBuffEntry.VultureShapedMutation;
 
-        public BirdShapedMutationBuff()
+        public VultureShapedMutationBuff()
         {
             if (BuffCustom.TryGetGame(out var game))
             {
@@ -27,11 +28,12 @@ namespace BuiltinBuffs.Duality
                              .Where(i => i != null && i.graphicsModule != null))
                 {
                     var fly = new Fly(player);
-                    BirdShapedMutationBuffEntry.FlyFeatures.Add(player, fly);
-                    fly.BirdWing(player.graphicsModule as PlayerGraphics);
+                    VultureShapedMutationBuffEntry.FlyFeatures.Add(player, fly);
+                    fly.VultureWing(player.graphicsModule as PlayerGraphics);
                     fly.InitiateSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
+                VultureShapedMutationBuffEntry.EstablishRelationship();
             }
         }
 
@@ -41,7 +43,7 @@ namespace BuiltinBuffs.Duality
             foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
             {
-                if (BirdShapedMutationBuffEntry.FlyFeatures.TryGetValue(player, out var fly))
+                if (VultureShapedMutationBuffEntry.FlyFeatures.TryGetValue(player, out var fly))
                 {
                     if (fly.isFlying)
                         fly.StopFlight();
@@ -53,20 +55,20 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    internal class BirdShapedMutationBuffData : BuffData
+    internal class VultureShapedMutationBuffData : BuffData
     {
-        public override BuffID ID => BirdShapedMutationBuffEntry.BirdShapedMutation;
+        public override BuffID ID => VultureShapedMutationBuffEntry.VultureShapedMutation;
     }
 
-    internal class BirdShapedMutationBuffEntry : IBuffEntry
+    internal class VultureShapedMutationBuffEntry : IBuffEntry
     {
-        public static BuffID BirdShapedMutation = new BuffID("BirdShapedMutation", true);
+        public static BuffID VultureShapedMutation = new BuffID("VultureShapedMutation", true);
 
         public static ConditionalWeakTable<Player, Fly> FlyFeatures = new ConditionalWeakTable<Player, Fly>();
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<BirdShapedMutationBuff, BirdShapedMutationBuffData, BirdShapedMutationBuffEntry>(BirdShapedMutation);
+            BuffRegister.RegisterBuff<VultureShapedMutationBuff, VultureShapedMutationBuffData, VultureShapedMutationBuffEntry>(VultureShapedMutation);
         }
 
         public static void HookOn()
@@ -86,31 +88,7 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
         }
-
-        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
-        {
-            orig(self, abstractCreature, world);
-            if (!FlyFeatures.TryGetValue(self, out _))
-                FlyFeatures.Add(self, new Fly(self));
-        }
-
-        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
-        {
-            orig(self, eu);
-            if (FlyFeatures.TryGetValue(self, out var fly))
-            {
-                fly.Update();
-                self.GetExPlayerData().HaveHands = false;
-            }
-        }
-
-        private static void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
-        {
-            if (FlyFeatures.TryGetValue(self, out var fly))
-                fly.MovementUpdate(orig, eu);
-            orig(self, eu);
-        }
-
+        #region 额外特性
         //双手位置
         private static void SlugcatHand_Update(On.SlugcatHand.orig_Update orig, SlugcatHand self)
         {
@@ -145,6 +123,45 @@ namespace BuiltinBuffs.Duality
                 }
             return result;
         }
+        #endregion
+        #region 生物关系
+        //修改生物关系（秃鹫、魔王鹫、钢鸟、钢鹫不再攻击玩家）
+        public static void EstablishRelationship()
+        {
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Vulture, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.KingVulture, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.MirosBird, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+        }
+        #endregion
+
+        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
+        {
+            orig(self, abstractCreature, world);
+            if (!FlyFeatures.TryGetValue(self, out _))
+            {
+                FlyFeatures.Add(self, new Fly(self));
+                EstablishRelationship();
+            }
+        }
+
+        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            orig(self, eu);
+            if (FlyFeatures.TryGetValue(self, out var fly))
+            {
+                fly.Update();
+                self.GetExPlayerData().HaveHands = false;
+            }
+        }
+
+        private static void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
+        {
+            if (FlyFeatures.TryGetValue(self, out var fly))
+                fly.MovementUpdate(orig, eu);
+            orig(self, eu);
+        }
+
         #region 外观
         private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
@@ -180,7 +197,7 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, ow);
             if (FlyFeatures.TryGetValue(self.player, out var fly))
-                fly.BirdWing(self);
+                fly.VultureWing(self);
         }
 
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
@@ -303,7 +320,7 @@ namespace BuiltinBuffs.Duality
             return wingSprite + side + wing + wing;
         }
 
-        public void BirdWing(PlayerGraphics self)
+        public void VultureWing(PlayerGraphics self)
         {
             wing = new GenericBodyPart[36];
             for (int i = 0; i < wing.Length; i++)
@@ -341,14 +358,14 @@ namespace BuiltinBuffs.Duality
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             wingSprite = sLeaser.sprites.Length;
             Array.Resize(ref sLeaser.sprites, wingSprite + 6);
-            wingAtlas = Futile.atlasManager.LoadAtlas("buffassets/cardinfos/duality/birdshapedmutation/birdwings");
+            wingAtlas = Futile.atlasManager.LoadAtlas("buffassets/cardinfos/duality/vultureshapedmutation/vulturewings");
 
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
                     //内侧翅膀
-                    if (j != 1)
+                    if (j == 0)
                     {
                         TriangleMesh.Triangle[] tris = new TriangleMesh.Triangle[]
                         {
@@ -357,12 +374,12 @@ namespace BuiltinBuffs.Duality
                             new TriangleMesh.Triangle(1, 3, 4),
                             new TriangleMesh.Triangle(1, 4, 5)
                         };
-                        TriangleMesh triangleMesh = new TriangleMesh("BirdWing" + "A" + j, tris, true, true);
+                        TriangleMesh triangleMesh = new TriangleMesh("VultureWing" + "A" + j, tris, true, true);
 
-                        triangleMesh.UVvertices[0] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvTopLeft;
-                        triangleMesh.UVvertices[2] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvTopRight;
-                        triangleMesh.UVvertices[3] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvBottomRight;
-                        triangleMesh.UVvertices[5] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvBottomLeft;
+                        triangleMesh.UVvertices[0] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvTopLeft;
+                        triangleMesh.UVvertices[2] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvTopRight;
+                        triangleMesh.UVvertices[3] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvBottomRight;
+                        triangleMesh.UVvertices[5] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvBottomLeft;
                         triangleMesh.UVvertices[1] = Vector2.Lerp(triangleMesh.UVvertices[0], triangleMesh.UVvertices[2], 0.5f);
                         triangleMesh.UVvertices[4] = Vector2.Lerp(triangleMesh.UVvertices[3], triangleMesh.UVvertices[5], 0.5f);
 
@@ -383,12 +400,12 @@ namespace BuiltinBuffs.Duality
                             new TriangleMesh.Triangle(0, 3, 4),
                             new TriangleMesh.Triangle(0, 4, 5)
                         };
-                        TriangleMesh triangleMesh = new TriangleMesh("BirdWing" + "A" + j, tris, true, true);
+                        TriangleMesh triangleMesh = new TriangleMesh("VultureWing" + "A" + j, tris, true, true);
 
-                        triangleMesh.UVvertices[0] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvTopLeft;
-                        triangleMesh.UVvertices[2] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvTopRight;
-                        triangleMesh.UVvertices[3] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvBottomRight;
-                        triangleMesh.UVvertices[5] = wingAtlas._elementsByName["BirdWing" + "A" + j].uvBottomLeft;
+                        triangleMesh.UVvertices[0] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvTopLeft;
+                        triangleMesh.UVvertices[2] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvTopRight;
+                        triangleMesh.UVvertices[3] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvBottomRight;
+                        triangleMesh.UVvertices[5] = wingAtlas._elementsByName["VultureWing" + "A" + j].uvBottomLeft;
                         triangleMesh.UVvertices[1] = Vector2.Lerp(triangleMesh.UVvertices[0], triangleMesh.UVvertices[2], 0.5f);
                         triangleMesh.UVvertices[4] = Vector2.Lerp(triangleMesh.UVvertices[3], triangleMesh.UVvertices[5], 0.5f);
 
@@ -484,10 +501,10 @@ namespace BuiltinBuffs.Duality
             //i = 0为右侧翅膀， i = 1 为左侧翅膀
             for (int i = 0; i < 2; i++)
             {
-                //内层翅膀颜色
+                //内外层翅膀颜色
                 sLeaser.sprites[WingSprite(i, 0)].color = sLeaser.sprites[0].color;
-                sLeaser.sprites[WingSprite(i, 2)].color = Color.Lerp(sLeaser.sprites[0].color, Color.white, 0.5f);
-                //外层翅膀颜色
+                sLeaser.sprites[WingSprite(i, 1)].color = sLeaser.sprites[0].color;//Color.Lerp(sLeaser.sprites[0].color, Color.white, 0.5f);
+                //外层翅膀渐变颜色
                 float h; float s; float v;
                 Color.RGBToHSV(sLeaser.sprites[0].color, out h, out s, out v);
                 if (s == 0f || v == 0f)
@@ -496,7 +513,7 @@ namespace BuiltinBuffs.Duality
                     h += 0.15f;
                 s = 1f;
                 v = 1f;
-                sLeaser.sprites[WingSprite(i, 1)].color = Color.HSVToRGB(h, s, v);
+                sLeaser.sprites[WingSprite(i, 2)].color = Color.HSVToRGB(h, s, v);
             }
         }
 
@@ -742,7 +759,7 @@ namespace BuiltinBuffs.Duality
                 {
                     int startNum = i * 18 + j * 6;
                     //内层翅膀
-                    if (j != 1)
+                    if (j == 0)
                     {
                         wing[startNum + 0].pos = self.bodyChunks[0].pos + wingH * Vector2.up;
                         wing[startNum + 5].pos = wing[startNum + 0].pos - dif + wingH * Vector2.up;
@@ -804,7 +821,7 @@ namespace BuiltinBuffs.Duality
                     int startNum = i * 18 + j * 6;
                     float width = 5f * (foldLength - 1) * (i == 0 ? 1 : -1);
                     //内层翅膀
-                    if (j != 1)
+                    if (j == 0)
                     {
 
                         wing[startNum + 0].pos = self.bodyChunks[0].pos - wingH * Vector2.up * (self.playerState.isPup ? (0.1f - foldScale) : (1f - foldScale)) + wingW * Vector2.left * foldScale - 0.8f * difScale * dif;

@@ -14,7 +14,9 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public interface IParticleInitSpritesAndAddToContainerModules
     {
-        void ApplyInitSpritesAndAddToContainer(Particle particle);
+        void ApplyInitSprites(Particle particle);
+        void AddToContainer(Particle particle);
+
     }
     public interface IParticleUpdateModule
     {

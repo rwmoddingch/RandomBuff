@@ -216,7 +216,7 @@ namespace RandomBuff.Core.SaveData
         public List<BuffQuest> UpdateQuestState(WinGamePackage package)
         {
             List<BuffQuest> list = new ();
-            foreach (var questName in BuffConfigManager.GetQuestNameList())
+            foreach (var questName in BuffConfigManager.GetQuestIDList())
             {
                 if(IsQuestUnlocked(questName)) continue;
                 if (BuffConfigManager.GetQuestData(questName).UpdateUnlockedState(package))

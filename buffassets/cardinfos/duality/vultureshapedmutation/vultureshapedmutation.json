@@ -1,6 +1,6 @@
 {
-  "FaceName": "birdshapedmutation",
-  "BuffID": "BirdShapedMutation",
+  "FaceName": "vultureshapedmutation",
+  "BuffID": "VultureShapedMutation",
   "BuffType": "Duality",
   "BuffProperty": "Normal",
   "Triggerable": true,
@@ -9,17 +9,12 @@
   "Tag": [ "ShapedMutation" ],
   "Conflict": [ "ShapedMutation" ],
 
-  "MultiLayerFace": true,
-  "FaceLayer": 3,
-  "MaxFaceDepth": 2.0,
-  "FaceBackgroundColor": "6ABFE5",
-
   "Chinese": {
-    "BuffName": "鸟形突变",
+    "BuffName": "鹫形突变",
     "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。设置按键以在空中开启飞行和结束飞行。"
   },
   "English": {
-    "BuffName": "BirdShapedMutation",
+    "BuffName": "VultureShapedMutation",
     "Description": "Your hands have turned into wings, allowing you to fly freely, but now you can only hold a thing in your mouth. Set a button to start and end the flight in the air."
   }
 }

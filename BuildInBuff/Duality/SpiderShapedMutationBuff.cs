@@ -55,6 +55,7 @@ namespace BuiltinBuffs.Duality
                     spider.InitiateSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
+                SpiderShapedMutationBuffEntry.EstablishRelationship();
             }
         }
 
@@ -88,8 +89,6 @@ namespace BuiltinBuffs.Duality
             On.SlugcatStats.SlugcatCanMaul += SlugcatStats_SlugcatCanMaul;
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.Player.BiteEdibleObject += Player_BiteEdibleObject;
-
-            On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -264,10 +263,8 @@ namespace BuiltinBuffs.Duality
         #endregion
         #region 生物关系
         //修改生物关系（狼蛛、小蜘蛛不再攻击玩家）
-        private static void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)
+        public static void EstablishRelationship()
         {
-            orig();
-
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.BigSpider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Spider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
         }
@@ -277,7 +274,10 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, abstractCreature, world);
             if (!SpiderFeatures.TryGetValue(self, out _))
+            {
                 SpiderFeatures.Add(self, new SpiderCat(self));
+                EstablishRelationship();
+            }
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)

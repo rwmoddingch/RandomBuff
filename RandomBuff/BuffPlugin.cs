@@ -29,6 +29,7 @@ using Random = UnityEngine.Random;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
+using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
 
@@ -134,7 +135,7 @@ namespace RandomBuff
                     GachaTemplate.Init();
                     Condition.Init();
                     TypeSerializer.Init();
-                    BuffQuest.Init();
+                    QuestCondition.Init();
                     CosmeticUnlock.Init();
 
                     BuffFile.OnModsInit();
@@ -203,10 +204,12 @@ namespace RandomBuff
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
                     BuffConfigManager.InitTemplateStaticData();
-                    BuffConfigManager.InitQuestData();
                     BuffRegister.LoadBuffPluginAsset();
+
                     //这个会用到template数据（嗯
                     MissionRegister.RegisterAllMissions();
+                    BuffConfigManager.InitQuestData();
+
                     BuffRegister.BuildAllDataStaticWarpper();
                     isPostLoaded = true;
                 }

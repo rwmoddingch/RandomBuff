@@ -20,6 +20,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuff.Render.UI.Component;
@@ -145,9 +146,9 @@ namespace RandomBuff.Core.Entry
         /// 注册新的任务种类
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public static void RegisterQuestType<T>() where T : BuffQuest, new()
+        public static void RegisterQuestType<T>() where T : QuestCondition, new()
         {
-            BuffQuest.Register<T>();
+            QuestCondition.Register<T>();
         }
 
         /// <summary>

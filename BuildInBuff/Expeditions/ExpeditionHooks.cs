@@ -76,15 +76,15 @@ namespace BuiltinBuffs.Expeditions
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
 
-                    BuffPoolManager.Instance.CreateBuff(ShortSightedEntry.ShortSighted);
-                    BuffHud.Instance.AppendNewCard(ShortSightedEntry.ShortSighted);
+                    BuffPoolManager.Instance.CreateBuff(FlameThrowerBuffEntry.flameThrowerBuffID);
+                    BuffHud.Instance.AppendNewCard(FlameThrowerBuffEntry.flameThrowerBuffID);
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
                 {
                     BuffPoolManager.Instance.CreateBuff(FakeCreatureBuffData.FakeCreatureID);
                     BuffHud.Instance.AppendNewCard(FakeCreatureBuffData.FakeCreatureID);
-                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+                    //self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
 
                 }
             }
