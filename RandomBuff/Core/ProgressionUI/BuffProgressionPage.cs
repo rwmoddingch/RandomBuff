@@ -104,9 +104,6 @@ namespace RandomBuff.Core.ProgressionUI
 
             CreateElementsForRecordPage(testPage, recordScrollBoxSize, BuffPlayerData.Instance.SlotRecord);
             CreateElementsForCosmeticPage(testPage3, recordScrollBoxSize);
-            //testLabel = new FLabel(Custom.GetDisplayFont(), "WA");
-            //Container.AddChild(testLabel);
-            //testLabel.SetPosition(200, 200);
         }
 
         public static void CreateElementsForRecordPage(OpScrollBox opScrollBox, Vector2 size, InGameRecord records)
@@ -236,6 +233,19 @@ namespace RandomBuff.Core.ProgressionUI
             }
         }
 
+        public static void CreateElementsForQuestPage(OpScrollBox opScrollBox, Vector2 size)
+        {
+            List<QuestButton.QuestInfo> levelQuests = new List<QuestButton.QuestInfo>();
+            List<QuestButton.QuestInfo> otherQuests = new List<QuestButton.QuestInfo>();
+
+            foreach(var questName in BuffConfigManager.GetQuestNameList())
+            {
+                var questData = BuffConfigManager.GetQuestData(questName);
+                //questData.
+            }
+        }
+
+
         static void OnCosmeticButtonClick(CosmeticButton button)
         {
             BuffPlugin.Log($"{button.id}, {BuffPlayerData.Instance.IsCosmeticEnable(button.id)}");
@@ -344,8 +354,6 @@ namespace RandomBuff.Core.ProgressionUI
 
     public class CosmeticButton : OpSimpleImageButton
     {
-        
-
         public string id;
         string element;
 
@@ -368,9 +376,12 @@ namespace RandomBuff.Core.ProgressionUI
             this.disabledCol = disableCol;
             isTexture = true;
 
-            var OnClick = OnClickField.GetValue(this) as OnSignalHandler;
-            OnClick += OnClickCallBack;
-            OnClickField.SetValue(this, OnClick);
+            if(clickCallBack != null)
+            {
+                var OnClick = OnClickField.GetValue(this) as OnSignalHandler;
+                OnClick += OnClickCallBack;
+                OnClickField.SetValue(this, OnClick);
+            }
         }
 
         void OnClickCallBack(UIfocusable uIfocusable)
@@ -393,6 +404,43 @@ namespace RandomBuff.Core.ProgressionUI
         {
             isTexture = false;
             base.Unload();
+        }
+    }
+
+    public class QuestButton : OpSimpleImageButton
+    {
+        QuestInfo myInfo;
+
+        bool lastMouseOver;
+
+        public Action<QuestInfo> OnMouseOver;
+        public Action OnMouseLeave;
+
+        public QuestButton(QuestInfo info, Vector2 pos, Vector2 size) : base(pos, size, "Futile_White")
+        {
+            myInfo = info;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if(MouseOver && !lastMouseOver)
+            {
+                OnMouseOver?.Invoke(myInfo);
+            }
+            else if(!MouseOver && lastMouseOver)
+            {
+                OnMouseLeave?.Invoke();
+            }
+            lastMouseOver = MouseOver;
+        }
+
+
+        public struct QuestInfo
+        {
+            public string name;
+            public List<string> conditions;
+            public List<string> rewards;
         }
     }
 }

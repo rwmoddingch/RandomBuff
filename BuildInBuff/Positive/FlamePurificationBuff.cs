@@ -37,6 +37,21 @@ namespace BuiltinBuffs.Positive
 
         public static void HookOn()
         {
+            On.DaddyCorruption.DrawSprites += DaddyCorruption_DrawSprites;
+        }
+
+        private static void DaddyCorruption_DrawSprites(On.DaddyCorruption.orig_DrawSprites orig, DaddyCorruption self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig.Invoke(self, sLeaser, rCam, timeStacker, camPos);
+            if(TemperatrueModule.TryGetTemperatureModule(self, out var module))
+            {
+                var corruptionTempModule = module as DaddyCorruptionTempModule;
+                for(int i = 0;i < sLeaser.sprites.Length;i++)
+                {
+                    if (corruptionTempModule.skipSpriteIndexRange.Contains(i))
+                        sLeaser.sprites[i].isVisible = false;
+                }
+            }
         }
     }
 
@@ -133,6 +148,54 @@ namespace BuiltinBuffs.Positive
                 for(int i = 0;i < 1; i++)
                 {
                     worm.wormGrass.room.AddObject(new HolyFire.HolyFireSprite(Vector2.Lerp(worm.basePos, worm.pos, 1f)));
+                }
+            }
+        }
+    }
+
+    internal class DaddyCorruptionProvider : TemperatrueModule.ITemperatureModuleProvider
+    {
+        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        {
+            return new DaddyCorruptionTempModule();
+        }
+
+        public bool ProvideThisObject(UpdatableAndDeletable target)
+        {
+            if (FlamePurificationBuff.Instance == null)
+                return false;
+
+            return target is DaddyCorruption;
+        }
+    }
+
+    internal class DaddyCorruptionTempModule : TemperatrueModule
+    {
+        public List<int> skipSpriteIndexRange = new List<int>();
+        public override void Update(UpdatableAndDeletable updatableAndDeletable)
+        {
+            DaddyCorruption corruption = updatableAndDeletable as DaddyCorruption;
+            var lst = corruption.room.updateList.Where((u) => u is IHeatingCreature).Select((u) => u as IHeatingCreature).ToList();
+
+            for (int h = lst.Count - 1; h >= 0; h--)
+            {
+                var heatSource = lst[h];
+
+                for (int i = corruption.tiles.Count - 1; i >= 0; i--)
+                {
+                    var tile = corruption.tiles[i];
+                    if (heatSource.GetHeat(corruption, corruption.room.MiddleOfTile(tile)) > 0f)
+                    {
+                        var bulbLst = corruption.bulbs[tile.x - corruption.bottomLeft.x, tile.y - corruption.bottomLeft.y];
+                        foreach(var bulb in bulbLst)
+                        {
+                            for(int index = bulb.firstSprite; index < bulb.firstSprite + bulb.totalSprites; index++)
+                            {
+                                skipSpriteIndexRange.Add(index);
+                            }
+                        }
+                        bulbLst.Clear();
+                    }
                 }
             }
         }

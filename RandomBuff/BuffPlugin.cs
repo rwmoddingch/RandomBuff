@@ -78,8 +78,6 @@ namespace RandomBuff
             
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();
-
-            UniformLighting.TestUpdate();
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
