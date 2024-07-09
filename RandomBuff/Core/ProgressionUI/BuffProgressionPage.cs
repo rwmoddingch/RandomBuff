@@ -10,12 +10,16 @@ using Menu.Remix.MixedUI;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
 using RWCustom;
 using UnityEngine;
+using static RandomBuff.Core.ProgressionUI.QuestButton;
+using static RandomBuff.Render.Quest.QuestRendererManager;
 
 namespace RandomBuff.Core.ProgressionUI
 {
@@ -36,6 +40,8 @@ namespace RandomBuff.Core.ProgressionUI
         SimpleButton backButton;
         BigArrowButton prevRecordPageButton;
         BigArrowButton nextRecordPageButton;
+
+        QuestInfoHoverBox questInfoHoverBox;
 
         MenuTabWrapper tabWrapper;
 
@@ -102,8 +108,14 @@ namespace RandomBuff.Core.ProgressionUI
             var testPage2 = CreatePage(BuffResourceString.Get("ProgressionUI_Quest"), 1);
             var testPage3 = CreatePage(BuffResourceString.Get("ProgressionUI_Cosmetic"), 2);
 
+            questInfoHoverBox = new QuestInfoHoverBox(menu, this);
+            
+            //questInfoHoverBox.DisplayInfo(new QuestButton.QuestInfo());
+
             CreateElementsForRecordPage(testPage, recordScrollBoxSize, BuffPlayerData.Instance.SlotRecord);
             CreateElementsForCosmeticPage(testPage3, recordScrollBoxSize);
+            CreateElementsForQuestPage(testPage2, recordScrollBoxSize, this);
+            subObjects.Add(questInfoHoverBox);
         }
 
         public static void CreateElementsForRecordPage(OpScrollBox opScrollBox, Vector2 size, InGameRecord records)
@@ -233,17 +245,112 @@ namespace RandomBuff.Core.ProgressionUI
             }
         }
 
-        public static void CreateElementsForQuestPage(OpScrollBox opScrollBox, Vector2 size)
+        public static void CreateElementsForQuestPage(OpScrollBox opScrollBox, Vector2 size, BuffProgressionPage page)
         {
+            //构建任务信息
             List<QuestButton.QuestInfo> levelQuests = new List<QuestButton.QuestInfo>();
             List<QuestButton.QuestInfo> otherQuests = new List<QuestButton.QuestInfo>();
 
-            foreach(var questName in BuffConfigManager.GetQuestNameList())
+            foreach(var questID in BuffConfigManager.GetQuestIDList())
             {
-                var questData = BuffConfigManager.GetQuestData(questName);
-                //questData.
+                bool isLevelQuest = false;
+                var questInfo = new QuestButton.QuestInfo();
+                questInfo.conditions = new List<string>();
+                questInfo.rewards = new Dictionary<QuestUnlockedType, List<string>>();
+
+                var questData = BuffConfigManager.GetQuestData(questID);
+                questInfo.name = questData.QuestName;
+                questInfo.color = questData.QuestColor;
+                
+                foreach(var condition in questData.QuestConditions)
+                {
+                    if(condition is LevelQuestCondition)
+                        isLevelQuest = true;
+
+                    questInfo.conditions.Add(condition.ConditionMessage());
+                }
+
+                foreach(var rewards in questData.UnlockItem)
+                {
+                    questInfo.rewards.Add(rewards.Key, new List<string>());
+                    foreach (var entry in rewards.Value)
+                        questInfo.rewards[rewards.Key].Add(entry);
+                }
+
+                if(isLevelQuest)
+                {
+                    levelQuests.Add(questInfo);
+                    BuffPlugin.Log($"Add level quest : {questInfo.name}");
+                }
+                else
+                {
+                    otherQuests.Add(questInfo);
+                    BuffPlugin.Log($"Add other quest : {questInfo.name}");
+                }
+            }
+
+            //构建按钮元素
+            Vector2 buttonSize = new Vector2(50, 50);
+            Vector2 smallGap = new Vector2(5, 5);
+            float bigGap = 20f;
+
+            int buttonsInALine = Mathf.FloorToInt((size.x - smallGap.x) / (smallGap.x + buttonSize.x));
+            int lineCount = Mathf.CeilToInt(levelQuests.Count / (float)buttonsInALine) + Mathf.CeilToInt(otherQuests.Count / (float)buttonsInALine);
+
+            //                  顶部间隙   两种按钮总行间距                            两类按钮之间间距    底部间隙
+            float contentSize = bigGap + lineCount * (smallGap.y + buttonSize.y) + bigGap     +     bigGap;
+            contentSize = Mathf.Max(contentSize, size.y);
+            opScrollBox.contentSize = contentSize;
+
+            int x = 0;
+            float xPtr = smallGap.x;
+            float yPtr = contentSize - (bigGap + buttonSize.y);
+            
+            foreach(var info in levelQuests)
+            {
+                CreateButtonForInfo(info);
+            }
+
+            x = 0;
+            xPtr = smallGap.x;
+            yPtr -= bigGap + buttonSize.y;
+
+            foreach(var info in otherQuests)
+            {
+                CreateButtonForInfo(info);
+            }
+
+            void CreateButtonForInfo(QuestButton.QuestInfo info)
+            {
+                var button = new QuestButton(info, new Vector2(xPtr, yPtr), buttonSize);
+                button.OnMouseOver += page.ShowQuestInfo;
+                button.OnMouseLeave += page.HideQuestInfo;
+
+                opScrollBox.AddItems(button);
+                x++;
+                if (x == buttonsInALine)
+                {
+                    x = 0;
+                    xPtr = smallGap.x;
+                    yPtr -= (buttonSize.y + smallGap.y);
+                }
+                else
+                {
+                    xPtr += buttonSize.x + smallGap.x;
+                }
             }
         }
+
+        void ShowQuestInfo(QuestButton.QuestInfo questInfo)
+        {
+            questInfoHoverBox.DisplayInfo(questInfo);
+        }
+
+        void HideQuestInfo()
+        {
+            questInfoHoverBox.Hide();
+        }
+
 
 
         static void OnCosmeticButtonClick(CosmeticButton button)
@@ -439,8 +546,297 @@ namespace RandomBuff.Core.ProgressionUI
         public struct QuestInfo
         {
             public string name;
+            public bool finished;
+            public Color color;
             public List<string> conditions;
-            public List<string> rewards;
+            public Dictionary<QuestUnlockedType, List<string>> rewards;
+
+            public override bool Equals(object obj)
+            {
+                if(obj is QuestInfo questInfo)
+                    return Equals(questInfo.name, name);
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return name.GetHashCode();
+            }
+        }
+    }
+
+    public class QuestInfoHoverBox : MenuObject
+    {
+        static float boundWidth = 2f;
+        static float titleBorder = 20f;
+        static float entryHeight = 20f;
+        static float smallGap = 4f;
+        static float bigGap = 10f;
+        static float veryBigGap = 40f;
+
+        FSprite background;
+
+        FSprite leftBound;
+        FSprite upBound;
+        FSprite rightBound;
+        FSprite buttomBound;
+        FSprite midBound;
+
+        FLabel title;
+
+        float maxConditionX, maxRewardX;
+        List<FLabel> conditionLabels = new List<FLabel>();
+        List<FLabel> rewardTypeLabels = new List<FLabel>();
+        List<KeyValuePair<QuestUnlockedType, List<QuestLeaser>>> rewardLeasers = new List<KeyValuePair<QuestUnlockedType, List<QuestLeaser>>>();
+
+        QuestRendererManager questRendererManager;
+
+        float setAlpha;
+        float alpha;
+        float lastAlpha;
+
+        Vector2 mouseScreenPos;
+        Vector2 lastMouseScreenPos;
+
+        Vector2 setAnchor = new Vector2(0f, 1f);
+        Vector2 anchor = new Vector2(0f, 1f);//左上
+        Vector2 lastAnchor = new Vector2(0f, 1f);
+
+        Vector2 size = new Vector2(400f, 300f);
+
+        QuestInfo currentInfo;
+
+        public QuestInfoHoverBox(Menu.Menu menu, MenuObject owner) : base(menu, owner)
+        {
+            background = new FSprite("pixel")
+            {
+                color = Color.black,
+                scaleX = size.x,
+                scaleY = size.y,
+            };
+            Container.AddChild(background);
+
+            leftBound = new FSprite("pixel") {scaleX = boundWidth , anchorX = 0f, anchorY = 1f};
+            upBound = new FSprite("pixel") { scaleY = boundWidth, anchorX = 0f, anchorY = 1f};
+            rightBound = new FSprite("pixel") { scaleX = boundWidth, anchorX = 1f, anchorY = 1f};
+            buttomBound = new FSprite("pixel") { scaleY = boundWidth, anchorX = 0f, anchorY = 0f};
+            midBound = new FSprite("pixel") { scaleX = boundWidth, anchorX = 0.5f, anchorY = 1f};
+
+            Container.AddChild(leftBound);
+            Container.AddChild(upBound);
+            Container.AddChild(rightBound);
+            Container.AddChild(buttomBound);
+            Container.AddChild(midBound);
+
+            title = new FLabel(Custom.GetDisplayFont(), "");
+
+            Container.AddChild(title);
+            questRendererManager = new QuestRendererManager(Container, QuestRendererManager.Mode.QuestDisplay);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            lastAlpha = alpha;
+            if(alpha != setAlpha)
+            {
+                alpha = Mathf.Lerp(alpha, setAlpha, 0.25f);
+                if(Mathf.Approximately(alpha, setAlpha))
+                    alpha = setAlpha;
+            }
+
+            lastMouseScreenPos = mouseScreenPos;
+            mouseScreenPos = Futile.mousePosition;
+
+
+            //计算边角坐标，切换锚点，防止超出屏幕
+            float xAnchorBiasPos = (1f - setAnchor.x * 2f) * size.x + mouseScreenPos.x;
+            float yAnchorBiasPos = (1f - setAnchor.y * 2f) * size.y + mouseScreenPos.y;
+
+            if(xAnchorBiasPos < 0f || xAnchorBiasPos > Custom.rainWorld.options.ScreenSize.x)
+                setAnchor.x = 1f - setAnchor.x;
+
+            if (yAnchorBiasPos < 0f || yAnchorBiasPos > Custom.rainWorld.options.ScreenSize.y)
+                setAnchor.y = 1f - setAnchor.y;
+
+            lastAnchor = anchor;
+            if (anchor != setAnchor)
+            {
+                anchor = Vector2.Lerp(anchor, setAnchor, 0.25f);
+                if(Mathf.Approximately(anchor.x, setAnchor.x) && Mathf.Approximately(anchor.y , setAnchor.y))
+                {
+                    anchor = lastAnchor = setAnchor;
+                }
+            }
+            questRendererManager.Update();
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+
+            Vector2 ownerPos = Vector2.zero;
+            if (owner is PositionedMenuObject p)
+                ownerPos = Vector2.Lerp(p.lastPos, p.pos, timeStacker);
+
+            Vector2 smoothPos = Vector2.Lerp(lastMouseScreenPos, mouseScreenPos, timeStacker) + ownerPos;
+            Vector2 smoothAnchor = Vector2.Lerp(lastAnchor, anchor, timeStacker);
+
+            background.SetPosition(smoothPos);
+            background.alpha = alpha;
+
+            leftBound.SetPosition(smoothPos + new Vector2((-smoothAnchor.x) * size.x , (1f - smoothAnchor.y) * size.y));
+            leftBound.scaleY = size.y;
+            leftBound.alpha = alpha;
+
+            upBound.SetPosition(smoothPos + new Vector2((-smoothAnchor.x) * size.x, (1f - smoothAnchor.y) * size.y));
+            upBound.scaleX = size.x;
+            upBound.alpha = alpha;
+
+            rightBound.SetPosition(smoothPos + new Vector2((1f - smoothAnchor.x) * size.x, (1f - smoothAnchor.y) * size.y));
+            rightBound.scaleY = size.y;
+            rightBound.alpha = alpha;
+
+            buttomBound.SetPosition(smoothPos + new Vector2((-smoothAnchor.x) * size.x, (-smoothAnchor.y) * size.y));
+            buttomBound.scaleX = size.x;
+            buttomBound.alpha = alpha;
+
+            Vector2 topAnchor = smoothPos + new Vector2((1f -smoothAnchor.x) * size.x * 0.5f, (1f - smoothAnchor.y) * size.y - titleBorder);
+            title.SetPosition(topAnchor);
+            title.alpha = alpha;
+
+            midBound.SetPosition(topAnchor + new Vector2(0f, - veryBigGap));
+            midBound.alpha = alpha;
+
+            for (int i = 0;i < conditionLabels.Count;i++)
+            {
+                conditionLabels[i].SetPosition(topAnchor + new Vector2(-bigGap - maxConditionX, -bigGap - entryHeight - (entryHeight + bigGap) * i));
+                conditionLabels[i].alpha = alpha;
+            }
+
+            float ybias = - entryHeight;
+
+            for(int typeIndex = 0; typeIndex < rewardTypeLabels.Count;typeIndex++)
+            {
+                ybias -= bigGap;
+                rewardTypeLabels[typeIndex].SetPosition(topAnchor + new Vector2(bigGap, ybias));
+                rewardTypeLabels[typeIndex].alpha = alpha;
+                var currentRewardLeasers = rewardLeasers[typeIndex];
+
+                ybias -= entryHeight + bigGap;
+
+                for (int i = 0; i < currentRewardLeasers.Value.Count; i++)
+                {
+                    var leaser = currentRewardLeasers.Value[i];
+
+                    leaser.smoothCenterPos = topAnchor + new Vector2(bigGap + veryBigGap + leaser.rect.x / 2f, ybias - leaser.rect.y / 2f);
+                    leaser.smoothAlpha = alpha;
+                    ybias -= leaser.rect.y + smallGap;
+                }
+            }
+
+            if (lastAnchor != anchor)
+            {
+                background.SetAnchor(smoothAnchor);
+            }
+            questRendererManager.GrafUpdate(timeStacker);
+        }
+
+        public override void RemoveSprites()
+        {
+            base.RemoveSprites();
+            background.RemoveFromContainer();
+            leftBound.RemoveFromContainer();
+            upBound.RemoveFromContainer();
+            rightBound.RemoveFromContainer();
+            buttomBound.RemoveFromContainer();
+            midBound.RemoveFromContainer();
+            questRendererManager.Destroy();
+        }
+
+        public void DisplayInfo(QuestButton.QuestInfo questInfo)
+        {
+            setAlpha = 1.0f;
+            if (currentInfo.Equals(questInfo))
+                return;
+            currentInfo = questInfo;
+
+            title.text = questInfo.name;
+
+            foreach (var label in conditionLabels)
+                label.RemoveFromContainer();
+            conditionLabels.Clear();
+
+            foreach (var label in rewardTypeLabels)
+                label.RemoveFromContainer();
+            rewardTypeLabels.Clear();
+
+            questRendererManager.Destroy();
+            rewardLeasers.Clear();
+
+            background.MoveToFront();
+            leftBound.MoveToFront();
+            upBound.MoveToFront();
+            rightBound.MoveToFront();
+            buttomBound.MoveToFront();
+            midBound.MoveToFront();
+            title.MoveToFront();
+
+            int longest = questInfo.conditions.Count;
+            float y = titleBorder + bigGap + entryHeight + longest * (entryHeight + bigGap) + bigGap;
+
+            maxConditionX = float.MinValue;
+            maxRewardX = float.MinValue;
+
+            foreach (var condition in questInfo.conditions)//条件条目
+            {
+                float testWidth = LabelTest.GetWidth(condition, false);
+                if (testWidth > maxConditionX)
+                    maxConditionX = testWidth;
+                conditionLabels.Add(new FLabel(Custom.GetFont(), condition) { anchorX = 0f, anchorY = 1f});
+                Container.AddChild(conditionLabels.Last());
+            }
+
+            float y2 = titleBorder + bigGap + entryHeight + bigGap + entryHeight;
+            foreach(var rewards in questInfo.rewards)//奖励渲染
+            {
+                y2 += entryHeight + bigGap * 2f;
+                rewardLeasers.Add(new KeyValuePair<QuestUnlockedType, List<QuestLeaser>>(rewards.Key, new List<QuestLeaser>()));
+
+                string rewardEntryTitle = rewards.Key.value;//类别标签
+                maxRewardX = Mathf.Max(smallGap + LabelTest.GetWidth(rewardEntryTitle), maxRewardX);
+                rewardTypeLabels.Add(new FLabel(Custom.GetFont(), rewards.Key.value) { anchorX = 0f, anchorY = 1f});
+                Container.AddChild(rewardTypeLabels.Last());
+
+                foreach (var reward in rewards.Value)
+                {
+                    var leaser = questRendererManager.AddQuestToRender(rewards.Key, reward);
+                    rewardLeasers.Last().Value.Add(leaser);
+                    y2 += leaser.rect.y + smallGap;
+
+                    maxRewardX = Mathf.Max(leaser.rect.x + bigGap + veryBigGap, maxRewardX);
+                }
+            }
+            y = Mathf.Max(y, y2);
+
+            float max = Mathf.Max(maxConditionX, maxRewardX);
+            float x = bigGap + max + bigGap + bigGap + max + bigGap;
+            size = new Vector2(x, y);
+            background.scaleX = size.x;
+            background.scaleY = size.y;
+
+            midBound.scaleY = size.y - titleBorder - veryBigGap - bigGap;
+
+            leftBound.color = questInfo.color;
+            upBound.color = questInfo.color;
+            rightBound.color = questInfo.color;
+            buttomBound.color = questInfo.color;
+            midBound.color = questInfo.color;
+        }
+
+        public void Hide()
+        {
+            setAlpha = 0f;
         }
     }
 }

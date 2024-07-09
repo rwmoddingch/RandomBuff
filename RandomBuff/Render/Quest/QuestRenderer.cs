@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RandomBuff.Core.Progression;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,10 +30,18 @@ namespace RandomBuff.Render.Quest
         {
 
         }
+
+        public virtual void ClearSprites(QuestRendererManager.QuestLeaser questLeaser, QuestRendererManager.Mode mode)
+        {
+            foreach (var element in questLeaser.elements)
+                element.RemoveFromContainer();
+        }
     }
 
     public class QuestRendererManager
     {
+        static List<QuestRendererProvider> providers = new List<QuestRendererProvider>();
+
         public FContainer Container { get; private set; }
         public readonly Mode mode;
 
@@ -54,6 +63,24 @@ namespace RandomBuff.Render.Quest
 
             return leaser;
         }
+
+        public QuestLeaser AddQuestToRender(QuestUnlockedType type, string id)
+        {
+            foreach(var provider in providers)
+            {
+                var result = provider.Provide(type, id);
+                if (result != null)
+                    return AddQuestToRender(result);
+            }
+            var renderer = new DefaultQuestRenderer(id);
+            QuestLeaser leaser = new QuestLeaser(renderer, this);
+            renderer.Init(leaser, mode);
+            leaser.AddToContainer();
+            leasers.Add(leaser);
+
+            return leaser;
+        }
+
 
         public void Update()
         {
@@ -77,6 +104,13 @@ namespace RandomBuff.Render.Quest
             {
                 leaser.ClearAllElements();
             }
+            leasers.Clear();
+        }
+
+        public void DestroyLeaser(QuestLeaser leaser)
+        {
+            leaser.ClearAllElements();
+            leasers.Remove(leaser);
         }
 
         public class QuestLeaser
@@ -106,9 +140,18 @@ namespace RandomBuff.Render.Quest
 
             public void ClearAllElements()
             {
-                foreach(var element in elements)
-                    element.RemoveFromContainer();
+                questRenderer.ClearSprites(this, rendererManager.mode);
             }
+        }
+
+        public static void AddProvider(QuestRendererProvider provider)
+        {
+            providers.Add(provider);
+        }
+
+        public static void Init()
+        {
+            AddProvider(new BuffCardQuestProvider());
         }
     
         public enum Mode
@@ -122,4 +165,13 @@ namespace RandomBuff.Render.Quest
     {
         public QuestRenderer Renderer {get;} 
     }
+
+    public abstract class QuestRendererProvider
+    {
+        public virtual IQuestRenderer Provide(QuestUnlockedType type, string id)
+        {
+            return null;
+        }
+    }
 }
+

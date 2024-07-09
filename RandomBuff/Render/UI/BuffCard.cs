@@ -2,6 +2,7 @@
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
+using RandomBuff.Render.Quest;
 using System;
 using System.Collections.Generic;
 using System.IO;

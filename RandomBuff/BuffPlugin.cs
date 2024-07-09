@@ -32,6 +32,7 @@ using RandomBuff.Core.Progression.CosmeticUnlocks;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
+using RandomBuff.Render.Quest;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -137,6 +138,7 @@ namespace RandomBuff
                     TypeSerializer.Init();
                     QuestCondition.Init();
                     CosmeticUnlock.Init();
+                    QuestRendererManager.Init();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
