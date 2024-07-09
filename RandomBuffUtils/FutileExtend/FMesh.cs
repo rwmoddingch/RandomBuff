@@ -8,12 +8,32 @@ namespace RandomBuffUtils.FutileExtend
 {
     public class FMesh : FSprite
     {
-        public FMesh(string meshName, string imageName, bool customColor, bool customNormals = true) :
-            this(MeshManager.GetMeshByName(meshName),imageName, customColor, customNormals)
+
+        /// <summary>
+        /// FMesh构造函数
+        /// </summary>
+        /// <param name="meshName">模型名称</param>
+        /// <param name="imageName">模型对应贴图</param>
+        /// <param name="sortFacts">是否对模型面进行深度排序（保证前后覆盖效果）</param>
+        /// <param name="customNormals">是否启用法线</param>
+        /// <param name="customColor">是否启用顶点色</param>
+        public FMesh(string meshName, string imageName, bool sortFacts = true, bool customNormals = true, bool customColor = false) :
+            this(MeshManager.GetMeshByName(meshName),imageName, sortFacts, customNormals, customColor)
         {
         }
-        public FMesh(Mesh3DAsset mesh, string imageName, bool customColor, bool customNormals = true)  : base()
+
+        /// <summary>
+        /// FMesh构造函数
+        /// </summary>
+        /// <param name="mesh">模型资源</param>
+        /// <param name="imageName">模型对应贴图</param>
+        /// <param name="sortFacts">是否对模型面进行深度排序（保证前后覆盖效果）</param>
+        /// <param name="customNormals">是否启用法线</param>
+        /// <param name="customColor">是否启用顶点色</param>
+        public FMesh(Mesh3DAsset mesh, string imageName, bool sortFacts = true, bool customNormals = true,
+            bool customColor = false)  : base()
         {
+            _sortFacts = sortFacts;
             _mesh = mesh ?? throw new FutileException("MeshAsset is Null!");
 
             _customNormals = customNormals;
@@ -45,9 +65,12 @@ namespace RandomBuffUtils.FutileExtend
                 UpdateVertices();
                 int startVert = _firstFacetIndex * 3;
 
-          
+
                 var sortFacet = _mesh.facets;
-                
+                if(_sortFacts)
+                    sortFacet = _mesh.facets.OrderBy(i =>
+                        -(_vertices[i.vertices.a].z + _vertices[i.vertices.b].z + _vertices[i.vertices.c].z)).ToArray();
+
                 for (int i=0;i<sortFacet.Length;i++)
                 {
                     var curIndex = i * 3;
@@ -90,6 +113,9 @@ namespace RandomBuffUtils.FutileExtend
             }
 
         }
+
+
+        
 
         void ReImportVert()
         {
@@ -135,7 +161,9 @@ namespace RandomBuffUtils.FutileExtend
             return Quaternion.AngleAxis(angle, axis) * (position);
         }
 
-
+        /// <summary>
+        /// 模型三维旋转
+        /// </summary>
         public Vector3 rotation3D { 
 
             get => _rotation3d; 
@@ -149,6 +177,19 @@ namespace RandomBuffUtils.FutileExtend
             }
         }
 
+        /// <summary>
+        /// 模型三维旋转（四元数版）
+        /// </summary>
+        public Quaternion quaternion
+        {
+            get => Quaternion.Euler(_rotation3d);
+            set => rotation3D = value.eulerAngles;
+        }
+
+
+        /// <summary>
+        /// 模型颜色
+        /// </summary>
         public override Color color { 
 
             get => base.color;
@@ -168,6 +209,15 @@ namespace RandomBuffUtils.FutileExtend
             }
         }
 
+        /// <summary>
+        /// 是否启用了顶点色
+        /// </summary>
+        public bool customColor => _customColor;
+
+
+        /// <summary>
+        /// 是否启用法线
+        /// </summary>
         public bool customNormals
         {
             get => _customNormals;
@@ -178,6 +228,10 @@ namespace RandomBuffUtils.FutileExtend
             }
         }
 
+
+        /// <summary>
+        /// 模型资源
+        /// </summary>
         public Mesh3DAsset Mesh
         {
             get => _mesh;
@@ -196,6 +250,10 @@ namespace RandomBuffUtils.FutileExtend
             }
         }
 
+
+        /// <summary>
+        /// 模型三维缩放
+        /// </summary>
         public Vector3 Scale3D
         {
             get => _scale3d;
@@ -207,13 +265,38 @@ namespace RandomBuffUtils.FutileExtend
             }
         }
 
+        /// <summary>
+        /// 模型面排序选项
+        /// </summary>
+        public bool SortFacts
+        {
+            get => _sortFacts;
+            set
+            {
+                if(value ==  _sortFacts) return;
+                _sortFacts = value;
+                _isMeshDirty = true;
+            }
+        }
+
+
+        /// <summary>
+        /// 移动单一顶点
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="newPos"></param>
         public void MoveVertice(int index, Vector3 newPos)
         {
             _isMeshDirty = true;
             _animatedVertices[index] = newPos;
         }
 
-        public void SetColor(int index, Color color)
+        /// <summary>
+        /// 设置顶点颜色，请确保构造函数时启用了customColor
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="color"></param>
+        public void SetVerticeColor(int index, Color color)
         {
             _verticeColors[index] = color;
         }
@@ -226,6 +309,7 @@ namespace RandomBuffUtils.FutileExtend
         private Vector3 _scale3d = Vector3.one;
         private Color[] _verticeColors;
         private bool _customNormals;
+        private bool _sortFacts;
 
         private float _maxMeshZ = 0;
 
@@ -267,6 +351,9 @@ namespace RandomBuffUtils.FutileExtend
 
             }
 
+            /// <summary>
+            /// 根据顶点位置信息构造默认法线
+            /// </summary>
             public void BuildDefaultNormals()
             {
                 
@@ -329,7 +416,7 @@ namespace RandomBuffUtils.FutileExtend
 
     }
 
-    public class FMeshRenderLayer : FFacetRenderLayer
+    internal class FMeshRenderLayer : FFacetRenderLayer
     {
 
         public Vector3[] _normals = Array.Empty<Vector3>();

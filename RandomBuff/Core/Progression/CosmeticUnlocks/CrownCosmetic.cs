@@ -43,7 +43,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             public override void InitSprites(SLeaserInstance sLeaserInstance, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
                 sLeaserInstance.sprites = new FSprite[1];
-                sLeaserInstance.sprites[0] = new FMesh(grown,"Futile_White",true);
+                sLeaserInstance.sprites[0] = new FMesh(grown,"Futile_White",customColor: true);
                 Reset(self);
             }
 

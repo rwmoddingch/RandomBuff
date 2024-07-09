@@ -84,7 +84,7 @@ namespace BuiltinBuffs.Expeditions
                 {
                     BuffPoolManager.Instance.CreateBuff(FakeCreatureBuffData.FakeCreatureID);
                     BuffHud.Instance.AppendNewCard(FakeCreatureBuffData.FakeCreatureID);
-                    //self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
+                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
 
                 }
             }
@@ -108,8 +108,7 @@ namespace BuiltinBuffs.Expeditions
             public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
                 sLeaser.sprites = new FSprite[1];
-                sLeaser.sprites[0] = new FMesh("flameThrower", FlameThrowerBuffEntry.flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture", false,
-                    true)
+                sLeaser.sprites[0] = new FMesh("flameThrower", FlameThrowerBuffEntry.flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture")
                 {
                     shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"],
                 };
