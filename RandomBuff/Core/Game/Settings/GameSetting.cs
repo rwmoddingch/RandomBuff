@@ -75,6 +75,11 @@ namespace RandomBuff.Core.Game.Settings
 
         public void EnterGame(RainWorldGame game)
         {
+            if (name != null && ModManager.CoopAvailable)
+            {
+                game.GetStorySession.characterStatsJollyplayer[0].name = name;
+                game.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = name;
+            }
             name ??= game.StoryCharacter;
             gachaTemplate.EnterGame(game);
         }

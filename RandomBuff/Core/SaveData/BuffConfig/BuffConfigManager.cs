@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -295,11 +296,17 @@ namespace RandomBuff.Core.SaveData
                         BuffPlugin.LogException(e, $"Invalid BuffQuest file! Mod:{mod.name} ,Path:{file.FullName}");
                     }
 
-                    foreach (var qId in BuffConfigManager.GetQuestIDList())
+                    foreach (var qId in GetQuestIDList())
                     {
-                            BuffPlugin.LogDebug($"Quest ID:{qId}");
-                            foreach (var con in BuffConfigManager.GetQuestData(qId).QuestConditions)
+                        BuffPlugin.LogDebug($"Quest ID:{qId}");
+                        foreach (var con in GetQuestData(qId).QuestConditions)
                             BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
+                        foreach (var reward in GetQuestData(qId).UnlockItem)
+                        foreach (var v in reward.Value)
+                                BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
+
+                            
+                        
                     }
                 }
             }

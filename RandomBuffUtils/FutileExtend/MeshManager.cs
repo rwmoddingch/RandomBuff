@@ -79,6 +79,14 @@ namespace RandomBuffUtils.FutileExtend
             });
         }
 
+
+        /// <summary>
+        /// 读取模型文件，仅支持obj格式
+        /// </summary>
+        /// <param name="name">读取后模型名称</param>
+        /// <param name="path">模型文件位置</param>
+        /// <returns></returns>
+        /// <exception cref="FutileException"></exception>
         public static Mesh3DAsset LoadMesh(string name, string path)
         {
             if (MeshAssets.ContainsKey(name))

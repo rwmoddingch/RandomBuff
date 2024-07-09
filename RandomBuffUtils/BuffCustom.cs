@@ -14,5 +14,8 @@ namespace RandomBuffUtils
             game = Custom.rainWorld.processManager.currentMainLoop as RainWorldGame;
             return game != null;
         }
+
+        public static float TimeSpeed => (Custom.rainWorld.processManager.currentMainLoop?.framesPerSecond ?? 40) / 40f;
+        
     }
 }
