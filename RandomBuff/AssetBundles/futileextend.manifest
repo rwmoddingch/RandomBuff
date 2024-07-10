@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 257146363
+CRC: 3644835468
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c3a56ebaededddb29de893c62caa9c4a
+    Hash: bf3333bd6b308964cc68394d19691707
   TypeTreeHash:
     serializedVersion: 2
     Hash: 68c985bf88fecc38b460cdb825182138
@@ -13,7 +13,5 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/Shaders/CardBasicColor.shader
-- Assets/Shaders/CardHighlight.shader
-- Assets/Shaders/CardTextShader.shader
+- Assets/Shaders/UniformSimpleLighting.shader
 Dependencies: []

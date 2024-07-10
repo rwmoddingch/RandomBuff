@@ -85,3 +85,7 @@ Cicadas|蝉乌贼
 ProgressionUI_Record|记录
 ProgressionUI_Quest|收集
 ProgressionUI_Cosmetic|装饰品
+
+//QuestCondition
+Quest_Display_MissionQuest|完成 {0} 使命
+Quest_Display_LevelQuest|达到 {0} 等级

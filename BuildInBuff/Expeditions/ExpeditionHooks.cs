@@ -76,8 +76,8 @@ namespace BuiltinBuffs.Expeditions
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
 
-                    BuffPoolManager.Instance.CreateBuff(ShortSightedEntry.ShortSighted);
-                    BuffHud.Instance.AppendNewCard(ShortSightedEntry.ShortSighted);
+                    BuffPoolManager.Instance.CreateBuff(FlameThrowerBuffEntry.flameThrowerBuffID);
+                    BuffHud.Instance.AppendNewCard(FlameThrowerBuffEntry.flameThrowerBuffID);
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
@@ -108,8 +108,7 @@ namespace BuiltinBuffs.Expeditions
             public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
                 sLeaser.sprites = new FSprite[1];
-                sLeaser.sprites[0] = new FMesh("flameThrower", FlameThrowerBuffEntry.flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture", false,
-                    true)
+                sLeaser.sprites[0] = new FMesh("flameThrower", FlameThrowerBuffEntry.flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture")
                 {
                     shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"],
                 };

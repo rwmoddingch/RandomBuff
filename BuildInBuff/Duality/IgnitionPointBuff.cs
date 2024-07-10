@@ -625,10 +625,10 @@ namespace BuiltinBuffs.Duality
                 }
             }
 
-            if (Input.GetKey(KeyCode.H))
-                temperature += 0.1f;
-            else if (Input.GetKey(KeyCode.J))
-                temperature -= 0.1f;
+            //if (Input.GetKey(KeyCode.H))
+            //    temperature += 0.1f;
+            //else if (Input.GetKey(KeyCode.J))
+            //    temperature -= 0.1f;
 
             if (burn && creature.State is HealthState)
             {
@@ -1234,6 +1234,297 @@ namespace BuiltinBuffs.Duality
                 return 0f;
 
             return (heat / 40f) * (dist / rad) * burnRate;
+        }
+    }
+
+    public class RoomFlame : UpdatableAndDeletable, IHeatingCreature, IAccessibilityModifier
+    {
+        static ConditionalWeakTable<Room, RoomFlame> flameMapper = new ConditionalWeakTable<Room, RoomFlame>();
+
+        float[,] fireIntensities;
+        float fireIntensityDecrease;
+        float heat;
+
+        int totalBurningTile;
+
+        List<IntVector2> burningTiles = new List<IntVector2>();
+        //List<FLabel> labels = new List<FLabel>();
+
+        ParticleEmitter fireEmitter;
+        ParticleEmitter sparkleEmitter;
+
+        float stacker;
+        float rate;
+        float baseRate = 1f;
+
+        public RoomFlame(Room room, float heat, int maxFireLife = 400)
+        {
+            this.room = room;
+            this.heat = heat;
+            fireIntensities = new float[room.Width, room.Height];
+            fireIntensityDecrease = 1f / maxFireLife;
+
+            fireEmitter = CreateFireEmitter();
+            sparkleEmitter = CreateSparkleEmitter();
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            if (slatedForDeletetion)
+                return;
+
+            totalBurningTile = 0;
+            for (int x = 0; x < fireIntensities.GetLength(0); x++)
+            {
+                for (int y = 0; y < fireIntensities.GetLength(1); y++)
+                {
+                    if (fireIntensities[x, y] > 0f)
+                    {
+                        totalBurningTile++;
+                        fireIntensities[x, y] = Mathf.Clamp01(fireIntensities[x, y] - fireIntensityDecrease);
+                        if (fireIntensities[x, y] == 0)
+                        {
+                            int index = burningTiles.IndexOf(new IntVector2(x, y));
+                            //var label = labels[index];
+                            //label.RemoveFromContainer();
+                            //labels.RemoveAt(index);
+                            burningTiles.RemoveAt(index);
+                        }
+                    }
+                }
+            }
+            if (totalBurningTile == 0)
+                Destroy();
+
+            rate = baseRate * totalBurningTile;
+            stacker += rate;
+            while (stacker > 0 && totalBurningTile > 0)
+            {
+                stacker--;
+                var pos = burningTiles[Random.Range(0, burningTiles.Count)];
+                var middlePos = room.MiddleOfTile(pos);
+                if (Random.value < 0.2f * fireIntensities[pos.x, pos.y])
+                    room.AddObject(new HolyFire.HolyFireSprite(middlePos + Random.value * 10f * Custom.RNV()));
+            }
+
+            //for(int i = 0;i < burningTiles.Count; i++)
+            //{
+            //    labels[i].SetPosition(room.MiddleOfTile(burningTiles[i]) - room.game.cameras[0].pos);
+            //    labels[i].text = string.Format("{0:F1}", fireIntensities[burningTiles[i].x, burningTiles[i].y]);
+            //}
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            sparkleEmitter?.Die();
+            fireEmitter?.Die();
+        }
+
+        public void ApplyFire(Vector2 pos, float rad)
+        {
+            int left = Mathf.Clamp(room.GetTilePosition(pos + new Vector2(-rad, 0f)).x, 0, room.Width - 1);
+            int right = Mathf.Clamp(room.GetTilePosition(pos + new Vector2(rad, 0f)).x, 0, room.Width - 1);
+            int up = Mathf.Clamp(room.GetTilePosition(pos + new Vector2(0f, rad)).y, 0, room.Height - 1);
+            int down = Mathf.Clamp(room.GetTilePosition(pos + new Vector2(0f, -rad)).y, 0, room.Height - 1);
+
+            for (int x = left; x <= right; x++)
+            {
+                for (int y = down; y <= up; y++)
+                {
+                    if (room.GetTile(x, y).Solid)
+                        continue;
+
+                    if (Vector2.Distance(room.MiddleOfTile(x, y), pos) < rad)
+                    {
+                        if (fireIntensities[x, y] == 0f)
+                        {
+                            burningTiles.Add(new IntVector2(x, y));
+                            //labels.Add(new FLabel(Custom.GetFont(), "0"));
+                            //Futile.stage.AddChild(labels.Last());
+                        }
+                        fireIntensities[x, y] = 1f;
+                    }
+                }
+            }
+        }
+
+        public float GetHeat(UpdatableAndDeletable u, Vector2 pos)
+        {
+            var tile = room.GetTilePosition(pos);
+            if (tile.x < 0 || tile.x >= room.Width || tile.y < 0 || tile.y >= room.Height)
+                return 0f;
+
+            if (fireIntensities[tile.x, tile.y] > 0f)
+                return heat / 40f;
+            return 0f;
+        }
+
+        public ParticleEmitter CreateSparkleEmitter()
+        {
+            var emitter = new ParticleEmitter(room);
+            emitter.ApplyParticleSpawn(new RoomFireSpawner(emitter, this, 1, 200));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
+            emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 40, 60));
+            emitter.ApplyParticleModule(new DispatchRandomFirePos(emitter, this));
+            emitter.ApplyParticleModule(new SetConstVelociy(emitter, Vector2.up * 2f * room.gravity));
+            emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, l) =>
+            {
+                if (l < 0.5f)
+                    return Color.Lerp(Color.white, Color.yellow, l * 2f);
+                else
+                    return Color.Lerp(Color.yellow, Color.red, (l - 0.5f) * 2f);
+            }));
+
+            emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, l) =>
+            {
+                if (l < 0.2f)
+                    return l * 5f;
+                else if (l > 0.5f)
+                    return (1f - l) * 2f;
+                else
+                    return 1f;
+            }));
+
+            emitter.ApplyParticleModule(new VelocityOverLife(emitter, (p, l) =>
+            {
+                Vector2 vel = p.vel;
+                vel += Custom.RNV() * 0.2f;
+                return vel;
+            }));
+
+            emitter.ApplyParticleModule(new TrailDrawer(emitter, 0, 5)
+            {
+                gradient = (p, i, max) => p.color,
+                alpha = (p, i, max) => p.alpha,
+                width = (p, i, max) => 1f
+            });
+            ParticleSystem.ApplyEmitterAndInit(emitter);
+
+            return emitter;
+        }
+
+        public static Color flameCol_0 = Color.blue * 0.1f + Color.red * 1f + Color.white * 0.8f;
+        public static Color flameCol_1 = Color.white;
+        public static Color flameCol_2 = Color.white * 0.5f + Color.yellow * 0.5f;
+        public static Color flameCol_3 = Color.yellow * 0.6f + Color.red * 0.4f;
+        public static Color flameCol_4 = Color.red * 0.8f + Color.yellow * 0.2f;
+        public static Color flameCol_5 = Color.black;
+        public ParticleEmitter CreateFireEmitter()
+        {
+            var emitter = new ParticleEmitter(room);
+            emitter.ApplyParticleSpawn(new RoomFireSpawner(emitter, this, 4, 800));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam(FlameThrowerBuffEntry.flameVFX1, "StormIsApproaching.AdditiveDefault")));
+
+            emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 40, 80));
+            emitter.ApplyParticleModule(new DispatchRandomFirePos(emitter, this));
+            emitter.ApplyParticleModule(new SetConstVelociy(emitter, Vector2.up * 1f * room.gravity));
+            emitter.ApplyParticleModule(new ColorOverLife(fireEmitter, (p, l) =>
+            {
+                if (l < 0.1f)
+                    return Color.Lerp(flameCol_0, flameCol_1, l * 10f) * 0.35f;
+                else if (l < 0.25f)
+                    return Color.Lerp(flameCol_1, flameCol_2, (l - 0.1f) / 0.15f) * 0.35f;
+                else if (l < 0.4f)
+                    return Color.Lerp(flameCol_2, flameCol_3, (l - 0.25f) / 0.15f) * 0.3f;
+                else if (l < 0.8f)
+                    return Color.Lerp(flameCol_3, flameCol_4, (l - 0.4f) / 0.4f) * 0.3f;
+                else
+                    return Color.Lerp(flameCol_4, flameCol_5, (l - 0.8f) / 0.2f) * 0.3f;
+            }));
+            emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, l) =>
+            {
+                return 0.2f * Mathf.Sin(Mathf.PI * l);
+            }));
+
+            emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, l) =>
+            {
+                return 4f * Mathf.Sin(Mathf.PI * l);
+            }));
+            emitter.ApplyParticleModule(new DefaultDrawer(emitter, new int[1] { 0 }));
+            ParticleSystem.ApplyEmitterAndInit(emitter);
+
+            return emitter;
+        }
+
+        public static RoomFlame GetRoomFlame(Room room, float heat = 4f, int maxFireLife = 400)
+        {
+            if (flameMapper.TryGetValue(room, out var groundFlame) && !groundFlame.slatedForDeletetion)
+            {
+                return groundFlame;
+            }
+            else if (groundFlame != null)
+                flameMapper.Remove(room);
+
+            groundFlame = new RoomFlame(room, heat, maxFireLife);
+            room.AddObject(groundFlame);
+            flameMapper.Add(room, groundFlame);
+            return groundFlame;
+        }
+
+        public bool IsTileAccessible(IntVector2 tile, CreatureTemplate crit)
+        {
+            if (tile.x < 0 || tile.x >= fireIntensities.GetLength(0) || tile.y < 0 || tile.y >= fireIntensities.GetLength(1))
+                return true;
+            return fireIntensities[tile.x, tile.y] == 0;
+        }
+
+        class RoomFireSpawner : SpawnModule
+        {
+            RoomFlame groundFlame;
+            float stacker;
+            float rate;
+            float baseRate;
+
+            public RoomFireSpawner(ParticleEmitter emitter, RoomFlame groundFlame, float baseRatePerSec, int maxParticleCount) : base(emitter, maxParticleCount)
+            {
+                this.groundFlame = groundFlame;
+                baseRate = baseRatePerSec / 40f;
+            }
+
+            public override void Update()
+            {
+                base.Update();
+                rate = baseRate * groundFlame.totalBurningTile;
+                stacker += rate;
+                while (stacker > 0)
+                {
+                    stacker--;
+                    if (emitter.Particles.Count < maxParitcleCount)
+                    {
+                        emitter.SpawnParticle();
+                    }
+                }
+            }
+        }
+
+        class DispatchRandomFirePos : EmitterModule, IParticleInitModule
+        {
+            RoomFlame groundFlame;
+            public DispatchRandomFirePos(ParticleEmitter emitter, RoomFlame groundFlame) : base(emitter)
+            {
+                this.groundFlame = groundFlame;
+            }
+
+            public void ApplyInit(Particle particle)
+            {
+                var pos = groundFlame.burningTiles[(int)(particle.randomParam1 * (groundFlame.burningTiles.Count - 1))];
+                var middlePos = groundFlame.room.MiddleOfTile(pos);
+                particle.HardSetPos(middlePos + Custom.DegToVec(360f * particle.randomParam2) * 10f * particle.randomParam3);
+            }
+        }
+    }
+
+    public abstract class IgnitionPointBaseBuff<BuffType, DataType> : Buff<BuffType, DataType>
+        where BuffType : Buff<BuffType, DataType>
+        where DataType : BuffData, new()
+    {
+        public IgnitionPointBaseBuff()
+        {
+            GetTemporaryBuffPool().CreateTemporaryBuff(IgnitionPointBuffEntry.ignitionPointBuffID);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace RandomBuffUtils.FutileExtend
         {
             IL.FFacetRenderLayer.UpdateMeshProperties += FFacetRenderLayer_UpdateMeshPropertiesIL;
             On.FFacetRenderLayer.UpdateMeshProperties += FFacetRenderLayer_UpdateMeshProperties;
-            On.FFacetRenderLayer.Update += FFacetRenderLayer_Update;
+            //On.FFacetRenderLayer.Update += FFacetRenderLayer_Update;
             Mesh = FFacetType.CreateFacetType("RandomBuff.Pkuyo.Mesh", 16, 64, 1000,
                 (stage, type, atlas, shader) => new FMeshRenderLayer(stage, type, atlas, shader));
             Cube = LoadMesh("Cube", "buffassets/assetbundles/futileextend/Cube.obj");
@@ -41,7 +41,7 @@ namespace RandomBuffUtils.FutileExtend
                 if (self._depth != depth)
                 {
                     self._depth = depth;
-                    self._material.renderQueue = 2000;
+                    //self._material.renderQueue = 2000;
                 }
                 if (self._isMeshDirty)
                     self.UpdateMeshProperties();
@@ -79,6 +79,14 @@ namespace RandomBuffUtils.FutileExtend
             });
         }
 
+
+        /// <summary>
+        /// 读取模型文件，仅支持obj格式
+        /// </summary>
+        /// <param name="name">读取后模型名称</param>
+        /// <param name="path">模型文件位置</param>
+        /// <returns></returns>
+        /// <exception cref="FutileException"></exception>
         public static Mesh3DAsset LoadMesh(string name, string path)
         {
             if (MeshAssets.ContainsKey(name))

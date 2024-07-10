@@ -109,10 +109,6 @@ namespace RandomBuff.Core.BuffMenu
                 slugcatPages.Add(new SlugcatIllustrationPage(this, null, i + 1, slugNameOrders[i]));
                 pages.Add(slugcatPages[i]);
             }
-            //pages.Add();
-            //pages.Add();
-
-            pages[0].subObjects.Add(rainEffect = new RainEffect(this, pages[0]));
 
             InitButtonPage(pages[0]);
             container.AddChild(menuSlot.Container);
@@ -123,31 +119,36 @@ namespace RandomBuff.Core.BuffMenu
             foreach (var page in pages)
                 page.mouseCursor?.BumToFront();
 
-            //pages[0].Container.MoveToFront();
-            
-            //detailPage.Container.MoveToFront();
-
             UpdateSlugcatAndPage();
-            //TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, "Wawa test Label", new Vector2(400f, 30f))
-            //{
-            //    Pivot = new Vector2(0f, 1f),
-            //    color = Color.green,
-            //    alpha = 0.5f,
-            //    Alignment = TMPro.TextAlignmentOptions.Left
-            //};
-            //container.AddChild(label);
 
+            FSprite black = new FSprite("pixel") { 
+                color = Color.black, 
+                scaleX = Custom.rainWorld.options.ScreenSize.x,
+                scaleY = Custom.rainWorld.options.ScreenSize.y,
+                anchorX = 0f,
+                anchorY = 0f,
+                x = 0f,
+                y = 0f
+            };
 
-            //FSprite redDot = new FSprite("pixel") { color = Color.red, scale = 2f };
-
-            //container.AddChild(redDot);
-            //label.SetPosition(new Vector2(100f, 150f));
-            //redDot.SetPosition(new Vector2(100f, 150f));
-            //label.scale = 12.5f;
+            container.AddChild(black);
+            blackFadeAnim = AnimMachine.GetTickAnimCmpnt(0, 20, autoDestroy: true).BindModifier(Helper.EaseInOutCubic).BindActions(OnAnimUpdate: (anim) =>
+            {
+                black.alpha = 1f - anim.Get();
+                pages[3].Container.alpha = 0f;
+                Update();
+                GrafUpdate(1f);
+            },OnAnimFinished:(anim) =>
+            {
+                black.RemoveFromContainer();
+                pages[3].Container.alpha = 1f;
+                blackFadeAnim = null;
+            });
         }
+        TickAnimCmpnt blackFadeAnim;
         //
 
-        
+
         BuffContinueGameDetialPage continueDetailPage;
         BuffNewGameDetailPage newGameDetailPage;
         //--------------测试-----------------

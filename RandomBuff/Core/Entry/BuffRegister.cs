@@ -20,6 +20,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuff.Render.UI.Component;
@@ -145,9 +146,9 @@ namespace RandomBuff.Core.Entry
         /// 注册新的任务种类
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public static void RegisterQuestType<T>() where T : BuffQuest, new()
+        public static void RegisterQuestType<T>() where T : QuestCondition, new()
         {
-            BuffQuest.Register<T>();
+            QuestCondition.Register<T>();
         }
 
         /// <summary>
@@ -177,13 +178,14 @@ namespace RandomBuff.Core.Entry
                 }
 
                 TemplateTypes.Add(id,new GachaTemplateType(
-                    typeof(TTemplateType),new(banList)));
+                    typeof(TTemplateType), new HashSet<ConditionID>(banList)));
             }
             catch (Exception e)
             {
                 BuffPlugin.LogException(e, $"Exception when register GachaTemplate {id}");
             }
         }
+     
 
         /// <summary>
         /// 注册新的通关条件
@@ -191,7 +193,6 @@ namespace RandomBuff.Core.Entry
         /// <typeparam name="TConditionType"></typeparam>
         /// <param name="id">ID</param>
         /// <param name="displayName">显示类别名称</param>
-        /// <param name="canUseMore">是否可以同一局选取多个</param>
         /// <param name="parentId">继承某个条件的Ban情况</param>
         /// <param name="banList">Ban掉特定的游玩模式，请保证对应的GachaTemplate已经注册</param>
         public static void RegisterCondition<TConditionType>(ConditionID id, string displayName,
@@ -230,7 +231,43 @@ namespace RandomBuff.Core.Entry
                 BuffPlugin.LogException(e, $"Exception when register condition {id}");
             }
         }
+
+        /// <summary>
+        /// 注册新的通关条件
+        /// </summary>
+        /// <typeparam name="TConditionType"></typeparam>
+        /// <param name="id">ID</param>
+        /// <param name="displayName">显示类别名称</param>
+        /// <param name="isHidden">是否为隐藏条件（不可随机抽取）</param>
+        /// <param name="parentId">继承某个条件的Ban情况</param>
+        public static void RegisterCondition<TConditionType>(ConditionID id, string displayName,bool isHidden,
+            ConditionID parentId = null)
+            where TConditionType : Condition, new()
+        {
+            try
+            {
+                if (id != Helper.GetUninit<TConditionType>().ID)
+                {
+                    BuffPlugin.LogError($"{id}'s Condition has unexpected ConditionID!");
+                    return;
+                }
+
+                var parent = GetConditionType(parentId);
+                if (parent == null && parentId != null)
+                {
+                    BuffPlugin.LogError($"can't find Condition:{parentId}, When register Condition:{id} parent");
+                    return;
+                }
+                ConditionTypes.Add(id, new ConditionType(id, typeof(TConditionType), GetConditionType(parentId), displayName,isHidden));
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception when register condition {id}");
+            }
+        }
     }
+
+
 
     /// <summary>
     /// 保存Buff的注册信息，负责保存BuffData/Buff的Type信息
@@ -313,12 +350,7 @@ namespace RandomBuff.Core.Entry
             allEntry.Clear();
             foreach (var mod in ModManager.ActiveMods)
             {
-                var resolver = new DefaultAssemblyResolver();
-                resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/plugins");
-                foreach(var modPath in ModManager.ActiveMods.Where(i => mod.requirements.Contains(i.id) 
-                                                                        && i.requirements.Contains(BuffPlugin.ModId)))
-                    resolver.AddSearchDirectory(modPath.path + "/plugins");
-
+             
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
                 if (!Directory.Exists(path))
                     continue;
@@ -422,6 +454,23 @@ namespace RandomBuff.Core.Entry
                 currentRuntimeBuffName.Clear();
             }
             CurrentModId = string.Empty;
+            var somePath = Path.Combine(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).basePath, "buffassets",
+                "assetbundles", "extend");
+            if (Directory.Exists(somePath))
+            {
+                DirectoryInfo info = new DirectoryInfo(somePath);
+                foreach (var file in info.GetFiles())
+                {
+                    try
+                    {
+                        Assembly.LoadFrom(file.FullName);
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e);
+                    }
+                }
+            }
         }
 
 
@@ -484,18 +533,23 @@ namespace RandomBuff.Core.Entry
             public ConditionType Parent { get; }
             public string DisplayName { get; }
 
+            public bool IsHidden { get; }
+
             public ConditionID Id { get; }
 
-            public ConditionType(ConditionID id, Type type, ConditionType parent, string displayName)
+            public ConditionType(ConditionID id, Type type, ConditionType parent, string displayName,bool isHidden = false)
             {
                 Id = id;
                 Type = type;
                 Parent = parent;
                 DisplayName = displayName;
+                IsHidden = isHidden;
             }
 
             public bool CanUseInCurrentTemplate(GachaTemplateID id)
             {
+                if (IsHidden)
+                    return false;
                 var type = GetTemplateType(id);
                 var con = this;
                 while (con != null)
@@ -516,8 +570,14 @@ namespace RandomBuff.Core.Entry
 
             public GachaTemplateType(Type type, HashSet<ConditionID> banConditionIds)
             {
-                this.Type = type;
+                Type = type;
                 BanConditionIds = banConditionIds;
+            }
+
+            public GachaTemplateType(Type type)
+            {
+                Type = type;
+                BanConditionIds = new HashSet<ConditionID>();
             }
         }
 

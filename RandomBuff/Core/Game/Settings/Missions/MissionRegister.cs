@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI.Component;
 
 namespace RandomBuff.Core.Game.Settings.Missions
@@ -62,6 +63,8 @@ namespace RandomBuff.Core.Game.Settings.Missions
                     }
                 }
             }
+
+            QuestRendererManager.AddProvider(new MissionQuestRendererProvider());
         }
     }
 }

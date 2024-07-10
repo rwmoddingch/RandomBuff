@@ -16,9 +16,18 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public override void Init(QuestRendererManager.QuestLeaser questLeaser, QuestRendererManager.Mode mode)
         {
-            questLeaser.rect = new Vector2(120, 120);
-            questLeaser.elements = new FNode[1];
-            questLeaser.elements[0] = new FSprite((owner as CosmeticUnlock).IconElement) { scale = 1.5f };
+            if(mode == QuestRendererManager.Mode.NotificationBanner)
+            {
+                questLeaser.rect = new Vector2(120, 120);
+                questLeaser.elements = new FNode[1];
+                questLeaser.elements[0] = new FSprite((owner as CosmeticUnlock).IconElement) { scale = 1.5f };
+            }
+            else
+            {
+                questLeaser.rect = new Vector2(80, 80f);
+                questLeaser.elements = new FNode[1];
+                questLeaser.elements[0] = new FSprite((owner as CosmeticUnlock).IconElement) { scale = 1f };
+            }
         }
 
         public override void Draw(QuestRendererManager.QuestLeaser questLeaser, float timeStacker, QuestRendererManager.Mode mode)

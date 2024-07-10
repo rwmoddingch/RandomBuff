@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 
-namespace RandomBuff.Core.Progression
+namespace RandomBuff.Core.Progression.Quest.Condition
 {
-    internal class LevelQuest : BuffQuest
+    internal class LevelQuestCondition : QuestCondition
     {
-        public override string TypeName => nameof(LevelQuest);
-        public override string QuestMessage()
+        public override string TypeName => "LevelCondition";
+        public override string ConditionMessage()
         {
-            return string.Format(Custom.rainWorld.inGameTranslator.Translate("Reach Level {} to Unlock"), level);
+            return string.Format(BuffResourceString.Get("Quest_Display_LevelQuest"), level);
         }
 
         public override bool UpdateUnlockedState(WinGamePackage package)

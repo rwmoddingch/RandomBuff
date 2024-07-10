@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Missions;
 using RWCustom;
 
-namespace RandomBuff.Core.Progression
+namespace RandomBuff.Core.Progression.Quest.Condition
 {
-    internal class MissionQuest : BuffQuest
+    internal class MissionQuestCondition : QuestCondition
     {
-        public override string TypeName => nameof(MissionQuest);
-        public override string QuestMessage()
+        public override string TypeName => "MissionCondition";
+        public override string ConditionMessage()
         {
             string missionName = "???";
             if (MissionRegister.TryGetMission(new MissionID(missionId), out var mission))
                 missionName = mission.MissionName;
-            return string.Format(Custom.rainWorld.inGameTranslator.Translate("Complete the Mission {}"),
+            return string.Format(BuffResourceString.Get("Quest_Display_MissionQuest"),
                 Custom.rainWorld.inGameTranslator.Translate(missionName));
         }
 

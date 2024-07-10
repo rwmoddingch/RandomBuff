@@ -51,6 +51,13 @@ namespace RandomBuffUtils
             return orig(self, name);
         }
 
+        /// <summary>
+        /// 读取自定义位置的声音
+        /// </summary>
+        /// <param name="id">声音对应的ID</param>
+        /// <param name="soundPath">声音文件对应的数据</param>
+        /// <param name="groupData">该组声音的属性</param>
+        /// <param name="datas">每个声音切片的属性</param>
         public static void LoadSound([NotNull] SoundID id, string soundPath, BuffSoundGroupData groupData,
             params BuffSoundData[] datas)
         {

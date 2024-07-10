@@ -114,6 +114,11 @@ namespace RandomBuff.Core.Buff
         {
             return BuffPoolManager.Instance.GetTemporaryBuffPool(ID);
         }
+
+        public string GetBindKey()
+        {
+            return BuffPlayerData.Instance.GetKeyBind(ID);
+        }
     }
 
     /// <summary>

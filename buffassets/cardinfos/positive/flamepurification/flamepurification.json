@@ -1,0 +1,17 @@
+{
+    "FaceName": "flamepurification",
+    "BuffID" : "FlamePurification",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "FF2D0E",
+
+    "Chinese" : {
+        "BuffName" : "烈焰净化",
+        "Description" : "前置为燃点；地形上燃烧的火焰将可以清楚舌草和香菇墙"
+    },
+    "English" : {
+        "BuffName" : "EjectionRock",
+        "Description" : "Pre-set to IgnitionPoint; burning flames on the terrain will be able to clear walls of tongue grass and corrupt"
+    }
+}

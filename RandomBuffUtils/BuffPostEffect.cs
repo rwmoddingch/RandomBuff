@@ -20,6 +20,11 @@ namespace RandomBuffUtils
         private static BuffPostEffectManager instance;
         private static Dictionary<int, List<BuffPostEffect>> allPostLayer = new();
 
+
+        /// <summary>
+        /// 移除后期处理效果
+        /// </summary>
+        /// <param name="effect"></param>
         public static void RemoveEffect(BuffPostEffect effect)
         {
             if (allPostLayer.TryGetValue(effect.Layer, out var items))
@@ -27,7 +32,11 @@ namespace RandomBuffUtils
 
         }
 
-
+        /// <summary>
+        /// 添加新的后期处理效果
+        /// </summary>
+        /// <param name="effect">要添加的效果</param>
+        /// <param name="pos">添加顺序位置</param>
         public static void AddEffect(BuffPostEffect effect, InsertPosition pos = InsertPosition.Last)
         {
             if (!allPostLayer.TryGetValue(effect.Layer, out var items))
@@ -97,7 +106,10 @@ namespace RandomBuffUtils
 
 
     }
-
+    
+    /// <summary>
+    /// 后期处理效果的基类
+    /// </summary>
     public abstract class BuffPostEffect
     {
         protected Material material;
@@ -109,12 +121,29 @@ namespace RandomBuffUtils
             Layer = layer;
         }
 
+        /// <summary>
+        /// 后期处理效果的层数，层数越大，处理越靠后
+        /// </summary>
         public int Layer { get; protected set; } = 0;
 
+        /// <summary>
+        /// 进行后期处理的函数，
+        /// 注意务必至少进行一次source到dest的Blit否则可能会出现未定义行为。
+        /// </summary>
+        /// <param name="source">原始贴图</param>
+        /// <param name="destination">目标贴图</param>
         public abstract void OnRenderImage(RenderTexture source, RenderTexture destination);
 
+
+        /// <summary>
+        /// Unity的update，注意时间间隔为Time.deltatime
+        /// </summary>
         public virtual void Update(){}
 
+        /// <summary>
+        /// 删除函数，
+        /// 务必要在不使用的时候删除
+        /// </summary>
         public virtual void Destroy()
         {
             needDeletion = true;
@@ -123,6 +152,10 @@ namespace RandomBuffUtils
         }
     }
 
+    /// <summary>
+    /// 限定时间的后期处理基类，会在持续时间结束后自动删除。
+    /// 注意若持续时间为负数则会永久存在。
+    /// </summary>
     public abstract class BuffPostEffectLimitTime : BuffPostEffect
     {
         protected readonly float duringTime;
@@ -137,6 +170,9 @@ namespace RandomBuffUtils
             this.fadeTime = fadeTime / duringTime;
         }
 
+        /// <summary>
+        /// 过渡的alpha值
+        /// </summary>
         protected virtual float LerpAlpha => Mathf.InverseLerp(0, enterTime, 1 - lifeTime) * Mathf.InverseLerp(0, fadeTime, lifeTime);
 
         public override void Update()
@@ -146,9 +182,8 @@ namespace RandomBuffUtils
             {
             }
             else
-                lifeTime -= Time.deltaTime * (Custom.rainWorld.processManager.currentMainLoop?.framesPerSecond ?? 40) / 40f / duringTime;
-            
-  
+                lifeTime -= Time.deltaTime * BuffCustom.TimeSpeed / duringTime;
+
             if (lifeTime <= 0)
                 Destroy();
         }

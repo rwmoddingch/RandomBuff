@@ -84,3 +84,7 @@ Cicadas|Cicadas
 ProgressionUI_Record|RECORD
 ProgressionUI_Quest|QUEST
 ProgressionUI_Cosmetic|COSMETIC
+
+//QuestCondition
+Quest_Display_MissionQuest|Complete {0} mission
+Quest_Display_LevelQuest|Reach {0} level

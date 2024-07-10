@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 300992646
+CRC: 47545242
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -7,4 +7,7 @@ AssetBundleManifest:
       Dependencies: {}
     Info_1:
       Name: textmesh pro
+      Dependencies: {}
+    Info_2:
+      Name: futileextend
       Dependencies: {}

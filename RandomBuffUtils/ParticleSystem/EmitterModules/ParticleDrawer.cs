@@ -16,19 +16,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         {
             this.renderElementIndexs = renderElementIndexs;
         }
-        public void ApplyInitSpritesAndAddToContainer(Particle particle)
-        {
-            for(int i = 0;i < renderElementIndexs.Length;i++)
-            {
-                int index = renderElementIndexs[i];
-                var param = particle.spriteInitParams[index];
-
-                particle.fNodes[index] = new FSprite(param.element);
-                if(!string.IsNullOrEmpty(param.shader))
-                    (particle.fNodes[index] as FSprite).shader = Custom.rainWorld.Shaders[param.shader];
-                particle.emitter.system.Containers[param.layer].AddChild(particle.fNodes[index]);
-            }
-        }
+     
 
         public void ApplyDrawSprites(Particle particle, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
@@ -37,9 +25,8 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             Color smoothColor = Color.Lerp(particle.lastColor, particle.color, timeStacker);
             float smoothRotation = Mathf.Lerp(particle.lastRotation, particle.rotation, timeStacker);
 
-            for (int i = 0; i < renderElementIndexs.Length; i++)
+            foreach (var index in renderElementIndexs)
             {
-                int index = renderElementIndexs[i];
                 particle.fNodes[index].SetPosition(smoothPos - camPos);
                 particle.fNodes[index].scaleX = smoothScaleXY.x * particle.spriteInitParams[index].scale;
                 particle.fNodes[index].scaleY = smoothScaleXY.y * particle.spriteInitParams[index].scale;
@@ -51,10 +38,30 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
         public void ApplyClearSprites(Particle particle)
         {
-            for (int i = 0; i < renderElementIndexs.Length; i++)
+            foreach (var index in renderElementIndexs)
             {
-                int index = renderElementIndexs[i];
                 particle.fNodes[index].RemoveFromContainer();
+            }
+        }
+
+        public void ApplyInitSprites(Particle particle)
+        {
+            foreach (var index in renderElementIndexs)
+            {
+                var param = particle.spriteInitParams[index];
+
+                particle.fNodes[index] = new FSprite(param.element);
+                if (!string.IsNullOrEmpty(param.shader))
+                    (particle.fNodes[index] as FSprite).shader = Custom.rainWorld.Shaders[param.shader];
+            }
+        }
+
+        public void AddToContainer(Particle particle)
+        {
+            foreach (var index in renderElementIndexs)
+            {
+                var param = particle.spriteInitParams[index];
+                particle.emitter.system.Containers[param.layer].AddChild(particle.fNodes[index]);
             }
         }
     }
@@ -68,8 +75,8 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public Func<Particle, int, int, float> width;
         public Func<Particle, float, float> widthModifyOverLife;
 
-        int trailCount;
-        int index;
+        readonly int trailCount;
+        readonly int index;
 
         public TrailDrawer(ParticleEmitter emitter, int index, int trailCount = 10) : base(emitter)
         {
@@ -94,15 +101,6 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             {
                 data.colorsList.RemoveAt(trailCount);
             }
-        }
-
-        public void ApplyInitSpritesAndAddToContainer(Particle particle)
-        {
-            particle.fNodes[index] = TriangleMesh.MakeLongMesh(trailCount - 1, false, true, particle.spriteInitParams[index].element);
-            if (!string.IsNullOrEmpty(particle.spriteInitParams[index].shader))
-                (particle.fNodes[index] as TriangleMesh).shader = Custom.rainWorld.Shaders[particle.spriteInitParams[index].shader];
-
-            particle.emitter.system.Containers[particle.spriteInitParams[index].layer].AddChild(particle.fNodes[index]);
         }
 
         public void ApplyDrawSprites(Particle particle, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -186,10 +184,24 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             return result;
         }
 
+        public void ApplyInitSprites(Particle particle)
+        {
+            particle.fNodes[index] = TriangleMesh.MakeLongMesh(trailCount - 1, false, true, particle.spriteInitParams[index].element);
+            if (!string.IsNullOrEmpty(particle.spriteInitParams[index].shader))
+                (particle.fNodes[index] as TriangleMesh).shader = Custom.rainWorld.Shaders[particle.spriteInitParams[index].shader];
+
+        }
+
+        public void AddToContainer(Particle particle)
+        {
+            particle.emitter.system.Containers[particle.spriteInitParams[index].layer].AddChild(particle.fNodes[index]);
+        }
+
         internal class TrailData : Particle.ParticleUniqueData
         {
             public List<Vector2> positionsList;
             public List<Color> colorsList;
         }
+
     }
 }

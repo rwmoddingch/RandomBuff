@@ -84,6 +84,7 @@ namespace RandomBuff.Core.Progression
             Register<MeteorSpearCosmetic>();
 
             grown = MeshManager.LoadMesh("grown", AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
+            QuestRendererManager.AddProvider(new CosmeticQuestRendererProvider());
         }
 
         internal static CosmeticUnlock CreateInstance(string name,RainWorldGame game)
@@ -144,6 +145,21 @@ namespace RandomBuff.Core.Progression
     {
         CosmeticQuestRenderer questRenderer;
         public QuestRenderer Renderer => questRenderer;
+    }
 
+    internal class CosmeticQuestRendererProvider : QuestRendererProvider
+    {
+        public override IQuestRenderer Provide(QuestUnlockedType type, string id)
+        {
+            if (type != QuestUnlockedType.Cosmetic)
+                return null;
+
+            if(CosmeticUnlock.cosmeticUnlocks.TryGetValue(new CosmeticUnlockID(id), out var cosmeticType))
+            {
+                return Activator.CreateInstance(cosmeticType) as CosmeticUnlock;
+            }
+
+            return null;
+        }
     }
 }
