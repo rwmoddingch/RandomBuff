@@ -879,7 +879,7 @@ namespace BuiltinBuffs.Duality
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             
             if (sLeaser.sprites.Length >= 9)
-                for (int i = 4; i <= 8; i++)
+                for (int i = 5; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
             sLeaser.sprites[CoreSpriteStart].isVisible = false;//口珠的纽带，直接隐藏
             for (int j = 0; j < mouthBeads.Length; j++)
@@ -1239,7 +1239,7 @@ namespace BuiltinBuffs.Duality
                     {
                         Vector2 a = Custom.DegToVec(360f * UnityEngine.Random.value);
                         self.room.AddObject(new MouseSpark(self.firstChunk.pos + a * 18f, self.firstChunk.vel + a * 36f * UnityEngine.Random.value, 20f, new Color(0.7f, 1f, 1f)));
-                        self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Latch_On_Player, self.firstChunk.pos, 0.3f, 0f);
+                        self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Latch_On_Player, self.firstChunk.pos, 0.3f, 1f);
                     }
                 }
             }
