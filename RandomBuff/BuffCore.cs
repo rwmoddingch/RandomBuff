@@ -17,7 +17,7 @@ namespace RandomBuff
         /// <param name="id"></param>
         /// <param name="buff"></param>
         /// <returns></returns>
-        public static bool TryGetBuff(BuffID id, out IBuff buff)
+        public static bool TryGetBuff(this BuffID id, out IBuff buff)
         {
             buff = null;
             if (BuffPoolManager.Instance != null)
@@ -32,7 +32,7 @@ namespace RandomBuff
         /// <param name="id"></param>
         /// <param name="buff"></param>
         /// <returns></returns>
-        public static bool TryGetBuff<TBuff>(BuffID id, out TBuff buff) where TBuff : IBuff
+        public static bool TryGetBuff<TBuff>(this BuffID id, out TBuff buff) where TBuff : IBuff
         {
             buff = default;
             if (TryGetBuff(id, out var iBuff))
@@ -55,6 +55,43 @@ namespace RandomBuff
             return null;
         }
 
+        /// <summary>
+        /// 创建新的Buff
+        /// </summary>
+        /// <param name="id">待创建的BuffID</param>
+        /// <param name="needStack">是否需要堆叠，非堆叠情况下尝试创建不会重复创建仅会获取到第一个</param>
+        /// <returns></returns>
+        public static IBuff CreateNewBuff(this BuffID id, bool needStack = true)
+        {
+            if (BuffPoolManager.Instance != null)
+            {
+                bool canShow = !id.TryGetBuff(out _);
+                var re = BuffPoolManager.Instance.CreateBuff(id, needStack);
+                if (canShow)
+                    BuffHud.Instance.AppendNewCard(id);
+                return re;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// 创建新的Buff
+        /// </summary>
+        /// <param name="id">待创建的BuffID</param>
+        /// <param name="needStack">是否需要堆叠，非堆叠情况下尝试创建不会重复创建仅会获取到第一个</param>
+        /// <returns></returns>
+        public static TBuff CreateNewBuff<TBuff>(this BuffID id, bool needStack = true) where TBuff : class, IBuff
+        {
+            if (BuffPoolManager.Instance != null)
+            {
+                bool canShow = !id.TryGetBuff(out _);
+                var re = BuffPoolManager.Instance.CreateBuff(id, needStack);
+                if (canShow)
+                    BuffHud.Instance.AppendNewCard(id);
+                return (TBuff)re;
+            }
+            return null;
+        }
         /// <summary>
         /// 获取ID对应的Buff,可能为空
         /// </summary>
@@ -92,7 +129,7 @@ namespace RandomBuff
                 return (TData)BuffPoolManager.Instance.GetBuffData(id);
             return (TData)BuffDataManager.Instance.GetBuffData(id);
         }
-
+   
         /// <summary>
         /// 获取当前猫的BuffList
         /// 可能为空

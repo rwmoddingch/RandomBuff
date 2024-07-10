@@ -1,0 +1,17 @@
+{
+    "FaceName": "Netzach",
+    "ID": "Netzach",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "35da2a",
+    "Chinese":{
+        "BuffName":"生存下去的勇气",
+        "Description":"饱食度回复减少，且随持有卡牌时间增长而进一步减少，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+    },
+    "English":{
+        "BuffName":"The Fearlessness to keep on Living",
+        "Description":""
+    }
+}

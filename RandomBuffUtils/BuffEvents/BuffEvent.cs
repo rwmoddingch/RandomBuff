@@ -22,13 +22,16 @@ namespace RandomBuffUtils
             add
             {
                 if (onCreatureKilled == null || onCreatureKilled.GetInvocationList().Length == 0)
+                {
                     On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
+                }
+
                 onCreatureKilled += value;
             }
             remove
             {
                 onCreatureKilled -= value;
-                if (onCreatureKilled.GetInvocationList().Length == 0)
+                if ((onCreatureKilled?.GetInvocationList()?.Length ?? 0) == 0)
                     On.PlayerSessionRecord.AddKill -= PlayerSessionRecord_AddKill;
             }
 

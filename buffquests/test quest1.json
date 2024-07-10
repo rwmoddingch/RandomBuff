@@ -1,15 +1,22 @@
 {
-    "Type":"MissionQuest",
     "Name":"Cool Test",
     "Color":"F0F0F0",
     "ID":"builtin.quest.cooltest",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"Strayer"
+        },
+        {
+            "Type":"LevelCondition",
+            "Level":5
+        }
+    ],
     "UnlockItem":
     {
         "Mission":
         [
-            "Druid",
             "Test"
         ]
-    },
-    "MissionID":"Strayer"
+    }
 }

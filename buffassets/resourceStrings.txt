@@ -67,6 +67,10 @@ DisplayName_Card|Collect {0} {1} buffcards
 DisplayName_Like|Maximize like with {0}
 DisplayName_MeetSS_SL|Meet Pebbles and Moon in {0} cycles
 DisplayName_Gourmand|Complete Gourmand Feast
+DisplayName_Interval_OutRange|Completed the task within {0}-{1} cycles, now hidden
+DisplayName_FixCycle|Complete the mission in {0} cycle
+DisplayName_MeltDownHunt|Kill {0}
+DisplayName_Death|Complete the mission less than {0} death  
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -88,3 +92,6 @@ ProgressionUI_Cosmetic|COSMETIC
 //QuestCondition
 Quest_Display_MissionQuest|Complete {0} mission
 Quest_Display_LevelQuest|Reach {0} level
+
+//mission
+Mission_Display_Meltdown|Sephirah Meltdowns

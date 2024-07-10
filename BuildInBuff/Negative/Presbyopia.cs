@@ -22,7 +22,7 @@ namespace BuiltinBuffs.Negative
             BuffRegister.RegisterBuff<PresbyopiaBuff, PresbyopiaBuffData, PresbyopiaEntry>(Presbyopia);
         }
 
-        public static void OnModsInit()
+        public static void HookOn()
         {
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
 
