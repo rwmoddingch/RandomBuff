@@ -1,0 +1,17 @@
+{
+    "FaceName": "Hokma",
+    "ID": "Hokma",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "7abf45",
+    "Chinese":{
+        "BuffName":"拥抱过去，创造未来",
+        "Description":"游戏无法进行暂停，且游戏速度随持有时间加快，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+    },
+    "English":{
+        "BuffName":"The Eye Embracing the Past, Building the Future",
+        "Description":""
+    }
+}

@@ -733,8 +733,9 @@ namespace BuiltinBuffs.Positive
             new Vector4(4.6f, 1, -3f, 0.1f),
             new Vector4(-1.8f, 1, 0.8f, -0.05f)
         };
-        protected override float LerpAlpha => Mathf.Pow(Mathf.InverseLerp(0, enterTime, 1 - lifeTime), 2f);
+        protected override float LerpAlpha =>Mathf.Pow(base.LerpAlpha,0.33f);
 
+        private bool useAlpha = false;
 
         private Vector4 GetRandomLine()
         {
@@ -744,7 +745,7 @@ namespace BuiltinBuffs.Positive
             return new Vector4(k, 1,posX.y - k * posX.x,0);
         }
 
-        public CutEffect(int layer, float duringTime, float enterTime,float fadeTime,int count = 7) : base(layer, duringTime, enterTime, fadeTime)
+        public CutEffect(int layer, float duringTime, float enterTime,float fadeTime,int count = 7,bool useAlpha = false) : base(layer, duringTime, enterTime, fadeTime)
         {
             material = new Material(StormIsApproachingEntry.CutScreen);
             Array.Resize(ref lineParams, count);
@@ -754,6 +755,7 @@ namespace BuiltinBuffs.Positive
                 lineParams[i].w = Random.Range(-0.1f, 0.1f);
             }
 
+            this.useAlpha = useAlpha;
 
         }
 
@@ -762,7 +764,7 @@ namespace BuiltinBuffs.Positive
             base.OnRenderImage(source, destination);
             material.SetVectorArray("lineParams", lineParams);
             material.SetFloat("length", lineParams.Length * LerpAlpha);
-            material.SetFloat("inst", 1);
+            material.SetFloat("inst", useAlpha ? LerpAlpha : 1);
 
             Graphics.Blit(source, destination, material);
         }

@@ -1,0 +1,17 @@
+{
+    "FaceName": "Tiphereth",
+    "ID": "Tiphereth",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "f2b643",
+    "Chinese":{
+        "BuffName":"存在意义的憧憬",
+        "Description":"轮回内随机降雨，避难所100%损坏，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+    },
+    "English":{
+        "BuffName":"The Expectation for the Meaning of Existence",
+        "Description":""
+    }
+}

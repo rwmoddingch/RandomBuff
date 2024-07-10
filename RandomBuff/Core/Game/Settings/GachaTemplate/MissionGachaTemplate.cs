@@ -38,7 +38,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                         continue;
                     }
                     BuffPoolManager.Instance.CreateBuff(id, true);
-                    BuffHud.Instance.AppendNewCard(id);
+                    BuffHud.Instance?.AppendNewCard(id);
                 }
             }
         }

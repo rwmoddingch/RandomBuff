@@ -75,9 +75,13 @@ namespace BuiltinBuffs.Expeditions
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-
-                    BuffPoolManager.Instance.CreateBuff(FlameThrowerBuffEntry.flameThrowerBuffID);
-                    BuffHud.Instance.AppendNewCard(FlameThrowerBuffEntry.flameThrowerBuffID);
+                    foreach (var crit in self.Players[0].Room.creatures.Select(i => i.realizedCreature))
+                    {
+                        if(crit is Player) continue;
+                        crit.SetKillTag(self.Players[0]);
+                        crit.Die();
+                        self.GetStorySession.playerSessionRecords[0].AddKill(crit);
+                    }
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))

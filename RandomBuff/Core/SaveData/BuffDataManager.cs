@@ -185,7 +185,7 @@ namespace RandomBuff.Core.SaveData
             foreach(var id in allDatas[name].Keys)
                 BuffPlayerData.Instance.AddCollect(id);
 
-            foreach (var data in allDatas[name])
+            foreach (var data in allDatas[name].ToArray())
             {
                 try
                 {

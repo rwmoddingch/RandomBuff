@@ -1,0 +1,17 @@
+{
+    "FaceName": "Yesod",
+    "ID": "Yesod",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "dd15ff",
+    "Chinese":{
+        "BuffName":"卓尔不凡的理性",
+        "Description":"游戏出现模糊效果，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+    },
+    "English":{
+        "BuffName":" The Rationality to Maintain Discretion",
+        "Description":"TODO"
+    }
+}

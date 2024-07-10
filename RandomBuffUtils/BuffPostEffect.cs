@@ -178,7 +178,7 @@ namespace RandomBuffUtils
         public override void Update()
         {
             if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game &&
-                game.pauseMenu != null)
+                game.GamePaused)
             {
             }
             else
