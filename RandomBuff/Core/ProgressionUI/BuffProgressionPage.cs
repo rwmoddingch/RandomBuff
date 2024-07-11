@@ -574,6 +574,10 @@ namespace RandomBuff.Core.ProgressionUI
         static float bigGap = 10f;
         static float veryBigGap = 40f;
 
+        static int maxCardInARow = 5;
+
+
+
         FSprite background;
 
         FSprite leftBound;
@@ -708,7 +712,7 @@ namespace RandomBuff.Core.ProgressionUI
             midBound.SetPosition(topAnchor + new Vector2(0f, - veryBigGap));
             midBound.alpha = alpha;
 
-            for (int i = 0;i < conditionLabels.Count;i++)
+            for (int i = 0;i < conditionLabels.Count;i++)//绘制条件
             {
                 conditionLabels[i].SetPosition(topAnchor + new Vector2(-bigGap - maxConditionX, -bigGap - entryHeight - (entryHeight + bigGap) * i));
                 conditionLabels[i].alpha = alpha;
@@ -725,13 +729,20 @@ namespace RandomBuff.Core.ProgressionUI
 
                 ybias -= entryHeight + bigGap;
 
-                for (int i = 0; i < currentRewardLeasers.Value.Count; i++)
+                if(currentRewardLeasers.Key == QuestUnlockedType.Card)
                 {
-                    var leaser = currentRewardLeasers.Value[i];
+                    DrawBuffCardQuestRenderers(currentRewardLeasers.Value, topAnchor, alpha, ref ybias);
+                }
+                else
+                {
+                    for (int i = 0; i < currentRewardLeasers.Value.Count; i++)
+                    {
+                        var leaser = currentRewardLeasers.Value[i];
 
-                    leaser.smoothCenterPos = topAnchor + new Vector2(bigGap + veryBigGap + leaser.rect.x / 2f, ybias - leaser.rect.y / 2f);
-                    leaser.smoothAlpha = alpha;
-                    ybias -= leaser.rect.y + smallGap;
+                        leaser.smoothCenterPos = topAnchor + new Vector2(bigGap + veryBigGap + leaser.rect.x / 2f, ybias - leaser.rect.y / 2f);
+                        leaser.smoothAlpha = alpha;
+                        ybias -= leaser.rect.y + smallGap;
+                    }
                 }
             }
 
@@ -808,18 +819,34 @@ namespace RandomBuff.Core.ProgressionUI
                 rewardTypeLabels.Add(new FLabel(Custom.GetFont(), rewards.Key.value) { anchorX = 0f, anchorY = 1f});
                 Container.AddChild(rewardTypeLabels.Last());
 
-                foreach (var reward in rewards.Value)
+                if (rewards.Key == QuestUnlockedType.Card)
                 {
-                    var leaser = questRendererManager.AddQuestToRender(rewards.Key, reward);
-                    rewardLeasers.Last().Value.Add(leaser);
-                    y2 += leaser.rect.y + smallGap;
+                    foreach (var reward in rewards.Value)
+                    {
+                        var leaser = questRendererManager.AddQuestToRender(rewards.Key, reward);
+                        rewardLeasers.Last().Value.Add(leaser);
+                    }
 
-                    maxRewardX = Mathf.Max(leaser.rect.x + bigGap + veryBigGap, maxRewardX);
+                    Vector2 rect = GetBuffCardQuestRendererSize(rewardLeasers.Last().Value);
+                    maxRewardX = Mathf.Max(rect.x + bigGap + veryBigGap, maxRewardX);
+                    y2 += rect.y;
+                }
+                else
+                {
+                    foreach (var reward in rewards.Value)
+                    {
+                        var leaser = questRendererManager.AddQuestToRender(rewards.Key, reward);
+                        rewardLeasers.Last().Value.Add(leaser);
+                        y2 += leaser.rect.y + smallGap;
+
+                        maxRewardX = Mathf.Max(leaser.rect.x + bigGap + veryBigGap, maxRewardX);
+                    }
                 }
             }
             y = Mathf.Max(y, y2);
 
             float max = Mathf.Max(maxConditionX, maxRewardX);
+            maxConditionX = max;
             float x = bigGap + max + bigGap + bigGap + max + bigGap;
             size = new Vector2(x, y);
             background.scaleX = size.x;
@@ -833,6 +860,36 @@ namespace RandomBuff.Core.ProgressionUI
             buttomBound.color = questInfo.color;
             midBound.color = questInfo.color;
         }
+
+        Vector2 GetBuffCardQuestRendererSize(List<QuestLeaser> buffCardLeasers)
+        {
+            if (buffCardLeasers.Count < maxCardInARow)
+                return new Vector2(buffCardLeasers.Count * (buffCardLeasers.First().rect.x + smallGap), buffCardLeasers.First().rect.y + smallGap);
+
+            int rows = Mathf.CeilToInt(buffCardLeasers.Count / (float)maxCardInARow);
+            return new Vector2(maxCardInARow * (buffCardLeasers.First().rect.x + smallGap), rows * (buffCardLeasers.First().rect.y + smallGap));
+        }
+
+        void DrawBuffCardQuestRenderers(List<QuestLeaser> buffCardLeasers, Vector2 topAnchor, float alpha, ref float yBias)
+        {
+            int x = 0;
+            int y = 0;
+
+            foreach(var leaser in buffCardLeasers)
+            {
+                leaser.smoothCenterPos = topAnchor + new Vector2(bigGap + veryBigGap + x * (leaser.rect.x + smallGap) + leaser.rect.x / 2f, yBias - y * (leaser.rect.y + smallGap) - leaser.rect.y / 2f);
+                leaser.smoothAlpha = alpha;
+
+                x++;
+                if(x == maxCardInARow)
+                {
+                    x = 0;
+                    y++;
+                    yBias -= leaser.rect.y + smallGap;
+                }
+            }
+        }
+
 
         public void Hide()
         {

@@ -105,6 +105,8 @@ namespace RandomBuff.Core.Game
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 cycleDatas.Add(data.Key, data.Value.Clone());
 
+            Instance = this;
+
             GameSetting = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).Clone();
             GameSetting.EnterGame(Game);
           
@@ -120,7 +122,6 @@ namespace RandomBuff.Core.Game
                     cosmeticList.Add(unlock);
             }
 
-            Instance = this;
 
         }
 
@@ -325,13 +326,19 @@ namespace RandomBuff.Core.Game
             }
             temporaryBuffPools.Clear();
 
+            GameSetting.SessionEnd(Game);
+            GameSetting.inGameRecord += record;
+
+            BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
+
+
             foreach (var buff in buffList)
             {
                 try
                 {
                     if (GetBuffData(buff.ID).NeedDeletion)
-                        UnstackBuff(buff.ID,false);
-                    
+                        UnstackBuff(buff.ID, false);
+
                 }
                 catch (Exception e)
                 {
@@ -340,10 +347,7 @@ namespace RandomBuff.Core.Game
                     ExceptionTracker.TrackException(e, $"Exception happened when invoke buff Destroy of {buff.ID}");
                 }
             }
-            GameSetting.SessionEnd(Game);
-            GameSetting.inGameRecord += record;
 
-            BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
             BuffFile.Instance.SaveFile();
 
             if (GameSetting.Win || Input.GetKey(KeyCode.P))

@@ -92,8 +92,8 @@ namespace RandomBuffUtils.FutileExtend
             if (self.room == null)
                 return;
 
-            var lightSources = self.room.updateList.Where(u => u is LightSource)
-                .Select(u => u as LightSource)
+            var lightSources = self.room.updateList
+                .OfType<LightSource>()
                 .Where(l => !l.flat)
                 .ToList();
 
