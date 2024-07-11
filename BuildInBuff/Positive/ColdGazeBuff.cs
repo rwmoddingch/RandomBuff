@@ -18,6 +18,10 @@ using RandomBuffUtils.ParticleSystem;
 using System.Diagnostics.Eventing.Reader;
 using MoreSlugcats;
 using Expedition;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using BuiltinBuffs.Duality;
+using static ExtraExtentions;
 
 namespace BuiltinBuffs.Positive
 {
@@ -33,7 +37,16 @@ namespace BuiltinBuffs.Positive
                              .Where(i => i != null && i.graphicsModule != null))
                 {
                     var coldGaze = new ColdGaze(player, player.room);
-                    ColdGazeBuffEntry.ColdGazeFeatures.Add(player, coldGaze);
+                    ColdGazeBuffEntry.ColdGazeFeatures.Add(player, coldGaze); 
+
+                    if (ColdGazeBuffEntry.StackLayer >= 3)
+                    {
+                        Medusa medusaCat = new Medusa(player, coldGaze);
+                        ColdGazeBuffEntry.MedusaFeatures.Add(player, medusaCat);
+                        medusaCat.ctor(player.graphicsModule as PlayerGraphics);
+                        medusaCat.InitiateSprites(game.cameras[0].spriteLeasers.
+                            First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
+                    }
                 }
             }
         }
@@ -43,6 +56,29 @@ namespace BuiltinBuffs.Positive
     {
         public override BuffID ID => ColdGazeBuffEntry.ColdGaze;
         public override int MaxCycleCount => 5;
+
+        public override void Stack()
+        {
+            base.Stack();
+            if (BuffCustom.TryGetGame(out var game) &&
+                ColdGazeBuffEntry.ColdGaze.GetBuffData() != null &&
+                ColdGazeBuffEntry.StackLayer >= 3)
+            {
+                foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
+                             .Where(i => i != null && i.graphicsModule != null))
+                {
+                    if (ColdGazeBuffEntry.ColdGazeFeatures.TryGetValue(player, out var coldGaze) &&
+                       !ColdGazeBuffEntry.MedusaFeatures.TryGetValue(player, out _))
+                    {
+                        Medusa medusaCat = new Medusa(player, coldGaze);
+                        ColdGazeBuffEntry.MedusaFeatures.Add(player, medusaCat);
+                        medusaCat.ctor(player.graphicsModule as PlayerGraphics);
+                        medusaCat.InitiateSprites(game.cameras[0].spriteLeasers.
+                            First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
+                    }
+                }
+            }
+        }
     }
 
     internal class ColdGazeBuffEntry : IBuffEntry
@@ -50,6 +86,7 @@ namespace BuiltinBuffs.Positive
         public static BuffID ColdGaze = new BuffID("ColdGaze", true);
 
         public static ConditionalWeakTable<Player, ColdGaze> ColdGazeFeatures = new ConditionalWeakTable<Player, ColdGaze>();
+        public static ConditionalWeakTable<Player, Medusa> MedusaFeatures = new ConditionalWeakTable<Player, Medusa>();
         public static ConditionalWeakTable<AbstractCreature, Freeze> FreezeFeatures = new ConditionalWeakTable<AbstractCreature, Freeze>();
 
         public static int StackLayer
@@ -74,6 +111,14 @@ namespace BuiltinBuffs.Positive
 
             On.Player.ctor += Player_ctor;
             On.Player.NewRoom += Player_NewRoom;
+
+            On.PlayerGraphics.ctor += PlayerGraphics_ctor;
+            On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
+            On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
+            On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+            On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
+            On.PlayerGraphics.Update += PlayerGraphics_Update;
+            On.PlayerGraphics.Reset += PlayerGraphics_Reset;
         }
 
         #region 玩家
@@ -82,9 +127,16 @@ namespace BuiltinBuffs.Positive
             orig(self, abstractCreature, world);
             if (!ColdGazeFeatures.TryGetValue(self, out _))
             {
-                ColdGaze coldGaze = new ColdGaze(self, self.room);
-                self.room.AddObject(coldGaze);
-                ColdGazeFeatures.Add(self, coldGaze);
+                ColdGaze newColdGaze = new ColdGaze(self, self.room);
+                self.room.AddObject(newColdGaze);
+                ColdGazeFeatures.Add(self, newColdGaze);
+            }
+            if (StackLayer >= 3 &&
+                ColdGazeFeatures.TryGetValue(self, out var coldGaze) &&
+                !MedusaFeatures.TryGetValue(self, out _))
+            {
+                Medusa medusaCat = new Medusa(self, coldGaze);
+                MedusaFeatures.Add(self, medusaCat);
             }
         }
 
@@ -106,6 +158,64 @@ namespace BuiltinBuffs.Positive
                 self.room.AddObject(newColdGaze);
                 ColdGazeFeatures.Add(self, newColdGaze);
             }
+
+            if (MedusaFeatures.TryGetValue(self, out var medusaCat))
+                medusaCat.NewRoom(self.room);
+        }
+        #endregion
+
+        #region 蛇发
+        private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+            orig(self, sLeaser, rCam, palette);
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+                medusaCat.ApplyPalette(sLeaser, rCam, palette);
+        }
+
+        private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+                medusaCat.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+        }
+
+        private static void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            orig(self, sLeaser, rCam);
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+            {
+                medusaCat.InitiateSprites(sLeaser, rCam);
+            }
+        }
+
+        private static void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            orig(self, sLeaser, rCam, newContatiner);
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+                medusaCat.AddToContainer(sLeaser, rCam, newContatiner);
+        }
+
+        private static void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
+        {
+            orig(self, ow);
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+                medusaCat.ctor(self);
+        }
+
+        private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
+        {
+            orig(self);
+            if (Input.GetKeyDown(KeyCode.T))
+                ColdGaze.GetBuffData().Stack();
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+                medusaCat.Update();
+        }
+
+        private static void PlayerGraphics_Reset(On.PlayerGraphics.orig_Reset orig, PlayerGraphics self)
+        {
+            orig(self);
+            if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
+                medusaCat.Reset();
         }
         #endregion
 
@@ -593,6 +703,10 @@ namespace BuiltinBuffs.Positive
                     bodyChunk.vel *= 0f;
                     bodyChunk.HardSetPosition(bodyChunk.pos);
                 }
+                if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
+                {
+                    heatModule.temperature = 0f;
+                }
             }
 
             if (freezeCount == 0 && ShouldBeFired())
@@ -819,30 +933,126 @@ namespace BuiltinBuffs.Positive
             ParticleSystem.ApplyEmitterAndInit(emitter);
         }
     }
-    
-    //蛇发外观，暂未完成和使用
-    internal class Medusa : GraphicsModule
+
+    #region 蛇发外观
+    internal class Medusa
     {
+        WeakReference<Player> ownerRef;
+        public MedusaHair[] hairs;
+
+        public void ctor(PlayerGraphics self)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i].ctor(self);
+        }
+
+        public Medusa(Player player, ColdGaze coldGaze)
+        {
+            ownerRef = new WeakReference<Player>(player);
+            this.hairs = new MedusaHair[6];
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i] = new MedusaHair(player, coldGaze, this, i, 30f + Random.value * 5f);
+        }
+
+        #region 外观
+        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i].InitiateSprites(sLeaser, rCam);
+        }
+
+        public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i].DrawSprites(sLeaser, rCam, timeStacker, camPos);
+        }
+
+        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i].ApplyPalette(sLeaser, rCam, palette);
+        }
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i].AddToContainer(sLeaser, rCam, newContatiner);
+        }
+
+        public void Reset()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            for (int i = 0; i < hairs.Length; i++)
+                hairs[i].Reset();
+        }
+        #endregion
+
+        public void Update()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            for (int i = 0; i < hairs.Length; i++)
+                this.hairs[i].Update();
+        }
+
+        public void NewRoom(Room room)
+        {
+            for (int i = 0; i < this.hairs.Length; i++)
+                this.hairs[i].NewRoom(room);
+        }
+    }
+
+    internal class MedusaHair
+    {
+        #region 属性
+        WeakReference<Player> ownerRef;
+        ColdGaze coldGaze;
+        Medusa medusa;
+        private PlayerGraphics.PlayerObjectLooker objectLooker;
         private Tentacle tentacle;
+        private Vector2 wantPos;
+        private Vector2 randomMovePos;
+        private Vector2 movePos;
+        private Vector2 rootPos;
+        private Vector2 lastRootPos;
+        private Vector2 headToFace;
+        private Vector2 lastHeadToFace;
+
         private Vector2 lookPoint;
-        private float sinWave;
+        private Vector2 wantLookPoint;
+        private Vector2 lookDirection;
+        private Vector2 lastLookDir;
+
+        private Color eyesColor;
         private float numberOfWavesOnBody;
+        private float sinWave;
         private float sinSpeed;
+        private float sinPhase;
         private float[] swallowArray;
         private float lastExtended;
         private float extended;
-        private float s; 
+        private float s;
         private float retractSpeed;
-        private int attackCounter; 
+        private float length;
+        private float indexDeg;
+        private int attackCounter;
+        private int index;
+        private int moveCount;
         private bool showAsAngry;
-
-        public Vector2 rootPos
-        {
-            get
-            {
-                return (this.medusaCat.graphicsModule as PlayerGraphics).head.pos;
-            }
-        }
 
         public float bodySize
         {
@@ -864,53 +1074,278 @@ namespace BuiltinBuffs.Positive
             }
         }
 
-        private Player medusaCat
+        public Vector2 WantLookPoint
         {
             get
             {
-                return base.owner as Player;
+                if (!ownerRef.TryGetTarget(out var player))
+                    return Vector2.zero;
+                Vector2 lookDir = Vector2.zero;
+
+                if (player.grasps[0] != null && player.grasps[0].grabbed is JokeRifle)
+                {
+                    //this.lookDirection = (player.grasps[0].grabbed as JokeRifle).aimDir;
+                    lookDir = (player.grasps[0].grabbed as JokeRifle).aimDir;
+                }
+                else if (player.room != null)
+                {
+                    RoomCamera.SpriteLeaser spriteLeaser = player.room.game.cameras[0].spriteLeasers.First(i => i.drawableObject == player.graphicsModule);
+                    for (int i = 3; i <= 7; i++)
+                    {
+                        if (spriteLeaser.sprites[3].element.name.Contains(i.ToString()))
+                        {
+                            if (player.input[0].x != 0)
+                                lookDir = new Vector2(player.input[0].x, 0);
+                            else
+                                lookDir = ((player.graphicsModule as PlayerGraphics).head.pos - player.bodyChunks[0].pos).normalized;
+                        }
+                    }
+                }
+                if (lookDir == Vector2.zero && this.wantLookPoint != Vector2.zero)
+                    return this.wantLookPoint;
+                else
+                    lookDir = ((player.graphicsModule as PlayerGraphics).head.pos - player.bodyChunks[0].pos).normalized;
+                return this.tentacle.Tip.pos + 0.1f * length * lookDir;
             }
         }
 
-        public Medusa(PhysicalObject ow) : base(ow, false)
+
+        private int firstSprite;
+
+        private int TotalSprites => 4;
+        #endregion
+        public void ctor(PlayerGraphics self)
         {
             this.numberOfWavesOnBody = 1.8f;
             this.sinSpeed = 0.016666668f;
             this.swallowArray = new float[this.tentacle.tChunks.Length];
-            this.cullRange = 1000f;
             this.extended = 1f;
+            this.objectLooker = new PlayerGraphics.PlayerObjectLooker(self);
         }
 
-        public override void Reset()
+        public MedusaHair(Player player, ColdGaze coldGaze, Medusa medusa, int index, float length)
         {
-            base.Reset();
-        }
-
-        public override void Update()
-        {
-            this.tentacle.Update();
-            this.tentacle.limp = !medusaCat.Consious;
-            this.tentacle.retractFac = 1f - this.extended;
-            
-            if (medusaCat.Consious)
+            ownerRef = new WeakReference<Player>(player);
+            this.coldGaze = coldGaze;
+            this.medusa = medusa;
+            this.length = length;
+            this.index = index;
+            this.indexDeg = ((float)this.index + 0.5f) * 360f / (float)medusa.hairs.Length;
+            this.moveCount = 80;
+            this.randomMovePos = Vector2.zero;
+            this.headToFace = Vector2.zero;
+            this.wantLookPoint = Vector2.zero;
+            this.lookDirection = Vector2.zero;
+            this.sinPhase = Random.value * 0.5f + 0.75f;
+            this.tentacle = new Tentacle(player, player.bodyChunks[0], this.length * this.bodySize);
+            this.tentacle.room = player.room;
+            this.tentacle.segments = new List<IntVector2>();
+            for (int i = 0; i < (int)(this.tentacle.idealLength / 20f); i++)
             {
+                this.tentacle.segments.Add(player.abstractCreature.pos.Tile);//room.GetTilePosition(this.owner.firstChunk.pos)
+            }
+            this.tentacle.tProps = new Tentacle.TentacleProps(false, false, true, 0.5f, 0f, 1.4f, 0f, 0f, 1.2f, 10f, 0.25f, 5f, 15, 60, 12, 0);
+            this.tentacle.tChunks = new Tentacle.TentacleChunk[(int)(15f * Mathf.Lerp(this.bodySize, 1f, 0.5f))];
+            for (int i = 0; i < this.tentacle.tChunks.Length; i++)
+            {
+                this.tentacle.tChunks[i] = new Tentacle.TentacleChunk(this.tentacle, i, (float)(i + 1) / (float)this.tentacle.tChunks.Length, 2f * Mathf.Lerp(this.bodySize, 1f, 0.5f));
+                this.tentacle.tChunks[i].PhaseToSegment();
+                this.tentacle.tChunks[i].Reset();
+            }
+            this.tentacle.stretchAndSqueeze = 0.1f;
+            this.Extend();
+        }
+
+        #region 外观
+        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            firstSprite = sLeaser.sprites.Length;
+            Array.Resize(ref sLeaser.sprites, firstSprite + TotalSprites);
+            sLeaser.sprites[firstSprite + 0] = new FSprite("WormEye", true);
+            sLeaser.sprites[firstSprite + 1] = TriangleMesh.MakeLongMesh(this.tentacle.tChunks.Length, false, false);
+            sLeaser.sprites[firstSprite + 2] = new FSprite("WormHead", true);
+            sLeaser.sprites[firstSprite + 2].scale = Mathf.Lerp(this.bodySize, 1f, 0.5f);
+            sLeaser.sprites[firstSprite + 2].scaleX = 0.75f;
+            sLeaser.sprites[firstSprite + 2].anchorY = 0.12f;
+            sLeaser.sprites[firstSprite + 3] = new FSprite("WormEye", true);
+            self.AddToContainer(sLeaser, rCam, null);
+        }
+
+        public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            this.eyesColor = sLeaser.sprites[9].color;
+            float extend = Mathf.Lerp(this.lastExtended, this.extended, timeStacker);
+            Vector2 lasttChunkPos = Vector2.Lerp(lastRootPos, rootPos, timeStacker);
+            float lastRad = 4f;
+            for (int i = 0; i < this.tentacle.tChunks.Length; i++)
+            {
+                Vector2 tChunkPos = Vector2.Lerp(this.tentacle.tChunks[i].lastPos, this.tentacle.tChunks[i].pos, timeStacker);
+                float ratio = (float)i / (float)(this.tentacle.tChunks.Length - 1);
+                float tendToRetract = Mathf.Pow(Mathf.Max(1f - ratio - extend, 0f), 1.5f);
+                if (extend < 0.2f)
+                {
+                    tendToRetract = Mathf.Min(1f, tendToRetract + Mathf.InverseLerp(0.2f, 0f, extend));
+                }
+                tChunkPos = Vector2.Lerp(tChunkPos, rootPos, tendToRetract) + new Vector2(0f, -this.length / 4f * Mathf.Pow(tendToRetract, 0.5f));
+                float d = Mathf.Sin((Mathf.Lerp(this.sinWave - this.sinSpeed, this.sinWave, timeStacker) + ratio * this.numberOfWavesOnBody) * 3.1415927f * 2f);
+
+                Vector2 dir = (tChunkPos - lasttChunkPos).normalized;
+                Vector2 perp = Custom.PerpendicularVector(dir);
+                Vector2 wave = perp * d * 11f * Mathf.Sqrt(this.length / 400f) * Mathf.Pow(Mathf.Max(0f, Mathf.Sin(ratio * 3.1415927f)), 0.75f) * extend;
+
+                //头两节不受波动影响
+                if (i != this.tentacle.tChunks.Length - 1 && i != this.tentacle.tChunks.Length - 2)
+                {
+                    tChunkPos += wave;
+                    dir = (tChunkPos - lasttChunkPos).normalized;
+                }
+                else
+                    dir = (lookPoint - wantPos).normalized;
+                perp = Custom.PerpendicularVector(dir); 
+                //头部
+                if (i == this.tentacle.tChunks.Length - 1)
+                {
+                    sLeaser.sprites[firstSprite + 2].x = tChunkPos.x - camPos.x;
+                    sLeaser.sprites[firstSprite + 2].y = tChunkPos.y - camPos.y;
+                    sLeaser.sprites[firstSprite + 2].rotation = Mathf.Lerp(sLeaser.sprites[firstSprite + 2].rotation, Custom.AimFromOneVectorToAnother(-dir, dir), 0.05f);
+                    float num5 = Mathf.Cos(Custom.AimFromOneVectorToAnother(-dir, dir) / 360f * 2f * 3.1415927f);
+                    num5 = Mathf.Pow(Mathf.Abs(num5), 0.25f) * Mathf.Sign(num5);
+                    int num6 = (num5 * Mathf.Sign(dir.x) > 0f) ? 3 : 0;
+                    dir = Custom.DegToVec(sLeaser.sprites[firstSprite + 2].rotation);
+                    perp = Custom.PerpendicularVector(dir);
+                    sLeaser.sprites[firstSprite + 3 - num6].x = tChunkPos.x - camPos.x + dir.x * 10f * this.bodySize + perp.x * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
+                    sLeaser.sprites[firstSprite + 3 - num6].y = tChunkPos.y - camPos.y + dir.y * 10f * this.bodySize + perp.y * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
+                    sLeaser.sprites[firstSprite + 0 + num6].x = tChunkPos.x - camPos.x + dir.x * 10f * this.bodySize - perp.x * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
+                    sLeaser.sprites[firstSprite + 0 + num6].y = tChunkPos.y - camPos.y + dir.y * 10f * this.bodySize - perp.y * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
+                    /*
+                    float modifyH = -Mathf.Clamp(tChunkPos.y - lasttChunkPos.y, -2f, 2f);
+                    sLeaser.sprites[firstSprite + 2].y += modifyH;
+                    sLeaser.sprites[firstSprite + 3 - num6].y += modifyH;
+                    sLeaser.sprites[firstSprite + 0 + num6].y += modifyH;*/
+                }
+                //蛇身
+                float tChunkLength = Vector2.Distance(tChunkPos, lasttChunkPos) / 7f;
+                float rad = this.tentacle.tChunks[i].stretchedRad + this.swallowArray[i] * 5f;
+                (sLeaser.sprites[firstSprite + 1] as TriangleMesh).MoveVertice(i * 4 + 0, lasttChunkPos - perp * (rad + lastRad) * 0.5f + dir * tChunkLength - camPos);
+                (sLeaser.sprites[firstSprite + 1] as TriangleMesh).MoveVertice(i * 4 + 1, lasttChunkPos + perp * (rad + lastRad) * 0.5f + dir * tChunkLength - camPos);
+                (sLeaser.sprites[firstSprite + 1] as TriangleMesh).MoveVertice(i * 4 + 2, tChunkPos - perp * rad - dir * tChunkLength - camPos);
+                (sLeaser.sprites[firstSprite + 1] as TriangleMesh).MoveVertice(i * 4 + 3, tChunkPos + perp * rad - dir * tChunkLength - camPos);
+                lastRad = rad;
+                lasttChunkPos = tChunkPos;
+            }
+            sLeaser.sprites[firstSprite + 0].color = (this.showAsAngry ? new Color(1f, 0f, 0f) : eyesColor);
+            sLeaser.sprites[firstSprite + 3].color = (this.showAsAngry ? new Color(1f, 0f, 0f) : eyesColor);
+        }
+
+        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+            sLeaser.sprites[firstSprite + 1].color = sLeaser.sprites[0].color;//palette.blackColor;
+            sLeaser.sprites[firstSprite + 2].color = sLeaser.sprites[0].color;//palette.blackColor;
+        }
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            if (firstSprite >= 1 && sLeaser.sprites.Length >= firstSprite + TotalSprites)
+            {
+                var foregroundContainer = rCam.ReturnFContainer("Foreground");
+                var midgroundContainer = rCam.ReturnFContainer("Midground");
+                if (newContatiner == null)
+                {
+                    newContatiner = rCam.ReturnFContainer("Midground");
+                }
+                for (int k = 0; k < TotalSprites; k++)
+                {
+                    sLeaser.sprites[firstSprite + k].RemoveFromContainer();
+                    newContatiner.AddChild(sLeaser.sprites[firstSprite + k]);
+                    sLeaser.sprites[firstSprite + k].MoveBehindOtherNode(sLeaser.sprites[0]);
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            this.tentacle.Reset(player.bodyChunks[0].pos);
+        }
+
+        public void NewRoom(Room room)
+        {
+            this.tentacle.NewRoom(room);
+        }
+        #endregion
+
+        public void Update()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            this.RootPosUpdate();
+            this.LookUpdate();
+            this.tentacle.Update();
+            this.tentacle.limp = !player.Consious;
+            this.tentacle.retractFac = 1f - this.extended;
+
+            this.showAsAngry = false;
+            if (this.attackCounter > 0)
+            {
+                this.attackCounter++;
+                if (this.attackCounter > 220)
+                {
+                    this.attackCounter = 0;
+                }
+                return;
+            }
+
+            this.moveCount--;
+            if (moveCount == 0)
+            {
+                randomMovePos = Custom.DegToVec(indexDeg + 2f * (Random.value - 0.5f) * 360f / (float)medusa.hairs.Length) * length * 0.8f + 
+                                Mathf.Clamp(Random.value, 0.7f, 1f) * Custom.RNV() * length * 0.3f;
+                moveCount = Random.Range(40, 240);
+                sinPhase = Random.value * 0.5f + 0.75f;
+            }
+
+            if (player.Consious)
+            {/*
+                if (this.chargePos != null)
+                {
+                    this.lookPoint = this.chargePos.Value + Custom.DirVec(base.mainBodyChunk.pos, this.chargePos.Value) * 100f;
+                    base.mainBodyChunk.vel += Vector2.ClampMagnitude(this.chargePos.Value - base.mainBodyChunk.pos, 20f) / 5f;
+                    this.chargePos = null;
+                }*/
+                this.movePos = Vector2.Lerp(this.movePos, 
+                                            new Vector2(-3f * headToFace.x, -2.5f * headToFace.y) * length * 0.03f +//随猫猫的头而透视
+                                            -(this.lookPoint - this.wantPos).normalized * length * 0.1f +//随自己的视线而移动
+                                            randomMovePos,
+                                            0.1f);
+                this.wantPos = this.rootPos + this.movePos;
+                this.lookPoint = Vector2.Lerp(this.lookPoint,
+                                              this.WantLookPoint,
+                                              0.05f);
                 this.extended += this.retractSpeed;
                 this.extended = Mathf.Clamp(this.extended, 0f, 1f);
-                if (this.retractSpeed < 0f)
-                {
-                    this.lookPoint = this.rootPos + new Vector2(0f, 1000f);
-                }
                 List<IntVector2> list = null;
-                this.tentacle.MoveGrabDest(this.lookPoint, ref list);
+                this.tentacle.MoveGrabDest(this.wantPos, ref list);
                 float value = Vector2.Distance(this.tentacle.Tip.pos, this.lookPoint);
                 if (this.attackCounter == 0)
                 {
+                    this.tentacle.tProps.goalAttractionSpeedTip = Mathf.Lerp(0.15f, 1.9f, Mathf.InverseLerp(40f, 90f, value));
                     //this.tentacle.tProps.goalAttractionSpeedTip = Mathf.Lerp(0.15f, 1.9f, Mathf.InverseLerp(40f, this.AI.searchingGarbage ? 90f : 290f, value));
-                    if (this.tentacle.backtrackFrom == -1 && this.medusaCat.room.aimap.getTerrainProximity(medusaCat.mainBodyChunk.pos) < 2)
+                    
+                    if (this.tentacle.backtrackFrom == -1 && player.room.aimap.getTerrainProximity(player.mainBodyChunk.pos) < 2)
                     {
                         for (int num6 = 0; num6 < 8; num6++)
                         {
-                            if (this.medusaCat.room.aimap.getTerrainProximity(this.medusaCat.room.GetTilePosition(medusaCat.mainBodyChunk.pos) + Custom.eightDirections[num6]) > 1)
+                            if (player.room.aimap.getTerrainProximity(player.room.GetTilePosition(player.mainBodyChunk.pos) + Custom.eightDirections[num6]) > 1)
                             {
                                 this.tentacle.Tip.vel += Custom.eightDirections[num6].ToVector2() * 2f;
                                 break;
@@ -925,17 +1360,18 @@ namespace BuiltinBuffs.Positive
                 else if (this.attackCounter < 40)
                 {
                     this.tentacle.tProps.goalAttractionSpeedTip = 40f;
-                    medusaCat.mainBodyChunk.vel += Vector2.ClampMagnitude(this.lookPoint - medusaCat.mainBodyChunk.pos, 30f) / 1f;
+                    this.tentacle.Tip.vel += Vector2.ClampMagnitude(this.lookPoint - player.mainBodyChunk.pos, 30f) / 1f;
                 }
                 else if (this.attackCounter < 190)
                 {
-                    medusaCat.mainBodyChunk.pos = this.lookPoint;
+                    this.tentacle.Tip.pos = this.lookPoint;
                 }
                 else
                 {
                     this.lookPoint.y = this.lookPoint.y + 20f;
                     this.tentacle.tProps.goalAttractionSpeedTip = 0.01f;
                 }
+
                 for (int num7 = 0; num7 < this.tentacle.tChunks.Length; num7++)
                 {
                     if (this.tentacle.backtrackFrom == -1 || num7 < this.tentacle.backtrackFrom)
@@ -945,12 +1381,14 @@ namespace BuiltinBuffs.Positive
                         if (this.attackCounter > 20 || this.extended < 1f)
                         {
                             Tentacle.TentacleChunk tentacleChunk = this.tentacle.tChunks[num7];
-                            tentacleChunk.vel.y = tentacleChunk.vel.y + 0.5f;
+                            tentacleChunk.vel.y += 0.5f;
                         }
                         else
                         {
                             Tentacle.TentacleChunk tentacleChunk2 = this.tentacle.tChunks[num7];
-                            tentacleChunk2.vel.y = tentacleChunk2.vel.y + (1f - num8) * 0.5f;
+                            //tentacleChunk2.vel.y = tentacleChunk2.vel.y + (1f - num8) * 0.5f;
+                            tentacleChunk2.vel += (1f - num8) * 0.5f * Custom.DegToVec(this.index * 360f / (float)medusa.hairs.Length);
+                            //tentacleChunk2.vel.y -= (1f - num8) * 0.5f;
                         }
                         float num9 = Mathf.Sin(3.1415927f * Mathf.Pow(num8, 2f)) * 0.1f;/*
                         if (this.CurrentlyLookingAtScaryCreature())
@@ -962,8 +1400,8 @@ namespace BuiltinBuffs.Positive
                         {
                             num9 *= 3f;
                         }
-                        this.tentacle.tChunks[num7].vel += Custom.DirVec(this.lookPoint, this.tentacle.tChunks[num7].pos) * num9;
-                        if (num7 > 1)
+                        this.tentacle.tChunks[num7].vel += Custom.DirVec(this.wantPos, this.tentacle.tChunks[num7].pos) * num9;
+                        if (num7 > 1 && num7 < this.tentacle.tChunks.Length - 1)
                         {
                             this.tentacle.tChunks[num7].vel += Custom.DirVec(this.tentacle.tChunks[num7 - 2].pos, this.tentacle.tChunks[num7].pos) * 0.2f;
                             this.tentacle.tChunks[num7 - 2].vel -= Custom.DirVec(this.tentacle.tChunks[num7 - 2].pos, this.tentacle.tChunks[num7].pos) * 0.2f;
@@ -986,32 +1424,39 @@ namespace BuiltinBuffs.Positive
 
             if (this.extended != 0f)
             {
-                float num14 = 0f;
+                float num14 = 0.5f;
                 if (this.tentacle.backtrackFrom == -1)
                 {
                     num14 = 0.5f;
                 }
-                else if (!medusaCat.Consious)
+                else if (!player.Consious)
                 {
                     num14 = 0.7f;
                 }
-                Vector2 a = Custom.DirVec(medusaCat.bodyChunks[0].pos, this.tentacle.Tip.pos);
-                float num15 = Vector2.Distance(medusaCat.bodyChunks[0].pos, this.tentacle.Tip.pos);
-                this.tentacle.Tip.pos += (0f - num15) * a * num14;
-                this.tentacle.Tip.vel += (0f - num15) * a * num14;
+                Vector2 a = Custom.DirVec(this.tentacle.Tip.pos, wantPos);
+                float distA = Vector2.Distance(this.tentacle.Tip.pos, wantPos);
+                this.tentacle.Tip.pos += Mathf.Min(5f, distA) * a * num14;
+                distA = Vector2.Distance(this.tentacle.Tip.pos, wantPos);
+                this.tentacle.Tip.vel *= 0f;
+                this.tentacle.Tip.vel += Mathf.Min(5f, distA) * a * num14;
+                
+                Vector2 lookDir = (lookPoint - wantPos).normalized;
+                Vector2 neckPos = this.tentacle.Tip.pos - lookDir * this.tentacle.idealLength / (float)this.tentacle.tChunks.Length * 0.9f;
+
+                Vector2 b = Custom.DirVec(this.tentacle.tChunks[tentacle.tChunks.Length - 2].pos, neckPos);
+                float distB = Vector2.Distance(this.tentacle.tChunks[tentacle.tChunks.Length - 2].pos, neckPos);
+                this.tentacle.tChunks[tentacle.tChunks.Length - 2].pos += Mathf.Min(5f, distB) * b * (1f - num14);
+                distB = Vector2.Distance(this.tentacle.tChunks[tentacle.tChunks.Length - 2].pos, neckPos); 
+                this.tentacle.tChunks[tentacle.tChunks.Length - 2].vel *= 0f;
+                this.tentacle.tChunks[tentacle.tChunks.Length - 2].vel += Mathf.Min(5f, distB) * b * (1f - num14);
             }
 
-            base.Update();
-            if (this.culled)
-            {
-                return;
-            }
-            if (this.medusaCat.Consious)
+            if (player.Consious)
             {
                 if (this.attackCounter < 20)
                 {
                     this.numberOfWavesOnBody = Mathf.Lerp(this.numberOfWavesOnBody, Mathf.Lerp(1.8f, 3.4f, this.stress), 0.1f);
-                    this.sinSpeed = Mathf.Lerp(this.sinSpeed, Mathf.Lerp(0.016666668f, 0.05f, this.stress), 0.05f);
+                    this.sinSpeed = Mathf.Lerp(this.sinSpeed, Mathf.Lerp(0.016666668f, 0.05f, this.stress) * sinPhase, 0.05f);
                 }
                 else
                 {
@@ -1039,77 +1484,95 @@ namespace BuiltinBuffs.Positive
             this.lastExtended = this.extended;
         }
 
-        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        public void RootPosUpdate()
         {
-            sLeaser.sprites = new FSprite[4];
-            sLeaser.sprites[0] = new FSprite("WormEye", true);
-            sLeaser.sprites[1] = TriangleMesh.MakeLongMesh(this.tentacle.tChunks.Length, false, false);
-            sLeaser.sprites[2] = new FSprite("WormHead", true);
-            sLeaser.sprites[3] = new FSprite("WormEye", true);
-            sLeaser.sprites[2].scale = Mathf.Lerp(this.bodySize, 1f, 0.5f);
-            this.AddToContainer(sLeaser, rCam, null);
-            base.InitiateSprites(sLeaser, rCam);
-        }
-
-        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-            if (this.culled)
-            {
+            if (!ownerRef.TryGetTarget(out var player))
                 return;
-            }
-            float num = Mathf.Lerp(this.lastExtended, this.extended, timeStacker);
-            Vector2 vector = this.medusaCat.bodyChunks[1].pos + new Vector2(0f, -30f - 100f * (1f - num));
-            float num2 = 4f;
-            for (int i = 0; i < this.tentacle.tChunks.Length; i++)
+
+            lastHeadToFace = headToFace;
+            lastRootPos = rootPos;
+
+            headToFace = Vector2.zero;
+            foreach (var sLeaser in player.room.game.cameras[0].spriteLeasers)
             {
-                Vector2 vector2 = Vector2.Lerp(this.tentacle.tChunks[i].lastPos, this.tentacle.tChunks[i].pos, timeStacker);
-                float num3 = (float)i / (float)(this.tentacle.tChunks.Length - 1);
-                float num4 = Mathf.Pow(Mathf.Max(1f - num3 - num, 0f), 1.5f);
-                if (num < 0.2f)
+                if (sLeaser.drawableObject == player.graphicsModule)
                 {
-                    num4 = Mathf.Min(1f, num4 + Mathf.InverseLerp(0.2f, 0f, num));
+                    //头部至脸部方向的向量(转动修正)
+                    headToFace = new Vector2(sLeaser.sprites[9].x - sLeaser.sprites[3].x, sLeaser.sprites[9].y - sLeaser.sprites[3].y);
                 }
-                vector2 = Vector2.Lerp(vector2, this.medusaCat.bodyChunks[1].pos, num4) + new Vector2(0f, -100f * Mathf.Pow(num4, 0.5f));
-                float d = Mathf.Sin((Mathf.Lerp(this.sinWave - this.sinSpeed, this.sinWave, timeStacker) + num3 * this.numberOfWavesOnBody) * 3.1415927f * 2f);
-                vector2 += Custom.PerpendicularVector((vector2 - vector).normalized) * d * 11f * Mathf.Pow(Mathf.Max(0f, Mathf.Sin(num3 * 3.1415927f)), 0.75f) * num;
-                Vector2 normalized = (vector2 - vector).normalized;
-                Vector2 vector3 = Custom.PerpendicularVector(normalized);
-                if (i == this.tentacle.tChunks.Length - 1)
-                {
-                    sLeaser.sprites[2].x = vector2.x - camPos.x;
-                    sLeaser.sprites[2].y = vector2.y - camPos.y;
-                    sLeaser.sprites[2].rotation = Custom.AimFromOneVectorToAnother(-normalized, normalized);
-                    float num5 = Mathf.Cos(Custom.AimFromOneVectorToAnother(-normalized, normalized) / 360f * 2f * 3.1415927f);
-                    num5 = Mathf.Pow(Mathf.Abs(num5), 0.25f) * Mathf.Sign(num5);
-                    int num6 = (num5 * Mathf.Sign(normalized.x) > 0f) ? 3 : 0;
-                    sLeaser.sprites[3 - num6].x = vector2.x - camPos.x + normalized.x * 5f * this.bodySize + vector3.x * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
-                    sLeaser.sprites[3 - num6].y = vector2.y - camPos.y + normalized.y * 5f * this.bodySize + vector3.y * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
-                    sLeaser.sprites[num6].x = vector2.x - camPos.x + normalized.x * 5f * this.bodySize - vector3.x * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
-                    sLeaser.sprites[num6].y = vector2.y - camPos.y + normalized.y * 5f * this.bodySize - vector3.y * 3f * Mathf.Lerp(this.bodySize, 1f, 0.75f) * num5;
-                }
-                float d2 = Vector2.Distance(vector2, vector) / 7f;
-                float num7 = this.tentacle.tChunks[i].stretchedRad + this.swallowArray[i] * 5f;
-                (sLeaser.sprites[1] as TriangleMesh).MoveVertice(i * 4, vector - vector3 * (num7 + num2) * 0.5f + normalized * d2 - camPos);
-                (sLeaser.sprites[1] as TriangleMesh).MoveVertice(i * 4 + 1, vector + vector3 * (num7 + num2) * 0.5f + normalized * d2 - camPos);
-                (sLeaser.sprites[1] as TriangleMesh).MoveVertice(i * 4 + 2, vector2 - vector3 * num7 - normalized * d2 - camPos);
-                (sLeaser.sprites[1] as TriangleMesh).MoveVertice(i * 4 + 3, vector2 + vector3 * num7 - normalized * d2 - camPos);
-                num2 = num7;
-                vector = vector2;
             }
-            sLeaser.sprites[0].color = (this.showAsAngry ? new Color(1f, 0f, 0f) : new Color(1f, 1f, 1f));
-            sLeaser.sprites[3].color = (this.showAsAngry ? new Color(1f, 0f, 0f) : new Color(1f, 1f, 1f));
+
+            rootPos = (player.graphicsModule as PlayerGraphics).head.pos + new Vector2(-3f * headToFace.x, -2.5f * headToFace.y);
         }
 
-        public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        public void LookUpdate()
         {
-            sLeaser.sprites[1].color = palette.blackColor;
-            sLeaser.sprites[2].color = palette.blackColor;
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (player.room.world.rainCycle.RainApproaching < 1f && 
+                Random.value > player.room.world.rainCycle.RainApproaching && 
+                Random.value < 0.009803922f && 
+                (player.room.roomSettings.DangerType == RoomRain.DangerType.Rain || player.room.roomSettings.DangerType == RoomRain.DangerType.FloodAndRain))
+            {
+                this.objectLooker.LookAtPoint(new Vector2(player.room.PixelWidth * Random.value, player.room.PixelHeight + 100f), (1f - player.room.world.rainCycle.RainApproaching) * 0.6f);
+            }
+            if (!player.Consious)
+            {
+                this.objectLooker.LookAtNothing();
+            }
+            if (!player.dead)
+            {
+                if (player.lungsExhausted || player.exhausted)
+                {
+                    this.objectLooker.LookAtNothing();
+                }
+            }
+            if (Random.value < 0.1f)
+            {
+                this.objectLooker.Update();
+            }
+            if (Random.value < 0.0025f)
+            {
+                this.objectLooker.LookAtNothing();
+            }
+            this.lastLookDir = this.lookDirection;
+            if (player.Consious && this.objectLooker.looking)
+            {
+                //this.lookDirection = Custom.DirVec(this.tentacle.Tip.pos, this.objectLooker.mostInterestingLookPoint);
+                this.wantLookPoint = this.objectLooker.mostInterestingLookPoint;
+            }
+            else
+            {
+                //this.lookDirection *= 0f;
+                wantLookPoint = Vector2.zero;
+            }
         }
 
-        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        public void Extend()
         {
-            base.AddToContainer(sLeaser, rCam, newContatiner);
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            IntVector2 tile = player.abstractCreature.pos.Tile;
+            this.tentacle.segments = new List<IntVector2>
+            {
+                player.abstractCreature.pos.Tile
+            };
+            int num = player.abstractCreature.pos.Tile.y + 1;
+            while ((float)num < (float)player.abstractCreature.pos.Tile.y + this.tentacle.idealLength / 20f && !player.room.GetTile(tile).Solid)
+            {
+                this.tentacle.segments.Add(tile);
+                tile.y = num;
+                num++;
+            }
+            for (int k = 0; k < this.tentacle.tChunks.Length; k++)
+            {
+                this.tentacle.tChunks[k].pos = player.room.MiddleOfTile(this.tentacle.segments[this.tentacle.tChunks[k].currentSegment]);
+                this.tentacle.tChunks[k].lastPos = this.tentacle.tChunks[k].pos;
+            }
+            this.tentacle.retractFac = 0f;
+            this.extended = 1f;
+            this.retractSpeed = 0.005f;
         }
     }
+    #endregion
 }

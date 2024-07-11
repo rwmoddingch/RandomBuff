@@ -1470,11 +1470,11 @@ namespace BuiltinBuffs.Duality
             {
                 if (vultureCat.IsMiros)
                 {
-                    kGraphics.owner.room.PlaySound((Random.value < 0.5f) ? SoundID.Spear_Fragment_Bounce : SoundID.Spear_Bounce_Off_Wall, pos, Mathf.InverseLerp(10f, 60f, vector3.magnitude), Mathf.Lerp(3.5f, 0.5f, Mathf.InverseLerp(7f, 70f, CurrentLength)));
+                    //kGraphics.owner.room.PlaySound((Random.value < 0.5f) ? SoundID.Spear_Fragment_Bounce : SoundID.Spear_Bounce_Off_Wall, pos, Mathf.InverseLerp(10f, 60f, vector3.magnitude), Mathf.Lerp(3.5f, 0.5f, Mathf.InverseLerp(7f, 70f, CurrentLength)));
                 }
                 else
                 {
-                    kGraphics.owner.room.PlaySound(SoundID.Vulture_Feather_Hit_Terrain, pos, Mathf.InverseLerp(0.2f, 20f, vector3.magnitude), Mathf.Lerp(3.5f, 0.5f, Mathf.InverseLerp(7f, 70f, CurrentLength)));
+                    //kGraphics.owner.room.PlaySound(SoundID.Vulture_Feather_Hit_Terrain, pos, Mathf.InverseLerp(0.2f, 20f, vector3.magnitude), Mathf.Lerp(3.5f, 0.5f, Mathf.InverseLerp(7f, 70f, CurrentLength)));
                 }
                 terrainContactTimer = 0;
             }
@@ -1849,8 +1849,8 @@ namespace BuiltinBuffs.Duality
                             {
                                 vultureCat.hangingInTentacle = true;
                             }*/
-                            if(!Custom.DistLess(base.Tip.pos, connectedChunk.pos, idealLength * vultureCat.groundRetractionScale) &&
-                                UnderneathIsSolid())
+                            if(!Custom.DistLess(base.Tip.pos, connectedChunk.pos, idealLength * vultureCat.groundRetractionScale)// && UnderneathIsSolid()
+                                )
                             {
                                 ReleaseGrip();
                                 vultureCat.hangingInTentacle = false;
@@ -2251,6 +2251,7 @@ namespace BuiltinBuffs.Duality
         }
     }
 
+    #region 鱼叉
     internal class KingTusks
     {
         public class Tusk : SharedPhysics.IProjectileTracer
@@ -3754,4 +3755,5 @@ namespace BuiltinBuffs.Duality
             return num;
         }
     }
+    #endregion
 }
