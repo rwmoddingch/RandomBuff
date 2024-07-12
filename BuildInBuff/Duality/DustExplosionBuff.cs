@@ -54,6 +54,8 @@ namespace BuiltinBuffs.Duality
 
         public bool ProvideThisObject(UpdatableAndDeletable target)
         {
+            if (DustExplosionBuff.Instance == null)
+                return false;
             return (target is SmokeSystem);
         }
     }
@@ -66,6 +68,8 @@ namespace BuiltinBuffs.Duality
 
         public bool ProvideThisObject(UpdatableAndDeletable target)
         {
+            if (DustExplosionBuff.Instance == null)
+                return false;
             return (target is CosmeticSprite && CosmeticSpriteHeatModule.IsCosmeticSpriteNeedModule(target as CosmeticSprite));
         }
     }
@@ -287,8 +291,8 @@ namespace BuiltinBuffs.Duality
             smoke.room.AddObject(new Explosion.ExplosionLight(centroidPos, 0.8f * averageRad, 1f, 3, new Color(1f, 1f, 1f)));
             smoke.room.AddObject(new Explosion.ExplosionLight(centroidPos, 5f * averageRad, 2f, 60, this.explodeColor));
             smoke.room.AddObject(new ExplosionSpikes(smoke.room, centroidPos, 9, 2.5f * averageRad, 5f, 5f, 90f, this.explodeColor));
-            smoke.room.AddObject(new ShockWave(centroidPos, 3f * averageRad, 0.485f, 30, true));
-            smoke.room.AddObject(new ShockWave(centroidPos, 15f * averageRad, 0.185f, 18, false));
+            smoke.room.AddObject(new ShockWave(centroidPos, 3f * averageRad, 0.285f, 30, true));
+            smoke.room.AddObject(new ShockWave(centroidPos, 15f * averageRad, 0.85f, 18, false));
 
             smoke.Destroy();
         }
@@ -462,8 +466,8 @@ namespace BuiltinBuffs.Duality
             sp.room.AddObject(new Explosion.ExplosionLight(sp.pos, 0.8f * rad, 1f, 3, new Color(1f, 1f, 1f)));
             sp.room.AddObject(new Explosion.ExplosionLight(sp.pos, 5f * rad, 2f, 60, this.explodeColor));
             sp.room.AddObject(new ExplosionSpikes(sp.room, sp.pos, 9, 2.5f * rad, 5f, 5f, 90f, this.explodeColor));
-            sp.room.AddObject(new ShockWave(sp.pos, 3f * rad, 0.485f, 30, true));
-            sp.room.AddObject(new ShockWave(sp.pos, 15f * rad, 0.185f, 18, false));
+            sp.room.AddObject(new ShockWave(sp.pos, 3f * rad, 0.285f, 30, true));
+            sp.room.AddObject(new ShockWave(sp.pos, 15f * rad, 0.85f, 18, false));
 
             sp.Destroy();
         }

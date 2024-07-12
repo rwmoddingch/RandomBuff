@@ -1280,6 +1280,8 @@ namespace BuiltinBuffs.Positive
 
         public void NewRoom(Room room)
         {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
             this.tentacle.NewRoom(room);
         }
         #endregion
