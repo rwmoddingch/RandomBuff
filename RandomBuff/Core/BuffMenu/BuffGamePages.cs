@@ -1394,6 +1394,7 @@ namespace RandomBuff.Core.BuffMenu
                             this.menuLabel.text = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName;
                             this.signalText = "MISSIONBUFF_" + bindBuff.value;
                             this.buttonColor = staticData.Color;
+                            this.buttonColor.a = 0.2f;
                             this.active = true;
                         }
                         else

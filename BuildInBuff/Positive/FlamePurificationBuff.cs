@@ -125,7 +125,7 @@ namespace BuiltinBuffs.Positive
 
 
                             patch.tiles.RemoveAt(t);
-
+                            BuffUtils.Log("FlamePurification", $"Wormgrass patch tile wiped out, {patch.tiles.Count} left");
                             var lst1 = patch.cosmeticWormLengths.ToList();
                             lst1.RemoveAt(t);
                             patch.cosmeticWormLengths = lst1.ToArray();
@@ -137,7 +137,22 @@ namespace BuiltinBuffs.Positive
 
                             patch.trackedCreatures.Clear();
                             if (patch.tiles.Count == 0)
+                            {
                                 wormGrass.patches.Remove(patch);
+                                BuffUtils.Log("FlamePurification", $"Wormgrass patch wiped out, {wormGrass.patches.Count} left");
+                                if (wormGrass.patches.Count == 0)
+                                {
+                                    wormGrass.Destroy();
+
+                                    BuffUtils.Log("FlamePurification", "Wormgrass wiped out");
+                                    foreach (var update in wormGrass.room.updateList.Where(u => u is INoticeWormGrassWipedOut).Select(u => u as INoticeWormGrassWipedOut))
+                                    {
+                                        BuffUtils.Log("FlamePurification", $"{update.GetType()} notice wormgrass wiped out");
+                                        update.WormGrassWipedOut(wormGrass);
+                                    }
+
+                                }
+                            }
                         }
                     }
                 }
@@ -282,5 +297,10 @@ namespace BuiltinBuffs.Positive
 
             AddToContainer(sLeaser, rCam, null);
         }
+    }
+
+    public interface INoticeWormGrassWipedOut
+    {
+        void WormGrassWipedOut(WormGrass wormGrass);
     }
 }

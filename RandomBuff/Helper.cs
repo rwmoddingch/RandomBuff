@@ -298,5 +298,13 @@ namespace RandomBuff
         {
             return new Color(r / 255f, g / 255f, b / 255f);
         }
+
+        public static bool IsZhChar(string ch)
+        {
+            byte[] byte_len = System.Text.Encoding.Default.GetBytes(ch);
+            if (byte_len.Length >= 2) { return true; }
+
+            return false;
+        }
     }
 }

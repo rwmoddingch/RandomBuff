@@ -828,6 +828,8 @@ namespace RandomBuff.Core.ProgressionUI
                     }
 
                     Vector2 rect = GetBuffCardQuestRendererSize(rewardLeasers.Last().Value);
+
+                    BuffPlugin.Log($"GetBuffCardQuestRendererSize {rect.x} {rect.y}");
                     maxRewardX = Mathf.Max(rect.x + bigGap + veryBigGap, maxRewardX);
                     y2 += rect.y;
                 }
@@ -866,7 +868,7 @@ namespace RandomBuff.Core.ProgressionUI
             if (buffCardLeasers.Count < maxCardInARow)
                 return new Vector2(buffCardLeasers.Count * (buffCardLeasers.First().rect.x + smallGap), buffCardLeasers.First().rect.y + smallGap);
 
-            int rows = Mathf.CeilToInt(buffCardLeasers.Count / (float)maxCardInARow);
+            int rows = Mathf.Max(1, Mathf.CeilToInt(buffCardLeasers.Count / (float)maxCardInARow));
             return new Vector2(maxCardInARow * (buffCardLeasers.First().rect.x + smallGap), rows * (buffCardLeasers.First().rect.y + smallGap));
         }
 
@@ -888,6 +890,8 @@ namespace RandomBuff.Core.ProgressionUI
                     yBias -= leaser.rect.y + smallGap;
                 }
             }
+            if(x > 0)
+                yBias -= buffCardLeasers.First().rect.y + smallGap;
         }
 
 

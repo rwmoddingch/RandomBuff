@@ -82,6 +82,18 @@ namespace RandomBuff.Core.Game.Settings
             }
             name ??= game.StoryCharacter;
             gachaTemplate.EnterGame(game);
+
+            foreach (var condition in conditions)
+            {
+                try
+                {
+                    condition.InGameUpdate(game);
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e, $"Exception In {condition.ID}:EnterGame");
+                }
+            }
         }
 
 

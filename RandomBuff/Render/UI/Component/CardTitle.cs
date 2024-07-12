@@ -72,10 +72,18 @@ namespace RandomBuff.Render.UI.Component
         {
             switchTitleRequest.Clear();
             handlerCount = text.Length;
+            float width = 0f;
             for(int i = 0;i < text.Length; i++)
             {
-                currentActiveHandlers.Add(new SingleCardHandler(this, text.Substring(i,1), i));
+                var newCardHandler = new SingleCardHandler(this, text.Substring(i, 1), i);
+                currentActiveHandlers.Add(newCardHandler);
+
+                width += newCardHandler.width + newCardHandler.spanToLeft;
             }
+
+            for(int i = 0;i< currentActiveHandlers.Count; i++)
+                currentActiveHandlers[i].CaculateDeltaPos(i, width, currentActiveHandlers.Count);
+
         }
 
         public void RequestSwitchTitle(string title, bool caspLock = false)
@@ -99,6 +107,8 @@ namespace RandomBuff.Render.UI.Component
             int counter;
 
             Vector2 deltaPos;
+            public float width;
+            public float spanToLeft;
 
             Mode currentMode;
 
@@ -112,10 +122,29 @@ namespace RandomBuff.Render.UI.Component
                 title.container.AddChild(card.Container);
                 card.CardTexture.shader = Custom.rainWorld.Shaders["MenuText"];
                 delay = index * -title.flipDelay;
-                deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f) + new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (0.5f - title.anchorX) * title.handlerCount, 0f);
+                //deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f) + new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (0.5f - title.anchorX) * title.handlerCount, 0f);
 
+                width = CardBasicAssets.RenderTextureSize.x * title.scale * 0.8f * (Helper.IsZhChar(text) ? 1f : 0.7f);
+                
+                if (index == 0)
+                    spanToLeft = 0;
+                else
+                    spanToLeft = title.spanShrink * title.scale * CardBasicAssets.RenderTextureSize.x * 0.05f * (Helper.IsZhChar(text) ? 1.5f : 1f);
                 SwitchMode(Mode.FlipIn);
             }
+
+            public void CaculateDeltaPos(int index, float totalWidth, int totalCount)
+            {
+                float deltaToLeft = 0f;
+                for(int i = 0;i < index; i++)
+                {
+                    deltaToLeft += title.currentActiveHandlers[i].width + title.currentActiveHandlers[i].spanToLeft;
+                }
+                deltaToLeft += width / 2f + spanToLeft;
+
+                deltaPos = new Vector2(deltaToLeft - totalWidth * title.anchorX, 0);
+            }
+
 
             public void Update()
             {

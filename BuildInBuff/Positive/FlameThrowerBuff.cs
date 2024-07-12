@@ -118,11 +118,13 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    public class FlameThrower : PlayerCarryableItem, IDrawable
+    public class FlameThrower : PlayerCarryableItem, IDrawable, IHeatingCreature
     {
         static float flameDistance = 45f;
         static int throwFlameCoolDown = 6;
         static float maxHeat = 40 * 4f;
+        static float heatInfectRange = 160f;
+        static float heatInfectHeight = 40f;
 
         Vector3 currentRotation3D;
         Vector3 lastRotation3D;
@@ -463,6 +465,28 @@ namespace BuiltinBuffs.Positive
             flameEmitter = emitter;
         }
 
+
+        public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
+        {
+            if (!throwFlame)
+                return 0f;
+
+            float distance = Vector2.Distance(pos, flamePosDelta + firstChunk.pos);
+            if (distance > heatInfectRange)
+                return 0f;
+
+            Vector2 posDir = (pos- (flamePosDelta + firstChunk.pos)).normalized;
+            float cos = Vector2.Dot(posDir, dir.normalized);
+            if (cos <= 0f)
+                return 0f;
+
+            float height = Mathf.Sin(Mathf.Acos(cos)) * distance;
+            if (height < heatInfectHeight)
+                return 1f / 40f;
+
+            return 0f;
+        }
+
         public class FlameVelociy : EmitterModule, IParticleInitModule
         {
             FlameThrower flameThrower;
@@ -497,11 +521,5 @@ namespace BuiltinBuffs.Positive
             }
         }
 
-        public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
-        {
-            //TODO :接口
-            return 0;
-            //throw new NotImplementedException();
-        }
     }
 }

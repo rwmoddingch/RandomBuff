@@ -548,7 +548,7 @@ namespace RandomBuff.Core.Game
                 return false;
 
             poolManager.CreateBuff(id, needStack);
-            BuffHud.Instance.AppendNewCard(id);
+            BuffHud.Instance?.AppendNewCard(id);
             managedIDs.Add(id);
 
             return true;
