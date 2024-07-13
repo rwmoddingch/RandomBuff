@@ -14,12 +14,26 @@ using RandomBuff.Core.StaticsScreen;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Menu;
+using RandomBuff.Core.Game.Settings;
 
 namespace RandomBuff.Core.Hooks
 {
     static partial class CoreHooks
     {
 
+        public static void GameSettingSpecialSetup(SaveState saveState, GameSetting gameSetting)
+        {
+            if (gameSetting.MissionId == "DoomExpress")
+            {
+                saveState.miscWorldSaveData.moonHeartRestored = false;
+                saveState.miscWorldSaveData.pebblesEnergyTaken = false;
+            }
+        }
+
+        public static bool IsCurrentGameSettingNeed(GameSetting gameSetting)
+        {
+            return gameSetting.MissionId == "DoomExpress" || gameSetting.MissionId == "EmergnshyTreatment";
+        }
         public static void InGameHooksInit()
         {
             On.RainWorldGame.Update += RainWorldGame_Update;
@@ -39,7 +53,8 @@ namespace RandomBuff.Core.Hooks
             if (Custom.rainWorld.BuffMode())
             {
                 self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
-                self.roomSettings.roomSpecificScript = false;
+                self.roomSettings.roomSpecificScript = self.roomSettings.roomSpecificScript && IsCurrentGameSettingNeed(BuffPoolManager.Instance?.GameSetting??
+                BuffDataManager.Instance.GetGameSetting(self.world.game.StoryCharacter));
             }
 
             orig(self);
@@ -95,6 +110,7 @@ namespace RandomBuff.Core.Hooks
                 //self.miscWorldSaveData.cyclesSinceSSai = 10;
                 //self.miscWorldSaveData.SSaiThrowOuts = -1;
                 progression.miscProgressionData.beaten_Gourmand = true;
+                GameSettingSpecialSetup(self,BuffDataManager.Instance.GetGameSetting(saveStateNumber));
             }
         }
 

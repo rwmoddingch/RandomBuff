@@ -17,6 +17,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Reflection.Emit;
 using BuiltinBuffs.Negative;
+using BuiltinBuffs.Negative.SephirahMeltdown;
 using BuiltinBuffs.Positive;
 using RandomBuffUtils.FutileExtend;
 using Unity.Mathematics;
@@ -75,13 +76,7 @@ namespace BuiltinBuffs.Expeditions
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-                    foreach (var crit in self.Players[0].Room.creatures.Select(i => i.realizedCreature))
-                    {
-                        if(crit is Player) continue;
-                        crit.SetKillTag(self.Players[0]);
-                        crit.Die();
-                        self.GetStorySession.playerSessionRecords[0].AddKill(crit);
-                    }
+                    NetzachBuffData.Netzach.CreateNewBuff();
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))

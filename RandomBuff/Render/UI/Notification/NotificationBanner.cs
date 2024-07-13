@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using RandomBuff.Core.Progression.Quest;
 using UnityEngine;
 using static Expedition.ExpeditionProgression;
 using static RandomBuff.Render.Quest.QuestRendererManager;

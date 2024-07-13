@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Render.Quest;
 using RandomBuffUtils.FutileExtend;
 using UnityEngine;

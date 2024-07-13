@@ -68,7 +68,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         /// <summary>
         /// 轮回结束时触发
         /// </summary>
-        public abstract void SessionEnd();
+        /// <param name="game"></param>
+        public abstract void SessionEnd(RainWorldGame game);
 
         /// <summary>
         /// 游戏进行时update触发

@@ -8,10 +8,10 @@
     "Color" : "7abf45",
     "Chinese":{
         "BuffName":"拥抱过去，创造未来",
-        "Description":"游戏无法进行暂停，且游戏速度随持有时间加快，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+        "Description":"游戏速度随持有时间加快，暂停会使所有玩家眩晕，眩晕时长随暂停次数增加，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
     },
     "English":{
         "BuffName":"The Eye Embracing the Past, Building the Future",
-        "Description":""
+        "Description":"The speed of the game increases with the card holding time. Pause will stun all players. The duration of stun increases with the number of pauses. After unlocking the card, a positive card will be randomly obtained before the card is recycled."
     }
 }

@@ -20,18 +20,18 @@ namespace RandomBuff.Core.Entry
 
         public static void RegisterHook(BuffID id, Type type)
         {
-            if (type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public) == null)
+            if (type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) == null)
                 BuffPlugin.LogWarning("No HookOn");
             else
             {
-                var method = type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public);
+                var method = type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 ILHook hook = new ILHook(method,
                     (il) => RegisterHook_Impl(id, type, il, method, HookLifeTimeLevel.InGame));
             }
 
-            if (type.GetMethod("LongLifeCycleHookOn", BindingFlags.Static | BindingFlags.Public) != null)
+            if (type.GetMethod("LongLifeCycleHookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) != null)
             {
-                var method = type.GetMethod("LongLifeCycleHookOn", BindingFlags.Static | BindingFlags.Public);
+                var method = type.GetMethod("LongLifeCycleHookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 ILHook hook = new ILHook(method,
                     (il) => RegisterHook_Impl(id, type, il, method, HookLifeTimeLevel.UntilQuit));
             }

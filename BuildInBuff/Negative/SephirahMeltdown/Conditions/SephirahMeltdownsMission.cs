@@ -9,6 +9,7 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
@@ -24,16 +25,16 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public SephirahMeltdownsMission()
         {
-            gameSetting = new GameSetting(BindSlug,"Normal","CC_S03")
+            gameSetting = new GameSetting(BindSlug)
             {
                 conditions = new List<Condition>()
                 {
                     new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedLizard},
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 8,maxConditionCycle = 12,type = CreatureTemplate.Type.KingVulture},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 8,maxConditionCycle = 12,type = CreatureTemplate.Type.RedCentipede},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 12}
                 },
-                gachaTemplate = new MissionGachaTemplate()
+                gachaTemplate = new SephirahMeltdownsTemplate()
                 {
                     cardPick = new Dictionary<int, List<string>>()
                     {
@@ -45,31 +46,43 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {8, new List<string>()
                         {
                             HokmaBuffData.Hokma.value,
+                            "bur-pursued"
                         }},
                     }, 
                     NCount = 0, NSelect = 0, NShow = 0,
                     PCount = 0, PSelect = 0, PShow = 0,
+                    ForceStartPos = "CC_S03"
                 }
             };
             startBuffSet.Add(MalkuthBuffData.Malkuth);
             startBuffSet.Add(YesodBuffData.Yesod);
             startBuffSet.Add(NetzachBuffData.Netzach);
             startBuffSet.Add(HodBuffData.Hod);
-
-
-
         }
 
         public void RegisterMission()
         {
             BuffRegister.RegisterCondition<MeltdownHuntCondition>(MeltdownHuntCondition.MeltdownHunt, "Meltdown Hunt",true);
             BuffRegister.RegisterCondition<DeathCondition>(DeathCondition.Death, "Death");
-            BuffRegister.RegisterCondition<FixedCycleCondition>(FixedCycleCondition.FixedCycle, "Fix Cycles");
+            BuffRegister.RegisterCondition<FixedCycleCondition>(FixedCycleCondition.FixedCycle, "Fix Cycles", true);
 
             MissionRegister.RegisterMission(SephirahMeltdowns, new SephirahMeltdownsMission());
+            BuffRegister.RegisterGachaTemplate<SephirahMeltdownsTemplate>(SephirahMeltdownsTemplate.SephirahMeltdowns);
+        }
 
+    }
 
+    internal class SephirahMeltdownsTemplate : MissionGachaTemplate
+    {
+        public static readonly GachaTemplateID SephirahMeltdowns=
+            new GachaTemplateID(nameof(SephirahMeltdowns), true);
 
+        public override GachaTemplateID ID => SephirahMeltdowns;
+
+        public override void SessionEnd(RainWorldGame game)
+        {
+            CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
+                new CachaPacket() { negative = (0, 0, 0), positive = (1, 5, 1) } : new CachaPacket();
         }
     }
 }

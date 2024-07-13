@@ -10,6 +10,7 @@ using Menu.Remix.MixedUI;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;

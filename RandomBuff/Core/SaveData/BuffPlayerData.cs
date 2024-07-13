@@ -10,6 +10,7 @@ using UnityEngine;
 using System.Runtime.CompilerServices;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.Progression.Record;
 
 namespace RandomBuff.Core.SaveData

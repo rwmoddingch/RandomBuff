@@ -11,12 +11,22 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.Normal;
 
+        public NormalGachaTemplate() {}
+
+        public NormalGachaTemplate(bool noPick)
+        {
+            if (noPick)
+            {
+                NShow = NSelect = NCount = PSelect = PCount = PShow = 0;
+            }
+        }
+
         public override void NewGame()
         {
             CurrentPacket = new CachaPacket() { positive = (SPSelect, SPShow, SPCount), negative = (SNSelect, SNShow, SNCount) };
         }
 
-        public override void SessionEnd()
+        public override void SessionEnd(RainWorldGame game)
         {
             CurrentPacket = new CachaPacket() { positive = (PSelect, PShow, PCount), negative = (NSelect, NShow, NCount) };
             BuffPlugin.LogDebug($"Session End: {CurrentPacket.positive}, {CurrentPacket.negative}");

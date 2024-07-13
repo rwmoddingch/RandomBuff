@@ -737,6 +737,8 @@ namespace BuiltinBuffs.Positive
 
         private bool useAlpha = false;
 
+        public float inst = 1;
+
         private Vector4 GetRandomLine()
         {
             var posX = new Vector2(Random.value, Random.Range(0, 2));
@@ -764,7 +766,7 @@ namespace BuiltinBuffs.Positive
             base.OnRenderImage(source, destination);
             material.SetVectorArray("lineParams", lineParams);
             material.SetFloat("length", lineParams.Length * LerpAlpha);
-            material.SetFloat("inst", useAlpha ? LerpAlpha : 1);
+            material.SetFloat("inst", (useAlpha ? LerpAlpha : 1) * inst);
 
             Graphics.Blit(source, destination, material);
         }

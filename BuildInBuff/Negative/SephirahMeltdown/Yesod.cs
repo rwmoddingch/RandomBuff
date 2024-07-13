@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using RandomBuff.Core.Buff;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Negative.SephirahMeltdown
 {
@@ -25,7 +27,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public YesodBuff()
         {
             if (BuffCustom.TryGetGame(out var game))
-                effect = new YesodScreenEffect(game.cameras[0], Data.CycleUse >=2 ? "HUD2" : "Foreground", Data.CycleUse/3f);
+                effect = new YesodScreenEffect(game.cameras[0], Data.CycleUse >=2 ? "HUD2" : Data.CycleUse >=1 ? "Water" : "Foreground", Data.CycleUse > 1 ? Data.CycleUse/3f : 0);
             
         }
 
@@ -52,6 +54,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     class YesodScreenEffect
     {
         private bool moveToFront = false;
+        private float inst;
+        private bool isEnable = false;
+
         public YesodScreenEffect(RoomCamera rCam, string layerName,float inst) : base()
         {
             effect = new CustomFSprite("Futile_White");
@@ -69,22 +74,45 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 moveToFront = true;
             }
 
-            for (int i = 0; i < effect.verticeColors.Length; i++)
-            {
-                effect.verticeColors[i].r = 0.07f;
-                effect.verticeColors[i].g = 0.1f;
-                effect.verticeColors[i].b = 0.1f;
-                effect.verticeColors[i].a = inst * 0f;
-            }
-
+            isEnable = layerName == "HUD2";
+            this.inst = inst;
 
         }
 
+        private float timer = 0;
+        private float waitTimer = 0;
+
+        private float instFac = 0.1f;
+        private float yClamp = 0.05f;
+        private bool IsEnable => timer > 0 && waitTimer <= 0;
 
         public void Draw(float timeStacker)
         {
             if(moveToFront)
                 effect.MoveToFront();
+
+            if (waitTimer <= 0)
+            {
+                timer -= Time.deltaTime;
+                if (timer <= 0)
+                {
+                    instFac = Random.Range(0.2f, 0.5f) * (Random.value < 0.03f ?  Random.Range(2,3) : 1) * (Random.value < 0.03f ? Random.Range(2, 3) : 1);
+                    timer = Random.Range(0.7f, 2f);
+                    yClamp = Random.Range(0.05f, 0.15f);
+                }
+            }
+            else
+            {
+                waitTimer-= Time.deltaTime;
+            }
+            for (int i = 0; i < effect.verticeColors.Length; i++)
+            {
+                effect.verticeColors[i].r = 0.042f;
+                effect.verticeColors[i].g = 0.5f;
+                effect.verticeColors[i].b = yClamp;
+                effect.verticeColors[i].a = inst * instFac * 0.01f * (IsEnable ? 1 : 0);
+            }
+
         }
 
         public void ClearSprites()

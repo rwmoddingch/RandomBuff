@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Progression.Quest;
 using UnityEngine;
 
 namespace RandomBuff.Render.Quest

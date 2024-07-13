@@ -30,7 +30,7 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
 
         public void RegisterMission()
         {
-            MissionRegister.RegisterMission(ID, new TestMission());
+           // MissionRegister.RegisterMission(ID, new TestMission());
         }
     }
 }

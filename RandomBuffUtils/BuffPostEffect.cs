@@ -163,6 +163,10 @@ namespace RandomBuffUtils
         protected readonly float enterTime;
         protected readonly float fadeTime;
 
+        public bool IgnorePaused { get; set; }
+        public bool IgnoreGameSpeed { get; set; }
+
+
         protected BuffPostEffectLimitTime(int layer,float duringTime, float enterTime, float fadeTime) : base(layer) 
         {
             this.duringTime = duringTime;
@@ -178,11 +182,11 @@ namespace RandomBuffUtils
         public override void Update()
         {
             if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game &&
-                game.GamePaused)
+                game.GamePaused && !IgnorePaused)
             {
             }
             else
-                lifeTime -= Time.deltaTime * BuffCustom.TimeSpeed / duringTime;
+                lifeTime -= Time.deltaTime * (IgnoreGameSpeed ? 1 : BuffCustom.TimeSpeed) / duringTime;
 
             if (lifeTime <= 0)
                 Destroy();

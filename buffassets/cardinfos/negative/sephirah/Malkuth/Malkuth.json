@@ -8,10 +8,10 @@
     "Color" : "f8f254",
     "Chinese":{
         "BuffName":"昂首阔步的信念",
-        "Description":"游戏内UI全部隐藏，持有两轮回以上所有生物进出管道颜色不显示，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+        "Description":"在每轮回初投掷、拾取、跳跃三个按键随机调换顺序。游戏内UI全部隐藏，持有两轮回以上所有生物进出管道颜色不显示，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
     },
     "English":{
         "BuffName":"The Will to Stand up Straight",
-        "Description":"TODO"
+        "Description":"At the beginning of cycles, the keys of throwing, picking up, and jumping buttons is randomly changed. The UI in the game is completely hidden. The colors of all creatures entering and exiting the pipes that have been held for more than two cycles are not displayed. After unlocking the card, you will randomly get a positive card before recycling the card."
     }
 }
