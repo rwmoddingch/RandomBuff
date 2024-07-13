@@ -24,7 +24,10 @@ namespace RandomBuff.Core.Game
             hud.fContainers[1].AddChild(slotTitle.Container);
 
             foreach (var id in BuffPoolManager.Instance.GetAllBuffIds())
+            {
                 inGameSlot.AppendCardDirectly(id);
+                HandleAddBuffHUD(id);
+            }
 
             Instance = this;
 

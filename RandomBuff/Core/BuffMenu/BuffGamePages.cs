@@ -1367,14 +1367,21 @@ namespace RandomBuff.Core.BuffMenu
                 public bool active;
                 float origY;
                 float hideY;
+                float shadowAlpha;
 
+
+                FSprite shadow;
                 AnimateComponentBase animCmpnt;
 
                 public CardTitleButton(BuffID bindBuff ,Menu.Menu menu, MenuObject owner, Vector2 pos, AnimateComponentBase animCmpnt = null) : base(menu,owner,"--","NOSIGNAL",pos,buttonSize)
                 {
-                    RefreshBuffInfo(bindBuff);
                     this.animCmpnt = animCmpnt;
                     SetPos(pos.y);
+
+                    shadow = new FSprite("Circle20") { /*shader = Custom.rainWorld.Shaders["FlatLight"] ,*/ alpha = 0f, color = Color.black, scale = 0.8f};
+                    Container.AddChild(shadow);
+                    shadow.MoveBehindOtherNode(menuLabel.label);
+                    RefreshBuffInfo(bindBuff);
                 }
 
                 public void SetPos(float y)
@@ -1393,9 +1400,12 @@ namespace RandomBuff.Core.BuffMenu
                             var staticData = BuffConfigManager.GetStaticData(this.bindBuff);
                             this.menuLabel.text = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName;
                             this.signalText = "MISSIONBUFF_" + bindBuff.value;
-                            this.buttonColor = staticData.Color;
-                            this.buttonColor.a = 0.2f;
+                            this.buttonColor = staticData.Color * 0.1f;
+                            this.buttonColor.a = 1f;
                             this.active = true;
+                            shadowAlpha = 1f;
+                            shadow.color = staticData.Color;
+                            //shadow.scaleX = LabelTest.GetWidth(staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName) / 20f + 8;
                         }
                         else
                         {
@@ -1404,6 +1414,7 @@ namespace RandomBuff.Core.BuffMenu
                             this.buttonColor = new Color(0.2f, 0.2f, 0.2f);
                             this.signalText = "NOSIGNAL";
                             this.active = false;
+                            shadowAlpha = 0f;
                         }
                     }
                     else
@@ -1413,6 +1424,7 @@ namespace RandomBuff.Core.BuffMenu
                         this.buttonColor = new Color(0.2f, 0.2f, 0.2f);
                         this.signalText = "NOSIGNAL";
                         this.active = false;
+                        shadowAlpha = 0f;
                     }
                 }
 
@@ -1434,17 +1446,6 @@ namespace RandomBuff.Core.BuffMenu
                 public override void GrafUpdate(float timeStacker)
                 {
                     base.GrafUpdate(timeStacker);
-                    this.menuLabel.label.color = this.buttonColor;
-                    
-                    //for (int i = 0; i < this.roundedRect.sprites.Length; i++)
-                    //{
-                    //    this.roundedRect.sprites[i].color = this.buttonColor;
-                    //}
-
-                    //for (int j = 0; j < this.selectRect.sprites.Length; j++)
-                    //{
-                    //    this.selectRect.sprites[j].color = this.buttonColor;
-                    //}
 
                     float smoothAlpha = 1f;
                     if (animCmpnt != null)
@@ -1472,6 +1473,11 @@ namespace RandomBuff.Core.BuffMenu
                         roundedRect.sprites[roundedRect.SideSprite(i)].alpha = smoothAlpha;
                         roundedRect.sprites[roundedRect.CornerSprite(i)].alpha = smoothAlpha;
                     }
+
+                    Vector2 smoothPos = Vector2.Lerp(ScreenLastPos, ScreenPos, timeStacker);
+                    shadow.SetPosition(smoothPos + new Vector2(15f, buttonSize.y / 2f));
+                    shadow.alpha = smoothAlpha * shadowAlpha;
+                    shadow.scale = 0.9f + 0.4f * buttonBehav.sizeBump;
                 }
 
                 public override void Update()
