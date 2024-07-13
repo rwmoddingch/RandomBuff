@@ -447,6 +447,8 @@ namespace RandomBuff.Core.Game
                 return;
             }
             BuffHookWarpper.DisableBuff(id, HookLifeTimeLevel.InGame);
+            BuffHookWarpper.DisableBuff(id, HookLifeTimeLevel.UntilQuit);
+
             try
             {
                 buffDictionary[id].Destroy();

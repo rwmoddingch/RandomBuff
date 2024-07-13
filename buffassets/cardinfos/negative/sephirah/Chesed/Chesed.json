@@ -8,10 +8,10 @@
     "Color" : "5fb1dc",
     "Chinese":{
         "BuffName":"值得托付的信任",
-        "Description":"蜥蜴致死率提升，蜥蜴和蜘蛛的速度提升，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+        "Description":"根据屏幕上UI提示，分别给予除蛞蝓猫以外生物伤害(D)，移动速度(S)，伤害抗性（R）的提升。解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
     },
     "English":{
         "BuffName":"Those who are Faithful and Trustworthy",
-        "Description":"TODO"
+        "Description":"According to the UI prompts on the screen, increase the damage (D), movement speed (S), and damage resistance (R) of creatures other than slug cats. After unlocking the card, you will randomly obtain a card before recycling it."
     }
 }

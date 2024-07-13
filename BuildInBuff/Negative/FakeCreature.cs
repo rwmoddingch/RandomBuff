@@ -45,7 +45,7 @@ namespace BuiltinBuffs.Negative
 
                         if (Random.value < Custom.LerpMap(Custom.Dist(
                                 shortCut.StartTile.ToVector2() * 20f - new Vector2(10, 10),
-                                player.realizedCreature.DangerPos), 60, 300, 0.06f, 0.02f, 0.4f) / 20f * 1.05f *
+                                player.realizedCreature.DangerPos), 60, 300, 0.06f, 0.02f, 0.4f) / 20f * 1.0f *
                             Mathf.Clamp01(waitCounter - 80) *
                             Custom.LerpMap(waitCounter, 80, 120, 0.1f, 1f) *
                             Custom.LerpMap(waitCounter, 300, 500, 1f, 2f))

@@ -4,10 +4,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Buff;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -25,6 +28,15 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     {
         public override BuffID ID => TipherethBuffData.Tiphereth;
 
+
+        public TipherethBuff()
+        {
+            if (BuffCustom.TryGetGame(out var game) && game.Players[0].Room.shelterIndex != -1)
+            {
+                game.world.brokenShelters[game.Players[0].Room.shelterIndex] = true;
+                game.world.brokenShelterIndexDueToPrecycle = game.Players[0].Room.shelterIndex;
+            }
+        }
         public override void Destroy()
         {
             base.Destroy();
@@ -41,8 +53,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static void HookOn()
         {
-            On.RainCycle.ctor += RainCycle_ctor;
             On.RainCycle.Update += RainCycle_Update;
+            IL.RainCycle.Update += RainCycle_UpdateIL;
             On.RainWorldGame.AllowRainCounterToTick += RainWorldGame_AllowRainCounterToTick;
             new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.MicroScreenShake)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(MicroScreenShakeHook), BindingFlags.NonPublic | BindingFlags.Static));
@@ -55,6 +67,27 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.preCycleRain_Intensity)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(preCycleRain_IntensityHook), BindingFlags.NonPublic | BindingFlags.Static));
+
+            
+          
+        }
+
+        public static void LongLifeCycleHookOn()
+        {
+            On.RainCycle.ctor += RainCycle_ctor;
+        }
+        private static void RainCycle_UpdateIL(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if(c.TryGotoNext(MoveType.After,i => i.MatchStfld<RainCycle>("pause")
+                   ,i => i.Match(OpCodes.Br)
+                   ,i => i.MatchLdsfld<ModManager>("MSC")))
+            {
+                c.EmitDelegate<Func<bool, bool>>((re) => re && RainInst <= 0);
+            }
+            else
+                BuffUtils.LogError(TipherethBuffData.Tiphereth,"hook failed");
+            
         }
 
         private static bool RainWorldGame_AllowRainCounterToTick(On.RainWorldGame.orig_AllowRainCounterToTick orig, RainWorldGame self)
@@ -119,7 +152,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             var (inst, alpha) = rainTuples.Max(i => Intensity(self, i.center, i.duringTime));
             RainInst = inst;
             RainAlpha = alpha;
-            ;
             orig(self);
 
 
@@ -174,7 +206,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     Mathf.Cos(cycle.preCycleRainPulse_WaveC)
                     * (1 - alpha) * 2 * edge, 1 - alpha);
         }
-
+   
         private static void RainCycle_ctor(On.RainCycle.orig_ctor orig, RainCycle self, World world, float minutes)
         {
             world.game.rainWorld.setup.forcePrecycles = true;

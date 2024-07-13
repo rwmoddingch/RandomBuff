@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
@@ -31,6 +33,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             AssetBundle bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetbundles/sephirah"));
             Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.Yesod", FShader.CreateShader("SephirahMeltdownEntry.Yesod",
                 bundle.LoadAsset<Shader>("Yesod")));
+            Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.GrayCast", FShader.CreateShader("SephirahMeltdownEntry.GrayCast",
+                bundle.LoadAsset<Shader>("GrayCast")));
+            Futile.atlasManager.LoadAtlas(Path.Combine(ChesedBuffData.Chesed.GetStaticData().AssetPath, "ChesedTex"));
         }
     }
 

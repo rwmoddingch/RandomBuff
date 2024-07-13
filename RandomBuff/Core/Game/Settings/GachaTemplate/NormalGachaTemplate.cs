@@ -16,7 +16,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             CurrentPacket = new CachaPacket() { positive = (SPSelect, SPShow, SPCount), negative = (SNSelect, SNShow, SNCount) };
         }
 
-        public override void SessionEnd()
+        public override void SessionEnd(RainWorldGame game)
         {
             CurrentPacket = new CachaPacket() { positive = (PSelect, PShow, PCount), negative = (NSelect, NShow, NCount) };
             BuffPlugin.LogDebug($"Session End: {CurrentPacket.positive}, {CurrentPacket.negative}");

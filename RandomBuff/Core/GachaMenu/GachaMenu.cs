@@ -70,8 +70,16 @@ namespace RandomBuff.Core.GachaMenu
                     currentPacket.positive.pickTimes--;
                     if (currentPacket.positive.pickTimes == 0)
                         positive = false;
-                    selectCount = 0;
-                    needNew = true;
+                    if (currentPacket.negative.pickTimes != 0)
+                    {
+                        selectCount = 0;
+                        needNew = true;
+                    }
+                    else
+                    {
+                        exitCounter = 0;
+                        return;
+                    }
                 }
             }
             else

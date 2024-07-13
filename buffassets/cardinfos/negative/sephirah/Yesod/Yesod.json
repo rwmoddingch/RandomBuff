@@ -8,10 +8,10 @@
     "Color" : "dd15ff",
     "Chinese":{
         "BuffName":"卓尔不凡的理性",
-        "Description":"游戏出现模糊效果，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
+        "Description":"游戏画面出现模糊，噪点效果，解锁卡牌后在卡牌回收前随机获得一张正面卡牌"
     },
     "English":{
         "BuffName":" The Rationality to Maintain Discretion",
-        "Description":"TODO"
+        "Description":"The game screen appears blurry and noisy. After unlocking the card, a positive card is randomly obtained before the card is recycled."
     }
 }

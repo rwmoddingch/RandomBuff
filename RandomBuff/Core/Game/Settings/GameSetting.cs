@@ -114,7 +114,7 @@ namespace RandomBuff.Core.Game.Settings
         {
             try
             {
-                gachaTemplate.SessionEnd();
+                gachaTemplate.SessionEnd(game);
                 BuildFallBackCard(game);
             }
             catch (Exception e)

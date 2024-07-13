@@ -66,7 +66,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             }
 
         }
-        public override void SessionEnd()
+        public override void SessionEnd(RainWorldGame game)
         {
             CurrentPacket = new CachaPacket();
             BuffPlugin.Log($"QuickGameSetting : SessionEnd! isPositive: {isPositive}");
