@@ -88,6 +88,11 @@ namespace BuiltinBuffs.Negative
     {
         public static Shader displacementShader;
         public static Texture2D defaultDisplacementTexture;
+
+        public static Texture2D defaultTurbulentTexture;
+
+        public static FShader Turbulent;
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<FakeCreatureBuff, FakeCreatureBuffData, FakeCreatureHook>(FakeCreatureBuffData.FakeCreatureID);
@@ -101,7 +106,13 @@ namespace BuiltinBuffs.Negative
                 FShader.CreateShader($"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain", bundle.LoadAsset<Shader>("AlphaBehindTerrain")));
             displacementShader = bundle.LoadAsset<Shader>("Displacement");
             defaultDisplacementTexture = bundle.LoadAsset<Texture2D>("T_FX_Tile_0141");
+            defaultTurbulentTexture = bundle.LoadAsset<Texture2D>("T_FX_Tile_0137_Moon");
 
+            Custom.rainWorld.Shaders.Add($"{FakeCreatureBuffData.FakeCreatureID}.Turbulent",
+                Turbulent = FShader.CreateShader($"{FakeCreatureBuffData.FakeCreatureID}.Turbulent", bundle.LoadAsset<Shader>("Turbulent")));
+
+            Shader.SetGlobalTexture("Turbulent_Tex",defaultTurbulentTexture);
+            Shader.SetGlobalVector("Turbulent_SV",new Vector4(4,3,0,-0.1f));
         }
 
         private void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)

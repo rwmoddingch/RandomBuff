@@ -112,25 +112,19 @@ namespace BuiltinBuffs.Expeditions
             public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
                 sLeaser.sprites = new FSprite[1];
-                sLeaser.sprites[0] = new FMesh("flameThrower", FlameThrowerBuffEntry.flameThrowerBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "flameThrowerTexture")
+                sLeaser.sprites[0] = new FSprite("Futile_White")
                 {
-                    shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"],
+                    shader = FakeCreatureEntry.Turbulent,
+                    scale = 20,
+                    alpha = 0.1f,
+                    color = new Color(0.7f,1f,10f)
                 };
-                AddToContainer(sLeaser,rCam,null);
+                AddToContainer(sLeaser,rCam,rCam.ReturnFContainer("Water"));
             }
 
             public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
             {
                 base.AddToContainer(sLeaser, rCam, newContatiner);
-                //obj = new GameObject();
-                //var render = obj.AddComponent<MeshRenderer>();
-                //var filter = obj.AddComponent<MeshFilter>();
-                //filter.mesh = UniformLighting.TestMesh;
-                //render.material = new Material(rCam.game.rainWorld.Shaders["UniformSimpleLighting"].shader);
-                //render.material.mainTexture = UniformLighting.TestTex;
-                //rCam.ReturnFContainer("HUD").AddChild(node = new FGameObjectNode(obj,true,false,false));
-                Futile.instance.camera.renderingPath = RenderingPath.Forward;
-                BuffPlugin.Log($"{  Futile.instance.camera.actualRenderingPath.ToString()}");
             }
 
             private float time;
@@ -139,14 +133,6 @@ namespace BuiltinBuffs.Expeditions
             {
                 base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
                 sLeaser.sprites[0].SetPosition(pos-camPos);
-                var mesh = sLeaser.sprites[0] as FMesh;
-                mesh.rotation3D = new Vector3(0, 90, 90+ (time+=Time.deltaTime*50));
-                mesh.scale = 10;
-                mesh.rotation = 90;
-                //node.SetPosition(pos - camPos + new Vector2(0,100));
-                //node._meshZ = 100;
-                //obj.transform.localScale = new Vector3(10, 10, 10);
-                //obj.transform.eulerAngles = new Vector3(mesh.rotation3D.x, mesh.rotation3D.z, mesh.rotation3D.y);
             }
         }
 
