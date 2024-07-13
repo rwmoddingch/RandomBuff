@@ -71,6 +71,9 @@ DisplayName_Interval_OutRange|在{0}-{1}轮回内完成任务，当前隐藏
 DisplayName_FixCycle|在{0}轮回完成使命
 DisplayName_MeltDownHunt|消灭{0}
 DisplayName_Death|死亡数小于{0}下完成使命
+DisplayName_CycleScore|本次雨循环消灭生物获得{0}点分数
+DisplayName_SaveMoon|在{0}轮回内帮助仰望皓月
+DisplayName_Battery|将五块卵石的核心安装给仰望皓月
 
 //BuffCondition_BuffTypes
 all types|所有类型
@@ -95,3 +98,11 @@ Quest_Display_LevelQuest|达到 {0} 等级
 
 //mission
 Mission_Display_Meltdown|核心抑制
+Mission_Display_DodgeTheRock|DODGE THE ROCKS
+Mission_Display_Druid|与龙共舞
+Mission_Display_Strayer|异邦浪客
+Mission_Display_EmergnshyTreatment|紧稽救援
+Mission_Display_MidnightSnack|午夜凶粮
+Mission_Display_ArtOfExplosion|爆破艺术
+Mission_Display_DuelsOfSnipers|狙击对决
+Mission_Display_DoomExpress|末日速递

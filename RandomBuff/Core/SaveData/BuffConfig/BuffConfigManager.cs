@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData.BuffConfig;
 using UnityEngine;
 
@@ -296,18 +297,18 @@ namespace RandomBuff.Core.SaveData
                         BuffPlugin.LogException(e, $"Invalid BuffQuest file! Mod:{mod.name} ,Path:{file.FullName}");
                     }
 
-                    foreach (var qId in GetQuestIDList())
-                    {
-                        BuffPlugin.LogDebug($"Quest ID:{qId}");
-                        foreach (var con in GetQuestData(qId).QuestConditions)
-                            BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
-                        foreach (var reward in GetQuestData(qId).UnlockItem)
-                        foreach (var v in reward.Value)
-                                BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
+                }
+                foreach (var qId in GetQuestIDList())
+                {
+                    BuffPlugin.LogDebug($"Quest ID:{qId}");
+                    foreach (var con in GetQuestData(qId).QuestConditions)
+                        BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
+                    foreach (var reward in GetQuestData(qId).UnlockItem)
+                    foreach (var v in reward.Value)
+                        BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
 
-                            
-                        
-                    }
+
+
                 }
             }
         }

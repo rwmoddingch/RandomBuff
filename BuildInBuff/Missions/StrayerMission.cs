@@ -1,13 +1,13 @@
-﻿using RandomBuff.Core.Game.Settings.Conditions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using MoreSlugcats;
+using RandomBuff;
+using RandomBuff.Core.Game.Settings;
+using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.Missions;
+using UnityEngine;
 
-namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
+namespace BuiltinBuffs.Missions
 {
     public sealed class StrayerMission : Mission, IMissionEntry
     {
@@ -17,7 +17,7 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
 
         public override Color TextCol => Color.white;
 
-        public override string MissionName => "STRANGE LAND STRAYER";
+        public override string MissionName => BuffResourceString.Get("Mission_Display_Strayer");
 
         public StrayerMission()
         {
@@ -27,15 +27,16 @@ namespace RandomBuff.Core.Game.Settings.Missions.BuiltInMissions
                 {
                     new AchievementCondition() { achievementID = WinState.EndgameID.Traveller },
                     new AchievementCondition() { achievementID = WinState.EndgameID.Survivor },
+                    new MeetSS_SLCondition(){cycleRequirement = 15,meetSL = true,meetSS = true}
                 }
             };
 
             if(ModManager.MSC)
                 gameSetting.conditions.Add(new AchievementCondition() { achievementID = MoreSlugcatsEnums.EndgameID.Nomad });
 
-            startBuffSet.Add(new Buff.BuffID("RandomRain"));
-            startBuffSet.Add(new Buff.BuffID("ShortCircuitGate"));
-            startBuffSet.Add(new Buff.BuffID("Armstron"));
+            startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("RandomRain"));
+            startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("ShortCircuitGate"));
+            startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("Armstron"));
         }
 
         public void RegisterMission()

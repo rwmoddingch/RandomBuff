@@ -22,6 +22,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     internal class MalkuthBuff : Buff<MalkuthBuff,MalkuthBuffData>
     {
         public override BuffID ID => MalkuthBuffData.Malkuth;
+
+        public MalkuthBuff()
+        {
+            MalkuthHook.HHH();
+        }
     }
 
     internal class MalkuthHook
@@ -38,7 +43,14 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             On.HUD.TextPrompt.Draw += TextPrompt_Draw;
             On.HUD.RainMeter.Draw += RainMeter_Draw;
 
-            HHH();
+            On.MoreSlugcats.ThreatPulser.Draw += ThreatPulser_Draw;
+        }
+
+        private static void ThreatPulser_Draw(On.MoreSlugcats.ThreatPulser.orig_Draw orig, MoreSlugcats.ThreatPulser self, float timeStacker)
+        {
+            orig(self,timeStacker);
+            foreach (var h in self.circles)
+                h.sprite.isVisible = false;
         }
 
         public static void HHH()

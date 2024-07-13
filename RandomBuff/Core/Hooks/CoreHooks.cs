@@ -46,7 +46,9 @@ namespace RandomBuff.Core.Hooks
 
             On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
             On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
+            On.JollyCoop.JollyMenu.JollyPlayerSelector.Update += JollyPlayerSelector_Update;
             On.ModManager.ModFolderHasDLLContent += ModManager_ModFolderHasDLLContent;
+
 
             InGameHooksInit();
 
@@ -54,6 +56,14 @@ namespace RandomBuff.Core.Hooks
             BuffPlugin.Log("Core Hook Loaded");
 
             //TestStartGameMenu = new("TestStartGameMenu");
+
+        }
+
+        private static void JollyPlayerSelector_Update(On.JollyCoop.JollyMenu.JollyPlayerSelector.orig_Update orig, JollyCoop.JollyMenu.JollyPlayerSelector self)
+        {
+            orig(self);
+            if(self.menu.manager.rainWorld.BuffMode() && self.index == 0)
+                self.classButton.GetButtonBehavior.greyedOut = true;
 
         }
 

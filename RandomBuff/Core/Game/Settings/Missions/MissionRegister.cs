@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI.Component;

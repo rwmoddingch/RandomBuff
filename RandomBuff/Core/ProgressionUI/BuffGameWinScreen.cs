@@ -16,6 +16,7 @@ using Menu.Remix.MixedUI;
 using RandomBuff.Core.ProgressionUI;
 using RandomBuff.Render.UI.Notification;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest;
 
 namespace RandomBuff.Core.StaticsScreen
 {

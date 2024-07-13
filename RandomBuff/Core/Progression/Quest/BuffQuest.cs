@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression.Quest.Condition;
-using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;
-using static Expedition.ExpeditionProgression;
 
-namespace RandomBuff.Core.Progression
+namespace RandomBuff.Core.Progression.Quest
 {
 
     public class QuestUnlockedType : ExtEnum<QuestUnlockedType>

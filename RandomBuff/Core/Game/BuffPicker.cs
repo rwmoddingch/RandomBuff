@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Progression;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
 

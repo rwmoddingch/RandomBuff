@@ -305,6 +305,8 @@ namespace RandomBuff.Core.BuffMenu
                 targetScrolledPageIndex--;
                 modeSelectPage.SetShow(false);
                 PlaySound(SoundID.MENU_Next_Slugcat);
+                if (ModManager.CoopAvailable)
+                    manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[(currentPageIndex - 1 + slugNameOrders.Count) % slugNameOrders.Count];
                 //UpdateSlugcat();
             }
             else if (message == "NEXT")
@@ -312,7 +314,10 @@ namespace RandomBuff.Core.BuffMenu
                 //quedSideInput = Math.Min(3, quedSideInput + 1);
                 targetScrolledPageIndex++;
                 modeSelectPage.SetShow(false);
+
                 PlaySound(SoundID.MENU_Next_Slugcat);
+                if (ModManager.CoopAvailable)
+                    manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[(currentPageIndex+1) % slugNameOrders.Count];
                 //UpdateSlugcat();
             }
             else if (message == "START")

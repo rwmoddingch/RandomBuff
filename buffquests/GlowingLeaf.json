@@ -1,0 +1,17 @@
+{
+    "Name":"Glowing Leaf",
+    "Color":"fffe68",
+    "ID":"builtin.quest.GlowingLeaf",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"Druid"
+        }
+    ],
+    "UnlockItem":
+    {
+       "Cosmetic":[
+        "GlowingLeaf"
+       ]
+    }
+}

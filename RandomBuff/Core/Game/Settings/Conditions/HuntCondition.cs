@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Expedition;
 using Newtonsoft.Json;
 using RandomBuffUtils;
 
@@ -12,10 +13,18 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public override ConditionID ID => ConditionID.Hunt;
 
-        public override int Exp => 0;
+
+
+        public override int Exp => 0;//TODO
 
         [JsonProperty]
         public CreatureTemplate.Type type = CreatureTemplate.Type.GreenLizard;
+
+        [JsonProperty]
+        private int currentKillCount;
+
+        [JsonProperty]
+        public int killCount;
 
         public HuntCondition()
         {
@@ -24,29 +33,33 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
-            
+            if (creature.Template.type == type || creature.Template.TopAncestor().type == type)
+            {
+                currentKillCount++;
+                if (currentKillCount == killCount)
+                    Finished = true;
+                onLabelRefresh?.Invoke(this);
+            }
         }
 
-        public override void SessionEnd(SaveState save)
-        {
-            
-        }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions = null)
         {
-            return ConditionState.Fail;
+            return ConditionState.Fail;//TODO
         }
 
         public override string DisplayProgress(InGameTranslator translator)
         {
-            throw new NotImplementedException();
+            return $"({currentKillCount}/{killCount})";
 
         }
 
         public override string DisplayName(InGameTranslator translator)
         {
-            throw new NotImplementedException();
+            if (ChallengeTools.creatureNames == null)
+                ChallengeTools.CreatureName(ref ChallengeTools.creatureNames);
+            return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"), ChallengeTools.creatureNames[type.index]);
         }
 
         ~HuntCondition()

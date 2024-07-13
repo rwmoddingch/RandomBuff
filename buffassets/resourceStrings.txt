@@ -71,7 +71,9 @@ DisplayName_Interval_OutRange|Completed the task within {0}-{1} cycles, now hidd
 DisplayName_FixCycle|Complete the mission in {0} cycle
 DisplayName_MeltDownHunt|Kill {0}
 DisplayName_Death|Complete the mission less than {0} death  
-
+DisplayName_CycleScore|Earn {0} points from creature kills this cycle
+DisplayName_SaveMoon|Save Moon in {0} cycles
+DisplayName_Battery|Install the Pebbles core to moon
 //BuffCondition_BuffTypes
 all types|all types
 Negative|negative
@@ -93,5 +95,13 @@ ProgressionUI_Cosmetic|COSMETIC
 Quest_Display_MissionQuest|Complete {0} mission
 Quest_Display_LevelQuest|Reach {0} level
 
-//mission
-Mission_Display_Meltdown|Sephirah Meltdowns
+//Mission
+Mission_Display_DodgeTheRock|DODGE THE ROCKS
+Mission_Display_Meltdown|SEPHIRAH MELTDOWNS
+Mission_Display_Druid|DANCES WITH DRAGONS
+Mission_Display_Strayer|STRANGE LAND STRAYER
+Mission_Display_EmergnshyTreatment|EMERGNSHY TREATMENT
+Mission_Display_MidnightSnack|HAUNTED MIDNIGHT SNACK
+Mission_Display_ArtOfExplosion|ART OF EXPLOSION
+Mission_Display_DuelsOfSnipers|DUELS OF SNIPERS
+Mission_Display_DoomExpress|DOOM EXPRESS

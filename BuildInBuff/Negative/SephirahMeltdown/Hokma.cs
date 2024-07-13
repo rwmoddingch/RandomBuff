@@ -21,7 +21,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly BuffID Hokma = new BuffID(nameof(Hokma), true);
 
         public override BuffID ID => Hokma;
-        public int FramePreSecond => (int)Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 40, 80);
+        public int FramePreSecond => (int)Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 40, 70);
 
 
     }
@@ -111,7 +111,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private static void PauseMenu_ctor(On.Menu.PauseMenu.orig_ctor orig, Menu.PauseMenu self, ProcessManager manager, RainWorldGame game)
         {
-            BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 6, true){ inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true});
+            BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true){ inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true});
             game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2,1,0.1f,1);
             foreach (var player in game.AlivePlayers)
             {

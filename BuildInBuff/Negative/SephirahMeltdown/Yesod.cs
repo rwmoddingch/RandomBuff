@@ -82,7 +82,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private float timer = 0;
         private float waitTimer = 0;
 
-        private float instFac = 0.5f;
+        private float instFac = 0.1f;
         private float yClamp = 0.05f;
         private bool IsEnable => timer > 0 && waitTimer <= 0;
 
@@ -96,9 +96,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 timer -= Time.deltaTime;
                 if (timer <= 0)
                 {
-                    instFac = Random.Range(0.5f, 1.2f);
-                    timer = Random.Range(0.3f, 1f);
-                    //waitTimer = Random.Range(1, 3F);
+                    instFac = Random.Range(0.2f, 0.5f) * (Random.value < 0.03f ?  Random.Range(2,3) : 1) * (Random.value < 0.03f ? Random.Range(2, 3) : 1);
+                    timer = Random.Range(0.7f, 2f);
                     yClamp = Random.Range(0.05f, 0.15f);
                 }
             }

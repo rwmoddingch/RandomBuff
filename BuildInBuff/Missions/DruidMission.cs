@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using RandomBuff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -14,7 +15,7 @@ namespace BuiltinBuffs.Missions
 
         public override SlugcatStats.Name BindSlug => SlugcatStats.Name.Yellow;
 
-        public override string MissionName => "DANCES WITH DRAGONS";
+        public override string MissionName => BuffResourceString.Get("Mission_Display_Druid");
 
         public DruidMission()
         {
