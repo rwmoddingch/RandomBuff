@@ -87,7 +87,8 @@ namespace RandomBuff.Core.Game.Settings
             {
                 try
                 {
-                    condition.InGameUpdate(game);
+                    //BuffPlugin.Log($"Condition {condition.ID} {condition.GetType()} enter game");
+                    condition.EnterGame(game);
                 }
                 catch (Exception e)
                 {

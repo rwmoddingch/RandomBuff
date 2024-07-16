@@ -1,4 +1,5 @@
-﻿using BuiltinBuffs.Positive;
+﻿using BuiltinBuffs.Negative;
+using BuiltinBuffs.Positive;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -1416,7 +1417,11 @@ namespace BuiltinBuffs.Duality
         {
             var emitter = new ParticleEmitter(room);
             emitter.ApplyParticleSpawn(new RoomFireSpawner(emitter, this, 4, 800));
+
+
             emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam(FlameThrowerBuffEntry.flameVFX1, "StormIsApproaching.AdditiveDefault")));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", FakeCreatureEntry.Turbulent.name, 8, 0.2f, 6f, new Color(0.3f, 0.5f, 10f))));
+            
 
             emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
             emitter.ApplyParticleModule(new SetRandomLife(emitter, 40, 80));
@@ -1437,7 +1442,7 @@ namespace BuiltinBuffs.Duality
             }));
             emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, l) =>
             {
-                return 0.2f * Mathf.Sin(Mathf.PI * l);
+                return 0.4f * Mathf.Sin(Mathf.PI * l);
             }));
 
             emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, l) =>

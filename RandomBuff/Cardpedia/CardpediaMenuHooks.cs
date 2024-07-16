@@ -67,6 +67,7 @@ namespace RandomBuff.Cardpedia
             Futile.atlasManager.LoadImage("buffassets/illustrations/TinySplash");
             Futile.atlasManager.LoadImage("buffassets/illustrations/FoodBag");
             Futile.atlasManager.LoadImage("buffassets/illustrations/MStar");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/correctSymbol");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Chi");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Stack_Chi");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Chi");
