@@ -80,6 +80,9 @@ Negative|negative
 Positive|positive
 Duality|duality
 
+//BuffCondition_Builtin
+InRangeDisplayName_WormGrassWipeOutCondition|Wipe out all wormgrass in room
+
 //BuffCondition_CommunityID
 Lizards|Lizards
 Scavengers|Scavengers

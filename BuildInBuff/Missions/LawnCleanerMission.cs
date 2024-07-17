@@ -2,6 +2,7 @@
 using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
 using Newtonsoft.Json;
+using RandomBuff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
@@ -70,7 +71,7 @@ namespace BuiltinBuffs.Missions
 
         public override string InRangeDisplayName()
         {
-            return "Wipe out all wormgrass in required rooms";
+            return BuffResourceString.Get("InRangeDisplayName_WormGrassWipeOutCondition");
         }
 
         public override string InRangeDisplayProgress()

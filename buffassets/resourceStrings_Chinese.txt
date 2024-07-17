@@ -81,6 +81,9 @@ Negative|负面
 Positive|正面
 Duality|双向
 
+//BuffCondition_Builtin
+InRangeDisplayName_WormGrassWipeOutCondition|清除房间内的所有舌草
+
 //BuffCondition_CommunityID
 Lizards|蜥蜴
 Scavengers|拾荒者

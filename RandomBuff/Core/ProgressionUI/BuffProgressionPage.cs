@@ -265,8 +265,11 @@ namespace RandomBuff.Core.ProgressionUI
                 
                 foreach(var condition in questData.QuestConditions)
                 {
-                    if(condition is LevelQuestCondition)
+                    if(condition is LevelQuestCondition levelQuestCondition)
+                    {
                         isLevelQuest = true;
+                        questInfo.level = levelQuestCondition.Level;
+                    }
 
                     questInfo.conditions.Add(condition.ConditionMessage());
                 }
@@ -289,6 +292,15 @@ namespace RandomBuff.Core.ProgressionUI
                     BuffPlugin.Log($"Add other quest : {questInfo.name}");
                 }
             }
+
+            levelQuests.Sort((x, y) =>
+            {
+                int res = x.level.CompareTo(y.level);
+                if (res == 0)
+                    res = x.conditions.Count.CompareTo(y.conditions.Count);
+                return res;
+            });
+
 
             //构建按钮元素
             Vector2 buttonSize = new Vector2(50, 50);
@@ -547,6 +559,7 @@ namespace RandomBuff.Core.ProgressionUI
         public struct QuestInfo
         {
             public string name;
+            public int level;//只在有level condition时使用
             public bool finished;
             public Color color;
             public List<string> conditions;
@@ -637,10 +650,10 @@ namespace RandomBuff.Core.ProgressionUI
             questRendererManager = new QuestRendererManager(Container, QuestRendererManager.Mode.QuestDisplay);
 
 
-            foreach (KeyValuePair<string, FAtlasElement> item in Futile.atlasManager._allElementsByName)
-            {
-                BuffPlugin.Log(item.Key);
-            }
+            //foreach (KeyValuePair<string, FAtlasElement> item in Futile.atlasManager._allElementsByName)
+            //{
+            //    BuffPlugin.Log(item.Key);
+            //}
         }
 
         public override void Update()
