@@ -2,6 +2,7 @@
 using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
 using Newtonsoft.Json;
+using RandomBuff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
@@ -70,7 +71,7 @@ namespace BuiltinBuffs.Missions
 
         public override string InRangeDisplayName()
         {
-            return "Wipe out all wormgrass in required rooms";
+            return BuffResourceString.Get("InRangeDisplayName_WormGrassWipeOutCondition");
         }
 
         public override string InRangeDisplayProgress()
@@ -88,6 +89,7 @@ namespace BuiltinBuffs.Missions
         {
             base.EnterGame(game);
             On.Room.Loaded += Room_Loaded;
+            BuffUtils.Log("WormGrassWipeOutCondition", $"EnterGame");
         }
 
         private void Room_Loaded(On.Room.orig_Loaded orig, Room self)
@@ -113,6 +115,7 @@ namespace BuiltinBuffs.Missions
             finishedRooms.Add(room.abstractRoom.name);
             if (finishedRooms.Count >= roomRequirements)
                 Finished = true;
+            onLabelRefresh?.Invoke(this);
         }
     }
 
@@ -129,7 +132,9 @@ namespace BuiltinBuffs.Missions
             if (slatedForDeletetion)
                 return;
 
-            if (room.updateList.Where(u => u is WormGrass).Where(u => !u.slatedForDeletetion).Count() == 0)
+            BuffUtils.Log("RoomWormGrassWipeCheck", $"{room.updateList.Count(u => (u is WormGrass) && !u.slatedForDeletetion)}");
+
+            if (room.updateList.Count(u => (u is WormGrass) && !u.slatedForDeletetion) == 0)
             {
                 (BuffPoolManager.Instance.GameSetting.conditions.Find(c => c is WormGrassWipeOutCondition) as WormGrassWipeOutCondition).NoticeRoomFinished(room);
             }

@@ -27,5 +27,7 @@ namespace RandomBuff.Core.Progression.Quest.Condition
 
         [JsonProperty("Level")]
         private int level;
+
+        public int Level => level;
     }
 }

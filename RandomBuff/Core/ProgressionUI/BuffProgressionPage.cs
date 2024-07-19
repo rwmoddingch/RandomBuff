@@ -265,8 +265,11 @@ namespace RandomBuff.Core.ProgressionUI
                 
                 foreach(var condition in questData.QuestConditions)
                 {
-                    if(condition is LevelQuestCondition)
+                    if(condition is LevelQuestCondition levelQuestCondition)
+                    {
                         isLevelQuest = true;
+                        questInfo.level = levelQuestCondition.Level;
+                    }
 
                     questInfo.conditions.Add(condition.ConditionMessage());
                 }
@@ -289,6 +292,15 @@ namespace RandomBuff.Core.ProgressionUI
                     BuffPlugin.Log($"Add other quest : {questInfo.name}");
                 }
             }
+
+            levelQuests.Sort((x, y) =>
+            {
+                int res = x.level.CompareTo(y.level);
+                if (res == 0)
+                    res = x.conditions.Count.CompareTo(y.conditions.Count);
+                return res;
+            });
+
 
             //构建按钮元素
             Vector2 buttonSize = new Vector2(50, 50);
@@ -323,7 +335,7 @@ namespace RandomBuff.Core.ProgressionUI
 
             void CreateButtonForInfo(QuestButton.QuestInfo info)
             {
-                var button = new QuestButton(info, new Vector2(xPtr, yPtr), buttonSize);
+                var button = new QuestButton(info, new Vector2(xPtr, yPtr), buttonSize, info.finished);
                 button.OnMouseOver += page.ShowQuestInfo;
                 button.OnMouseLeave += page.HideQuestInfo;
 
@@ -523,8 +535,8 @@ namespace RandomBuff.Core.ProgressionUI
 
         public Action<QuestInfo> OnMouseOver;
         public Action OnMouseLeave;
-
-        public QuestButton(QuestInfo info, Vector2 pos, Vector2 size) : base(pos, size, "Futile_White")
+        
+        public QuestButton(QuestInfo info, Vector2 pos, Vector2 size, bool finished) : base(pos, size, finished ? "buffassets/illustrations/correctSymbol" : "Sandbox_QuestionMark")
         {
             myInfo = info;
         }
@@ -547,6 +559,7 @@ namespace RandomBuff.Core.ProgressionUI
         public struct QuestInfo
         {
             public string name;
+            public int level;//只在有level condition时使用
             public bool finished;
             public Color color;
             public List<string> conditions;
@@ -577,8 +590,6 @@ namespace RandomBuff.Core.ProgressionUI
 
         static int maxCardInARow = 5;
 
-
-
         FSprite background;
 
         FSprite leftBound;
@@ -605,7 +616,7 @@ namespace RandomBuff.Core.ProgressionUI
 
         Vector2 setAnchor = new Vector2(0f, 1f);
         Vector2 anchor = new Vector2(0f, 1f);//左上
-        Vector2 lastAnchor = new Vector2(0f, 1f);
+        Vector2 lastAnchor = new Vector2(0f, 0f);
 
         Vector2 size = new Vector2(400f, 300f);
 
@@ -637,6 +648,12 @@ namespace RandomBuff.Core.ProgressionUI
 
             Container.AddChild(title);
             questRendererManager = new QuestRendererManager(Container, QuestRendererManager.Mode.QuestDisplay);
+
+
+            //foreach (KeyValuePair<string, FAtlasElement> item in Futile.atlasManager._allElementsByName)
+            //{
+            //    BuffPlugin.Log(item.Key);
+            //}
         }
 
         public override void Update()
@@ -650,19 +667,19 @@ namespace RandomBuff.Core.ProgressionUI
                     alpha = setAlpha;
             }
 
-            lastMouseScreenPos = mouseScreenPos;
-            mouseScreenPos = Futile.mousePosition;
+            //lastMouseScreenPos = mouseScreenPos;
+            //mouseScreenPos = Futile.mousePosition;
 
 
             //计算边角坐标，切换锚点，防止超出屏幕
-            float xAnchorBiasPos = (1f - setAnchor.x * 2f) * size.x + mouseScreenPos.x;
-            float yAnchorBiasPos = (1f - setAnchor.y * 2f) * size.y + mouseScreenPos.y;
+            //float xAnchorBiasPos = (1f - setAnchor.x * 2f) * size.x + mouseScreenPos.x;
+            //float yAnchorBiasPos = (1f - setAnchor.y * 2f) * size.y + mouseScreenPos.y;
 
-            if(xAnchorBiasPos < 0f || xAnchorBiasPos > Custom.rainWorld.options.ScreenSize.x)
-                setAnchor.x = 1f - setAnchor.x;
+            //if(xAnchorBiasPos < 0f || xAnchorBiasPos > Custom.rainWorld.options.ScreenSize.x)
+            //    setAnchor.x = 1f - setAnchor.x;
 
-            if (yAnchorBiasPos < 0f || yAnchorBiasPos > Custom.rainWorld.options.ScreenSize.y)
-                setAnchor.y = 1f - setAnchor.y;
+            //if (yAnchorBiasPos < 0f || yAnchorBiasPos > Custom.rainWorld.options.ScreenSize.y)
+            //    setAnchor.y = 1f - setAnchor.y;
 
             lastAnchor = anchor;
             if (anchor != setAnchor)
@@ -684,7 +701,7 @@ namespace RandomBuff.Core.ProgressionUI
             if (owner is PositionedMenuObject p)
                 ownerPos = Vector2.Lerp(p.lastPos, p.pos, timeStacker);
 
-            Vector2 smoothPos = Vector2.Lerp(lastMouseScreenPos, mouseScreenPos, timeStacker) + ownerPos;
+            Vector2 smoothPos = mouseScreenPos + ownerPos;
             Vector2 smoothAnchor = Vector2.Lerp(lastAnchor, anchor, timeStacker);
 
             background.SetPosition(smoothPos);
@@ -706,7 +723,7 @@ namespace RandomBuff.Core.ProgressionUI
             buttomBound.scaleX = size.x;
             buttomBound.alpha = alpha;
 
-            Vector2 topAnchor = smoothPos + new Vector2((1f -smoothAnchor.x) * size.x * 0.5f, (1f - smoothAnchor.y) * size.y - titleBorder);
+            Vector2 topAnchor = smoothPos + new Vector2((1f -smoothAnchor.x - smoothAnchor.x) * size.x / 2f, (1f - smoothAnchor.y) * size.y - titleBorder);
             title.SetPosition(topAnchor);
             title.alpha = alpha;
 
@@ -768,6 +785,7 @@ namespace RandomBuff.Core.ProgressionUI
 
         public void DisplayInfo(QuestButton.QuestInfo questInfo)
         {
+            mouseScreenPos = Futile.mousePosition;
             setAlpha = 1.0f;
             if (currentInfo.Equals(questInfo))
                 return;
@@ -862,6 +880,19 @@ namespace RandomBuff.Core.ProgressionUI
             rightBound.color = questInfo.color;
             buttomBound.color = questInfo.color;
             midBound.color = questInfo.color;
+
+            setAnchor = new Vector2(0f, 1f);
+            if(mouseScreenPos.y - size.y < 0f)
+            {
+                float delta = Mathf.Abs(mouseScreenPos.y - size.y) + bigGap;
+                setAnchor.y = 1f - delta / size.y;
+            }
+
+            if (mouseScreenPos.x + size.x > Custom.rainWorld.options.ScreenSize.x)
+            {
+                float delta = mouseScreenPos.x + size.x - Custom.rainWorld.options.ScreenSize.x + bigGap;
+                setAnchor.x = delta / size.x;
+            }
         }
 
         Vector2 GetBuffCardQuestRendererSize(List<QuestLeaser> buffCardLeasers)
@@ -880,7 +911,7 @@ namespace RandomBuff.Core.ProgressionUI
 
             foreach(var leaser in buffCardLeasers)
             {
-                leaser.smoothCenterPos = topAnchor + new Vector2(bigGap + veryBigGap + x * (leaser.rect.x + smallGap) + leaser.rect.x / 2f, yBias - y * (leaser.rect.y + smallGap) - leaser.rect.y / 2f);
+                leaser.smoothCenterPos = topAnchor + new Vector2(bigGap + veryBigGap + x * (leaser.rect.x + smallGap) + leaser.rect.x / 2f, yBias/* - y * (leaser.rect.y + smallGap)*/ - leaser.rect.y / 2f);
                 leaser.smoothAlpha = alpha;
 
                 x++;
