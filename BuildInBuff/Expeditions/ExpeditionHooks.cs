@@ -44,47 +44,23 @@ namespace BuiltinBuffs.Expeditions
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
                 {
-                    var all = ExpeditionProgression.burdenGroups.First().Value;
-
-                    var id = new BuffID(all[index++]);
-                    try
-                    {
-                        BuffPoolManager.Instance.CreateBuff(id);
-                        BuffHud.Instance.AppendNewCard(id);
-                    }
-                    catch (Exception e)
-                    {
-                    }
-
+                    BinahBuff.Instance.Data.Health = 0.005f;
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.S))
                 {
-                    var all = ExpeditionProgression.perkGroups.First().Value;
-                    if (index2 == all.Count) return;
-
-                    try
-                    {
-                        var id = new BuffID(all[index2++]);
-                        BuffPoolManager.Instance.CreateBuff(id);
-                        BuffHud.Instance.AppendNewCard(id);
-                    }
-                    catch (Exception e)
-                    {
-                    }
+                    BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Fairy, 0);
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-                    NetzachBuffData.Netzach.CreateNewBuff();
+                    BinahBuffData.Binah.CreateNewBuff();
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
                 {
-                    BuffPoolManager.Instance.CreateBuff(FakeCreatureBuffData.FakeCreatureID);
-                    BuffHud.Instance.AppendNewCard(FakeCreatureBuffData.FakeCreatureID);
-                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
-
+                    BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Key,0);
+                    self.Players[0].realizedCreature.room.AddObject(new BinahShowEffect(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos,300,RainWorld.SaturatedGold));
                 }
             }
 

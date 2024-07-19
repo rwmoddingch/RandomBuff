@@ -27,6 +27,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             BuffRegister.RegisterBuff<NetzachBuff, NetzachBuffData, NetzachHook>(NetzachBuffData.Netzach);
             BuffRegister.RegisterBuff<TipherethBuff, TipherethBuffData, TipherethHook>(TipherethBuffData.Tiphereth);
             BuffRegister.RegisterBuff<YesodBuff, YesodBuffData, YesodBuff>(YesodBuffData.Yesod);
+            BuffRegister.RegisterBuff<BinahBuff, BinahBuffData, BinahHook>(BinahBuffData.Binah);
+
         }
 
         public static void LoadAssets()
@@ -36,7 +38,14 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 bundle.LoadAsset<Shader>("Yesod")));
             Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.GrayCast", FShader.CreateShader("SephirahMeltdownEntry.GrayCast",
                 bundle.LoadAsset<Shader>("GrayCast")));
+            Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.BinahWave", FShader.CreateShader("SephirahMeltdownEntry.BinahWave",
+                bundle.LoadAsset<Shader>("BinahWave")));
+            Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.Bar", FShader.CreateShader("SephirahMeltdownEntry.Bar",
+                bundle.LoadAsset<Shader>("BinahBar")));
             Futile.atlasManager.LoadAtlas(Path.Combine(ChesedBuffData.Chesed.GetStaticData().AssetPath, "ChesedTex"));
+            Futile.atlasManager.LoadAtlas(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahTex"));
+
+
         }
     }
 

@@ -74,6 +74,8 @@ DisplayName_Death|Complete the mission less than {0} death
 DisplayName_CycleScore|Earn {0} points from creature kills this cycle
 DisplayName_SaveMoon|Save Moon in {0} cycles
 DisplayName_Battery|Install the Pebbles core to moon
+DisplayName_MeltDownBinah|Defeat An Arbiter
+
 //BuffCondition_BuffTypes
 all types|all types
 Negative|negative

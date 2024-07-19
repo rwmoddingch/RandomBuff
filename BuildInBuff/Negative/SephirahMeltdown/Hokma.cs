@@ -21,7 +21,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly BuffID Hokma = new BuffID(nameof(Hokma), true);
 
         public override BuffID ID => Hokma;
-        public int FramePreSecond => (int)Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 40, 70);
+        public int FramePreSecond => (int)Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 45, 85);
 
 
     }
@@ -82,10 +82,29 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             //    typeof(HokmaHook).GetMethod("RainWorldGamePausedHook", BindingFlags.NonPublic | BindingFlags.Static));
             IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.Menu.PauseMenu.ctor += PauseMenu_ctor;
+            On.Player.checkInput += Player_checkInput;
             //IL.RainWorldGame.Update += RainWorldGame_Update;
             //new Hook(typeof(RoomCamera).GetProperty(nameof(RoomCamera.roomSafeForPause)).GetGetMethod(),
             //typeof(HokmaHook).GetMethod("RoomCameraRoomSafeForPauseHook", BindingFlags.NonPublic | BindingFlags.Static));
             count = 0;
+        }
+
+        private static void Player_checkInput(On.Player.orig_checkInput orig, Player self)
+        {
+            orig(self);
+            if (self.input[0].mp && !self.input[1].mp && (BinahBuff.Instance == null|| BinahBuff.Instance.Data.CycleUse <=3 ))
+            {
+                BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
+                    { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });
+                self.abstractCreature.world.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 1, 0.1f, 1);
+                foreach (var player in self.abstractCreature.world.game.AlivePlayers)
+                {
+                    if (player.realizedCreature is Player crit)
+                        crit.Stun(200 + count * 80);
+                }
+
+                count++;
+            }
         }
 
 
@@ -111,14 +130,20 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private static void PauseMenu_ctor(On.Menu.PauseMenu.orig_ctor orig, Menu.PauseMenu self, ProcessManager manager, RainWorldGame game)
         {
-            BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true){ inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true});
-            game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2,1,0.1f,1);
-            foreach (var player in game.AlivePlayers)
+            if (BinahBuff.Instance == null || BinahBuff.Instance.Data.CycleUse <= 3)
             {
-                if (player.realizedCreature is Player crit)
-                    crit.Stun(200 + count * 80);
+                BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
+                    { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });
+                game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 1, 0.1f, 1);
+                foreach (var player in game.AlivePlayers)
+                {
+                    if (player.realizedCreature is Player crit)
+                        crit.Stun(200 + count * 80);
+                }
+
+                count++;
             }
-            count++;
+
             orig(self, manager, game);
         }
 

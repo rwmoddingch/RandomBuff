@@ -149,7 +149,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void RainWorldGame_GhostShutDown(On.RainWorldGame.orig_GhostShutDown orig, RainWorldGame self, GhostWorldPresence.GhostID ghostID)
         {
-            BuffPoolManager.Instance?.WinGame();
+            //BuffPoolManager.Instance?.WinGame();
             orig(self, ghostID);
         }
 

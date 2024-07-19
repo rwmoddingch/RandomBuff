@@ -30,7 +30,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 conditions = new List<Condition>()
                 {
                     new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedLizard},
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 8,maxConditionCycle = 12,type = CreatureTemplate.Type.RedCentipede},
+                    new BinahCondition(){minConditionCycle = 9,maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 12}
                 },
@@ -45,8 +45,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         }},
                         {8, new List<string>()
                         {
-                            HokmaBuffData.Hokma.value,
-                            "bur-pursued"
+                            HokmaBuffData.Hokma.value
+                        }},
+                        {9, new List<string>()
+                        {
+                            BinahBuffData.Binah.value
                         }},
                     }, 
                     NCount = 0, NSelect = 0, NShow = 0,
@@ -65,6 +68,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             BuffRegister.RegisterCondition<MeltdownHuntCondition>(MeltdownHuntCondition.MeltdownHunt, "Meltdown Hunt",true);
             BuffRegister.RegisterCondition<DeathCondition>(DeathCondition.Death, "Death");
             BuffRegister.RegisterCondition<FixedCycleCondition>(FixedCycleCondition.FixedCycle, "Fix Cycles", true);
+            BuffRegister.RegisterCondition<BinahCondition>(BinahCondition.Binah, "Binah", true);
 
             MissionRegister.RegisterMission(SephirahMeltdowns, new SephirahMeltdownsMission());
             BuffRegister.RegisterGachaTemplate<SephirahMeltdownsTemplate>(SephirahMeltdownsTemplate.SephirahMeltdowns);

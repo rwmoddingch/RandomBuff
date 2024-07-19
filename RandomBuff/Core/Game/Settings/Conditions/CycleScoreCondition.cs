@@ -27,6 +27,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
+            ChallengeTools.ParseCreatureSpawns();
             if (ChallengeTools.creatureSpawns[ExpeditionData.slugcatPlayer.value]
                     .FirstOrDefault(i => i.creature == creature.Template.type)
                 is { } spawnData)
