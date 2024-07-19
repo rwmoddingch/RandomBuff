@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Expedition;
 using RandomBuff;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
@@ -29,8 +32,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 conditions = new List<Condition>()
                 {
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedLizard},
-                    new BinahCondition(){minConditionCycle = 9,maxConditionCycle = 12},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedCentipede},
+                    new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 12}
                 },
@@ -42,13 +45,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {
                             TipherethBuffData.Tiphereth.value,
                             ChesedBuffData.Chesed.value,
+                            "bur-pursued"
                         }},
                         {8, new List<string>()
                         {
-                            HokmaBuffData.Hokma.value
-                        }},
-                        {9, new List<string>()
-                        {
+                            HokmaBuffData.Hokma.value,
                             BinahBuffData.Binah.value
                         }},
                     }, 
@@ -83,10 +84,27 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public override GachaTemplateID ID => SephirahMeltdowns;
 
+        public override void EnterGame(RainWorldGame game)
+        {
+            if (game.GetStorySession.saveState.cycleNumber == 4)
+            {
+                ExpeditionGame.burdenTrackers.Add(new ExpeditionGame.PursuedTracker(game));
+                BuffUtils.Log("SephirahMeltdown", "Add bur-pursued at 4 cycles");
+            }
+
+            base.EnterGame(game);
+        }
+
         public override void SessionEnd(RainWorldGame game)
         {
+            if (game.GetStorySession.saveState.cycleNumber == 7)
+            {
+                BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("bur-pursued"));
+                BuffUtils.Log("SephirahMeltdown","Remove bur-pursued at 8 cycles");
+            }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
                 new CachaPacket() { negative = (0, 0, 0), positive = (1, 5, 1) } : new CachaPacket();
         }
+
     }
 }

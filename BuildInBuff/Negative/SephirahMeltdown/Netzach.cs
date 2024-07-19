@@ -35,6 +35,21 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             On.Player.AddFood += Player_AddFood;
             On.Player.AddQuarterFood += Player_AddQuarterFood;
+            On.SeedCob.HitByWeapon += SeedCob_HitByWeapon;
+        }
+
+        private static void SeedCob_HitByWeapon(On.SeedCob.orig_HitByWeapon orig, SeedCob self, Weapon weapon)
+        {
+            if (weapon == null || self.room == null || self.room.roomSettings == null)
+                return;
+            if (weapon is Spear && weapon.firstChunk.vel.magnitude < 20f)
+            {
+
+                if (UnityEngine.Random.Range(0.5f, 0.8f) < self.freezingCounter)
+                    self.spawnUtilityFoods();
+                return;
+            }
+            orig(self,weapon);
         }
 
         private static bool useOrig = false;
