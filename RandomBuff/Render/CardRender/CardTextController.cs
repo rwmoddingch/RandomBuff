@@ -98,6 +98,7 @@ namespace RandomBuff.Render.CardRender
                 textMesh.margin = new Vector4(0.1f, 0f, 0f, 0f);
                 textMesh.outlineWidth = 5f;
                 textMesh.outlineColor = Color.black;
+                textMesh.alpha = 0f;
                 _maxScrollVel = 1f;
             }
             else

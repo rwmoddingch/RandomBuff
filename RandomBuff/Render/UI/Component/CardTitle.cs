@@ -22,18 +22,20 @@ namespace RandomBuff.Render.UI.Component
         public Vector2 pos;
 
         public float spanShrink;
+        public float spanAdjust;
         bool readyForSwitch;
         int handlerCount;
         protected List<SingleCardHandler> currentActiveHandlers = new List<SingleCardHandler>();
 
         List<string> switchTitleRequest = new List<string>();
 
-        public CardTitle(FContainer container, float scale, Vector2 pos, float spanShrink = 1f, float anchorX = 0.5f, int flipCounter = 20, int flipDelay = 5)
+        public CardTitle(FContainer container, float scale, Vector2 pos, float spanShrink = 1f, float anchorX = 0.5f, int flipCounter = 20, int flipDelay = 5, float spanAdjust = 0f)
         {
             this.scale = scale;
             lastPos = this.pos = pos;
             this.container = container;
             this.spanShrink = spanShrink;
+            this.spanAdjust = spanAdjust;
             this.anchorX = anchorX;
             this.flipCounter = flipCounter;
             this.flipDelay = flipDelay;
@@ -127,9 +129,9 @@ namespace RandomBuff.Render.UI.Component
                 width = CardBasicAssets.RenderTextureSize.x * title.scale * 0.8f * (Helper.IsZhChar(text) ? 1f : 0.7f);
                 
                 if (index == 0)
-                    spanToLeft = 0;
+                    spanToLeft = 0 + title.spanAdjust;
                 else
-                    spanToLeft = title.spanShrink * title.scale * CardBasicAssets.RenderTextureSize.x * 0.05f * (Helper.IsZhChar(text) ? 1.5f : 1f);
+                    spanToLeft = title.spanAdjust + title.spanShrink * title.scale * CardBasicAssets.RenderTextureSize.x * 0.05f * (Helper.IsZhChar(text) ? 1.5f : 1f);
                 SwitchMode(Mode.FlipIn);
             }
 

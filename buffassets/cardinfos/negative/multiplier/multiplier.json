@@ -1,0 +1,17 @@
+{
+    "FaceName": "multiplier",
+    "ID" : "Multiplier",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "4E00FF",
+    
+    "Chinese" : {
+        "BuffName" : "倍增器",
+        "Description" : "每隔一段时间克隆区域内所有除了玩家外的生物直到达到一定的数量上限"
+    },
+    "English": {
+        "BuffName" : "Multiplier",
+        "Description" : "TODO"
+    }
+}

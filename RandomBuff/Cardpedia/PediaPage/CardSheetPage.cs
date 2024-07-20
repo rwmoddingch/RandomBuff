@@ -131,6 +131,8 @@ namespace RandomBuff.Cardpedia.PediaPage
             for (int i = 0; i < allIDs.Count; i++)
             {
                 var lst = sheetIDPages.Last();
+                if (!BuffPlayerData.Instance.IsCollected(allIDs[i]))
+                    continue;
                 lst.Add(allIDs[i]);
                 if (lst.Count >= CardpediaStatics.sheetNumPerPage)
                     sheetIDPages.Add(new List<BuffID>());

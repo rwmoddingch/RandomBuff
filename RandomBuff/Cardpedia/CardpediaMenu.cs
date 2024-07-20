@@ -12,6 +12,7 @@ using RandomBuff.Cardpedia.Elements;
 using RandomBuff.Core.Buff;
 using System.Runtime.CompilerServices;
 using RandomBuff.Cardpedia.PediaPage;
+using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Cardpedia
 {
@@ -139,11 +140,43 @@ namespace RandomBuff.Cardpedia
             pages[0].subObjects.Add(dualButton);
             pages[0].subObjects.Add(posiButton);
 
+            //计算卡牌获取进度
+            int totNegativeCount, collectedNegativeCount, totPositiveCount, collectedPositiveCount, totDuallityCount, collectedDuallityCount;
+            totNegativeCount = totPositiveCount = totDuallityCount = collectedNegativeCount = collectedPositiveCount = collectedDuallityCount = 0;
+            foreach(var idValue in BuffID.values.entries)
+            {
+                var id = new BuffID(idValue);
+
+                if (!BuffConfigManager.ContainsId(id))
+                    continue;
+
+                var staticData = BuffConfigManager.GetStaticData(id);
+                switch (staticData.BuffType)
+                {
+                    case BuffType.Positive:
+                        totPositiveCount++;
+                        if (BuffPlayerData.Instance.IsCollected(id))
+                            collectedPositiveCount++;
+                        break;
+                    case BuffType.Negative:
+                        totNegativeCount++;
+                        if (BuffPlayerData.Instance.IsCollected(id))
+                            collectedNegativeCount++;
+                        break;
+                    case BuffType.Duality:
+                        totDuallityCount++;
+                        if (BuffPlayerData.Instance.IsCollected(id))
+                            collectedDuallityCount++;
+                        break;
+                }
+            }
+
+
             //进度圆环
             progressRing_Negative = new FSprite("Futile_White");
             progressRing_Negative.scale = 5f;
             progressRing_Negative.color = new Color(0.9f, 0f, 0.10f);
-            progressRing_Negative.alpha = 0.5f;
+            progressRing_Negative.alpha = collectedNegativeCount / (float)totNegativeCount;
             progressRing_Negative.SetPosition(negaButton.fillSprite.GetPosition() - new Vector2(452f, 0));
             progressRing_Negative.shader = this.manager.rainWorld.Shaders["HoldButtonCircle"];
             var backRing_Nega = new FSprite("Futile_White");
@@ -156,7 +189,7 @@ namespace RandomBuff.Cardpedia
             progressRing_Positive = new FSprite("Futile_White");
             progressRing_Positive.scale = 5f;
             progressRing_Positive.color = new Color(0f, 1f, 0.85f);
-            progressRing_Positive.alpha = 0.5f;
+            progressRing_Positive.alpha = collectedPositiveCount / (float)totPositiveCount;
             progressRing_Positive.SetPosition(posiButton.fillSprite.GetPosition() - new Vector2(452f, 0));
             progressRing_Positive.shader = this.manager.rainWorld.Shaders["HoldButtonCircle"];
             var backRing_Posi = new FSprite("Futile_White");
@@ -169,7 +202,7 @@ namespace RandomBuff.Cardpedia
             progressRing_Duality = new FSprite("Futile_White");
             progressRing_Duality.scale = 5f;
             progressRing_Duality.color = new Color(0.85f, 0.85f, 0.85f);
-            progressRing_Duality.alpha = 0.5f;
+            progressRing_Duality.alpha = collectedDuallityCount / (float)totDuallityCount;
             progressRing_Duality.SetPosition(dualButton.fillSprite.GetPosition() - new Vector2(452f, 0));
             progressRing_Duality.shader = this.manager.rainWorld.Shaders["HoldButtonCircle"];
             var backRing_Dual = new FSprite("Futile_White");
@@ -183,15 +216,15 @@ namespace RandomBuff.Cardpedia
             pages[0].Container.AddChild(progressRing_Positive);
             pages[0].Container.AddChild(progressRing_Duality);
 
-            progress_Negative = new FLabel(Custom.GetFont(), (progressRing_Negative.alpha * 100f).ToString() + "%");
+            progress_Negative = new FLabel(Custom.GetFont(), (string.Format("{0:F1}%", progressRing_Negative.alpha * 100f)));
             progress_Negative.color = progressRing_Negative.color;
             progress_Negative.SetPosition(progressRing_Negative.GetPosition());
             progress_Negative.scale = 1.5f;
-            progress_Positive = new FLabel(Custom.GetFont(), (progressRing_Positive.alpha * 100f).ToString() + "%");
+            progress_Positive = new FLabel(Custom.GetFont(), (string.Format("{0:F1}%", progressRing_Positive.alpha * 100f)));
             progress_Positive.color = progressRing_Positive.color;
             progress_Positive.SetPosition(progressRing_Positive.GetPosition());
             progress_Positive.scale = 1.5f;
-            progress_Duality = new FLabel(Custom.GetFont(), (progressRing_Duality.alpha * 100f).ToString() + "%");
+            progress_Duality = new FLabel(Custom.GetFont(), (string.Format("{0:F1}%",progressRing_Duality.alpha * 100f)));
             progress_Duality.color = progressRing_Duality.color;
             progress_Duality.SetPosition(progressRing_Duality.GetPosition());
             progress_Duality.scale = 1.5f;

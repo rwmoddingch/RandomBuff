@@ -22,7 +22,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public CycleScoreCondition()
         {
-            BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+            //BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
         }
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)

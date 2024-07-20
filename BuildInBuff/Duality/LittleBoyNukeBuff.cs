@@ -20,7 +20,7 @@ namespace BuiltinBuffs.Duality
 {
     internal class LittleBoyNukeBuffEntry : IBuffEntry
     {
-        public static Color RadiatCol = Color.green * 0.6f + Color.blue * 0.4f;
+        public static Color RadiatCol = Color.green * 0.7f + Color.blue * 0.3f;
         public static BuffID littelBoyNukeID = new BuffID("LittleBoyNuke", true);
         public static SoundID nukeSound = new SoundID("LittleBoyNuke", true);
         public void OnEnable()
@@ -30,7 +30,7 @@ namespace BuiltinBuffs.Duality
 
         public static void LoadAssets()
         {
-            BuffSounds.LoadSound(nukeSound, littelBoyNukeID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("littleboynuke1A", 0.4f));
+            BuffSounds.LoadSound(nukeSound, littelBoyNukeID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("littleboynuke1A", 0.25f));
         }
 
         public static void HookOn()
@@ -44,7 +44,7 @@ namespace BuiltinBuffs.Duality
         {
             self.explodeColor = RadiatCol;
             orig.Invoke(self, hitChunk);
-            self.room.AddObject(new RadiationField(self.room, self.firstChunk.pos, self.thrownBy, 300f, 40 * 10, 3f));
+            self.room.AddObject(new RadiationField(self, self.room, self.firstChunk.pos, self.thrownBy, 300f, 40 * 10, 1f));
             if (self.room.game.cameras[0].room == self.room)
                 BuffPostEffectManager.AddEffect(new BurstRadialBlurEffect(0, 0.17f, 0.05f, 0.075f, (self.firstChunk.pos - self.room.game.cameras[0].pos) / Custom.rainWorld.screenSize));
         }
@@ -123,10 +123,12 @@ namespace BuiltinBuffs.Duality
 
             LightSource lightSource;
             ParticleEmitter emitter;
+            PhysicalObject owner;
 
-            public RadiationField(Room room, Vector2 pos, Creature killTag, float rad, int life, float dmgPerSec)
+            public RadiationField(PhysicalObject owner, Room room, Vector2 pos, Creature killTag, float rad, int life, float dmgPerSec)
             {
                 this.rad = rad;
+                this.owner = owner;
                 this.setLife = this.life = life;
                 dmgPerFrame = dmgPerSec / 40f;
                 this.room = room;
@@ -168,12 +170,16 @@ namespace BuiltinBuffs.Duality
                 lightSource.setAlpha = lifeFac + (UnityEngine.Random.value * 2f - 1f) * 0.1f * lifeFac;
                 lightSource.setRad = rad * lifeFac * 2f * exLightFac;
 
-
-                foreach (var creature in room.updateList.Where(u => u is Creature).Select(u => u as Creature))
+                var lst = room.updateList.Where(u => u is Creature).Select(u => u as Creature).ToList();
+                foreach (var creature in lst)
                 {
+                    if (creature is Player)
+                        continue;
+
                     if(Vector2.Distance(creature.DangerPos, pos) < rad)
                     {
-                        creature.Violence(null, null, creature.mainBodyChunk, null, Creature.DamageType.Explosion, dmgPerFrame, dmgPerFrame);
+                        creature.SetKillTag(killTag.abstractCreature);
+                        creature.Violence(owner.firstChunk, null, creature.mainBodyChunk, null, Creature.DamageType.Explosion, dmgPerFrame, dmgPerFrame);
                     }
                 }
 

@@ -24,7 +24,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static ConditionID CycleScore;
 
         public static ConditionID MeetSS_SL;
-
+        public static ConditionID Extermination;
 
         static ConditionID()
         {
@@ -36,6 +36,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             MeetSS_SL = new ConditionID("MeetSS_SL", true);
             Gourmand = new ConditionID("Gourmand", true);
             CycleScore = new ConditionID(nameof(CycleScore), true);
+            Extermination = new ConditionID("Extermination", true);
             //SaveSL = new ConditionID("SaveSL", true);
         }
 
@@ -144,7 +145,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Score Condition");
 
             BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition", true);//TODO
-
+            BuffRegister.RegisterCondition<ExterminationCondition>(ConditionID.Extermination, "Extermination Condition");
         }
 
         public enum ConditionState

@@ -179,7 +179,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                 mission = bindMission.MissionName;
                 showAnim = AnimMachine.GetTickAnimCmpnt(0, ConditionInstance.MaxShowAnimTimer + ConditionInstance.MaxStayDisplayTimer, autoStart: false).AutoPause().BindActions(OnAnimFinished: OnTickAnimFinish);
 
-                cardTitle = new CardTitle(conditionHUD.Container, 0.07f, hoverPos, 0.7f, 0f, 10, 2);
+                cardTitle = new CardTitle(conditionHUD.Container, 0.07f, hoverPos, 0.5f, 0f, 10, 2);
                 Show = true;
             }
 
