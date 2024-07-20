@@ -25,7 +25,6 @@ Notification_RewardTitle|已获得奖励:
 Notification_MissionReward|解锁使命
 Notification_MissionReward_Unique|解锁专属使命
 
-
 //BuffMenu:
 Survival|生存模式
 Normal|普通模式
@@ -74,6 +73,7 @@ DisplayName_Death|死亡数小于{0}下完成使命
 DisplayName_CycleScore|本次雨循环消灭生物获得{0}点分数
 DisplayName_SaveMoon|在{0}轮回内帮助仰望皓月
 DisplayName_Battery|将五块卵石的核心安装给仰望皓月
+DisplayName_MeltDownBinah|击败 Binah
 
 //BuffCondition_BuffTypes
 all types|所有类型

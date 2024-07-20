@@ -50,7 +50,7 @@ namespace BuiltinBuffs.Missions
 
         public void RegisterMission()
         {
-            BuffRegister.RegisterCondition<SaveMoonCondition>(SaveMoonCondition.SaveMoon,"Save Moon");
+            BuffRegister.RegisterCondition<SaveMoonCondition>(SaveMoonCondition.SaveMoon,"Save Moon",true);
 
             MissionRegister.RegisterMission(TreatmentMission.EmergnshyTreatment,new TreatmentMission());
         }
@@ -103,6 +103,8 @@ namespace BuiltinBuffs.Missions
         public override void SessionEnd(SaveState save)
         {
             currentCycle = save.cycleNumber + 1;
+            On.SLOracleWakeUpProcedure.NextPhase -= SLOracleWakeUpProcedure_NextPhase;
+
         }
     }
 }

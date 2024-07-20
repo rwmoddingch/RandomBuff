@@ -130,7 +130,6 @@ namespace RandomBuffUtils.ParticleSystem
                     iIniSpriteAndAddToContainer.ApplyInitSprites(this);
                 iIniSpriteAndAddToContainer.AddToContainer(this);
             }
-
             SetDirty(false);
         }
 

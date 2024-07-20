@@ -36,55 +36,44 @@ namespace BuiltinBuffs.Expeditions
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
                 {
-                    var all = ExpeditionProgression.burdenGroups["moreslugcats"];
-                    var id = new BuffID(all[Random.Range(0, all.Count)]);
-                    BuffPoolManager.Instance.CreateBuff(id);
-                    BuffHud.Instance.AppendNewCard(id);
+                    //var all = ExpeditionProgression.burdenGroups.First().Value;
+                    //var id = new BuffID(all[Random.Range(0, all.Count)]);
+                    //id.CreateNewBuff();
+                    if (BuffCustom.TryGetGame(out var game))
+                    {
+                        AbstractCreature ab = new AbstractCreature(game.world,
+                            StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedCentipede), null,
+                            game.Players[0].pos, game.GetNewID());
+
+                        Centipede c = new Centipede(ab, game.world);
+                        game.GetStorySession.playerSessionRecords[0].AddKill(c);
+                    }
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
                 {
-                    var all = ExpeditionProgression.burdenGroups.First().Value;
-
-                    var id = new BuffID(all[index++]);
-                    try
+                    BinahBuff.Instance.Data.Health -= 0.1f;
+                    if (BinahBuff.Instance.Data.Health < 0)
                     {
-                        BuffPoolManager.Instance.CreateBuff(id);
-                        BuffHud.Instance.AppendNewCard(id);
+                        BinahBuff.Instance.Data.Health = 0;
+                        BinahGlobalManager.Die();
                     }
-                    catch (Exception e)
-                    {
-                    }
-
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.S))
                 {
-                    var all = ExpeditionProgression.perkGroups.First().Value;
-                    if (index2 == all.Count) return;
-
-                    try
-                    {
-                        var id = new BuffID(all[index2++]);
-                        BuffPoolManager.Instance.CreateBuff(id);
-                        BuffHud.Instance.AppendNewCard(id);
-                    }
-                    catch (Exception e)
-                    {
-                    }
+                    BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Fairy, 0);
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-                    NetzachBuffData.Netzach.CreateNewBuff();
+                    BinahBuffData.Binah.CreateNewBuff();
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
                 {
-                    BuffPoolManager.Instance.CreateBuff(FakeCreatureBuffData.FakeCreatureID);
-                    BuffHud.Instance.AppendNewCard(FakeCreatureBuffData.FakeCreatureID);
-                    self.Players[0].realizedCreature.room.AddObject(new MeshTest(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos));
-
+                    BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Key,0);
+                    self.Players[0].realizedCreature.room.AddObject(new BinahShowEffect(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos,300,RainWorld.SaturatedGold));
                 }
             }
 
@@ -231,9 +220,17 @@ namespace BuiltinBuffs.Expeditions
                 typeof(ExpeditionHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+            On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
         }
 
-    
+        private static bool forceDisable = false;
+
+        private static void RainWorldGame_GoToDeathScreen(On.RainWorldGame.orig_GoToDeathScreen orig, RainWorldGame self)
+        {
+            forceDisable = true;
+            orig(self);
+            forceDisable = false;
+        }
 
         private static string ExpeditionProgression_UnlockSprite(On.Expedition.ExpeditionProgression.orig_UnlockSprite orig, string key, bool alwaysShow)
         {
@@ -257,7 +254,7 @@ namespace BuiltinBuffs.Expeditions
 
         private static bool RainWorldExpeditionModeGet(Func<RainWorld, bool> orig, RainWorld self)
         {
-            return orig(self) || (self.BuffMode() && activeUnlocks.Any());
+            return (orig(self) || (self.BuffMode() && activeUnlocks.Any())) && !forceDisable;
         }
 
         private static List<string> ExpeditionGameActiveUnlocksGet(Func<List<string>> orig)

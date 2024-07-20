@@ -245,8 +245,12 @@ namespace RandomBuff.Core.Entry
         private static void RemoveRuntimeHook(string idStr,string levelStr)
         {
             var id = new BuffID(idStr);
-            if(Enum.TryParse(levelStr,out HookLifeTimeLevel level))
+            if (Enum.TryParse(levelStr, out HookLifeTimeLevel level))
+            {
+                BuffPlugin.LogDebug($"RemoveRuntimeHook: {idStr},{levelStr}, Count:{RegistedRuntimeHooks[id][level].Count}");
                 RegistedRuntimeHooks[id][level].ForEach(i => i.Dispose());
+            }
+
             RegistedRuntimeHooks[id][level].Clear();
         }
 

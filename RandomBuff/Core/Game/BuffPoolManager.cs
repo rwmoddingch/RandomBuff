@@ -332,12 +332,13 @@ namespace RandomBuff.Core.Game
             BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
 
 
-            foreach (var buff in buffList)
+            for (int i = buffList.Count-1;i>=0;i--)
             {
+                var buff = buffList[i];
                 try
                 {
                     if (GetBuffData(buff.ID).NeedDeletion)
-                        UnstackBuff(buff.ID, false);
+                        UnstackBuff(buff.ID);
 
                 }
                 catch (Exception e)
@@ -350,7 +351,7 @@ namespace RandomBuff.Core.Game
 
             BuffFile.Instance.SaveFile();
 
-            if (GameSetting.Win || Input.GetKey(KeyCode.P))
+            if (GameSetting.Win)
             {
                 CreateWinGamePackage();
                 

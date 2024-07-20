@@ -107,7 +107,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             }
             for (int i = 0; i < effect.verticeColors.Length; i++)
             {
-                effect.verticeColors[i].r = 0.042f;
+                effect.verticeColors[i].r = 0.064f;
                 effect.verticeColors[i].g = 0.5f;
                 effect.verticeColors[i].b = yClamp;
                 effect.verticeColors[i].a = inst * instFac * 0.01f * (IsEnable ? 1 : 0);
