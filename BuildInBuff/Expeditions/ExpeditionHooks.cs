@@ -52,7 +52,12 @@ namespace BuiltinBuffs.Expeditions
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
                 {
-                    BinahBuff.Instance.Data.Health = 0.005f;
+                    BinahBuff.Instance.Data.Health -= 0.1f;
+                    if (BinahBuff.Instance.Data.Health < 0)
+                    {
+                        BinahBuff.Instance.Data.Health = 0;
+                        BinahGlobalManager.Die();
+                    }
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.S))

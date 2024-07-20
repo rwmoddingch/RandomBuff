@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Expedition;
 using Newtonsoft.Json;
+using RandomBuff.Core.Buff;
 using RandomBuffUtils;
 using UnityEngine;
 
@@ -20,9 +21,16 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         private float score;
 
-        public CycleScoreCondition()
+        public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+        }
+
+        public override void SessionEnd(SaveState save)
+        {
+            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
+            base.SessionEnd(save);
         }
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
@@ -33,11 +41,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 ChallengeTools.ParseCreatureSpawns();
             }
 
-            if (ChallengeTools.creatureSpawns[ExpeditionData.slugcatPlayer.value]
-                    .FirstOrDefault(i => i.creature == creature.Template.type)
-                is { } spawnData)
+            if (ChallengeTools.creatureScores.TryGetValue(creature.Template.type.value,out var p))
             {
-                score += spawnData.points;
+                score += p;
                 onLabelRefresh?.Invoke(this);
             }
         }

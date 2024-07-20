@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -56,7 +57,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public override void CycleEnd()
         {
             base.CycleEnd();
-            if (CycleUse == MaxCycleCount && !BuffConfigManager.IsItemLocked(QuestUnlockedType.Card, ID.value))
+            if (CycleUse == MaxCycleCount && !BuffConfigManager.IsItemLocked(QuestUnlockedType.Card, ID.value) &&
+                BuffPoolManager.Instance.GameSetting.MissionId != SephirahMeltdownsMission.SephirahMeltdowns.value)
                 Reward();
             
             CycleUse = Mathf.Min(CycleUse, MaxCycleCount);

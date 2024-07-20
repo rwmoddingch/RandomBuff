@@ -25,9 +25,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         [JsonProperty] 
         private int currentKill = 0;
 
-        public MeltdownHuntCondition()
-        {
-        }
+      
 
         public override void EnterGame(RainWorldGame game)
         {
@@ -46,6 +44,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             if (creature.Template.type == type || creature.Template.TopAncestor().type == type)
             {
                 currentKill++;
+                if (currentKill == killCount)
+                    Finished = true;
                 onLabelRefresh?.Invoke(this);
             }
         }
@@ -55,8 +55,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         public override int Exp => 400;
         public override string InRangeDisplayName()
         {
-            if (currentKill == killCount)
-                Finished = true;
+
             if(ChallengeTools.creatureNames == null)
                 ChallengeTools.CreatureName(ref ChallengeTools.creatureNames);
             return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"), ChallengeTools.creatureNames[type.index]);

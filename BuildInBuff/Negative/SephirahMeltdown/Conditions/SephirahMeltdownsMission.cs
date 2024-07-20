@@ -103,7 +103,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 BuffUtils.Log("SephirahMeltdown","Remove bur-pursued at 8 cycles");
             }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
-                new CachaPacket() { negative = (0, 0, 0), positive = (1, 5, 1) } : new CachaPacket();
+                new CachaPacket() { negative = (0, 0, 0), positive = (2, 6, 1) } : new CachaPacket();
         }
 
     }

@@ -49,13 +49,15 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public override BuffID ID => BinahBuffData.Binah;
         public bool needSpawnChain = true;
 
+        public const int MaxTime = 200;
+
         public BinahBuff()
         {
             MyTimer = new DownCountBuffTimer(((timer, worldGame) =>
             {
 
                 needSpawnChain = true;
-            }), 200);
+            }), MaxTime);
 
             BinahGlobalManager.Init();
             if (BuffCustom.TryGetGame(out var game))
@@ -124,8 +126,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public float Health
         {
-            get => Mathf.InverseLerp(0.25f, 0.92f, sprites[1].color.r);
-            set => sprites[1].color = new Color(Mathf.Lerp(0.25f, 0.92f, value), 1, 1);
+            get => Mathf.InverseLerp(0.17f, 0.72f, sprites[1].color.r);
+            set => sprites[1].color = new Color(Mathf.Lerp(0.17f, 0.72f, value), 1, 1);
         }
 
         public void CleanSprites()
@@ -286,6 +288,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             On.TempleGuardAI.ThrowOutScore += TempleGuardAI_ThrowOutScore;
             On.TempleGuardAI.Update += TempleGuardAI_Update;
             On.TempleGuard.Die += TempleGuard_Die;
+            On.TempleGuard.Update += TempleGuard_Update;
 
             On.Creature.Violence += Creature_Violence;
 
@@ -301,7 +304,15 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             currentDarkness = 0;
         }
 
-    
+        private static void TempleGuard_Update(On.TempleGuard.orig_Update orig, TempleGuard self, bool eu)
+        {
+            if (Modules.TryGetValue(self, out var module))
+            {
+                self.stun = 0;
+                self.blind = 0;
+            }
+            orig(self, eu);
+        }
 
         private static void RegionGate_Update(On.RegionGate.orig_Update orig, RegionGate self, bool eu)
         {
@@ -437,7 +448,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             if (slatedForDeletetion)
                 return;
-            if (room.abstractRoom != player.abstractCreature.Room)
+            if (room.abstractRoom != player.abstractCreature.Room || BinahGlobalManager.needDelete)
             {
                 Destroy();
                 return;
@@ -463,6 +474,26 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             critRef = new WeakReference<TempleGuard>(crit);
             crit.CollideWithTerrain = false;
             crit.CollideWithObjects = false;
+
+            BinahGlobalManager.requestFairyAttack += BinahGlobalManager_OnRequestFairyAttack;
+        }
+
+        private void BinahGlobalManager_OnRequestFairyAttack()
+        {
+            if (!critRef.TryGetTarget(out var guard) || guard.room.PlayersInRoom.Count == 0)
+                return;
+            
+            var forceDir = Vector2.zero;
+            var centerPos = Vector2.Lerp(guard.bodyChunks[1].pos, guard.bodyChunks[2].pos, 0.5f);
+            foreach (var p in guard.room.PlayersInRoom.Where(i => !i.dead))
+            {
+                guard.room.AddObject(new BinahFairy(guard.room, centerPos,
+                    Custom.DirVec(centerPos, p.DangerPos)));
+                forceDir += Custom.DirVec(p.DangerPos, centerPos);
+            }
+
+            foreach (var chunk in guard.bodyChunks)
+                chunk.vel += forceDir.normalized * 5F;
         }
 
         private bool IsAttacking => AttackType != BinahAttackType.None;
@@ -519,6 +550,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                                     ai.guard.room.AddObject(new BinahKey(ai.guard.room,Vector2.Lerp(ai.guard.bodyChunks[1].pos, ai.guard.bodyChunks[2].pos, 0.5f), 
                                         focusedPlayer));
                                     break;
+                                case BinahAttackType.Strike:
+                                    foreach(var player in ai.guard.room.PlayersInRoom)
+                                        ai.guard.room.AddObject(new BinahStrike(ai.guard.room, player.DangerPos));
+                                    AttackType = BinahAttackType.None;
+                                    break;
                                 default:
                                     break;
                             }
@@ -558,17 +594,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
                         if (attackCounter / 80 == 3)
                         {
-                            var forceDir = Vector2.zero;
-                            var centerPos = Vector2.Lerp(ai.guard.bodyChunks[1].pos, ai.guard.bodyChunks[2].pos, 0.5f);
-                            foreach (var p in ai.guard.room.PlayersInRoom.Where(i => !i.dead))
-                            {
-                                ai.guard.room.AddObject(new BinahFairy(ai.guard.room, centerPos,
-                                    Custom.DirVec(centerPos, p.DangerPos)));
-                                forceDir += Custom.DirVec(p.DangerPos, centerPos);
-                            }
-                            
-                            foreach (var chunk in ai.guard.bodyChunks)
-                                chunk.vel += forceDir.normalized * 5F;
+                            BinahGlobalManager.requestFairyAttack?.Invoke();
                             AttackType = BinahAttackType.None;
                         }
                         else if (attackCounter % 80 == 1)
@@ -620,6 +646,18 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     internal static partial class BinahGlobalManager
     {
         public static event Action OnBinahDie;
+        public static event Action OnBinahNewChain;
+
+
+        public static Action requestFairyAttack;
+
+        public static bool NeedFinalAttack
+        {
+            get => needFinalAttack && ChainRoomIndices.Count > 0 && !needDelete;
+            set => needFinalAttack = value;
+        }
+
+        private static bool needFinalAttack;
 
         private static readonly List<FSprite> ChainSprites = new List<FSprite>();
 
@@ -668,7 +706,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     {
         public static bool needDelete = false;
 
-
         public static readonly List<int> ChainRoomIndices = new List<int>();
 
         public static readonly Dictionary<int, CreatureTemplate.Type> ChainType = new Dictionary<int, CreatureTemplate.Type>();
@@ -685,6 +722,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static bool SpawnNewChain(RainWorldGame game)
         {
+            NeedFinalAttack = BinahBuff.Instance.Data.Health < 0.25f;
             localDamage = 0;
             if (game.AlivePlayers.Count == 0 || game.AlivePlayers[0].Room?.connections == null) return false;
             ChainRoomIndices.Clear();
@@ -701,8 +739,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     if(room?.connections == null) continue;
                     foreach (var node in room.connections.Where(i => !allRooms.Contains(i)))
                     {
-                        allRooms.Add(node);
-                        toUseRooms.Add(game.world.GetAbstractRoom(node));
+                        if (game.world.GetAbstractRoom(node) != null && !game.world.GetAbstractRoom(node).shelter && !game.world.GetAbstractRoom(node).gate)
+                        {
+                            allRooms.Add(node);
+                            toUseRooms.Add(game.world.GetAbstractRoom(node));
+                        }
                     }
                 }
             }
@@ -721,6 +762,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     allRooms.RemoveAt(r);
             }
             CheckChainCreateOrDelete();
+            OnBinahNewChain?.Invoke();
             BuffUtils.Log(BinahBuffData.Binah, $"new chains count:{maxCount}");
             return true;
         }
@@ -783,7 +825,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         None,
         Key,
         Fairy,
-
+        Strike
     }
 
     //AI及血量相关
@@ -821,10 +863,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             DisplayPos.Clear();
             ChainType.Clear();
             cd.Clear();
+            NeedFinalAttack = false;
             maxCount = 1;
             updateCounter = 0;
             foreach(var item in MaxCd)
-                cd.Add(item.Key,Random.Range(MaxCd[item.Key].min, MaxCd[item.Key].max)*40);
+                cd.Add(item.Key,Random.Range(0, MaxCd[item.Key].max)*40);
             localDamage = 0;
         }
 
@@ -852,22 +895,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                         abCrit?.abstractAI?.SetDestination((game.AlivePlayers.FirstOrDefault() ?? game.Players.First())
                             .pos);
             }
-            else if (updateCounter % 160 == 80)
-            {
-                foreach (var ply in game.AlivePlayers.Select(i => i.realizedCreature))
-                {
-                    if(ply?.room == null) continue;
-                    foreach (var crit in ply.room.abstractRoom.creatures.Select(i => i.realizedCreature))
-                    {
-                        if (crit?.abstractCreature?.abstractAI?.RealAI?.tracker is Tracker tracker &&
-                            crit.Template.TopAncestor().type != CreatureTemplate.Type.Scavenger)
-                        {
-                            tracker.SeeCreature(ply.abstractCreature);
-                        }
-                    }
-                }
-
-            }
         }
 
 
@@ -875,6 +902,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static bool TryUseAttack(BinahAttackType attackType)
         {
+            if (attackType == BinahAttackType.Strike && BinahBuff.Instance.Data.Health > 0.75f)
+                return false;
+            if (attackType == BinahAttackType.Key && BinahBuff.Instance.Data.Health < 0.25f)
+                return false;
             var re = cd[attackType].value <= 0;
             if(re)
                 cd[attackType].value = int.MaxValue; //等待攻击结束
@@ -889,7 +920,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly Dictionary<BinahAttackType,(int min,int max)> MaxCd = new Dictionary<BinahAttackType, (int min, int max)>()
         {
             { BinahAttackType.Key ,(30,45)},
-            { BinahAttackType.Fairy,(20,30)}
+            { BinahAttackType.Fairy,(20,30)},
+            { BinahAttackType.Strike,(20,30)}
         };
         private static Dictionary<BinahAttackType,RefInt> cd = new Dictionary<BinahAttackType, RefInt>();
         
@@ -1090,6 +1122,152 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         }
     }
 
+    internal class BinahFinalAttack : CosmeticSprite
+    {
+        private TempleGuard guard;
+
+        private float time;
+        private float lastTime;
+        private int explodeCounter = -1;
+        private float offset;
+        private float vel;
+
+        private int dieCounter = -1;
+
+        private readonly ParticleEmitter[] emitters = new ParticleEmitter[8];
+
+
+        public BinahFinalAttack(Room room, TempleGuard guard)
+        {
+            this.room = room;
+            this.guard = guard;
+            pos = lastPos = Vector2.Lerp(guard.bodyChunks[1].pos, guard.bodyChunks[2].pos, 0.5f);
+            lastTime = time = (1-BinahBuff.Instance.MyTimer.frames / (BinahBuff.MaxTime * 40f)) * 9;
+            for(int i =1;i<=(int)time;i++)
+                emitters[(int)time-1] = CreatureEmitter(360 / 8f * (i-1) - 90, true);
+
+        }
+
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            base.InitiateSprites(sLeaser, rCam);
+            sLeaser.sprites = new FSprite[8];
+            for (int i = 0; i < 8; i++)
+                sLeaser.sprites[i] = new FSprite("Binah.Key")
+                {
+                    anchorX = -0.2f, width = BinahKey.Width, height = BinahKey.Width / 25 * 6, isVisible = false,
+                    rotation = 360 / 8f * i - 90
+                };
+            AddToContainer(sLeaser, rCam, rCam.ReturnFContainer("HUD"));
+
+        }
+
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            for (int i = 0; i < 8; i++)
+            {
+                sLeaser.sprites[i].SetPosition(Custom.DegToVec(360 / 8f * i) *offset + pos - camPos);
+                sLeaser.sprites[i].isVisible = time > (i+1) || explodeCounter >= 0;
+                sLeaser.sprites[i].alpha = Mathf.Pow(Mathf.Clamp01((Mathf.Lerp(lastTime, time, timeStacker) - (i+1))*5), 0.4f) *
+                                           Custom.LerpMap(dieCounter + timeStacker, 0, 40, 1, 0, 2f);
+            }
+        }
+
+        public void Die()
+        {
+            dieCounter = 0;
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            foreach(var emitter in emitters)
+                emitter?.Die();
+        }
+
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            this.pos = Vector2.Lerp(guard.bodyChunks[1].pos, guard.bodyChunks[2].pos, 0.5f);
+            if (explodeCounter >= 0)
+            {
+                vel = Mathf.Lerp(vel, 40, 0.1f);
+                offset += vel;
+                for (int i = 0; i < 8; i++)
+                {
+                    var center = pos + Custom.DegToVec(360 / 8f * i + 90) * (BinahKey.Width - BinahKey.Width / 25 * 3 + offset);
+                    var rad = BinahKey.Width / 25 * 3;
+                    foreach (var crit in room.abstractRoom.creatures.Select(c => c.realizedCreature))
+                    {
+                        if (crit == null || crit.dead)
+                            continue;
+                        if (crit.bodyChunks.Any(c => Custom.DistLess(c.pos, center, rad)))
+                        {
+                            room.AddObject(new CreatureSpasmer(crit,true,200));
+                            crit.Stun(300);
+                            crit.Die();
+                        }
+                    }
+                }
+
+                if (explodeCounter == 120)
+                    Destroy();
+                return;
+            }
+
+            if (dieCounter >= 0)
+            {
+                dieCounter++;
+                if(dieCounter == 40)
+                    Destroy();
+                return;
+            }
+            lastTime = time;
+            time = (1 - BinahBuff.Instance.MyTimer.frames / (BinahBuff.MaxTime * 40f)) * 9;
+
+            if (time < lastTime || (int)time - 1 == emitters.Length)//时间
+            {
+                explodeCounter = 0;
+            }
+            else if ((int)time != 0 && emitters[(int)time-1] == null)
+                emitters[(int)time-1] = CreatureEmitter(360 / 8f * ((int)time-1) - 90, false);
+        }
+
+        private ParticleEmitter CreatureEmitter(float deg, bool needBurst)
+        {
+            var emitter = new ParticleEmitter(room);
+            emitter.ApplyEmitterModule(new BindPositionModule(emitter, (emit) =>
+            {
+                emit.pos = this.pos;
+            }));
+            float texSize = Futile.atlasManager.GetElementWithName("Binah.Smoke").sourceSize.x;
+
+            if (needBurst)
+                emitter.ApplyParticleModule(new BurstSpawnerModule(emitter, 30));
+            emitter.ApplyParticleModule(new BindPositionModule(emitter, (emit) =>
+            {
+                emit.pos = pos + offset * Custom.DegToVec(deg+90);
+                emit.lastPos = lastPos;
+            }));
+            emitter.ApplyParticleModule(new RateSpawnerModule(emitter, 120, 20));
+            emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0));
+            emitter.ApplyParticleModule(new RectPositionModule(emitter, new Rect(BinahKey.Width * 0.2f, -(BinahKey.Width / 25 * 6) / 3, 
+                BinahKey.Width * 1.15f, (BinahKey.Width / 25 * 6) * 2 / 3),deg));
+            emitter.ApplyParticleModule(new SetRandomScale(emitter, 70 / texSize, 120 / texSize));
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 2 * 40, 4 * 40));
+            emitter.ApplyParticleModule(new SetRandomRotation(emitter, 0, 360));
+            emitter.ApplyParticleModule(new SetConstVelociy(emitter, Vector2.zero));
+            emitter.ApplyParticleModule(new AlphaOverLife(emitter, ((particle, time) => Mathf.InverseLerp(0, 0.1f, time))));
+            emitter.ApplyParticleModule(new ColorOverLife(emitter, ((particle, time) => BinahKey.KeySmokeColor * Mathf.Lerp(0.5f, 0, time))));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Binah.Smoke", $"{StormIsApproachingEntry.StormIsApproaching}.AdditiveDefault")));
+            emitter.pos = emitter.lastPos = pos;
+            ParticleSystem.ApplyEmitterAndInit(emitter);
+            return emitter;
+        }
+    }
+
     internal class BinahKey : CosmeticSprite
     {
         internal class BinahRing : CosmeticSprite
@@ -1167,7 +1345,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private const int MaxCount = ReadyCount + 160;
 
-        private static readonly Color KeySmokeColor = Custom.hexToColor("D892FF");
+        public static readonly Color KeySmokeColor = Custom.hexToColor("D892FF");
 
         private readonly ParticleEmitter emitter;
         private Player focusPlayer;
@@ -1193,7 +1371,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             emitter.ApplyParticleModule(new SetRandomRotation(emitter, 0, 360));
             emitter.ApplyParticleModule(new SetConstVelociy(emitter, Vector2.zero));
             emitter.ApplyParticleModule(new AlphaOverLife(emitter,((particle, time) => Mathf.InverseLerp(0, 0.1f, time))));
-            emitter.ApplyParticleModule(new ColorOverLife(emitter,((particle, time) => KeySmokeColor * Mathf.Lerp(1.2f,0,time) )));
+            emitter.ApplyParticleModule(new ColorOverLife(emitter,((particle, time) => KeySmokeColor * Mathf.Lerp(1f,0,time) )));
             emitter.ApplyParticleModule(new AddElement(emitter,new Particle.SpriteInitParam("Binah.Smoke",$"{StormIsApproachingEntry.StormIsApproaching}.AdditiveDefault")));
             emitter.pos = emitter.lastPos = pos;
             ParticleSystem.ApplyEmitterAndInit(emitter);
@@ -1395,11 +1573,19 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private int totTime;
         private bool isInit;
 
+        private BinahFinalAttack finalAttack;
+
         public BinahRoom(Room room, bool needChain)
         {
             this.room = room;
             this.needChain = needChain;
             index = BinahGlobalManager.DisplayChains.Count(i => i.room == room);
+            BinahGlobalManager.OnBinahNewChain += BinahGlobalManager_OnBinahNewChain;
+        }
+
+        private void BinahGlobalManager_OnBinahNewChain()
+        {
+            finalAttack = null;
         }
 
         private int initState = 0;
@@ -1557,9 +1743,20 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public void Die()
         {
-            room.AddObject(new GhostEffect(guard.graphicsModule, 40, 1, 0));
+            if (guard != null)
+            {
+                room.AddObject(new GhostEffect(guard.graphicsModule, 40, 1, 0));
+                guard.Destroy();
+                guard = null;
+            }
+
+            if (finalAttack != null)
+            {
+                finalAttack.Die();
+                finalAttack = null;
+            }
+
             Destroy();
-            guard.Destroy();
         }
 
 
@@ -1575,7 +1772,18 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             }
 
             if (BinahGlobalManager.needDelete)
+            {
                 Die();
+            }
+
+            if (BinahGlobalManager.NeedFinalAttack && finalAttack == null && canSpawn)
+                room.AddObject(finalAttack = new BinahFinalAttack(room, guard));
+            else if (!BinahGlobalManager.NeedFinalAttack && finalAttack != null)
+            {
+                finalAttack.Die();
+                finalAttack = null;
+            }
+
 
             totTime++;
             chainsActiveTime += 1f;
@@ -1637,4 +1845,68 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 module.OnDestroy();
         }
     }
+
+    internal class BinahStrike : CosmeticSprite
+    {
+        private const int WaitCounter = 80;
+        private const int OutCounter = 6;
+
+        private int counter = 0;
+        public BinahStrike(Room room, Vector2 pos)
+        {
+            this.room = room;
+            this.lastPos = this.pos = pos - new Vector2(0, 15);
+        }
+
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            base.InitiateSprites(sLeaser, rCam);
+    
+            sLeaser.sprites = new FSprite[2];
+            sLeaser.sprites[0] = new FSprite("Binah.StrikeFog"){height = 25,width = 150};
+            sLeaser.sprites[1] = new FSprite("Binah.Strike") { height = 0, width = 150, anchorY = 0 };
+            AddToContainer(sLeaser,rCam,rCam.ReturnFContainer("Water"));
+        }
+
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            if (slatedForDeletetion)
+                return;
+            var alpha = Custom.LerpMap(counter + timeStacker, WaitCounter, WaitCounter + OutCounter, 0, 1,0.33f) *
+                        Custom.LerpMap(counter + timeStacker, WaitCounter + OutCounter, WaitCounter + OutCounter * 2, 1,
+                            0,2f);
+            sLeaser.sprites[0].SetPosition(pos - camPos + Vector2.down*5* alpha);
+            sLeaser.sprites[1].SetPosition(pos - camPos);
+            sLeaser.sprites[1].height = alpha * 200;
+
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            counter++;
+            if (Math.Abs(counter - (WaitCounter + OutCounter * 0.5f)) < 2)
+            {
+                foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
+                {
+                    if(crit== null || crit.dead) continue;
+
+                    if (crit.bodyChunks.Any(i => Custom.DistLess(i.pos, pos + new Vector2(0, 50), 80)))
+                    {
+                        crit.Violence(crit.mainBodyChunk, null, crit.mainBodyChunk, null, Creature.DamageType.Blunt, 2,
+                            80);
+                    }
+                }
+            }
+
+            if (counter == WaitCounter + 2 * OutCounter)
+            {
+                Destroy();
+            }
+        }
+    }
+
+
+   
 }
