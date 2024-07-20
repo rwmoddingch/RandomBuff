@@ -53,7 +53,7 @@ namespace BuiltinBuffs.Expeditions
 
         public static bool IsUseless(string str)
         {
-            return useLess.Contains(str);
+            return UseLess.Contains(str);
         }
 
         public static bool OnlyEnglish(string str)
@@ -62,7 +62,7 @@ namespace BuiltinBuffs.Expeditions
                 (i  >= 'a' && i <= 'z') || (i >= '0' && i <= '9') || i == '.' || i == ',');
         }
 
-        private static HashSet<string> useLess = new HashSet<string>()
+        private static readonly HashSet<string> UseLess = new HashSet<string>()
         {
             "unl-lantern",
             "unl-bomb",

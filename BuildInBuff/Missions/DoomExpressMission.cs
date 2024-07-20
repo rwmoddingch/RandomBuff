@@ -44,16 +44,22 @@ namespace BuiltinBuffs.Missions
         public void RegisterMission()
         {
             MissionRegister.RegisterMission(DoomExpress,new DoomExpressMission());
-            BuffRegister.RegisterCondition<BatteryCondition>(BatteryCondition.Battery,"Battery");
+            BuffRegister.RegisterCondition<BatteryCondition>(BatteryCondition.Battery,"Battery", true);
         }
     }
 
     public class BatteryCondition : Condition
     {
-
-        public BatteryCondition()
+        public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             On.RainWorldGame.ForceSaveNewDenLocation += RainWorldGame_ForceSaveNewDenLocation;
+        }
+
+        public override void SessionEnd(SaveState save)
+        {
+            base.SessionEnd(save);
+            On.RainWorldGame.ForceSaveNewDenLocation -= RainWorldGame_ForceSaveNewDenLocation; ;
         }
 
         private void RainWorldGame_ForceSaveNewDenLocation(On.RainWorldGame.orig_ForceSaveNewDenLocation orig, RainWorldGame game, string roomName, bool saveWorldStates)

@@ -13,8 +13,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 {
     internal class AchievementCondition : Condition
     {
-        public AchievementCondition()
+        public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             BuffEvent.OnAchievementCompleted += BuffEvent_OnAchievementCompleted;
         }
 

@@ -7,6 +7,7 @@ using RandomBuff.Core.Entry;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using RandomBuff;
+using BuiltinBuffs.Positive;
 
 namespace TemplateGains
 {
@@ -31,7 +32,7 @@ namespace TemplateGains
         private static void Weapon_Update(On.Weapon.orig_Update orig, Weapon self, bool eu)
         {
             orig.Invoke(self, eu);
-            if (self.myTurnWeapon().canWarp&& BuffCore.GetBuff(new BuffID ("BounceSpear",false))!=null?self.mode==Weapon.Mode.Free:self.mode == Weapon.Mode.StuckInCreature)
+            if (self.myTurnWeapon().canWarp&& BounceSpearBuff.Instance != null ? self.mode==Weapon.Mode.Free : self.mode == Weapon.Mode.StuckInCreature)
             {
                 WeaponWarp(self,self.myTurnWeapon().player);
             }
@@ -40,26 +41,29 @@ namespace TemplateGains
         public static void WeaponWarp(Weapon weapon,Player slug)
         {
             weapon.myTurnWeapon().canWarp = false;
-
-            weapon.firstChunk.pos = slug.firstChunk.pos;
-            if (slug.FreeHand() != -1)
-            { 
-                //StillMyTurnBuff.Instance.TriggerSelf(true);
-                slug.SlugcatGrab(weapon, slug.FreeHand());
-                weapon.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, weapon.firstChunk);
+            if (slug?.firstChunk != null && slug.room != null && slug.Consious && weapon.firstChunk != null)
+            {
+                weapon.firstChunk.pos = slug.firstChunk.pos;
+                if (slug.FreeHand() != -1)
+                {
+                    slug.SlugcatGrab(weapon, slug.FreeHand());
+                    weapon.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, weapon.firstChunk);
+                }
             }
         }
         private static bool Rock_HitSomething(On.Rock.orig_HitSomething orig, Rock self, SharedPhysics.CollisionResult result, bool eu)
         {
             bool hit = orig.Invoke(self, result, eu);
-            if (hit && self.thrownBy is Player) self.myTurnWeapon().CanWarp(self.thrownBy as  Player);
+            if (hit && self.thrownBy is Player player)
+                self.myTurnWeapon().CanWarp(player);
 
             return hit;
         }
         private static bool MyTurn_HitSomething(On.Spear.orig_HitSomething orig, Spear self, SharedPhysics.CollisionResult result, bool eu)
         {
             bool hit = orig.Invoke(self, result, eu);
-            if (hit && self.thrownBy is Player) self.myTurnWeapon().CanWarp(self.thrownBy as Player);
+            if (hit && self.thrownBy is Player player) 
+                self.myTurnWeapon().CanWarp(player);
 
             return hit;
         }

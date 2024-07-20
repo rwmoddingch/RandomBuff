@@ -27,7 +27,18 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public MeltdownHuntCondition()
         {
+        }
+
+        public override void EnterGame(RainWorldGame game)
+        {
+            base.EnterGame(game);
             BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+        }
+
+        public override void SessionEnd(SaveState save)
+        {
+            base.SessionEnd(save);
+            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
         }
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)

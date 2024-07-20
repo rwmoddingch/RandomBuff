@@ -36,10 +36,18 @@ namespace BuiltinBuffs.Expeditions
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
                 {
-                    var all = ExpeditionProgression.burdenGroups["moreslugcats"];
-                    var id = new BuffID(all[Random.Range(0, all.Count)]);
-                    BuffPoolManager.Instance.CreateBuff(id);
-                    BuffHud.Instance.AppendNewCard(id);
+                    //var all = ExpeditionProgression.burdenGroups.First().Value;
+                    //var id = new BuffID(all[Random.Range(0, all.Count)]);
+                    //id.CreateNewBuff();
+                    if (BuffCustom.TryGetGame(out var game))
+                    {
+                        AbstractCreature ab = new AbstractCreature(game.world,
+                            StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedCentipede), null,
+                            game.Players[0].pos, game.GetNewID());
+
+                        Centipede c = new Centipede(ab, game.world);
+                        game.GetStorySession.playerSessionRecords[0].AddKill(c);
+                    }
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
@@ -207,9 +215,17 @@ namespace BuiltinBuffs.Expeditions
                 typeof(ExpeditionHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+            On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
         }
 
-    
+        private static bool forceDisable = false;
+
+        private static void RainWorldGame_GoToDeathScreen(On.RainWorldGame.orig_GoToDeathScreen orig, RainWorldGame self)
+        {
+            forceDisable = true;
+            orig(self);
+            forceDisable = false;
+        }
 
         private static string ExpeditionProgression_UnlockSprite(On.Expedition.ExpeditionProgression.orig_UnlockSprite orig, string key, bool alwaysShow)
         {
@@ -233,7 +249,7 @@ namespace BuiltinBuffs.Expeditions
 
         private static bool RainWorldExpeditionModeGet(Func<RainWorld, bool> orig, RainWorld self)
         {
-            return orig(self) || (self.BuffMode() && activeUnlocks.Any());
+            return (orig(self) || (self.BuffMode() && activeUnlocks.Any())) && !forceDisable;
         }
 
         private static List<string> ExpeditionGameActiveUnlocksGet(Func<List<string>> orig)

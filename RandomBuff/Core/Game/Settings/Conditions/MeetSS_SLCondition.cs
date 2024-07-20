@@ -23,13 +23,16 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         [JsonProperty]
         public bool meetSL;
 
-        public MeetSS_SLCondition()
+
+        public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             On.Room.ReadyForAI += Room_ReadyForAI;
         }
 
-        ~MeetSS_SLCondition()
+        public override void SessionEnd(SaveState save)
         {
+            base.SessionEnd(save);
             On.Room.ReadyForAI -= Room_ReadyForAI;
         }
 

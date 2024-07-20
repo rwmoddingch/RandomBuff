@@ -47,7 +47,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     internal class BinahBuff : Buff<BinahBuff,BinahBuffData>, BuffHudPart.IOwnBuffHudPart
     {
         public override BuffID ID => BinahBuffData.Binah;
-        private bool needSpawnChain = true;
+        public bool needSpawnChain = true;
 
         public BinahBuff()
         {
@@ -55,7 +55,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             {
 
                 needSpawnChain = true;
-            }), 150);
+            }), 200);
 
             BinahGlobalManager.Init();
             if (BuffCustom.TryGetGame(out var game))
@@ -685,6 +685,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static bool SpawnNewChain(RainWorldGame game)
         {
+            localDamage = 0;
             if (game.AlivePlayers.Count == 0 || game.AlivePlayers[0].Room?.connections == null) return false;
             ChainRoomIndices.Clear();
             BuffPostEffectManager.AddEffect(new ShockEffect(0,1.3f,0.5f,0.7f,0,10,0.2f,Custom.RNV()*1.3F));
@@ -824,9 +825,13 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             updateCounter = 0;
             foreach(var item in MaxCd)
                 cd.Add(item.Key,Random.Range(MaxCd[item.Key].min, MaxCd[item.Key].max)*40);
+            localDamage = 0;
         }
 
         private static int updateCounter;
+
+        private static float localDamage = 0;
+
         public static void GlobalUpdate(RainWorldGame game)
         {
             foreach (var item in cd)
@@ -849,12 +854,17 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             }
             else if (updateCounter % 160 == 80)
             {
-                foreach (var room in game.world.activeRooms)
-                foreach (var creature in room.abstractRoom.creatures.Select(i => i.realizedCreature))
+                foreach (var ply in game.AlivePlayers.Select(i => i.realizedCreature))
                 {
-                    if (creature?.abstractCreature?.abstractAI?.RealAI is ArtificialIntelligence ai && ai.tracker != null)
-                        ai.tracker.SeeCreature(game.AlivePlayers.FirstOrDefault() ?? game.Players.First());
-                    
+                    if(ply?.room == null) continue;
+                    foreach (var crit in ply.room.abstractRoom.creatures.Select(i => i.realizedCreature))
+                    {
+                        if (crit?.abstractCreature?.abstractAI?.RealAI?.tracker is Tracker tracker &&
+                            crit.Template.TopAncestor().type != CreatureTemplate.Type.Scavenger)
+                        {
+                            tracker.SeeCreature(ply.abstractCreature);
+                        }
+                    }
                 }
 
             }
@@ -886,10 +896,26 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static void HitBinah(float damage)
         {
+            if (waitToDelete >= 0)
+                return;
+
             BinahBuff.Instance.Data.Health -= damage / BinahBuffData.MaxHealth * Resistance;
+            localDamage += damage / BinahBuffData.MaxHealth * Resistance;
+   
             BuffUtils.Log(BinahBuffData.Binah,$"Hit {damage} damage, current life: {BinahBuff.Instance.Data.Health}, resistance: {Resistance}");
             if (BinahBuff.Instance.Data.Health <= 0)
+            {
                 Die();
+                return;
+            }
+
+            if (localDamage > 0.25f)
+            {
+                BuffUtils.Log(BinahBuffData.Binah, $"Hit 1/4 raw damage, switch to next part");
+                BinahBuff.Instance.MyTimer.Reset();
+                BinahBuff.Instance.needSpawnChain = true;
+
+            }
         }
 
         private static int waitToDelete = -1;
@@ -1039,9 +1065,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 {
                     if (crit == null || crit.dead || critSet.Contains(crit))
                         continue;
-                    if (crit.bodyChunks.Any(i => Custom.DistLess(i.pos, pos, 30)))
+                    if (crit.bodyChunks.Any(i => Custom.DistLess(i.pos, pos, 50)))
                     {
-                        room.AddObject(new CreatureSpasmer(crit,false,240));
+                        crit.Stun(360);
+                        room.AddObject(new CreatureSpasmer(crit,false,320));
                         critSet.Add(crit);
                     }
                 }
@@ -1202,7 +1229,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     if(crit == null || crit.dead)
                         continue;
                     if(crit.bodyChunks.Any(i => Custom.DistLess(i.pos, center, rad)))
-                        crit.Stun(70);
+                        crit.Stun(150);
                 }
 
                 if (!hasTriggerCreature)

@@ -26,10 +26,12 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         [JsonProperty]
         public int killCount;
 
-        public HuntCondition()
+        public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
         }
+
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
@@ -55,6 +57,12 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         }
 
+        public override void SessionEnd(SaveState save)
+        {
+            base.SessionEnd(save);
+            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
+        }
+
         public override string DisplayName(InGameTranslator translator)
         {
             if (ChallengeTools.creatureNames == null)
@@ -62,9 +70,5 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"), ChallengeTools.creatureNames[type.index]);
         }
 
-        ~HuntCondition()
-        {
-            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
-        }
     }
 }
