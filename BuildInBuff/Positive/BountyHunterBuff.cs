@@ -82,12 +82,8 @@ namespace BuiltinBuffs.Positive
             if (lst.Count == 0)
                 return;
 
-            //bountyCreature = lst[Random.Range(0, lst.Count)];
-            foreach (var c in lst)
-            {
-                if (c.creatureTemplate.type == CreatureTemplate.Type.Overseer)
-                    bountyCreature = c;
-            }
+            bountyCreature = lst[Random.Range(0, lst.Count)];
+
             currentHUD?.ChangeBounty(bountyCreature);
         }
 

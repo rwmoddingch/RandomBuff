@@ -285,6 +285,7 @@ namespace RandomBuff.Core.SaveData
                     !buffCoreFile.Contains("buff-player"))
                 {
                     LoadFailedFallBack();
+                    return;
                 }
                 var fileVersion = new BuffFormatVersion(buffCoreFile.Get("buff-version"));
 
@@ -292,6 +293,7 @@ namespace RandomBuff.Core.SaveData
                 {
                     BuffPlugin.LogError("OutDate version, clean all data!");
                     LoadFailedFallBack(true);
+                    return;
                 }
                 BuffPlugin.Log($"Buff file version : [{fileVersion}], current version : [{BuffPlugin.saveVersion}]");
                 BuffConfigManager.LoadConfig(buffCoreFile.Get("buff-config"), fileVersion);
@@ -337,6 +339,9 @@ namespace RandomBuff.Core.SaveData
                 buffCoreFile.Set("buff-data", "");
             if (!buffCoreFile.Contains("buff-player") || forceDelete)
                 buffCoreFile.Set("buff-player", "");
+            BuffConfigManager.LoadConfig(buffCoreFile.Get("buff-config"), BuffPlugin.saveVersion);
+            BuffDataManager.LoadData(buffCoreFile.Get("buff-data"), BuffPlugin.saveVersion);
+            BuffPlayerData.LoadBuffPlayerData(buffCoreFile.Get("buff-player"), BuffPlugin.saveVersion);
             LoadState = BuffFileLoadState.AfterLoad;
         }
     }

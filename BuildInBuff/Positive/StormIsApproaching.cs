@@ -619,7 +619,7 @@ namespace BuiltinBuffs.Positive
             else if (counter == 8 + delay + (int)((duringTime + 0.15f - 0.3f) * 40))
             {
                 room.game.paused = false;
-                foreach (var crit in room.abstractRoom.creatures.Where(i => i.creatureTemplate.dangerousToPlayer > 0)
+                foreach (var crit in room.abstractRoom.creatures.Where(i => i.creatureTemplate.dangerousToPlayer > 0 && !(i.realizedCreature is Player))
                              .Select(i => i.realizedCreature))
                 {
                     crit.Die();

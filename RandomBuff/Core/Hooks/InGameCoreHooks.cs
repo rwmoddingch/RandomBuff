@@ -28,6 +28,12 @@ namespace RandomBuff.Core.Hooks
                 saveState.miscWorldSaveData.moonHeartRestored = false;
                 saveState.miscWorldSaveData.pebblesEnergyTaken = false;
             }
+            else if (gameSetting.MissionId == "EmergnshyTreatment")
+            {
+                saveState.miscWorldSaveData.moonRevived = false;
+                saveState.miscWorldSaveData.SLOracleState.playerEncounters = 0;
+                saveState.miscWorldSaveData.SLOracleState.neuronsLeft = 0;
+            }
         }
 
         public static bool IsCurrentGameSettingNeed(GameSetting gameSetting)

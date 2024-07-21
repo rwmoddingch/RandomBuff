@@ -112,8 +112,17 @@ namespace RandomBuff.Core.Game
           
             BuffPlugin.Log($"Enter Game,TemplateID: {GameSetting.gachaTemplate.ID}, Difficulty: {GameSetting.Difficulty}, Condition Count: {GameSetting.conditions.Count}");
 
+
+            foreach(var condition in GameSetting.conditions)
+                BuffPlugin.LogDebug($"---condition: {condition.ID}");
+
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
+            {
                 CreateBuff(data.Key);
+                BuffPlugin.LogDebug($"---buff: {data.Key}");
+
+            }
+
 
             foreach (var value in CosmeticUnlockID.values.entries.Where(BuffConfigManager.IsCosmeticCanUse))
             {

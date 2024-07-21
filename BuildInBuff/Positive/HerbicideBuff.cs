@@ -12,15 +12,40 @@ using RandomBuffUtils;
 
 namespace BuiltinBuffs.Positive
 {
+    internal class HerbicideIBuffData : BuffData
+    {
+        public override BuffID ID => HerbicideIBuffEntry.HerbicideBuffID;
+    }
+
+    internal class HerbicideIBuff : Buff<HerbicideIBuff, HerbicideIBuffData>
+    {
+        public override BuffID ID => HerbicideIBuffEntry.HerbicideBuffID;
+
+        public HerbicideIBuff()
+        {
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                foreach (var room in game.world.activeRooms)
+                {
+                    foreach (var worm in room.updateList.Where(i => i is WormGrass))
+                        worm.Destroy();
+                    foreach (var worm in room.updateList.Where(i => i is WormGrass.Worm))
+                        worm.Destroy();
+                }
+            }
+
+        }
+    }
+
 
 
     internal class HerbicideIBuffEntry : IBuffEntry
     {
-        public static BuffID HerbicideBuffID = new BuffID("Herbicide", true);
+        public static readonly BuffID HerbicideBuffID = new BuffID("Herbicide", true);
 
         public  void OnEnable()
         {
-            BuffRegister.RegisterBuff<HerbicideIBuffEntry>(HerbicideBuffID);
+            BuffRegister.RegisterBuff<HerbicideIBuff, HerbicideIBuffData, HerbicideIBuffEntry>(HerbicideBuffID);
         }
 
         public static void HookOn()
