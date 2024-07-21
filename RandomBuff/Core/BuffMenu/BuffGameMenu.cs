@@ -22,6 +22,7 @@ using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Render.UI.Notification;
 using RandomBuff.Core.ProgressionUI;
 using RandomBuff.Render.UI.Component;
+using RandomBuff.Core.Progression.Quest;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -491,6 +492,13 @@ namespace RandomBuff.Core.BuffMenu
             base.GrafUpdate(timeStacker);
             menuSlot.GrafUpdate(timeStacker);
             testNotification.GrafUpdate(timeStacker);
+
+            if(Input.GetKeyDown(KeyCode.N) && BuffPlugin.DevEnabled)
+            {
+                testNotification.NewRewardNotification(QuestUnlockedType.Cosmetic, "FireWork");
+                testNotification.NewRewardNotification(QuestUnlockedType.Card, "FlameThrower");
+                testNotification.NewRewardNotification(QuestUnlockedType.Card, "DivingBeing");
+            }
             
             if (RWInput.CheckPauseButton(0) && !modeSelectPage.Show && !newGameDetailPage.Show &&
                 !missionPage.Show && manager.nextSlideshow == null && !lastPausedButtonClicked)

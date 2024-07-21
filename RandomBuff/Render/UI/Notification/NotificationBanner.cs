@@ -337,34 +337,46 @@ namespace RandomBuff.Render.UI.Notification
 
         public void AppendReward(QuestUnlockedType questUnlockedType, string itemName)
         {
-            if(questUnlockedType == QuestUnlockedType.Mission)
-            {
-                MissionID id = new MissionID(itemName);
-                var newInstance = new MissionReward(id, this);
-                newInstance.InitSprites();
-                rewardInstances.Add(newInstance);
+            var newInstance = new RewardInstance(this, questUnlockedType, itemName);
+            newInstance.InitSprites();
+            rewardInstances.Add(newInstance);
 
-                if(rewardInstances.Count > 1)
-                {
-                    splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
-                    notificationManager.Container.AddChild(splitLines.Last());
-                    linePoses.Add(Vector2.zero);
-                }
-            }
-            else if(questUnlockedType == QuestUnlockedType.Cosmetic)
+            if (rewardInstances.Count > 1)
             {
-                CosmeticUnlockID cosmeticUnlockID = new CosmeticUnlockID(itemName);
-                var instance = new CosmeticReward(cosmeticUnlockID, this);
-                instance.InitSprites();
-                rewardInstances.Add(instance);
-
-                if (rewardInstances.Count > 1)
-                {
-                    splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
-                    notificationManager.Container.AddChild(splitLines.Last());
-                    linePoses.Add(Vector2.zero);
-                }
+                splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
+                notificationManager.Container.AddChild(splitLines.Last());
+                linePoses.Add(Vector2.zero);
             }
+
+
+            //if (questUnlockedType == QuestUnlockedType.Mission)
+            //{
+            //    MissionID id = new MissionID(itemName);
+            //    var newInstance = new MissionReward(id, this);
+            //    newInstance.InitSprites();
+            //    rewardInstances.Add(newInstance);
+
+            //    if(rewardInstances.Count > 1)
+            //    {
+            //        splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
+            //        notificationManager.Container.AddChild(splitLines.Last());
+            //        linePoses.Add(Vector2.zero);
+            //    }
+            //}
+            //else if(questUnlockedType == QuestUnlockedType.Cosmetic)
+            //{
+            //    CosmeticUnlockID cosmeticUnlockID = new CosmeticUnlockID(itemName);
+            //    var instance = new CosmeticReward(cosmeticUnlockID, this);
+            //    instance.InitSprites();
+            //    rewardInstances.Add(instance);
+
+            //    if (rewardInstances.Count > 1)
+            //    {
+            //        splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
+            //        notificationManager.Container.AddChild(splitLines.Last());
+            //        linePoses.Add(Vector2.zero);
+            //    }
+            //}
 
             RecaculateInstancePos();
 
@@ -433,25 +445,32 @@ namespace RandomBuff.Render.UI.Notification
         }
 
 
-        public abstract class RewardInstance
+        public class RewardInstance
         {
             public RewardBanner banner;
-            
+            QuestUnlockedType questUnlockedType;
+            string id;
+
             public float width = 250;
             public Vector2 pos;
 
             public FLabel title;
-
-            public RewardInstance(RewardBanner banner)
+            QuestLeaser quest;
+            
+            public RewardInstance(RewardBanner banner, QuestUnlockedType questUnlockedType, string id)
             {
                 this.banner = banner;
+                this.questUnlockedType = questUnlockedType;
+                this.id = id;
             }
 
             public virtual void InitSprites()
             {
-                title = new FLabel(Custom.GetDisplayFont(), "") { anchorX = 0.5f, anchorY = 1f};
+                quest = banner.questRendererManager.AddQuestToRender(questUnlockedType, id);
+                BuffPlugin.Log($"quest renderer type : {quest.questRenderer.GetType()}");
+                width = quest.rect.x + 20f;
+                title = new FLabel(Custom.GetDisplayFont(), banner.questRendererManager.GetProvider(questUnlockedType, id).GetRewardTitle(questUnlockedType, id)) { anchorX = 0.5f, anchorY = 1f};
                 banner.notificationManager.Container.AddChild(title);
-                
             }
 
             public virtual void Update()
@@ -461,9 +480,19 @@ namespace RandomBuff.Render.UI.Notification
             public virtual void GrafUpdate(float timeStacker)
             {
                 float smoothContentExpand = Mathf.Lerp(banner.lastContentExpand, banner.contentExpand, timeStacker);
-                title.alpha = smoothContentExpand;
 
-                title.SetPosition(new Vector2(pos.x, pos.y + banner.rewardInstanceHeight / 2f));
+                if(title != null)
+                {
+                    title.alpha = smoothContentExpand;
+                    title.SetPosition(new Vector2(pos.x, pos.y + banner.rewardInstanceHeight / 2f));
+                }
+
+                if(quest != null)
+                {
+                    quest.smoothAlpha = smoothContentExpand;
+                    quest.smoothCenterPos = pos;
+                }
+
             }
 
             public virtual void Destroy()
@@ -479,7 +508,7 @@ namespace RandomBuff.Render.UI.Notification
 
             QuestLeaser quest;
 
-            public MissionReward(MissionID missionID, RewardBanner banner) : base(banner)
+            public MissionReward(MissionID missionID, RewardBanner banner, QuestUnlockedType questUnlockedType, string id) : base(banner, questUnlockedType, id)
             {
                 MissionRegister.TryGetMission(missionID, out var mission);
                 missionName = mission.MissionName;
@@ -516,7 +545,7 @@ namespace RandomBuff.Render.UI.Notification
             CosmeticUnlock cosmeticUnlock;
             QuestLeaser quest;
 
-            public CosmeticReward(CosmeticUnlockID cosmeticID, RewardBanner banner) : base(banner)
+            public CosmeticReward(CosmeticUnlockID cosmeticID, RewardBanner banner, QuestUnlockedType questUnlockedType, string id) : base(banner, questUnlockedType, id)
             {
                 cosmeticUnlock = CosmeticUnlock.CreateInstance(cosmeticID.value, null);
 

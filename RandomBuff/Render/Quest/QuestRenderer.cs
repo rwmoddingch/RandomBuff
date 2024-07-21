@@ -82,6 +82,17 @@ namespace RandomBuff.Render.Quest
             return leaser;
         }
 
+        public QuestRendererProvider GetProvider(QuestUnlockedType type, string id)
+        {
+            foreach (var provider in providers)
+            {
+                var result = provider.Provide(type, id);
+                if (result != null)
+                    return provider;
+            }
+            return null;
+        }
+
 
         public void Update()
         {
@@ -172,6 +183,11 @@ namespace RandomBuff.Render.Quest
         public virtual IQuestRenderer Provide(QuestUnlockedType type, string id)
         {
             return null;
+        }
+
+        public virtual string GetRewardTitle(QuestUnlockedType type, string id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

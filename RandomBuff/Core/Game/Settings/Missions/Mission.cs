@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression.Quest;
 using UnityEngine;
+using System.Xml;
 
 namespace RandomBuff.Core.Game.Settings.Missions
 {
@@ -73,6 +74,13 @@ namespace RandomBuff.Core.Game.Settings.Missions
             if (MissionRegister.TryGetMission(new MissionID(id), out var mission))
                 return mission;
             return null;
+        }
+
+        public override string GetRewardTitle(QuestUnlockedType type, string id)
+        {
+            MissionRegister.TryGetMission(new MissionID(id), out var mission);
+
+            return mission.BindSlug != null ? BuffResourceString.Get("Notification_MissionReward_Unique") : BuffResourceString.Get("Notification_MissionReward");
         }
     }
 }

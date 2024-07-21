@@ -35,5 +35,10 @@ namespace RandomBuff.Render.Quest
             }
             return null;
         }
+
+        public override string GetRewardTitle(QuestUnlockedType type, string id)
+        {
+            return BuffResourceString.Get("Notification_CardReward");
+        }
     }
 }

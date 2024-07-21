@@ -2,6 +2,7 @@
 MainMenu_Buff|BUFF
 MainMenu_Cardpedia|CARDPEDIA
 
+
 //BuffGameMenu
 BuffGameMenu_NewGame|NEW GAME
 BuffGameMenu_LoadGame|{0} - Cycle: {1} - Buff Count: {2}
@@ -42,6 +43,7 @@ Notification_RewardTitle|Awards received:
 Notification_MissionReward|Unlock mission
 Notification_MissionReward_Unique|Unlock unique mission
 Notification_CosmeticReward|Unlock cosmetic
+Notification_CardReward|Unlock card
 
 //BuffMenu:
 Survival|SURVIVAL
@@ -64,6 +66,7 @@ Mode_Desc_Mission|Choose a mission to start a new game.<LINE>Your goals and init
 InGameSlot_SlotTitle|BuffSlot
 InGameSlot_CardDetail|BuffDetail
 CardPickSlot_SlotTitle|Pick <Cards> cards
+
 
 //CardpediaCardSheet
 Everlasting|Everlasting

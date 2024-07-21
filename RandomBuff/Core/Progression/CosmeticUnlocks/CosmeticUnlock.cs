@@ -162,5 +162,10 @@ namespace RandomBuff.Core.Progression
 
             return null;
         }
+
+        public override string GetRewardTitle(QuestUnlockedType type, string id)
+        {
+            return BuffResourceString.Get("Notification_CosmeticReward");
+        }
     }
 }

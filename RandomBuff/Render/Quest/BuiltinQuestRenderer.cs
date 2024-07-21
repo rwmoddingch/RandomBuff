@@ -76,6 +76,10 @@ namespace RandomBuff.Render.Quest
         {
             card.Alpha = questLeaser.smoothAlpha;
             card.Position = questLeaser.smoothCenterPos;
+            if(mode == QuestRendererManager.Mode.NotificationBanner)
+            {
+                card.Rotation= new Vector3(0f, 90f * (1 - questLeaser.smoothAlpha), 0f);
+            }
         }
 
         public override void ClearSprites(QuestRendererManager.QuestLeaser questLeaser, QuestRendererManager.Mode mode)
