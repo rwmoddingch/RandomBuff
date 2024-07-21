@@ -40,7 +40,7 @@ namespace RandomBuff.Core.StaticsScreen
         //分数预计算结果
         //0:scoreindex, 1:count 2:intData
         List<KeyValuePair<CreatureTemplate.Type, int[]>> killsAndCounts = new();
-        int[] defaultScores;
+        static int[] defaultScores;
 
         public BuffGameScoreCaculator(Menu.Menu menu, MenuObject owner, Vector2 pos, WinGamePackage winGamePackage, float width = 300f) : base(menu, owner, pos)
         {
@@ -64,8 +64,12 @@ namespace RandomBuff.Core.StaticsScreen
         {
             int totalScore = 0;
             //获取生物的分数
-            defaultScores = new int[MultiplayerUnlocks.SandboxUnlockID.values.entries.Count];
-            SandboxSettingsInterface.DefaultKillScores(ref defaultScores);
+            if(defaultScores == null)
+            {
+                defaultScores = new int[MultiplayerUnlocks.SandboxUnlockID.values.entries.Count];
+                SandboxSettingsInterface.DefaultKillScores(ref defaultScores);
+            }
+
 
             foreach(var kill in winPackage.saveState.kills)
             {

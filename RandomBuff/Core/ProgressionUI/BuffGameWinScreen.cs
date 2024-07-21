@@ -83,7 +83,7 @@ namespace RandomBuff.Core.StaticsScreen
             float middleX = 400f;
             float width = 460f;
 
-            title = new CardTitle(container, BuffCard.normalScale * 0.6f, new Vector2(middleX, 668f), 0.1f);
+            title = new CardTitle(container, BuffCard.normalScale * 0.6f, new Vector2(middleX, 668f), 0.1f, spanAdjust: -50f);
 
             continueButton = new SimpleButton(this, pages[0], Translate("CONTINUE"), "CONTINUE", new Vector2(rightAnchor - 150f, 40f), new Vector2(100f, 30f));
             pages[0].subObjects.Add(continueButton);

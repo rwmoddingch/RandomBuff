@@ -232,7 +232,7 @@ namespace RandomBuff.Core.Game
             if (game.GamePaused)
                 return;
 
-            if(!lastbuttonPressed && Input.GetKey(KeyCode.P))
+            if(!lastbuttonPressed && Input.GetKey(KeyCode.P) && BuffPlugin.DevEnabled)
             {
                 game.Win(false);
             }
@@ -351,7 +351,7 @@ namespace RandomBuff.Core.Game
 
             BuffFile.Instance.SaveFile();
 
-            if (GameSetting.Win)
+            if (GameSetting.Win || (Input.GetKey(KeyCode.P) && BuffPlugin.DevEnabled))
             {
                 CreateWinGamePackage();
                 

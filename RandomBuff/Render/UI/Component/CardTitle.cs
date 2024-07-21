@@ -129,7 +129,7 @@ namespace RandomBuff.Render.UI.Component
                 width = CardBasicAssets.RenderTextureSize.x * title.scale * 0.8f * (Helper.IsZhChar(text) ? 1f : 0.7f);
                 
                 if (index == 0)
-                    spanToLeft = 0 + title.spanAdjust;
+                    spanToLeft = 0;
                 else
                     spanToLeft = title.spanAdjust + title.spanShrink * title.scale * CardBasicAssets.RenderTextureSize.x * 0.05f * (Helper.IsZhChar(text) ? 1.5f : 1f);
                 SwitchMode(Mode.FlipIn);
