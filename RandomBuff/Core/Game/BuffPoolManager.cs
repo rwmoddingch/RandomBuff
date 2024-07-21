@@ -427,7 +427,8 @@ namespace RandomBuff.Core.Game
                 }
 
                 BuffHud.Instance.TriggerCard(buff.ID);
-                record.totTriggerCount++;
+                record.ActiveCard();
+                BuffPlayerData.Instance.SlotRecord.ActiveCard();
                 if (re)
                 {
                     return UnstackBuff(buff.ID);

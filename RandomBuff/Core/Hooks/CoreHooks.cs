@@ -180,7 +180,7 @@ namespace RandomBuff.Core.Hooks
             float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
             Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
             Vector2 size = new Vector2(buttonWidth, 30f);
-            self.AddMainMenuButton(new SimpleButton(self, self.pages[0], "BUFF", "BUFF", pos, size), () =>
+            self.AddMainMenuButton(new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos, size), () =>
             {
                 self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.TestStartGameMenu);
                 self.PlaySound(SoundID.MENU_Switch_Page_In);

@@ -126,7 +126,6 @@ namespace RandomBuff.Core.Buff
                 }
                 else
                 {
-                    BuffPlugin.LogWarning("OutDate Format At ID, Now BuffID");
                     if (!ExtEnumBase.TryParse(typeof(BuffID), (string)rawData[loadState = "ID"], true, out var re))
                     {
                         BuffPlugin.LogFatal("Can't find registered BuffID, Maybe forgot to add codes?");

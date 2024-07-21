@@ -171,7 +171,7 @@ namespace RandomBuff.Core.SaveData
         internal static bool IsSpecialItemLocked(string itemName) => IsItemLocked(QuestUnlockedType.Special,itemName);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsCosmeticCanUse(string id) => !IsItemLocked(QuestUnlockedType.Cosmetic, id) && BuffPlayerData.Instance.IsCosmeticEnable(id);
+        internal static bool IsCosmeticCanUse(string id) => !IsItemLocked(QuestUnlockedType.Cosmetic, id) && BuffPlayerData.Instance.IsCosmeticEnable(id) && CosmeticUnlock.cosmeticUnlocks.ContainsKey(new CosmeticUnlockID(id));
 
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 

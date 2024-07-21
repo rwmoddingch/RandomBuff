@@ -172,10 +172,13 @@ namespace BuiltinBuffs.Duality
                 }
             }
 
-            if (Input.GetKey(KeyCode.H))
-                temperature += 0.1f;
-            else if (Input.GetKey(KeyCode.J))
-                temperature -= 0.1f;
+            if (BuffPlugin.DevEnabled)
+            {
+                if (Input.GetKey(KeyCode.H))
+                    temperature += 0.1f;
+                else if (Input.GetKey(KeyCode.J))
+                    temperature -= 0.1f;
+            }
 
             if (burn)
             {/*

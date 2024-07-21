@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Expedition;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -134,17 +135,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
-        private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
-        {
-            
-            
-        }
 
 
 
         public override string DisplayName(InGameTranslator translator)
         {
-            return $"Kill {killRequirement} ceatures with {weaponType}";
+            
+            return string.Format(BuffResourceString.Get("DisplayName_Extermination"),killRequirement,BuffResourceString.Get(ChallengeTools.ItemName(weaponType),true));
         }
 
         public override string DisplayProgress(InGameTranslator translator)

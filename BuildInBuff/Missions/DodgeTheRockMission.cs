@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using RandomBuff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -16,7 +17,7 @@ namespace BuiltinBuffs.Missions
 
         public override Color TextCol => Color.white;
 
-        public override string MissionName => "DODGE THE ROCKS";
+        public override string MissionName => BuffResourceString.Get("Mission_Display_DodgeTheRock");
 
         public DodgeTheRockMission()
         {

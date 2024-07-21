@@ -29,7 +29,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 if(_boxedValue != value)
                 {
                     _boxedValue = value;
-                    BuffPlugin.Log($"Set BoxedValue to {value}");
+                    BuffPlugin.LogDebug($"Set BoxedValue to {value}");
                     valueDirty = value != lastSavedValue;
                 }
             }

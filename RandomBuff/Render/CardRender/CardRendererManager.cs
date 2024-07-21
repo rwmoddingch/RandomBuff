@@ -66,7 +66,7 @@ namespace RandomBuff.Render.CardRender
             mostInavtiveRenderer.gameObject.SetActive(true);
             mostInavtiveRenderer.Init(mostInavtiveRenderer._id, BuffConfigManager.GetStaticData(buffID));
             inactiveCardRenderers.Remove(mostInavtiveRenderer);
-            BuffPlugin.Log($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
+            BuffPlugin.LogDebug($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
             return mostInavtiveRenderer;
 
             BuffCardRenderer GetNewRenderer(BuffID buffID)

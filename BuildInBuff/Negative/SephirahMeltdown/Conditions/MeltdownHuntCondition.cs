@@ -58,7 +58,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
             if(ChallengeTools.creatureNames == null)
                 ChallengeTools.CreatureName(ref ChallengeTools.creatureNames);
-            return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"), ChallengeTools.creatureNames[type.index]);
+            return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"),killCount, ChallengeTools.creatureNames[type.index]);
         }
 
         public override string InRangeDisplayProgress()

@@ -60,7 +60,7 @@ namespace RandomBuff
                 else
                 {
                     componentRefs.RemoveAt(i);
-                    BuffPlugin.Log($"Remove componenetRef due to no value");
+                    BuffPlugin.LogDebug($"Remove componenetRef due to no value");
                 }
             }
         }
@@ -76,7 +76,7 @@ namespace RandomBuff
                 else
                 {
                     componentRefs.RemoveAt(i);
-                    BuffPlugin.Log($"Remove componenetRef due to no value");
+                    BuffPlugin.LogDebug($"Remove componenetRef due to no value");
                 }
             }
         }

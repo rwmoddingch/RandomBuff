@@ -164,7 +164,7 @@ namespace RandomBuff.Core.ProgressionUI
             foreach(var idValue in CosmeticUnlockID.values.entries)
             {
                 var id = new CosmeticUnlockID(idValue);
-                if((BuffConfigManager.IsCosmeticCanUse(idValue) || true/*目前先跳过*/) && CosmeticUnlock.cosmeticUnlocks.ContainsKey(id))
+                if(!BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, idValue) && CosmeticUnlock.cosmeticUnlocks.ContainsKey(id))
                 {
                     var cosmetic = Activator.CreateInstance(CosmeticUnlock.cosmeticUnlocks[id]) as CosmeticUnlock;
                     if(cosmetic.BindCat == null)
@@ -227,7 +227,7 @@ namespace RandomBuff.Core.ProgressionUI
                 {
                     CosmeticButton cosmeticButton = new CosmeticButton(new Vector2(x, startY - yDecrease), buttonSize, unlock.IconElement, unlock.UnlockID.value, Color.green, color, OnCosmeticButtonClick);
                     cosmeticButton.SetEnable(buffData.IsCosmeticEnable(unlock.UnlockID.value));
-
+                    cosmeticButton.wrapper = opScrollBox.wrapper;
                     opScrollBox.AddItems(cosmeticButton);
                     
                     lineButtonCount++;
@@ -281,7 +281,8 @@ namespace RandomBuff.Core.ProgressionUI
                         questInfo.rewards[rewards.Key].Add(entry);
                 }
 
-                if(isLevelQuest)
+                questInfo.finished = BuffPlayerData.Instance.IsQuestUnlocked(questID);
+                if (isLevelQuest)
                 {
                     levelQuests.Add(questInfo);
                     BuffPlugin.Log($"Add level quest : {questInfo.name}");
@@ -340,6 +341,7 @@ namespace RandomBuff.Core.ProgressionUI
                 button.OnMouseLeave += page.HideQuestInfo;
 
                 opScrollBox.AddItems(button);
+                button.wrapper = opScrollBox.wrapper;
                 x++;
                 if (x == buttonsInALine)
                 {

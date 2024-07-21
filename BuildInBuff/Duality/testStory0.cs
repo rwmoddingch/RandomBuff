@@ -25,7 +25,7 @@ namespace HotDogGains.Duality
         public static BuffID testStory0ID = new BuffID("testStory0ID", true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<testStory0Buff, testStory0BuffData, testStory0BuffEntry>(testStory0ID);
+            //BuffRegister.RegisterBuff<testStory0Buff, testStory0BuffData, testStory0BuffEntry>(testStory0ID);
         }
         public static void HookOn()
         {

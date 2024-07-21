@@ -74,8 +74,10 @@ namespace RandomBuff.Core.SaveData
             var str = "[RECORD]: ";
             foreach (var item in SlotRecord.GetValueDictionary())
                 str += $"{{{item.Key},{item.Value}}},";
-
             BuffPlugin.Log(str);
+
+            foreach(var quest in GetAllCompleteQuests())
+                BuffPlugin.LogDebug($"BuffQuest: {quest}");
         }
 
         internal string ToStringData()

@@ -257,7 +257,7 @@ namespace RandomBuff.Render.UI.Component
             dynamic_levelLabel.alpha = smoothAlpha;
             dynamic_expLabel.alpha = smoothAlpha;
 
-            if (Input.GetKey(KeyCode.I))
+            if (Input.GetKey(KeyCode.I) && BuffPlugin.DevEnabled)
                 Exp++;
         }
 

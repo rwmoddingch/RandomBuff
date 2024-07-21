@@ -272,10 +272,10 @@ namespace RandomBuff.Core.BuffMenu
         int _showCounter = -1;
         int _targetShowCounter;
         int flagControlIndex;
-        bool Show
+        public bool Show
         {
             get => _targetShowCounter == BuffGameMenuStatics.MaxShowSwitchCounter;
-            set => _targetShowCounter = (value ? BuffGameMenuStatics.MaxShowSwitchCounter : 0);
+            private set => _targetShowCounter = (value ? BuffGameMenuStatics.MaxShowSwitchCounter : 0);
         }
         float ShowFactor => (float)_showCounter / BuffGameMenuStatics.MaxShowSwitchCounter;
 
@@ -313,8 +313,8 @@ namespace RandomBuff.Core.BuffMenu
 
             Vector2 testPos = new Vector2(683f, 85f) + new Vector2(SlugcatSelectMenu.GetRestartTextOffset(gameMenu.CurrLang), 80f);
             subObjects.Add(backButton = new SimpleButton(gameMenu, this, gameMenu.Translate("BACK"), "NEWGAME_DETAIL_BACK", new Vector2(200f, 698f), new Vector2(110f, 30f)));
-            subObjects.Add(startGameButton = new HoldButton(gameMenu, this, gameMenu.Translate("NEWGAME"), "NEWGAME_DETAIL_NEWGAME", new Vector2(683f, 85f), 40f));
-            subObjects.Add(settingButton = new SimpleButton(gameMenu, this, gameMenu.Translate(BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
+            subObjects.Add(startGameButton = new HoldButton(gameMenu, this, BuffResourceString.Get("BuffGameMenu_NewGame"), "NEWGAME_DETAIL_NEWGAME", new Vector2(683f, 85f), 40f));
+            subObjects.Add(settingButton = new SimpleButton(gameMenu, this, (BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
                 "NEWGAME_DETAIL_SELECT_MODE", new Vector2(683f - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
                 new Vector2(120, 40)));
             settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
@@ -380,7 +380,7 @@ namespace RandomBuff.Core.BuffMenu
             if (show)
             {
                 InitConditions();
-                settingButton.menuLabel.text = gameMenu.Translate(currentGameSetting.TemplateName);
+                settingButton.menuLabel.text = BuffResourceString.Get(currentGameSetting.TemplateName);
             }
             else
                 QuitToSelectSlug();
@@ -427,6 +427,14 @@ namespace RandomBuff.Core.BuffMenu
             {
                 flagRenderer.GrafUpdate(timeStacker);
             }
+
+            if (Show && RWInput.CheckPauseButton(0))
+            {
+                SetShow(false);
+                menu.PlaySound(SoundID.MENU_Switch_Page_Out);
+                (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
+
+            }
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -440,7 +448,7 @@ namespace RandomBuff.Core.BuffMenu
                 var index = list.IndexOf(gameSetting.TemplateName) + 1;
                 gameSetting.LoadTemplate(list[index == list.Count ? 0 : index]);
 
-                settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
+                settingButton!.menuLabel.text = BuffResourceString.Get(gameSetting.TemplateName);
                 cardTitle.RequestSwitchTitle(BuffResourceString.Get(gameSetting.TemplateName));
                 ClearCurrentConditions();
                 InitConditions();
@@ -616,6 +624,8 @@ namespace RandomBuff.Core.BuffMenu
 
         int flagControlIndex;
         bool show;
+
+        public bool Show => show;
         Vector2 flagHangPos;
         Vector2 flagHidePos;
 
@@ -790,6 +800,13 @@ namespace RandomBuff.Core.BuffMenu
             {
                 flagRenderer.GrafUpdate(timeStacker);
             }
+
+            if (Show && RWInput.CheckPauseButton(0))
+            {
+                SetShow(false);
+                menu.PlaySound(SoundID.MENU_Switch_Page_Out);
+                (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
+            }
         }
 
         public class MissionButton : SimpleButton
@@ -941,11 +958,11 @@ namespace RandomBuff.Core.BuffMenu
                 generalHoldBox = new EmptyRoundRect(menu, owner, "", new Vector2(448f, 1440f), new Vector2(660f, 260f), 440f, missionPage.showAnim);
                 subObjects.Add(generalHoldBox);
 
-                title_exclusive = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? "专属使命":"EXCLUSIVE\nMISSION");
+                title_exclusive = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffMissionPage_Exclusive"));
                 title_exclusive.SetPosition(new Vector2(338f, Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? 640f : 620f));
                 title_exclusive.alpha = 0f;
                 Container.AddChild(title_exclusive);
-                title_general = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? "通用使命":"GENERAL MISSIONS");
+                title_general = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffMissionPage_General"));
                 title_general.SetPosition(new Vector2(778f, 640f));
                 title_general.alpha = 0f;
                 Container.AddChild(title_general);
@@ -1032,7 +1049,7 @@ namespace RandomBuff.Core.BuffMenu
                 if (!match)
                 {
                     exclusiveMission.bindMission = null;
-                    exclusiveMission.menuLabel.text = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? "该角色无\n专属使命":"NO EXCLUSIVE MISSION\nFOR THIS CHARACTER";
+                    exclusiveMission.menuLabel.text = BuffResourceString.Get("BuffMissionPage_No_Exclusive");
                     exclusiveMission.active = false;
                     exclusiveMission.signalText = "NOSIGNAL";
                 }
@@ -1214,14 +1231,14 @@ namespace RandomBuff.Core.BuffMenu
                 missionTitle.SetPosition(missionTitleHidePos);
                 Container.AddChild(missionTitle);
 
-                conditionTitle = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? "使命目标":"MISSION GOALS");
-                buffTitle = new FLabel(Custom.GetDisplayFont(), Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? "携带卡牌" : "MISSION BUFFS");
+                conditionTitle = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffMissionPage_Goal"));
+                buffTitle = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffMissionPage_Buffs"));
                 conditionTitle.SetPosition(conditionTitleHidePos);
                 buffTitle.SetPosition(buffTitleHidePos);
                 Container.AddChild(conditionTitle);
                 Container.AddChild(buffTitle);
 
-                startButton = new HoldButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("START MISSION"),"MISSION_START", new Vector2(688f, 160f), 120f);
+                startButton = new HoldButton(menu, this, BuffResourceString.Get("BuffMissionPage_Start"),"MISSION_START", new Vector2(688f, 160f), 120f);
                 subObjects.Add(startButton);
 
                 darkSprite = new FSprite("pixel");
@@ -1532,8 +1549,8 @@ namespace RandomBuff.Core.BuffMenu
             };
             Container.AddChild(modeIntroduction);
 
-            subObjects.Add(defaultmodeButton = new SimpleButton(menu, this, "FREE MODE", "DEFAULTMODE", new Vector2(493f, 900f), new Vector2(160f, 200f)));
-            subObjects.Add(missionmodeButton = new SimpleButton(menu, this, "MISSION MODE", "MISSIONMODE", new Vector2(733f, 900f), new Vector2(160f, 200f)));
+            subObjects.Add(defaultmodeButton = new SimpleButton(menu, this, BuffResourceString.Get("Mode_Free"), "DEFAULTMODE", new Vector2(493f, 900f), new Vector2(160f, 200f)));
+            subObjects.Add(missionmodeButton = new SimpleButton(menu, this, BuffResourceString.Get("Mode_Mission"), "MISSIONMODE", new Vector2(733f, 900f), new Vector2(160f, 200f)));
         }
 
         public void SetShow(bool show)
@@ -1583,11 +1600,11 @@ namespace RandomBuff.Core.BuffMenu
 
             if (defaultmodeButton.MouseOver)
             {
-                modeIntroduction.text = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? freeModeIntro_Chi : freeModeIntro;
+                modeIntroduction.text = BuffResourceString.Get("Mode_Desc_Free");
             }
             else if (missionmodeButton.MouseOver)
             {
-                modeIntroduction.text = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? missionModeIntro_Chi : missionModeIntro;
+                modeIntroduction.text = BuffResourceString.Get("Mode_Desc_Mission");
             }
         }
         public override void GrafUpdate(float timeStacker)
@@ -1600,14 +1617,6 @@ namespace RandomBuff.Core.BuffMenu
             defaultmodeButton.pos.y = Mathf.Lerp(900f, 400f, num);
             missionmodeButton.pos.y = Mathf.Lerp(900f, 400f, num);
         }
-
-        //模式说明内容
-        #region
-        public static readonly string freeModeIntro = "You can customize the game's difficulty,\nmode and goals freely before starting a new game,\nand can only get cards through card gachas.";
-        public static readonly string freeModeIntro_Chi = "你可以在开始新一局游戏之前自由决定游戏难度、模式和目标，\n但只能通过抽卡来获得卡牌。";
-        public static readonly string missionModeIntro = "Choose a mission to start a new game.\nYour goals and initial cards are decided by which mission you chose,\nand you can't change the game's difficulty and mode.";
-        public static readonly string missionModeIntro_Chi = "选择一个使命以开始一局新游戏。\n你的游戏目标和初始携带卡牌由选择的任务决定，\n且无法自行决定游戏难度和模式。";
-        #endregion
     }
 
     public class FNodeWrapper : PositionedMenuObject
