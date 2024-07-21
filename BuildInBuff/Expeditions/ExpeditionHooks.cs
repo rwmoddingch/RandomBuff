@@ -32,7 +32,7 @@ namespace BuiltinBuffs.Expeditions
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
-            if (Input.GetKey(KeyCode.Y))
+            if (Input.GetKey(KeyCode.Y) && BuffPlugin.DevEnabled)
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
                 {

@@ -29,7 +29,7 @@ namespace BuiltinBuffs.Missions
 
         public override Color TextCol => Color.white;
 
-        public override string MissionName => "LAWN CLEANER";
+        public override string MissionName => BuffResourceString.Get("Mission_Display_LawnCleaner");
 
         public LawnCleanerMission()
         {

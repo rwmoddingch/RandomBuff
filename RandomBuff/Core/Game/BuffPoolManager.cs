@@ -232,7 +232,7 @@ namespace RandomBuff.Core.Game
             if (game.GamePaused)
                 return;
 
-            if(!lastbuttonPressed && Input.GetKey(KeyCode.P))
+            if(!lastbuttonPressed && Input.GetKey(KeyCode.P) && BuffPlugin.DevEnabled)
             {
                 game.Win(false);
             }
@@ -427,7 +427,8 @@ namespace RandomBuff.Core.Game
                 }
 
                 BuffHud.Instance.TriggerCard(buff.ID);
-                record.totTriggerCount++;
+                record.ActiveCard();
+                BuffPlayerData.Instance.SlotRecord.ActiveCard();
                 if (re)
                 {
                     return UnstackBuff(buff.ID);

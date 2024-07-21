@@ -146,12 +146,8 @@ namespace RandomBuff
 
 
                     BuffUtils.OnEnable();
-                    if (DevEnabled)
-                        On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-                    isLoaded = true;
 
                     //TODO : 测试用
-                    //TestTypeSerializer();
                     DevEnabled = true;
 
                     CardpediaMenuHooks.Hook();
@@ -161,6 +157,9 @@ namespace RandomBuff
                     AnimMachine.Init();
 
                     StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());
+
+                    isLoaded = true;
+
                 }
             }
             catch (Exception e)
@@ -169,15 +168,7 @@ namespace RandomBuff
             }
         }
 
-        private void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
-        {
-            orig(self, dt);
-            if (self.rainWorld.BuffMode() && Directory.Exists("Debug") && DevEnabled)
-            {
-     
-            }
-        
-        }
+      
 
         private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
         {

@@ -272,10 +272,10 @@ namespace RandomBuff.Core.BuffMenu
         int _showCounter = -1;
         int _targetShowCounter;
         int flagControlIndex;
-        bool Show
+        public bool Show
         {
             get => _targetShowCounter == BuffGameMenuStatics.MaxShowSwitchCounter;
-            set => _targetShowCounter = (value ? BuffGameMenuStatics.MaxShowSwitchCounter : 0);
+            private set => _targetShowCounter = (value ? BuffGameMenuStatics.MaxShowSwitchCounter : 0);
         }
         float ShowFactor => (float)_showCounter / BuffGameMenuStatics.MaxShowSwitchCounter;
 
@@ -426,6 +426,14 @@ namespace RandomBuff.Core.BuffMenu
             if (Show || flagRenderer.NeedRenderUpdate)
             {
                 flagRenderer.GrafUpdate(timeStacker);
+            }
+
+            if (Show && RWInput.CheckPauseButton(0))
+            {
+                SetShow(false);
+                menu.PlaySound(SoundID.MENU_Switch_Page_Out);
+                (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
+
             }
         }
 
@@ -616,6 +624,8 @@ namespace RandomBuff.Core.BuffMenu
 
         int flagControlIndex;
         bool show;
+
+        public bool Show => show;
         Vector2 flagHangPos;
         Vector2 flagHidePos;
 
@@ -789,6 +799,13 @@ namespace RandomBuff.Core.BuffMenu
             if(show || flagRenderer.NeedRenderUpdate)
             {
                 flagRenderer.GrafUpdate(timeStacker);
+            }
+
+            if (Show && RWInput.CheckPauseButton(0))
+            {
+                SetShow(false);
+                menu.PlaySound(SoundID.MENU_Switch_Page_Out);
+                (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
             }
         }
 

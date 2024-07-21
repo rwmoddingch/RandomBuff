@@ -134,17 +134,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
-        private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
-        {
-            
-            
-        }
 
 
 
         public override string DisplayName(InGameTranslator translator)
         {
-            return $"Kill {killRequirement} ceatures with {weaponType}";
+            
+            return string.Format(BuffResourceString.Get("DisplayName_Extermination"),killRequirement,translator.Translate(weaponType.value));
         }
 
         public override string DisplayProgress(InGameTranslator translator)

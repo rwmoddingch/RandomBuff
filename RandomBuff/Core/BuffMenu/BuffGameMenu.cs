@@ -177,6 +177,9 @@ namespace RandomBuff.Core.BuffMenu
         SimpleButton jollyToggleConfigMenu;
         SimpleButton progressionMenu;
 
+        public bool lastPausedButtonClicked;
+
+
         void InitButtonPage(Page page)
         {
             page.subObjects.Add(startButton = new HoldButton(this, page, Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
@@ -482,11 +485,20 @@ namespace RandomBuff.Core.BuffMenu
             base.RawUpdate(dt);
         }
 
+
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
             menuSlot.GrafUpdate(timeStacker);
             testNotification.GrafUpdate(timeStacker);
+            
+            if (RWInput.CheckPauseButton(0) && !modeSelectPage.Show && !newGameDetailPage.Show &&
+                !missionPage.Show && manager.nextSlideshow == null && !lastPausedButtonClicked)
+            {
+                manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+                PlaySound(SoundID.MENU_Switch_Page_Out);
+            }
+            lastPausedButtonClicked = RWInput.CheckPauseButton(0);
         }
 
         public override void ShutDownProcess()

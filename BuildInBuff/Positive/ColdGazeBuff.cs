@@ -205,7 +205,7 @@ namespace BuiltinBuffs.Positive
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
         {
             orig(self);
-            if (Input.GetKeyDown(KeyCode.T))
+            if (Input.GetKeyDown(KeyCode.T) && BuffPlugin.DevEnabled)
                 ColdGaze.GetBuffData().Stack();
             if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
                 medusaCat.Update();

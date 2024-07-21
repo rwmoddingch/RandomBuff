@@ -224,7 +224,7 @@ namespace RandomBuff.Render.CardRender
             if (string.IsNullOrEmpty(result))
                 result = ">>";
             graphTextMesh.text = result;
-            BuffPlugin.Log($"KeyBinder text set to {result}");
+            //BuffPlugin.Log($"KeyBinder text set to {result}");
         }
 
         protected override void Update()
