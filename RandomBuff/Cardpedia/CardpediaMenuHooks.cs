@@ -36,7 +36,7 @@ namespace RandomBuff.Cardpedia
             float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
             Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
             Vector2 size = new Vector2(buttonWidth, 30f);
-            SimpleButton collectionButton = new SimpleButton(self, self.pages[0], self.Translate("CARDPEDIA"), "CARDPEDIA", pos, size);
+            SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
             menu = self;
             self.AddMainMenuButton(collectionButton, new Action(CollectionButtonPressed), 0);
         }

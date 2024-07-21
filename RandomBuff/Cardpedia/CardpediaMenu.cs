@@ -52,6 +52,8 @@ namespace RandomBuff.Cardpedia
         public BigFancyButton dualButton;
         public BigFancyButton posiButton;
 
+        private bool lastPauseClicked = false;
+
         public BuffType currentType
         {
             set
@@ -343,6 +345,20 @@ namespace RandomBuff.Cardpedia
                 //textBoxManager.Draw(timeStacker);
                 //cardSheetManager.GrafUpdate(timeStacker);
                 configManager.GrafUpdate(timeStacker);
+
+                if (!lastPauseClicked && RWInput.CheckPauseButton(0))
+                {
+                    if (!BrowsingCards)
+                    {
+                        OnExit();
+                    }
+                    else
+                    {
+                        BrowsingCards = false;
+                        sheetPage.Show = false;
+                    }
+                }
+                lastPauseClicked = RWInput.CheckPauseButton(0);
             }
         }
 

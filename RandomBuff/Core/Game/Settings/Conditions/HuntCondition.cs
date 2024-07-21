@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Expedition;
 using Newtonsoft.Json;
 using RandomBuffUtils;
+using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
@@ -48,7 +49,54 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> sameConditions = null)
         {
-            return ConditionState.Fail;//TODO
+
+            ChallengeTools.ExpeditionCreature expeditionCreature = GetExpeditionCreature(name,
+                ExpeditionData.challengeDifficulty,
+                sameConditions != null
+                    ? sameConditions.OfType<HuntCondition>().Select(i => i.type).ToArray()
+                    : Array.Empty<CreatureTemplate.Type>());
+
+            if (expeditionCreature == null)
+            {
+                return ConditionState.Fail;
+            }
+
+            killCount = (int)Mathf.Lerp(3f, 15f,Mathf.Pow(difficulty, 2.5f));
+            if (expeditionCreature.points < 7)
+                killCount += UnityEngine.Random.Range(3, 6);
+            
+            if (killCount > expeditionCreature.spawns)
+                killCount = expeditionCreature.spawns;
+            
+            if (killCount > 25) killCount = 25;
+
+            type = expeditionCreature.creature;
+
+            return ConditionState.Ok_More;
+        }
+
+        public static ChallengeTools.ExpeditionCreature GetExpeditionCreature(SlugcatStats.Name slugcat, float difficulty, CreatureTemplate.Type[] types)
+        {
+            if (ChallengeTools.creatureSpawns == null || !ChallengeTools.creatureSpawns.ContainsKey(slugcat.value))
+            {
+                if (ChallengeTools.creatureScores == null)
+                    ChallengeTools.GenerateCreatureScores(ref ChallengeTools.creatureScores);
+                if(!ExpeditionGame.unlockedExpeditionSlugcats.Contains(slugcat))
+                    ExpeditionGame.unlockedExpeditionSlugcats.Add(slugcat);
+                ChallengeTools.ParseCreatureSpawns();
+            }
+
+            int num = (int)(25.0 * Math.Pow(difficulty, 2.22));
+            List<ChallengeTools.ExpeditionCreature> list = new List<ChallengeTools.ExpeditionCreature>();
+            foreach (ChallengeTools.ExpeditionCreature item in ChallengeTools.creatureSpawns[slugcat.value])
+            {
+                if (Math.Abs(num - item.points) <= Mathf.Lerp(5f, 17f, (float)Math.Pow(difficulty, 2.7)) && !types.Contains(item.creature))
+                    list.Add(item);
+                
+            }
+            if(list.Any())
+                return list[UnityEngine.Random.Range(0, list.Count - 1)];
+            return null;
         }
 
         public override string DisplayProgress(InGameTranslator translator)
@@ -67,7 +115,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             if (ChallengeTools.creatureNames == null)
                 ChallengeTools.CreatureName(ref ChallengeTools.creatureNames);
-            return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"), ChallengeTools.creatureNames[type.index]);
+            return string.Format(BuffResourceString.Get("DisplayName_MeltDownHunt"),killCount, ChallengeTools.creatureNames[type.index]);
         }
 
     }

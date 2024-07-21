@@ -1,3 +1,21 @@
+//MainMenu
+MainMenu_Buff|卡牌
+MainMenu_Cardpedia|卡牌图鉴
+
+
+//BuffGameMenu
+BuffGameMenu_NewGame|新游戏
+BuffGameMenu_LoadGame|{0} - 轮回: {1} - 卡牌数量: {2}
+BuffGameMenu_LoadGameUK|未知数据 - 卡牌数量: {0}
+
+//BuffMissionPage
+BuffMissionPage_General|通用使命
+BuffMissionPage_Exclusive|专属使命
+BuffMissionPage_No_Exclusive|该角色无<LINE>专属使命
+BuffMissionPage_Start|开始使命
+BuffMissionPage_Goal|使命目标
+BuffMissionPage_Buffs|携带卡牌
+
 //CardSheetPage:
 CardSheetPage_Life_Countable|循环
 CardSheetPage_Life_Uncountable|永久
@@ -36,12 +54,27 @@ ProgressionMenu_Show|进度
 BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
 
+//BuffModeSelect
+Mode_Free|自由模式
+Mode_Mission|使命模式
+Mode_Desc_Free|你可以在开始新一局游戏之前自由决定游戏难度、模式和目标，<LINE>但只能通过抽卡来获得卡牌。
+Mode_Desc_Mission|选择一个使命以开始一局新游戏。<LINE>你的游戏目标和初始携带卡牌由选择的任务决定，<LINE>且无法自行决定游戏难度和模式。
 
 //BuffCardSlot
 InGameSlot_SlotTitle|Buff卡槽
 InGameSlot_CardDetail|Buff详情
 CardPickSlot_SlotTitle|抽取<Cards>张卡
 
+
+//CardpediaCardSheet
+Everlasting|永久
+Cycles|循环
+Stackable|可叠加
+Unstackable|不可叠加
+CardpediaCardSheet_Manually|主动点击触发
+CardpediaCardSheet_Automatically|主自动触发
+CardpediaCardSheet_Info|（点击下方卡牌以查看详细信息）
+CardpediaCardSheet_None|（无）
 
 //Records
 totCard|获取的所有Buff数量：
@@ -68,13 +101,14 @@ DisplayName_MeetSS_SL|在{0}循环内见到五块卵石和仰望皎月
 DisplayName_Gourmand|完成胖猫食谱
 DisplayName_Interval_OutRange|在{0}-{1}轮回内完成任务，当前隐藏
 DisplayName_FixCycle|在{0}轮回完成使命
-DisplayName_MeltDownHunt|消灭{0}
+DisplayName_MeltDownHunt|消灭 {0} 只{1}
 DisplayName_Death|死亡数小于{0}下完成使命
 DisplayName_CycleScore|本次雨循环消灭生物获得{0}点分数
 DisplayName_SaveMoon|在{0}轮回内帮助仰望皓月
 DisplayName_Battery|将五块卵石的核心安装给仰望皓月
 DisplayName_MeltDownBinah|击败 Binah
-DisplayName_Extermination|使用 {1} 消灭 {0} 只生物
+DisplayName_Extermination|使用{1}消灭 {0} 只生物
+DisplayName_Score|消灭生物获得{0}点分数
 
 //BuffCondition_BuffTypes
 all types|所有类型
@@ -90,6 +124,10 @@ Lizards|蜥蜴
 Scavengers|拾荒者
 Cicadas|蝉乌贼
 
+//BuffCondition_WeaponID
+Spear|任意矛
+ScavengerBomb|炸弹
+Rock|石头
 
 //ProgressionUI
 ProgressionUI_Record|记录

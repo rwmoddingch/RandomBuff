@@ -155,26 +155,19 @@ namespace RandomBuff.Cardpedia.Elements
                 var data = card.ID.GetBuffData();
                 if (data is CountableBuffData)
                 {
-                    life = (data as CountableBuffData).MaxCycleCount.ToString() + (language == InGameTranslator.LanguageID.Chinese ? "循环" : " Cycles");
+                    life = (data as CountableBuffData).MaxCycleCount.ToString() + BuffResourceString.Get("Cycles",true);
                 }
-                else life = language == InGameTranslator.LanguageID.Chinese ? "永久" : "Everlasting";
+                else life = BuffResourceString.Get("Everlasting", true);
             }
             else
             {
-                life = language == InGameTranslator.LanguageID.Chinese ? "永久" : "Everlasting";
+                life = BuffResourceString.Get("Everlasting", true);
             }
 
             var staticData = card.StaticData;
-            if (language == InGameTranslator.LanguageID.Chinese)
-            {
-                stack = staticData.Stackable ? "可叠加" : "不可叠加";
-                trigger = staticData.Triggerable ? "主动点击触发" : "自动触发";
-            }
-            else
-            {
-                stack = staticData.Stackable ? "Stackable" : "Unstackable";
-                trigger = staticData.Triggerable ? "Manually" : "Automatically";
-            }
+            stack = BuffResourceString.Get(staticData.Stackable ? "Stackable" : "Unstackable",true);
+            trigger = BuffResourceString.Get(staticData.Triggerable ? "CardpediaCardSheet_Manually" : "CardpediaCardSheet_Automatically");
+            
             description = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.Description;
             title = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName;
 

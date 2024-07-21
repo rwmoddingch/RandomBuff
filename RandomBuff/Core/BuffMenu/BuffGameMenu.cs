@@ -241,17 +241,17 @@ namespace RandomBuff.Core.BuffMenu
                 var re = saveGameData[CurrentName];
                 if (re != null)
                 {
-                    testLabel.label.text =
-                        $"{re.shelterName} - Cycle: {re.cycle} - Buff Count: {BuffDataManager.Instance.GetAllBuffIds(CurrentName).Count}";
+                    testLabel.label.text = string.Format(BuffResourceString.Get("BuffGameMenu_LoadGame"),
+                        re.shelterName, re.cycle, BuffDataManager.Instance.GetAllBuffIds(CurrentName).Count);
                 }
                 else
                 {
-                    testLabel.label.text = $"UNKNOWN DATA - Buff Count: {BuffDataManager.Instance.GetAllBuffIds(CurrentName).Count}";
+                    testLabel.label.text =  string.Format(BuffResourceString.Get("BuffGameMenu_LoadGameUK"), BuffDataManager.Instance.GetAllBuffIds(CurrentName).Count);
                 }
             }
             else
             {
-                testLabel.label.text = "NEW GAME";
+                testLabel.label.text = BuffResourceString.Get("BuffGameMenu_NewGame");
             }
             menuSlot.UpdatePage(currentPageIndex);
             continueDetailPage.ChangeSlugcat(CurrentName);

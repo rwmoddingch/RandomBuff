@@ -205,12 +205,9 @@ namespace RandomBuff.Cardpedia
             textBoxes[0].RefreshTextTexture(ownerContainer, "? ? ?", textBoxes[0].blurSprite.GetPosition());
             textBoxes[1].RefreshTextTexture(ownerContainer, "? ? ?", textBoxes[1].blurSprite.GetPosition());
             textBoxes[2].RefreshTextTexture(ownerContainer, "? ? ?", textBoxes[2].blurSprite.GetPosition());
-            string str = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
-                "（点击下方卡牌以查看详细信息）" : "(Click the cards below to view the detail information)";
-            textBoxes[3].RefreshTextTexture(ownerContainer, str, textBoxes[3].blurSprite.GetPosition() + new Vector2(0, 80f));
-            string str2 = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
-                "（无）" : "(None)";
-            textBoxes[4].RefreshTextTexture(ownerContainer, str2, textBoxes[4].blurSprite.GetPosition());
+      
+            textBoxes[3].RefreshTextTexture(ownerContainer, BuffResourceString.Get("CardpediaCardSheet_Info"), textBoxes[3].blurSprite.GetPosition() + new Vector2(0, 80f));
+            textBoxes[4].RefreshTextTexture(ownerContainer, BuffResourceString.Get("CardpediaCardSheet_None"), textBoxes[4].blurSprite.GetPosition());
             titleBox.RefreshTextTexture(ownerContainer, "? ? ?", new Vector2(203f, 298f));           
         }
 

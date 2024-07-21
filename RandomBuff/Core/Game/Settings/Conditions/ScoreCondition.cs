@@ -11,17 +11,19 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class CycleScoreCondition : Condition
+    internal class ScoreCondition : Condition
     {
-        public override ConditionID ID => ConditionID.CycleScore;
-        public override int Exp => (int)(targetScore / 3f); //TODO
+        public override ConditionID ID => ConditionID.Score;
+        public override int Exp => (int)(targetScore / 10f); //TODO
 
         [JsonProperty]
         public float targetScore;
 
+        [JsonProperty]
         private float score;
 
         private SlugcatStats.Name name;
+
 
         public override void EnterGame(RainWorldGame game)
         {
@@ -47,7 +49,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
-
             if (ChallengeTools.creatureSpawns[name.value].FirstOrDefault(i => i.creature == creature.Template.type) is { } crit)
             {
                 score += crit.points;
@@ -57,7 +58,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
         {
-            targetScore = Mathf.RoundToInt(Mathf.Lerp(20f, 125f, difficulty) / 10f) * 10;
+            targetScore = Mathf.RoundToInt(Mathf.Lerp(200f, 500f, difficulty) / 10f) * 10;
             return ConditionState.Ok_NoMore;
         }
 
@@ -70,7 +71,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             if (score > targetScore)
                 Finished = true;
-            return string.Format(BuffResourceString.Get("DisplayName_CycleScore"),targetScore);
+            return string.Format(BuffResourceString.Get("DisplayName_Score"),targetScore);
         }
     }
 }

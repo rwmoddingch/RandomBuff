@@ -1,3 +1,20 @@
+//MainMenu
+MainMenu_Buff|BUFF
+MainMenu_Cardpedia|CARDPEDIA
+
+//BuffGameMenu
+BuffGameMenu_NewGame|NEW GAME
+BuffGameMenu_LoadGame|{0} - Cycle: {1} - Buff Count: {2}
+BuffGameMenu_LoadGameUK|UNKNOWN DATA - Buff Count: {0}
+
+//BuffMissionPage
+BuffMissionPage_General|GENERAL MISSIONS
+BuffMissionPage_Exclusive|EXCLUSIVE<LINE>MISSION
+BuffMissionPage_No_Exclusive|NO EXCLUSIVE MISSION<LINE>FOR THIS CHARACTER
+BuffMissionPage_Start|START MISSION
+BuffMissionPage_Goal|MISSION GOALS
+BuffMissionPage_Buffs|MISSION BUFFS
+
 //CardSheetPage:
 CardSheetPage_Life_Countable|Cycles
 CardSheetPage_Life_Uncountable|Everlasting
@@ -37,12 +54,26 @@ ProgressionMenu_Show|PROGRESSION
 BuffConditionHUD_WinInfo|sleep to finish game
 BuffConditionHUD_WinTitle|WIN
 
+//BuffModeSelect
+Mode_Free|FREE MODE
+Mode_Mission|MISSION MODE
+Mode_Desc_Free|You can customize the game's difficulty,<LINE>mode and goals freely before starting a new game,<LINE>and can only get cards through card gachas.
+Mode_Desc_Mission|Choose a mission to start a new game.<LINE>Your goals and initial cards are decided by which mission you chose,<LINE>and you can't change the game's difficulty and mode.
 
 //BuffCardSlot
 InGameSlot_SlotTitle|BuffSlot
 InGameSlot_CardDetail|BuffDetail
 CardPickSlot_SlotTitle|Pick <Cards> cards
 
+//CardpediaCardSheet
+Everlasting|Everlasting
+Cycles|Cycles
+Stackable|Stackable
+Unstackable|Unstackable
+CardpediaCardSheet_Manually|Manually
+CardpediaCardSheet_Automatically|Automatically
+CardpediaCardSheet_Info|(Click the cards below to view the detail information)
+CardpediaCardSheet_None|(None)
 
 //Records
 totCard|Number of all buffs acquired:
@@ -69,19 +100,21 @@ DisplayName_MeetSS_SL|Meet Pebbles and Moon in {0} cycles
 DisplayName_Gourmand|Complete Gourmand Feast
 DisplayName_Interval_OutRange|Completed the task within {0}-{1} cycles, now hidden
 DisplayName_FixCycle|Complete the mission in {0} cycle
-DisplayName_MeltDownHunt|Kill {0}
+DisplayName_MeltDownHunt|Kill {0} {1} 
 DisplayName_Death|Complete the mission less than {0} death  
 DisplayName_CycleScore|Earn {0} points from creature kills this cycle
 DisplayName_SaveMoon|Save Moon in {0} cycles
 DisplayName_Battery|Install the Pebbles core to moon
 DisplayName_MeltDownBinah|Defeat An Arbiter
 DisplayName_Extermination|Kill {0} ceatures with {1}
+DisplayName_Score|Earn {0} points from creature kills
 
 //BuffCondition_BuffTypes
 all types|all types
 Negative|negative
 Positive|positive
 Duality|duality
+
 
 //BuffCondition_Builtin
 InRangeDisplayName_WormGrassWipeOutCondition|Wipe out all wormgrass in room

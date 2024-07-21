@@ -51,11 +51,27 @@ namespace RandomBuff
                             continue;
 
                         var splited = lines[i].Split('|');
-                        currentLangMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
-                        BuffPlugin.Log($"Load resource string : {splited[0].Trim()} | {splited[1].Trim()}, {languageID}");
+                        if (splited.Length != 2)
+                        {
+                            BuffPlugin.LogError($"Resource string format error at line:{i}, {lines[i]}");
+                        }
+                        else
+                        {
 
-                        if (!engLoaded && languageID == InGameTranslator.LanguageID.English)
-                            engMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
+
+                            if (!currentLangMapper.ContainsKey(splited[0].Trim()))
+                            {
+                                currentLangMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
+                                BuffPlugin.Log(
+                                    $"Load resource string : {splited[0].Trim()} | {splited[1].Trim()}, {languageID}");
+
+                            }
+                            else
+                                BuffPlugin.LogError($"buff resource string already contains key:{splited[0].Trim()}");
+
+                            if (!engLoaded && languageID == InGameTranslator.LanguageID.English)
+                                engMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
+                        }
                     }
                 }
             }

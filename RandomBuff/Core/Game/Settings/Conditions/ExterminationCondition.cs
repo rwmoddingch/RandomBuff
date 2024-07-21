@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Expedition;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -140,7 +141,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override string DisplayName(InGameTranslator translator)
         {
             
-            return string.Format(BuffResourceString.Get("DisplayName_Extermination"),killRequirement,translator.Translate(weaponType.value));
+            return string.Format(BuffResourceString.Get("DisplayName_Extermination"),killRequirement,BuffResourceString.Get(ChallengeTools.ItemName(weaponType),true));
         }
 
         public override string DisplayProgress(InGameTranslator translator)
