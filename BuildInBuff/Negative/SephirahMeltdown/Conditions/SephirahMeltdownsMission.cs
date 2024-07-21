@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                     new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedCentipede},
                     new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
-                    new DeathCondition(){deathCount = 12}
+                    new DeathCondition(){deathCount = 20}
                 },
                 gachaTemplate = new SephirahMeltdownsTemplate()
                 {

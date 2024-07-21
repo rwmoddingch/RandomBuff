@@ -73,7 +73,7 @@ namespace RandomBuff.Core.Progression
 
         internal static void Init()
         {
-            Register<TestCosmeticUnlock>();
+            //Register<TestCosmeticUnlock>();
             Register<FireworkCosmetic>();
             Register<CrownCosmetic>();
             Register<GlowingLeafCosmetic>();

@@ -111,6 +111,7 @@ namespace RandomBuff.Core.StaticsScreen
                 totalScore += condition.Exp;
             }
             BuffPlayerData.Instance.playerTotExp += totalScore;
+            
         }
 
         DelayCmpnt waitScoreDeletionDelay;

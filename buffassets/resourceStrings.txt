@@ -41,7 +41,7 @@ Notificaion_ConfirmButton|Confirm
 Notification_RewardTitle|Awards received:
 Notification_MissionReward|Unlock mission
 Notification_MissionReward_Unique|Unlock unique mission
-
+Notification_CosmeticReward|Unlock cosmetic
 
 //BuffMenu:
 Survival|SURVIVAL

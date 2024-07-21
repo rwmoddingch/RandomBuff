@@ -230,13 +230,13 @@ namespace RandomBuff.Render.UI
         protected override void OnMouseSingleClick()
         {
             if(CurrentFocusCard != null)
-                OnBuffCardSingleClick.Invoke(CurrentFocusCard);
+                OnBuffCardSingleClick?.Invoke(CurrentFocusCard);
         }
 
         protected override void OnMouseDoubleClick()
         {
             if(CurrentFocusCard != null)
-                OnBuffCardDoubleClick.Invoke(CurrentFocusCard);
+                OnBuffCardDoubleClick?.Invoke(CurrentFocusCard);
         }
 
     }
@@ -479,7 +479,7 @@ namespace RandomBuff.Render.UI
 
         void TriggerCard(BuffCard card)
         {
-            if (card.StaticData.Triggerable)
+            if (card.StaticData?.Triggerable ?? false)
             {
                 card.onMouseDoubleClick?.Invoke();
                 if (BuffPoolManager.Instance.TriggerBuff(card.ID))

@@ -159,6 +159,9 @@ namespace RandomBuff.Render.UI.Notification
 
         public virtual void SwitchState(State newState)
         {
+            if(newState == currentState)
+                return;
+
             currentState = newState;
             stateCounter = 0;
 

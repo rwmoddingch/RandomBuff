@@ -33,10 +33,6 @@
       <HintPath>..\include\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="HOOKS-RandomBuff">
-      <HintPath>..\include\HOOKS-RandomBuff.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\include\Mono.Cecil.dll</HintPath>
       <Private>False</Private>

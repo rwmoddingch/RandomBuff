@@ -110,7 +110,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         internal static void Init()
         {
-            var id = BuffID.None;
+            _ = BuffID.None;
             BuffRegister.RegisterGachaTemplate<NormalGachaTemplate>(GachaTemplateID.Normal);
             BuffRegister.RegisterGachaTemplate<QuickGachaTemplate>(GachaTemplateID.Quick,ConditionID.Card);
             BuffRegister.RegisterGachaTemplate<MissionGachaTemplate>(GachaTemplateID.Mission);

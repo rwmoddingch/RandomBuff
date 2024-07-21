@@ -42,6 +42,7 @@ Notificaion_ConfirmButton|确认
 Notification_RewardTitle|已获得奖励:
 Notification_MissionReward|解锁使命
 Notification_MissionReward_Unique|解锁专属使命
+Notification_CosmeticReward|解锁装饰品
 
 //BuffMenu:
 Survival|生存模式
@@ -109,15 +110,13 @@ DisplayName_Battery|将五块卵石的核心安装给仰望皓月
 DisplayName_MeltDownBinah|击败 Binah
 DisplayName_Extermination|使用{1}消灭 {0} 只生物
 DisplayName_Score|消灭生物获得{0}点分数
+InRangeDisplayName_WormGrassWipeOutCondition|清除房间内的所有舌草
 
 //BuffCondition_BuffTypes
 all types|所有类型
 Negative|负面
 Positive|正面
 Duality|双向
-
-//BuffCondition_Builtin
-InRangeDisplayName_WormGrassWipeOutCondition|清除房间内的所有舌草
 
 //BuffCondition_CommunityID
 Lizards|蜥蜴

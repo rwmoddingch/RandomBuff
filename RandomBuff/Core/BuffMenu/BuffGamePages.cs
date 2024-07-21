@@ -314,7 +314,7 @@ namespace RandomBuff.Core.BuffMenu
             Vector2 testPos = new Vector2(683f, 85f) + new Vector2(SlugcatSelectMenu.GetRestartTextOffset(gameMenu.CurrLang), 80f);
             subObjects.Add(backButton = new SimpleButton(gameMenu, this, gameMenu.Translate("BACK"), "NEWGAME_DETAIL_BACK", new Vector2(200f, 698f), new Vector2(110f, 30f)));
             subObjects.Add(startGameButton = new HoldButton(gameMenu, this, BuffResourceString.Get("BuffGameMenu_NewGame"), "NEWGAME_DETAIL_NEWGAME", new Vector2(683f, 85f), 40f));
-            subObjects.Add(settingButton = new SimpleButton(gameMenu, this, gameMenu.Translate(BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
+            subObjects.Add(settingButton = new SimpleButton(gameMenu, this, (BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
                 "NEWGAME_DETAIL_SELECT_MODE", new Vector2(683f - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
                 new Vector2(120, 40)));
             settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
@@ -448,7 +448,7 @@ namespace RandomBuff.Core.BuffMenu
                 var index = list.IndexOf(gameSetting.TemplateName) + 1;
                 gameSetting.LoadTemplate(list[index == list.Count ? 0 : index]);
 
-                settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
+                settingButton!.menuLabel.text = BuffResourceString.Get(gameSetting.TemplateName);
                 cardTitle.RequestSwitchTitle(BuffResourceString.Get(gameSetting.TemplateName));
                 ClearCurrentConditions();
                 InitConditions();
