@@ -61,8 +61,8 @@ namespace BuiltinBuffs.Positive
 
         public DeathFreeMedallionBuffData()
         {
-            WawaTest = CreatureTemplate.Type.BigEel;
-            BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
+            //WawaTest = CreatureTemplate.Type.BigEel;
+            //BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
 
             //try
             //{
@@ -79,7 +79,7 @@ namespace BuiltinBuffs.Positive
         public override void DataLoaded(bool newData)
         {
             base.DataLoaded(newData);
-            BuffPlugin.Log($"Get wawaTest : {WawaTest}");
+            //BuffPlugin.Log($"Get wawaTest : {WawaTest}");
 
         }
     }

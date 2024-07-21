@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative
             foreach (var player in game.Players)
             {
                 if (player.realizedCreature?.room != null &&
-                    player.realizedCreature?.room == game.cameras[0].room)
+                    player.realizedCreature?.room == game.cameras[0].room && !game.cameras[0].room.abstractRoom.gate)
                 {
                     foreach (var shortCut in player.realizedCreature.room.shortcuts.Where(i =>
                                  i.shortCutType == ShortcutData.Type.RoomExit &&

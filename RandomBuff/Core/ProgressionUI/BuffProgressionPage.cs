@@ -196,7 +196,7 @@ namespace RandomBuff.Core.ProgressionUI
             yPointer -= CreateSingleBlock(new Color(0.5f, 0.5f, 0.5f), noBindCosmetics, yPointer, true);
             foreach(var pair in nameForCosmetics)
             {
-                Color col = PlayerGraphics.SlugcatColor(pair.Key);
+                Color col = PlayerGraphics.DefaultSlugcatColor(pair.Key);
                 yPointer -= CreateSingleBlock(col, pair.Value, yPointer);
             }
 

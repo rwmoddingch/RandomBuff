@@ -148,7 +148,7 @@ namespace RandomBuff
                     BuffUtils.OnEnable();
 
                     //TODO : 测试用
-                    DevEnabled = true;
+                    //DevEnabled = true;
 
                     CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();

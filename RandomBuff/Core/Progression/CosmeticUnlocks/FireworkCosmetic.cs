@@ -28,12 +28,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             while(c.TryGotoNext(MoveType.After,
                 (i) => i.MatchLdsfld<SoundID>("Fire_Spear_Explode")))
             {
-                BuffPlugin.Log("Player_ClassMechanicsArtificer 1");
                 c.GotoNext(MoveType.After, (i) => i.MatchCallvirt<Room>("PlaySound"));
-                BuffPlugin.Log("Player_ClassMechanicsArtificer 2");
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Action<Player>>(PyroJumped);
-                BuffPlugin.Log("Player_ClassMechanicsArtificer 3");
             }
         }
 

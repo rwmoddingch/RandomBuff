@@ -49,7 +49,8 @@ namespace RandomBuffUtils.BuffEvents
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig.Invoke(self, abstractCreature, world);
-            OnEnterRoom(self.room.abstractRoom);
+            if(self.room != null) 
+                OnEnterRoom(self.room.abstractRoom);
         }
 
         private static void OnEnterRoom(AbstractRoom room)
