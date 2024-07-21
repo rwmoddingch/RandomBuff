@@ -32,7 +32,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         {
             this.minValue = minValue;
             this.maxValue = maxValue;
-            BuffPlugin.Log($"Create BuffConfigurableAcceptableRange, default : {defaultValue}, min : {minValue}, max : {maxValue}");
+            BuffPlugin.LogDebug($"Create BuffConfigurableAcceptableRange, default : {defaultValue}, min : {minValue}, max : {maxValue}");
         }
 
         public override object Clamp(object value)
@@ -62,12 +62,12 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         public BuffConfigurableAcceptableList(object defaultValue, object[] values) : base(defaultValue)
         {
             this.values = values;
-            string debugString = $"Create BuffConfigurableAcceptableList of {base.defaultValue.GetType()}, default : {base.defaultValue}, values:";
-            foreach(object value in values)
-            {
-                debugString = string.Concat(debugString, $"\n{value}");
-            }
-            BuffPlugin.Log(debugString);
+            //string debugString = $"Create BuffConfigurableAcceptableList of {base.defaultValue.GetType()}, default : {base.defaultValue}, values:";
+            //foreach(object value in values)
+            //{
+            //    debugString = string.Concat(debugString, $"\n{value}");
+            //}
+            //BuffPlugin.Log(debugString);
         }
 
         public override object Clamp(object value)
@@ -90,7 +90,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         public BuffConfigurableAcceptableKeyCode(KeyCode defaultkey) : base(defaultkey)
         {
             this.defaultkey = defaultkey;
-            BuffPlugin.Log($"Create BuffConfigurableAcceptableKeyCode, default : {defaultkey}");
+            BuffPlugin.LogDebug($"Create BuffConfigurableAcceptableKeyCode, default : {defaultkey}");
         }
 
         public override object Clamp(object value)
@@ -116,7 +116,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             this.valueA = valueA;
             this.valueB = valueB;
 
-            BuffPlugin.Log($"Create BuffConfigurableAcceptableKeyCode, valueA : {valueA}, valueB : {valueB}");
+            BuffPlugin.LogDebug($"Create BuffConfigurableAcceptableKeyCode, valueA : {valueA}, valueB : {valueB}");
         }
 
         public override object Clamp(object value)

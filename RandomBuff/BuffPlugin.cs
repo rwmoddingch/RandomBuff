@@ -246,9 +246,9 @@ namespace RandomBuff
             if (DevEnabled)
             {
                 UnityEngine.Debug.Log($"[RandomBuff] {message}");
-                if (canAccessLog)
-                    File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Debug]\t\t{message}\n");
             }
+            if (canAccessLog)
+                File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"[Debug]\t\t{message}\n");
 
         }
 
