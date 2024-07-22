@@ -119,7 +119,7 @@ namespace BuiltinBuffs.Duality
             float dmgPerFrame;
 
             Vector2 pos;
-            Creature killTag;
+            AbstractCreature killTag;
 
             LightSource lightSource;
             ParticleEmitter emitter;
@@ -133,7 +133,8 @@ namespace BuiltinBuffs.Duality
                 dmgPerFrame = dmgPerSec / 40f;
                 this.room = room;
                 this.pos = pos;
-                this.killTag = killTag;
+
+                this.killTag = killTag?.abstractCreature;
 
                 lightSource = new LightSource(pos, true, RadiatCol, this);
                 room.AddObject(lightSource);
@@ -178,7 +179,8 @@ namespace BuiltinBuffs.Duality
 
                     if(Vector2.Distance(creature.DangerPos, pos) < rad)
                     {
-                        creature.SetKillTag(killTag.abstractCreature);
+                        if(killTag != null)
+                            creature.SetKillTag(killTag);
                         creature.Violence(owner.firstChunk, null, creature.mainBodyChunk, null, Creature.DamageType.Explosion, dmgPerFrame, dmgPerFrame);
                     }
                 }
