@@ -98,7 +98,7 @@ namespace BuiltinBuffs.Duality
                                 {
                                     if (self.room != null)
                                     {
-                                        self.room.AddObject(new RandomBuffUtils.DamageOnlyExplosion(self.room, self, self.bodyChunks[crackerData.crackChunk[i].x].pos, 8, 40f * self.size, 20f * self.size, 5f * self.size,
+                                        self.room.AddObject(new RandomBuffUtils.DamageOnlyExplosion(self.room, self, self.bodyChunks[crackerData.crackChunk[i].x].pos, 8, 40f * self.size, 20f * self.size, 1.5f * self.size,
                                             100f * self.size, 0, self, 1f, 0f, 0f, CreatureTemplate.Type.Centipede));
                                         self.shellJustFellOff = crackerData.crackChunk[i].x;
                                         self.CentiState.shells[crackerData.crackChunk[i].x] = false;
@@ -114,10 +114,10 @@ namespace BuiltinBuffs.Duality
                                                     centipedeShell.lavaImmune = true;
                                                 }
                                                 self.room.AddObject(centipedeShell);
-                                                self.room.AddObject(new ShockWave(self.bodyChunks[crackerData.crackChunk[i].x].pos, 40f * self.size + 20f, 0.5f, 8, true));
+                                                self.room.AddObject(new ShockWave(self.bodyChunks[crackerData.crackChunk[i].x].pos, 40f * self.size + 20f, 0.01f, 8, true));
                                                 self.room.AddObject(new Explosion.ExplosionLight(self.bodyChunks[crackerData.crackChunk[i].x].pos, 40f * self.size + 20f, 0.8f, 8, Color.white));
                                                 self.room.AddObject(new Explosion.FlashingSmoke(self.bodyChunks[crackerData.crackChunk[i].x].pos, Custom.RNV() * 3f * UnityEngine.Random.value, 1f, Color.white, explodeColor, 11));
-                                                self.room.PlaySound(SoundID.Bomb_Explode, self.bodyChunks[crackerData.crackChunk[i].x], false, 0.8f * self.size + 0.2f, 1.2f);
+                                                self.room.PlaySound(SoundID.Bomb_Explode, self.bodyChunks[crackerData.crackChunk[i].x], false, 0.4f * self.size + 0.2f, 1.2f);
                                             }
                                         }
 
@@ -131,7 +131,7 @@ namespace BuiltinBuffs.Duality
                                 {
                                     if (self.room != null)
                                     {
-                                        self.room.AddObject(new RandomBuffUtils.DamageOnlyExplosion(self.room, self, self.bodyChunks[crackerData.crackChunk[i].y].pos, 8, 40f * self.size, 20f * self.size, 5f * self.size,
+                                        self.room.AddObject(new RandomBuffUtils.DamageOnlyExplosion(self.room, self, self.bodyChunks[crackerData.crackChunk[i].y].pos, 8, 40f * self.size, 20f * self.size, 1.5f * self.size,
                                             100f * self.size, 0, self, 1f, 0f, 0f, CreatureTemplate.Type.Centipede));
                                         self.shellJustFellOff = crackerData.crackChunk[i].y;
                                         self.CentiState.shells[crackerData.crackChunk[i].y] = false;
@@ -147,10 +147,10 @@ namespace BuiltinBuffs.Duality
                                                     centipedeShell.lavaImmune = true;
                                                 }
                                                 self.room.AddObject(centipedeShell);
-                                                self.room.AddObject(new ShockWave(self.bodyChunks[crackerData.crackChunk[i].y].pos, 40f * self.size + 20f, 0.5f, 8, true));
+                                                self.room.AddObject(new ShockWave(self.bodyChunks[crackerData.crackChunk[i].y].pos, 40f * self.size + 20f, 0.01f, 8, true));
                                                 self.room.AddObject(new Explosion.ExplosionLight(self.bodyChunks[crackerData.crackChunk[i].y].pos, 40f * self.size + 20f, 0.8f, 8, Color.white));
                                                 self.room.AddObject(new Explosion.FlashingSmoke(self.bodyChunks[crackerData.crackChunk[i].y].pos, Custom.RNV() * 3f * UnityEngine.Random.value, 1f, Color.white, explodeColor, 11));
-                                                self.room.PlaySound(SoundID.Bomb_Explode, self.bodyChunks[crackerData.crackChunk[i].y], false, 0.8f * self.size + 0.2f, 1.2f);
+                                                self.room.PlaySound(SoundID.Bomb_Explode, self.bodyChunks[crackerData.crackChunk[i].y], false, 0.4f * self.size + 0.2f, 1.2f);
                                             }
                                         }
 
@@ -159,7 +159,7 @@ namespace BuiltinBuffs.Duality
 
                             }
                             crackerData.crackChunk[i] += new IntVector2(-1, 1);
-                            crackerData.crackingCooldown = 10;
+                            crackerData.crackingCooldown = 20;
                         }
                     }
                 }
