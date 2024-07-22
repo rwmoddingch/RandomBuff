@@ -66,25 +66,28 @@ namespace BuiltinBuffs.Duality
             orig(self, eu);
             if (butterModule.TryGetValue(self, out var module))
             {
-                if (self.bodyMode == Player.BodyModeIndex.ZeroG || self.bodyMode == Player.BodyModeIndex.Swimming || self.bodyMode == Player.BodyModeIndex.Stunned || self.animation == Player.AnimationIndex.AntlerClimb || self.animation == Player.AnimationIndex.VineGrab)
+                Vector2 currentVel = 0.5f * (self.firstChunk.vel + self.bodyChunks[1].vel);
+
+                if ((self.bodyMode == Player.BodyModeIndex.ZeroG || self.bodyMode == Player.BodyModeIndex.Swimming || self.bodyMode == Player.BodyModeIndex.Stunned || self.bodyMode == Player.BodyModeIndex.CorridorClimb ||
+                    self.bodyMode == Player.BodyModeIndex.WallClimb || self.animation == Player.AnimationIndex.AntlerClimb || self.animation == Player.AnimationIndex.VineGrab 
+                    || self.animation == Player.AnimationIndex.LedgeCrawl || self.animation == Player.AnimationIndex.LedgeGrab))
                 {
                     module.butterVel *= 0f;
                     return;
                 }
 
-                if (self.animation == Player.AnimationIndex.ClimbOnBeam || self.bodyMode == Player.BodyModeIndex.CorridorClimb)
+                if (self.animation == Player.AnimationIndex.ClimbOnBeam)
                 {
                     module.butterVel *= 0f;
                 }
 
                 module.butterVel *= self.bodyMode == Player.BodyModeIndex.Crawl ? 0.96f : 0.99f;
-                Vector2 currentVel = 0.5f * (self.firstChunk.vel + self.bodyChunks[1].vel);
                 if ((module.butterVel.magnitude < currentVel.magnitude && module.butterVel.x * currentVel.x > 0)||(lastCanJump <= 0 && self.canJump > 0))
                 {
                     module.butterVel = currentVel;
                 }
 
-                if (self.canJump > 0)
+                if (self.canJump > 0 || self.wantToJump <= 0)
                 {                                                            
                     if(currentVel.x * module.butterVel.x >= 0)
                     {
@@ -102,11 +105,13 @@ namespace BuiltinBuffs.Duality
                     }
                     
                 }
+                /*
                 else if(self.bodyMode != Player.BodyModeIndex.CorridorClimb)
                 {
                     self.firstChunk.vel += new Vector2(module.butterVel.x - currentVel.x, 0);
                     self.bodyChunks[1].vel += new Vector2(module.butterVel.x - currentVel.x, 0);
                 }
+                */
             }
         }
 
