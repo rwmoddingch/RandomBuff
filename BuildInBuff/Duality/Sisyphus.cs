@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace HotDogGains.Duality
@@ -19,6 +20,13 @@ namespace HotDogGains.Duality
         {
             BuffRegister.RegisterBuff<SisyphusBuff, SisyphusBuffData, SisyphusBuffEntry>(SisyphusID);
         }
+
+        public static void LoadAssets()
+        {
+            BuffSounds.LoadSound(Enums.Sounds.sisyphus, SisyphusID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("sisyphus"));
+
+        }
+
         public static void HookOn()
         {
             On.Player.SlugcatGrab += Player_SlugcatGrab;

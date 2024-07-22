@@ -55,7 +55,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             targetScore = Mathf.RoundToInt(Mathf.Lerp(20f, 125f, difficulty) / 10f) * 10;
             return ConditionState.Ok_NoMore;

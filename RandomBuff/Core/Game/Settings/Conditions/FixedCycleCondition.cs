@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using RandomBuff;
-using RandomBuff.Core.Game.Settings.Conditions;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
+namespace RandomBuff.Core.Game.Settings.Conditions
 {
     internal class FixedCycleCondition : Condition
     {
-        public static readonly ConditionID FixedCycle = new ConditionID(nameof(FixedCycle), true);
-        public override ConditionID ID => FixedCycle;
+        public override ConditionID ID => ConditionID.FixedCycle;
         public override int Exp => 300;
 
         public int SetCycle

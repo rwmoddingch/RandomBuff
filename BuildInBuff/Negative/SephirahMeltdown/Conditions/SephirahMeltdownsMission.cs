@@ -67,8 +67,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         public void RegisterMission()
         {
             BuffRegister.RegisterCondition<MeltdownHuntCondition>(MeltdownHuntCondition.MeltdownHunt, "Meltdown Hunt",true);
-            BuffRegister.RegisterCondition<DeathCondition>(DeathCondition.Death, "Death");
-            BuffRegister.RegisterCondition<FixedCycleCondition>(FixedCycleCondition.FixedCycle, "Fix Cycles", true);
             BuffRegister.RegisterCondition<BinahCondition>(BinahCondition.Binah, "Binah", true);
 
             MissionRegister.RegisterMission(SephirahMeltdowns, new SephirahMeltdownsMission());
@@ -87,10 +85,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         public override void EnterGame(RainWorldGame game)
         {
             if (game.GetStorySession.saveState.cycleNumber == 4)
-            {
-                ExpeditionGame.burdenTrackers.Add(new ExpeditionGame.PursuedTracker(game));
                 BuffUtils.Log("SephirahMeltdown", "Add bur-pursued at 4 cycles");
-            }
+            
 
             base.EnterGame(game);
         }

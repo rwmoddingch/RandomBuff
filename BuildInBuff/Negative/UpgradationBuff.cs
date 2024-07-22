@@ -48,7 +48,7 @@ namespace BuiltinBuffs.Negative
             {
                 if (obj is Player)
                     continue;
-                if (obj is Creature creature)
+                if (obj is Creature creature && !creature.dead)
                 {
                     if (IgnoreThisType(creature.abstractCreature.creatureTemplate.type))
                         continue;

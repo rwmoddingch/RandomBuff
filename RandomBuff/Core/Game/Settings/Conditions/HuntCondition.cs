@@ -47,13 +47,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions = null)
+            List<Condition> conditions = null)
         {
 
             ChallengeTools.ExpeditionCreature expeditionCreature = GetExpeditionCreature(name,
                 ExpeditionData.challengeDifficulty,
-                sameConditions != null
-                    ? sameConditions.OfType<HuntCondition>().Select(i => i.type).ToArray()
+                conditions != null
+                    ? conditions.OfType<HuntCondition>().Select(i => i.type).ToArray()
                     : Array.Empty<CreatureTemplate.Type>());
 
             if (expeditionCreature == null)

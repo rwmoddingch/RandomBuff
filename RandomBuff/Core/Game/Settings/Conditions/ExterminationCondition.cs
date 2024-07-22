@@ -149,7 +149,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             return $"[{kills}/{killRequirement}]";
         }
 
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             weaponType = AbstractPhysicalObject.AbstractObjectType.Spear;
             killRequirement = Random.Range(10, 50);

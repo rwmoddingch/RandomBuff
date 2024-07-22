@@ -33,11 +33,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override int Exp => 100;
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions = null)
+            List<Condition> conditions = null)
         {
-            sameConditions ??= new List<Condition>();
+            conditions ??= new List<Condition>();
             var re = WinState.EndgameID.values.entries.Select(i => new WinState.EndgameID(i)).Where(i =>
-                sameConditions.All(j => (j as AchievementCondition).achievementID != i)).ToList();
+                conditions.All(j => (j as AchievementCondition).achievementID != i)).ToList();
             re.Remove(MoreSlugcatsEnums.EndgameID.Mother);
             re.Remove(MoreSlugcatsEnums.EndgameID.Gourmand);
 

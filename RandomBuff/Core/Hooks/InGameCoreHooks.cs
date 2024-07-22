@@ -137,6 +137,10 @@ namespace RandomBuff.Core.Hooks
                     BuffPlugin.LogDebug($"Force start pos:{pos}");
                     self.denPosition = self.lastVanillaDen = pos;
                 }
+                else if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+                {
+                    self.denPosition = self.lastVanillaDen = "SU_INTRO01";
+                }
             }
         }
 

@@ -44,6 +44,7 @@ namespace RandomBuffUtils
             ObjectExtendHooks.OnEnable();
             BuffSounds.OnEnable();
             MeshManager.OnModsInit();
+            BuffScene.OnModsInit();
 
             UniformLighting.OnModsInit();
             everInit = true;

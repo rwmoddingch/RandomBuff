@@ -41,10 +41,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             return $"({Mathf.FloorToInt(lastLike * 100f)}%)";
         }
 
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
-            sameConditions ??= new List<Condition>();
-            var choices = CreatureCommunities.CommunityID.values.entries.Select((i) => new CreatureCommunities.CommunityID(i)).Where((i) =>!exclusiveIDs.Contains(i)).Where((i) => sameConditions.All(j => (j as LikeCondition).communityID != i)).ToList();
+            conditions ??= new List<Condition>();
+            var choices = CreatureCommunities.CommunityID.values.entries.Select((i) => new CreatureCommunities.CommunityID(i)).Where((i) =>!exclusiveIDs.Contains(i)).Where((i) => conditions.OfType<LikeCondition>().All(j => j.communityID != i)).ToList();
 
             if (choices.Count == 0)
                 return ConditionState.Fail;

@@ -196,9 +196,49 @@ namespace BuiltinBuffs.Expeditions
             il.Emit(OpCodes.Ldstr, item);
             il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.AddUnique), new[] { typeof(List<string>), typeof(string) }));
             il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldstr, item);
+            il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.ExpeditionBuffCtor), new[] { typeof(string) }));
+
             il.Emit(OpCodes.Call, typeof(RuntimeBuff).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First());
             il.Emit(OpCodes.Ret);
         }
+
+
+        public static void ExpeditionBuffCtor(string id)
+        {
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                switch (id)
+                {
+                    case "unl-backspear":
+                        foreach(var ply in game.Players.Select(i => i.realizedCreature as Player))
+                            if (ply != null)
+                                ply.spearOnBack = new Player.SpearOnBack(ply);
+                        break;
+                    case "unl-agility":
+                        foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
+                            if (ply != null)
+                            {
+                                ply.slugcatStats.lungsFac = 0.15f;
+                                ply.slugcatStats.runspeedFac = 1.75f;
+                                ply.slugcatStats.poleClimbSpeedFac = 1.8f;
+                                ply.slugcatStats.corridorClimbSpeedFac = 1.6f;
+                            }
+                        break;
+                    case "unl-glow":
+                        game.GetStorySession.saveState.theGlow = true;
+                        break;
+                    case "unl-karma":
+                        game.GetStorySession.saveState.deathPersistentSaveData.reinforcedKarma = true;
+                        break;
+                    case "bur-pursued":
+                        if (ExpeditionGame.burdenTrackers.All( i => !(i is ExpeditionGame.PursuedTracker)))
+                            ExpeditionGame.burdenTrackers.Add(new ExpeditionGame.PursuedTracker(game));
+                        break;
+                }
+            }
+        }
+
 
         public static void RegisterStaticData([NotNull] BuffStaticData data)
         {

@@ -38,11 +38,11 @@ namespace BuiltinBuffs.Positive
                 (i) => i.MatchCall<SlugcatStats>("SpearSpawnExplosiveRandomChance"),
                 (i) => i.MatchClt(),
                 (i) => i.MatchNewobj<AbstractSpear>(),
-                (i) => i.MatchStloc(71),
+                (i) => i.MatchStloc(73),
                 (i) => i.MatchLdsfld<ModManager>("MSC"),
                 (i) => i.Match(OpCodes.Brfalse_S));
             c1.Index -= 2;
-            c1.Emit(OpCodes.Ldloc, 71);
+            c1.Emit(OpCodes.Ldloc, 73);
             c1.EmitDelegate<Action<AbstractSpear>>((abSpear) =>
             {
                 abSpear.explosive = false;

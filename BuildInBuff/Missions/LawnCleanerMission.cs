@@ -79,7 +79,7 @@ namespace BuiltinBuffs.Missions
             return $"{finishedRooms.Count} / {roomRequirements}";
         }
 
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             roomRequirements = Random.Range(2, 5);
             return ConditionState.Ok_NoMore;
