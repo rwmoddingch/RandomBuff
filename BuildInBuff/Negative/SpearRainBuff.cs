@@ -47,6 +47,8 @@ namespace BuiltinBuffs.Negative
         {
             ILCursor c1 = new ILCursor(il);
             c1.Index = 0;
+            c1.Emit(OpCodes.Ldarg_S, (byte)1);
+            c1.EmitDelegate<Action<RoomCamera.SpriteLeaser>>(sLeaser => sLeaser.sprites = Array.Empty<FSprite>());
             c1.Emit(OpCodes.Ret);
         }
 

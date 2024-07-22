@@ -159,9 +159,9 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="buffId"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public bool IsCollected(BuffID buffId)=> collectData.Contains(buffId.value);
-        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsCollected(BuffID buffId) => collectData.Contains(buffId.value) || BuffPlugin.AllCardDisplay;
+
         /// <summary>
         /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()
         /// </summary>

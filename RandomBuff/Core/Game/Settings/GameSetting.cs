@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings
@@ -38,6 +37,8 @@ namespace RandomBuff.Core.Game.Settings
         public SlugcatStats.Name name;
 
         public HashSet<ConditionID> cantAddMore = new();
+
+        private HashSet<ConditionID> cantAddMoreTmp = new();
 
         public List<BuffID> fallbackPick = null;
 
@@ -197,12 +198,15 @@ namespace RandomBuff.Core.Game.Settings
         {
             var re = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(id).Type);
             var result = re.SetRandomParameter(name, Difficulty, conditions.ToList());
-            if (result == Condition.ConditionState.Ok_NoMore || result == Condition.ConditionState.Fail)
+            if (result is Condition.ConditionState.Ok_NoMore or Condition.ConditionState.Fail)
                 cantAddMore.Add(re.ID);
-            conditions.Add(re);
+            else if(result == Condition.ConditionState.Fail_Tmp)
+                cantAddMoreTmp.Add(re.ID);
 
-            if (result == Condition.ConditionState.Fail)
+            if (result is Condition.ConditionState.Fail or Condition.ConditionState.Fail_Tmp)
                 return null;
+
+            conditions.Add(re);
             return re;
         }
 
@@ -210,6 +214,8 @@ namespace RandomBuff.Core.Game.Settings
         {
             if (cantAddMore.Contains(condition.ID))
                 cantAddMore.Remove(condition.ID);
+            if (cantAddMoreTmp.Contains(condition.ID))
+                cantAddMoreTmp.Remove(condition.ID);
             conditions.Remove(condition);
         }
 
@@ -217,6 +223,7 @@ namespace RandomBuff.Core.Game.Settings
         {
             cantAddMore.Clear();
             conditions.Clear();
+            cantAddMoreTmp.Clear();
         }
 
         /// <summary>
@@ -228,7 +235,7 @@ namespace RandomBuff.Core.Game.Settings
         public (Condition condition, bool canGetMore) GetRandomCondition()
         {
             var list = BuffRegister.GetAllConditionList();
-            list.RemoveAll(i =>cantAddMore.Contains(i) ||
+            list.RemoveAll(i => cantAddMore.Contains(i) || cantAddMoreTmp.Contains(i) ||
                                  !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
 
             if (list.Count == 0)
@@ -240,7 +247,9 @@ namespace RandomBuff.Core.Game.Settings
             if (newCondition == null)
                 return (null, false);
 
-            return (newCondition, cantAddMore.Count < BuffRegister.GetAllConditionList().Count);
+
+            cantAddMoreTmp.Clear();
+            return (newCondition, (cantAddMore.Count) < BuffRegister.GetAllConditionList().Count);
         }
 
 

@@ -149,7 +149,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement Condition");
             BuffRegister.RegisterCondition<LikeCondition>(ConditionID.Like, "Like Condition");
             BuffRegister.RegisterCondition<MeetSS_SLCondition>(ConditionID.MeetSS_SL, "Meet SS and SL");
-            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand Feast",true);
+            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand Feast");
             BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Score Condition");
 
             BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
@@ -164,7 +164,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             Ok_More,
             Ok_NoMore,
-            Fail
+            Fail,
+            Fail_Tmp,
         }
     }
 }

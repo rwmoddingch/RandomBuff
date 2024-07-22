@@ -16,10 +16,7 @@ namespace BuildInBuff.Positive
     class ColorEaterBuff : Buff<ColorEaterBuff, ColorEaterBuffData>
     {
         public override BuffID ID => ColorEaterBuffEntry.ColorEaterID;
-        public override void Update(RainWorldGame game)
-        {
-            base.Update(game);
-        }
+      
         public override bool Trigger(RainWorldGame game)
         {
             if (game.AlivePlayers.Count > 0)
@@ -90,6 +87,9 @@ namespace BuildInBuff.Positive
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
+            if (self.room != null && !self.Consious)
+                return;
+
             var plateData = self.EatPlate();
             //趴下按下吸色
             if (self.bodyMode == Player.BodyModeIndex.Crawl && self.input[0].y < 0)

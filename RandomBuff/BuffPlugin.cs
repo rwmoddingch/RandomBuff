@@ -55,6 +55,8 @@ namespace RandomBuff
 
         internal static BuffPlugin Instance { get; private set; }
 
+        public static bool AllCardDisplay { get; private set; }
+
         public const string ModId = "randombuff";
 
         public void OnEnable()
@@ -128,6 +130,13 @@ namespace RandomBuff
                     {
                         DevEnabled = true;
                         LogWarning("Debug Enable");
+                    }
+
+                    if (File.Exists(AssetManager.ResolveFilePath("buffallcards.txt")))
+                    {
+                        AllCardDisplay = true;
+                        LogWarning("Displayed all cards");
+
                     }
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();

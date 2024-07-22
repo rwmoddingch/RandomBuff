@@ -9,8 +9,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public override ConditionID ID => ConditionID.Death;
         public override int Exp => 300;
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
+            if (conditions.Count < 2)
+                return ConditionState.Fail_Tmp;
+
             deathCount = (int)Random.Range(Mathf.Lerp(5, 15, 1 - difficulty), Mathf.Lerp(10, 30, 1 - difficulty));
             return ConditionState.Ok_NoMore;
         }

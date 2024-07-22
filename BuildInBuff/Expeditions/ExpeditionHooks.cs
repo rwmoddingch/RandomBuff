@@ -75,131 +75,6 @@ namespace BuiltinBuffs.Expeditions
 
 
 
-        public class MeshTest : CosmeticSprite
-        {
-            private GameObject obj;
-            private FGameObjectNode node;
-            public MeshTest(Room room, Vector2 pos)
-            {
-                this.room = room;
-                this.pos = pos;
-            }
-
-            public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-            {
-                sLeaser.sprites = new FSprite[1];
-                sLeaser.sprites[0] = new FSprite("Futile_White")
-                {
-                    shader = FakeCreatureEntry.Turbulent,
-                    scale = 20,
-                    alpha = 0.1f,
-                    color = new Color(0.7f,1f,10f)
-                };
-                AddToContainer(sLeaser,rCam,rCam.ReturnFContainer("Water"));
-            }
-
-            public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-            {
-                base.AddToContainer(sLeaser, rCam, newContatiner);
-            }
-
-            private float time;
-
-            public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-            {
-                base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-                sLeaser.sprites[0].SetPosition(pos-camPos);
-            }
-        }
-
-        [BuffAbstractPhysicalObject]
-        public class TestAb : AbstractSpear , IBuffAbstractPhysicalObjectInitialization
-        {
-            [BuffAbstractPhysicalObjectProperty]
-            public int test1 = -1;
-            [BuffAbstractPhysicalObjectProperty]
-            public int test2 { get; private set; } = -1;
-
-            public override void Realize()
-            {
-                BuffUtils.Log("tEST","Test realized");
-                realizedObject = new TestObject(this);
-            }
-
-            public override string ToString()
-            {
-                if (test1 == -1)
-                    test1 = Random.Range(10, 50);
-                if (test2 == -1)
-                    test2 = Random.Range(10, 50);
-                return base.ToString();
-            }
-
-            public AbstractPhysicalObject Initialize(World world, AbstractObjectType type, WorldCoordinate pos, EntityID Id,
-                string[] unrecognizedAttributes)
-            {
-                BuffUtils.Log("tEST","sdsdsd");
-                return new TestAb(world, pos, ID);
-            }
-
-
-            public TestAb(World world, WorldCoordinate pos, EntityID ID) : base(world,null, pos, ID, false)
-            {
-            }
-
-        }
-
-        public class TestObject : PlayerCarryableItem, IDrawable
-        {
-            private TestAb ab;
-            public TestObject(AbstractPhysicalObject abstractPhysicalObject) : base(abstractPhysicalObject)
-            {
-                ab = abstractPhysicalObject as TestAb;
-                base.bodyChunks = new BodyChunk[1];
-                base.bodyChunks[0] = new BodyChunk(this, 0, new Vector2(0f, 0f), 5f, 0.07f);
-                this.bodyChunkConnections = Array.Empty<BodyChunkConnection>();
-                base.airFriction = 0.999f;
-                base.gravity = 0.9f;
-                this.bounce = 0.4f;
-                this.surfaceFriction = 0.4f;
-                this.collisionLayer = 2;
-                base.waterFriction = 0.98f;
-                base.buoyancy = 0.4f;
-                base.firstChunk.loudness = 9f;
-            }
-            
-
-            public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-            {
-                label?.RemoveFromContainer();
-                label = null;
-                sLeaser.sprites = Array.Empty<FSprite>();
-                label = new FLabel(Custom.GetFont(), $"{ab.test1},{ab.test2}");
-                AddToContainer(sLeaser,rCam,null);
-            }
-
-            public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-            {
-                label.SetPosition(firstChunk.pos - camPos);
-            }
-
-            private FLabel label;
-
-            public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
-            {
-                
-            }
-
-            public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-            {
-                rCam.ReturnFContainer("HUD").AddChild(label);
-            }
-        }
-
-
-        private static int index = 0;
-        private static int index2 = 0;
-
         #endregion
         public static void OnModsInit()
         {
@@ -214,8 +89,20 @@ namespace BuiltinBuffs.Expeditions
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
             On.ProcessManager.RequestMainProcessSwitch_ProcessID += ProcessManager_RequestMainProcessSwitch_ProcessID;
+
+            _ = new Hook(typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),BindingFlags.Static | BindingFlags.Public).GetGetMethod(),
+                typeof(ExpeditionHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet), BindingFlags.Static | BindingFlags.NonPublic));
+             
         }
 
+        private static List<Challenge> ExpeditionData_ChallengeListGet(Func<List<Challenge>> orig)
+        {
+
+            if (Custom.rainWorld.BuffMode())
+                return new List<Challenge>();
+            return orig();
+
+        }
         private static void ProcessManager_RequestMainProcessSwitch_ProcessID(On.ProcessManager.orig_RequestMainProcessSwitch_ProcessID orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
             if (self.rainWorld.BuffMode() && (ID == ExpeditionEnums.ProcessID.ExpeditionGameOver ||

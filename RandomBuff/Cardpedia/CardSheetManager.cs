@@ -93,7 +93,7 @@ namespace RandomBuff.Cardpedia
                 }
                 catch
                 {
-                    Debug.Log($"[Cardpedia] Failed to get static data, skipping the problematic buff:" + id);
+                    BuffPlugin.LogError($"[Cardpedia] Failed to get static data, skipping the problematic buff:" + id);
                 }
             }
         }
