@@ -26,7 +26,7 @@ namespace BuiltinBuffs.Missions
                     new AchievementCondition() { achievementID = WinState.EndgameID.Chieftain }}
             };
 
-            startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("Upgradation"));
+            startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("ChronoLizard"));
             startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("MobileAssault"));
             startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("StoneofBlessing"));
         }

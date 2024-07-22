@@ -4,7 +4,7 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "FFF0B9",
+    "Color" : "dedede",
     
     "Chinese" : {
         "BuffName" : "潘多拉魔盒",

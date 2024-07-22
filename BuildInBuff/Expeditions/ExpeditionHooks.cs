@@ -39,15 +39,7 @@ namespace BuiltinBuffs.Expeditions
                     //var all = ExpeditionProgression.burdenGroups.First().Value;
                     //var id = new BuffID(all[Random.Range(0, all.Count)]);
                     //id.CreateNewBuff();
-                    if (BuffCustom.TryGetGame(out var game))
-                    {
-                        AbstractCreature ab = new AbstractCreature(game.world,
-                            StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedCentipede), null,
-                            game.Players[0].pos, game.GetNewID());
-
-                        Centipede c = new Centipede(ab, game.world);
-                        game.GetStorySession.playerSessionRecords[0].AddKill(c);
-                    }
+                    new BuffID("unl-agility").CreateNewBuff();
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))

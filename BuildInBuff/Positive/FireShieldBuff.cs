@@ -323,13 +323,13 @@ namespace BuiltinBuffs.Positive
                     creature.SetKillTag(this.bindCreature.abstractCreature);
                     if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
                     {
-                        return 0.1f + 0.03f * level;
+                        return 0.005f;// + 0.001f * level;
                     }
                 }
                 else
                     return 0f;
             }
-            return 0.1f + 0.03f * level;
+            return 0.005f;// + 0.001f * level;
         }
 
         public override void Update(bool eu)

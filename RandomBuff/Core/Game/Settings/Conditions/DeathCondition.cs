@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using RandomBuff;
-using RandomBuff.Core.Game.Settings.Conditions;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
+namespace RandomBuff.Core.Game.Settings.Conditions
 {
     internal class DeathCondition : Condition
     {
-        public static readonly ConditionID Death = new ConditionID(nameof(Death), true);
-        public override ConditionID ID => Death;
+        public override ConditionID ID => ConditionID.Death;
         public override int Exp => 300;
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
         {

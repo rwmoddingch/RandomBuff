@@ -27,12 +27,12 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions)
+            List<Condition> conditions)
         {
             List<string> list = new() { "all", "Positive", "Negative", "Duality" };
     
 
-            foreach (var condition in sameConditions.Select(i => i as CardCondition))
+            foreach (var condition in conditions.Select(i => i as CardCondition))
                 if(condition.all)
                     list.Remove("all");
                 else if (!condition.all && list.Contains(condition.type.ToString()))

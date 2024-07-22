@@ -85,18 +85,6 @@ namespace TemplateGains
                 missile.Update();
             }
 
-            //if (niceSlug != null)
-            //{
-            //    self.suckPoint = null;
-            //    self.bodyChunks[1].vel.y += self.gravity * 2.2f;
-            //    self.bodyChunks[1].vel += (Custom.DirVec(self.firstChunk.pos, niceSlug.firstChunk.pos) * 0.7f);
-            //}
-            //else if (playerIsHere)
-            //{
-            //    self.suckPoint = null;
-            //    self.bodyChunks[0].vel.y += self.gravity * 1.2f;
-            //    self.bodyChunks[1].vel.y += self.gravity * 1.2f;
-            //}
         }
 
     }
@@ -158,35 +146,6 @@ namespace TemplateGains
             Missile2();
             return;
 
-            var nextPos = Custom.Bezier(start, exPos1, end, exPos2, Mathf.InverseLerp(maxCount, 0, trackCount));
-
-            //改变龟龟朝向
-            self.shellDirection = Custom.DirVec(nextPos, self.bodyChunks[1].pos);
-            //让龟龟按着曲线往玩家那里飞
-            self.bodyChunks[0].vel = Custom.LerpMap(Vector2.Distance(nextPos,self.firstChunk.pos),3,100,5,10)*Custom.DirVec(self.firstChunk.pos,nextPos);
-
-            //拉伸龟龟让他更像在飞
-            self.bodyChunks[1].vel += Custom.DirVec(nextPos, self.bodyChunks[0].pos) * 5f;
-            self.bodyChunks[0].vel-= Custom.DirVec(nextPos, self.bodyChunks[0].pos) * 5f;
-
-            if (trackCount%6==0)
-            {
-
-                if (smoke.room!=self.room)
-                {
-                    smoke.Destroy(); 
-                    smoke = new MissileSmoke(self.room);
-                }
-
-                var t = Mathf.InverseLerp(800, 0, Vector2.Distance(self.firstChunk.pos, end));
-                if (Random.value<t)
-                {
-                    self.room.PlaySound(Enums.Sounds.Snail_Missile, self.firstChunk.pos, t, t * 2);
-                }
-                
-                //冒烟
-                smoke.EmitSmoke(self.firstChunk.pos, -self.firstChunk.vel+Custom.RNV(), true, Random.Range(20, 40));
-            }
 
         }
         public void Missile2()

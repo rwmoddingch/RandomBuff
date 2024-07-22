@@ -48,10 +48,6 @@ namespace BuiltinBuffs.Duality
 
         public override bool Trigger(RainWorldGame game)
         {
-            var player = game.Players[0];
-            var obj = new AbstractSurpriseGift(player.Room.world, null, player.pos, player.Room.world.game.GetNewID());
-            player.Room.AddEntity(obj);
-            obj.RealizeInRoom();
             return false;
         }
     }

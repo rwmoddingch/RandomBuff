@@ -4,7 +4,7 @@
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "6E3B3B",
+    "Color" : "ffffff",
     "Chinese" : {
         "BuffName" : "哑弹",
         "Description" : "拾荒者手雷有概率无法爆炸"

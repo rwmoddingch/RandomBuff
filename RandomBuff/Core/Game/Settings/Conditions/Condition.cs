@@ -26,6 +26,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public static ConditionID MeetSS_SL;
         public static ConditionID Extermination;
+        public static ConditionID FixedCycle;
+
+        public static ConditionID Death;
+
 
         static ConditionID()
         {
@@ -40,6 +44,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             Extermination = new ConditionID("Extermination", true);
             Score = new ConditionID(nameof(Score), true);
             //SaveSL = new ConditionID("SaveSL", true);
+            FixedCycle = new(nameof(FixedCycle), true);
+            Death = new(nameof(Death), true);
         }
 
         public ConditionID(string value, bool register = false) : base(value, register)
@@ -104,7 +110,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         //如果可以重复第二项则为已有同类型的列表
         //返回true代表可以继续选择本类型
         public abstract ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions);
+            List<Condition> conditions);
 
         //获取进度
         public abstract string DisplayProgress(InGameTranslator translator);
@@ -143,12 +149,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement Condition");
             BuffRegister.RegisterCondition<LikeCondition>(ConditionID.Like, "Like Condition");
             BuffRegister.RegisterCondition<MeetSS_SLCondition>(ConditionID.MeetSS_SL, "Meet SS and SL");
-            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand Feast");
+            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand Feast",true);
             BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Score Condition");
 
             BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
             BuffRegister.RegisterCondition<ExterminationCondition>(ConditionID.Extermination, "Extermination Condition");
             BuffRegister.RegisterCondition<ScoreCondition>(ConditionID.Score, "Score Condition");
+            BuffRegister.RegisterCondition<DeathCondition>(ConditionID.Death, "Death");
+            BuffRegister.RegisterCondition<FixedCycleCondition>(ConditionID.FixedCycle, "Fix Cycles", true);
 
         }
 

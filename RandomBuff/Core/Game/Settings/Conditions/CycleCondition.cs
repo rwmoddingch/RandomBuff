@@ -36,7 +36,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
-            List<Condition> sameConditions = null)
+            List<Condition> conditions = null)
         {
             cycle = (int)Random.Range(Mathf.Lerp(5, 15, difficulty), Mathf.Lerp(10, 30, difficulty));
             BuffPlugin.LogDebug($"Add Cycle Condition {cycle}");

@@ -14,7 +14,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
     {
         protected bool IsCanUse => currentCycle >= minConditionCycle && currentCycle < maxConditionCycle;
 
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
             => ConditionState.Ok_NoMore;
 
         public abstract string InRangeDisplayName();

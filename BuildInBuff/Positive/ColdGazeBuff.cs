@@ -204,9 +204,9 @@ namespace BuiltinBuffs.Positive
 
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
         {
-            orig(self);
+            orig(self);/*
             if (Input.GetKeyDown(KeyCode.T) && BuffPlugin.DevEnabled)
-                ColdGaze.GetBuffData().Stack();
+                ColdGaze.GetBuffData().Stack();*/
             if (MedusaFeatures.TryGetValue(self.player, out var medusaCat))
                 medusaCat.Update();
         }
@@ -451,6 +451,7 @@ namespace BuiltinBuffs.Positive
             TriangleMesh triangleMesh = TriangleMesh.MakeGridMesh("Futile_White", this.gridDiv);
             this.meshDirty = true;
             sLeaser.sprites[0] = triangleMesh;
+            sLeaser.sprites[0].isVisible = false;
             //sLeaser.sprites[0].shader = rCam.room.game.rainWorld.Shaders["FlatLight"];
             //sLeaser.sprites[0].shader = rCam.room.game.rainWorld.Shaders["LightBeam"];
             this.verts = new Vector2[(sLeaser.sprites[0] as TriangleMesh).vertices.Length];
@@ -847,6 +848,8 @@ namespace BuiltinBuffs.Positive
             foreach (var player in self.room.game.AlivePlayers.Select(i => i.realizedCreature as Player)
                                      .Where(i => i != null && i.graphicsModule != null))
             {
+                if (player == null || player.room == null)
+                    return false;
                 if (ColdGazeBuffEntry.ColdGazeFeatures.TryGetValue(player, out var coldGaze))
                 {
                     Vector2 headPos = (player.graphicsModule as PlayerGraphics).head.pos;

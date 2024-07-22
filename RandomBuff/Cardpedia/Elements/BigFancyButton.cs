@@ -63,7 +63,7 @@ namespace RandomBuff.Cardpedia.Elements
 
             if (menu.manager.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
             {
-                string str = BuffResourceString.Get("Negative");
+                string str = BuffResourceString.Get(type);
                 chiLabel = new FLabel(Custom.GetFont(), str);
                 chiLabel.scale = 2f;
                 chiLabel.SetPosition(flatSprite.GetPosition() - new Vector2(310f, 20f));

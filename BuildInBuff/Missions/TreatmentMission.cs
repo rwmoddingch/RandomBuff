@@ -68,7 +68,7 @@ namespace BuiltinBuffs.Missions
 
         [JsonProperty]
         public int targetCycle;
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             if(name != SlugcatStats.Name.Red)
                 return ConditionState.Fail;

@@ -91,7 +91,7 @@ BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
 BasicInGameBuffCardSlot_OnCardExclusiveShow|单击左键以翻转卡牌<LINE>单击右键以退出详情浏览
 BasicInGameBuffCardSlot_NoCardFocus|将鼠标移至一个卡牌上并单击鼠标左键来查看卡牌
 BasicInGameBuffCardSlot_ExitHUD|<LINE>按下 <HUD_KEY> 来关闭 hud
-BasicInGameBuffCardSlot_BindKey|<LINE>按下 <KEYBINDER_KEY> 并按另一个按键来给 <BuffID> 绑定快捷键
+BasicInGameBuffCardSlot_BindKey|<LINE>按住 <KEYBINDER_KEY> 并按另一个按键来给 <BuffID> 绑定快捷键
 
 
 //BuffCondition

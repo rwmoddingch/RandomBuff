@@ -4,7 +4,7 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "A475FF",
+    "Color" : "ff78f2",
 
     "Chinese" : {
         "BuffName" : "信息冗余",

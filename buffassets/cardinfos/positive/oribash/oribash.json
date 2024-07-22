@@ -8,10 +8,10 @@
 
     "Chinese" : {
         "BuffName" : "奥日猛击",
-        "Description" : "我不会写简介"
+        "Description" : "靠近生物用鼠标按住右键选择方向后松开，可以将玩家向对应方向弹射，生物反方向弹射。"
     },
     "English" : {
         "BuffName" : "Ori Bash",
-        "Description" : "No description."
+        "Description" : "Get close to a creature, hold down the right mouse button to select a direction, and then release it. This will launch the player in the corresponding direction and the creature in the opposite direction."
     }
 }

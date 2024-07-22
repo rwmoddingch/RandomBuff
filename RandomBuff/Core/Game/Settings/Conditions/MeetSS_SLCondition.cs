@@ -71,9 +71,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             return $"({(meetSL?"SL":"")} {(meetSS?"SS":"")})";
         }
 
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> sameConditions)
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
-            sameConditions ??= new List<Condition>();
+            conditions ??= new List<Condition>();
             if (ModManager.MSC)
             {
                 var timeline = SlugcatStats.SlugcatTimelineOrder().ToList();
@@ -86,7 +86,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 if (indexOfThis >= indexOfArtificer && indexOfThis <= indexOfSofanthiel)
                     return ConditionState.Fail;
 
-                if (sameConditions.Find((i) => i is MeetSS_SLCondition) != null)
+                if (conditions.Find((i) => i is MeetSS_SLCondition) != null)
                     return ConditionState.Fail;
 
                 cycleRequirement = UnityEngine.Random.Range(15, 25);
@@ -94,7 +94,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
             else
             {
-                if (sameConditions.Find((i) => i is MeetSS_SLCondition) != null)
+                if (conditions.Find((i) => i is MeetSS_SLCondition) != null)
                     return ConditionState.Fail;
 
                 cycleRequirement = UnityEngine.Random.Range(15, 25);
