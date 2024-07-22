@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Multiplier",
-        "Description" : "TODO"
+        "Description" : "Clone all creatures in the region, except the player at regular intervals until a certain number is reached"
     }
 }

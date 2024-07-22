@@ -45,7 +45,7 @@ namespace BuiltinBuffs.Negative
 
                         if (Random.value < Custom.LerpMap(Custom.Dist(
                                 shortCut.StartTile.ToVector2() * 20f - new Vector2(10, 10),
-                                player.realizedCreature.DangerPos), 60, 300, 0.06f, 0.02f, 0.4f) / 20f * 1.0f *
+                                player.realizedCreature.DangerPos), 60, 300, 0.06f, 0.02f, 0.4f) / 20f * 0.6f *
                             Mathf.Clamp01(waitCounter - 80) *
                             Custom.LerpMap(waitCounter, 80, 120, 0.1f, 1f) *
                             Custom.LerpMap(waitCounter, 300, 500, 1f, 2f))
@@ -60,6 +60,7 @@ namespace BuiltinBuffs.Negative
                             if (Random.value > 0.025f)
                             {
                                 var module = new FakeCreatureModule(creature);
+                                creature.CollideWithObjects = false;
                                 FakeCreatureHook.modules.Add(creature, module);
                                 BuffUtils.Log(FakeCreatureBuffData.FakeCreatureID,
                                     $"Create creature with fake module! {shortCut.destNode}, {acreature.creatureTemplate.type}, {module.maxCounter}");
@@ -163,6 +164,24 @@ namespace BuiltinBuffs.Negative
             On.DaddyLongLegs.Collide += DaddyLongLegs_Collide;
             On.Lizard.AttemptBite += Lizard_AttemptBite;
             On.Lizard.Bite += Lizard_Bite;
+
+            On.Lizard.Violence += Lizard_Violence;
+            On.Creature.Violence += Creature_Violence;
+        }
+
+        private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            if (source.owner is Creature crit && modules.TryGetValue(crit, out _))
+                damage = 0;
+            orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
+
+        }
+
+        private static void Lizard_Violence(On.Lizard.orig_Violence orig, Lizard self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos onAppendagePos, Creature.DamageType type, float damage, float stunBonus)
+        {
+            if (source.owner is Creature crit && modules.TryGetValue(crit, out _))
+                damage = 0;
+            orig(self,source,directionAndMomentum,hitChunk,onAppendagePos, type, damage, stunBonus);
         }
 
         private static void Lizard_Bite(On.Lizard.orig_Bite orig, Lizard self, BodyChunk chunk)
@@ -273,6 +292,29 @@ namespace BuiltinBuffs.Negative
         {
             if (!creatureRef.TryGetTarget(out var creature))
                 return;
+            bool needBreak = false;
+            if (creature.room != null)
+            {
+                foreach (var ply in creature.room.PlayersInRoom)
+                {
+                    if (needBreak)
+                        break;
+                    foreach (var chunk in creature.bodyChunks)
+                    {
+                        if (ply.bodyChunks.Any(i => Custom.DistLess(i.pos, chunk.pos, (i.rad + chunk.rad))))
+                        {
+                            SuckIntoShortCut();
+                            needBreak = true;
+                            break;
+                        }
+                    }
+                }
+
+            }
+
+            if (needBreak)
+                return;
+
             if (counter >= 0)
             {
                 if (creature.inShortcut)

@@ -8,6 +8,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
@@ -17,6 +18,8 @@ namespace BuiltinBuffs.Positive
     internal class OriBashBuff : Buff<OriBashBuff,OriBashBuffData>
     {
         public override BuffID ID => OriBashBuffEntry.OriBash;
+
+        public override bool Triggerable => false;
 
         public OriBashBuff()
         {
@@ -32,6 +35,19 @@ namespace BuiltinBuffs.Positive
                 }
             }
         }
+
+        public override void Destroy()
+        {
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                foreach (var player in game.Players.Select(i => i.realizedCreature as Player)
+                             .Where(i => i != null && i.graphicsModule != null))
+                {
+                    OriBashBuffEntry.BashFeatures.Remove(player);
+                }
+            }
+        }
+
     }
 
     internal class OriBashBuffData : BuffData
@@ -130,6 +146,9 @@ namespace BuiltinBuffs.Positive
         int bashTimer = 0;
         bool isPressUse;
 
+        private Vector2 dir;
+
+
         public static FAtlas arrow;
 
         WeakReference<Player> ownerRef;
@@ -158,6 +177,21 @@ namespace BuiltinBuffs.Positive
             rCam.ReturnFContainer("HUD").AddChild(sLeaser.sprites[startSprite + 1]);
         }
 
+        public Vector2 GetInputDirection(Player player,Vector2 sourcePos)
+        {
+            if (BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash) == KeyCode.None.ToString())
+                return Custom.DirVec(sourcePos,
+                    new Vector2(Input.mousePosition.x, Input.mousePosition.y));
+            return RWInput.PlayerInput(player.playerState.playerNumber).analogueDir;
+        }
+
+
+        public bool GetInput()
+        {
+            return Input.GetMouseButton(1) ||
+                   BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash));
+        }
+
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, UnityEngine.Vector2 camPos)
         {
             Player self;
@@ -166,26 +200,28 @@ namespace BuiltinBuffs.Positive
 
             if (isBash)
             {
-                Vector2 dir = Custom.DirVec(sLeaser.sprites[startSprite].GetPosition(), new Vector2(Input.mousePosition.x, Input.mousePosition.y));
+                
+                dir = Vector3.Slerp(dir, GetInputDirection(self,sLeaser.sprites[startSprite].GetPosition()),0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite].x = Mathf.Lerp(self.mainBodyChunk.lastPos.x, self.mainBodyChunk.pos.x, timeStacker) - camPos.x;
                 sLeaser.sprites[startSprite].y = Mathf.Lerp(self.mainBodyChunk.lastPos.y, self.mainBodyChunk.pos.y, timeStacker) - camPos.y;
+                sLeaser.sprites[startSprite].scaleX = Mathf.Lerp(sLeaser.sprites[startSprite].scale,0.75f, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite].rotation = Custom.VecToDeg(Vector2.Perpendicular(dir));
-                sLeaser.sprites[startSprite + 1].scale = 15;
+                sLeaser.sprites[startSprite + 1].scale = Mathf.Lerp(sLeaser.sprites[startSprite + 1].scale, 15, 0.03f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite + 1].SetPosition(sLeaser.sprites[startSprite].GetPosition());
                 sLeaser.sprites[startSprite + 1].color = Color.white;
                 sLeaser.sprites[startSprite + 1].alpha = 1;
 
-                if (!Input.GetMouseButton(1) || bashTarget == null || !self.Consious)
+                if (!GetInput() || bashTarget == null || !self.Consious)
                 {
                     isBash = false;
                     OriBashBuffEntry.UpdateSpeed = 1000;
                     foreach (var chunk in self.bodyChunks)
-                        chunk.vel = dir * 25;
+                        chunk.vel = dir * 20;
 
                     if (bashTarget != null)
                     {
                         foreach (var chunk in bashTarget.bodyChunks)
-                            chunk.vel = dir * 25 * -1.25f;
+                            chunk.vel = dir * 15 * -1.25f;
                         bashTarget = null;
                         outroTimer = 10;
                     }
@@ -198,11 +234,12 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[startSprite + 1].scale = Mathf.Pow(num, 0.5f) * 15;
                 sLeaser.sprites[startSprite + 1].alpha = Mathf.Pow(num, 0.5f);
                 sLeaser.sprites[startSprite + 1].color = Color.Lerp(Color.black, Color.white, Mathf.Pow(num, 0.5f));
+                sLeaser.sprites[startSprite].scaleX = Mathf.Pow(Mathf.InverseLerp(3, 10, outroTimer), 0.5f) * 0.75f;
             }
-            if (sLeaser.sprites[startSprite].isVisible != isBash)
-            {
-                sLeaser.sprites[startSprite].isVisible = isBash;
-            }
+
+            
+            sLeaser.sprites[startSprite].isVisible = sLeaser.sprites[startSprite].scaleX > 0.01f;
+            
         }
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -233,8 +270,9 @@ namespace BuiltinBuffs.Positive
                 }
             }
 
-            if (Input.GetMouseButton(1) && !isPressUse)
-            {
+            if (GetInput() && !isPressUse)
+            { 
+                dir = self.input[0].analogueDir;
                 bashTimer = 0;
                 isPressUse = true;
                 if (self.room.abstractRoom != null)
