@@ -174,7 +174,7 @@ namespace BuiltinBuffs.Duality
         {
             int result = orig(self);
             if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
-                if (self.grasps[0] != null || self.grasps[0] != null)
+                if (self.grasps[0] != null || self.grasps[1] != null)
                 {
                     result = -1;
                 }
@@ -1221,11 +1221,17 @@ namespace BuiltinBuffs.Duality
         //进行更新
         public void Update()
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return;
-            if (self.room == null)
+            if (player.room == null)
                 return;
-            if (self.Submersion > 0.1f && !this.hasContactWater)
+
+            if (player.grasps[0] != null && player.grasps[1] != null)
+            {
+                player.ReleaseGrasp(1);
+            }
+
+            if (player.Submersion > 0.1f && !this.hasContactWater)
             {
                 this.hasContactWater = true;
                 BuffPlugin.Log("JellyfishCat has contact with water!");
@@ -1238,8 +1244,8 @@ namespace BuiltinBuffs.Duality
                     for (int j = 0; j < 15; j++)
                     {
                         Vector2 a = Custom.DegToVec(360f * UnityEngine.Random.value);
-                        self.room.AddObject(new MouseSpark(self.firstChunk.pos + a * 18f, self.firstChunk.vel + a * 36f * UnityEngine.Random.value, 20f, new Color(0.7f, 1f, 1f)));
-                        self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Latch_On_Player, self.firstChunk.pos, 0.3f, 1f);
+                        player.room.AddObject(new MouseSpark(player.firstChunk.pos + a * 18f, player.firstChunk.vel + a * 36f * UnityEngine.Random.value, 20f, new Color(0.7f, 1f, 1f)));
+                        player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Latch_On_Player, player.firstChunk.pos, 0.3f, 1f);
                     }
                 }
             }
@@ -1276,35 +1282,35 @@ namespace BuiltinBuffs.Duality
             }
             oralArmSway += 0.05f + 0.05f * Mathf.Clamp(newBody[0].vel.magnitude, 0f, 5f);
             ConsumeCreateUpdate();
-            surfaceMode = self.animation == Player.AnimationIndex.SurfaceSwim;/*
+            surfaceMode = player.animation == Player.AnimationIndex.SurfaceSwim;/*
             if (StartPos == Vector2.zero)
             {
                 if (abstractState.HomePos == Vector2.zero)
                 {
-                    StartPos = self.room.MiddleOfTile(self.abstractCreature.pos);
+                    StartPos = player.room.MiddleOfTile(player.abstractCreature.pos);
                 }
                 else
                 {
                     StartPos = abstractState.HomePos;
                 }
-                //surfaceMode = !self.room.PointSubmerged(StartPos + new Vector2(0f, 80f));
+                //surfaceMode = !player.room.PointSubmerged(StartPos + new Vector2(0f, 80f));
                 if (surfaceMode)
                 {
-                    StartPos.y = (float)(self.room.defaultWaterLevel + 1) * 20f;
+                    StartPos.y = (float)(player.room.defaultWaterLevel + 1) * 20f;
                 }
                 BuffPlugin.Log("Jelly home at " + StartPos.ToString());
             }*/
             if (driftGoalPos == Vector2.zero)//abstractState.DriftPos
             {
-                driftGoalPos = self.room.MiddleOfTile(self.abstractCreature.pos);
+                driftGoalPos = player.room.MiddleOfTile(player.abstractCreature.pos);
             }
-            else if(self.animation == Player.AnimationIndex.DeepSwim)
+            else if(player.animation == Player.AnimationIndex.DeepSwim)
             {
-                driftGoalPos = self.bodyChunks[0].pos + 30f * new Vector2(self.input[0].x, self.input[0].y);// abstractState.DriftPos;
+                driftGoalPos = player.bodyChunks[0].pos + 30f * new Vector2(player.input[0].x, player.input[0].y);// abstractState.DriftPos;
             }/*
-            if (!surfaceMode && driftGoalPos.y > (float)(self.room.defaultWaterLevel + 1) * 4f)
+            if (!surfaceMode && driftGoalPos.y > (float)(player.room.defaultWaterLevel + 1) * 4f)
             {
-                driftGoalPos.y = (float)(self.room.defaultWaterLevel + 1) * 4f;
+                driftGoalPos.y = (float)(player.room.defaultWaterLevel + 1) * 4f;
             }*/
             /*
             BuffPlugin.Log("Jelly goal at " + driftGoalPos.ToString());
@@ -1315,8 +1321,8 @@ namespace BuiltinBuffs.Duality
             {
                 newBody[i].lastPos = newBody[i].pos;
             }
-            newBody[0].pos = self.firstChunk.pos;
-            PlayerGraphics g = self.graphicsModule as PlayerGraphics;
+            newBody[0].pos = player.firstChunk.pos;
+            PlayerGraphics g = player.graphicsModule as PlayerGraphics;
             newBody[CoreChunk].pos = g.tail[g.tail.Length - 1].pos;// newBody[0].pos + new Vector2(0f, -8f);
             newBody[CoreChunk].vel *= 0f;/*
             newBody[leftHoodChunk].pos = newBody[0].pos + new Vector2(-4f, -2f);
@@ -1325,66 +1331,66 @@ namespace BuiltinBuffs.Duality
             newBody[rightHoodChunk].vel *= 0f;*/
             if (canBeSurfaceMode)
             {/*
-                if (self.firstChunk.pos.y < StartPos.y)
+                if (player.firstChunk.pos.y < StartPos.y)
                 {
-                    newBody[0].vel += new Vector2(0f, self.gravity * 2.7f * Mathf.InverseLerp(0f, 0.2f, self.Submersion));
-                    newBody[4].vel = new Vector2(0f, self.gravity * 4.1f * Mathf.InverseLerp(0f, 0.3f, self.Submersion));
-                    newBody[5].vel = new Vector2(0f, self.gravity * 3f * Mathf.InverseLerp(0f, 0.5f, self.Submersion));
-                    newBody[6].vel = new Vector2(0f, self.gravity * 3f * Mathf.InverseLerp(0f, 0.5f, self.Submersion));
+                    newBody[0].vel += new Vector2(0f, player.gravity * 2.7f * Mathf.InverseLerp(0f, 0.2f, player.Submersion));
+                    newBody[4].vel = new Vector2(0f, player.gravity * 4.1f * Mathf.InverseLerp(0f, 0.3f, player.Submersion));
+                    newBody[5].vel = new Vector2(0f, player.gravity * 3f * Mathf.InverseLerp(0f, 0.5f, player.Submersion));
+                    newBody[6].vel = new Vector2(0f, player.gravity * 3f * Mathf.InverseLerp(0f, 0.5f, player.Submersion));
                 }
-                if (self.firstChunk.pos.y > StartPos.y - 10f)
+                if (player.firstChunk.pos.y > StartPos.y - 10f)
                 {
                     BodyChunk bodyChunk = newBody[0];
                     bodyChunk.vel.y = bodyChunk.vel.y * 0.4f;
                 }*/
                 /*
-                Vector2 vector = Custom.DirVec(self.firstChunk.pos, newBody[0].pos);
+                Vector2 vector = Custom.DirVec(player.firstChunk.pos, newBody[0].pos);
                 vector.y *= 0f;
-                vector.x *= Mathf.InverseLerp(0f, 30f, Vector2.Distance(self.firstChunk.pos, newBody[0].pos)) / 2f;
-                self.firstChunk.vel *= 0.9f;
-                self.firstChunk.vel += vector;*/
+                vector.x *= Mathf.InverseLerp(0f, 30f, Vector2.Distance(player.firstChunk.pos, newBody[0].pos)) / 2f;
+                player.firstChunk.vel *= 0.9f;
+                player.firstChunk.vel += vector;*/
             }
             else
             {
                 newBody[CoreChunk].vel += new Vector2(0f, -0.28f);/*
-                newBody[0].vel += new Vector2(0f, (self.gravity * 1.95f + 1f) * 0.72f);
-                newBody[4].vel = new Vector2(0f, self.gravity * 3f * 0.72f);
-                newBody[5].vel = new Vector2(0f, self.gravity * 3f * 0.72f);
-                newBody[6].vel = new Vector2(0f, self.gravity * 3f * 0.72f);*/
+                newBody[0].vel += new Vector2(0f, (player.gravity * 1.95f + 1f) * 0.72f);
+                newBody[4].vel = new Vector2(0f, player.gravity * 3f * 0.72f);
+                newBody[5].vel = new Vector2(0f, player.gravity * 3f * 0.72f);
+                newBody[6].vel = new Vector2(0f, player.gravity * 3f * 0.72f);*/
             }/*
             newBody[4].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * 8f, 5f);
             Vector2 vector2 = Custom.PerpendicularVector(Custom.DirVec(newBody[4].pos, newBody[0].pos + rotation));
             newBody[5].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * -4f + vector2 * -27f, 5f);
             newBody[6].pos = Custom.MoveTowards(newBody[4].pos, newBody[0].pos + rotation * -4f + vector2 * 27f, 5f);*/
             bool flag = true;/*
-            if (!self.safariControlled)
+            if (!player.safariControlled)
             {
                 Vector2 b = (goHome ? driftGoalPos : newBody[0].pos);
                 driftCounter += 1f;
-                if (driftCounter > driftMaxim * 2f || Vector2.Distance(self.firstChunk.pos, b) > driftMaxim)
+                if (driftCounter > driftMaxim * 2f || Vector2.Distance(player.firstChunk.pos, b) > driftMaxim)
                 {
                     goHome = !goHome;
                     driftCounter = 0f;
                 }
             }
             else*/
-            if (self.inputWithDiagonals.HasValue)
+            if (player.inputWithDiagonals.HasValue)
             {
                 flag = false;
-                if (self.inputWithDiagonals.Value.AnyDirectionalInput)
+                if (player.inputWithDiagonals.Value.AnyDirectionalInput)
                 {
                     if (!huntPos.HasValue)
                     {
                         huntPos = newBody[CoreChunk].pos;
                     }
-                    if (Vector2.Distance(huntPos.Value + new Vector2(self.inputWithDiagonals.Value.x, self.inputWithDiagonals.Value.y) * 5f, newBody[CoreChunk].pos) < 180f)
+                    if (Vector2.Distance(huntPos.Value + new Vector2(player.inputWithDiagonals.Value.x, player.inputWithDiagonals.Value.y) * 5f, newBody[CoreChunk].pos) < 180f)
                     {
-                        newHuntPos(huntPos.Value + new Vector2(self.inputWithDiagonals.Value.x, self.inputWithDiagonals.Value.y) * 5f);
+                        newHuntPos(huntPos.Value + new Vector2(player.inputWithDiagonals.Value.x, player.inputWithDiagonals.Value.y) * 5f);
                     }
                 }
                 if (!canBeSurfaceMode)
                 {
-                    if (self.inputWithDiagonals.Value.thrw)
+                    if (player.inputWithDiagonals.Value.thrw)
                     {
                         if (driftGoalPos.y > newBody[0].pos.y)
                         {
@@ -1396,7 +1402,7 @@ namespace BuiltinBuffs.Duality
                         }
                         flag = true;
                     }
-                    else if (self.inputWithDiagonals.Value.jmp)
+                    else if (player.inputWithDiagonals.Value.jmp)
                     {
                         if (driftGoalPos.y > newBody[0].pos.y)
                         {
@@ -1409,7 +1415,7 @@ namespace BuiltinBuffs.Duality
                         flag = true;
                     }
                 }
-                if (self.inputWithDiagonals.Value.pckp)
+                if (player.inputWithDiagonals.Value.pckp)
                 {
                     PlayHorrifyingMoo();
                 }
@@ -1428,7 +1434,7 @@ namespace BuiltinBuffs.Duality
             }
             if (!flag)
             {
-                zero = new Vector2(0f, -0.09f * self.gravity);
+                zero = new Vector2(0f, -0.09f * player.gravity);
                 hoodPulse = Mathf.Lerp(hoodPulse, 0.63f, 0.08f);
             }
             if (zero.y < 0f)
@@ -1450,7 +1456,7 @@ namespace BuiltinBuffs.Duality
             newBody[0].vel += zero;
             if (canBeSurfaceMode)
             {
-                hoodSwayingPulse = 0.1f + Mathf.Pow(1f - self.Submersion, 20f) * 0.9f;
+                hoodSwayingPulse = 0.1f + Mathf.Pow(1f - player.Submersion, 20f) * 0.9f;
             }
             else if (!flag2)
             {
@@ -1461,8 +1467,8 @@ namespace BuiltinBuffs.Duality
                 hoodSwayingPulse = 0.1f + hoodSwayingPulse * 0.9f;
             }
             newBody[CoreChunk].vel += Custom.DirVec(newBody[CoreChunk].pos, newBody[0].pos) / 5f;
-            /*Custom.DirVec(newBody[CoreChunk].pos, self.firstChunk.pos);
-            Vector2 vector3 = self.firstChunk.pos + Custom.DirVec(self.firstChunk.pos, newBody[4].pos).normalized * 4f + Custom.DirVec(self.firstChunk.pos, newBody[CoreChunk].pos) * 26f * hoodSwayingPulse;
+            /*Custom.DirVec(newBody[CoreChunk].pos, player.firstChunk.pos);
+            Vector2 vector3 = player.firstChunk.pos + Custom.DirVec(player.firstChunk.pos, newBody[4].pos).normalized * 4f + Custom.DirVec(player.firstChunk.pos, newBody[CoreChunk].pos) * 26f * hoodSwayingPulse;
             float speed = 5.8f;
             Vector2 vector4 = Custom.PerpendicularVector(vector3) * 6f;
             newBody[leftHoodChunk].pos = Custom.MoveTowards(newBody[leftHoodChunk].pos, vector3 - vector4, speed);
@@ -1471,13 +1477,13 @@ namespace BuiltinBuffs.Duality
             /*
             if (!anyTentaclePulled)
             {
-                rotation = Vector3.Slerp(rotation, new Vector2(0f, 1f), (1f - 2f * Mathf.Abs(0.5f - self.firstChunk.submersion)) * 0.1f);
+                rotation = Vector3.Slerp(rotation, new Vector2(0f, 1f), (1f - 2f * Mathf.Abs(0.5f - player.firstChunk.submersion)) * 0.1f);
             }
             rotation = Vector3.Slerp(rotation, new Vector2(0f, 1f), 1f - Mathf.Abs(rotation.y));*/
-            rotation = (self.bodyChunks[0].pos - self.bodyChunks[1].pos).normalized;
-            if (self.firstChunk.ContactPoint.y < 0)
+            rotation = (player.bodyChunks[0].pos - player.bodyChunks[1].pos).normalized;
+            if (player.firstChunk.ContactPoint.y < 0)
             {
-                BodyChunk bodyChunk2 = self.firstChunk;
+                BodyChunk bodyChunk2 = player.firstChunk;
                 bodyChunk2.vel.x = bodyChunk2.vel.x * 0.8f;
             }
             LightUpdate();

@@ -48,10 +48,19 @@ namespace BuiltinBuffs.Negative
 
         public static void HookOn()
         {
+            On.Player.Update += Player_Update;
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
 
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+        }
+        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            orig(self, eu);
+            if (AmputationFeatures.TryGetValue(self, out var amputation))
+            {
+                amputation.Update();
+            }
         }
 
         //只能一次拿一个东西
@@ -71,7 +80,7 @@ namespace BuiltinBuffs.Negative
         {
             int result = orig(self);
             if (AmputationFeatures.TryGetValue(self, out var amputation))
-                if (self.grasps[0] != null || self.grasps[0] != null)
+                if (self.grasps[0] != null || self.grasps[1] != null)
                 {
                     result = -1;
                 }
@@ -93,6 +102,16 @@ namespace BuiltinBuffs.Negative
         public Amputation(Player player)
         {
             ownerRef = new WeakReference<Player>(player);
+        }
+
+        public void Update()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return; 
+            if (player.grasps[0] != null && player.grasps[1] != null)
+            {
+                player.ReleaseGrasp(1);
+            }
         }
 
         //只能一次拿一个东西

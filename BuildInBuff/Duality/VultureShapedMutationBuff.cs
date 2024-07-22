@@ -136,7 +136,7 @@ namespace BuiltinBuffs.Duality
         {
             int result = orig(self);
             if (VultureCatFeatures.TryGetValue(self, out var vultureCat))
-                if (self.grasps[0] != null || self.grasps[0] != null)
+                if (self.grasps[0] != null || self.grasps[1] != null)
                 {
                     result = -1;
                 }
@@ -1015,12 +1015,17 @@ namespace BuiltinBuffs.Duality
         //进行飞行
         public void Update()
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return;
-            if (!self.Consious) return;
+            if (!player.Consious) return;
+
+            if (player.grasps[0] != null && player.grasps[1] != null)
+            {
+                player.ReleaseGrasp(1);
+            }
 
             this.hangingInTentacle = false;
-            if (self.room != null)
+            if (player.room != null)
                 for (int i = 0; i < this.wings.GetLength(0); i++)
                     for (int j = 0; j < this.wings.GetLength(1); j++)
                         this.wings[i, j].Update();
@@ -1046,11 +1051,11 @@ namespace BuiltinBuffs.Duality
                 this.cantFindNewGripCounter--;
             }
 
-            if (self.animation == Player.AnimationIndex.HangFromBeam || self.animation == Player.AnimationIndex.SurfaceSwim)
+            if (player.animation == Player.AnimationIndex.HangFromBeam || player.animation == Player.AnimationIndex.SurfaceSwim)
             {
                 preventFlight = 15;
             }
-            else if (self.bodyMode == Player.BodyModeIndex.WallClimb)
+            else if (player.bodyMode == Player.BodyModeIndex.WallClimb)
             {
                 preventFlight = 10;//下次试试 8，或者更少
             }
@@ -1059,66 +1064,67 @@ namespace BuiltinBuffs.Duality
                 preventFlight--;
             }
 
-            moveDirection = new Vector2(self.input[0].x, self.input[0].y).normalized;
+            moveDirection = new Vector2(player.input[0].x, player.input[0].y).normalized;
 
-            if (self.wantToJump > 0)
+            if (player.wantToJump > 0)
             {
                 if (isFlying)
                     StopFlight();
-                else if (CanSustainFlight(self))
-                    InitiateFlight(self);
+                else if (CanSustainFlight(player))
+                    InitiateFlight(player);
             }
             //如果正在飞行
             if (isFlying)
             {
-                self.AerobicIncrease(0.01f);
+                player.AerobicIncrease(0.01f);
 
-                self.gravity = 0f;
-                self.airFriction = flightAirFriction;
+                player.gravity = 0f;
+                player.airFriction = flightAirFriction;
 
                 //飞行速度
-                FlightUpdate(self);
+                FlightUpdate(player);
 
                 if (CheckTentacleModeAnd(VultureCatTentacle.Mode.Climb))
                     StopFlight();
             }
             else
             {
-                self.airFriction = normalAirFriction;
-                self.gravity = normalGravity;
+                player.airFriction = normalAirFriction;
+                player.gravity = normalGravity;
 
-                wantPos = self.bodyChunks[0].pos + wingSpeed * new Vector2(self.input[0].x, self.input[0].y);
+                wantPos = player.bodyChunks[0].pos + wingSpeed * new Vector2(player.input[0].x, player.input[0].y);
             }
         }
 
         //调整姿势
         public void MovementUpdate(On.Player.orig_MovementUpdate orig, bool eu)
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return;
-            if (!self.Consious) return;
+            if (!player.Consious) return;
+
             if (isFlying)
             {
-                self.bodyMode = Player.BodyModeIndex.Default;
-                self.animation = Player.AnimationIndex.None;
+                player.bodyMode = Player.BodyModeIndex.Default;
+                player.animation = Player.AnimationIndex.None;
 
-                orig(self, eu);
+                orig(player, eu);
 
-                if (!CanSustainFlight(self))
+                if (!CanSustainFlight(player))
                 {
                     StopFlight();
                 }
                 else
                 {
-                    if (self.input[0].x != 0)
+                    if (player.input[0].x != 0)
                     {
-                        self.bodyMode = Player.BodyModeIndex.Default;
-                        self.animation = Player.AnimationIndex.LedgeCrawl;
+                        player.bodyMode = Player.BodyModeIndex.Default;
+                        player.animation = Player.AnimationIndex.LedgeCrawl;
                     }
                     else
                     {
-                        self.bodyMode = Player.BodyModeIndex.Default;
-                        self.animation = Player.AnimationIndex.None;
+                        player.bodyMode = Player.BodyModeIndex.Default;
+                        player.animation = Player.AnimationIndex.None;
                     }
                 }
             }

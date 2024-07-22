@@ -254,7 +254,7 @@ namespace BuiltinBuffs.Duality
         {
             int result = orig(self);
             if (SpiderFeatures.TryGetValue(self, out var spider))
-                if (self.grasps[0] != null || self.grasps[0] != null)
+                if (self.grasps[0] != null || self.grasps[1] != null)
                 {
                     result = -1;
                 }
@@ -754,13 +754,19 @@ namespace BuiltinBuffs.Duality
         //进行更新
         public void Update()
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return;
-            if (self.room == null)
+            if (player.room == null)
                 return;
-            if (self.graphicsModule != null && self.Consious && 
-                !self.room.aimap.TileAccessibleToCreature(self.mainBodyChunk.pos, self.Template) && 
-                !self.room.aimap.TileAccessibleToCreature(self.bodyChunks[1].pos, self.Template))
+
+            if (player.grasps[0] != null && player.grasps[1] != null)
+            {
+                player.ReleaseGrasp(1);
+            }
+
+            if (player.graphicsModule != null && player.Consious && 
+                !player.room.aimap.TileAccessibleToCreature(player.mainBodyChunk.pos, player.Template) && 
+                !player.room.aimap.TileAccessibleToCreature(player.bodyChunks[1].pos, player.Template))
             {
                 for (int l = 0; l < this.legs.GetLength(0); l++)
                 {
@@ -768,31 +774,31 @@ namespace BuiltinBuffs.Duality
                     {
                         if (this.legs[l, m].reachedSnapPosition &&
                             (!TileAccessibleToPlayer() ||
-                            (Custom.DistLess(wantPos, self.mainBodyChunk.pos, 20f) && 
-                            Vector2.Dot(wantPos - self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - self.mainBodyChunk.pos) < 0 &&
-                            !Custom.DistLess(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
-                            Custom.DistLess(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f))))
+                            (Custom.DistLess(wantPos, player.mainBodyChunk.pos, 20f) && 
+                            Vector2.Dot(wantPos - player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - player.mainBodyChunk.pos) < 0 &&
+                            !Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
+                            Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f))))
                         {
-                            Vector2 a = Custom.DirVec(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) * (Vector2.Distance(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
-                            self.mainBodyChunk.pos += a * 0.8f;
-                            self.mainBodyChunk.vel += a * 0.8f;
+                            Vector2 a = Custom.DirVec(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) * (Vector2.Distance(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
+                            player.mainBodyChunk.pos += a * 0.8f;
+                            player.mainBodyChunk.vel += a * 0.8f;
                         }/*
                         if (this.legs[l, m].reachedSnapPosition && modify == Vector2.up)
                         {
-                            Vector2 a = Vector2.up * (Vector2.Distance(self.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
-                            self.mainBodyChunk.pos += a * 0.8f;
-                            self.mainBodyChunk.vel += a * 0.8f;
+                            Vector2 a = Vector2.up * (Vector2.Distance(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
+                            player.mainBodyChunk.pos += a * 0.8f;
+                            player.mainBodyChunk.vel += a * 0.8f;
                         }*/
                     }
                 }
             }
-            if (self.Consious)
+            if (player.Consious)
             {
-                if (self.room.aimap.TileAccessibleToCreature(self.bodyChunks[0].pos, self.Template) || self.room.aimap.TileAccessibleToCreature(self.bodyChunks[0].pos, self.Template)) //
+                if (player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template) || player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template)) //
                 {
                     this.footingCounter++;
                 }
-                this.Act(self);
+                this.Act(player);
             }
             else
             {
@@ -800,25 +806,25 @@ namespace BuiltinBuffs.Duality
                 this.jumping = false;
                 if (this.deathConvulsions > 0f)
                 {
-                    if (self.dead)
+                    if (player.dead)
                     {
                         this.deathConvulsions = Mathf.Max(0f, this.deathConvulsions - UnityEngine.Random.value / 80f);
                     }
-                    if (self.mainBodyChunk.ContactPoint.x != 0 || self.mainBodyChunk.ContactPoint.y != 0)
+                    if (player.mainBodyChunk.ContactPoint.x != 0 || player.mainBodyChunk.ContactPoint.y != 0)
                     {
-                        self.mainBodyChunk.vel += Custom.RNV() * UnityEngine.Random.value * 8f * Mathf.Pow(this.deathConvulsions, 0.5f);
+                        player.mainBodyChunk.vel += Custom.RNV() * UnityEngine.Random.value * 8f * Mathf.Pow(this.deathConvulsions, 0.5f);
                     }
-                    if (self.bodyChunks[1].ContactPoint.x != 0 || self.bodyChunks[1].ContactPoint.y != 0)
+                    if (player.bodyChunks[1].ContactPoint.x != 0 || player.bodyChunks[1].ContactPoint.y != 0)
                     {
-                        self.bodyChunks[1].vel += Custom.RNV() * UnityEngine.Random.value * 4f * Mathf.Pow(this.deathConvulsions, 0.5f);
+                        player.bodyChunks[1].vel += Custom.RNV() * UnityEngine.Random.value * 4f * Mathf.Pow(this.deathConvulsions, 0.5f);
                     }
                     if (UnityEngine.Random.value < 0.05f)
                     {
-                        self.room.PlaySound(SoundID.Big_Spider_Death_Rustle, self.mainBodyChunk, false, 0.5f + UnityEngine.Random.value * 0.5f * this.deathConvulsions, 0.9f + 0.3f * this.deathConvulsions);
+                        player.room.PlaySound(SoundID.Big_Spider_Death_Rustle, player.mainBodyChunk, false, 0.5f + UnityEngine.Random.value * 0.5f * this.deathConvulsions, 0.9f + 0.3f * this.deathConvulsions);
                     }
                     if (UnityEngine.Random.value < 0.025f)
                     {
-                        self.room.PlaySound(SoundID.Big_Spider_Take_Damage, self.mainBodyChunk, false, UnityEngine.Random.value * 0.5f, 1f);
+                        player.room.PlaySound(SoundID.Big_Spider_Take_Damage, player.mainBodyChunk, false, UnityEngine.Random.value * 0.5f, 1f);
                     }
                 }
             }
