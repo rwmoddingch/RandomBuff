@@ -89,13 +89,7 @@ namespace BuiltinBuffs.Positive
         public static ConditionalWeakTable<Player, Medusa> MedusaFeatures = new ConditionalWeakTable<Player, Medusa>();
         public static ConditionalWeakTable<AbstractCreature, Freeze> FreezeFeatures = new ConditionalWeakTable<AbstractCreature, Freeze>();
 
-        public static int StackLayer
-        {
-            get
-            {
-                return ColdGaze.GetBuffData().StackLayer;
-            }
-        }
+        public static int StackLayer => ColdGaze.GetBuffData()?.StackLayer ?? 0;
 
         public void OnEnable()
         {

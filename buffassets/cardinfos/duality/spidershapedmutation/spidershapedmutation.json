@@ -16,10 +16,10 @@
 
   "Chinese": {
     "BuffName": "蛛形突变",
-    "Description": "你的四肢变成八条蛛腿，你可以像蜘蛛一样移动，吃蜘蛛能食用的食物。蜘蛛将不再敌视你，但是，闪光果和烟雾果对你是致命的。"
+    "Description": "你的四肢变成八条蛛腿，你可以像蜘蛛一样移动，吃蜘蛛能食用的食物，但你现在只能用嘴叼着一件东西。蜘蛛将不再敌视你，但是，闪光果和烟雾果对你是致命的。"
   },
   "English": {
     "BuffName": "SpiderShapedMutation",
-    "Description": "Your limbs become eight spider legs, and you can move like a Big Spider and eat food that the Big Spider can eat. Spiders and Big Spiders will no longer be hostile to you, but Flare Bomb and Spore Cloud are deadly to you."
+    "Description": "Your limbs become eight spider legs, and you can move like a Big Spider and eat food that the Big Spider can eat, but now you can only hold a thing in your mouth. Spiders and Big Spiders will no longer be hostile to you, but Flare Bomb and Spore Cloud are deadly to you."
   }
 }

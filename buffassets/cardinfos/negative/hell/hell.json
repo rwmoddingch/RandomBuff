@@ -5,7 +5,9 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "E90000",
-
+    "Conflict":[
+        "Tiphereth"
+    ],
     "Chinese" : {
         "BuffName" : "地狱",
         "Description" : "所有房间色调变为地狱色调，且水体变为致命的岩浆"
