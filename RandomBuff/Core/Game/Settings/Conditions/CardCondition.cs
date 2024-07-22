@@ -32,7 +32,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             List<string> list = new() { "all", "Positive", "Negative", "Duality" };
     
 
-            foreach (var condition in conditions.Select(i => i as CardCondition))
+            foreach (var condition in conditions.OfType<CardCondition>())
                 if(condition.all)
                     list.Remove("all");
                 else if (!condition.all && list.Contains(condition.type.ToString()))

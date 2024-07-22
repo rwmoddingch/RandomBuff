@@ -55,14 +55,20 @@ namespace BuiltinBuffs.Positive
         private static void Player_ThrownSpear(On.Player.orig_ThrownSpear orig, Player self, Spear spear)
         {
             orig.Invoke(self, spear);
-            for(int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
+                var dir = spear.throwDir.x == 0 ? new Vector2(i == 0 ? 1 : -1,0) : new Vector2(0, i == 0 ? 1 : -1);
+
                 AbstractSpear absSpaer = new AbstractSpear(spear.room.world, null, spear.abstractPhysicalObject.pos, spear.room.game.GetNewID(), false);
                 Spear newSpear = new Spear(absSpaer, spear.room.world);
                 newSpear.abstractPhysicalObject.RealizeInRoom();
-                newSpear.ChangeMode(Weapon.Mode.Thrown);
+                Vector2 vector = self.firstChunk.pos + spear.throwDir.ToVector2() * 10f + new Vector2(0f, 4f);
+
+                newSpear.Thrown(self, vector, null, spear.throwDir, Mathf.Lerp(1f, 1.5f, self.Adrenaline), false);
+
+                newSpear.firstChunk.lastPos = newSpear.firstChunk.pos +=  dir * 3;
                 newSpear.spearDamageBonus = spear.spearDamageBonus;
-                newSpear.firstChunk.vel = spear.firstChunk.vel + (i == 0 ? 1f : -1f) * Vector2.up * 0.25f * spear.firstChunk.vel.magnitude;
+                newSpear.firstChunk.vel = spear.firstChunk.vel + dir * 0.25f * spear.firstChunk.vel.magnitude;
             }
         }
     }
