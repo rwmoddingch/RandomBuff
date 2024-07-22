@@ -4,14 +4,14 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "A475FF",
+    "Color" : "FF5500",
     
     "Chinese" : {
         "BuffName" : "拉面蜈蚣",
-        "Description" : "蜈蚣（除小蜈蚣）变为两倍长"
+        "Description" : "蜈蚣变为两倍长"
     },
     "English": {
-        "BuffName" : "RandomRain",
+        "BuffName" : "Ramenpede",
         "Description" : "Double the length of centipedes"
     }
 }
