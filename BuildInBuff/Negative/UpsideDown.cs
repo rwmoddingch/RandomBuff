@@ -331,7 +331,7 @@ namespace BuiltinBuffs.Negative
                 c.Emit(OpCodes.Ldarg_3);
                 c.EmitDelegate<Func<PlayerGraphics, Vector2, float, Vector2>>(delegate (PlayerGraphics self, Vector2 vector3, float timeStacker)
                 {
-                    if (module.TryGetValue(self, out var _module))
+                    if (module.TryGetValue(self, out var _module) && _module.headTails.Count > 0)
                     {
                         int num = _module.headTails.Count - 1;
                         vector3 = Vector2.Lerp(_module.headTails[num].lastPos, _module.headTails[num].pos, timeStacker);
