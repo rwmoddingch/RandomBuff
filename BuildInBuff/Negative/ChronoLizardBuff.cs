@@ -40,6 +40,13 @@ namespace BuiltinBuffs.Negative
                 bodyChunk.HardSetPosition(pos);
                 bodyChunk.vel = Vector2.zero;
             }
+            foreach(var grasp in self.lizard.grasps)
+            foreach (var chunk in grasp.grabbed?.bodyChunks ?? Array.Empty<BodyChunk>())
+            {
+                chunk.HardSetPosition(pos);
+                chunk.vel = Vector2.zero;
+            }
+
             self.room.AddObject(new Fissure(self.room, startPos, pos, self.actOnJump.bestJump.power, self.lizard.effectColor, self.lizard));
 
         }

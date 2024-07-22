@@ -31,7 +31,7 @@ namespace BuiltinBuffs.Negative
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
             orig(self);
-            if (self.waterObject != null)
+            if (self.waterObject != null && !self.abstractRoom.shelter)
                 self.waterObject.WaterIsLethal = true;
         }
     }
