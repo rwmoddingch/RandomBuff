@@ -60,6 +60,7 @@ namespace BuiltinBuffs.Positive
                 AbstractSpear absSpaer = new AbstractSpear(spear.room.world, null, spear.abstractPhysicalObject.pos, spear.room.game.GetNewID(), false);
                 Spear newSpear = new Spear(absSpaer, spear.room.world);
                 newSpear.abstractPhysicalObject.RealizeInRoom();
+                newSpear.ChangeMode(Weapon.Mode.Thrown);
                 newSpear.spearDamageBonus = spear.spearDamageBonus;
                 newSpear.firstChunk.vel = spear.firstChunk.vel + (i == 0 ? 1f : -1f) * Vector2.up * 0.25f * spear.firstChunk.vel.magnitude;
             }

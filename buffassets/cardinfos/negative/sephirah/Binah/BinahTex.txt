@@ -2,7 +2,7 @@
 
 "Binah.Bar.png":
 {
-	"frame": {"x":0,"y":256,"w":1042,"h":153},
+	"frame": {"x":0,"y":128,"w":1042,"h":153},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1042,"h":153},
@@ -10,7 +10,7 @@
 },
 "Binah.BarBack.png":
 {
-	"frame": {"x":0,"y":409,"w":1042,"h":153},
+	"frame": {"x":0,"y":281,"w":1042,"h":153},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1042,"h":153},
@@ -18,7 +18,7 @@
 },
 "Binah.BarFront.png":
 {
-	"frame": {"x":0,"y":562,"w":1042,"h":153},
+	"frame": {"x":0,"y":434,"w":1042,"h":153},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1042,"h":153},
@@ -26,7 +26,7 @@
 },
 "Binah.BarMid.png":
 {
-	"frame": {"x":0,"y":715,"w":1042,"h":153},
+	"frame": {"x":0,"y":587,"w":1042,"h":153},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":1042,"h":153},
@@ -34,7 +34,7 @@
 },
 "Binah.Fairy.png":
 {
-	"frame": {"x":128,"y":0,"w":256,"h":30},
+	"frame": {"x":0,"y":0,"w":256,"h":30},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":30},
@@ -42,7 +42,7 @@
 },
 "Binah.Key.png":
 {
-	"frame": {"x":640,"y":0,"w":500,"h":120},
+	"frame": {"x":556,"y":0,"w":500,"h":120},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":500,"h":120},
@@ -50,7 +50,7 @@
 },
 "Binah.Smoke.png":
 {
-	"frame": {"x":0,"y":0,"w":128,"h":128},
+	"frame": {"x":1056,"y":0,"w":128,"h":128},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
@@ -58,19 +58,35 @@
 },
 "Binah.Smoke2.png":
 {
-	"frame": {"x":384,"y":0,"w":256,"h":256},
+	"frame": {"x":1042,"y":587,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
+},
+"Binah.Strike.png":
+{
+	"frame": {"x":1298,"y":587,"w":150,"h":297},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":297},
+	"sourceSize": {"w":150,"h":297}
+},
+"Binah.StrikeFog.png":
+{
+	"frame": {"x":256,"y":0,"w":300,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":300,"h":40},
+	"sourceSize": {"w":300,"h":40}
 }},
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "BinahTex.png",
 	"format": "RGBA8888",
-	"size": {"w":1140,"h":868},
+	"size": {"w":1448,"h":884},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:20a637a2096481c1af91c2d0cdeeb88a:05e042ae1b86adb9e28a6d89b67102b7:28b245fe7d4cccb00d07b2e127139f04$"
+	"smartupdate": "$TexturePacker:SmartUpdate:1ca4247be28ae4d7bd242d78dff99d41:9786813e364f133481b29ce4114dbe1b:28b245fe7d4cccb00d07b2e127139f04$"
 }
 }

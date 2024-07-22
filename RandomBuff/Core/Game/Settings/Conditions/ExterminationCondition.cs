@@ -101,6 +101,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     if (record.sourceObjType == weaponType)
                     {
                         kills++;
+                        if (kills == killRequirement)
+                            Finished = true;
                         onLabelRefresh?.Invoke(this);
                     }
                 }

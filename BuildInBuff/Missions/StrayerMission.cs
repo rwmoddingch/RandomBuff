@@ -27,7 +27,7 @@ namespace BuiltinBuffs.Missions
                 {
                     new AchievementCondition() { achievementID = WinState.EndgameID.Traveller },
                     new AchievementCondition() { achievementID = WinState.EndgameID.Survivor },
-                    new MeetSS_SLCondition(){cycleRequirement = 15,meetSL = true,meetSS = true}
+                    new MeetSS_SLCondition(){cycleRequirement = 15}
                 }
             };
 

@@ -37,7 +37,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             conditions ??= new List<Condition>();
             var re = WinState.EndgameID.values.entries.Select(i => new WinState.EndgameID(i)).Where(i =>
-                conditions.All(j => (j as AchievementCondition).achievementID != i)).ToList();
+                conditions.OfType<AchievementCondition>().All(j => j.achievementID != i)).ToList();
             re.Remove(MoreSlugcatsEnums.EndgameID.Mother);
             re.Remove(MoreSlugcatsEnums.EndgameID.Gourmand);
 

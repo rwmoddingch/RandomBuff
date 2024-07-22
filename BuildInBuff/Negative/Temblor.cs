@@ -34,12 +34,12 @@ namespace HotDogGains.Negative
             orig.Invoke(self);
             if (self.roomRealizer != null)
             {
-                foreach (var absRoom in self.roomRealizer.GetRealizedRooms())
+                foreach (var absRoom in self.world.activeRooms)
                 {
-                    if (absRoom.realizedRoom != null && Random.value > 0.9f)
+                    if (absRoom != null && Random.value > 0.9f)
                     {
                         float power = Random.value;
-                        var room = absRoom.realizedRoom;
+                        var room = absRoom;
                         var vibPos = new Vector2(Random.Range(0, room.PixelWidth), Random.Range(0, room.PixelHeight));
                         room.ScreenMovement(vibPos, Custom.RNV(), power * 10f);
 

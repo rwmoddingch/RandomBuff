@@ -8,7 +8,7 @@
     
     "Chinese" : {
         "BuffName" : "拉面蜈蚣",
-        "Description" : "蜈蚣变为两倍长"
+        "Description" : "蜈蚣（除小蜈蚣）变为两倍长"
     },
     "English": {
         "BuffName" : "RandomRain",

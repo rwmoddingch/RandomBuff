@@ -333,7 +333,7 @@ namespace BuiltinBuffs.Negative
                 {
                     if (module.TryGetValue(self, out var _module))
                     {
-                        int num = self.tail.Length - 1;
+                        int num = _module.headTails.Count - 1;
                         vector3 = Vector2.Lerp(_module.headTails[num].lastPos, _module.headTails[num].pos, timeStacker);
                         return vector3;
                     }
