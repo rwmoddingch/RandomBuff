@@ -91,7 +91,10 @@ namespace RandomBuff.Core.StaticsScreen
             }
             foreach(var kill in killsAndCounts)
             {
-                totalScore += defaultScores[kill.Value[0]] * kill.Value[1];
+                if (kill.Value[0] != -1)
+                    totalScore += defaultScores[kill.Value[0]] * kill.Value[1];
+                else
+                    BuffPlugin.LogDebug($"Can't get creature for no sandbox creature, type:{kill.Key}");
             }
 
             //获取卡牌分数

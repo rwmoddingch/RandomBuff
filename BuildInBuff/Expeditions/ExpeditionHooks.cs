@@ -213,6 +213,15 @@ namespace BuiltinBuffs.Expeditions
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
+            On.ProcessManager.RequestMainProcessSwitch_ProcessID += ProcessManager_RequestMainProcessSwitch_ProcessID;
+        }
+
+        private static void ProcessManager_RequestMainProcessSwitch_ProcessID(On.ProcessManager.orig_RequestMainProcessSwitch_ProcessID orig, ProcessManager self, ProcessManager.ProcessID ID)
+        {
+            if (self.rainWorld.BuffMode() && (ID == ExpeditionEnums.ProcessID.ExpeditionGameOver ||
+                                              ID == ExpeditionEnums.ProcessID.ExpeditionWinScreen))
+                return;
+            orig(self, ID);
         }
 
         private static bool forceDisable = false;
