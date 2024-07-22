@@ -1,4 +1,5 @@
-﻿using RandomBuff.Core.Buff;
+﻿using RandomBuff;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using System;
@@ -29,13 +30,27 @@ namespace BuiltinBuffs.Duality
 
         public override void Destroy()
         {
-            base.Destroy();
-            foreach(var represent in activeRoomRepresents)
+            try
             {
-                for(int i = 0;i < represent.room.connections.Length;i++)
+                foreach (var represent in activeRoomRepresents)
                 {
-                    represent.room.connections[i] = represent.origConnections[i].index;
+                    if (represent.room.connections == null || represent.origConnections == null)
+                        continue;
+
+                    for (int i = 0; i < represent.room.connections.Length; i++)
+                    {
+                        represent.room.connections[i] = represent.origConnections[i].index;
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e);
+            }
+            finally
+            {
+                activeRoomRepresents.Clear();
+                randomized = false;
             }
         }
 
