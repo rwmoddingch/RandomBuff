@@ -4,7 +4,7 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "7E0A00",
+    "Color" : "ffbe4d",
     
     "Chinese" : {
         "BuffName" : "无限火力",

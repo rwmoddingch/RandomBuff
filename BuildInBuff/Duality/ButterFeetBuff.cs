@@ -66,6 +66,12 @@ namespace BuiltinBuffs.Duality
             orig(self, eu);
             if (butterModule.TryGetValue(self, out var module))
             {
+                if (self.bodyMode == Player.BodyModeIndex.ZeroG || self.bodyMode == Player.BodyModeIndex.Swimming || self.bodyMode == Player.BodyModeIndex.Stunned || self.animation == Player.AnimationIndex.AntlerClimb || self.animation == Player.AnimationIndex.VineGrab)
+                {
+                    module.butterVel *= 0f;
+                    return;
+                }
+
                 if (self.animation == Player.AnimationIndex.ClimbOnBeam || self.bodyMode == Player.BodyModeIndex.CorridorClimb)
                 {
                     module.butterVel *= 0f;

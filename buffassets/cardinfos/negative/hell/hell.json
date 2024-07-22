@@ -4,14 +4,14 @@
     "BuffType" : "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "FFFFFF",
+    "Color" : "E90000",
 
     "Chinese" : {
         "BuffName" : "地狱",
-        "Description" : "所有房间色调变为地狱色调"
+        "Description" : "所有房间色调变为地狱色调，且水体变为致命的岩浆"
     },
     "English" : {
         "BuffName" : "Hell",
-        "Description" : "All rooms have been changed to the palette of hell."
+        "Description" : "All rooms have been changed to the palette of hell, and the water becomes lethal lava"
     }
 }

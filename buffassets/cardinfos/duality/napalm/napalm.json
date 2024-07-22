@@ -4,7 +4,7 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "FF7300",
+    "Color" : "000000",
 
     "Chinese" : {
         "BuffName" : "凝固汽油弹",

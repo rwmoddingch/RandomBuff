@@ -4,7 +4,7 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "9D9D9D",
+    "Color" : "ff8800",
     
     "Chinese" : {
         "BuffName" : "集束炸弹",
