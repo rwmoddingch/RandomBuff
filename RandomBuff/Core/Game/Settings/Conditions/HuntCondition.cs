@@ -16,10 +16,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
 
-        public override int Exp => 0;//TODO
+        public override int Exp => 20 * killCount;//TODO
 
-        [JsonProperty]
-        public CreatureTemplate.Type type = CreatureTemplate.Type.GreenLizard;
+        [JsonProperty] 
+        public CreatureTemplate.Type type;
 
         [JsonProperty]
         private int currentKillCount;
