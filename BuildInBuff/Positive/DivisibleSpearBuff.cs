@@ -34,13 +34,6 @@ namespace BuiltinBuffs.Positive
     {
         public static BuffID DivisibleSpear = new BuffID("DivisibleSpear", true);
 
-        public static int StackLayer
-        {
-            get
-            {
-                return DivisibleSpear.GetBuffData().StackLayer;
-            }
-        }
 
         public void OnEnable()
         {
@@ -50,7 +43,28 @@ namespace BuiltinBuffs.Positive
         public static void HookOn()
         {
             On.Player.ThrownSpear += Player_ThrownSpear;
+            On.Spear.ChangeMode += Spear_ChangeMode;
         }
+
+        private static void Spear_ChangeMode(On.Spear.orig_ChangeMode orig, Spear self, Weapon.Mode newMode)
+        {
+            if (modules.TryGetValue(self, out _))
+            {
+                self.Destroy();
+                BuffUtils.Log(DivisibleSpear, "Destroy split spear");
+                modules.Remove(self);
+                return;
+            }
+
+            orig(self, newMode);
+        }
+
+        private class SpearModule{}
+
+
+        private static ConditionalWeakTable<Spear, SpearModule> modules = new ConditionalWeakTable<Spear, SpearModule>();
+
+    
 
         private static void Player_ThrownSpear(On.Player.orig_ThrownSpear orig, Player self, Spear spear)
         {
@@ -63,11 +77,12 @@ namespace BuiltinBuffs.Positive
                 spear.room.abstractRoom.AddEntity(absSpaer);
                 absSpaer.RealizeInRoom();
                 var newSpear = absSpaer.realizedObject as Spear;
-
+                newSpear.room = spear.room;
                 Vector2 vector = self.firstChunk.pos + spear.throwDir.ToVector2() * 10f + new Vector2(0f, 4f);
 
                 newSpear.Thrown(self, vector, null, spear.throwDir, Mathf.Lerp(1f, 1.5f, self.Adrenaline), false);
 
+                modules.Add(newSpear, new SpearModule());
                 newSpear.firstChunk.lastPos = newSpear.firstChunk.pos +=  dir * 3;
                 newSpear.spearDamageBonus = spear.spearDamageBonus;
                 newSpear.firstChunk.vel = spear.firstChunk.vel + dir * 0.25f * spear.firstChunk.vel.magnitude;
