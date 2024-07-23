@@ -39,7 +39,8 @@ namespace RandomBuff.Render.UI
 
         public Vector2 MousePos => new Vector2(Futile.mousePosition.x, Futile.mousePosition.y);
 
-        protected Helper.InputButtonTracker mouseLeftButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0), true, true, Double_ClickThreashold);
+        protected Helper.InputButtonTracker mouseLeftButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0), false, false, Double_ClickThreashold);
+        protected Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
 
         protected bool enableMouseInput = true;
 
@@ -50,13 +51,15 @@ namespace RandomBuff.Render.UI
 
         public virtual void Update()
         {
-            mouseLeftButtonTracker.Update(out bool singleClick, out bool doubleClick);
-            if(enableMouseInput && !overrideDisabled)
+            mouseLeftButtonTracker.Update(out bool singleClick, out bool _);
+            mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
+
+            if (enableMouseInput && !overrideDisabled)
             {
                 if(singleClick) 
                     OnMouseSingleClick();
-                if(doubleClick)
-                    OnMouseDoubleClick();
+                if (mouseRightSingle)
+                    OnMouseRightClick();
             }
             
             for(int i = managedCards.Count - 1; i >= 0; i--)
@@ -85,9 +88,13 @@ namespace RandomBuff.Render.UI
 
         }
 
+        [Obsolete("目前放弃使用双击以缓解延迟问题，双击功能现由右键替代")]
         protected virtual void OnMouseDoubleClick()
         {
+        }
 
+        protected virtual void OnMouseRightClick()
+        {
         }
 
         protected virtual void UpdateFocusCard()
@@ -156,9 +163,9 @@ namespace RandomBuff.Render.UI
             CurrentFocusCard?.OnMouseSingleClick();
         }
 
-        protected override void OnMouseDoubleClick()
+        protected override void OnMouseRightClick()
         {
-            CurrentFocusCard?.OnMouseDoubleClick();
+            CurrentFocusCard?.OnMouseRightClick();
         }
 
         public void DestroyManagedCard()
@@ -196,7 +203,7 @@ namespace RandomBuff.Render.UI
         public T Slot { get => BaseSlot as T; protected set => BaseSlot = value; }
 
         public event Action<BuffCard> OnBuffCardSingleClick;
-        public event Action<BuffCard> OnBuffCardDoubleClick;
+        public event Action<BuffCard> OnBuffCardRightClick;
 
         public ClickSignalInteractionManager(T slot) : base(slot)
         {
@@ -233,12 +240,11 @@ namespace RandomBuff.Render.UI
                 OnBuffCardSingleClick?.Invoke(CurrentFocusCard);
         }
 
-        protected override void OnMouseDoubleClick()
+        protected override void OnMouseRightClick()
         {
-            if(CurrentFocusCard != null)
-                OnBuffCardDoubleClick?.Invoke(CurrentFocusCard);
+            if (CurrentFocusCard != null)
+                OnBuffCardRightClick?.Invoke(CurrentFocusCard);
         }
-
     }
 
     internal class InGameSlotInteractionManager : CardInteractionManager
@@ -292,7 +298,7 @@ namespace RandomBuff.Render.UI
         public List<BuffCard> NegativeBuffCards { get; } = new List<BuffCard>();
 
         Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
-        Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
+        //Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
 
         public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot, bool canTriggerBuff = false) : base(slot)
         {
@@ -304,13 +310,13 @@ namespace RandomBuff.Render.UI
         public override void Update()
         {
             toggleShowButtonTracker.Update(out bool showButtonSingle, out bool _);
-            mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
+            //mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
 
             if (showButtonSingle && !overrideDisabled)
                 OnToggleShowButtonSingleClick();
 
-            if (mouseRightSingle && !overrideDisabled)
-                OnMouseRightSingleClick();
+            //if (mouseRightSingle && !overrideDisabled)
+            //    OnMouseRightSingleClick();
 
             keyBinderProcessor?.Update();
             base.Update();
@@ -427,14 +433,22 @@ namespace RandomBuff.Render.UI
                 SetState(State.Hide);
         }
 
-        protected void OnMouseRightSingleClick()
+        protected override void OnMouseRightClick()
         {
-            if (currentState == State.ExclusiveShow)
+            if (overrideDisabled || !canTriggerBuff)
+                return;
+
+            if (currentState == State.Show || currentState == State.ExclusiveShow)
             {
-                Slot.RecoverCardSort(exclusiveShowCard);
-                exclusiveShowCard = null;
-                SetState(State.Show);
+                TriggerCard(CurrentFocusCard);
             }
+
+            //if (currentState == State.ExclusiveShow)
+            //{
+            //    Slot.RecoverCardSort(exclusiveShowCard);
+            //    exclusiveShowCard = null;
+            //    SetState(State.Show);
+            //}
         }
 
         protected override void OnMouseSingleClick()
@@ -450,18 +464,14 @@ namespace RandomBuff.Render.UI
             }
             else if(currentState == State.ExclusiveShow)
             {
-                exclusiveShowCard.OnMouseSingleClick();
-            }
-        }
-
-        protected override void OnMouseDoubleClick()
-        {
-            if (overrideDisabled || !canTriggerBuff)
-                return;
-
-            if (currentState == State.Show || currentState == State.ExclusiveShow)
-            {
-                TriggerCard(CurrentFocusCard);
+                if(CurrentFocusCard == null)
+                {
+                    Slot.RecoverCardSort(exclusiveShowCard);
+                    exclusiveShowCard = null;
+                    SetState(State.Show);
+                }
+                else
+                    exclusiveShowCard.OnMouseSingleClick();
             }
         }
 
@@ -481,7 +491,7 @@ namespace RandomBuff.Render.UI
         {
             if (card.StaticData?.Triggerable ?? false)
             {
-                card.onMouseDoubleClick?.Invoke();
+                card.onMouseRightClick?.Invoke();
                 if (BuffPoolManager.Instance.TriggerBuff(card.ID))
                 {
                     Slot.RemoveCard(card.ID);
@@ -505,6 +515,8 @@ namespace RandomBuff.Render.UI
                 if (SubManager != null) SubManager.overrideDisabled = false;
                 if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
                 Slot.completeSlot.Title?.ChangeTitle("", true);
+
+                Slot.completeSlot?.SetGamePaused(false);
             }
             else if(newState == State.Show)
             {
@@ -515,6 +527,8 @@ namespace RandomBuff.Render.UI
                 if (SubManager != null) SubManager.overrideDisabled = true;
                 if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
                 Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
+
+                Slot.completeSlot?.SetGamePaused(true);
             }
             else if(newState == State.ExclusiveShow)
             {
@@ -523,6 +537,8 @@ namespace RandomBuff.Render.UI
 
                 Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_CardDetail"), true);
                 if (SubManager != null) SubManager.overrideDisabled = true;
+
+                Slot.completeSlot?.SetGamePaused(true);
             }
         }
 
@@ -806,22 +822,22 @@ namespace RandomBuff.Render.UI
             }
         }
 
-        protected override void OnMouseDoubleClick()
+        protected override void OnMouseRightClick()
         {
-            if(CurrentFocusCard != null)
+            if (CurrentFocusCard != null)
             {
-                CurrentFocusCard.OnMouseDoubleClick();
+                CurrentFocusCard.OnMouseRightClick();
                 Slot.CardPicked(CurrentFocusCard);
 
                 if (Major2AdditionalMapper.TryGetValue(CurrentFocusCard, out var additional))
                 {
-                    additional.OnMouseDoubleClick();
+                    additional.OnMouseRightClick();
                     Slot.CardPicked(additional);
                 }
 
                 if (Additional2MajorMapper.TryGetValue(CurrentFocusCard, out var major))
                 {
-                    major.OnMouseDoubleClick();
+                    major.OnMouseRightClick();
                     Slot.CardPicked(additional);
                 }
             }

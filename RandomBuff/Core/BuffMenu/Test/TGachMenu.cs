@@ -37,7 +37,7 @@ namespace RandomBuff.Core.BuffMenu.Test
                 interactionManager.ManageCard(pickCard[i]);
                 pickCard[i].Container.MoveToBack();
                 var id = cards[i].BuffID;
-                pickCard[i].onMouseDoubleClick += () => OnPositiveClicked(id);
+                pickCard[i].onMouseRightClick += () => OnPositiveClicked(id);
             }
 
 
@@ -50,7 +50,7 @@ namespace RandomBuff.Core.BuffMenu.Test
                 pickCard2[i].Alpha = 0;
                 pickCard2[i].Container.MoveToBack();
                 var id = cards2[i].BuffID;
-                pickCard2[i].onMouseDoubleClick += () => OnNegativeClicked(id);
+                pickCard2[i].onMouseRightClick += () => OnNegativeClicked(id);
             }
         }
 

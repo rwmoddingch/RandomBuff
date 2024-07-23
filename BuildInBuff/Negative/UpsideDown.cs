@@ -38,8 +38,8 @@ namespace BuiltinBuffs.Negative
             IL.PlayerGraphics.MSCUpdate += PlayerGraphics_MSCUpdate;
             IL.PlayerGraphics.Update += PlayerGraphics_Update1;
             IL.Player.TongueUpdate += Player_TongueUpdate;
-
-
+            IL.Player.TerrainImpact += Player_TerrainImpact;
+            
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
@@ -48,6 +48,34 @@ namespace BuiltinBuffs.Negative
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
+        }
+
+        private static void Player_TerrainImpact(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            ILLabel label = null;
+            if (c.TryGotoNext(MoveType.After,
+                i => i.MatchLdarg((byte)3),
+                i => i.Match(OpCodes.Ldloc_0),
+                i => i.MatchBleUn(out label)
+                ))
+            {
+                c.Emit(OpCodes.Ldarg_1);
+                c.Emit(OpCodes.Ldc_I4_2);
+                c.Emit(OpCodes.Bge_S, label.Target);
+            }
+
+            ILLabel label2 = null;
+            if (c.TryGotoNext(MoveType.After,
+                i => i.MatchLdarg((byte)3),
+                i => i.Match(OpCodes.Ldloc_1),
+                i => i.MatchBleUn(out label2)
+                ))
+            {
+                c.Emit(OpCodes.Ldarg_1);
+                c.Emit(OpCodes.Ldc_I4_2);
+                c.Emit(OpCodes.Bge_S, label2.Target);
+            }
         }
 
         private static void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -331,7 +359,7 @@ namespace BuiltinBuffs.Negative
                 c.Emit(OpCodes.Ldarg_3);
                 c.EmitDelegate<Func<PlayerGraphics, Vector2, float, Vector2>>(delegate (PlayerGraphics self, Vector2 vector3, float timeStacker)
                 {
-                    if (module.TryGetValue(self, out var _module))
+                    if (module.TryGetValue(self, out var _module) && _module.headTails.Count > 0)
                     {
                         int num = _module.headTails.Count - 1;
                         vector3 = Vector2.Lerp(_module.headTails[num].lastPos, _module.headTails[num].pos, timeStacker);

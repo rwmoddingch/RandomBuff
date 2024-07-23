@@ -101,7 +101,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     if (record.sourceObjType == weaponType)
                     {
                         kills++;
-                        if (kills == killRequirement)
+                        if (kills >= killRequirement)
                             Finished = true;
                         onLabelRefresh?.Invoke(this);
                     }
@@ -112,8 +112,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
-
-
             //return;
             try
             {

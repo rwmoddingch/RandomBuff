@@ -99,6 +99,35 @@ namespace RandomBuff.Render.UI.Component
                 currentActiveHandlers[i].Destroy();
         }
 
+        public static float GetNormScale(float s)
+        {
+            return BuffCard.normalScale * s;
+        }
+
+        public static int GetNormFlipCounter(bool longString)
+        {
+            if (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
+                return longString ? 10 : 20;
+            else
+                return longString ? 8 : 15;
+        }
+
+        public static int GetNormFlipDelay(bool longString)
+        {
+            if (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
+                return longString ? 3 : 5;
+            else
+                return longString ? 2 : 4;
+        }
+
+        public static float GetNormSpanAdjust(float s)
+        {
+            if (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
+                return -20f * s;
+            return -60f * s;
+        }
+
+
         protected class SingleCardHandler
         {
             CardTitle title;

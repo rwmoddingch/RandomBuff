@@ -149,3 +149,32 @@ Mission_Display_DuelsOfSnipers|DUELS OF SNIPERS
 Mission_Display_DoomExpress|DOOM EXPRESS
 Mission_Display_RadiationCrisis|RADIATION CRISIS
 Mission_Display_LawnCleaner|LAWN CLEANER
+
+
+//BuffManual
+//BuffManual_Topic
+BuffManual_Introduction|Introduction
+BuffManual_Gameplay|Gameplay
+BuffManual_Buff|Buff
+BuffManual_Condition|Condition
+BuffManual_Gamemode|Gamemode
+
+//BuffManual_SubpageTitle
+BuffManual_Introduction_0|Introduction
+BuffManual_Gameplay_0|Gameplay
+BuffManual_Buff_0|Buff
+BuffManual_Condition_0|Condition
+BuffManual_Gamemode_0|GameMode Introduction
+BuffManual_Gamemode_1|FreeMode
+BuffManual_Gamemode_2|FreeMode-Normal
+BuffManual_Gamemode_3|FreeMode-Quick
+BuffManual_Gamemode_4|FreeMode-Survival
+BuffManual_Gamemode_5|MissionMode
+
+//BuffManual_Gamemode
+BuffManual_GameMode_Content_0|There are two modes of random buff, divided into normal mode and mission mode.
+BuffManual_GameMode_Content_1|The most conventional way to play the game.<LINE>If you succeed in making a settlement, you will only settle the experience value to level up based on the completed conditions, number of kills and number of cards held.<LINE>Sub-modes can be switched in the lower left corner of the interface.
+BuffManual_GameMode_Content_2|You can choose from 0 to 5 conditions to play, each successful rain sleep will be drawn in a round, and the rain sleep will be settled when all conditions are completed. <LINE>No settlement will be made at 0 conditions. <LINE>Depending on the slug cat selected, the initial room is the same as the initial room of the selected slug cat in Campaign Mode.
+BuffManual_GameMode_Content_3|The conditions are selected in the same way as normal mode, but a completely randomized draw will be made every 30 seconds. <LINE>The earliest drawn buff will be automatically removed when the number of cards exceeds a certain number.<LINE>The initial room will be randomly selected from all shelters in the current area.
+BuffManual_GameMode_Content_4|Conditions are selected in the same way as normal mode. However, you can choose a certain number of initial buffs when you start the game, and every time you go through a rain cycle after that, an additional negative buff will be added.<LINE>The initial rooms are selected in the same way as in Quick Mode.
+BuffManual_GameMode_Content_5|The mode of fixed conditions and initial gains is divided into generic missions and exclusive missions. <LINE>Exclusive missions can only be completed by specific slug cats, while general missions can be completed by any slug cat. <LINE>Completing missions not only allows you to level up as in Free Mode, but also unlocks special collectibles!
