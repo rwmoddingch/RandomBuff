@@ -70,7 +70,7 @@ namespace RandomBuff.Render.UI
         public CardInteractionManager interactionManager;
 
         public Action onMouseSingleClick;
-        public Action onMouseDoubleClick;
+        public Action onMouseRightClick;
 
         public Vector2 LocalMousePos
         {
@@ -401,9 +401,9 @@ namespace RandomBuff.Render.UI
             BuffPlugin.Log("Card singleclick");
         }
 
-        public void OnMouseDoubleClick()
+        public void OnMouseRightClick()
         {
-            onMouseDoubleClick?.Invoke();
+            onMouseRightClick?.Invoke();
         }
 
         public enum AnimatorState

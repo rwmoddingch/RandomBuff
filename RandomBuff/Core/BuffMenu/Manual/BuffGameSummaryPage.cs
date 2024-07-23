@@ -13,6 +13,8 @@ namespace RandomBuff.Core.BuffMenu.Manual
         {
             float anchorY = rectHeight;
             AddIllusitration("buffassets/illustrations", "manual_summary", ref anchorY);
+            anchorY -= 25f;
+            AddText(BuffResourceString.Get("BuffManual_Summary_Content_0"), true, ref anchorY);
         }
     }
 }

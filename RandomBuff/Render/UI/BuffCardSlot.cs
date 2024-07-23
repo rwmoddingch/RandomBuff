@@ -700,6 +700,11 @@ namespace RandomBuff.Render.UI
             TriggerAnimSlot.TriggerBuff(buffID);
         }
 
+        public void SetGamePaused(bool pause)
+        {
+            BuffPoolManager.Instance.Game.paused = pause;
+        }
+
         public override void Destory()
         {
             BasicSlot.Destory();
