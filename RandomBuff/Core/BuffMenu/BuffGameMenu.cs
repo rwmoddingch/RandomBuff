@@ -330,6 +330,8 @@ namespace RandomBuff.Core.BuffMenu
                 PlaySound(SoundID.MENU_Start_New_Game);
                 if (manager.rainWorld.progression.IsThereASavedGame(CurrentName))
                 {
+                    manager.rainWorld.progression.currentSaveState = null;
+                    manager.arenaSitting = null;
                     manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         CurrentName;
                     manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
@@ -358,8 +360,10 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if (message == "CONTINUE_DETAIL_RESTART")
             {
+                manager.rainWorld.progression.currentSaveState = null;
+                manager.arenaSitting = null;
                 manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
-                        CurrentName;
+                    CurrentName;
                 manager.rainWorld.progression.WipeSaveState(CurrentName);
                 manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
 
@@ -373,6 +377,8 @@ namespace RandomBuff.Core.BuffMenu
 
                 var setting = BuffDataManager.Instance.GetGameSetting(CurrentName);
                 manager.rainWorld.progression.WipeSaveState(CurrentName);
+                manager.arenaSitting = null;
+
                 BuffDataManager.Instance.SetGameSetting(CurrentName, setting);
                 manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
                 if (ModManager.CoopAvailable)

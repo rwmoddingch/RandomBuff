@@ -386,23 +386,30 @@ namespace BuiltinBuffs.Positive
             {
                 if (owner.room != null)
                 {
-                    RoomCamera.SpriteLeaser spriteLeaser = owner.room.game.cameras[0].spriteLeasers.First(i => i.drawableObject == owner.graphicsModule);
-                    for (int i = 3; i <= 7; i++)
+                    RoomCamera.SpriteLeaser spriteLeaser = owner.room.game.cameras[0].spriteLeasers.FirstOrDefault(i => i.drawableObject == owner.graphicsModule);
+                    if (spriteLeaser != null)
                     {
-                        if (spriteLeaser.sprites[3].element.name.Contains(i.ToString()))
+                        for (int i = 3; i <= 7; i++)
                         {
-                            if (this.owner.input[0].x != 0)
-                                return new Vector2(this.owner.input[0].x, 0);
-                            else
-                                return ((owner.graphicsModule as PlayerGraphics).head.pos - owner.bodyChunks[0].pos).normalized;
+                            if (spriteLeaser.sprites[3].element.name.Contains(i.ToString()))
+                            {
+                                if (owner.input[0].x != 0 || !(owner.graphicsModule is PlayerGraphics graphic))
+                                    return new Vector2(owner.input[0].x, 0);
+                                else
+                                    return (graphic.head.pos - owner.bodyChunks[0].pos).normalized;
+                            }
                         }
                     }
                 }
-                if ((owner.graphicsModule as PlayerGraphics).lookDirection != Vector2.zero)
+
+                if (owner.graphicsModule is PlayerGraphics graphics)
                 {
-                    return (owner.graphicsModule as PlayerGraphics).lookDirection;
+                    if (graphics.lookDirection != Vector2.zero)
+                        return graphics.lookDirection;
+                    return (graphics.head.pos - owner.bodyChunks[0].pos).normalized;
                 }
-                return ((owner.graphicsModule as PlayerGraphics).head.pos - owner.bodyChunks[0].pos).normalized;
+                return new Vector2(owner.input[0].x, 0);
+
             }
         }
 

@@ -87,7 +87,7 @@ namespace BuildInBuff.Positive
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-            if (self.room != null && !self.Consious)
+            if (self.room != null || !self.Consious)
                 return;
 
             var plateData = self.EatPlate();

@@ -24,8 +24,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             if (newFinished.Contains(achievementID))
                 Finished = true;
 
-            if (newUnfinished.Contains(achievementID))
-                Finished = false;
         }
 
         public override ConditionID ID => ConditionID.Achievement;
@@ -70,10 +68,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 translator.Translate(WinState.PassageDisplayName(achievementID)));
         }
 
-        ~AchievementCondition()
+        public override void SessionEnd(SaveState save)
         {
+            base.SessionEnd(save);
             BuffEvent.OnAchievementCompleted -= BuffEvent_OnAchievementCompleted;
+
         }
+
+        
 
         [JsonProperty]
         public WinState.EndgameID achievementID;

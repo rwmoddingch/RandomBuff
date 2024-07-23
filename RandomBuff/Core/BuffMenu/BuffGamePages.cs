@@ -759,9 +759,12 @@ namespace RandomBuff.Core.BuffMenu
                 gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);
                 BuffDataManager.Instance.SetGameSetting(gameMenu.CurrentName, currentGameSetting = pickedMission.GameSetting.Clone());
                 currentGameSetting.MissionId = pickedMission.ID.value;
+                gameMenu.manager.rainWorld.progression.currentSaveState = null;
+                menu.manager.arenaSitting = null;
                 gameMenu.manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         gameMenu.CurrentName; 
                 gameMenu.manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
+
                 if (ModManager.CoopAvailable)
                 {
                     for (int i = 1; i < menu.manager.rainWorld.options.JollyPlayerCount; i++)
