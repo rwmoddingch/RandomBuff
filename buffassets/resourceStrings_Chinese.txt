@@ -88,10 +88,10 @@ totTriggerCount|Buff触发的次数:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
-BasicInGameBuffCardSlot_OnCardExclusiveShow|单击左键以翻转卡牌<LINE>单击右键以退出详情浏览
+BasicInGameBuffCardSlot_OnCardExclusiveShow|单击左键以翻转卡牌<LINE>左键单击空白处以退出详情浏览
 BasicInGameBuffCardSlot_NoCardFocus|将鼠标移至一个卡牌上并单击鼠标左键来查看卡牌
 BasicInGameBuffCardSlot_ExitHUD|<LINE>按下 <HUD_KEY> 来关闭 hud
-BasicInGameBuffCardSlot_BindKey|<LINE>按住 <KEYBINDER_KEY> 并按另一个按键来给 <BuffID> 绑定快捷键
+BasicInGameBuffCardSlot_BindKey|<LINE>按住 <KEYBINDER_KEY> 并同时按另一个按键来给 <BuffID> 绑定快捷键
 
 
 //BuffCondition
@@ -176,6 +176,8 @@ BuffManual_Gamemode_3|自由模式-快速
 BuffManual_Gamemode_4|自由模式-生存
 BuffManual_Gamemode_5|使命模式
 
+//BuffManual_Summary
+BuffManual_Summary_Content_0|随机增益是以随机的增益效果搭配为玩法的游戏模式。你可以为自己添加挑战，也可以完成特殊的使命来解锁奖励。
 //BuffManual_Gamemode
 BuffManual_GameMode_Content_0|随机增益一共有两种模式，分为普通模式和使命模式。
 BuffManual_GameMode_Content_1|最常规的游玩方式。<LINE>如果成功进行结算，只会根据完成的条件、击杀数量和持有卡牌数量结算经验值提升等级。<LINE>可在界面左下角切换子模式。

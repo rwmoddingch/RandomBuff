@@ -88,10 +88,10 @@ totTriggerCount|Number of buff triggers:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|Single click to check <BuffID> in detail
-BasicInGameBuffCardSlot_OnCardExclusiveShow|Single click to turn over the card<LINE>Right click to exit detail mode
+BasicInGameBuffCardSlot_OnCardExclusiveShow|Single click to turn over the card<LINE>Single click blank space to exit detail mode
 BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and click to check it
 BasicInGameBuffCardSlot_ExitHUD|<LINE>Press <HUD_KEY> to turn off hud
-BasicInGameBuffCardSlot_BindKey|<LINE>Hold <KEYBINDER_KEY> and press another key to bind shortcut key for <BuffID>
+BasicInGameBuffCardSlot_BindKey|<LINE>Press another key while hold <KEYBINDER_KEY> to bind shortcut key for <BuffID>
 
 
 //BuffCondition
@@ -171,6 +171,8 @@ BuffManual_Gamemode_3|FreeMode-Quick
 BuffManual_Gamemode_4|FreeMode-Survival
 BuffManual_Gamemode_5|MissionMode
 
+//BuffManual_Summary
+BuffManual_Summary_Content_0|RandomBuff is a game mode that is played with randomized gain effect pairings. You can add challenges for yourself or complete special missions to unlock rewards.
 //BuffManual_Gamemode
 BuffManual_GameMode_Content_0|There are two modes of random buff, divided into normal mode and mission mode.
 BuffManual_GameMode_Content_1|The most conventional way to play the game.<LINE>If you succeed in making a settlement, you will only settle the experience value to level up based on the completed conditions, number of kills and number of cards held.<LINE>Sub-modes can be switched in the lower left corner of the interface.
