@@ -50,7 +50,18 @@ namespace RandomBuff.Core.Hooks
             On.SaveState.ctor += SaveState_setup;
             On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
 
+            On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+
             On.Room.Loaded += Room_Loaded;
+        }
+
+        private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
+        {
+            orig(self, dt);
+            if (BuffHud.Instance?.NeedShowCursor ?? false)
+                Cursor.visible = true;
+            else
+                Cursor.visible = self.devUI != null || !self.rainWorld.options.fullScreen;
         }
 
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)

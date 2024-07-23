@@ -762,6 +762,14 @@ namespace RandomBuff.Core.BuffMenu
                 gameMenu.manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =
                         gameMenu.CurrentName; 
                 gameMenu.manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
+                if (ModManager.CoopAvailable)
+                {
+                    for (int i = 1; i < menu.manager.rainWorld.options.JollyPlayerCount; i++)
+                        menu.manager.rainWorld.RequestPlayerSignIn(i, null);
+
+                    for (int j = menu.manager.rainWorld.options.JollyPlayerCount; j < 4; j++)
+                        menu.manager.rainWorld.DeactivatePlayer(j);
+                }
                 currentGameSetting.NewGame();
 
                 for (int j = 0; j < pickedMission.startBuffSet.Count; j++)

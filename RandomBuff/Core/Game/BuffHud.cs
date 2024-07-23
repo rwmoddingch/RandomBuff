@@ -9,6 +9,7 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 
@@ -16,6 +17,9 @@ namespace RandomBuff.Core.Game
 {
     internal class BuffHud : HudPart
     {
+        private bool lastPaused = false;
+        private bool pausedLocked = false;
+
         public BuffHud(HUD.HUD hud) : base(hud)
         {
             slotTitle = new BuffSlotTitle();
@@ -92,8 +96,25 @@ namespace RandomBuff.Core.Game
             HandleAddBuffHUD(id);
         }
 
+
+
         public override void Update()
         {
+            if (BuffCustom.TryGetGame(out var game) && inGameSlot.WaitingPickCard)
+            {
+                if (!pausedLocked)
+                {
+                    pausedLocked = true;
+                    lastPaused = game.paused;
+                }
+                else if (!game.paused && lastPaused)
+                    lastPaused = false;
+
+                game.paused = inGameSlot.WaitingPickCard;
+            }
+            else if (pausedLocked)
+                game.paused = false;
+
             inGameSlot.Update();
             slotTitle.Update();
 
@@ -168,6 +189,8 @@ namespace RandomBuff.Core.Game
 
         BuffSlotTitle slotTitle;
         private CommmmmmmmmmmmmmpleteInGameSlot inGameSlot;
+
+        public bool NeedShowCursor => inGameSlot.NeedShowCursor;
 
         Dictionary<BuffID, BuffHudPart> id2hudParts = new Dictionary<BuffID, BuffHudPart>();
         List<BuffHudPart> hudParts = new List<BuffHudPart>();

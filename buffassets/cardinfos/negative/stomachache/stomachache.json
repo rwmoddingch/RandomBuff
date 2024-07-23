@@ -9,5 +9,9 @@
     "Chinese":{
         "BuffName":"我肚子疼",
         "Description":"吃食物后会被眩晕2秒"
+    },
+    "English":{
+        "BuffName":"Stomachache",
+        "Description":"Players will be stunned for 2 seconds after eating food."
     }
 }

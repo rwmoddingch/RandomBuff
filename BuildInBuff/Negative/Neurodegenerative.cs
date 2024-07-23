@@ -57,7 +57,7 @@ namespace HotDogBuff
     internal class MyLastRoom
     {
         public Room lastRoom;
-        public int cdMax = 200;
+        public int cdMax = 100;
         public int cd = 0;
         public MyLastRoom() { }
     }
