@@ -110,7 +110,7 @@ namespace RandomBuff.Core.Hooks
                     self.miscWorldSaveData.moonHeartRestored = true;
                     self.miscWorldSaveData.pebblesEnergyTaken = true;
                 }
-                self.deathPersistentSaveData.karma = 4;
+                self.deathPersistentSaveData.karma = SlugcatStats.SlugcatStartingKarma(self.saveStateNumber);
                 self.deathPersistentSaveData.karmaCap = 4;
                 self.deathPersistentSaveData.theMark = true;
                 self.miscWorldSaveData.SLOracleState.playerEncountersWithMark = ((saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear) ? 5 : 2);

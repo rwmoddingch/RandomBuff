@@ -51,7 +51,7 @@ namespace RandomBuffUtils
             remove
             {
                 onNewRoom -= value;
-                if (onNewRoom.GetInvocationList().Length == 0)
+                if (onNewRoom == null || onNewRoom.GetInvocationList().Length == 0)
                     On.Player.NewRoom -= Player_NewRoom;
             }
         }
@@ -108,7 +108,7 @@ namespace RandomBuffUtils
             remove
             {
                 onAchievementCompleted -= value;
-                if (onAchievementCompleted.GetInvocationList().Length == 0)
+                if (onAchievementCompleted == null || onAchievementCompleted.GetInvocationList().Length == 0)
                     On.WinState.CycleCompleted -= WinState_CycleCompleted;
             }
         }
