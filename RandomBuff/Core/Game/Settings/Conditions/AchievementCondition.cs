@@ -32,7 +32,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             conditions ??= new List<Condition>();
             var re = WinState.EndgameID.values.entries.Select(i => new WinState.EndgameID(i)).Where(i =>
-                conditions.OfType<AchievementCondition>().All(j => j.achievementID != i)).ToList();
+                conditions.OfType<AchievementCondition>().All(j => j.achievementID != i) && !string.IsNullOrWhiteSpace(WinState.PassageDisplayName(i))).ToList();
             re.Remove(MoreSlugcatsEnums.EndgameID.Mother);
             re.Remove(MoreSlugcatsEnums.EndgameID.Gourmand);
 
@@ -62,14 +62,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override string DisplayName(InGameTranslator translator)
         {
             return string.Format(BuffResourceString.Get("DisplayName_Achievement"),
-                translator.Translate(WinState.PassageDisplayName(achievementID)));
+                translator.Translate( string.IsNullOrWhiteSpace(WinState.PassageDisplayName(achievementID)) ? "[MISSING ACHIEVEMENT]" : (WinState.PassageDisplayName(achievementID))));
         }
 
-        public override void SessionEnd(SaveState save)
+        //这个必须延后
+        ~AchievementCondition()
         {
-            base.SessionEnd(save);
             BuffEvent.OnAchievementCompleted -= BuffEvent_OnAchievementCompleted;
-
         }
 
         

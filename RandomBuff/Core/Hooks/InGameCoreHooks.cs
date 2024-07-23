@@ -15,6 +15,7 @@ using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Menu;
 using RandomBuff.Core.Game.Settings;
+using RandomBuffUtils;
 
 namespace RandomBuff.Core.Hooks
 {
@@ -66,11 +67,11 @@ namespace RandomBuff.Core.Hooks
 
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
-            if (Custom.rainWorld.BuffMode())
+            if (Custom.rainWorld.BuffMode() && BuffCustom.TryGetGame(out var game))
             {
                 self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
                 self.roomSettings.roomSpecificScript = self.roomSettings.roomSpecificScript && IsCurrentGameSettingNeed(BuffPoolManager.Instance?.GameSetting??
-                BuffDataManager.Instance.GetGameSetting(self.world.game.StoryCharacter));
+                BuffDataManager.Instance.GetGameSetting(game.StoryCharacter ?? Custom.rainWorld.progression.PlayingAsSlugcat));
             }
 
             orig(self);
