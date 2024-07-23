@@ -99,7 +99,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             if (needSpawnChain)
                 needSpawnChain = !BinahGlobalManager.SpawnNewChain(game);
 
-            BuffUtils.Log(BinahBuffData.Binah,$"health:{Data.Health}");
         }
 
         public BuffHudPart CreateHUDPart()

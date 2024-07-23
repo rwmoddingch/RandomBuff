@@ -60,8 +60,10 @@ namespace BuiltinBuffs.Positive
                 var dir = spear.throwDir.x == 0 ? new Vector2(i == 0 ? 1 : -1,0) : new Vector2(0, i == 0 ? 1 : -1);
 
                 AbstractSpear absSpaer = new AbstractSpear(spear.room.world, null, spear.abstractPhysicalObject.pos, spear.room.game.GetNewID(), false);
-                Spear newSpear = new Spear(absSpaer, spear.room.world);
-                newSpear.abstractPhysicalObject.RealizeInRoom();
+                spear.room.abstractRoom.AddEntity(absSpaer);
+                absSpaer.RealizeInRoom();
+                var newSpear = absSpaer.realizedObject as Spear;
+
                 Vector2 vector = self.firstChunk.pos + spear.throwDir.ToVector2() * 10f + new Vector2(0f, 4f);
 
                 newSpear.Thrown(self, vector, null, spear.throwDir, Mathf.Lerp(1f, 1.5f, self.Adrenaline), false);

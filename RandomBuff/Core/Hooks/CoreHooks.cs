@@ -196,7 +196,7 @@ namespace RandomBuff.Core.Hooks
 
                 BuffPlugin.Log($"Change slot from {lastSlot} to {self.rainWorld.options.saveSlot}");
                 self.rainWorld.progression.Destroy(lastSlot);
-                self.rainWorld.progression = new PlayerProgression(self.rainWorld, true, true);
+                self.rainWorld.progression = new PlayerProgression(self.rainWorld, true, false);
             }
             orig(self, ID);
         }

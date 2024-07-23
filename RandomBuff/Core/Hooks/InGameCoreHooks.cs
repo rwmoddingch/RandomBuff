@@ -38,7 +38,7 @@ namespace RandomBuff.Core.Hooks
 
         public static bool IsCurrentGameSettingNeed(GameSetting gameSetting)
         {
-            return gameSetting.MissionId == "DoomExpress" || gameSetting.MissionId == "EmergnshyTreatment";
+            return gameSetting.MissionId is "DoomExpress" or "EmergnshyTreatment";
         }
         public static void InGameHooksInit()
         {
@@ -50,7 +50,6 @@ namespace RandomBuff.Core.Hooks
             On.SaveState.ctor += SaveState_setup;
             On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
 
-            On.SaveState.ctor += SaveState_ctor;
             On.Room.Loaded += Room_Loaded;
         }
 
@@ -68,13 +67,7 @@ namespace RandomBuff.Core.Hooks
 
    
 
-        private static void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
-        {
-            orig(self, saveStateNumber, progression);
-            if (Custom.rainWorld.BuffMode())
-                self.dreamsState = null;
-        }
-
+    
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
         {
             if (Custom.rainWorld.BuffMode() && Custom.rainWorld.progression.currentSaveState.cycleNumber == 0)
@@ -92,7 +85,6 @@ namespace RandomBuff.Core.Hooks
                 self.deathPersistentSaveData.KarmaFlowerMessage = true;
                 self.deathPersistentSaveData.GoExploreMessage = true;
                 self.deathPersistentSaveData.ScavMerchantMessage = true;
-                self.deathPersistentSaveData.ScavTollMessage = true;
                 self.deathPersistentSaveData.SMEatTutorial = true;
                 self.deathPersistentSaveData.SMTutorialMessage = true;
                 self.deathPersistentSaveData.TongueTutorialMessage = true;
@@ -107,7 +99,7 @@ namespace RandomBuff.Core.Hooks
                     self.miscWorldSaveData.moonHeartRestored = true;
                     self.miscWorldSaveData.pebblesEnergyTaken = true;
                 }
-                self.deathPersistentSaveData.karma = SlugcatStats.SlugcatStartingKarma(saveStateNumber);
+                self.deathPersistentSaveData.karma = 4;
                 self.deathPersistentSaveData.karmaCap = 4;
                 self.deathPersistentSaveData.theMark = true;
                 self.miscWorldSaveData.SLOracleState.playerEncountersWithMark = ((saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear) ? 5 : 2);
@@ -117,6 +109,7 @@ namespace RandomBuff.Core.Hooks
                 //self.miscWorldSaveData.SSaiThrowOuts = -1;
                 progression.miscProgressionData.beaten_Gourmand = true;
                 GameSettingSpecialSetup(self,BuffDataManager.Instance.GetGameSetting(saveStateNumber));
+                self.dreamsState = null;
             }
         }
 

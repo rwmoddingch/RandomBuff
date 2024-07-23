@@ -19,6 +19,7 @@ using System.Reflection.Emit;
 using BuiltinBuffs.Negative;
 using BuiltinBuffs.Negative.SephirahMeltdown;
 using BuiltinBuffs.Positive;
+using MonoMod.Cil;
 using RandomBuffUtils.FutileExtend;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
@@ -86,13 +87,34 @@ namespace BuiltinBuffs.Expeditions
             _ = new Hook(typeof(BuffPoolManager).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance,null,new Type[] { typeof(RainWorldGame) },Array.Empty<ParameterModifier>()),
                 typeof(ExpeditionHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
+
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
-            On.ProcessManager.RequestMainProcessSwitch_ProcessID += ProcessManager_RequestMainProcessSwitch_ProcessID;
+            On.WinState.CycleCompleted += WinState_CycleCompleted;
+
+            IL.RainWorldGame.Update += RainWorldGame_Update;
 
             _ = new Hook(typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),BindingFlags.Static | BindingFlags.Public).GetGetMethod(),
                 typeof(ExpeditionHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet), BindingFlags.Static | BindingFlags.NonPublic));
              
+        }
+
+        private static void RainWorldGame_Update(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            while (c.TryGotoNext(MoveType.Before,
+                       i => i.MatchLdsfld(out var fld) && fld.Name.Contains("expeditionComplete")))
+            {
+                c.EmitDelegate<Action>(() => ExpeditionGame.expeditionComplete &= !Custom.rainWorld.BuffMode());
+                c.GotoNext(MoveType.After, i => i.MatchLdsfld(out var fld) && fld.Name.Contains("expeditionComplete"));
+            }
+        }
+
+        private static void WinState_CycleCompleted(On.WinState.orig_CycleCompleted orig, WinState self, RainWorldGame game)
+        {
+            forceDisable = true;
+            orig(self,game);
+            forceDisable = false;
         }
 
         private static List<Challenge> ExpeditionData_ChallengeListGet(Func<List<Challenge>> orig)
@@ -103,13 +125,7 @@ namespace BuiltinBuffs.Expeditions
             return orig();
 
         }
-        private static void ProcessManager_RequestMainProcessSwitch_ProcessID(On.ProcessManager.orig_RequestMainProcessSwitch_ProcessID orig, ProcessManager self, ProcessManager.ProcessID ID)
-        {
-            if (self.rainWorld.BuffMode() && (ID == ExpeditionEnums.ProcessID.ExpeditionGameOver ||
-                                              ID == ExpeditionEnums.ProcessID.ExpeditionWinScreen))
-                return;
-            orig(self, ID);
-        }
+    
 
         private static bool forceDisable = false;
 
