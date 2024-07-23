@@ -87,7 +87,7 @@ namespace BuildInBuff.Positive
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-            if (self.room != null && !self.Consious)
+            if (self.room == null || !self.Consious)
                 return;
 
             var plateData = self.EatPlate();
@@ -111,7 +111,7 @@ namespace BuildInBuff.Positive
             self.slugcatStats.foodToHibernate = Convert.ToInt32(Mathf.Lerp(0, self.slugcatStats.maxFood, plateData.InvertLerpColor()));
 
             //如果饱食度显示不匹配就刷新显示
-            if (self.room.game.cameras.Count() > 0)
+            if (self.room.game.cameras.Any())
             {
                 if (self.room.game.cameras[0].hud.foodMeter.survivalLimit != self.slugcatStats.foodToHibernate)
                 {

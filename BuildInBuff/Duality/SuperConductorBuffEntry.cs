@@ -85,7 +85,7 @@ namespace BuiltinBuffs.Duality
             if (type == Creature.DamageType.Electric)
             {
                 BuffUtils.Log("SuperConductor", $"Edmg {damage}");
-                if (ArcThrower.source2throwerMapper.ContainsKey(source))
+                if (source == null || ArcThrower.source2throwerMapper.ContainsKey(source))
                     return;
 
                 if(source.owner is Weapon weapon && weapon.thrownBy != null)

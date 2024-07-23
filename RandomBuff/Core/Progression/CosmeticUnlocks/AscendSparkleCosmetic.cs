@@ -62,11 +62,6 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
     {
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
         {
-            if (module.PlayerRef.TryGetTarget(out var player))
-            {
-                (player.abstractCreature.world.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma = 9;
-                (player.abstractCreature.world.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap = 9;
-            }
 
             if (module.Name == MoreSlugcatsEnums.SlugcatStatsName.Saint)
                 return new AscendSparkleGraphicModule();

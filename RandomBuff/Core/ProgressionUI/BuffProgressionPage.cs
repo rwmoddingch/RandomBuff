@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Menu;
 using Menu.Remix;
 using Menu.Remix.MixedUI;
+using MoreSlugcats;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Progression;
@@ -225,7 +226,8 @@ namespace RandomBuff.Core.ProgressionUI
 
                 foreach(var unlock in unlocks)
                 {
-                    CosmeticButton cosmeticButton = new CosmeticButton(new Vector2(x, startY - yDecrease), buttonSize, unlock.IconElement, unlock.UnlockID.value, Color.green, color, OnCosmeticButtonClick);
+                    CosmeticButton cosmeticButton = new CosmeticButton(new Vector2(x, startY - yDecrease), buttonSize, unlock.IconElement, unlock.UnlockID.value, Color.green, 
+                        (color * (unlock.BindCat == MoreSlugcatsEnums.SlugcatStatsName.Saint ? 0.5F : 1F)).CloneWithNewAlpha(1), OnCosmeticButtonClick);
                     cosmeticButton.SetEnable(buffData.IsCosmeticEnable(unlock.UnlockID.value));
                     cosmeticButton.wrapper = opScrollBox.wrapper;
                     opScrollBox.AddItems(cosmeticButton);

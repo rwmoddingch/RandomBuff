@@ -16,7 +16,8 @@ namespace HotDogGains.Positive
         public override BuffID ID => RedEnvelopeBuffEntry.RedEnvelopeID;
         public override bool Trigger(RainWorldGame game)
         {
-            if (game.AlivePlayers[0] != null)
+            if (game.AlivePlayers.FirstOrDefault() != null && !game.AlivePlayers[0].realizedCreature.inShortcut &&
+                game.AlivePlayers[0].realizedCreature.room != null)
             {
                 var player = game.AlivePlayers[0].realizedCreature as Player;
                 for (int i = 0; i < Random.value*20; i++)
@@ -30,9 +31,10 @@ namespace HotDogGains.Positive
                     pearl.realizedObject.firstChunk.vel += Custom.RNV() * Random.value * 20;
                 }
                 player.room.PlaySound(SoundID.SANDBOX_Add_Item,player.mainBodyChunk);
-                 
+                return true;
             }
-            return true;
+
+            return false;
         }
 
     }

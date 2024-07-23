@@ -165,7 +165,7 @@ namespace RandomBuff.Core.SaveData
         internal static List<string> GetQuestIDList() => questDatas.Keys.ToList();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => lockedMap[unlockedType].ContainsKey(itemName) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName]);
+        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => (lockedMap[unlockedType].ContainsKey(itemName) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName])) && !BuffPlugin.AllCardDisplay;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsSpecialItemLocked(string itemName) => IsItemLocked(QuestUnlockedType.Special,itemName);

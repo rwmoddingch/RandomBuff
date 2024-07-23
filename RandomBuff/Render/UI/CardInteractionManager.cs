@@ -290,6 +290,8 @@ namespace RandomBuff.Render.UI
 
         State currentState;
 
+        public bool NeedCursor => currentState != State.Hide;
+
         public int PositiveShowIndex { get; protected set; }
         public int NegativeShowIndex { get; protected set; }
 

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RandomBuff;
-using RandomBuff.Core.Buff;
+﻿using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RWCustom;
+using System.Linq;
 using UnityEngine;
 
 namespace BuiltinBuffs.Positive
@@ -88,7 +83,7 @@ namespace BuiltinBuffs.Positive
 
         public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
-            newContatiner = rCam.ReturnFContainer("Foregrounds");
+            newContatiner = rCam.ReturnFContainer("Foreground");
             newContatiner.AddChild(sLeaser.sprites[0]);
         }
     }

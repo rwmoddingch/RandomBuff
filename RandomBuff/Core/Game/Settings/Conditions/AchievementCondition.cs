@@ -1,13 +1,10 @@
 ﻿
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MoreSlugcats;
 using Newtonsoft.Json;
 using RandomBuffUtils;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using static RainWorld;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
@@ -24,8 +21,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             if (newFinished.Contains(achievementID))
                 Finished = true;
 
-            if (newUnfinished.Contains(achievementID))
-                Finished = false;
         }
 
         public override ConditionID ID => ConditionID.Achievement;
@@ -70,10 +65,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 translator.Translate(WinState.PassageDisplayName(achievementID)));
         }
 
-        ~AchievementCondition()
+        public override void SessionEnd(SaveState save)
         {
+            base.SessionEnd(save);
             BuffEvent.OnAchievementCompleted -= BuffEvent_OnAchievementCompleted;
+
         }
+
+        
 
         [JsonProperty]
         public WinState.EndgameID achievementID;

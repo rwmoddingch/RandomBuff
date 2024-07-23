@@ -19,7 +19,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         [JsonProperty]
         public CreatureCommunities.CommunityID communityID;
+
         int counter;
+
+        [JsonProperty]
         float lastLike;
 
         public LikeCondition()

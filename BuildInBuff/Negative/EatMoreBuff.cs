@@ -65,7 +65,6 @@ namespace BuiltinBuffs.Negative
             var data = eatMoreBuffID.GetBuffData();
             int newHibernateRequirement = origFoodRequirement.y + data.StackLayer;
             int newMaxFoodRequirement = Mathf.Max(newHibernateRequirement, origFoodRequirement.x);
-            BuffUtils.Log(eatMoreBuffID, $"{newMaxFoodRequirement},{newHibernateRequirement}");
 
             return new IntVector2(newMaxFoodRequirement, newHibernateRequirement);
         }

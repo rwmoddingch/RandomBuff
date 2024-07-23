@@ -39,7 +39,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         private void Room_ReadyForAI(On.Room.orig_ReadyForAI orig, Room self)
         {
             orig.Invoke(self);
-            var oracles = self.updateList.Where((u) => u is Oracle).Select((u) => u as Oracle).ToList();
+            if (self.game == null)
+                return;
+            var oracles = self.updateList.OfType<Oracle>().ToList();
             if (self.game.IsArenaSession) return;
             if (self.game.rainWorld.progression.currentSaveState.cycleNumber > cycleRequirement)
                 return;

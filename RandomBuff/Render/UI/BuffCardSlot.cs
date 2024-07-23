@@ -538,6 +538,9 @@ namespace RandomBuff.Render.UI
 
         Queue<Action> pickerRequests = new();
 
+        public bool NeedShowCursor => ActivePicker != null ||
+                                      (BasicSlot.BaseInteractionManager as InGameSlotInteractionManager).NeedCursor;
+
         public CommmmmmmmmmmmmmpleteInGameSlot(BuffSlotTitle slotTitle = null)
         {
             Title = slotTitle;
@@ -637,9 +640,7 @@ namespace RandomBuff.Render.UI
                 foreach(var line in lines)
                 {
                     var id = new BuffID(line);
-                    BuffPoolManager.Instance.CreateBuff(id);
-                    AppendCard(id);
-                    BuffHud.Instance.HandleAddBuffHUD(id);
+                    id.CreateNewBuff();
                 }
             }
         }
@@ -662,6 +663,8 @@ namespace RandomBuff.Render.UI
             });
             BuffPlugin.Log("Request new pick");
         }
+
+        public bool WaitingPickCard => pickerRequests.Any();
 
         /// <summary>
         /// 申请抽卡，利用委托延迟创建抽取的卡牌

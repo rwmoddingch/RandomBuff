@@ -41,7 +41,7 @@ namespace BuiltinBuffs.Negative
                 bodyChunk.vel = Vector2.zero;
             }
             foreach(var grasp in self.lizard.grasps)
-            foreach (var chunk in grasp.grabbed?.bodyChunks ?? Array.Empty<BodyChunk>())
+            foreach (var chunk in grasp?.grabbed?.bodyChunks ?? Array.Empty<BodyChunk>())
             {
                 chunk.HardSetPosition(pos);
                 chunk.vel = Vector2.zero;

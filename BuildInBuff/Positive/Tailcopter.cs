@@ -39,8 +39,8 @@ namespace TemplateGains
         private static void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-
-            if (!self.GetExPlayerData().HaveTail) return;
+            
+            if (!self.GetExPlayerData().HaveTail || self.inShortcut || self.room == null || self.graphicsModule == null) return;
 
             //if (PlayerUtils.TryGetModulePart<Tail,TailcopterBuffEntry>(self,out var modulePart))
             //{
