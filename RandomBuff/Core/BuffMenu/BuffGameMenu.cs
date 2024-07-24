@@ -369,6 +369,7 @@ namespace RandomBuff.Core.BuffMenu
 
                 continueDetailPage.ChangeSlugcat(CurrentName);
                 menuSlot.SetupBuffs(slugNameOrders);
+                UpdateSlugcatAndPage();
             }
             else if (message == "NEWGAME_DETAIL_NEWGAME")
             {

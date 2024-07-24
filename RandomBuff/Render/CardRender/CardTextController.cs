@@ -96,10 +96,15 @@ namespace RandomBuff.Render.CardRender
                 rectTransform.localPosition = new Vector3(0f, -0.5f, -0.01f);
                 textMesh.enableWordWrapping = false;
                 textMesh.margin = new Vector4(0.1f, 0f, 0f, 0f);
-                textMesh.outlineWidth = 5f;
-                textMesh.outlineColor = Color.black;
+                //textMesh.outlineWidth = 5f;
+                //textMesh.outlineColor = Color.black;
                 textMesh.alpha = 0f;
                 _maxScrollVel = 1f;
+
+                (textMesh as TextMeshPro).m_renderer.material.EnableKeyword("UNDERLAY_ON");
+                (textMesh as TextMeshPro).m_renderer.material.SetColor(TMPro.ShaderUtilities.ID_UnderlayColor, Color.black);
+                (textMesh as TextMeshPro).m_renderer.material.SetFloat(TMPro.ShaderUtilities.ID_UnderlayDilate, 1f);
+                (textMesh as TextMeshPro).m_renderer.material.SetFloat(TMPro.ShaderUtilities.ID_UnderlaySoftness, 0.7f);
             }
             else
             {
@@ -111,6 +116,12 @@ namespace RandomBuff.Render.CardRender
                 rectTransform.localPosition = new Vector3(0f, 0f, -0.01f);
                 textMesh.SetOutlineThickness(0f);
                 _maxScrollVel = 0.25f;
+                textMesh.outlineColor = Color.white;
+
+                (textMesh as TextMeshPro).m_renderer.material.EnableKeyword("UNDERLAY_ON");
+                (textMesh as TextMeshPro).m_renderer.material.SetColor(TMPro.ShaderUtilities.ID_UnderlayColor, Color.black);
+                (textMesh as TextMeshPro).m_renderer.material.SetFloat(TMPro.ShaderUtilities.ID_UnderlayDilate, 1f);
+                (textMesh as TextMeshPro).m_renderer.material.SetFloat(TMPro.ShaderUtilities.ID_UnderlaySoftness, 0.7f);
             }
 
             Text = text;
