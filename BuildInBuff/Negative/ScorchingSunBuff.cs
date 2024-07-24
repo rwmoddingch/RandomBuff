@@ -143,7 +143,7 @@ namespace BuiltinBuffs.Negative
                         self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.Bloom, 0.1f * num, false));
                     else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom).amount < 0.15f * num)
                         self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom).amount = 0.15f * num;
-
+                    
 
                     for (int k = 0; k < self.abstractRoom.creatures.Count; k++)
                     {
@@ -151,7 +151,7 @@ namespace BuiltinBuffs.Negative
                             self.abstractRoom.creatures[k].realizedCreature.room != null)
                         {
                             Creature creature = self.abstractRoom.creatures[k].realizedCreature;
-
+                            
                             if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
                             {
                                 float heatAdd = heatModule.coolOffRate * num / 3f;
@@ -166,7 +166,7 @@ namespace BuiltinBuffs.Negative
                                 heatModule = new CreatureTemperatureModule(creature);
                                 TemperatrueModule.temperatureModuleMapping.Add(creature, heatModule);
                             }
-                            creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.02f * num);
+                            //creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.02f * num);//这行会导致拾荒飞天
                         }
                     }
                 }
@@ -209,21 +209,11 @@ namespace BuiltinBuffs.Negative
                     heatstroke = Mathf.Min(1f, heatModule.temperature / heatModule.ignitingPoint);
                 }
 
-                if (!self.Stunned && Random.Range(0, 800f + 10f * heatstroke) > 800f)
+                if (!self.Stunned && Random.Range(0, 801f + 10f * heatstroke) > 800f)
                 {
                     ScorchingSunBuff.Instance.TriggerSelf();
                     self.Stun(80);
                 }
-            }
-        }
-
-        #region 标签
-        private static void Creature_Update(On.Creature.orig_Update orig, Creature self, bool eu)
-        {
-            orig.Invoke(self, eu);
-            if (self.room != null && !HeatOverHead.Instances.ContainsKey(self))
-            {
-                new HeatOverHead(self);
             }
         }
 
@@ -236,7 +226,7 @@ namespace BuiltinBuffs.Negative
                 num = 2;
             else if (room.roomSettings.DangerType == RoomRain.DangerType.FloodAndRain)
                 num = 1;
-            
+
             for (int k = 0; k < room.borderExits.Length; k++)
             {
                 if (room.borderExits[k].type == AbstractRoomNode.Type.SkyExit)
@@ -264,6 +254,16 @@ namespace BuiltinBuffs.Negative
                 return true;
             }
             return false;
+        }
+
+        #region 标签
+        private static void Creature_Update(On.Creature.orig_Update orig, Creature self, bool eu)
+        {
+            orig.Invoke(self, eu);
+            if (self.room != null && !HeatOverHead.Instances.ContainsKey(self))
+            {
+                new HeatOverHead(self);
+            }
         }
 
         private static void ClearLabels()
