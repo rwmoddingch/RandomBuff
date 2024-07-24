@@ -415,7 +415,7 @@ namespace BuiltinBuffs.Positive
                                 }
                                 (tail.realizedObject as GeckoTail).tailColor = self.ShortCutColor();
                                 grabber.Grab(tail.realizedObject, num, 0, Creature.Grasp.Shareability.CanOnlyShareWithNonExclusive, 1f, false, false);
-                                //module.tailCut = true;
+                                module.tailCut = true;
                                 self.GetExPlayerData().HaveTail = false;
                                 break;
                             }
