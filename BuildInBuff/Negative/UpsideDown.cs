@@ -24,7 +24,7 @@ namespace BuiltinBuffs.Negative
 
     internal class UpsideDownBuffEntry : IBuffEntry
     {
-        public static BuffID UpsideDownID = new BuffID("UpsideDown",true);
+        public static BuffID UpsideDownID = new BuffID("UpsideDown", true);
         public static ConditionalWeakTable<PlayerGraphics, HeadTailData> module = new ConditionalWeakTable<PlayerGraphics, HeadTailData>();
 
         public void OnEnable()
@@ -39,7 +39,7 @@ namespace BuiltinBuffs.Negative
             IL.PlayerGraphics.Update += PlayerGraphics_Update1;
             IL.Player.TongueUpdate += Player_TongueUpdate;
             IL.Player.TerrainImpact += Player_TerrainImpact;
-            
+
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
@@ -139,7 +139,7 @@ namespace BuiltinBuffs.Negative
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
-            if (module.TryGetValue(self.graphicsModule as PlayerGraphics, out var _module))
+            if (self.graphicsModule != null && module.TryGetValue(self.graphicsModule as PlayerGraphics, out var _module))
             {
                 if (self.tongue != null)
                 {
@@ -154,8 +154,35 @@ namespace BuiltinBuffs.Negative
                         self.bodyChunkConnections.Last().type = PhysicalObject.BodyChunkConnection.Type.Pull;
                     }
                 }
-            }
 
+                if (self.bodyChunks.Length > 2 && _module.headTails.Count > 0)
+                {
+                    Vector2 mousePos = (Vector2)Futile.mousePosition + self.room.game.cameras[0].pos;
+                    bool flag = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(self.room, self.bodyChunks[1].pos, _module.headTails.Last().pos) != null;
+                    bool flag2 = Custom.DistLess(self.bodyChunks.Last().pos, self.bodyChunks[1].pos, 100f);
+                    bool flag3 = self.tongue != null && self.tongue.mode.value.Contains("Attach");
+                    bool flag4 = !self.Consious && self.grabbedBy.Count > 0;
+
+                    if (flag4) return;
+
+                    for (int i = 0; i < _module.headTails.Count; i++)
+                    {
+                        if (self.room != null && self.room.game != null && self.room == self.room.game.cameras[0].room && self.room.game.devToolsActive && Input.GetKey(KeyCode.V))
+                        {                           
+                            _module.headTails[i].Reset(mousePos);
+                        }
+
+                        if (!flag2 || flag)
+                        {
+                            if (!flag3)
+                                _module.headTails[i].Reset(self.bodyChunks[1].pos);
+                            else
+                                self.bodyChunks.Last().HardSetPosition(self.bodyChunks[1].pos);
+                        }
+                    }
+
+                }
+            }
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
