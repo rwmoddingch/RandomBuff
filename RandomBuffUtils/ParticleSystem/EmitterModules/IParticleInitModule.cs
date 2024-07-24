@@ -12,18 +12,22 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
  
     public class SetRandomVelocity : EmitterModule, IParticleInitModule
     {
+        private bool isDir;
         Vector2 a;
         Vector2 b;
 
-        public SetRandomVelocity(ParticleEmitter emitter, Vector2 a, Vector2 b) : base(emitter)
+        public SetRandomVelocity(ParticleEmitter emitter, Vector2 a, Vector2 b,bool isDir = true) : base(emitter)
         {
+            this.isDir = isDir;
             this.a = a;
             this.b = b;
         }
 
         public void ApplyInit(Particle particle)
         {
-            Vector2 vel = Vector3.Slerp(a, b, Random.value).normalized * Mathf.Lerp(a.magnitude,b.magnitude,Random.value);
+            Vector2 vel = isDir
+                ? Vector3.Slerp(a, b, Random.value).normalized * Mathf.Lerp(a.magnitude, b.magnitude, Random.value)
+                : new Vector2(Random.Range(a.x, b.x), Random.Range(a.y, b.y));
             particle.SetVel(vel);
         }
     }

@@ -16,6 +16,9 @@ BuffMissionPage_Start|开始使命
 BuffMissionPage_Goal|使命目标
 BuffMissionPage_Buffs|携带卡牌
 
+//BuffContinueGamePage
+BuffContinueGamePage_Restart|删除存档
+
 //CardSheetPage:
 CardSheetPage_Life_Countable|循环
 CardSheetPage_Life_Uncountable|永久

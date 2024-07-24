@@ -78,7 +78,7 @@ namespace BuiltinBuffs.Positive
                 absSpaer.RealizeInRoom();
                 var newSpear = absSpaer.realizedObject as Spear;
                 newSpear.room = spear.room;
-                Vector2 vector = self.firstChunk.pos + spear.throwDir.ToVector2() * 10f + new Vector2(0f, 4f);
+                Vector2 vector = (self.firstChunk.pos + spear.throwDir.ToVector2() + dir) * 10f;
 
                 newSpear.Thrown(self, vector, null, spear.throwDir, Mathf.Lerp(1f, 1.5f, self.Adrenaline), false);
 

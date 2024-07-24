@@ -6,12 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
+using RandomBuffUtils.ParticleSystem;
+using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RWCustom;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Positive
 {
@@ -57,7 +61,9 @@ namespace BuiltinBuffs.Positive
 
     internal class OriBashBuffEntry : IBuffEntry
     {
-        public static BuffID OriBash = new BuffID("OriBash", true);
+        public static readonly BuffID OriBash = new BuffID("OriBash", true);
+
+        public static readonly SoundID BashEnd = new SoundID(nameof(BashEnd), true);
         public void OnEnable()
         {
            
@@ -74,6 +80,13 @@ namespace BuiltinBuffs.Positive
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
+        }
+
+
+
+        public static void LoadAssets()
+        {
+            BuffSounds.LoadSound(BashEnd,OriBash.GetStaticData().AssetPath,new BuffSoundGroupData(),new BuffSoundData("bash"));
         }
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
@@ -188,8 +201,10 @@ namespace BuiltinBuffs.Positive
 
         public bool GetInput()
         {
-            return Input.GetMouseButton(1) ||
-                   BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash));
+            if(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash) == KeyCode.None.ToString())
+                return Input.GetMouseButton(1);
+            else
+                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash));
         }
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, UnityEngine.Vector2 camPos)
@@ -206,7 +221,7 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[startSprite].y = Mathf.Lerp(self.mainBodyChunk.lastPos.y, self.mainBodyChunk.pos.y, timeStacker) - camPos.y;
                 sLeaser.sprites[startSprite].scaleX = Mathf.Lerp(sLeaser.sprites[startSprite].scale,0.75f, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite].rotation = Custom.VecToDeg(Vector2.Perpendicular(dir));
-                sLeaser.sprites[startSprite + 1].scale = Mathf.Lerp(sLeaser.sprites[startSprite + 1].scale, 15, 0.03f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
+                sLeaser.sprites[startSprite + 1].scale = Mathf.Lerp(sLeaser.sprites[startSprite + 1].scale, 15, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite + 1].SetPosition(sLeaser.sprites[startSprite].GetPosition());
                 sLeaser.sprites[startSprite + 1].color = Color.white;
                 sLeaser.sprites[startSprite + 1].alpha = 1;
@@ -222,8 +237,37 @@ namespace BuiltinBuffs.Positive
                     {
                         foreach (var chunk in bashTarget.bodyChunks)
                             chunk.vel = dir * 15 * -1.25f;
+                        var minChunk = bashTarget.bodyChunks.OrderBy(i => Custom.Dist(i.pos, self.mainBodyChunk.pos)).First();
+                        var centerPos = Vector2.Lerp(self.mainBodyChunk.pos, minChunk.pos,0.5f);
+                        ParticleEmitter emitter = new ParticleEmitter(self.room)
+                            { pos = centerPos, lastPos = centerPos };
+                        emitter.ApplyEmitterModule(new SetEmitterLife(emitter,5,false));
+
+                        emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, Random.Range(3, 6)));
+
+                        emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                        emitter.ApplyParticleModule(new SetRandomPos(emitter,20));
+                        emitter.ApplyParticleModule(new SetRandomLife(emitter, 15, 45));
+                        emitter.ApplyParticleModule(new SetRandomVelocity(emitter,Custom.DegToVec(Custom.VecToDeg(-dir) + 20)*10, Custom.DegToVec(Custom.VecToDeg(-dir) - 20)*25));
+                        emitter.ApplyParticleModule(new SetConstColor(emitter,   (self.ShortCutColor()*2).CloneWithNewAlpha(1)));
+                        emitter.ApplyParticleModule(new SetRandomScale(emitter,1,4));
+                        emitter.ApplyParticleModule(new AddElement(emitter,
+                            new Particle.SpriteInitParam("Circle20", "", 8, 1, 0.05f)));
+                        emitter.ApplyParticleModule(new AddElement(emitter,
+                            new Particle.SpriteInitParam("Futile_White", "LightSource", 8, 0.2f, 3)));
+                        emitter.ApplyParticleModule(new AddElement(emitter,
+                            new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.2f, 1f)));
+                        emitter.ApplyParticleModule(new SetOriginalAlpha(emitter,0));
+                        emitter.ApplyParticleModule(new AlphaOverLife(emitter, (particle, f) =>
+                        {
+                            particle.vel *= 0.89f;
+                            return Mathf.InverseLerp(0, 0.05f, f) * Mathf.Pow(Mathf.InverseLerp(1, 0.35f, f), 1.5f);
+                        }));
+                        self.room.AddObject(new Explosion.ExplosionLight(centerPos,450,0.5f,15,self.ShortCutColor()));
+                        ParticleSystem.ApplyEmitterAndInit(emitter);
                         bashTarget = null;
                         outroTimer = 10;
+                        self.room.PlaySound(OriBashBuffEntry.BashEnd,self.mainBodyChunk.pos,0.15f,1);
                     }
 
                 }
@@ -252,7 +296,16 @@ namespace BuiltinBuffs.Positive
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return;
-            if (!self.Consious) return;
+            if (!self.Consious)
+            {
+                if (isBash)
+                {
+                    isBash = false;
+                    outroTimer = 10;
+                }
+
+                return;
+            }
             if (outroTimer > 0)
             {
                 self.mushroomEffect = 0.1f;

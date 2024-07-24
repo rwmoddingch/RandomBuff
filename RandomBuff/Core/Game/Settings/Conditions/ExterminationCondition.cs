@@ -146,7 +146,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayProgress(InGameTranslator translator)
         {
-            return $"[{kills}/{killRequirement}]";
+            return $"({kills}/{killRequirement})";
         }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)

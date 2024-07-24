@@ -16,6 +16,8 @@ BuffMissionPage_Start|START MISSION
 BuffMissionPage_Goal|MISSION GOALS
 BuffMissionPage_Buffs|MISSION BUFFS
 
+//BuffContinueGamePage
+BuffContinueGamePage_Restart|Restart
 //CardSheetPage:
 CardSheetPage_Life_Countable|Cycles
 CardSheetPage_Life_Uncountable|Everlasting

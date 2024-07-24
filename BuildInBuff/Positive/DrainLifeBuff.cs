@@ -24,6 +24,7 @@ namespace BuiltinBuffs.Positive
 
         public DrainLifeBuff()
         {
+
         }
     }
 
@@ -37,13 +38,7 @@ namespace BuiltinBuffs.Positive
         public static BuffID DrainLife = new BuffID("DrainLife", true);
         public static ConditionalWeakTable<Creature, DrainLife> DrainLifeFeatures = new ConditionalWeakTable<Creature, DrainLife>();
 
-        public static int StackLayer
-        {
-            get
-            {
-                return DrainLife.GetBuffData().StackLayer;
-            }
-        }
+        public static int StackLayer => DrainLife.GetBuffData()?.StackLayer ?? 0;
 
         public void OnEnable()
         {
@@ -86,6 +81,10 @@ namespace BuiltinBuffs.Positive
                 }
                 drainLife.LastHealth = (self.State as HealthState).health;
             }
+            else if (self.abstractCreature.state is HealthState)
+            {
+                DrainLifeFeatures.Add(self,new DrainLife(self));
+            }
         }
     }
 
@@ -93,27 +92,16 @@ namespace BuiltinBuffs.Positive
     internal class DrainLife
     {
         WeakReference<Creature> ownerRef;
-        float lastHealth;
 
-        public float LastHealth
-        {
-            get
-            {
-                return this.lastHealth;
-            }
-            set
-            {
-                this.lastHealth = value;
-            }
-        }
+        public float LastHealth { get; set; }
 
         public DrainLife(Creature c)
         {
             ownerRef = new WeakReference<Creature>(c);
-            if (c.State is HealthState)
-                lastHealth = (c.State as HealthState).health;
+            if (c.State is HealthState state)
+                LastHealth = state.health;
             else
-                lastHealth = -1;
+                LastHealth = -1;
         }
     }
 }

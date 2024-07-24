@@ -187,7 +187,7 @@ namespace RandomBuff.Core.SaveData
         {
             if (keyBind != KeyCode.None.ToString())//清除重复的绑定
             {
-                foreach (var bind in keyBindData)
+                foreach (var bind in keyBindData.ToList())
                 {
                     if (bind.Value == keyBind)
                         InternalSetKeyBind(bind.Key, KeyCode.None.ToString());

@@ -27,9 +27,10 @@ namespace BuiltinBuffs.Positive
             if (BuffCustom.TryGetGame(out var game))
             {
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
-                             .Where(i => i != null && i.graphicsModule != null))
+                             .Where(i => i != null && i.graphicsModule != null && i.room != null))
                 {
                     var flashShield = new FlashShield(player, player.room);
+                    player.room.AddObject(flashShield);
                     FlashShieldBuffEntry.FlashShieldFeatures.Add(player, flashShield);
                 }
             }
@@ -48,13 +49,7 @@ namespace BuiltinBuffs.Positive
         public static ConditionalWeakTable<Player, FlashShield> FlashShieldFeatures = new ConditionalWeakTable<Player, FlashShield>();
 
 
-        public static int StackLayer
-        {
-            get
-            {
-                return FlashShield.GetBuffData().StackLayer;
-            }
-        }
+        public static int StackLayer => FlashShield.GetBuffData()?.StackLayer ?? 0;
 
         public void OnEnable()
         {
@@ -86,9 +81,12 @@ namespace BuiltinBuffs.Positive
             {
                 FlashShieldFeatures.Remove(self);
                 flashShield.Destroy();
-                flashShield = new FlashShield(self, self.room);
-                self.room.AddObject(flashShield);
-                FlashShieldFeatures.Add(self, flashShield);
+                if (self.room != null)
+                {
+                    flashShield = new FlashShield(self, self.room);
+                    self.room.AddObject(flashShield);
+                    FlashShieldFeatures.Add(self, flashShield);
+                }
             }
             else
             {
@@ -140,7 +138,7 @@ namespace BuiltinBuffs.Positive
             if (!ownerRef.TryGetTarget(out var player))
                 return;
             base.InitiateSprites(sLeaser, rCam);
-            this.room = rCam.room;
+            this.room = player.room;
             sLeaser.sprites = new FSprite[totalSprites];
             sLeaser.sprites[this.firstSprite + 0] = new FSprite("Futile_White", true);
             sLeaser.sprites[this.firstSprite + 0].shader = rCam.game.rainWorld.Shaders["VectorCircle"];
@@ -172,8 +170,11 @@ namespace BuiltinBuffs.Positive
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            if (!ownerRef.TryGetTarget(out var player))
+            if (!ownerRef.TryGetTarget(out var player) || slatedForDeletetion)
+            {
+                sLeaser.CleanSpritesAndRemove();
                 return;
+            }
             Vector2 vector = this.Center(timeStacker);
             for (int k = 0; k < totalSprites; k++)
             {
@@ -204,9 +205,7 @@ namespace BuiltinBuffs.Positive
 
         public override void Update(bool eu)
         {
-            if (!ownerRef.TryGetTarget(out var player))
-                return;
-            if (owner.room == null || this.room == null || owner.room != this.room)
+            if (!ownerRef.TryGetTarget(out var player) || owner.room == null || this.room == null || owner.room != this.room)
             {
                 this.Destroy();
                 return;
@@ -240,7 +239,8 @@ namespace BuiltinBuffs.Positive
                         Custom.DistLess(owner.DangerPos, this.room.abstractRoom.creatures[k].realizedCreature.DangerPos, Radius(level, 0f)))
                     {
                         Creature creature = this.room.abstractRoom.creatures[k].realizedCreature;
-                        shouldFire = true;
+                        shouldFire = !creature.dead;
+
                         if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(this.owner.abstractCreature) > 0.5f)
                         {
                             shouldFire = false;
@@ -277,9 +277,19 @@ namespace BuiltinBuffs.Positive
                                 this.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Hard, creature.mainBodyChunk);
                             creature.SetKillTag(this.owner.abstractCreature);
                             creature.mainBodyChunk.vel *= 0.8f / Mathf.Pow(level, 0.3f);
-                            creature.Violence(this.owner.mainBodyChunk,
-                                              Custom.DirVec(this.owner.DangerPos, creature.DangerPos).normalized,//* Radius(level, 0f) / (Custom.Dist(this.owner.DangerPos, creature.DangerPos) + 0.5f * Radius(level, 0f))
-                                              creature.firstChunk, null, Creature.DamageType.Blunt, 0.01f * level, 0f);
+
+                            if (creature.Template.smallCreature)
+                            {
+                                creature.Die();
+                            }
+                            else
+                            {
+                                creature.Violence(this.owner.mainBodyChunk,
+                                    Custom.DirVec(this.owner.DangerPos, creature.DangerPos).normalized,//* Radius(level, 0f) / (Custom.Dist(this.owner.DangerPos, creature.DangerPos) + 0.5f * Radius(level, 0f))
+                                    creature.firstChunk, null, Creature.DamageType.Blunt, 0.01f * level, 0f);
+                            }
+                      
+                          
                         }
                     }
                 }
@@ -287,13 +297,15 @@ namespace BuiltinBuffs.Positive
 
             if (this.lightSource == null)
             {
-                this.lightSource = new LightSource(this.pos, false, this.color, this);
+                this.lightSource = new LightSource(Center(1), false, this.color, this);
                 this.lightSource.affectedByPaletteDarkness = 0.5f;
+                this.lightSource.requireUpKeep = true;
                 this.room.AddObject(this.lightSource);
             }
             else
             {
-                this.lightSource.setPos = new Vector2?(this.pos);
+                this.lightSource.stayAlive = true;
+                this.lightSource.setPos = Center(1);
                 this.lightSource.setRad = 4f * Radius(level, 0f) + 150f;
                 this.lightSource.setAlpha = new float?(1f);
                 if (this.lightSource.slatedForDeletetion || this.lightSource.room != this.room)
