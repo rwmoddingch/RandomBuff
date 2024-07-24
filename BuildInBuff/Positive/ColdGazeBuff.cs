@@ -384,7 +384,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                if (owner.room != null)
+                if (owner.room != null && owner.room == owner.room.game.cameras[0].room && owner.graphicsModule != null)
                 {
                     RoomCamera.SpriteLeaser spriteLeaser = owner.room.game.cameras[0].spriteLeasers.FirstOrDefault(i => i.drawableObject == owner.graphicsModule);
                     if (spriteLeaser != null)
@@ -1091,7 +1091,9 @@ namespace BuiltinBuffs.Positive
                     //this.lookDirection = (player.grasps[0].grabbed as JokeRifle).aimDir;
                     lookDir = (player.grasps[0].grabbed as JokeRifle).aimDir;
                 }
-                else if (player.room != null)
+                else if (player.room != null && 
+                         player.room == player.room.game.cameras[0].room && 
+                         player.graphicsModule != null)
                 {
                     RoomCamera.SpriteLeaser spriteLeaser = player.room.game.cameras[0].spriteLeasers.First(i => i.drawableObject == player.graphicsModule);
                     for (int i = 3; i <= 7; i++)
