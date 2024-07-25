@@ -87,7 +87,7 @@ totPositiveCard|获取的正面Buff数量：
 totNegativeCard|获取的负面Buff数量：
 totDualityCard|获取的双向Buff数量：
 totTriggerCount|Buff触发的次数:
-
+RunCount|完成的游戏局数:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
@@ -144,6 +144,9 @@ ProgressionUI_Cosmetic|装饰品
 //QuestCondition
 Quest_Display_MissionQuest|完成 {0} 使命
 Quest_Display_LevelQuest|达到 {0} 等级
+Quest_Display_RunCountQuest|完成 {0} 局游戏
+Quest_Display_SingleRunCardQuest|在一局游戏内获取 {1} 张{0}卡
+Quest_Display_CardQuest|总计获取 {1} 张{0}卡
 
 //mission
 Mission_Display_Meltdown|核心抑制

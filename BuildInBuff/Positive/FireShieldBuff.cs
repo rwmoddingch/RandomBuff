@@ -288,6 +288,8 @@ namespace BuiltinBuffs.Positive
             {
                 Creature creature = updatableAndDeletable as Creature;
                 shouldFire = true;
+                if (creature is TubeWorm)
+                    shouldFire = false;
                 if (creature is Player)
                     shouldFire = false;
                 if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(this.bindCreature.abstractCreature) > 0.5f)

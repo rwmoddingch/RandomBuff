@@ -8,7 +8,7 @@
 
     "Chinese" : {
         "BuffName" : "烈焰净化",
-        "Description" : "前置为燃点；地形上燃烧的火焰将可以清楚舌草和香菇墙"
+        "Description" : "前置为燃点；地形上燃烧的火焰将可以清除舌草和香菇墙"
     },
     "English" : {
         "BuffName" : "EjectionRock",
