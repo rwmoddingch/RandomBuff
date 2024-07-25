@@ -45,14 +45,8 @@ namespace BuiltinBuffs.Duality
             On.FlyGraphics.DrawSprites += FlyGraphics_DrawSprites;
             On.Rock.HitSomething += Rock_HitSomething;
             On.SporeCloud.Update += SporeCloud_Update;
-            On.SlugcatStats.ctor += SlugcatStats_ctor;
         }
 
-        private static void SlugcatStats_ctor(On.SlugcatStats.orig_ctor orig, SlugcatStats self, SlugcatStats.Name slugcat, bool malnourished)
-        {
-            orig(self,slugcat,malnourished);
-            self.foodToHibernate = 0;
-        }
 
         private static void SporeCloud_Update(On.SporeCloud.orig_Update orig, SporeCloud self, bool eu)
         {
@@ -162,7 +156,6 @@ namespace BuiltinBuffs.Duality
 
         public void Update()
         {
-
             if (wings == null && self.room != null && self.graphicsModule != null)
             {
                 wings = new PixieWings(self);
@@ -174,7 +167,6 @@ namespace BuiltinBuffs.Duality
             if (self.room == null || self.room != wings.room || self.graphicsModule == null)
             {
                 wings.Destroy();
-                wings.slatedForDeletetion = true;
                 wings = null;
             }
         }
@@ -261,16 +253,13 @@ namespace BuiltinBuffs.Duality
         public override void Update(bool eu)
         {
             base.Update(eu);
-            /*
+            
             if (self.graphicsModule == null || self.room == null || self.room != this.room || self.slatedForDeletetion) 
             { 
                 this.Destroy();
-                self.slatedForDeletetion = true;
                 return;
             }
-            
-            if (playerGraphics == null) return;            
-            */
+
             lastFlapDeg = flapDeg;
             if (flapCoolDown > 0) flapCoolDown--;
             if (flapDown > 0)
