@@ -171,7 +171,7 @@ namespace BuiltinBuffs.Duality
 
             if (wings == null) return;
 
-            if (self.room == null || self.room != wings.room || self.slatedForDeletetion || self.dead)
+            if (self.room == null || self.room != wings.room || self.graphicsModule == null)
             {
                 wings.Destroy();
                 wings.slatedForDeletetion = true;

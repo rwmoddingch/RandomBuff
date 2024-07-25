@@ -155,7 +155,7 @@ namespace BuiltinBuffs.Negative
                     }
                 }
 
-                if (self.bodyChunks.Length > 2 && _module.headTails.Count > 0)
+                if (self.room != null && self.room.game != null && self.bodyChunks.Length > 2 && _module.headTails.Count > 0)
                 {
                     Vector2 mousePos = (Vector2)Futile.mousePosition + self.room.game.cameras[0].pos;
                     bool flag = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(self.room, self.bodyChunks[1].pos, _module.headTails.Last().pos) != null;
