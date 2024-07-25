@@ -82,7 +82,11 @@ namespace RandomBuff.Core.Progression.Quest
         {
             for(int i =0;i<QuestConditions.Count;i++)
                 if (QuestConditions[i].UpdateUnlockedState(package))
-                    BuffPlayerData.Instance.UpdateQuestConditionState(QuestId,i);
+                {
+                    BuffPlugin.LogDebug($"Quest Name:{QuestId}, Condition Index:{i}, TotalCount: {BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId)}");
+                    BuffPlayerData.Instance.UpdateQuestConditionState(QuestId, i);
+                }
+
             return BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId) == QuestConditions.Count;
         }
 
