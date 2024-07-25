@@ -41,7 +41,6 @@ namespace BuiltinBuffs.Duality
                     vultureCat.InitiateSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
-                VultureShapedMutationBuffEntry.EstablishRelationship();
             }
         }
 
@@ -89,6 +88,9 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
+            On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
+            //On.VultureAI.DoIWantToBiteCreature += VultureAI_DoIWantToBiteCreature;
+
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
@@ -144,13 +146,38 @@ namespace BuiltinBuffs.Duality
         }
         #endregion
         #region 生物关系
-        //修改生物关系（秃鹫、魔王鹫、钢鸟、钢鹫不再攻击玩家）
+        //修改生物关系（携带面具时，秃鹫、魔王鹫不再攻击玩家）
+        /*
         public static void EstablishRelationship()
         {
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Vulture, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.KingVulture, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.MirosBird, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+        }*/
+        public static CreatureTemplate.Relationship VultureAI_UpdateDynamicRelationship(On.VultureAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, VultureAI self, RelationshipTracker.DynamicRelationship dRelation)
+        {
+            CreatureTemplate.Relationship result = orig(self, dRelation);
+            if ((self.vulture.State as Vulture.VultureState).mask && !self.IsMiros)
+            {
+                CreatureTemplate.Relationship relationship = self.StaticRelationship(dRelation.trackerRep.representedCreature);
+                if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat &&
+                    dRelation.trackerRep.representedCreature.realizedCreature is Player &&
+                    VultureCatFeatures.TryGetValue(dRelation.trackerRep.representedCreature.realizedCreature as Player, out var vultureCat))
+                {
+                    if (vultureCat.State.mask)
+                        result = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                }
+            }
+            return result;
+        }
+        //修改生物关系（钢鸟、钢鹫不再攻击玩家）（未应用）
+        public static bool VultureAI_DoIWantToBiteCreature(On.VultureAI.orig_DoIWantToBiteCreature orig, VultureAI self, AbstractCreature creature)
+        {
+            bool result = orig(self, creature);
+            if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
+                result = false;
+            return result;
         }
         #endregion
 
@@ -160,7 +187,6 @@ namespace BuiltinBuffs.Duality
             if (!VultureCatFeatures.TryGetValue(self, out _))
             {
                 VultureCatFeatures.Add(self, new VultureCat(self));
-                EstablishRelationship();
             }
         }
 
@@ -1017,11 +1043,22 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
-            if (!player.Consious) return;
+            if (!player.Consious) 
+                StopFlight();
 
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);
+            }
+
+            if ((player.grasps[0] != null && player.grasps[0].grabbed is VultureMask) ||
+                (player.grasps[1] != null && player.grasps[1].grabbed is VultureMask))
+            {
+                this.State.mask = true;
+            }
+            else
+            {
+                this.State.mask = false;
             }
 
             this.hangingInTentacle = false;

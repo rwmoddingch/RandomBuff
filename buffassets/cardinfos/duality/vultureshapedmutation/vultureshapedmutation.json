@@ -11,10 +11,10 @@
 
   "Chinese": {
     "BuffName": "鹫形突变",
-    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。按跳跃键以在空中开启飞行和结束飞行。秃鹫类生物和钢鸟类生物对你不再有敌意。"
+    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。按跳跃键以在空中开启飞行和结束飞行。当你拥有面具时，秃鹫类生物对你不再有敌意。"
   },
   "English": {
     "BuffName": "VultureShapedMutation",
-    "Description": "Your hands have turned into wings, allowing you to fly freely, but now you can only hold a thing in your mouth. Press the jump button to start and end the flight in the air. Vulture creatures and Mirosbird creatures no longer have hostility towards you."
+    "Description": "Your hands have turned into wings, allowing you to fly freely, but now you can only hold a thing in your mouth. Press the jump button to start and end the flight in the air. When you has a mask, Vulture creatures no longer have hostility towards you."
   }
 }

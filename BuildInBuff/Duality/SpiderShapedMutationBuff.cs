@@ -463,6 +463,9 @@ namespace BuiltinBuffs.Duality
                     {
                         sLeaser.sprites[this.LegSprite(i, j, 2)] = new FSprite("SpiderLeg" + j.ToString() + "B", true);
                     }
+                    sLeaser.sprites[LegSprite(i, j, 0)].color = sLeaser.sprites[0].color;
+                    sLeaser.sprites[LegSprite(i, j, 1)].color = sLeaser.sprites[0].color;
+                    sLeaser.sprites[LegSprite(i, j, 2)].color = sLeaser.sprites[0].color;
                 }
             }
 
