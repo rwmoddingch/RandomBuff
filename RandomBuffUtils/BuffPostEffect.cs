@@ -148,7 +148,6 @@ namespace RandomBuffUtils
         {
             needDeletion = true;
             BuffUtils.Log("BuffPostEffect",$"Destroy {GetType().Name}");
-            Material.Destroy(material);
         }
     }
 

@@ -12,6 +12,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 
@@ -46,8 +47,40 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             Futile.atlasManager.LoadAtlas(Path.Combine(ChesedBuffData.Chesed.GetStaticData().AssetPath, "ChesedTex"));
             Futile.atlasManager.LoadAtlas(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahTex"));
 
+            BinahScreenEffect = bundle.LoadAsset<Shader>("BinahScreenEffect");
+            BinahScreenEffectTexture = bundle.LoadAsset<Texture2D>("CameraFilterPack_Blizzard1");
 
+            BuffSounds.LoadSound(BinahAtkStone, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk_Stone"));
+            BuffSounds.LoadSound(BinahAtkFairy, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk_Fairy"));
+            BuffSounds.LoadSound(BinahAtkStrike, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk_Strike"));
+
+            BuffSounds.LoadSound(BinahAtkFinalStart, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk4_CastStart"));
+            BuffSounds.LoadSound(BinahAtkFinalLoop, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk4_CastLoop"));
+            BuffSounds.LoadSound(BinahAtkFinalEnd, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk4_CastEnd"));
+            BuffSounds.LoadSound(BinahAtkFinalMake, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
+                new BuffSoundData("Binah_Atk4_make"));
         }
+
+        public static readonly SoundID BinahAtkStone = new SoundID(nameof(BinahAtkStone), true);
+        public static readonly SoundID BinahAtkFairy = new SoundID(nameof(BinahAtkFairy), true);
+        public static readonly SoundID BinahAtkStrike = new SoundID(nameof(BinahAtkStrike), true);
+
+
+        public static readonly SoundID BinahAtkFinalStart = new SoundID(nameof(BinahAtkFinalStart), true);
+        public static readonly SoundID BinahAtkFinalLoop = new SoundID(nameof(BinahAtkFinalLoop), true);
+        public static readonly SoundID BinahAtkFinalEnd = new SoundID(nameof(BinahAtkFinalEnd), true);
+        public static readonly SoundID BinahAtkFinalMake = new SoundID(nameof(BinahAtkFinalMake), true);
+
+
+        public static Shader BinahScreenEffect;
+        public static Texture2D BinahScreenEffectTexture;
+
     }
 
     internal abstract class SephirahMeltdownBuffData : CountableBuffData
