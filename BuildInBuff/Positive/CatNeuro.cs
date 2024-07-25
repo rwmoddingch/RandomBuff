@@ -62,7 +62,7 @@ namespace HotDogGains.Positive
             if (self.neuroCatLight().light != null)
             {
                 self.neuroCatLight().light.stayAlive = true;
-                self.neuroCatLight().light.setRad = new float?(400f*(1+BuffCore.GetBuffData(CatNeuroID).StackLayer));
+                self.neuroCatLight().light.setRad = new float?(400f*(1+CatNeuroID.GetBuffData().StackLayer));
                 self.neuroCatLight().light.setPos = new Vector2?(self.player.mainBodyChunk.pos);
                 if (self.neuroCatLight().light.slatedForDeletetion || self.player.room.Darkness(self.player.mainBodyChunk.pos) == 0f)
                 {
@@ -74,7 +74,7 @@ namespace HotDogGains.Positive
                 self.neuroCatLight().light = new LightSource(self.player.mainBodyChunk.pos, false, Color.Lerp(new Color(1f, 1f, 1f), (ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Slugpup) ? self.player.ShortCutColor() : PlayerGraphics.SlugcatColor(self.CharacterForColor), 0.5f), self.player)
                 {
                     requireUpKeep = true,
-                    setRad = new float?(400f*(1+BuffCore.GetBuffData(CatNeuroID).StackLayer)),
+                    setRad = new float?(400f*(1+CatNeuroID.GetBuffData().StackLayer)),
                     setAlpha = new float?(1f)
                 };
                 self.player.room.AddObject(self.neuroCatLight().light);

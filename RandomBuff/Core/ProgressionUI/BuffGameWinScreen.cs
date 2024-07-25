@@ -120,6 +120,10 @@ namespace RandomBuff.Core.StaticsScreen
             pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(middleX - width / 2f, 200f), winPackage, width));
             scoreCaculator.Container.MoveToFront();
 
+            BuffPlayerData.Instance.SlotRecord.RunCount++;
+            if (winPackage.missionId != null)
+                BuffPlayerData.Instance.finishedMission.Add(winPackage.missionId);
+
 
             //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
             newFinishedQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);

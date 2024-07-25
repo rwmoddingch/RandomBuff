@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression.Quest.Condition;
+using RandomBuff.Core.SaveData;
 using RWCustom;
 using UnityEngine;
 
@@ -23,12 +24,14 @@ namespace RandomBuff.Core.Progression.Quest
             _ = Mission;
             _ = Cosmetic;
             _ = Special;
-
+            _ = FreePick;
         }
 
         public static readonly QuestUnlockedType Card = new(nameof(Card), true);
         public static readonly QuestUnlockedType Mission = new(nameof(Mission), true);
         public static readonly QuestUnlockedType Cosmetic = new(nameof(Cosmetic), true);
+        public static readonly QuestUnlockedType FreePick = new(nameof(FreePick), true);
+
         public static readonly QuestUnlockedType Special = new(nameof(Special), true);
 
     }
@@ -77,7 +80,10 @@ namespace RandomBuff.Core.Progression.Quest
         /// <returns></returns>
         public bool UpdateUnlockedState(WinGamePackage package)
         {
-            return QuestConditions.All(i => i.UpdateUnlockedState(package));
+            for(int i =0;i<QuestConditions.Count;i++)
+                if (QuestConditions[i].UpdateUnlockedState(package))
+                    BuffPlayerData.Instance.UpdateQuestConditionState(QuestId,i);
+            return BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId) == QuestConditions.Count;
         }
 
         /// <summary>

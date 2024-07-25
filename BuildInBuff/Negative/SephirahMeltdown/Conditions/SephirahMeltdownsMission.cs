@@ -55,6 +55,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                     }, 
                     NCount = 0, NSelect = 0, NShow = 0,
                     PCount = 0, PSelect = 0, PShow = 0,
+                    PocketPackMultiply = 0,
                     ForceStartPos = "CC_S03"
                 }
             };

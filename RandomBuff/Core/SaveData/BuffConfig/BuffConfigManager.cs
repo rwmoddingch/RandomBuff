@@ -173,6 +173,11 @@ namespace RandomBuff.Core.SaveData
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsCosmeticCanUse(string id) => !IsItemLocked(QuestUnlockedType.Cosmetic, id) && BuffPlayerData.Instance.IsCosmeticEnable(id) && CosmeticUnlock.cosmeticUnlocks.ContainsKey(new CosmeticUnlockID(id));
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int GetFreePickCount(float multiply) =>
+            (int)((0.5f + lockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value)) * multiply));
+
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 
         static BuffConfigManager()

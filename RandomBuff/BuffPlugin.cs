@@ -47,7 +47,7 @@ namespace RandomBuff
     [BepInPlugin(ModId, "Random Buff", "1.0.0")]
     internal class BuffPlugin : BaseUnityPlugin
     {
-        public static BuffFormatVersion saveVersion = new ("a-0.0.5");
+        public static BuffFormatVersion saveVersion = new ("a-0.0.6");
 
         public static BuffFormatVersion outDateVersion = new("a-0.0.3");
 

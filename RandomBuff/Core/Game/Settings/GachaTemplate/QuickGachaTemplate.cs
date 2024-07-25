@@ -20,6 +20,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         public QuickGachaTemplate()
         {
             ExpMultiply = 1.2f;
+            PocketPackMultiply = 0;
         }
 
         public override void EnterGame(RainWorldGame game)

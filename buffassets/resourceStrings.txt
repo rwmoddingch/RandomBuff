@@ -86,7 +86,7 @@ totPositiveCard|Number of positive buffs acquired:
 totNegativeCard|Number of negative buffs acquired:
 totDualityCard|Number of duality buffs acquired:
 totTriggerCount|Number of buff triggers:
-
+RunCount|Number of games completed:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|Single click to check <BuffID> in detail
@@ -138,6 +138,9 @@ ProgressionUI_Cosmetic|COSMETIC
 //QuestCondition
 Quest_Display_MissionQuest|Complete {0} mission
 Quest_Display_LevelQuest|Reach {0} level
+Quest_Display_RunCountQuest|complete {0} games
+Quest_Display_SingleRunCardQuest|Collect {1} {0} cards in a single game
+Quest_Display_CardQuest|Collect {1} {0} cards
 
 //Mission
 Mission_Display_DodgeTheRock|DODGE THE ROCKS

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.SaveData;
 using RWCustom;
 
 namespace RandomBuff.Core.Progression.Quest.Condition
@@ -19,7 +20,7 @@ namespace RandomBuff.Core.Progression.Quest.Condition
 
         public override bool UpdateUnlockedState(WinGamePackage package)
         {
-            return package.missionId == missionId;
+            return BuffPlayerData.Instance.finishedMission.Contains(missionId);
 
         }
 

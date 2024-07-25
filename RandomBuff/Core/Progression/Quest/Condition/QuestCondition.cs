@@ -71,6 +71,8 @@ namespace RandomBuff.Core.Progression.Quest.Condition
         {
             Register<LevelQuestCondition>();
             Register<MissionQuestCondition>();
+            Register<CardQuestCondition>();
+            Register<RunCountQuestCondition>();
             QuestUnlockedType.Init();
         }
 
