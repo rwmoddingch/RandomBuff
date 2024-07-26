@@ -70,7 +70,8 @@ namespace BuiltinBuffs.Expeditions
             "unl-electric",
             "unl-sing",
             "unl-gun",
-            "bur-doomed"
+            "bur-doomed",
+            "unl-passage"
         };
 
         private static void InitExpeditionType()
@@ -134,7 +135,10 @@ namespace BuiltinBuffs.Expeditions
                     staticData.CardInfos.Add(Custom.rainWorld.inGameTranslator.currentLanguage, new BuffStaticData.CardInfo()
                     {
                         BuffName = ForceUnlockedAndLoad(ExpeditionProgression.UnlockName, item),
-                        Description = ForceUnlockedAndLoad(ExpeditionProgression.UnlockDescription, item),
+                        Description = (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
+                        $"(来自:{Custom.rainWorld.inGameTranslator.Translate(ModManager.ActiveMods.FirstOrDefault(i => i.id == group.Key)?.name ?? group.Key)})\n" :
+                        $"(From:{Custom.rainWorld.inGameTranslator.Translate(ModManager.ActiveMods.FirstOrDefault(i => i.id == group.Key)?.name ?? group.Key)})\n") +
+                        ForceUnlockedAndLoad(ExpeditionProgression.UnlockDescription, item),
                     });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{item}Buff", true),
                         ass.GetType($"BuffExtend.{item}BuffData"));
@@ -160,7 +164,10 @@ namespace BuiltinBuffs.Expeditions
                         Custom.rainWorld.inGameTranslator.currentLanguage, new BuffStaticData.CardInfo()
                         {
                             BuffName = name,
-                            Description = ForceUnlockedAndLoad(ExpeditionProgression.BurdenManualDescription, item),
+                            Description = (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ?
+                                              $"(来自:{Custom.rainWorld.inGameTranslator.Translate(ModManager.ActiveMods.FirstOrDefault(i => i.id == group.Key)?.name ?? group.Key)})\n" :
+                                              $"(From:{Custom.rainWorld.inGameTranslator.Translate(ModManager.ActiveMods.FirstOrDefault(i => i.id == group.Key)?.name ?? group.Key)})\n")
+                            + ForceUnlockedAndLoad(ExpeditionProgression.BurdenManualDescription, item),
                         });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{item}Buff", true),
                         ass.GetType($"BuffExtend.{item}BuffData"));
