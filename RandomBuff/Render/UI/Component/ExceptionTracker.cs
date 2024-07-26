@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -172,16 +173,36 @@ namespace RandomBuff.Render.UI.Component
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TrackException(Exception e, string streamlineInfo)
         {
-            string key = e.StackTrace ?? e.Message + streamlineInfo;
+            //string key = e.StackTrace ?? e.Message + streamlineInfo;
+            //if (exceptions.ContainsKey(key))
+            //{
+            //    exceptions[key].count++;
+            //}
+            //else
+            //{
+            //    var tracker = new TrackedException(e, streamlineInfo);
+            //    exceptions.Add(key, tracker);
+            //    allTrackers.Add(tracker);
+            //}
+
+            //if (Singleton != null)
+            //    Singleton.Signal("NewTracker", null);
+        }
+
+
+        public static void TrackExceptionNew(string stackTrace, string streamlineInfo)
+        {
+            string key = stackTrace + streamlineInfo;
             if (exceptions.ContainsKey(key))
             {
                 exceptions[key].count++;
             }
             else
             {
-                var tracker = new TrackedException(e, streamlineInfo);
+                var tracker = new TrackedException( streamlineInfo, stackTrace);
                 exceptions.Add(key, tracker);
                 allTrackers.Add(tracker);
             }
@@ -189,7 +210,6 @@ namespace RandomBuff.Render.UI.Component
             if (Singleton != null)
                 Singleton.Signal("NewTracker", null);
         }
-
         /// <summary>
         /// 右上角定位
         /// </summary>
@@ -309,10 +329,19 @@ namespace RandomBuff.Render.UI.Component
             public string origMessage;
             public int count = 1;
 
+
+            [Obsolete]
             public TrackedException(Exception exception, string streamlineInfo)
             {
                 typeName = exception.GetType().Name;
                 origMessage = exception.Message + "\n" + exception.StackTrace;
+                this.streamlineInfo = streamlineInfo;
+            }
+
+            public TrackedException(string streamlineInfo, string stackTrace)
+            {
+                typeName = streamlineInfo.Split(':')[0];
+                origMessage = stackTrace;
                 this.streamlineInfo = streamlineInfo;
             }
         }

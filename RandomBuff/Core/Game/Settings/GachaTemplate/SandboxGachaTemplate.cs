@@ -19,6 +19,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             {
                 NShow = NSelect = NCount = PSelect = PCount = PShow = 0;
             }
+
+            PocketPackMultiply = 0;
             ExpMultiply = 0f;
         }
 

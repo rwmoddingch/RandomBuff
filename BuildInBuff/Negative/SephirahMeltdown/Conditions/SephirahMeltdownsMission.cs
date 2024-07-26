@@ -83,6 +83,12 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public override GachaTemplateID ID => SephirahMeltdowns;
 
+        public SephirahMeltdownsTemplate()
+        {
+            PocketPackMultiply = 0;
+            ExpMultiply *= 1.5f;
+        }
+
         public override void EnterGame(RainWorldGame game)
         {
             if (game.GetStorySession.saveState.cycleNumber == 4)

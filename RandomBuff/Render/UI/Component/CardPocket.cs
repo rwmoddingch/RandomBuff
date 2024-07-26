@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Progression.Quest;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI.Component
@@ -51,7 +52,7 @@ namespace RandomBuff.Render.UI.Component
             }
         }
 
-        public CardPocket(List<BuffID> initBuffID, string title, CardPocketCallBack updateSelectedBuffsCallBack, float cardScale, Vector2 size, Vector2 hoverPos, Vector2 anchor)
+        public CardPocket(List<BuffID> initBuffID, string title, CardPocketCallBack updateSelectedBuffsCallBack, float cardScale, Vector2 size, Vector2 hoverPos, Vector2 anchor,int maxSelectCount = -1)
         {
             this.title = title;
             this.updateSelectedBuffsCallBack = updateSelectedBuffsCallBack;
@@ -66,7 +67,7 @@ namespace RandomBuff.Render.UI.Component
             bottomContainer_1 = new FContainer();
             bottomContainer_2 = new FContainer();
             symbolContainer = new FContainer();
-            slot = new CardPocketSlot(this);
+            slot = new CardPocketSlot(this) { maxSelectedCount = maxSelectCount};
 
             container.AddChild(bottomContainer_2);
             container.AddChild(bottomContainer_1);
@@ -179,6 +180,8 @@ namespace RandomBuff.Render.UI.Component
         int testDisplayMinRoll;
         int testDisplayMaxRoll;
 
+        public int maxSelectedCount = -1;
+
         Helper.InputButtonTracker mouseClickTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0));
 
         public int cardsInRoll;
@@ -227,7 +230,8 @@ namespace RandomBuff.Render.UI.Component
             foreach (var buffIDValue in BuffID.values.entries)
             {
                 var id = new BuffID(buffIDValue);
-                if (!BuffConfigManager.ContainsId(id))
+                if (!BuffConfigManager.ContainsId(id) || !BuffPlayerData.Instance.IsCollected(id) ||
+                    BuffConfigManager.IsItemLocked(QuestUnlockedType.Card, id.value))
                     continue;
                 var staticData = BuffConfigManager.GetStaticData(id);
 
@@ -396,7 +400,7 @@ namespace RandomBuff.Render.UI.Component
             {
                 RemoveCard(buff, true);
             }
-            (BaseInteractionManager as CardPocketInteratctionManager).ChangeBuffType();
+            (BaseInteractionManager as CardPocketInteratctionManager)!.ChangeBuffType();
             ScrollToTop();
             if(updateDisplay)
                 UpdateDisplayRoll();
@@ -439,14 +443,14 @@ namespace RandomBuff.Render.UI.Component
             testDisplayMinRoll = minRoll;
             testDisplayMaxRoll = maxRoll;
 
-            (BaseInteractionManager as CardPocketInteratctionManager).UpdateDisplayRoll(minRoll, maxRoll);
+            (BaseInteractionManager as CardPocketInteratctionManager)!.UpdateDisplayRoll(minRoll, maxRoll);
         }
 
         public void ToggleSelectBuff(BuffID buffID)
         {
             if(CurrentSelectedBuffs.Contains(buffID))
                 CurrentSelectedBuffs.Remove(buffID);
-            else
+            else if(maxSelectedCount == -1 || CurrentSelectedBuffs.Count < maxSelectedCount)
                 CurrentSelectedBuffs.Add(buffID);
         }
 

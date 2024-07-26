@@ -140,6 +140,9 @@ namespace RandomBuff
                         LogWarning("Displayed all cards");
 
                     }
+
+                    Application.logMessageReceived += Application_logMessageReceived;
+
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();
                     BuffResourceString.Init();
@@ -242,11 +245,20 @@ namespace RandomBuff
             }
         }
 
+
+        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Exception)
+                ExceptionTracker.TrackExceptionNew(stackTrace,condition);
+            
+        }
+
         private static bool isLoaded = false;
         private static bool isPostLoaded = false;
         private static bool canAccessLog = true;
 
         internal static bool DevEnabled { get; private set; }
+
 
 
         /// <summary>

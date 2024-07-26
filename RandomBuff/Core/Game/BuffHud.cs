@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using HUD;
+using JetBrains.Annotations;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Game.Settings;
@@ -12,6 +14,7 @@ using RandomBuff.Render.UI.Component;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
+using static RandomBuff.Render.UI.Component.CardPocket;
 
 namespace RandomBuff.Core.Game
 {
@@ -44,6 +47,28 @@ namespace RandomBuff.Core.Game
         public void NewGame(SlugcatStats.Name saveName)
         {
             var setting = BuffPoolManager.Instance.GameSetting.gachaTemplate;
+
+            if (BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply) != 0)
+            {
+                pocket = new CardPocket(BuffCore.GetAllBuffIds(), string.Format(
+                        BuffResourceString.Get("BuffHUD_FreePick"),
+                        BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply)), (
+                        (all, _, _) =>
+                        {
+                            foreach (var card in all)
+                                card.CreateNewBuff();
+                            pocket!.Destroy();
+                            pocket = null;
+                        }),
+                    BuffCard.normalScale * 0.5f, new Vector2(400f, Custom.rainWorld.screenSize.y - 200),
+                    new Vector2(Custom.rainWorld.screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f),
+                    BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply));
+                hud.fContainers[1].AddChild(pocket.Container);
+                pocket.SetShow(true);
+
+            }
+
+            //TODO : Obsolete
             if (setting.CurrentPacket.NeedMenu)
             {
                 for (int i = 0; i < setting.CurrentPacket.positive.pickTimes; i++)
@@ -100,7 +125,7 @@ namespace RandomBuff.Core.Game
 
         public override void Update()
         {
-            if (BuffCustom.TryGetGame(out var game) && inGameSlot.WaitingPickCard)
+            if (BuffCustom.TryGetGame(out var game) && (inGameSlot.WaitingPickCard || (pocket?.Show ?? false)))
             {
                 if (!pausedLocked)
                 {
@@ -110,28 +135,43 @@ namespace RandomBuff.Core.Game
                 else if (!game.paused && lastPaused)
                     lastPaused = false;
 
-                game.paused = inGameSlot.WaitingPickCard;
+                game.paused = inGameSlot.WaitingPickCard || (pocket?.Show ?? false);
             }
             else if (pausedLocked)
                 game.paused = false;
 
-            inGameSlot.Update();
-            slotTitle.Update();
-
-            for (int i = hudParts.Count - 1; i >= 0; i--)
+            if (pocket != null)
             {
-                hudParts[i].Update(hud);
+                pocket.Update();
+            }
+            else
+            {
+                inGameSlot.Update();
+                slotTitle.Update();
+
+                for (int i = hudParts.Count - 1; i >= 0; i--)
+                {
+                    hudParts[i].Update(hud);
+                }
             }
         }
 
         public override void Draw(float timeStacker)
         {
             base.Draw(timeStacker);
-            inGameSlot.GrafUpdate(timeStacker);
-            slotTitle.GrafUpdate(timeStacker);
-            for (int i = hudParts.Count - 1; i >= 0; i--)
+
+            if (pocket != null)
             {
-                hudParts[i].Draw(hud, timeStacker);
+                pocket.GrafUpdate(timeStacker);
+            }
+            else
+            {
+                inGameSlot.GrafUpdate(timeStacker);
+                slotTitle.GrafUpdate(timeStacker);
+                for (int i = hudParts.Count - 1; i >= 0; i--)
+                {
+                    hudParts[i].Draw(hud, timeStacker);
+                }
             }
         }
 
@@ -150,6 +190,7 @@ namespace RandomBuff.Core.Game
         {
             inGameSlot.Destory();
             slotTitle.Destroy();
+            pocket?.Destroy();
             base.ClearSprites();
 
             foreach(var part in hudParts)
@@ -184,16 +225,18 @@ namespace RandomBuff.Core.Game
             }
         }
 
+        [CanBeNull]
+        private CardPocket pocket;
 
         public static BuffHud Instance { get; private set; }
 
-        BuffSlotTitle slotTitle;
+        private BuffSlotTitle slotTitle;
         private CommmmmmmmmmmmmmpleteInGameSlot inGameSlot;
 
         public bool NeedShowCursor => inGameSlot.NeedShowCursor;
 
-        Dictionary<BuffID, BuffHudPart> id2hudParts = new Dictionary<BuffID, BuffHudPart>();
-        List<BuffHudPart> hudParts = new List<BuffHudPart>();
+        private Dictionary<BuffID, BuffHudPart> id2hudParts = new Dictionary<BuffID, BuffHudPart>();
+        private List<BuffHudPart> hudParts = new List<BuffHudPart>();
     }
 
     public abstract class BuffHudPart
