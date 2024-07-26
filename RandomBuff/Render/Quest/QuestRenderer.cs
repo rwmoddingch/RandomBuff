@@ -164,6 +164,7 @@ namespace RandomBuff.Render.Quest
         public static void Init()
         {
             AddProvider(new BuffCardQuestProvider());
+            AddProvider(new FreePickQuestProvider());
         }
     
         public enum Mode

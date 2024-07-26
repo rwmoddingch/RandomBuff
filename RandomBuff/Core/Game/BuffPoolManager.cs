@@ -521,9 +521,12 @@ namespace RandomBuff.Core.Game
 
         private void CreateWinGamePackage()
         {
-            winGamePackage = new WinGamePackage();
-            winGamePackage.missionId = GameSetting.MissionId;
-            winGamePackage.saveState = Game.GetStorySession.saveState;
+            winGamePackage = new WinGamePackage
+            {
+                missionId = GameSetting.MissionId,
+                saveState = Game.GetStorySession.saveState,
+                expMultiply = GameSetting.gachaTemplate.ExpMultiply,
+            };
             foreach (var buff in buffDictionary.Keys)
                 winGamePackage.winWithBuffs.Add(buff);
             foreach(var condition in GameSetting.conditions) 
@@ -592,6 +595,7 @@ namespace RandomBuff.Core.Game
         public SaveState saveState;
         public InGameRecord buffRecord;
 
+        public float expMultiply;
         public string missionId;
     }
 }

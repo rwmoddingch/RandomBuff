@@ -47,6 +47,18 @@ namespace RandomBuff.Render.Quest
         }
     }
 
+    internal class FreePickQuestRender : DefaultQuestRenderer
+    {
+
+        public FreePickQuestRender(string id) : base(id) { }
+
+        public override void Init(QuestRendererManager.QuestLeaser questLeaser, QuestRendererManager.Mode mode)
+        {
+            base.Init(questLeaser, mode);
+            (questLeaser.elements[0] as FLabel)!.text = BuffResourceString.Get("QuestRender_FreePick");
+        }
+    }
+
     internal class BuffCardQuestRenderer : QuestRenderer
     {
         BuffID id;

@@ -62,6 +62,8 @@ namespace RandomBuff
                             if (!currentLangMapper.ContainsKey(splited[0].Trim()))
                             {
                                 currentLangMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
+                                if (!engLoaded && languageID == InGameTranslator.LanguageID.English)
+                                    engMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
                                 BuffPlugin.Log(
                                     $"Load resource string : {splited[0].Trim()} | {splited[1].Trim()}, {languageID}");
 
@@ -69,8 +71,7 @@ namespace RandomBuff
                             else
                                 BuffPlugin.LogError($"buff resource string already contains key:{splited[0].Trim()}");
 
-                            if (!engLoaded && languageID == InGameTranslator.LanguageID.English)
-                                engMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
+             
                         }
                     }
                 }
