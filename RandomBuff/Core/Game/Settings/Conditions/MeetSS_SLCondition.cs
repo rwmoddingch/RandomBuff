@@ -18,50 +18,63 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public int cycleRequirement;
 
         [JsonProperty]
-        public bool meetSS;
+        private bool meetSS;
 
         [JsonProperty]
-        public bool meetSL;
+        private bool meetSL;
 
+
+        [JsonProperty] 
+        private int currentCycle;
 
         public override void EnterGame(RainWorldGame game)
         {
             base.EnterGame(game);
-            On.Room.ReadyForAI += Room_ReadyForAI;
+            currentCycle = game.GetStorySession.saveState.cycleNumber;
+            if (currentCycle <= cycleRequirement)
+            {
+                On.SSOracleBehavior.SeePlayer += SSOracleBehavior_SeePlayer;
+                On.SLOracleBehavior.Update += SLOracleBehavior_Update;
+
+            }
+        }
+
+        private void SLOracleBehavior_Update(On.SLOracleBehavior.orig_Update orig, SLOracleBehavior self, bool eu)
+        {
+           orig(self, eu);
+           if (self.hasNoticedPlayer && !meetSL)
+           {
+               meetSL = true;
+               onLabelRefresh?.Invoke(this);
+           }
         }
 
         public override void SessionEnd(SaveState save)
         {
             base.SessionEnd(save);
-            On.Room.ReadyForAI -= Room_ReadyForAI;
-        }
 
-        private void Room_ReadyForAI(On.Room.orig_ReadyForAI orig, Room self)
-        {
-            orig.Invoke(self);
-            if (self.game == null)
-                return;
-            var oracles = self.updateList.OfType<Oracle>().ToList();
-            if (self.game.IsArenaSession) return;
-            if (self.game.rainWorld.progression.currentSaveState.cycleNumber > cycleRequirement)
-                return;
-            foreach(var o in oracles)
+            if (currentCycle <= cycleRequirement)
             {
-                if (o.ID == Oracle.OracleID.SS && !meetSS)
-                {
-                    meetSS = true;
-                    onLabelRefresh?.Invoke(this);
-                }
-                if(o.ID == Oracle.OracleID.SL && !meetSL)
-                {
-                    meetSL = true;
-                    onLabelRefresh?.Invoke(this);
-                }
+                On.SSOracleBehavior.SeePlayer -= SSOracleBehavior_SeePlayer;
+                On.SLOracleBehavior.Update -= SLOracleBehavior_Update;
             }
 
-            if (meetSS && meetSL)
-                Finished = true;
+            currentCycle = save.cycleNumber + 1;
         }
+
+        private void SSOracleBehavior_SeePlayer(On.SSOracleBehavior.orig_SeePlayer orig, SSOracleBehavior self)
+        {
+            orig(self);
+            if (self.oracle.ID == Oracle.OracleID.SS)
+            {
+                meetSS = true;
+                onLabelRefresh?.Invoke(this);
+            }
+        }
+
+    
+
+       
 
         public override string DisplayName(InGameTranslator translator)
         {
@@ -70,7 +83,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayProgress(InGameTranslator translator)
         {
-            return $"({(meetSL?"SL":"")} {(meetSS?"SS":"")})";
+            if (meetSS && meetSL)
+                Finished = true;
+            return (Finished ? "" : $"({currentCycle}/{cycleRequirement})") + ((meetSS || meetSL) ? $"({(meetSL ? "SL" : "")} {(meetSS ? "SS" : "")})" : "");
         }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)

@@ -1,7 +1,7 @@
 {
     "FaceName": "ejectionrock",
     "BuffID" : "EjectionRock",
-    "BuffType" : "Positive",
+    "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "4C535A",

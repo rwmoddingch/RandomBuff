@@ -139,6 +139,23 @@ namespace BuiltinBuffs.Positive
             }
         }
 
+        public static bool CanSwallowEdible(PhysicalObject physicalObject, bool fullfilled)
+        {
+            if (physicalObject.abstractPhysicalObject.type.value.Contains("Swarmer"))
+            {
+                return fullfilled;
+            }
+            if ((physicalObject is VultureGrub))
+            {
+                return !(physicalObject as Creature).dead;
+            }
+            if (physicalObject is Hazer)
+            {
+                return !(physicalObject as Hazer).hasSprayed;
+            }
+            return false;
+        }
+
         private static void Player_GrabUpdate(On.Player.orig_GrabUpdate orig, Player self, bool eu)
         {
             orig(self, eu);
@@ -151,11 +168,14 @@ namespace BuiltinBuffs.Positive
                 bool shouldUpdate = true;
                 for (int i = 0; i < self.grasps.Length; i++)
                 {
-                    if (self.grasps[i] != null && self.grasps[i].grabbed != null && self.grasps[i].grabbed is IPlayerEdible && self.FoodInStomach < self.MaxFoodInStomach)
+                    if (self.grasps[i] != null && self.grasps[i].grabbed != null && self.grasps[i].grabbed is IPlayerEdible)
                     {
-                        canRegurgitate = false;
-                        shouldUpdate = false;
-                        break;
+                        if (!CanSwallowEdible(self.grasps[i].grabbed, self.FoodInStomach >= self.MaxFoodInStomach))
+                        {
+                            canRegurgitate = false;
+                            shouldUpdate = false;
+                            break;
+                        }                       
                     }
                 }
                 if (shouldUpdate)
@@ -456,8 +476,11 @@ namespace BuiltinBuffs.Positive
                     string str = string.Empty;
                     for (int i = 0; i < objectsInStomach.Count; i++)
                     {
-                        str += objectsInStomach[i].ToString();
-                        if (i < objectsInStomach.Count - 1)
+                        if (objectsInStomach[i] is AbstractCreature)
+                            str += SaveState.AbstractCreatureToStringStoryWorld(objectsInStomach[i] as AbstractCreature);
+                        else
+                            str += objectsInStomach[i].ToString();
+                        //if (i < objectsInStomach.Count - 1)
                         {
                             str += "<sSoA>";
                         }
@@ -474,7 +497,16 @@ namespace BuiltinBuffs.Positive
             string[] array = Regex.Split(data, "<sSoA>");
             for (int i = 0; i < array.Length; i++)
             {
-                var absObj = SaveState.AbstractPhysicalObjectFromString(world, array[i]);
+                if (string.IsNullOrEmpty(array[i])) continue;
+                AbstractPhysicalObject absObj = null;
+                if (array[i].Contains("<oA>"))
+                {
+                    absObj = SaveState.AbstractPhysicalObjectFromString(world, array[i]);
+                }
+                else if (array[i].Contains("<cA>"))
+                {
+                    absObj = SaveState.AbstractCreatureFromString(world, array[i], false);
+                }
                 if (absObj != null) objectsInStomach.Add(absObj);
             }
         }

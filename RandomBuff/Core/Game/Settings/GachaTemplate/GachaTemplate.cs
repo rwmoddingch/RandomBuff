@@ -43,7 +43,15 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         /// 总经验的加成倍数
         /// 可以通过json更改
         /// </summary>
+        [JsonProperty] 
         public float ExpMultiply = 1;
+
+
+        /// <summary>
+        /// 自由选卡加成
+        /// </summary>
+        [JsonProperty]
+        public float PocketPackMultiply = 1;
 
         /// <summary>
         /// 是否需要随机出生点

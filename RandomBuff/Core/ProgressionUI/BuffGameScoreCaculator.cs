@@ -117,7 +117,7 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 totalScore += condition.Exp;
             }
-            BuffPlayerData.Instance.playerTotExp += totalScore;
+            BuffPlayerData.Instance.playerTotExp += Mathf.RoundToInt(totalScore * winPackage.expMultiply);
             
         }
 

@@ -177,7 +177,7 @@ namespace RandomBuffUtils
         }
 
 
-        public static int FindIndex(this SoundLoader loader, string name)
+        internal static int FindIndex(this SoundLoader loader, string name)
         {
             var index = loader.audioClipNames.IndexOf(name);
             return index == -1 ? loader.audioClipNames.Length : index;

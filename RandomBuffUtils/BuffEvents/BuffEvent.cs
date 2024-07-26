@@ -137,11 +137,13 @@ namespace RandomBuffUtils
         private static void WinState_CycleCompleted(On.WinState.orig_CycleCompleted orig, WinState self, RainWorldGame game)
         {
             orig(self, game);
-            var finished = self.endgameTrackers.Where(i => i.GoalFullfilled || !i.GoalAlreadyFullfilled).Select(i => i.ID);
-            var unFinished = self.endgameTrackers.Where(i => !i.GoalFullfilled || i.GoalAlreadyFullfilled).Select(i => i.ID);
-
+            var finished = self.endgameTrackers.Where(i => i.GoalFullfilled && !i.GoalAlreadyFullfilled).Select(i => i.ID);
+            var unFinished = self.endgameTrackers.Where(i => !i.GoalFullfilled && i.GoalAlreadyFullfilled).Select(i => i.ID);
+            
             if (finished.Any() || unFinished.Any())
             {
+                foreach(var id in finished)
+                    BuffUtils.Log("BuffEvent",$"finished {id}");
                 onAchievementCompleted.SafeInvoke("onAchievementCompleted", finished.ToList(), unFinished.ToList());
             }
         }

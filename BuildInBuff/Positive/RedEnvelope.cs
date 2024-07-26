@@ -19,7 +19,7 @@ namespace HotDogGains.Positive
             if (game.AlivePlayers.FirstOrDefault() != null && !game.AlivePlayers[0].realizedCreature.inShortcut &&
                 game.AlivePlayers[0].realizedCreature.room != null)
             {
-                var player = game.AlivePlayers[0].realizedCreature as Player;
+                var player = game.AlivePlayers.FirstOrDefault().realizedCreature as Player;
                 for (int i = 0; i < Random.value*20; i++)
                 {
                     var pearl = new DataPearl.AbstractDataPearl(

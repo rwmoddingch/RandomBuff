@@ -16,6 +16,9 @@ BuffMissionPage_Start|开始使命
 BuffMissionPage_Goal|使命目标
 BuffMissionPage_Buffs|携带卡牌
 
+//BuffContinueGamePage
+BuffContinueGamePage_Restart|删除存档
+
 //CardSheetPage:
 CardSheetPage_Life_Countable|循环
 CardSheetPage_Life_Uncountable|永久
@@ -44,6 +47,8 @@ Notification_MissionReward|解锁使命
 Notification_MissionReward_Unique|解锁专属使命
 Notification_CosmeticReward|解锁装饰品
 Notification_CardReward|解锁卡牌
+Notification_FreePickReward|解锁自由抽卡数
+//挨我服了我说不明白人话谁改改这个
 
 //BuffMenu:
 Survival|生存模式
@@ -87,7 +92,7 @@ totPositiveCard|获取的正面Buff数量：
 totNegativeCard|获取的负面Buff数量：
 totDualityCard|获取的双向Buff数量：
 totTriggerCount|Buff触发的次数:
-
+RunCount|完成的游戏局数:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
@@ -144,6 +149,12 @@ ProgressionUI_Cosmetic|装饰品
 //QuestCondition
 Quest_Display_MissionQuest|完成 {0} 使命
 Quest_Display_LevelQuest|达到 {0} 等级
+Quest_Display_RunCountQuest|完成 {0} 局游戏
+Quest_Display_SingleRunCardQuest|在一局游戏内获取 {1} 张{0}卡（可重复）
+Quest_Display_CardQuest|总计获取 {1} 张{0}卡（可重复）
+
+//QuestRender
+QuestRender_FreePick|自由抽卡数 +1
 
 //mission
 Mission_Display_Meltdown|核心抑制

@@ -41,4 +41,5 @@ namespace RandomBuff.Render.Quest
             return BuffResourceString.Get("Notification_CardReward");
         }
     }
+    
 }

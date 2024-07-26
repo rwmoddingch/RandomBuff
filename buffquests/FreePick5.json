@@ -1,0 +1,18 @@
+{
+    "Name":"FreePick5",
+    "Color":"FFFFFF",
+    "ID":"builtin.quest.FreePick5",
+    "Conditions":[
+        {
+            "Type":"CardCondition",
+            "CardType":"All",
+            "count":100
+        }
+    ],
+    "UnlockItem":
+    {
+       "FreePick":[
+        "5"
+       ]
+    }
+}

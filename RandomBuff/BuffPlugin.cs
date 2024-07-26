@@ -33,6 +33,8 @@ using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
 using RandomBuff.Render.Quest;
+using System.Drawing;
+using Steamworks;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -47,7 +49,7 @@ namespace RandomBuff
     [BepInPlugin(ModId, "Random Buff", "1.0.0")]
     internal class BuffPlugin : BaseUnityPlugin
     {
-        public static BuffFormatVersion saveVersion = new ("a-0.0.5");
+        public static BuffFormatVersion saveVersion = new ("a-0.0.6");
 
         public static BuffFormatVersion outDateVersion = new("a-0.0.3");
 
@@ -84,6 +86,8 @@ namespace RandomBuff
             FakeFoodPool.UpdateInactiveItems();
         }
 
+        private FStage devVersion;
+
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
 
@@ -95,9 +99,7 @@ namespace RandomBuff
                         File.Delete("randombuff.log");
                      
                     File.Create(AssetManager.ResolveFilePath("buffcore.log")).Close();
-
                 }
-
             }
             catch (Exception e)
             {
@@ -213,6 +215,24 @@ namespace RandomBuff
                     BuffConfigManager.InitQuestData();
 
                     BuffRegister.BuildAllDataStaticWarpper();
+
+                    /****************************************/
+
+                    On.StaticWorld.InitCustomTemplates += orig =>
+                    {
+                        orig();
+                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff 2024_07_25\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
+                        {
+                            Alignment = TMPro.TextAlignmentOptions.BottomLeft,
+                            Pivot = new Vector2(0f, 0f),
+                            y = 5,
+                            x = 5,
+                            alpha = 0.3f
+                        };
+                        Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
+                        devVersion.AddChild(label);
+                    };
+                    /****************************************/
                     isPostLoaded = true;
                 }
             }

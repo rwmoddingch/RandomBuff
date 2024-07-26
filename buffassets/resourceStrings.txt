@@ -16,6 +16,8 @@ BuffMissionPage_Start|START MISSION
 BuffMissionPage_Goal|MISSION GOALS
 BuffMissionPage_Buffs|MISSION BUFFS
 
+//BuffContinueGamePage
+BuffContinueGamePage_Restart|Restart
 //CardSheetPage:
 CardSheetPage_Life_Countable|Cycles
 CardSheetPage_Life_Uncountable|Everlasting
@@ -44,7 +46,7 @@ Notification_MissionReward|Unlock mission
 Notification_MissionReward_Unique|Unlock unique mission
 Notification_CosmeticReward|Unlock cosmetic
 Notification_CardReward|Unlock card
-
+Notification_FreePickReward|Unlock free pick count
 //BuffMenu:
 Survival|SURVIVAL
 Normal|NORMAL
@@ -87,7 +89,7 @@ totPositiveCard|Number of positive buffs acquired:
 totNegativeCard|Number of negative buffs acquired:
 totDualityCard|Number of duality buffs acquired:
 totTriggerCount|Number of buff triggers:
-
+RunCount|Number of games completed:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|Single click to check <BuffID> in detail
@@ -139,6 +141,13 @@ ProgressionUI_Cosmetic|COSMETIC
 //QuestCondition
 Quest_Display_MissionQuest|Complete {0} mission
 Quest_Display_LevelQuest|Reach {0} level
+Quest_Display_RunCountQuest|complete {0} games
+Quest_Display_SingleRunCardQuest|Collect {1} {0} cards in a game (duplicates allowed)
+Quest_Display_CardQuest|Collect {1} {0} cards (duplicates allowed)
+
+//QuestRender
+QuestRender_FreePick|Free pick count +1
+
 
 //Mission
 Mission_Display_DodgeTheRock|DODGE THE ROCKS

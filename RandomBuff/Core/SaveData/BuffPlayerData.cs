@@ -12,6 +12,8 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.Progression.Record;
+using static RandomBuff.Render.UI.Component.RandomBuffFlag;
+using System.Reflection;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -63,6 +65,12 @@ namespace RandomBuff.Core.SaveData
                     case "COSMETIC":
                         enableCosmetics = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
                         break;
+                    case "QUESTSTATES":
+                        questStates = JsonConvert.DeserializeObject<Dictionary<string, HashSet<int>>>(dataSplit[1]);
+                        break;
+                    case "MISSION":
+                        finishedMission = JsonConvert.DeserializeObject<HashSet<string>>(dataSplit[1]);
+                        break;
                     default:
                         unrecognizedSaveStrings.Add(item);
                         break;
@@ -87,8 +95,11 @@ namespace RandomBuff.Core.SaveData
             builder.Append($"KEYBIND{PlayerDataSubSplit}{JsonConvert.SerializeObject(keyBindData)}{PlayerDataSplit}");
             builder.Append($"EXP{PlayerDataSubSplit}{playerTotExp}{PlayerDataSplit}");
             builder.Append($"QUEST{PlayerDataSubSplit}{JsonConvert.SerializeObject(finishedQuest)}{PlayerDataSplit}");
+            builder.Append($"QUESTSTATES{PlayerDataSubSplit}{JsonConvert.SerializeObject(questStates)}{PlayerDataSplit}");
+
             builder.Append($"TOTCARDS{PlayerDataSubSplit}{JsonConvert.SerializeObject(SlotRecord)}{PlayerDataSplit}");
             builder.Append($"COSMETIC{PlayerDataSubSplit}{JsonConvert.SerializeObject(enableCosmetics)}{PlayerDataSplit}");
+            builder.Append($"MISSION{PlayerDataSubSplit}{JsonConvert.SerializeObject(finishedMission)}{PlayerDataSplit}");
 
             foreach (var item in unrecognizedSaveStrings)
                 builder.Append($"{item}{PlayerDataSplit}");
@@ -98,22 +109,14 @@ namespace RandomBuff.Core.SaveData
         public static void LoadBuffPlayerData(string rawData, BuffFormatVersion formatVersion)
         {
             try
-            {   // TODO: 正式版删除
-                if (formatVersion < new BuffFormatVersion("a-0.0.5"))
-                {
-                    var newData = JsonConvert.DeserializeObject<BuffPlayerData>(rawData) ?? new BuffPlayerData();
-                    newData.keyBindData ??= new Dictionary<string, string>();
-                    newData.collectData ??= new List<string>();
-                    return;
-                }
-
-                new BuffPlayerData(rawData, formatVersion);
+            {
+                _ = new BuffPlayerData(rawData, formatVersion);
 
             }
             catch (Exception e)
             {
                 BuffPlugin.LogException(e, "Exception In BuffPlayerData:LoadBuffPlayerData");
-                new BuffPlayerData();
+                _ = new BuffPlayerData();
             }
       
         }
@@ -126,8 +129,6 @@ namespace RandomBuff.Core.SaveData
         /// <param name="buffId"></param>
         public void AddCollect(BuffID buffId)
         {
-            if (collectData == null)
-                collectData = new List<string>();
             if (!collectData.Contains(buffId.value))
             {
                 BuffPlugin.Log($"Add buff:{buffId} collect to Save Slot");
@@ -187,7 +188,7 @@ namespace RandomBuff.Core.SaveData
         {
             if (keyBind != KeyCode.None.ToString())//清除重复的绑定
             {
-                foreach (var bind in keyBindData)
+                foreach (var bind in keyBindData.ToList())
                 {
                     if (bind.Value == keyBind)
                         InternalSetKeyBind(bind.Key, KeyCode.None.ToString());
@@ -206,6 +207,36 @@ namespace RandomBuff.Core.SaveData
         /// <param name="questId"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsQuestUnlocked(string questId) => finishedQuest.Contains(questId);
+
+
+        /// <summary>
+        /// 更新同步任务条件状态
+        /// </summary>
+        /// <param name="questId"></param>
+        /// <param name="index"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UpdateQuestConditionState(string questId, int index)
+        {
+            if(!questStates.ContainsKey(questId))
+                questStates.Add(questId,new HashSet<int>());
+            if (!questStates[questId].Contains(index))
+                questStates[questId].Add(index);
+        }
+
+
+        /// <summary>
+        /// 获取对应id任务的条件完成数量
+        /// </summary>
+        /// <param name="questId"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetQuestConditionStateCount(string questId)
+        {
+            if (!questStates.ContainsKey(questId))
+                questStates.Add(questId, new HashSet<int>());
+            return questStates[questId].Count;
+        }
+
 
         /// <summary>
         /// 获取所有完成的任务，注意可能会包含卸载的mod内的任务
@@ -258,33 +289,11 @@ namespace RandomBuff.Core.SaveData
             }
         }
 
-
-        public int playerTotExp = 0;
-        public SlotRecord SlotRecord { get; set; } = new();
-
-        private List<string> collectData = new();
-
-        private HashSet<string> enableCosmetics = new();
-
-
-        //TODO : 改进等级算法
-        public int PlayerLevel => Exp2Level(playerTotExp);
-
-        private Dictionary<string, string> keyBindData = new();
-
-        private readonly List<string> unrecognizedSaveStrings = new();
-
-        private HashSet<string> finishedQuest = new();
-
-        private const string PlayerDataSplit = "<Bpd>";
-        private const string PlayerDataSubSplit = "<BpdI>";
-
-        static int expBeforeConstDelta = 295 * 10 + 5 * (10 * 10);
         public static int Exp2Level(int exp)
         {
-            if (exp > expBeforeConstDelta)
+            if (exp > ExpBeforeConstDelta)
             {
-                return (exp - expBeforeConstDelta) / 400 + 10;
+                return (exp - ExpBeforeConstDelta) / 400 + 10;
             }
             return Mathf.FloorToInt((-295 + Mathf.Sqrt(295f * 295f + 4f * 5f * exp)) / (2f * 5f));
         }
@@ -294,7 +303,39 @@ namespace RandomBuff.Core.SaveData
             if (level <= 10)//等差
                 return /*(300 + 300 + 10 * (level - 1)) * level / 2;*/ 295 * level + 5 * (level * level);
             else
-                return expBeforeConstDelta + (level - 10) * 400;
+                return ExpBeforeConstDelta + (level - 10) * 400;
         }
+
+
+
+
+        public int playerTotExp = 0;
+
+        public SlotRecord SlotRecord { get; set; } = new();
+
+        //TODO : 改进等级算法
+        public int PlayerLevel => Exp2Level(playerTotExp);
+
+
+        public readonly HashSet<string> finishedMission = new();
+
+
+
+        private readonly List<string> collectData = new();
+
+        private readonly HashSet<string> enableCosmetics = new();
+
+        private readonly Dictionary<string, string> keyBindData = new();
+
+        private readonly List<string> unrecognizedSaveStrings = new();
+
+        private readonly Dictionary<string,HashSet<int>> questStates = new();
+
+        private readonly HashSet<string> finishedQuest = new();
+
+
+        private const string PlayerDataSplit = "<Bpd>";
+        private const string PlayerDataSubSplit = "<BpdI>";
+        private const int ExpBeforeConstDelta = 295 * 10 + 5 * (10 * 10);
     }
 }

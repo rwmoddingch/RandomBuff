@@ -127,7 +127,7 @@ namespace RandomBuff.Core.BuffMenu
             Vector2 testPos = new Vector2(683f, 85f) + new Vector2(SlugcatSelectMenu.GetRestartTextOffset(gameMenu.CurrLang), 80f);
             var tabWrapper = new MenuTabWrapper(gameMenu, this);
             subObjects.Add(tabWrapper);
-            restartButton = new OpHoldButton(new Vector2(683f + 240f - 120f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)), new Vector2(120, 40), "Restart", 100f);
+            restartButton = new OpHoldButton(new Vector2(683f + 240f - 120f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)), new Vector2(120, 40), BuffResourceString.Get("BuffContinueGamePage_Restart"), 100f);
             restartButton.colorEdge = Color.red;
             restartButton.description = " ";
 

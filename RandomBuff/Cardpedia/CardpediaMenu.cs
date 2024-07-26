@@ -93,7 +93,6 @@ namespace RandomBuff.Cardpedia
             scene = new InteractiveMenuScene(this, null, Menu.MenuScene.SceneID.Empty);
             pages[0].subObjects.Add(scene);
 
-
             //加载画面
             Vector2 centerPos = new Vector2(683, 393);
             string path = "buffassets/illustrations/SlugLoading_";
@@ -276,6 +275,9 @@ namespace RandomBuff.Cardpedia
 
             sheetPage = new CardSheetPage(this, pages[0], Vector2.zero);
             pages[0].subObjects.Add(sheetPage);
+            pages[0].mouseCursor.cursorSprite.MoveToFront();
+          
+
 
             Instance = this;
             inited = true;

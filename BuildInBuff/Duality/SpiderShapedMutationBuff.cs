@@ -463,6 +463,9 @@ namespace BuiltinBuffs.Duality
                     {
                         sLeaser.sprites[this.LegSprite(i, j, 2)] = new FSprite("SpiderLeg" + j.ToString() + "B", true);
                     }
+                    sLeaser.sprites[LegSprite(i, j, 0)].color = sLeaser.sprites[0].color;
+                    sLeaser.sprites[LegSprite(i, j, 1)].color = sLeaser.sprites[0].color;
+                    sLeaser.sprites[LegSprite(i, j, 2)].color = sLeaser.sprites[0].color;
                 }
             }
 
@@ -521,11 +524,13 @@ namespace BuiltinBuffs.Duality
             if (sLeaser.sprites.Length >= 9)
                 for (int i = 4; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
-            
+
             float flip = Mathf.Lerp(this.lastFlip, this.flip, timeStacker);
             float num = 0f; // player.superLaunchJump / 20f;
             Vector2 bodyPos = Vector2.Lerp(player.mainBodyChunk.lastPos, player.mainBodyChunk.pos, timeStacker);
             Vector2 hipsPos = Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker) + Custom.RNV() * Random.value * 3.5f * num;
+            //BuffPlugin.Log($"bodyPos:" + bodyPos);
+            //BuffPlugin.Log($"hipsPos:" + hipsPos);
             Vector2 formHipsToBody = Custom.DirVec(hipsPos, bodyPos);
             Vector2 a = Custom.PerpendicularVector(formHipsToBody);
             for (int j = 0; j < this.legs.GetLength(0); j++)
@@ -535,7 +540,7 @@ namespace BuiltinBuffs.Duality
                     float t = Mathf.InverseLerp(0f, (float)(this.legs.GetLength(1) - 1), (float)k);
                     Vector2 rootPos = Vector2.Lerp(bodyPos, hipsPos, 0.3f);
                     //蛛腿根部位置
-                    rootPos += a * ((j == 0) ? -1f : 1f) * 3f * (1f - Mathf.Abs(flip));
+                    rootPos += a * ((j == 0) ? -1f : 1f) * 3f * (1f - Mathf.Abs(flip));//问题在这一步
                     rootPos += formHipsToBody * Mathf.Lerp(10f, -6f, t);
                     Vector2 legPos = Vector2.Lerp(this.legs[j, k].lastPos, this.legs[j, k].pos, timeStacker);
                     float legFlips = Mathf.Lerp(this.legFlips[j, k, 1], this.legFlips[j, k, 0], timeStacker);
@@ -556,7 +561,9 @@ namespace BuiltinBuffs.Duality
                         InverseKinematic_Reverse(rootPos, legPos, this.legLength * 0.7f, this.legLength * 0.7f, legFlips) :
                         Custom.InverseKinematic(rootPos, legPos, this.legLength * 0.7f, this.legLength * 0.7f, legFlips);*/
                     Vector2 jointPos = Custom.InverseKinematic(rootPos, legPos, this.legLength * 0.7f, this.legLength * 0.7f, legFlips);
-                    jointPos = Vector2.Lerp(jointPos, (rootPos + legPos) * 0.5f - a * flip * Custom.LerpMap(Vector2.Distance(rootPos, legPos), 0f, this.legLength * 1.3f, this.legLength * 0.7f, 0f, 3f), Mathf.Abs(flip));
+                    jointPos = Vector2.Lerp(jointPos, 
+                                            (rootPos + legPos) * 0.5f - a * flip * Custom.LerpMap(Vector2.Distance(rootPos, legPos), 0f, this.legLength * 1.3f, this.legLength * 0.7f, 0f, 3f), 
+                                            Mathf.Abs(flip));
                     //内侧蛛腿
                     Vector2 innerLeg = Vector2.Lerp(rootPos, jointPos, 0.5f);
                     //外侧蛛腿
@@ -594,6 +601,9 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player))
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            if (float.IsNaN(this.flip))
+                this.flip = 0;
+
             if (!player.Consious || !Footing)
             {
                 this.legsDangleCounter = 30;
@@ -748,6 +758,8 @@ namespace BuiltinBuffs.Duality
             {
                 arthropod[i].Reset(player.bodyChunks[0].pos);
             }
+            this.flip = 0;
+            this.lastFlip = 0;
         }
         #endregion
 

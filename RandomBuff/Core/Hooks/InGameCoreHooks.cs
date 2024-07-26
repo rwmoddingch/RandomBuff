@@ -37,7 +37,7 @@ namespace RandomBuff.Core.Hooks
             }
         }
 
-        public static bool IsCurrentGameSettingNeed(GameSetting gameSetting)
+        public static bool IsCurrentFullRoomSettingNeed(GameSetting gameSetting)
         {
             return gameSetting.MissionId is "DoomExpress" or "EmergnshyTreatment";
         }
@@ -65,20 +65,34 @@ namespace RandomBuff.Core.Hooks
                 Cursor.visible = self.devUI != null || !self.rainWorld.options.fullScreen;
         }
 
+
+
+
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
             if (Custom.rainWorld.BuffMode() && BuffCustom.TryGetGame(out var game))
             {
                 self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
-                self.roomSettings.roomSpecificScript = self.roomSettings.roomSpecificScript && IsCurrentGameSettingNeed(BuffPoolManager.Instance?.GameSetting??
-                BuffDataManager.Instance.GetGameSetting(game.StoryCharacter ?? Custom.rainWorld.progression.PlayingAsSlugcat));
+                if (!IsCurrentFullRoomSettingNeed(BuffPoolManager.Instance?.GameSetting ??
+                                             BuffDataManager.Instance.GetGameSetting(game.StoryCharacter ??
+                                                 Custom.rainWorld.progression.PlayingAsSlugcat)) &&
+                    RemoveRoomSettingList.Contains(self.abstractRoom.name))
+                {
+                    self.roomSettings.roomSpecificScript = false;
+                }
             }
 
             orig(self);
+            self.updateList.RemoveAll(i => i is MSCRoomSpecificScript.OE_NPCControl);
         }
 
-   
 
+        private static readonly HashSet<string> RemoveRoomSettingList = new()
+        {
+            "SL_C12", "SB_A14", "LF_A03", "SU_A43", "GW_A25", "SI_C02","HR_C01","Rock Bottom",
+            "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL",
+            "SH_GOR02"
+        };
     
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
         {

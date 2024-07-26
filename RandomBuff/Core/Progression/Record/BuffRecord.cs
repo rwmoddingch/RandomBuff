@@ -85,5 +85,7 @@ namespace RandomBuff.Core.Progression.Record
 
     public class SlotRecord : InGameRecord
     {
+        [JsonProperty]
+        public int RunCount;
     }
 }

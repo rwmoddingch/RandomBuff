@@ -41,12 +41,12 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 AbstractPhysicalObject.AbstractObjectType.ScavengerBomb,
                 AbstractPhysicalObject.AbstractObjectType.Rock,
             };
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
+            //TODO:暂时
+            //foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            //{
                 try
                 {
-                    foreach (var type in assembly.GetTypes())
+                    foreach (var type in typeof(Player).Assembly.GetTypes())
                     {
                         var ba = type.BaseType;
                         if (type.IsSubclassOf(typeof(Creature)))
@@ -59,7 +59,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 {
                     BuffUtils.LogException("ExterminationCondition", ex);
                 }
-            }
+            //}
 
             foreach(var hook in creatureViolenceHooks)
             {
@@ -146,7 +146,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayProgress(InGameTranslator translator)
         {
-            return $"[{kills}/{killRequirement}]";
+            return $"({kills}/{killRequirement})";
         }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)

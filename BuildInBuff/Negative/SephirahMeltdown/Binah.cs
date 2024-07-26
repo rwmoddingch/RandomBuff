@@ -88,6 +88,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 self.slugcatStats.poleClimbSpeedFac /= Fac;
                 self.slugcatStats.runspeedFac /= Fac;
             }
+
+            BinahGlobalManager.DestroyNoDie();
         }
 
         private const float Fac = 0.85f;
@@ -332,7 +334,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private static void RoomCamera_DrawUpdate(On.RoomCamera.orig_DrawUpdate orig, RoomCamera self, float timeStacker, float timeSpeed)
         {
             orig(self, timeStacker, timeSpeed);
-            currentDarkness = Mathf.Lerp(currentDarkness, BinahGlobalManager.needDelete ? 0 : 0.325f, 0.02f);
+            currentDarkness = Mathf.Lerp(currentDarkness, BinahGlobalManager.needDelete ? 0 : BinahBuff.Instance.Data.Health > 0.25F ? 0.325f : 0.5F, 0.02f);
             Shader.SetGlobalFloat(RainWorld.ShadPropDarkness,
                 Mathf.Lerp(Shader.GetGlobalFloat(RainWorld.ShadPropDarkness), 0, currentDarkness));
             if (BinahGlobalManager.needDelete && currentDarkness < 0.03f)
@@ -723,6 +725,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static bool SpawnNewChain(RainWorldGame game)
         {
             NeedFinalAttack = BinahBuff.Instance.Data.Health < 0.25f;
+            if (BinahBuff.Instance.Data.Health < 0.25f)
+                game.cameras[0].virtualMicrophone.PlaySound(SephirahMeltdownEntry.BinahAtkFinalStart, 1, 0.2f, 1);
+            
             localDamage = 0;
             if (game.AlivePlayers.Count == 0 || game.AlivePlayers[0].Room?.connections == null) return false;
             ChainRoomIndices.Clear();
@@ -849,7 +854,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             }
         }
 
-        public static float Resistance => ChainRoomIndices.Count == 0 ? 1.2f : Custom.LerpMap(ChainRoomIndices.Count,maxCount,1,0.1f,0.75f);
+        public static float Resistance => NeedFinalAttack
+            ? 0
+            : (ChainRoomIndices.Count == 0 ? 1.2f : Custom.LerpMap(ChainRoomIndices.Count, maxCount, 1, 0.1f, 0.75f));
 
 
         public static bool IsDead => false;
@@ -857,6 +864,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static void Init()
         {
+            postEffect = null;
             ChainRoomIndices.Clear();
             DisplayChains.Clear();
             DisplayChainPos.Clear();
@@ -875,10 +883,15 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private static float localDamage = 0;
 
+        private static BinahPost postEffect;
+
         public static void GlobalUpdate(RainWorldGame game)
         {
             foreach (var item in cd)
                 item.Value.value = item.Value - 1;
+
+            if(BinahBuff.Instance.Data.Health < 0.25f && postEffect == null)
+                BuffPostEffectManager.AddEffect(postEffect = new BinahPost(3));
             if (waitToDelete >= 0)
             {
                 waitToDelete++;
@@ -961,7 +974,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             waitToDelete = 0;
             if(BuffCustom.TryGetGame(out var game))
                 game.cameras[0].room.AddObject(new GhostHunch(game.cameras[0].room, null){goAt=10});
-
+            postEffect?.Destroy();
         }
 
 
@@ -977,10 +990,20 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
             BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
             BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
-
+            postEffect?.Destroy();
+            postEffect = null;
             OnBinahDie?.Invoke();
         }
 
+
+        public static void DestroyNoDie()
+        {
+            foreach (var chain in DisplayChains.ToList())
+                chain.Break();
+            DisplayChains.Clear();
+            postEffect?.Destroy();
+            postEffect = null;
+        }
 
         public static void DEBUG_ForceSetCd(BinahAttackType type, int cd)
         {
@@ -1082,14 +1105,24 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             emitter.ApplyParticleModule(new SetRandomRotation(emitter,0,360));
             emitter.ApplyParticleModule(new SetRandomScale(emitter,new Vector2(0.5f,0.2f),new Vector2(1f,0.4f)));
             ParticleSystem.ApplyEmitterAndInit(emitter);
+            if (room.BeingViewed)
+                room.PlaySound(SephirahMeltdownEntry.BinahAtkFairy, pos, 0.2f, 1f);
         }
 
         public override void Update(bool eu)
         {
             base.Update(eu);
-            foreach(var d in Custom.eightDirectionsAndZero)
+            foreach (var d in Custom.eightDirectionsAndZero)
+            {
                 if (room.GetTile(d.ToVector2() * 20 + pos).Solid)
+                {
                     dieCounter = 0;
+                    hitPos = pos;
+                    break;
+                }
+            }
+
+       
 
             if (dieCounter < 0)
             {
@@ -1108,13 +1141,13 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             else
             {
                 dieCounter++;
-                if(dieCounter == 4)
+                if(dieCounter == 4 || !Custom.DistLess(hitPos, pos, 50))
                     Destroy();
             }
         }
         private HashSet<Creature> critSet = new HashSet<Creature>();
         private int dieCounter = -1;
-
+        private Vector2 hitPos;
         public override void Destroy()
         {
             base.Destroy();
@@ -1145,6 +1178,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             lastTime = time = (1-BinahBuff.Instance.MyTimer.frames / (BinahBuff.MaxTime * 40f)) * 9;
             for(int i =1;i<=(int)time;i++)
                 emitters[(int)time-1] = CreatureEmitter(360 / 8f * (i-1) - 90, true);
+      
 
         }
 
@@ -1201,7 +1235,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     var rad = BinahKey.Width / 25 * 3;
                     foreach (var crit in room.abstractRoom.creatures.Select(c => c.realizedCreature))
                     {
-                        if (crit == null || crit.dead)
+                        if (crit == null || crit.dead || crit.inShortcut)
                             continue;
                         if (crit.bodyChunks.Any(c => Custom.DistLess(c.pos, center, rad)))
                         {
@@ -1230,9 +1264,15 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             if (time < lastTime || (int)time - 1 == emitters.Length)//时间
             {
                 explodeCounter = 0;
+                if (room.BeingViewed)
+                    room.PlaySound(SephirahMeltdownEntry.BinahAtkFinalEnd, pos, 0.2f, 1f);
             }
-            else if ((int)time != 0 && emitters[(int)time-1] == null)
-                emitters[(int)time-1] = CreatureEmitter(360 / 8f * ((int)time-1) - 90, false);
+            else if ((int)time != 0 && emitters[(int)time - 1] == null)
+            {
+                emitters[(int)time - 1] = CreatureEmitter(360 / 8f * ((int)time - 1) - 90, false);
+                if (room.BeingViewed)
+                    room.PlaySound(SephirahMeltdownEntry.BinahAtkFinalMake, pos, 0.3f, 1f);
+            }
         }
 
         private ParticleEmitter CreatureEmitter(float deg, bool needBurst)
@@ -1394,8 +1434,14 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 emitter.PInitModules.OfType<RectPositionModule>().First().deg =
                     Custom.VecToDeg(Vector2.Perpendicular(dir));
             }
+
             if (counter == ReadyCount - 2)
+            {
                 room.AddObject(new BinahRing(room, pos, dir));
+                if (room.BeingViewed)
+                    room.PlaySound(SephirahMeltdownEntry.BinahAtkStone, pos, 0.2f, 1);
+            }
+
             if (counter >= ReadyCount)
             {
                 vel = Vector2.Lerp(vel, dir*35, 0.1f);
@@ -1863,7 +1909,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             base.InitiateSprites(sLeaser, rCam);
     
             sLeaser.sprites = new FSprite[2];
-            sLeaser.sprites[0] = new FSprite("Binah.StrikeFog"){height = 25,width = 150};
+            sLeaser.sprites[0] = new FSprite("Binah.StrikeFog"){height = 25,width = 150,alpha = 0};
             sLeaser.sprites[1] = new FSprite("Binah.Strike") { height = 0, width = 150, anchorY = 0 };
             AddToContainer(sLeaser,rCam,rCam.ReturnFContainer("Water"));
         }
@@ -1879,6 +1925,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             sLeaser.sprites[0].SetPosition(pos - camPos + Vector2.down*5* alpha);
             sLeaser.sprites[1].SetPosition(pos - camPos);
             sLeaser.sprites[1].height = alpha * 200;
+            sLeaser.sprites[0].alpha =
+                Mathf.Lerp(sLeaser.sprites[0].alpha, counter > WaitCounter + OutCounter ? 0 : 1, 0.05f);
 
         }
 
@@ -1886,11 +1934,14 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             base.Update(eu);
             counter++;
+            if(counter == WaitCounter-10 && room.BeingViewed)
+                room.PlaySound(SephirahMeltdownEntry.BinahAtkStrike, pos, 0.2f, 1);
+
             if (Math.Abs(counter - (WaitCounter + OutCounter * 0.5f)) < 2)
             {
                 foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
                 {
-                    if(crit== null || crit.dead) continue;
+                    if(crit== null || crit.dead || crit.inShortcut) continue;
 
                     if (crit.bodyChunks.Any(i => Custom.DistLess(i.pos, pos + new Vector2(0, 50), 80)))
                     {
@@ -1907,6 +1958,64 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         }
     }
 
+    class BinahPost : BuffPostEffect
+    {
+        
+        public BinahPost(int layer) : base(layer)
+        {
+            material = new Material(SephirahMeltdownEntry.BinahScreenEffect);
+            material.SetTexture("_EffectTex",SephirahMeltdownEntry.BinahScreenEffectTexture);
+            toRotation[0] = rotation[0] = Random.value + 200;
+            toRotation[1] = rotation[1] = Random.value + 200;
+            waitCounter[0] = RandomValue;
+            waitCounter[1] = RandomValue;
 
-   
+        }
+
+        private float RandomValue => Random.Range(2, 5);
+
+        public override void OnRenderImage(RenderTexture source, RenderTexture destination)
+        {
+            material.SetColor("_EffectSV1",new Color(0.7f, 0.5f, 0.128F, 0.8f));
+            material.SetColor("_EffectSV2", new Color(0.8f, 0.8f,0.022f,0.8f));
+            material.SetColor("SnowColor",new Color(1,1,1,snowAlpha));
+            Graphics.Blit(source,destination,material);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            snowAlpha = Mathf.Lerp(snowAlpha, waitingForDelete ? 0 :0.3f, (waitingForDelete ? 0.05f : 0.01f) * Time.deltaTime * BuffCustom.TimeSpeed * 40f);
+            if (snowAlpha < 0.01f && waitingForDelete)
+            {
+                needDeletion = true;
+                return;
+            }
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    rotation[i] = Mathf.Lerp(rotation[i], toRotation[i], 0.02f * Time.deltaTime * BuffCustom.TimeSpeed * 40f);
+            //    if ((waitCounter[i] -= Time.deltaTime * BuffCustom.TimeSpeed) < 0)
+            //    {
+            //        waitCounter[i] = RandomValue;
+            //        toRotation[i] += Random.Range(-0.5f, 0.5f);
+            //    }
+                
+            //}
+
+        }
+
+        public override void Destroy()
+        {
+            waitingForDelete = true;
+        }
+
+        private bool waitingForDelete;
+        private float snowAlpha;
+
+        private readonly float[] rotation = new float[2];
+        private readonly float[] toRotation = new float[2];
+
+
+        private readonly float[] waitCounter = new float[2];
+    }
 }
