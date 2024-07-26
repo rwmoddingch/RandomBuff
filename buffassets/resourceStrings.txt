@@ -46,7 +46,7 @@ Notification_MissionReward|Unlock mission
 Notification_MissionReward_Unique|Unlock unique mission
 Notification_CosmeticReward|Unlock cosmetic
 Notification_CardReward|Unlock card
-
+Notification_FreePickReward|Unlock free pick count
 //BuffMenu:
 Survival|SURVIVAL
 Normal|NORMAL
@@ -139,8 +139,12 @@ ProgressionUI_Cosmetic|COSMETIC
 Quest_Display_MissionQuest|Complete {0} mission
 Quest_Display_LevelQuest|Reach {0} level
 Quest_Display_RunCountQuest|complete {0} games
-Quest_Display_SingleRunCardQuest|Collect {1} {0} cards in a single game
-Quest_Display_CardQuest|Collect {1} {0} cards
+Quest_Display_SingleRunCardQuest|Collect {1} {0} cards in a game (duplicates allowed)
+Quest_Display_CardQuest|Collect {1} {0} cards (duplicates allowed)
+
+//QuestRender
+QuestRender_FreePick|Free pick count +1
+
 
 //Mission
 Mission_Display_DodgeTheRock|DODGE THE ROCKS
