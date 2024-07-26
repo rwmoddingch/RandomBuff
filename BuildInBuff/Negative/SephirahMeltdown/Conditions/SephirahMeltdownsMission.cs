@@ -93,9 +93,33 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             if (game.GetStorySession.saveState.cycleNumber == 4)
                 BuffUtils.Log("SephirahMeltdown", "Add bur-pursued at 4 cycles");
-            
+            MusicEvent musicEvent = new MusicEvent
+            {
+                fadeInTime = 1f,
+                roomsRange = -1,
+                cyclesRest = 0,
+                volume = 0.2f,
+                prio = 10f,
+                stopAtDeath = false,
+                stopAtGate = false,
+                loop = true,
+                maxThreatLevel = 10,
+                songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
 
+            };
+            game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+
+            On.Music.MusicPlayer.GameRequestsSong += MusicPlayer_GameRequestsSong;
             base.EnterGame(game);
+        }
+
+        private void MusicPlayer_GameRequestsSong(On.Music.MusicPlayer.orig_GameRequestsSong orig, Music.MusicPlayer self, MusicEvent musicEvent)
+        {
+            var ghost = self.threatTracker?.ghostMode ?? -1;
+            orig(self,musicEvent);
+            if (ghost != -1)
+                self.threatTracker.ghostMode = ghost;
+            
         }
 
         public override void SessionEnd(RainWorldGame game)
@@ -107,6 +131,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
                 new CachaPacket() { negative = (0, 0, 0), positive = (2, 6, 1) } : new CachaPacket();
+            On.Music.MusicPlayer.GameRequestsSong -= MusicPlayer_GameRequestsSong;
         }
 
     }
