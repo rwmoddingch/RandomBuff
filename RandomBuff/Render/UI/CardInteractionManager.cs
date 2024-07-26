@@ -496,7 +496,7 @@ namespace RandomBuff.Render.UI
 
         void TriggerCard(BuffCard card)
         {
-            if (card.StaticData?.Triggerable ?? false)
+            if (card?.StaticData.Triggerable ?? false)
             {
                 card.onMouseRightClick?.Invoke();
                 if (BuffPoolManager.Instance.TriggerBuff(card.ID))

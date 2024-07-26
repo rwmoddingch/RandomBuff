@@ -176,7 +176,7 @@ namespace RandomBuff.Core.SaveData
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetFreePickCount(float multiply) =>
-            (int)((0.5f + (BuffPlugin.AllCardDisplay ? 5 : 0) + lockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value)) * multiply));
+            (int)((0.5f + (BuffPlugin.AllCardDisplay ? 5 : 0) + lockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value))) * multiply);
 
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 

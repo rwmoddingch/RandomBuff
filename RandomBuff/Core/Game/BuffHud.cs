@@ -55,6 +55,8 @@ namespace RandomBuff.Core.Game
                         BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply)), (
                         (all, _, _) =>
                         {
+                            if(all == null)
+                                return;
                             foreach (var card in all)
                                 card.CreateNewBuff();
                             pocket!.Destroy();
