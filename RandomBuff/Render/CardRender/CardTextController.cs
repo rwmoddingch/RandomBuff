@@ -213,7 +213,7 @@ namespace RandomBuff.Render.CardRender
             {
                 if (!_scrollReverse)
                 {
-                    if (_scrolledLength < _maxScrolledLength)
+                    if (_scrolledLength <= _maxScrolledLength)
                     {
                         float lerped = Mathf.Lerp(_scrolledLength, _scrolledLength + _maxScrollVel, 0.05f) - _scrolledLength;
                         float maxStep = _maxScrollVel * Time.deltaTime;
@@ -231,7 +231,7 @@ namespace RandomBuff.Render.CardRender
                 }
                 else
                 {
-                    if (_scrolledLength > _minScrolledLength)
+                    if (_scrolledLength >= _minScrolledLength)
                     {
                         float lerped = Mathf.Lerp(_scrolledLength, _scrolledLength - _maxScrollVel, 0.05f) - _scrolledLength;
                         float maxStep = -_maxScrollVel * Time.deltaTime;

@@ -49,6 +49,7 @@ Notification_CardReward|解锁卡牌
 Survival|生存模式
 Normal|普通模式
 Quick|快速模式
+Sandbox|沙盒模式
 ProgressionMenu_Show|进度
 
 
@@ -66,6 +67,8 @@ Mode_Desc_Mission|选择一个使命以开始一局新游戏。<LINE>你的游�
 InGameSlot_SlotTitle|Buff卡槽
 InGameSlot_CardDetail|Buff详情
 CardPickSlot_SlotTitle|抽取<Cards>张卡
+InGameSlot_SandBoxTitle|修改启用的buff
+InGameSlot_OpenSandBoxButton|Buff
 
 
 //CardpediaCardSheet

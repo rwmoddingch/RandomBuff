@@ -14,11 +14,13 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         public static GachaTemplateID Normal;
         public static GachaTemplateID Quick;
         public static GachaTemplateID Mission;
+        public static GachaTemplateID SandBox;
         static GachaTemplateID()
         {
             Normal = new GachaTemplateID("Normal", true);
             Quick = new GachaTemplateID("Quick", true);
             Mission = new GachaTemplateID("Mission", true);
+            SandBox = new GachaTemplateID("SandBox", true);
         }
 
         public GachaTemplateID(string value, bool register = false) : base(value, register)
@@ -114,7 +116,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             BuffRegister.RegisterGachaTemplate<NormalGachaTemplate>(GachaTemplateID.Normal);
             BuffRegister.RegisterGachaTemplate<QuickGachaTemplate>(GachaTemplateID.Quick,ConditionID.Card);
             BuffRegister.RegisterGachaTemplate<MissionGachaTemplate>(GachaTemplateID.Mission);
-
+            BuffRegister.RegisterGachaTemplate<SandboxGachaTemplate>(GachaTemplateID.SandBox);
         }
     }
 

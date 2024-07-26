@@ -463,6 +463,11 @@ namespace RandomBuff.Render.UI
                     exclusiveShowCard = CurrentFocusCard;
                     SetState(State.ExclusiveShow);
                 }
+
+                if(Slot.completeSlot != null)
+                {
+                    Slot.completeSlot.OpenPocketButton?.OnMouseLeftClick();
+                }
             }
             else if(currentState == State.ExclusiveShow)
             {
@@ -515,7 +520,11 @@ namespace RandomBuff.Render.UI
                     card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Hide);
 
                 if (SubManager != null) SubManager.overrideDisabled = false;
-                if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
+                if (Slot.completeSlot != null)
+                {
+                    Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
+                    Slot.completeSlot.SetPocketButtonShow(false);
+                }
                 Slot.completeSlot.Title?.ChangeTitle("", true);
 
                 Slot.completeSlot?.SetGamePaused(false);
@@ -527,7 +536,11 @@ namespace RandomBuff.Render.UI
                 foreach (var card in managedCards)
                     card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
                 if (SubManager != null) SubManager.overrideDisabled = true;
-                if (Slot.completeSlot != null) Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
+                if (Slot.completeSlot != null)
+                {
+                    Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
+                    Slot.completeSlot.SetPocketButtonShow(true);
+                }
                 Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
 
                 Slot.completeSlot?.SetGamePaused(true);

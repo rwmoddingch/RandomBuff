@@ -1,8 +1,10 @@
 ﻿using DevInterface;
 using MonoMod.Utils;
 using MonoMod.Utils.Cil;
+using RandomBuff.Core.Buff;
 using RewiredConsts;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -294,6 +296,20 @@ namespace RandomBuff
             return f < 0.5 ? 4 * f * f * f : 1 - Mathf.Pow(-2 * f + 2, 3) / 2;
         }
 
+        public static float EaseOutElastic(float t)
+        {
+            if (t == 0) 
+                return 0f; 
+            if (t == 1) 
+                return 1f;
+
+            float p = 1f * .3f;
+            float a = 1f;
+            float s = p / 4;
+            return (a * Mathf.Pow(2, -10 * t) * Mathf.Sin((t * 1f - s) * (2 * Mathf.PI) / p) + 1f) * 0.5f + t*0.5f;
+        }
+
+
         public static Color GetRGBColor(int r, int g, int b)
         {
             return new Color(r / 255f, g / 255f, b / 255f);
@@ -305,6 +321,59 @@ namespace RandomBuff
             if (byte_len.Length >= 2) { return true; }
 
             return false;
+        }
+
+        public static Vector2 DegToVec(float deg)
+        {
+            return new Vector2(Mathf.Cos(deg * Mathf.Deg2Rad), Mathf.Sin(deg * Mathf.Deg2Rad));
+        }
+
+        public static float VecToDeg(Vector2 vec)
+        {
+            return Mathf.Atan2(vec.y, vec.x);
+        }
+
+        public static IEnumerable<Type> SafeGetTypes(this Assembly assembly, bool logException = false)
+        {
+            Module[] modules;
+            Type[] types;
+            try
+            {
+                modules = assembly.GetModules(getResourceModules: false);
+            }
+            catch (Exception e)
+            {
+                if(logException)
+                    BuffPlugin.LogException(e);
+                modules = new Module[0];
+            }
+
+            for (int i = 0; i < modules.Length; i++)
+            {
+                try
+                {
+                    types = modules[i].GetTypes();
+                }
+                catch(Exception e)
+                {
+                    if (logException)
+                        BuffPlugin.LogException(e);
+                    types = new Type[0];
+                }
+
+                for (int j = 0; j < types.Length; j++)
+                {
+                    yield return types[j];
+                }
+            }
+            yield break;
+        }
+    
+        public static IEnumerable<BuffType> EnumBuffTypes()
+        {
+            yield return BuffType.Positive;
+            yield return BuffType.Duality;
+            yield return BuffType.Negative;
         }
     }
 }

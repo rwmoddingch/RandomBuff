@@ -3,12 +3,14 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.BuffCondition;
 using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -533,8 +535,12 @@ namespace RandomBuff.Render.UI
         public TriggerBuffAnimSlot TriggerAnimSlot { get; private set; }
         public BuffTimerAnimSlot TimerAnimSlot { get; private set; }
         public CardPickerSlot ActivePicker { get; private set; }
-
         public BuffConditionHUD ConditionHUD { get; private set; }
+        public CardPocket SandboxPocket { get; private set; }
+
+        FContainer buttonContainer;
+        public SideSingleSelectButton OpenPocketButton { get; private set; }
+
 
         Queue<Action> pickerRequests = new();
 
@@ -557,8 +563,32 @@ namespace RandomBuff.Render.UI
             Container.AddChild(ActiveAnimSlot.Container);
             Container.AddChild(TriggerAnimSlot.Container);
             Container.AddChild(TimerAnimSlot.Container);
-            
+
             Container.AddChild(ConditionHUD.Container);
+
+            if(BuffPoolManager.Instance.GameSetting.gachaTemplate.ID == GachaTemplateID.SandBox)
+            {
+                Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
+                SandboxPocket = new CardPocket(BuffCore.GetAllBuffIds(), BuffResourceString.Get("InGameSlot_SandBoxTitle"), CardPocketCallBack, BuffCard.normalScale * 0.5f, new Vector2(400f, screenSize.y - 200), new Vector2(screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f))
+                {
+                    toggleShowCallBack = (show) =>
+                    {
+                        BasicSlot.BaseInteractionManager.overrideDisabled = show;
+                    }
+                };
+                buttonContainer = new FContainer() { alpha = 0f };
+                Container.AddChild(SandboxPocket.Container);
+                Container.AddChild(buttonContainer);
+                OpenPocketButton = new SideSingleSelectButton(buttonContainer, new Vector2(Custom.rainWorld.options.ScreenSize.x, 200f), 100f, BuffResourceString.Get("InGameSlot_OpenSandBoxButton"), "", -90f)
+                {
+                    selectedAction = (s) =>
+                    {
+                        SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
+                        SandboxPocket.SetShow(true);
+                        OpenPocketButton.SetSelected(false);
+                    }
+                };
+            }
         }
 
         public override void Update()
@@ -569,7 +599,9 @@ namespace RandomBuff.Render.UI
             TriggerAnimSlot.Update();
             TimerAnimSlot.Update();
             ConditionHUD.Update();
-            if(ActivePicker != null)
+            SandboxPocket?.Update();
+            OpenPocketButton?.Update();
+            if (ActivePicker != null)
             {
                 ActivePicker.Update();
                 if (ActivePicker.AllFinished)
@@ -630,7 +662,8 @@ namespace RandomBuff.Render.UI
             ActivePicker?.GrafUpdate(timeStacker);
             TimerAnimSlot.GrafUpdate(timeStacker);
             ConditionHUD.DrawSprites(timeStacker);
-
+            SandboxPocket?.GrafUpdate(timeStacker);
+            OpenPocketButton?.GrafUpdate(timeStacker);
             if (Input.GetKeyDown(KeyCode.C) && File.Exists(path))
             {
                 //BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
@@ -716,7 +749,47 @@ namespace RandomBuff.Render.UI
             TriggerAnimSlot.Destory();
             TimerAnimSlot.Destory();
             ConditionHUD.Destroy();
+            SandboxPocket?.Destroy();
             base.Destory();
+        }
+
+        public void CardPocketCallBack(List<BuffID> all, List<BuffID> removed, List<BuffID> added)
+        {
+            foreach(var buff in added)
+                BuffCore.CreateNewBuff(buff);
+            foreach(var buff in removed)
+                BuffPoolManager.Instance.RemoveBuffAndData(buff);
+        }
+
+        bool show;
+        float initAlpha;
+        TickAnimCmpnt showAnim;
+        public void SetPocketButtonShow(bool show)
+        {
+            if (OpenPocketButton == null)
+                return;
+
+            if (this.show == show)
+                return;
+
+            if (showAnim != null)
+                showAnim.Destroy();
+
+            this.show = show;
+            initAlpha = buttonContainer.alpha;
+            showAnim = AnimMachine.GetTickAnimCmpnt(0, 20, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>
+            {
+                buttonContainer.alpha = Mathf.Lerp(initAlpha, this.show ? 1f : 0f, t.Get());
+            }, OnAnimFinished: (t) =>
+            {
+                buttonContainer.alpha = this.show ? 1f : 0f;
+                showAnim = null;
+                OpenPocketButton.enableInput = this.show;
+            });
+
+            if (!show && SandboxPocket.Show)
+                SandboxPocket.SetShow(false);
+
         }
 
         /// <summary>

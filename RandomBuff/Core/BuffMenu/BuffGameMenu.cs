@@ -180,8 +180,6 @@ namespace RandomBuff.Core.BuffMenu
         SimpleButton progressionMenu;
 
         public bool lastPausedButtonClicked;
-
-
         void InitButtonPage(Page page)
         {
             page.subObjects.Add(startButton = new HoldButton(this, page, Translate(SlugcatStats.getSlugcatName(CurrentName)), "START", new Vector2(683f, 85f), 40f));
@@ -502,7 +500,6 @@ namespace RandomBuff.Core.BuffMenu
             }
         }
 
-
         public override void RawUpdate(float dt)
         {
             
@@ -531,10 +528,25 @@ namespace RandomBuff.Core.BuffMenu
             if (RWInput.CheckPauseButton(0) && !modeSelectPage.Show && !newGameDetailPage.Show &&
                 !missionPage.Show && manager.nextSlideshow == null && !lastPausedButtonClicked)
             {
-                manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
-                PlaySound(SoundID.MENU_Switch_Page_Out);
+                EscLogic();
             }
             lastPausedButtonClicked = RWInput.CheckPauseButton(0);
+        }
+
+        public void EscLogic()
+        {
+            if(currentPage == 3)//progressionPage
+                (pages[3] as BuffProgressionPage).EscLogic();
+            else if (modeSelectPage.Show)
+                modeSelectPage.SetShow(false);
+            else if (missionPage.Show)
+                missionPage.EscLogic();
+            else if (newGameDetailPage.Show)
+                newGameDetailPage.EscLogic();
+            else
+                manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+
+            PlaySound(SoundID.MENU_Switch_Page_Out);
         }
 
         public override void ShutDownProcess()

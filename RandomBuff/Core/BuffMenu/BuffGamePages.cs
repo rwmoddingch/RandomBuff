@@ -3,6 +3,7 @@ using Menu.Remix;
 using Menu.Remix.MixedUI;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -12,6 +13,7 @@ using RandomBuff.Render.UI.Component;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -99,10 +101,10 @@ namespace RandomBuff.Core.BuffMenu
         //状态变量
         int _showCounter = -1;
         int _targetShowCounter;
-        bool Show
+        public bool Show
         {
             get => _targetShowCounter == MaxShowSwitchCounter;
-            set => _targetShowCounter = (value ? MaxShowSwitchCounter : 0);
+            private set => _targetShowCounter = (value ? MaxShowSwitchCounter : 0);
         }
         float ShowFactor => (float)_showCounter / MaxShowSwitchCounter;
         Action showToggleFinishCallBack;
@@ -229,6 +231,11 @@ namespace RandomBuff.Core.BuffMenu
         {
             gameMenu.PlaySound(SoundID.MENU_Start_New_Game);
             Singal(null, "CONTINUE_DETAIL_RESTART");
+        }
+
+        public void EscLogic()
+        {
+
         }
     }
 
@@ -586,6 +593,11 @@ namespace RandomBuff.Core.BuffMenu
             ClearCurrentConditions();
         }
 
+        public void EscLogic()
+        {
+            SetShow(false);
+        }
+
         class ConditionInstance
         {
             public Condition condition;
@@ -812,12 +824,20 @@ namespace RandomBuff.Core.BuffMenu
                 flagRenderer.GrafUpdate(timeStacker);
             }
 
-            if (Show && RWInput.CheckPauseButton(0))
-            {
-                SetShow(false);
-                menu.PlaySound(SoundID.MENU_Switch_Page_Out);
-                (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
-            }
+            //if (Show && RWInput.CheckPauseButton(0))
+            //{
+            //    SetShow(false);
+            //    menu.PlaySound(SoundID.MENU_Switch_Page_Out);
+            //    (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
+            //}
+        }
+
+        public void EscLogic()
+        {
+            if (MissionInfoBox.hasCardOnDisplay)
+                missionInfoBox.UpdateCardDisplay(false, null);
+            else
+                Singal(null,"NEWGAME_MISSION_BACK");
         }
 
         public class MissionButton : SimpleButton

@@ -3,6 +3,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Render.Quest;
+using RandomBuff.Render.UI.Component;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,6 +65,7 @@ namespace RandomBuff.Render.UI
 
         //动画机
         public AnimatorState currentAniamtorState = AnimatorState.Test_None;
+        public AnimatorState lastAnimatorState = AnimatorState.Test_None;
         public BuffCardAnimator currentAnimator;
 
         //交互
@@ -292,6 +294,7 @@ namespace RandomBuff.Render.UI
             if (newState == currentAniamtorState && currentAnimator != null)
                 return;
 
+            lastAnimatorState = currentAniamtorState;
             currentAnimator?.Destroy();
             currentAniamtorState = newState;
 
@@ -350,6 +353,14 @@ namespace RandomBuff.Render.UI
             else if(newState == AnimatorState.CardpediaSlot_StaticShow)
             {
                 currentAnimator = new CardpediaSlotStaticShowAnimator(this, Position, Rotation, Scale);
+            }
+            else if(newState == AnimatorState.CardPocketSlot_Normal)
+            {
+                currentAnimator = new CardPocketNormalAnimator(this, Position, Rotation, Scale);
+            }
+            else if (newState == AnimatorState.CardPocketSlot_Exclusive)
+            {
+                currentAnimator = new CardPocketExclusiveAnimator(this, Position, Rotation, Scale);
             }
             else
             {
@@ -437,7 +448,11 @@ namespace RandomBuff.Render.UI
             //图鉴界面卡槽动画状态
             CardpediaSlot_Scrolling,
             CardpediaSlot_Displaying,
-            CardpediaSlot_StaticShow
+            CardpediaSlot_StaticShow,
+
+            //卡包卡槽动画状态
+            CardPocketSlot_Normal,
+            CardPocketSlot_Exclusive,
         }
     }
 }

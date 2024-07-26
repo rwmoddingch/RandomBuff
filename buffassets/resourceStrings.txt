@@ -49,6 +49,7 @@ Notification_CardReward|Unlock card
 Survival|SURVIVAL
 Normal|NORMAL
 Quick|QUICK
+Sandbox|SANDBOX
 ProgressionMenu_Show|PROGRESSION
 
 
@@ -66,6 +67,8 @@ Mode_Desc_Mission|Choose a mission to start a new game.<LINE>Your goals and init
 InGameSlot_SlotTitle|BuffSlot
 InGameSlot_CardDetail|BuffDetail
 CardPickSlot_SlotTitle|Pick <Cards> cards
+InGameSlot_SandBoxTitle|Modify active buffs
+InGameSlot_OpenSandBoxButton|Buff
 
 
 //CardpediaCardSheet

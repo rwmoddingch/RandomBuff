@@ -44,7 +44,6 @@ namespace RandomBuff.Core.Game.Settings
 
         public bool IsValid { get; private set; } = true;
 
-
         public string MissionId { get; set; }
 
         public InGameRecord inGameRecord = new ();
@@ -386,7 +385,7 @@ namespace RandomBuff.Core.Game.Settings
             if (fallbackPick != null)
                 builder.Append($"FALLBACK{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}{SettingSplit}");
             if(MissionId != null)
-                builder.Append($"MISSION{SubSettingSplit}{MissionId}");
+                builder.Append($"MISSION{SubSettingSplit}{MissionId}{SettingSplit}");
 
             return builder.ToString();
         }

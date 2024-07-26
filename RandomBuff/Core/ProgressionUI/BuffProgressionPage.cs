@@ -474,6 +474,11 @@ namespace RandomBuff.Core.ProgressionUI
             subObjects.Remove(tabWrapper);
             tabWrapper.RemoveSprites();
         }
+
+        public void EscLogic()
+        {
+            HideProgressionPage();
+        }
     }
 
     public class CosmeticButton : OpSimpleImageButton
