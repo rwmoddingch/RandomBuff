@@ -107,11 +107,11 @@ namespace BuiltinBuffs.Negative
                     rock.firstChunk.lastPos = rock.firstChunk.pos;
                     rock.tailPos = rock.firstChunk.pos;
                     rock.setRotation = dir;
-                    
 
-                    if(BuffCore.TryGetBuff(EjectionRockIBuffEntry.ejectionRockBuffID, out var _))
+
+                    if (BuffCore.TryGetBuff(EjectionRockIBuffEntry.ejectionRockBuffID, out var _))
                     {
-                        rock.ChangeMode(Weapon.Mode.Thrown);rock.doNotTumbleAtLowSpeed = true;
+                        rock.ChangeMode(Weapon.Mode.Thrown); rock.doNotTumbleAtLowSpeed = true;
                         rock.rotationSpeed = 0f;
                         rock.meleeHitChunk = null;
                         rock.overrideExitThrownSpeed = 0f;

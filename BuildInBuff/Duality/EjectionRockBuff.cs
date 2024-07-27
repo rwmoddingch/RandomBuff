@@ -37,6 +37,59 @@ namespace BuiltinBuffs.Positive
             On.Weapon.WeaponDeflect += Weapon_WeaponDeflect;
             On.Rock.DrawSprites += Rock_DrawSprites;
             On.Rock.HitSomething += Rock_HitSomething;
+            On.Player.Update += Player_Update;
+        }
+
+        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            orig.Invoke(self, eu);
+
+            if (Input.GetKey(KeyCode.C))
+            {
+                Vector2 dir = Custom.RNV();
+                AbstractPhysicalObject abstractPhysicalObject = new AbstractPhysicalObject(self.room.world, AbstractPhysicalObject.AbstractObjectType.Rock, null, self.room.GetWorldCoordinate(self.firstChunk.pos + dir * 80f), self.room.game.GetNewID());
+                abstractPhysicalObject.RealizeInRoom();
+                Rock rock = abstractPhysicalObject.realizedObject as Rock;
+
+                rock.firstChunk.pos += dir * 40f;
+
+                rock.thrownPos = rock.firstChunk.pos;
+                rock.thrownBy = null;
+                IntVector2 throwDir = new IntVector2(0, 0);
+
+                if (dir.x > 0)
+                    throwDir.x = 1;
+                else if (dir.x < 0)
+                    throwDir.x = -1;
+
+                if (dir.y > 0)
+                    throwDir.y = 1;
+                else if (dir.y < 0)
+                    throwDir.y = -1;
+                rock.throwDir = throwDir;
+
+                rock.firstFrameTraceFromPos = rock.thrownPos;
+                rock.changeDirCounter = 3;
+                rock.ChangeOverlap(true);
+                rock.firstChunk.MoveFromOutsideMyUpdate(false, rock.thrownPos);
+
+                float vel = 10f;
+
+                rock.firstChunk.vel = vel * dir;
+                rock.firstChunk.pos = dir * 40f + self.firstChunk.pos;
+                rock.firstChunk.lastPos = rock.firstChunk.pos;
+                rock.tailPos = rock.firstChunk.pos;
+                rock.setRotation = dir;
+
+
+                if (BuffCore.TryGetBuff(EjectionRockIBuffEntry.ejectionRockBuffID, out var _))
+                {
+                    rock.ChangeMode(Weapon.Mode.Thrown); rock.doNotTumbleAtLowSpeed = true;
+                    rock.rotationSpeed = 0f;
+                    rock.meleeHitChunk = null;
+                    rock.overrideExitThrownSpeed = 0f;
+                }
+            }
         }
 
         private static bool Rock_HitSomething(On.Rock.orig_HitSomething orig, Rock self, SharedPhysics.CollisionResult result, bool eu)
@@ -181,9 +234,18 @@ namespace BuiltinBuffs.Positive
 
             float vel = 40f * module.frc;
             self.overrideExitThrownSpeed = 0f;
+            
+            //屏幕移动会导致黑屏，有点莫名其妙的问题
+            //if(Random.value < 0.1f)
+            //{
+            //    Vector2 screenMovementPos = self.firstChunk.pos;
+            //    screenMovementPos.x = Mathf.Clamp(screenMovementPos.x, 0f, self.room.PixelWidth);
+            //    screenMovementPos.y = Mathf.Clamp(screenMovementPos.y, 0f, self.room.PixelHeight);
 
-            self.room.ScreenMovement(new Vector2?(self.firstChunk.pos), -dir * 1.5f, 0f);
-            self.room.PlaySound(SoundID.Rock_Hit_Wall, self.firstChunk);
+            //    self.room.ScreenMovement(new Vector2?(screenMovementPos), -dir * 1.5f, 0f);
+            //}
+  
+            self.room.PlaySound(SoundID.Rock_Hit_Wall, self.firstChunk.pos);
 
             self.firstChunk.vel = vel * dir;
             self.firstChunk.pos += dir;

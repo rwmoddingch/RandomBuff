@@ -64,6 +64,8 @@ namespace BuiltinBuffs.Duality
         {
             //List<AbstractRoomRepresent> roomRepresents = new List<AbstractRoomRepresent>();
             List<AbstractRoomRepresent> roomForConnect = new List<AbstractRoomRepresent>();
+            if (activeRoomRepresents.Count > 0)
+                activeRoomRepresents.Clear();
 
             foreach (var room in world.abstractRooms)
             {
