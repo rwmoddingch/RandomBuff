@@ -1286,11 +1286,12 @@ namespace BuiltinBuffs.Duality
                         fireIntensities[x, y] = Mathf.Clamp01(fireIntensities[x, y] - fireIntensityDecrease);
                         if (fireIntensities[x, y] == 0)
                         {
-                            int index = burningTiles.IndexOf(new IntVector2(x, y));
-                            //var label = labels[index];
-                            //label.RemoveFromContainer();
-                            //labels.RemoveAt(index);
-                            burningTiles.RemoveAt(index);
+                            IntVector2 pos = new IntVector2(x, y);
+                            if (burningTiles.Contains(pos))
+                            {
+                                int index = burningTiles.IndexOf(pos);
+                                burningTiles.RemoveAt(index);
+                            }
                         }
                     }
                 }

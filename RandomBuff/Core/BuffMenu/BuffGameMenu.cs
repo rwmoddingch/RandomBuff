@@ -44,6 +44,7 @@ namespace RandomBuff.Core.BuffMenu
         public RandomBuffFlag flag;
 
         NotificationManager testNotification;
+        public BuffExtraInfoPage extraInfoPage;
 
         internal BuffGameMenuSlot menuSlot;
         internal SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
@@ -96,6 +97,7 @@ namespace RandomBuff.Core.BuffMenu
             flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1200f, 500f));
             menuSlot.SetupBuffs(slugNameOrders);
             testNotification = new NotificationManager(this, container, 4);
+            
             pages = new List<Page>()
             {
 
@@ -103,7 +105,7 @@ namespace RandomBuff.Core.BuffMenu
                 new(this, null, "GameDetailPage", 1),
                 new (this, null, "WawaSlugcatPage", 2),
                 new BuffProgressionPage(this, null, 3),
-                testNotification
+                testNotification,
             };
            
             for (int i = 0; i < slugNameOrders.Count; i++)
@@ -118,10 +120,14 @@ namespace RandomBuff.Core.BuffMenu
             continueDetailPage.SetShow(false);
             newGameDetailPage.SetShow(false);
 
+            extraInfoPage = new BuffExtraInfoPage(this, null, "ExtraInfoPage", pages.Count);
+            pages.Add(extraInfoPage);
+
             foreach (var page in pages)
                 page.mouseCursor?.BumToFront();
 
             UpdateSlugcatAndPage();
+
 
             FSprite black = new FSprite("pixel") { 
                 color = Color.black, 
@@ -527,32 +533,61 @@ namespace RandomBuff.Core.BuffMenu
 
             if(Input.GetKeyDown(KeyCode.N) && BuffPlugin.DevEnabled)
             {
-                testNotification.NewRewardNotification(QuestUnlockedType.Cosmetic, "FireWork");
-                testNotification.NewRewardNotification(QuestUnlockedType.Card, "FlameThrower");
-                testNotification.NewRewardNotification(QuestUnlockedType.Card, "DivingBeing");
+                TestFunction();
             }
             
-            if (RWInput.CheckPauseButton(0) && !modeSelectPage.Show && !newGameDetailPage.Show &&
-                !missionPage.Show && manager.nextSlideshow == null && !lastPausedButtonClicked)
+            if (RWInput.CheckPauseButton(0) && manager.nextSlideshow == null && !lastPausedButtonClicked)
             {
                 EscLogic();
             }
             lastPausedButtonClicked = RWInput.CheckPauseButton(0);
         }
 
+        public void TestFunction()
+        {
+            if (extraInfoPage.Show)
+                extraInfoPage.EscLogic();
+            else
+            {
+                extraInfoPage.AppendGachaInfo("正面抽卡数 0", true)
+                   .AppendGachaInfo("负面或中性抽卡数 0", false)
+                   .AppendInfoEntry("经验倍率 1.5")
+                   .SetMainInfo("This is a really wawa test for extra info page :3")
+                   .SetShow(true);
+            }
+        }
+
         public void EscLogic()
         {
+            //BuffPlugin.Log($"{currentPage == 3}, {modeSelectPage.Show}, {missionPage.Show}, {newGameDetailPage.Show}");
+            string info = "";
             if(currentPage == 3)//progressionPage
+            {
+                info = "exit progression";
                 (pages[3] as BuffProgressionPage).EscLogic();
+            }
             else if (modeSelectPage.Show)
+            {
+                info = "exit modeSelect";
                 modeSelectPage.SetShow(false);
+            }
             else if (missionPage.Show)
+            {
+                info = "exit mission";
                 missionPage.EscLogic();
+            }
             else if (newGameDetailPage.Show)
+            {
+                info = "exit newGame";
                 newGameDetailPage.EscLogic();
+            }
             else
+            {
+                info = "exit";
                 manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+            }
 
+            //BuffPlugin.Log(info);
             PlaySound(SoundID.MENU_Switch_Page_Out);
         }
 

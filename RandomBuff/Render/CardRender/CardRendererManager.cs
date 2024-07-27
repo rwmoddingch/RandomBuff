@@ -222,6 +222,10 @@ namespace RandomBuff.Render.CardRender
 
         public static Texture TextBack { get; private set; }
 
+        public static Color PositiveColor { get; } = Helper.GetRGBColor(27, 178, 196);
+        public static Color NegativeColor { get; } = Helper.GetRGBColor(183, 56, 73);
+        public static Color DualityColor { get; } = Helper.GetRGBColor(177, 170, 187);
+
         /// <summary>
         /// 卡牌渲染的贴图尺寸
         /// </summary>
