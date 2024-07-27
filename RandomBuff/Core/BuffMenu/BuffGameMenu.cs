@@ -190,17 +190,24 @@ namespace RandomBuff.Core.BuffMenu
             //    "SELECT_MODE", new Vector2(683 - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
             //    new Vector2(120, 40)));
 
+            float y = manager.rainWorld.screenSize.y - 100f;
             if (ModManager.JollyCoop)
+            {
                 page.subObjects.Add(jollyToggleConfigMenu = new SimpleButton(this, page, Translate("SHOW"), "JOLLY_TOGGLE_CONFIG",
-                    new Vector2(1056f, manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
+                    new Vector2(1056f, y), new Vector2(110f, 30f)));
+                y -= 40f;
+            }
             page.subObjects.Add(progressionMenu = new SimpleButton(this, page, BuffResourceString.Get("ProgressionMenu_Show"), "PROGRESSIONMENU_SHOW",
-                    new Vector2(1056f, manager.rainWorld.screenSize.y - 100f - 40f), new Vector2(110f, 30f)));
+                    new Vector2(1056f, y), new Vector2(110f, 30f)));
+            y -= 40f;
+
+            page.subObjects.Add(new SimpleButton(this, page, base.Translate("MANUAL"), "MANUAL", new Vector2(1056f, y), new Vector2(110f, 30f)));
 
 
             page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));
             testLabel.label.alignment = FLabelAlignment.Center;
             testLabel.label.color = MenuColor(MenuColors.White).rgb;
-            page.subObjects.Add(new SimpleButton(this, page, base.Translate("MANUAL"), "MANUAL", new Vector2(Custom.GetScreenOffsets()[1] - 150f, 695f), new Vector2(100f, 30f)));
+            
             //float restartTextWidth = SlugcatSelectMenu.GetRestartTextWidth(CurrLang);
             //float restartTextOffset = SlugcatSelectMenu.GetRestartTextOffset(CurrLang);
 
