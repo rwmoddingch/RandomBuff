@@ -11,7 +11,10 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.Normal;
 
-        public NormalGachaTemplate() {}
+        public NormalGachaTemplate()
+        {
+            TemplateDescription = "GachaTemplate_Desc_Normal";
+        }
 
         public NormalGachaTemplate(bool noPick)
         {
