@@ -38,7 +38,7 @@ namespace TemplateGains
                 if (item != null && item.state.alive && item?.realizedObject is Player player)
                 {
                     player.Stun(200);
-                    var explotion = new Explosion(player.room, player, player.mainBodyChunk.pos, 10, 200, 30f, 1.8f, 80, 20, player, 10, 0, 1);
+                    var explotion = new DamageOnlyExplosion(player.room, player, player.mainBodyChunk.pos, 10, 200, 10f, 1.8f, 80, 20, player, 10, 0, 1, game.Players.ToArray());
                     player.room.AddObject(explotion);
 
                     var vector = player.mainBodyChunk.pos;
