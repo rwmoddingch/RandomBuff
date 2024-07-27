@@ -13,7 +13,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public SandboxGachaTemplate()
         {
-            NShow = NSelect = NCount = PSelect = PCount = PShow = 0;
+            TemplateDescription = "GachaTemplate_Desc_Sandbox";
             PocketPackMultiply = 0;
             ExpMultiply = 0f;
         }
@@ -21,47 +21,17 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public override void NewGame()
         {
-            CurrentPacket = new CachaPacket() { positive = (SPSelect, SPShow, SPCount), negative = (SNSelect, SNShow, SNCount) };
+            CurrentPacket = new CachaPacket() {positive = (0, 0, 0), negative = (0, 0, 0) };
         }
 
         public override void SessionEnd(RainWorldGame game)
         {
-            CurrentPacket = new CachaPacket() { positive = (PSelect, PShow, PCount), negative = (NSelect, NShow, NCount) };
+            CurrentPacket = new CachaPacket() { positive = (0, 0, 0), negative = (0, 0, 0) };
             BuffPlugin.LogDebug($"Session End: {CurrentPacket.positive}, {CurrentPacket.negative}");
         }
 
 
-        public override bool NeedRandomStart => RandomStart;
+        public override bool NeedRandomStart => false;
 
-        [JsonProperty]
-        public int PSelect = 0;
-        [JsonProperty]
-        public int PShow = 0;
-        [JsonProperty]
-        public int PCount = 0;
-
-        [JsonProperty]
-        public int NSelect = 0;
-        [JsonProperty]
-        public int NShow = 0;
-        [JsonProperty]
-        public int NCount = 0;
-
-        [JsonProperty]
-        public int SPSelect = 0;
-        [JsonProperty]
-        public int SPShow = 0;
-        [JsonProperty]
-        public int SPCount = 0;
-
-        [JsonProperty]
-        public int SNSelect = 0;
-        [JsonProperty]
-        public int SNShow = 0;
-        [JsonProperty]
-        public int SNCount = 0;
-
-        [JsonProperty]
-        public bool RandomStart = false;
     }
 }

@@ -13,6 +13,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using UnityEngine;
 using RandomBuff.Render.UI.Component;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -125,8 +126,11 @@ namespace RandomBuff.Core.SaveData
                         BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                         if (BuffFile.Instance.LoadState == BuffFile.BuffFileLoadState.AfterLoad)
                         {
-                            BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
-                            GetGameSetting(name).inGameRecord.AddCard(id.GetStaticData().BuffType);
+                            if (GetGameSetting(name).gachaTemplate is not SandboxGachaTemplate)
+                            {
+                                BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
+                                GetGameSetting(name).inGameRecord.AddCard(id.GetStaticData().BuffType);
+                            }
                         }
                         BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
                         allDatas[name].Add(id, data);

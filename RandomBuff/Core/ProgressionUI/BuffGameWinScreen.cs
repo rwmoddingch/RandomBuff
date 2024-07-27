@@ -13,6 +13,7 @@ using RandomBuff.Render.UI.Component;
 using RandomBuff.Render.UI;
 using Menu.Remix;
 using Menu.Remix.MixedUI;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.ProgressionUI;
 using RandomBuff.Render.UI.Notification;
 using RandomBuff.Core.Progression;
@@ -120,16 +121,19 @@ namespace RandomBuff.Core.StaticsScreen
             pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(middleX - width / 2f, 200f), winPackage, width));
             scoreCaculator.Container.MoveToFront();
 
-            BuffPlayerData.Instance.SlotRecord.RunCount++;
-            if (winPackage.missionId != null)
-                BuffPlayerData.Instance.finishedMission.Add(winPackage.missionId);
+            if (BuffPoolManager.Instance.GameSetting.gachaTemplate is not SandboxGachaTemplate)
+            {
+                BuffPlayerData.Instance.SlotRecord.RunCount++;
+
+                if (winPackage.missionId != null)
+                    BuffPlayerData.Instance.finishedMission.Add(winPackage.missionId);
 
 
-            //TODO:在这里完成结算数据上传到BuffPlayerData，并在之后调用以下函数
-            newFinishedQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
-            foreach (var quest in newFinishedQuests)
-                BuffPlugin.Log($"accomplish quest: {quest.QuestName}");
-            //TODO:新任务完成的提示
+                newFinishedQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
+                foreach (var quest in newFinishedQuests)
+                    BuffPlugin.Log($"accomplish quest: {quest.QuestName}");
+
+            }
 
             manager.rainWorld.progression.WipeSaveState(winPackage.saveState.saveStateNumber);
 

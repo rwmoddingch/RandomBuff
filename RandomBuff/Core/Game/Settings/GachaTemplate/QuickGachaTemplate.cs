@@ -19,6 +19,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public QuickGachaTemplate()
         {
+            TemplateDescription = "GachaTemplate_Desc_Quick";
             ExpMultiply = 1.2f;
             PocketPackMultiply = 0;
         }

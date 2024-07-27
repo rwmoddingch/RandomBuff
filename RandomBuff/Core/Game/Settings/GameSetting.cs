@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using RWCustom;
 using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings
@@ -48,13 +49,6 @@ namespace RandomBuff.Core.Game.Settings
 
         public InGameRecord inGameRecord = new ();
 
-        public GameSetting(SlugcatStats.Name name,string gachaTemplate = "Normal", string startPos = null)
-        {
-            LoadTemplate(gachaTemplate);
-            this.name = name;
-            this.gachaTemplate.ForceStartPos = startPos;
-        }
-
         public bool Win
         {
             get
@@ -68,6 +62,17 @@ namespace RandomBuff.Core.Game.Settings
         public float Difficulty { get; private set; } = 0.5f;
 
 
+        public string Description => Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDescription,true))
+                                     + "\n\n" + Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDetail, true));
+
+
+        public GameSetting(SlugcatStats.Name name, string gachaTemplate = "Normal", string startPos = null)
+        {
+            LoadTemplate(gachaTemplate);
+            this.name = name;
+            this.gachaTemplate.ForceStartPos = startPos;
+        }
+
         public void NewGame()
         {
             gachaTemplate.NewGame();
@@ -80,6 +85,8 @@ namespace RandomBuff.Core.Game.Settings
                 game.GetStorySession.characterStatsJollyplayer[0].name = name;
                 game.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = name;
             }
+
+            //BuffPlugin.LogDebug($"GameSetting Desc: {Description}");
             name ??= game.StoryCharacter;
             gachaTemplate.EnterGame(game);
 

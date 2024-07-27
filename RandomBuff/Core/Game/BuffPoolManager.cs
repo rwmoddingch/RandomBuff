@@ -5,6 +5,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
@@ -200,8 +201,13 @@ namespace RandomBuff.Core.Game
             {
                 BuffPlugin.Log($"Already contains BuffData {id} in {Game.StoryCharacter} game, stack More");
                 cycleDatas[id].Stack();
-                BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
-                record.AddCard(id.GetStaticData().BuffType);
+
+                if (GameSetting.gachaTemplate is not SandboxGachaTemplate)
+                {
+                    BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
+                    record.AddCard(id.GetStaticData().BuffType);
+                }
+
                 return cycleDatas[id];
             }
 
@@ -409,6 +415,7 @@ namespace RandomBuff.Core.Game
                 buffDictionary.Add(id, buff);
                 buffList.Add(buff);
                 BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.InGame);
+                BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                 return buff;
             }
             catch (Exception e)
@@ -436,8 +443,14 @@ namespace RandomBuff.Core.Game
                 }
 
                 BuffHud.Instance.TriggerCard(buff.ID);
-                record.ActiveCard();
-                BuffPlayerData.Instance.SlotRecord.ActiveCard();
+
+                if (GameSetting.gachaTemplate is not SandboxGachaTemplate)
+                {
+                    record.ActiveCard();
+                    BuffPlayerData.Instance.SlotRecord.ActiveCard();
+                }
+
+
                 if (re)
                 {
                     return UnstackBuff(buff.ID);

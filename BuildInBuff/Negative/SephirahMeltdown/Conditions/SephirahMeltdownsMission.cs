@@ -85,6 +85,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public SephirahMeltdownsTemplate()
         {
+            TemplateDescription = "GachaTemplate_Desc_SephirahMeltdowns";
             PocketPackMultiply = 0;
             ExpMultiply *= 1.5f;
         }
@@ -98,7 +99,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 fadeInTime = 1f,
                 roomsRange = -1,
                 cyclesRest = 0,
-                volume = 0.2f,
+                volume = 0.13f,
                 prio = 10f,
                 stopAtDeath = false,
                 stopAtGate = false,

@@ -99,6 +99,25 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
 
 
+        /// <summary>
+        /// 当前抽卡模版的详情信息
+        /// </summary>
+        public virtual string TemplateDetail
+        {
+            get
+            {
+                if(PocketPackMultiply == 0)
+                    return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "\n", ExpMultiply);
+                return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base") + "\n", ExpMultiply,
+                    PocketPackMultiply);
+            }
+        }
+
+        /// <summary>
+        /// 当前抽卡模版的通用介绍
+        /// </summary>
+        [JsonProperty]
+        public string TemplateDescription { get; set; }
 
         /// <summary>
         /// 当前的抽卡信息
