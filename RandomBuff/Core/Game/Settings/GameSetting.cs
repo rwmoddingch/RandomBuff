@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using RWCustom;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings
@@ -177,7 +178,9 @@ namespace RandomBuff.Core.Game.Settings
 
             var data = BuffConfigManager.GetTemplateData(name);
             gachaTemplate = (GachaTemplate.GachaTemplate)Activator.CreateInstance(BuffRegister.GetTemplateType(data.Id).Type);
-            gachaTemplate.ExpMultiply = data.ExpMultiply;
+            if(Mathf.Abs(data.ExpMultiply - (-1)) > 0.02f)
+                gachaTemplate.ExpMultiply = data.ExpMultiply;
+
             foreach (var pair in data.datas)
             {
                 try

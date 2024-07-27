@@ -10,5 +10,6 @@
     "SNSelect" : 2,
     "SNShow" : 5,
     "SNCount" : 1,
+    "ExpMultiply":1.5,
     "RandomStart" : true
 }

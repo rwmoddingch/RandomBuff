@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI.Component
@@ -140,13 +141,13 @@ namespace RandomBuff.Render.UI.Component
                 mainButton.text = LabelTest.TrimText(allTrackers[currentTracker].typeName, textBoxWidth - 40f, true, false) + $" x{allTrackers[currentTracker].count}";
                 textBox.size = new Vector2(textBoxWidth, textBoxHeight);
 
-                nextButton.pos = new Vector2(ScreenSize.x, ScreenSize.y - 50f - textBoxHeight);
+                nextButton.pos = new Vector2(ScreenSize.x, Mathf.Max(ScreenSize.y - 50f - textBoxHeight, 50));
                 nextButton.size = new Vector2(smallButtonWidth, 50f);
 
-                prevButton.pos = new Vector2(ScreenSize.x - smallButtonWidth, ScreenSize.y - 50f - textBoxHeight);
+                prevButton.pos = new Vector2(ScreenSize.x - smallButtonWidth, Mathf.Max(ScreenSize.y - 50f - textBoxHeight, 50));
                 prevButton.size = new Vector2(smallButtonWidth, 50f);
 
-                toggleTextButton.pos = new Vector2(ScreenSize.x - smallButtonWidth * 2f, ScreenSize.y - 50f - textBoxHeight);
+                toggleTextButton.pos = new Vector2(ScreenSize.x - smallButtonWidth * 2f, Mathf.Max(ScreenSize.y - 50f - textBoxHeight, 50));
                 toggleTextButton.size = new Vector2(smallButtonWidth, 50f);
 
 
