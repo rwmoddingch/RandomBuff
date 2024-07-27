@@ -30,6 +30,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             BuffRegister.RegisterBuff<TipherethBuff, TipherethBuffData, TipherethHook>(TipherethBuffData.Tiphereth);
             BuffRegister.RegisterBuff<YesodBuff, YesodBuffData, YesodBuff>(YesodBuffData.Yesod);
             BuffRegister.RegisterBuff<BinahBuff, BinahBuffData, BinahHook>(BinahBuffData.Binah);
+            BuffRegister.RegisterBuff<AyinBuff, AyinBuffData, AyinHook>(AyinBuffData.Ayin);
+
 
         }
 
@@ -44,6 +46,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 bundle.LoadAsset<Shader>("BinahWave")));
             Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.Bar", FShader.CreateShader("SephirahMeltdownEntry.Bar",
                 bundle.LoadAsset<Shader>("BinahBar")));
+            Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.LevelColorRotation", FShader.CreateShader("SephirahMeltdownEntry.LevelColorRotation",
+                bundle.LoadAsset<Shader>("LevelColorRotation")));
             Futile.atlasManager.LoadAtlas(Path.Combine(ChesedBuffData.Chesed.GetStaticData().AssetPath, "ChesedTex"));
             Futile.atlasManager.LoadAtlas(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahTex"));
 

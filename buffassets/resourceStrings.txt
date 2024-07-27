@@ -109,9 +109,9 @@ GachaTemplate_Desc_Quick|No card draws; a card is randomly added every 30 second
 GachaTemplate_Desc_Sandbox|No card draws; cards can be freely added or removed, with no rewards given.
 GachaTemplate_Desc_Survival|Except for the initial card draw, only negative or duality cards are drawn.
 GachaTemplate_Desc_SephirahMeltdowns|Every four rounds constitute a stage. At the start of each stage, a specific negative card is obtained, and at the end of the stage, two positive cards can be drawn.
-GachaTemplate_Detail_Base|Experience multiplier: {0}, Initial draw multiplier: {1}
-GachaTemplate_Detail_Base_NoFreePick|Experience multiplier: {0}, No initial draw
-GachaTemplate_Detail_Normal|Positive card draws: {0}, Negative or duality card draws: {1}
+GachaTemplate_Detail_Base|Experience multiplier: {0}<LINE>Initial draw multiplier: {1}
+GachaTemplate_Detail_Base_NoFreePick|Experience multiplier: {0}<LINE>No initial draw
+GachaTemplate_Detail_Normal|<GachaPositive>Positive card draws: {0}<LINE><GachaNonPositive>Negative or duality card draws: {1}
 
 //BuffCondition
 DisplayName_Achievement|Earn {0} passage
@@ -130,6 +130,7 @@ DisplayName_Battery|Install the Pebbles core to moon
 DisplayName_MeltDownBinah|Defeat An Arbiter
 DisplayName_Extermination|Kill {0} ceatures with {1}
 DisplayName_Score|Earn {0} points from creature kills
+DisplayName_TreeOfLight|Collect a full amount of energy (food)
 
 //BuffCondition_BuffTypes
 all types|all types

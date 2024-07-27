@@ -69,6 +69,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             BuffRegister.RegisterCondition<MeltdownHuntCondition>(MeltdownHuntCondition.MeltdownHunt, "Meltdown Hunt",true);
             BuffRegister.RegisterCondition<BinahCondition>(BinahCondition.Binah, "Binah", true);
+            BuffRegister.RegisterCondition<TreeOfLightCondition>(TreeOfLightCondition.TreeOfLight, "TreeOfLight", true);
 
             MissionRegister.RegisterMission(SephirahMeltdowns, new SephirahMeltdownsMission());
             BuffRegister.RegisterGachaTemplate<SephirahMeltdownsTemplate>(SephirahMeltdownsTemplate.SephirahMeltdowns);
@@ -94,21 +95,25 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             if (game.GetStorySession.saveState.cycleNumber == 4)
                 BuffUtils.Log("SephirahMeltdown", "Add bur-pursued at 4 cycles");
-            MusicEvent musicEvent = new MusicEvent
+            if (game.GetStorySession.saveState.cycleNumber != 12)
             {
-                fadeInTime = 1f,
-                roomsRange = -1,
-                cyclesRest = 0,
-                volume = 0.13f,
-                prio = 10f,
-                stopAtDeath = false,
-                stopAtGate = false,
-                loop = true,
-                maxThreatLevel = 10,
-                songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
+                MusicEvent musicEvent = new MusicEvent
+                {
+                    fadeInTime = 1f,
+                    roomsRange = -1,
+                    cyclesRest = 0,
+                    volume = 0.13f,
+                    prio = 10f,
+                    stopAtDeath = true,
+                    stopAtGate = false,
+                    loop = true,
+                    maxThreatLevel = 10,
+                    songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
 
-            };
-            game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+                };
+                game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+            }
+
 
             On.Music.MusicPlayer.GameRequestsSong += MusicPlayer_GameRequestsSong;
             base.EnterGame(game);
@@ -132,6 +137,21 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
                 new CachaPacket() { negative = (0, 0, 0), positive = (2, 6, 1) } : new CachaPacket();
+            if (game.GetStorySession.saveState.cycleNumber == 11 &&
+                BuffPoolManager.Instance.GameSetting.conditions.Count(i => !i.Finished) == 1)
+            {
+                BuffUtils.Log("SephirahMeltdown", "Add Final Test");
+                BuffPoolManager.Instance.GameSetting.conditions.RemoveAll(i => i is DeathCondition);
+                BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(game.session.characterStats));
+                AyinBuffData.Ayin.CreateNewBuff();
+            }
+            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            {
+                fadeOutTime = 1,
+                prio = 20,
+                songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
+                type = StopMusicEvent.Type.AllSongs
+            });     
             On.Music.MusicPlayer.GameRequestsSong -= MusicPlayer_GameRequestsSong;
         }
 

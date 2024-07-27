@@ -62,8 +62,8 @@ namespace RandomBuff.Core.Game.Settings
         public float Difficulty { get; private set; } = 0.5f;
 
 
-        public string Description => Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDescription,true))
-                                     + "\n\n" + Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDetail, true));
+        public string Description => Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDetail, true)) + "\n" +
+                                     Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDescription, true));
 
 
         public GameSetting(SlugcatStats.Name name, string gachaTemplate = "Normal", string startPos = null)
