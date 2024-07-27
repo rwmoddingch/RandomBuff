@@ -1688,6 +1688,13 @@ namespace RandomBuff.Core.BuffMenu
             Container.RemoveChild(node);
         }
 
+        public void SetPosition(FNode node, Vector2 position)
+        {
+            if (!nodes.Contains(node))
+                return;
+            setPositions[node] = position;
+        }
+
         public override void Update()
         {
             base.Update();

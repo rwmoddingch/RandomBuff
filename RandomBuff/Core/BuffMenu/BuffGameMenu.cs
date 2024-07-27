@@ -24,6 +24,7 @@ using RandomBuff.Core.ProgressionUI;
 using RandomBuff.Render.UI.Component;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.BuffMenu.Manual;
+using RandomBuff.Core.Game.Settings;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -44,6 +45,7 @@ namespace RandomBuff.Core.BuffMenu
         public RandomBuffFlag flag;
 
         NotificationManager testNotification;
+        public BuffExtraInfoPage extraInfoPage;
 
         internal BuffGameMenuSlot menuSlot;
         internal SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
@@ -96,6 +98,7 @@ namespace RandomBuff.Core.BuffMenu
             flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1200f, 500f));
             menuSlot.SetupBuffs(slugNameOrders);
             testNotification = new NotificationManager(this, container, 4);
+            
             pages = new List<Page>()
             {
 
@@ -103,7 +106,7 @@ namespace RandomBuff.Core.BuffMenu
                 new(this, null, "GameDetailPage", 1),
                 new (this, null, "WawaSlugcatPage", 2),
                 new BuffProgressionPage(this, null, 3),
-                testNotification
+                testNotification,
             };
            
             for (int i = 0; i < slugNameOrders.Count; i++)
@@ -118,10 +121,14 @@ namespace RandomBuff.Core.BuffMenu
             continueDetailPage.SetShow(false);
             newGameDetailPage.SetShow(false);
 
+            extraInfoPage = new BuffExtraInfoPage(this, null, "ExtraInfoPage", pages.Count);
+            pages.Add(extraInfoPage);
+
             foreach (var page in pages)
                 page.mouseCursor?.BumToFront();
 
             UpdateSlugcatAndPage();
+
 
             FSprite black = new FSprite("pixel") { 
                 color = Color.black, 
@@ -428,6 +435,10 @@ namespace RandomBuff.Core.BuffMenu
             {
                 (pages[3] as BuffProgressionPage).ShowProgressionPage();
             }
+            else if(message == "EXTRAINFOPAGE_SHOW")
+            {
+                ShowExtraInfo();
+            }
         }
 
         float testDifficulty;
@@ -527,32 +538,98 @@ namespace RandomBuff.Core.BuffMenu
 
             if(Input.GetKeyDown(KeyCode.N) && BuffPlugin.DevEnabled)
             {
-                testNotification.NewRewardNotification(QuestUnlockedType.Cosmetic, "FireWork");
-                testNotification.NewRewardNotification(QuestUnlockedType.Card, "FlameThrower");
-                testNotification.NewRewardNotification(QuestUnlockedType.Card, "DivingBeing");
+                TestFunction();
             }
             
-            if (RWInput.CheckPauseButton(0) && !modeSelectPage.Show && !newGameDetailPage.Show &&
-                !missionPage.Show && manager.nextSlideshow == null && !lastPausedButtonClicked)
+            if (RWInput.CheckPauseButton(0) && manager.nextSlideshow == null && !lastPausedButtonClicked)
             {
                 EscLogic();
             }
             lastPausedButtonClicked = RWInput.CheckPauseButton(0);
         }
 
+        public void ShowExtraInfo()
+        {
+            BuffPlugin.Log($"{BuffDataManager.Instance.GetGameSetting(CurrentName).gachaTemplate.ToString()}");
+            var settingDescription = BuffDataManager.Instance.GetGameSetting(CurrentName).Description;
+            if (string.IsNullOrEmpty(settingDescription))
+                return;
+
+            string[] entries = Regex.Split(settingDescription, "<ENTRY>");
+            for(int i = 0;i < entries.Length - 1; i++)
+            {
+                if (string.IsNullOrEmpty(entries[i]))
+                    continue;
+
+                Color extraColor = Color.white;
+                if (entries[i].StartsWith("<Color="))
+                {
+                    entries[i] = Regex.Replace(entries[i], "<Color=", "");
+                    int firstAngleBracketIndex = entries[i].IndexOf('>');
+                    string hexVal = entries[i].Substring(0, firstAngleBracketIndex);
+                    extraColor = Custom.hexToColor(hexVal);
+                    entries[i] = entries[i].Substring(firstAngleBracketIndex + 1, entries[i].Length - firstAngleBracketIndex - 1);
+                }
+
+
+                if (entries[i].Contains("<GachaPositive>"))
+                {
+                    extraInfoPage.AppendGachaInfo(Regex.Replace(entries[i], "<GachaPositive>", ""), true);
+                    //BuffPlugin.Log($"Append gacha info positive");
+                }
+                else if (entries[i].Contains("<GachaNonPositive>"))
+                {
+                    extraInfoPage.AppendGachaInfo(Regex.Replace(entries[i], "<GachaNonPositive>", ""), false);
+                    //BuffPlugin.Log($"Append gacha info nonpositive");
+                }
+                else
+                    extraInfoPage.AppendInfoEntry(entries[i],color: extraColor);
+            }
+            extraInfoPage.SetMainInfo(entries.Last());
+            extraInfoPage.SetShow(true);
+        }
+
+        public void TestFunction()
+        {
+            if (extraInfoPage.Show)
+                extraInfoPage.EscLogic();
+            else
+            {
+                ShowExtraInfo();
+            }
+        }
+
         public void EscLogic()
         {
+            //BuffPlugin.Log($"{currentPage == 3}, {modeSelectPage.Show}, {missionPage.Show}, {newGameDetailPage.Show}");
+            string info = "";
             if(currentPage == 3)//progressionPage
+            {
+                info = "exit progression";
                 (pages[3] as BuffProgressionPage).EscLogic();
+            }
             else if (modeSelectPage.Show)
+            {
+                info = "exit modeSelect";
                 modeSelectPage.SetShow(false);
+            }
             else if (missionPage.Show)
+            {
+                info = "exit mission";
                 missionPage.EscLogic();
+            }
             else if (newGameDetailPage.Show)
+            {
+                info = "exit newGame";
                 newGameDetailPage.EscLogic();
+            }
             else
+            {
+                info = "exit";
                 manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+            }
 
+            //BuffPlugin.Log(info);
             PlaySound(SoundID.MENU_Switch_Page_Out);
         }
 

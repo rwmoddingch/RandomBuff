@@ -143,6 +143,8 @@ namespace RandomBuff
 
                     Application.logMessageReceived += Application_logMessageReceived;
 
+                    LoadUIAssets();
+
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();
                     BuffResourceString.Init();
@@ -322,6 +324,12 @@ namespace RandomBuff
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"       \t\t{m}\n");
             }
             UnityEngine.Debug.LogError(m);
+        }
+
+        internal static void LoadUIAssets()
+        {
+            Futile.atlasManager.LoadImage("buffassets/illustrations/cardpickicon");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/uilozenge");
         }
     }
 

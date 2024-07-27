@@ -111,9 +111,9 @@ GachaTemplate_Desc_Quick|无抽卡，每30秒随机添加一张卡牌，正面�
 GachaTemplate_Desc_Sandbox|无抽卡，可自由添加或删除卡牌，不会获得奖励
 GachaTemplate_Desc_Survival|除初始抽卡外，只抽取负面或中性卡牌
 GachaTemplate_Desc_SephirahMeltdowns|每四轮为一个阶段，每阶段开始时获得特定负面卡牌，阶段结束时可以抽取两张正面卡牌
-GachaTemplate_Detail_Base|经验倍率:{0}<LINE>初始抽卡倍率:{1}
-GachaTemplate_Detail_Base_NoFreePick|经验倍率:{0}<LINE>无初始抽卡
-GachaTemplate_Detail_Normal|<GachaPositive>正面抽卡数:{0}<LINE><GachaNonPositive>负面或中性抽卡数:{1}
+GachaTemplate_Detail_Base|<Color=FFC300>经验倍率:{0}<ENTRY>初始抽卡倍率:{1}
+GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>经验倍率:{0}<ENTRY>无初始抽卡
+GachaTemplate_Detail_Normal|<GachaPositive>正面抽卡数:{0}<ENTRY><GachaNonPositive>负面或中性抽卡数:{1}
 
 //BuffCondition
 DisplayName_Achievement|获取{0}通行证
