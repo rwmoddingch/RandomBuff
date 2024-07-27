@@ -235,7 +235,7 @@ namespace RandomBuff.Core.Game
         private BuffSlotTitle slotTitle;
         private CommmmmmmmmmmmmmpleteInGameSlot inGameSlot;
 
-        public bool NeedShowCursor => inGameSlot.NeedShowCursor;
+        public bool NeedShowCursor => inGameSlot.NeedShowCursor || (pocket?.Show ?? false);
 
         private Dictionary<BuffID, BuffHudPart> id2hudParts = new Dictionary<BuffID, BuffHudPart>();
         private List<BuffHudPart> hudParts = new List<BuffHudPart>();

@@ -536,7 +536,7 @@ namespace RandomBuff.Core.BuffMenu
             menuSlot.GrafUpdate(timeStacker);
             testNotification.GrafUpdate(timeStacker);
 
-            if(Input.GetKeyDown(KeyCode.N) && BuffPlugin.DevEnabled)
+            if(Input.GetKeyDown(KeyCode.N) /*&& BuffPlugin.DevEnabled*/)
             {
                 TestFunction();
             }
@@ -550,8 +550,12 @@ namespace RandomBuff.Core.BuffMenu
 
         public void ShowExtraInfo()
         {
-            BuffPlugin.Log($"{BuffDataManager.Instance.GetGameSetting(CurrentName).gachaTemplate.ToString()}");
-            var settingDescription = BuffDataManager.Instance.GetGameSetting(CurrentName).Description;
+            var gameSetting = (missionPage.Show)
+                ? BuffNewGameMissionPage.pickedMission.GameSetting
+                : BuffDataManager.Instance.GetGameSetting(CurrentName);
+         
+            
+            var settingDescription = gameSetting.Description;
             if (string.IsNullOrEmpty(settingDescription))
                 return;
 
@@ -593,7 +597,7 @@ namespace RandomBuff.Core.BuffMenu
         {
             if (extraInfoPage.Show)
                 extraInfoPage.EscLogic();
-            else
+            else if(newGameDetailPage.Show || continueDetailPage.Show || (missionPage.Show && BuffNewGameMissionPage.pickedMission != null))
             {
                 ShowExtraInfo();
             }
