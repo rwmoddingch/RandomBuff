@@ -15,11 +15,16 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public NormalGachaTemplate(bool noPick)
         {
+            TemplateDescription = "GachaTemplate_Desc_Normal";
+
             if (noPick)
             {
                 NShow = NSelect = NCount = PSelect = PCount = PShow = 0;
             }
         }
+
+        public override string TemplateDetail => base.TemplateDetail + string.Format(BuffResourceString.Get("GachaTemplate_Detail_Normal"),
+            PSelect * PCount, NSelect * NCount);
 
         public override void NewGame()
         {

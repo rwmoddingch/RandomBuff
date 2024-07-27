@@ -26,7 +26,7 @@ namespace HotDogGains.Positive
                      game.world, AbstractPhysicalObject.AbstractObjectType.DataPearl, null,
                      player.room.GetWorldCoordinate(player.DangerPos), game.GetNewID(), -1, -1, null,
                      new DataPearl.AbstractDataPearl.DataPearlType(ExtEnum<DataPearl.AbstractDataPearl.DataPearlType>.values.entries[Random.Range(0, ExtEnum<DataPearl.AbstractDataPearl.DataPearlType>.values.entries.Count)], false));
-
+                    game.AlivePlayers[0].Room.AddEntity(pearl);
                     pearl.RealizeInRoom();
                     pearl.realizedObject.firstChunk.vel += Custom.RNV() * Random.value * 20;
                 }

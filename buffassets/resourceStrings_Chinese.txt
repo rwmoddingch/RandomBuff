@@ -19,6 +19,7 @@ BuffMissionPage_Buffs|携带卡牌
 //BuffContinueGamePage
 BuffContinueGamePage_Restart|删除存档
 
+
 //CardSheetPage:
 CardSheetPage_Life_Countable|循环
 CardSheetPage_Life_Uncountable|永久
@@ -62,6 +63,9 @@ ProgressionMenu_Show|进度
 BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
 
+//BuffHUD
+BuffHUD_FreePick|选择初始卡牌（不多于{0}张）
+
 //BuffModeSelect
 Mode_Free|自由模式
 Mode_Mission|使命模式
@@ -101,6 +105,15 @@ BasicInGameBuffCardSlot_NoCardFocus|将鼠标移至一个卡牌上并单击鼠�
 BasicInGameBuffCardSlot_ExitHUD|<LINE>按下 <HUD_KEY> 来关闭 hud
 BasicInGameBuffCardSlot_BindKey|<LINE>按住 <KEYBINDER_KEY> 并同时按另一个按键来给 <BuffID> 绑定快捷键
 
+//GachaTemplate
+GachaTemplate_Desc_Normal|普通抽卡牌模式，轮回末可以进行抽卡
+GachaTemplate_Desc_Quick|无抽卡，每30秒随机添加一张卡牌，正面、负面中性交替
+GachaTemplate_Desc_Sandbox|无抽卡，可自由添加或删除卡牌，不会获得奖励
+GachaTemplate_Desc_Survival|除初始抽卡外，只抽取负面或中性卡牌
+GachaTemplate_Desc_SephirahMeltdowns|每四轮为一个阶段，每阶段开始时获得特定负面卡牌，阶段结束时可以抽取两张正面卡牌
+GachaTemplate_Detail_Base|经验倍率:{0}<LINE>初始抽卡倍率:{1}
+GachaTemplate_Detail_Base_NoFreePick|经验倍率:{0}<LINE>无初始抽卡
+GachaTemplate_Detail_Normal|<GachaPositive>正面抽卡数:{0}<LINE><GachaNonPositive>负面或中性抽卡数:{1}
 
 //BuffCondition
 DisplayName_Achievement|获取{0}通行证
@@ -119,7 +132,7 @@ DisplayName_Battery|将五块卵石的核心安装给仰望皓月
 DisplayName_MeltDownBinah|击败 Binah
 DisplayName_Extermination|使用{1}消灭 {0} 只生物
 DisplayName_Score|消灭生物获得{0}点分数
-
+DisplayName_TreeOfLight|集满能量（食物）
 
 //BuffCondition_BuffTypes
 all types|所有类型

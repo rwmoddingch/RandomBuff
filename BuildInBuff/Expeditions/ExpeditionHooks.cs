@@ -18,8 +18,10 @@ using Random = UnityEngine.Random;
 using System.Reflection.Emit;
 using BuiltinBuffs.Negative;
 using BuiltinBuffs.Negative.SephirahMeltdown;
+using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
 using MonoMod.Cil;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuffUtils.FutileExtend;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
@@ -37,10 +39,16 @@ namespace BuiltinBuffs.Expeditions
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
                 {
-                    //var all = ExpeditionProgression.burdenGroups.First().Value;
-                    //var id = new BuffID(all[Random.Range(0, all.Count)]);
-                    //id.CreateNewBuff();
-                    new BuffID("unl-agility").CreateNewBuff();
+                    ////BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(self.session.characterStats));
+                    ////AyinBuffData.Ayin.CreateNewBuff();
+                    ////self.Win(false);
+                    foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
+                    {
+                        if(con is FixedCycleCondition)
+                            continue;
+
+                        con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
+                    }
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))

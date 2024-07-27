@@ -59,7 +59,7 @@ namespace RandomBuff.Core.Game
                                 return;
                             foreach (var card in all)
                                 card.CreateNewBuff();
-                            pocket!.Destroy();
+                            pocket?.Destroy();
                             pocket = null;
                         }),
                     BuffCard.normalScale * 0.5f, new Vector2(400f, Custom.rainWorld.screenSize.y - 200),

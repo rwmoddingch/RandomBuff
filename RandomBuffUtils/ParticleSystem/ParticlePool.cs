@@ -31,7 +31,8 @@ namespace RandomBuffUtils.ParticleSystem
 
         public static void NewPool(this ParticleEmitter emitter)
         {
-            PoolDictionary.Add(emitter,new Queue<Particle>());
+            if(!PoolDictionary.ContainsKey(emitter))
+                PoolDictionary.Add(emitter,new Queue<Particle>());
         }
 
         public static void RecyclePool(this ParticleEmitter emitter)
