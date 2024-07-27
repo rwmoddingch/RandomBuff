@@ -69,6 +69,9 @@
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>..\include\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\include\UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\include\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>

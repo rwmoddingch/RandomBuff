@@ -171,7 +171,7 @@ namespace BuiltinBuffs.Negative
 
         private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
-            if (source.owner is Creature crit && modules.TryGetValue(crit, out _))
+            if (source?.owner is Creature crit && modules.TryGetValue(crit, out _))
                 damage = 0;
             orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
 
@@ -179,7 +179,7 @@ namespace BuiltinBuffs.Negative
 
         private static void Lizard_Violence(On.Lizard.orig_Violence orig, Lizard self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos onAppendagePos, Creature.DamageType type, float damage, float stunBonus)
         {
-            if (source.owner is Creature crit && modules.TryGetValue(crit, out _))
+            if (source?.owner is Creature crit && modules.TryGetValue(crit, out _))
                 damage = 0;
             orig(self,source,directionAndMomentum,hitChunk,onAppendagePos, type, damage, stunBonus);
         }

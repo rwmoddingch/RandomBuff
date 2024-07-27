@@ -140,6 +140,9 @@ namespace RandomBuff
                         LogWarning("Displayed all cards");
 
                     }
+
+                    Application.logMessageReceived += Application_logMessageReceived;
+
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();
                     BuffResourceString.Init();
@@ -221,7 +224,7 @@ namespace RandomBuff
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
-                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff 2024_07_25\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
+                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_07_27-2\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
                         {
                             Alignment = TMPro.TextAlignmentOptions.BottomLeft,
                             Pivot = new Vector2(0f, 0f),
@@ -242,11 +245,20 @@ namespace RandomBuff
             }
         }
 
+
+        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Exception)
+                ExceptionTracker.TrackExceptionNew(stackTrace,condition);
+            
+        }
+
         private static bool isLoaded = false;
         private static bool isPostLoaded = false;
         private static bool canAccessLog = true;
 
         internal static bool DevEnabled { get; private set; }
+
 
 
         /// <summary>

@@ -11,16 +11,13 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.SandBox;
 
-        public SandboxGachaTemplate() { }
-
-        public SandboxGachaTemplate(bool noPick)
+        public SandboxGachaTemplate()
         {
-            if (noPick)
-            {
-                NShow = NSelect = NCount = PSelect = PCount = PShow = 0;
-            }
+            NShow = NSelect = NCount = PSelect = PCount = PShow = 0;
+            PocketPackMultiply = 0;
             ExpMultiply = 0f;
         }
+
 
         public override void NewGame()
         {

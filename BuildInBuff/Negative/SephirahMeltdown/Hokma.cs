@@ -21,7 +21,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly BuffID Hokma = new BuffID(nameof(Hokma), true);
 
         public override BuffID ID => Hokma;
-        public int FramePreSecond => (int)Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 45, 85);
+        public int FramePreSecond => (int)Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 45, 70);
 
 
     }
@@ -78,21 +78,23 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static void HookOn()
         {
-            //new Hook(typeof(RainWorldGame).GetProperty(nameof(RainWorldGame.GamePaused)).GetGetMethod(),
-            //    typeof(HokmaHook).GetMethod("RainWorldGamePausedHook", BindingFlags.NonPublic | BindingFlags.Static));
+            new Hook(typeof(RainWorldGame).GetProperty(nameof(RainWorldGame.GamePaused)).GetGetMethod(),
+                typeof(HokmaHook).GetMethod("RainWorldGamePausedHook", BindingFlags.NonPublic | BindingFlags.Static));
             IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.Menu.PauseMenu.ctor += PauseMenu_ctor;
             On.Player.checkInput += Player_checkInput;
-            //IL.RainWorldGame.Update += RainWorldGame_Update;
-            //new Hook(typeof(RoomCamera).GetProperty(nameof(RoomCamera.roomSafeForPause)).GetGetMethod(),
-            //typeof(HokmaHook).GetMethod("RoomCameraRoomSafeForPauseHook", BindingFlags.NonPublic | BindingFlags.Static));
+            IL.RainWorldGame.Update += RainWorldGame_Update;
+            IL.RainWorldGame.GrafUpdate += RainWorldGame_Update;
+
+            new Hook(typeof(RoomCamera).GetProperty(nameof(RoomCamera.roomSafeForPause)).GetGetMethod(),
+            typeof(HokmaHook).GetMethod("RoomCameraRoomSafeForPauseHook", BindingFlags.NonPublic | BindingFlags.Static));
             count = 0;
         }
 
         private static void Player_checkInput(On.Player.orig_checkInput orig, Player self)
         {
             orig(self);
-            if (self.input[0].mp && !self.input[1].mp && (BinahBuff.Instance == null|| BinahBuff.Instance.Data.CycleUse <=3 ))
+            if ((self.input[0].mp && !self.input[1].mp && (BinahBuff.Instance == null|| BinahBuff.Instance.Data.CycleUse <=3 )) && self.abstractCreature.world.game.Players.Count == 1)
             {
                 BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
                     { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });
@@ -108,29 +110,30 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         }
 
 
-        //private static bool RoomCameraRoomSafeForPauseHook(Func<RoomCamera, bool> orig, RoomCamera self)
-        //{
-        //    return orig(self) && self.game.pauseMenu == null;
-        //}
+        private static bool RoomCameraRoomSafeForPauseHook(Func<RoomCamera, bool> orig, RoomCamera self)
+        {
+            return orig(self) && self.game.pauseMenu == null;
+        }
 
-        //private static void RainWorldGame_Update(ILContext il)
-        //{
-        //    ILCursor c = new ILCursor(il);
-        //    c.GotoNext(MoveType.After, i => i.MatchCall<RainWorldGame>("get_GamePaused"));
-        //    c.EmitDelegate<Func<bool, bool>>(b => false);
-        //}
+        private static void RainWorldGame_Update(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(MoveType.After, i => i.MatchCall<RainWorldGame>("get_GamePaused"));
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<bool,RainWorldGame,bool>>((b,game) => game.pauseMenu != null);
+        }
 
 
 
-        //private static bool RainWorldGamePausedHook(Func<RainWorldGame, bool> orig, RainWorldGame self)
-        //{
-        //    var re = orig(self);
-        //    return false;
-        //}
+        private static bool RainWorldGamePausedHook(Func<RainWorldGame, bool> orig, RainWorldGame self)
+        {
+            var re = orig(self);
+            return self.pauseMenu != null;
+        }
 
         private static void PauseMenu_ctor(On.Menu.PauseMenu.orig_ctor orig, Menu.PauseMenu self, ProcessManager manager, RainWorldGame game)
         {
-            if (BinahBuff.Instance == null || BinahBuff.Instance.Data.CycleUse <= 3)
+            if (BinahBuff.Instance == null || BinahBuff.Instance.Data.Health >= 0.25F)
             {
                 BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
                     { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });

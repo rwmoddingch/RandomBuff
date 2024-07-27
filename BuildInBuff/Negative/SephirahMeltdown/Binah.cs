@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
 using HUD;
 using MoreSlugcats;
@@ -48,6 +49,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     {
         public override BuffID ID => BinahBuffData.Binah;
         public bool needSpawnChain = true;
+        private MusicEvent turnOne;
+        private MusicEvent turnTwo;
 
         public const int MaxTime = 200;
 
@@ -75,22 +78,25 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 if(self.room != null)
                     self.room.AddObject(new BinahGuardBlackSmoke(self.room,self));
             }
-        }
 
-        public override void Destroy()
-        {
-            base.Destroy();
-            MyTimer.Reset();
-            foreach (var self in (BuffCustom.TryGetGame(out var game) ? game.Players : new List<AbstractCreature>())
-                     .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
+            turnOne = new MusicEvent
             {
-                self.slugcatStats.corridorClimbSpeedFac /= Fac;
-                self.slugcatStats.poleClimbSpeedFac /= Fac;
-                self.slugcatStats.runspeedFac /= Fac;
-            }
+                fadeInTime = 1f,
+                roomsRange = -1,
+                cyclesRest = 0,
+                prio = 9.9f,
+                volume = 0.2f,
+                stopAtDeath = false,
+                stopAtGate = false,
+                loop = true,
+                oneSongPerCycle = false,
+                maxThreatLevel = 10,
+                songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
 
-            BinahGlobalManager.DestroyNoDie();
+            };
+            game.rainWorld.processManager.musicPlayer.GameRequestsSong(turnOne);
         }
+
 
         private const float Fac = 0.85f;
 
@@ -101,7 +107,82 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             if (needSpawnChain)
                 needSpawnChain = !BinahGlobalManager.SpawnNewChain(game);
 
+            if (Data.Health < 0.75f && turnTwo == null)
+            {
+                turnTwo = new MusicEvent
+                {
+                    fadeInTime = 1f,
+                    roomsRange = -1,
+                    cyclesRest = 0,
+                    volume = 0.3f,
+                    prio = 12f,
+                    stopAtDeath = false,
+                    stopAtGate = false,
+                    loop = true,
+                    oneSongPerCycle = false,
+                    maxThreatLevel = 10,
+                    songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
+
+                };
+                game.rainWorld.processManager.musicPlayer.GameRequestsSong(turnTwo);
+
+            }
+
         }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            MyTimer.Reset();
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                foreach (var self in game.Players
+                    .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
+                {
+                    self.slugcatStats.corridorClimbSpeedFac /= Fac;
+                    self.slugcatStats.poleClimbSpeedFac /= Fac;
+                    self.slugcatStats.runspeedFac /= Fac;
+                }
+
+                if (BuffPoolManager.Instance.GameSetting.MissionId == SephirahMeltdownsMission.SephirahMeltdowns.value)
+                {
+                    turnOne = new MusicEvent
+                    {
+                        fadeInTime = 1f,
+                        roomsRange = -1,
+                        cyclesRest = 0,
+                        prio = 30f,
+                        volume = 0.2f,
+                        stopAtDeath = false,
+                        stopAtGate = false,
+                        loop = true,
+                        oneSongPerCycle = false,
+                        songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
+
+                    };
+
+                    //TODO:存在BUG
+                    game.GetStorySession.saveState.deathPersistentSaveData.songsPlayRecords.RemoveAll(i =>
+                        i.songName == $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong");
+                    game.rainWorld.processManager.musicPlayer.GameRequestsSong(turnOne);
+                }
+                else
+                {
+                    game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                    {
+                        fadeOutTime = 1,
+                        prio = 20,
+                        songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
+                        type = StopMusicEvent.Type.AllSongs
+                    });
+                }
+            }
+
+
+
+            BinahGlobalManager.DestroyNoDie();
+        }
+
 
         public BuffHudPart CreateHUDPart()
         {
@@ -466,6 +547,43 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             emitter.Die();
         }
     }
+    internal class BinahGuardRed : HudPart
+    {
+        private int counter = 0;
+        public BinahGuardRed(HUD.HUD hud) : base(hud)
+        {
+            sprite = new FSprite("Futile_White")
+            {
+                alpha = 0, color = Color.red, anchorX = 0, anchorY = 0, width = Custom.rainWorld.screenSize.x,
+                height = Custom.rainWorld.screenSize.y
+            };
+            hud.fContainers[1].AddChild(sprite);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            counter++;
+            if(counter == 80)
+                ClearSprites();
+        }
+
+        public override void Draw(float timeStacker)
+        {
+            base.Draw(timeStacker);
+            sprite.alpha = Mathf.Pow(Mathf.InverseLerp(0, 30, counter + timeStacker), 0.5f) *
+                           Mathf.Pow(Mathf.InverseLerp(80, 50, counter + timeStacker), 0.5f) *0.2f;
+        }
+
+        public override void ClearSprites()
+        {
+            base.ClearSprites();
+            sprite.RemoveFromContainer();
+            hud.parts.Remove(this);
+        }
+
+        private FSprite sprite;
+    }
 
     internal class BinahGuardModule
     {
@@ -487,7 +605,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             
             var forceDir = Vector2.zero;
             var centerPos = Vector2.Lerp(guard.bodyChunks[1].pos, guard.bodyChunks[2].pos, 0.5f);
-            foreach (var p in guard.room.PlayersInRoom.Where(i => !i.dead))
+            foreach (var p in guard.room.PlayersInRoom.Where(i => i != null && !i.dead))
             {
                 guard.room.AddObject(new BinahFairy(guard.room, centerPos,
                     Custom.DirVec(centerPos, p.DangerPos)));
@@ -600,8 +718,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                             AttackType = BinahAttackType.None;
                         }
                         else if (attackCounter % 80 == 1)
+                        {
                             BuffPostEffectManager.AddEffect(new Positive.SingleColorEffect(4, 1.7f, 1.25f, 0.75f,
                                 Custom.hexToColor("080203"), Custom.hexToColor("FF496A"), 0.7f));
+                            //ai.guard.room.game.cameras[0].hud.AddPart(new BinahGuardRed(ai.guard.room.game.cameras[0].hud));
+                        }
                         break;
                     default:
                         AttackType = BinahAttackType.None;
@@ -864,6 +985,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static void Init()
         {
+            needDelete = false;
             postEffect = null;
             ChainRoomIndices.Clear();
             DisplayChains.Clear();
@@ -987,9 +1109,13 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             else
                 name = Custom.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat;
 
-            BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
-            BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
-            BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
+            if (BuffPoolManager.Instance.GameSetting.MissionId != SephirahMeltdownsMission.SephirahMeltdowns.value)
+            {
+                BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
+                BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
+                BuffPicker.GetNewBuffsOfType(name, 1, BuffType.Positive)[0].BuffID.CreateNewBuff();
+            }
+
             postEffect?.Destroy();
             postEffect = null;
             OnBinahDie?.Invoke();
@@ -1465,9 +1591,12 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                             var index=  room.shortcutsIndex.IndexfOf(room.GetTilePosition(dir + center));
                             if (index != -1 && room.shortcuts[index].shortCutType != ShortcutData.Type.DeadEnd)
                             {
-
+                                var crit = FakeCreatureEntry.templates[
+                                    Random.Range(0, FakeCreatureEntry.templates.Length)];
+                                if (crit.type == CreatureTemplate.Type.RedCentipede)
+                                    crit = StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedLizard);
                                 AbstractCreature acreature = new AbstractCreature(room.world,
-                                    FakeCreatureEntry.templates[Random.Range(0, FakeCreatureEntry.templates.Length)],
+                                    crit,
                                     null, new WorldCoordinate(room.abstractRoom.index,0,0,index), room.world.game.GetNewID());
                              
                                 if (room.shortcuts[index].destinationCoord.room != -1 && room.shortcuts[index].destNode != -1)

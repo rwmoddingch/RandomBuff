@@ -73,6 +73,37 @@ namespace BuiltinBuffs.Positive
             On.Player.ctor += Player_ctor;
             On.Player.NewRoom += Player_NewRoom;
             On.Player.Update += Player_Update;
+            On.KingTusks.Update += KingTusks_Update;
+        }
+
+        private static void KingTusks_Update(On.KingTusks.orig_Update orig, KingTusks self)
+        {
+            orig(self);
+            foreach (var tusk in self.tusks)
+            {
+                if (tusk.mode == KingTusks.Tusk.Mode.ShootingOut)
+                {
+                    var shootPos = tusk.chunkPoints[0, 0] +
+                                   tusk.shootDir * (20 + Custom.LerpMap(tusk.modeCounter, 0f, 8f, 50f, 30f, 3f));
+                    foreach (var shield in self.vulture.room.updateList.OfType<PermanentShield>().Where(i => i.IsExisting))
+                    {
+                        if (Custom.DistLess(shield.CenterPos, shootPos,
+                                shield.Radius(shield.stackIndex,0)))
+                        {
+                            shield.ShowEffect(shootPos);
+                            var rnv = Custom.DirVec(shield.CenterPos, shootPos);
+                            tusk.chunkPoints[0, 2] += rnv * 20f;
+                            tusk.chunkPoints[1, 2] -= rnv * 20f;
+                            tusk.SwitchMode(KingTusks.Tusk.Mode.Dangling);
+                            tusk.room.ScreenMovement(shootPos, tusk.shootDir * 0.75f, 0.25f);
+                            tusk.room.PlaySound(SoundID.King_Vulture_Tusk_Bounce_Off_Terrain, tusk.chunkPoints[1,0]);
+                            break;
+                        }
+                    }
+                        
+                }
+
+            }
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -123,7 +154,7 @@ namespace BuiltinBuffs.Positive
     internal class PermanentShield : CosmeticSprite
     {
         Player owner;
-        int stackIndex;
+        public int stackIndex;
         int disappearCount;
         int emitterCount;
         float averageVoice;
@@ -138,13 +169,8 @@ namespace BuiltinBuffs.Positive
         float lastPush;
         float getToPush;
 
-        public bool IsExisting
-        {
-            get
-            {
-                return (disappearCount == 0);
-            }
-        }
+        private ParticleEmitter emitter;
+        public bool IsExisting => disappearCount == 0;
 
         public PermanentShield(Player player, int stackIndex, Room room)
         {
@@ -160,6 +186,8 @@ namespace BuiltinBuffs.Positive
             this.getToPush = 1f;
             this.emitterCount = 30;
         }
+
+        public Vector2 CenterPos => Center(0);
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
@@ -256,19 +284,32 @@ namespace BuiltinBuffs.Positive
                                 weapon.ChangeMode(Weapon.Mode.Free);
                                 weapon.SetRandomSpin();
                                 weapon.firstChunk.vel *= -0.2f;
-                                for (int num8 = 0; num8 < 5; num8++)
-                                {
-                                    owner.room.AddObject(new Spark(weapon.firstChunk.pos, Custom.RNV(), Color.white, null, 16, 24));
-                                }
-                                owner.room.AddObject(new Explosion.ExplosionLight(weapon.firstChunk.pos, 150f, 1f, 8, Color.white));
-                                owner.room.AddObject(new ShockWave(weapon.firstChunk.pos, 60f, 0.1f, 8, false));
-                                owner.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, weapon.firstChunk, false, 1f, 1.5f + Random.value * 0.5f);
-                                disappearCount = 1200;
+                                ShowEffect(weapon.firstChunk.pos);
                             }
                         }
                     }
                 }
             }
+            else
+            {
+                if (emitter != null)
+                {
+                    emitter.Die();
+                    emitter = null;
+                }
+            }
+        }
+
+        public void ShowEffect(Vector2 pos)
+        {
+            for (int num8 = 0; num8 < 5; num8++)
+            {
+                owner.room.AddObject(new Spark(pos, Custom.RNV(), Color.white, null, 16, 24));
+            }
+            owner.room.AddObject(new Explosion.ExplosionLight(pos, 150f, 1f, 8, Color.white));
+            owner.room.AddObject(new ShockWave(pos, 60f, 0.1f, 8, false));
+            owner.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, pos, 1f, 1.5f + Random.value * 0.5f);
+            disappearCount = 1200;
         }
 
         private void EmitterUpdate()
@@ -302,20 +343,12 @@ namespace BuiltinBuffs.Positive
                     else
                         return Mathf.Min(1f, p.alpha + 0.05f);
                 }));
-                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
-                {
-                    return p.setScaleXY * 4f * a * (1f - a);
-                }));
-                emitter.ApplyParticleModule(new PositionOverLife(emitter, (p, a) =>
-                {
-                    return (p.pos - emitter.pos).normalized * Radius(this.stackIndex, 0f) + emitter.pos;
-                }));
-                emitter.ApplyParticleModule(new RotationOverLife(emitter, (p, a) =>
-                {
-                    return Custom.VecToDeg(p.pos - emitter.pos);
-                }));
+                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) => p.setScaleXY * 4f * a * (1f - a)));
+                emitter.ApplyParticleModule(new PositionOverLife(emitter, (p, a) => (p.pos - emitter.pos).normalized * Radius(this.stackIndex, 0f) + emitter.pos));
+                emitter.ApplyParticleModule(new RotationOverLife(emitter, (p, a) => Custom.VecToDeg(p.pos - emitter.pos)));
 
                 ParticleSystem.ApplyEmitterAndInit(emitter);
+                this.emitter = emitter;
             }
         }
 
@@ -330,7 +363,7 @@ namespace BuiltinBuffs.Positive
             return vector + Custom.DirVec(vector, Vector2.Lerp(this.owner.bodyChunks[1].lastPos, this.owner.bodyChunks[1].pos, timeStacker)) * 5f;
         }
 
-        private float Radius(float ring, float timeStacker)
+        public float Radius(float ring, float timeStacker)
         {
             return (3f + ring + Mathf.Lerp(this.lastPush, this.push, timeStacker) - 0.5f * this.averageVoice) * Mathf.Lerp(this.lastExpand, this.expand, timeStacker) * 10f;
         }

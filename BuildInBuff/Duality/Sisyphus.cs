@@ -36,13 +36,13 @@ namespace HotDogGains.Duality
         private static void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
         {
             orig.Invoke(self, obj, graspUsed);
-            if (obj != null&&obj is Rock)
+            if (obj != null&&obj is Rock rock)
             {
                 RandomBuffUtils.BuffUtils.Log(SisyphusID, "SaveRoom and pos");
-                var rockData = (obj as Rock).SisyphusData();
-                rockData.saveRoom = obj.room;
-                rockData.savePos = obj.firstChunk.pos;
-                rockData.saveRegion = obj.room.world.regionState.regionName;
+                var rockData = rock.SisyphusData();
+                rockData.saveRoom = rock.room;
+                rockData.savePos = rock.firstChunk.pos;
+                rockData.saveRegion = rock.room.world.regionState.regionName;
             }
         }
 
@@ -50,7 +50,8 @@ namespace HotDogGains.Duality
         {
             Rock rock = self.grasps[grasp].grabbed as Rock;
             orig.Invoke(self, grasp, eu);
-            if (rock.SisyphusData().saveRoom!=null&&rock.SisyphusData().saveRegion==self.room.world.regionState.regionName)
+            if (rock?.SisyphusData().saveRoom != null &&
+                rock.SisyphusData().saveRegion == self.room.world.regionState.regionName)
             {
 
                 RandomBuffUtils.BuffUtils.Log(SisyphusID, "Warp rock and player");
@@ -59,8 +60,8 @@ namespace HotDogGains.Duality
                 Warp(rock, data.saveRoom, data.savePos);
                 SisyphusBuff.Instance.TriggerSelf(true);
 
-                
-                if (self.room.game.cameras!=null&& self.room.game.cameras.Length>0)
+
+                if (self.room.game.cameras != null && self.room.game.cameras.Length > 0)
                 {
                     var microphone = self.room.game.cameras[0].virtualMicrophone;
 
@@ -71,7 +72,8 @@ namespace HotDogGains.Duality
                             microphone.soundObjects[i].Destroy();
                         }
                     }
-                    microphone.PlaySound(Enums.Sounds.sisyphus, 0f, 1, 1);
+
+                    microphone.PlaySound(Enums.Sounds.sisyphus, 0f, 0.3f, 1);
 
                 }
             }

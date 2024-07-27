@@ -6,8 +6,8 @@
     "SPSelect" : 2,
     "SPShow" : 5,
     "SPCount" : 1,
-    "SNSelect" : 6,
-    "SNShow" : 10,
+    "SNSelect" : 2,
+    "SNShow" : 5,
     "SNCount" : 1,
     "RandomStart" : true
 }

@@ -85,7 +85,7 @@ namespace RandomBuff.Core.SaveData
             BuffPlugin.Log(str);
 
             foreach(var quest in GetAllCompleteQuests())
-                BuffPlugin.LogDebug($"BuffQuest: {quest}");
+                BuffPlugin.LogDebug($"BuffQuest: finished quest {quest}");
         }
 
         internal string ToStringData()

@@ -188,7 +188,15 @@ namespace RandomBuff.Cardpedia.PediaPage
             trigger = staticData.Triggerable ? BuffResourceString.Get("CardSheetPage_Stack_Triggerable") : BuffResourceString.Get("CardSheetPage_Stack_Untriggerable");
             description = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.Description;
             title = staticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage).info.BuffName;
-            infoDisplay.SetText(life, trigger, stack, description, "None");
+            var conflict = string.Empty;
+            foreach (var con in staticData.Conflict)
+            {
+                if (string.IsNullOrEmpty(conflict))
+                    conflict += con;
+                else
+                    conflict += $", {con}";
+            }
+            infoDisplay.SetText(life, trigger, stack, description, string.IsNullOrEmpty(conflict) ? "None" : conflict);
             ResetCardTexture(staticData.BuffID);
             //sheetManager.owner.configManager.OnCardPick(card);
             //textBoxManager.RefreshInformation(life, stack, trigger, description, title, card.ID);

@@ -64,14 +64,14 @@ namespace RandomBuffUtils
             {
                 foreach (var end in FileEnd)
                 {
-                    if (self.source.clip == null && self.piece.name.StartsWith("BUFF_") && File.Exists(
-                            AssetManager.ResolveFilePath(self.piece.name.Replace("BUFF_", "") +
+                    if (self.source.clip == null && self.trackName.StartsWith("BUFF_") && File.Exists(
+                            AssetManager.ResolveFilePath(self.trackName.Replace("BUFF_", "") +
                                                          end)))
                     {
                         self.isStreamed = true;
                         self.source.clip = AssetManager.SafeWWWAudioClip(
-                            "file://" + AssetManager.ResolveFilePath(self.piece.name.Replace("BUFF_", "")+end),
-                            false, true, end == ".ogg" ? AudioType.OGGVORBIS : AudioType.WAV);
+                            "file://" + AssetManager.ResolveFilePath(self.trackName.Replace("BUFF_", "")+end),
+                            false, true, end == ".ogg" ? AudioType.OGGVORBIS : AudioType.WAV); 
                     }
                 }
             }

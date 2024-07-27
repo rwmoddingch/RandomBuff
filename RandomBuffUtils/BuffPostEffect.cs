@@ -101,6 +101,10 @@ namespace RandomBuffUtils
             }
 
             Graphics.Blit(a, destination);
+
+            if(Futile.instance._cameraImage.texture != Futile.screen.renderTexture && Futile.instance._cameraImage.texture is RenderTexture render)
+                Graphics.Blit(a, render);
+
             RenderTexture.ReleaseTemporary(tmp);
         }
 

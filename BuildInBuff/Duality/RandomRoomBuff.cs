@@ -97,13 +97,18 @@ namespace BuiltinBuffs.Duality
                         else
                         {
                             var newRep = AbstractRoomRepresent.GetRepresentFromList(activeRoomRepresents, room);
-                            for (int j = 0; j < room.connections.Length; j++)
+                            //TODO:这是一个简易修改
+                            if (newRep != null)
                             {
-                                if (world.GetAbstractRoom(room.connections[j]) == matchRepreset.room)
-                                    newRep.connectionRepresents[j] = matchRepreset.room;
+                                for (int j = 0; j < room.connections.Length; j++)
+                                {
+                                    if (world.GetAbstractRoom(room.connections[j]) == matchRepreset.room)
+                                        newRep.connectionRepresents[j] = matchRepreset.room;
+                                }
+
+                                if (newRep.CurrentEmptyConnectionIndex == -1)
+                                    roomForConnect.Remove(newRep);
                             }
-                            if (newRep.CurrentEmptyConnectionIndex == -1)
-                                roomForConnect.Remove(newRep);
                         }
                     }
                     activeRoomRepresents.Remove(matchRepreset);
