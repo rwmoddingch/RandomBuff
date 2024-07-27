@@ -31,6 +31,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
     /// <summary>
     /// 负责控制游戏模式
     /// 基类
+    /// 只能用字段，不能用属性
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public abstract partial class GachaTemplate
@@ -117,7 +118,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         /// 当前抽卡模版的通用介绍
         /// </summary>
         [JsonProperty]
-        public string TemplateDescription { get; set; }
+        public string TemplateDescription = "";
 
         /// <summary>
         /// 当前的抽卡信息
