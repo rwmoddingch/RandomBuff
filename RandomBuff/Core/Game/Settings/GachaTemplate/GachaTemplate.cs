@@ -108,8 +108,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             get
             {
                 if(PocketPackMultiply == 0)
-                    return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "\n", ExpMultiply);
-                return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base") + "\n", ExpMultiply,
+                    return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "<ENTRY>", ExpMultiply);
+                return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base") + "<ENTRY>", ExpMultiply,
                     PocketPackMultiply);
             }
         }

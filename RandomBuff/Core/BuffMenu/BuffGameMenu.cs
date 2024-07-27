@@ -24,6 +24,7 @@ using RandomBuff.Core.ProgressionUI;
 using RandomBuff.Render.UI.Component;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.BuffMenu.Manual;
+using RandomBuff.Core.Game.Settings;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -434,6 +435,10 @@ namespace RandomBuff.Core.BuffMenu
             {
                 (pages[3] as BuffProgressionPage).ShowProgressionPage();
             }
+            else if(message == "EXTRAINFOPAGE_SHOW")
+            {
+                ShowExtraInfo();
+            }
         }
 
         float testDifficulty;
@@ -543,17 +548,54 @@ namespace RandomBuff.Core.BuffMenu
             lastPausedButtonClicked = RWInput.CheckPauseButton(0);
         }
 
+        public void ShowExtraInfo()
+        {
+            BuffPlugin.Log($"{BuffDataManager.Instance.GetGameSetting(CurrentName).gachaTemplate.ToString()}");
+            var settingDescription = BuffDataManager.Instance.GetGameSetting(CurrentName).Description;
+            if (string.IsNullOrEmpty(settingDescription))
+                return;
+
+            string[] entries = Regex.Split(settingDescription, "<ENTRY>");
+            for(int i = 0;i < entries.Length - 1; i++)
+            {
+                if (string.IsNullOrEmpty(entries[i]))
+                    continue;
+
+                Color extraColor = Color.white;
+                if (entries[i].StartsWith("<Color="))
+                {
+                    entries[i] = Regex.Replace(entries[i], "<Color=", "");
+                    int firstAngleBracketIndex = entries[i].IndexOf('>');
+                    string hexVal = entries[i].Substring(0, firstAngleBracketIndex);
+                    extraColor = Custom.hexToColor(hexVal);
+                    entries[i] = entries[i].Substring(firstAngleBracketIndex + 1, entries[i].Length - firstAngleBracketIndex - 1);
+                }
+
+
+                if (entries[i].Contains("<GachaPositive>"))
+                {
+                    extraInfoPage.AppendGachaInfo(Regex.Replace(entries[i], "<GachaPositive>", ""), true);
+                    //BuffPlugin.Log($"Append gacha info positive");
+                }
+                else if (entries[i].Contains("<GachaNonPositive>"))
+                {
+                    extraInfoPage.AppendGachaInfo(Regex.Replace(entries[i], "<GachaNonPositive>", ""), false);
+                    //BuffPlugin.Log($"Append gacha info nonpositive");
+                }
+                else
+                    extraInfoPage.AppendInfoEntry(entries[i],color: extraColor);
+            }
+            extraInfoPage.SetMainInfo(entries.Last());
+            extraInfoPage.SetShow(true);
+        }
+
         public void TestFunction()
         {
             if (extraInfoPage.Show)
                 extraInfoPage.EscLogic();
             else
             {
-                extraInfoPage.AppendGachaInfo("正面抽卡数 0", true)
-                   .AppendGachaInfo("负面或中性抽卡数 0", false)
-                   .AppendInfoEntry("经验倍率 1.5")
-                   .SetMainInfo("This is a really wawa test for extra info page :3")
-                   .SetShow(true);
+                ShowExtraInfo();
             }
         }
 
