@@ -271,6 +271,11 @@ namespace BuiltinBuffs.Duality
                 }
             }
 
+            if (self.animation == Player.AnimationIndex.VineGrab || self.animation == Player.AnimationIndex.AntlerClimb)
+            {
+                flapCoolDown = 15;
+            }
+
             if (self.canJump <= 0)
             {
                 if (flapDeg > 90f && flapDown == 0)
@@ -280,7 +285,7 @@ namespace BuiltinBuffs.Duality
 
                 if (self.wantToJump > 0 && flapCoolDown == 0)
                 {
-                    if (self.bodyMode != Player.BodyModeIndex.CorridorClimb && self.bodyMode != Player.BodyModeIndex.Swimming)
+                    if (self.bodyMode != Player.BodyModeIndex.CorridorClimb && self.bodyMode != Player.BodyModeIndex.Swimming && self.bodyMode != Player.BodyModeIndex.ClimbingOnBeam)
                     {
                         flapCoolDown = 15;
                         flapDown = 10;

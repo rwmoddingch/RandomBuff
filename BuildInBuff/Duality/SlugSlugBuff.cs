@@ -59,6 +59,11 @@ namespace BuiltinBuffs.Duality
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
+            if (!slugSlugModule.TryGetValue(self, out var slugslug))
+            {
+                slugSlugModule.Add(self, new SlugSlugModule(self));
+            }
+
             if (slugSlugModule.TryGetValue(self, out var module))
             {
                 if (module.mouthGrasp != null)
@@ -169,7 +174,7 @@ namespace BuiltinBuffs.Duality
             {
                 if (module.mouthGrasp != null && module.mouthGrasp.grabbed is IPlayerEdible)
                 {
-                    module.mouthGrasp.grabbed.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition());
+                    module.mouthGrasp.grabbed.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition() + camPos);
                 }
             }
         }
@@ -189,7 +194,7 @@ namespace BuiltinBuffs.Duality
             {
                 try
                 {
-                    mouthGrasp.Release();
+                    mouthGrasp?.Release();
                     mouthGrasp = null;
                 }
                 catch (Exception ex)
