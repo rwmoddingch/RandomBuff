@@ -29,7 +29,13 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                 rawData.Remove("Name");
                 data.Id = (GachaTemplateID)ExtEnumBase.Parse((typeof(GachaTemplateID)), rawData[loadState = "ID"].ToString(), true);
                 rawData.Remove("ID");
+                if (rawData.TryGetValue("ExpMultiply",out var obj))
+                {
+                    data.ExpMultiply = Convert.ToSingle(obj);
+                    rawData.Remove("ExpMultiply");
+                }
                 data.datas = rawData;
+
                 return true;
             }
             catch (Exception e)
@@ -49,7 +55,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public GachaTemplateID Id { get; private set; } = null;
 
-        public float ExpMultiply { get; private set; } = 1;
+        public float ExpMultiply { get; private set; } = -1;
 
         public Dictionary<string,object> datas = new ();
 

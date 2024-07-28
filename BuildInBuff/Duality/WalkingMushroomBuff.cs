@@ -102,10 +102,21 @@ namespace BuiltinBuffs.Duality
             }
         }
 
+        IntVector2 GetSafeStartPos(Mushroom self)
+        {
+            var tilePos = self.room.GetTilePosition(self.firstChunk.pos);
+            for (int i = 0; i < Custom.eightDirectionsAndZero.Length; i++)
+            {
+                if (!self.room.GetTile(Custom.eightDirectionsAndZero[i]+tilePos).Solid)
+                    return tilePos + Custom.eightDirectionsAndZero[i];
+            }
+            return tilePos;
+        }
+
         void FindNewGoalPos(Mushroom self)
         {
             IntVector2 goal = new IntVector2(Random.Range(0, self.room.Width), Random.Range(0, self.room.Height));
-            IntVector2 start = self.room.GetTilePosition(self.firstChunk.pos);
+            IntVector2 start = GetSafeStartPos(self);
 
             int i = 0;
             for (i = 0;i < 1000; i++)

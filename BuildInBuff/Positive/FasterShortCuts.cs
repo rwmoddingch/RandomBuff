@@ -123,10 +123,7 @@ namespace BuiltinBuffs.Positive
                             }
                         }
                     }
-                    else
-                    {
-                        self.transportVessels.RemoveAt(i);
-                    }
+                
                 }
             }
         }

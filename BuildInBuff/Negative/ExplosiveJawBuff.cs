@@ -31,7 +31,7 @@ namespace BuiltinBuffs.Negative
             UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos onAppendagePos,
             Creature.DamageType type, float damage, float stunBonus)
         {
-            if (hitChunk != null && hitChunk.index == 0 && directionAndMomentum != null &&
+            if (source?.owner is Spear && hitChunk != null && hitChunk.index == 0 && directionAndMomentum != null &&
                 self.HitHeadShield(directionAndMomentum.Value))
             {
                 Vector2 vector = hitChunk.pos;
