@@ -105,6 +105,7 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             On.SaveState.SessionEnded += SaveState_SessionEnded;
+            On.Creature.Violence += Creature_Violence;
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
@@ -145,6 +146,33 @@ namespace BuiltinBuffs.Duality
                 }
             }
             orig(self, game, survived, newMalnourished);
+        }
+
+        //电击抵抗
+        private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            UnityEngine.Vector2? newDirectionAndMomentum = directionAndMomentum;
+            float newDamage = damage;
+            float newStunBonus = stunBonus;
+
+            if (type == Creature.DamageType.Electric && self is Player player && JellyfishCatFeatures.TryGetValue(self as Player, out var jellyfishCat))
+            {
+                int i;
+                for (i = Mathf.FloorToInt(damage * 4f); i >= 4; i -= 4)
+                {
+                    (self as Player).AddFood(1);
+                }
+                while (i > 0)
+                {
+                    (self as Player).AddQuarterFood();
+                    i--;
+                }
+                float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
+                newDamage *= scale;
+                newStunBonus *= scale;
+                newDirectionAndMomentum *= scale;
+            }
+            orig(self, source, newDirectionAndMomentum, hitChunk, hitAppendage, type, newDamage, newStunBonus);
         }
 
         //双手位置
@@ -224,7 +252,7 @@ namespace BuiltinBuffs.Duality
         //玩家逐渐免疫蜈蚣的攻击
         private static void Centipede_Shock(On.Centipede.orig_Shock orig, Centipede self, PhysicalObject shockObj)
         {
-            int origStun = -1;
+            int origStun = 0;
             if (shockObj is Player &&
                JellyfishCatFeatures.TryGetValue(shockObj as Player, out var jellyfishCat))
             {
@@ -235,16 +263,18 @@ namespace BuiltinBuffs.Duality
 
             orig(self, shockObj);
 
-            if (shockObj is Player && origStun != -1 &&
+            if (shockObj is Player &&
                JellyfishCatFeatures.TryGetValue(shockObj as Player, out jellyfishCat))
             {
                 Player player = (Player)shockObj;
-                if (!jellyfishCat.ImmuneShock)
+                if (!jellyfishCat.ImmuneShock)//如果已经在死亡触发里消耗了ImmuneShock，则短暂眩晕
                     player.Stun(6);
-                else
+                else//否则，没有触发死亡，则加一点饱食度
+                {
                     jellyfishCat.ImmuneShock = false;
-                player.stun = Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
-                player.AddQuarterFood();
+                    player.AddQuarterFood();
+                }
+                player.stun = origStun + Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
             }
         }
         #endregion
@@ -276,7 +306,7 @@ namespace BuiltinBuffs.Duality
                     self.bodyChunks[1].pos -= addPos;
                 }
 
-                if (self.grabbedBy.Count > 0)
+                if (self.grabbedBy.Count > 0 && jellyfishCat.TryToAttack)
                 {
                     for (int i = 0; i < self.grabbedBy.Count; i++)
                     {
