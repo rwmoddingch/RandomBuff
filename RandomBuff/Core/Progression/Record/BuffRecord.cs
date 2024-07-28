@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Core.Progression.Record
 {
@@ -87,5 +88,12 @@ namespace RandomBuff.Core.Progression.Record
     {
         [JsonProperty]
         public int RunCount;
+
+        [JsonProperty]
+        public int InitPickCount
+        {
+            get => BuffConfigManager.GetFreePickCount(1);
+            set => _ = value;
+        }
     }
 }

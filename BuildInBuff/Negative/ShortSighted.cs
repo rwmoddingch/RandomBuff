@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative
         public static readonly BuffID ShortSighted = new BuffID(nameof(ShortSighted), true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<ShortSightedEntry>(ShortSighted);
+            BuffRegister.RegisterBuff<ShortSightedBuff,ShortSightedBuffData, ShortSightedEntry>(ShortSighted);
         }
 
         public static void HookOn()

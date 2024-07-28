@@ -97,6 +97,7 @@ totNegativeCard|获取的负面Buff数量：
 totDualityCard|获取的双向Buff数量：
 totTriggerCount|Buff触发的次数:
 RunCount|完成的游戏局数:
+InitPickCount|最大初始抽卡数:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
