@@ -849,13 +849,12 @@ namespace BuiltinBuffs.Positive
             foreach (var player in self.room.game.AlivePlayers.Select(i => i.realizedCreature as Player)
                                      .Where(i => i != null && i.graphicsModule != null))
             {
-                if (player == null || player.room == null)
-                    return false;
                 if (ColdGazeBuffEntry.ColdGazeFeatures.TryGetValue(player, out var coldGaze))
                 {
                     Vector2 headPos = (player.graphicsModule as PlayerGraphics).head.pos;
                     Vector2 LookDirection = coldGaze.LookDirection;
-                    if (Mathf.Abs(Custom.VecToDeg(self.mainBodyChunk.pos - headPos) - Custom.VecToDeg(LookDirection)) <= coldGaze.RangeAngle && //角度
+                    if (player != null && player.room != null &&
+                        Mathf.Abs(Custom.VecToDeg(self.mainBodyChunk.pos - headPos) - Custom.VecToDeg(LookDirection)) <= coldGaze.RangeAngle && //角度
                         Vector2.Dot(self.mainBodyChunk.pos - headPos, LookDirection) > 0 && //方向
                         Custom.DistLess(self.mainBodyChunk.pos, headPos, coldGaze.Radius(coldGaze.Level, 0f)) && //距离
                         (player.graphicsModule as PlayerGraphics).blink <= 0) //猫猫是否有睁眼

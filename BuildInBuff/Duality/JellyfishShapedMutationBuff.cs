@@ -141,6 +141,7 @@ namespace BuiltinBuffs.Duality
 
                     if ((BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData).dehydrationCycle == 2)
                         survived = false;
+                    BuffPlugin.Log("JellyfishShapedMutation DehydrationCycle: " + (BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData).dehydrationCycle);
                 }
             }
             orig(self, game, survived, newMalnourished);
@@ -1777,9 +1778,9 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.BigOneHand)
                 result = Player.ObjectGrabability.BigOneHand;
             else if (result == Player.ObjectGrabability.TwoHands)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
             else if (result == Player.ObjectGrabability.Drag)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
 
             return result;
         }
