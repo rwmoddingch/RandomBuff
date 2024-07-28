@@ -97,9 +97,20 @@ namespace BuiltinBuffs.Positive
     {
         public override BuffID ID => StormIsApproachingEntry.StormIsApproaching;
 
-        private bool hasUse = false;
 
-        public override bool Triggerable => !hasUse;
+        public StormIsApproachingBuff()
+        {
+            MyTimer = new DownCountBuffTimer((timer, game) =>
+            {
+                canTrigger = true;
+
+            }, 240, autoReset: false);
+            MyTimer.Paused = true;
+        }
+
+        public override bool Triggerable => canTrigger;
+
+        private bool canTrigger = true;
 
         public override bool Trigger(RainWorldGame game)
         {
@@ -110,11 +121,11 @@ namespace BuiltinBuffs.Positive
                 player = game.Players.FirstOrDefault(i => i.realizedCreature is Player && i.realizedCreature.room != null)?.realizedCreature as Player;
             if (player == null)
                 return false;
-
-            hasUse = true;
+            canTrigger = false;
 
             player.room.AddObject(new JudgmentCut(player.room, player));
-
+            MyTimer.Reset();
+            MyTimer.Paused = false;
             return false;
         }
     }
@@ -596,7 +607,7 @@ namespace BuiltinBuffs.Positive
 
             }
             else if (counter == 8 + delay + cut)
-                BuffPostEffectManager.AddEffect(new CutEffect(0, duringTime - cut / 40f,0.3f,0.03f));
+                BuffPostEffectManager.AddEffect(new CutEffect(0, duringTime - cut / 40f,0.3f,0.03f) { IgnoreGameSpeed = true, IgnorePaused = true });
             else if (counter == 8 + delay + cut + 10)
             {
                 player.SuperHardSetPosition(pos);

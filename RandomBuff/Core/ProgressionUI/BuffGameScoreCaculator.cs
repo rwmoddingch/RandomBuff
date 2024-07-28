@@ -75,6 +75,9 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 var unlock = MultiplayerUnlocks.SandboxUnlockForSymbolData(kill.Key).index;
 
+                if(unlock == -1)
+                    continue;
+
                 bool matched = false;
                 foreach(var element in killsAndCounts)
                 {

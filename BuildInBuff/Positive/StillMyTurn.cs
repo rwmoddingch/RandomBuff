@@ -63,7 +63,7 @@ namespace TemplateGains
         private static bool MyTurn_HitSomething(On.Spear.orig_HitSomething orig, Spear self, SharedPhysics.CollisionResult result, bool eu)
         {
             bool hit = orig.Invoke(self, result, eu);
-            if (hit && self.thrownBy is Player player) 
+            if (hit && self.thrownBy is Player player && !(self is ExplosiveSpear)) 
                 self.myTurnWeapon().CanWarp(player);
 
             return hit;
