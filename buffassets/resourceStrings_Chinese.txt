@@ -121,7 +121,7 @@ DisplayName_Achievement|获取{0}通行证
 DisplayName_Cycle|生存至少{0}个雨循环
 DisplayName_Card|获取{0}张{1}的buff卡
 DisplayName_Like|与{0}达到最高好感
-DisplayName_MeetSS_SL|在{0}循环内见到五块卵石和仰望皎月
+DisplayName_MeetSS_SL|在{0}循环内见到五块卵石和仰望皓月
 DisplayName_Gourmand|完成胖猫食谱
 DisplayName_Interval_OutRange|在{0}-{1}轮回内完成任务，当前隐藏
 DisplayName_FixCycle|在{0}轮回完成使命

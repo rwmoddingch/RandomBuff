@@ -332,7 +332,7 @@ namespace BuiltinBuffs.Positive
             {
                 for (int k = 0; k < this.room.abstractRoom.creatures.Count; k++)
                 {
-                    if (this.room.abstractRoom.creatures[k].realizedCreature != null)
+                    if (this.room.abstractRoom.creatures[k].realizedCreature != null && !room.abstractRoom.creatures[k].realizedCreature.inShortcut)
                     {
                         Creature creature = this.room.abstractRoom.creatures[k].realizedCreature;
 

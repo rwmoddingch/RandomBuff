@@ -50,7 +50,7 @@ namespace RandomBuff.Core.Game
 
             if (BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply) != 0)
             {
-                pocket = new CardPocket(BuffCore.GetAllBuffIds(), string.Format(
+                pocket = new CardPocket(new List<BuffID>(), string.Format(
                         BuffResourceString.Get("BuffHUD_FreePick"),
                         BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply)), (
                         (all, _, _) =>

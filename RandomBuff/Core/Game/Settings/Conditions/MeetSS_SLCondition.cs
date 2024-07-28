@@ -85,7 +85,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             if (meetSS && meetSL)
                 Finished = true;
-            return (Finished ? "" : $"({currentCycle}/{cycleRequirement})") + ((meetSS || meetSL) ? $"({(meetSL ? "SL" : "")} {(meetSS ? "SS" : "")})" : "");
+            return (Finished ? "" : $"({currentCycle}/{cycleRequirement})") + ((meetSS || meetSL) ? $"({(meetSL ? "Moon" : "")}{(meetSL && meetSS ? " " : "")}{(meetSS ? "FP" : "")})" : "");
         }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)

@@ -294,7 +294,7 @@ namespace BuiltinBuffs.Positive
             dir = new Vector2(player.flipDirection, 0);
             if (player.bodyMode == Player.BodyModeIndex.ZeroG)
                 dir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
-            emitter = new JudgmentGhostPeriodicEmitter(player, room, 8, 1, 20, 0.4f);
+            emitter = new JudgmentGhostPeriodicEmitter(player, room, 8, 1, 20, 0.4f); 
             room.AddObject(emitter);
     
         }
@@ -309,7 +309,8 @@ namespace BuiltinBuffs.Positive
                 room.AddObject(new LightningBolt(origPos - dir*15, player.DangerPos + dir *20, 
                     0, 2, 0.75f, 0.5f, 200f / 360f, true)
                 { intensity = 1f });
-                player.SuperHardSetPosition(new Vector2(100, 100000));
+                player.SuperHardSetPosition(origPos);
+
                 emitter.Destroy();
                 Destroy();
 
