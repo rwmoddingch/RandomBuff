@@ -35,6 +35,7 @@ using RandomBuffUtils.FutileExtend;
 using RandomBuff.Render.Quest;
 using System.Drawing;
 using Steamworks;
+using RandomBuff.Render.UI;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -143,7 +144,7 @@ namespace RandomBuff
 
                     Application.logMessageReceived += Application_logMessageReceived;
 
-                    LoadUIAssets();
+                    BuffUIAssets.LoadUIAssets();
 
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();
@@ -324,12 +325,6 @@ namespace RandomBuff
                 File.AppendAllText(AssetManager.ResolveFilePath("buffcore.log"), $"       \t\t{m}\n");
             }
             UnityEngine.Debug.LogError(m);
-        }
-
-        internal static void LoadUIAssets()
-        {
-            Futile.atlasManager.LoadImage("buffassets/illustrations/cardpickicon");
-            Futile.atlasManager.LoadImage("buffassets/illustrations/uilozenge");
         }
     }
 

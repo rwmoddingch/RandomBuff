@@ -36,13 +36,13 @@ namespace BuiltinBuffs.Duality
             BuffUtils.Log("ClusterBomb", $"{damage}");
             if(damage > 1f)
             {
-                int count = (int)Mathf.Clamp(damage * 4, 2, 20);
+                int count = (int)Mathf.Clamp(damage * 2, 2, 6);
                 
-                CreateClusterBombs(room, count, sourceObject, room.MiddleOfTile(room.GetTilePosition(pos)), lifeTime, rad * 0.8f, force * 0.5f, damage * 0.1f, stun * 0.5f, deafen * 0.5f, killTagHolder, killTagHolderDmgFactor, minStun * 0.5f, backgroundNoise * 0.5f);
+                CreateClusterBombs(room, count, sourceObject, room.MiddleOfTile(room.GetTilePosition(pos)), lifeTime, rad * 0.8f, force * 0.5f, damage * 0.1f, stun * 0.5f, deafen * 0.5f, killTagHolder, killTagHolderDmgFactor, minStun * 0.5f, backgroundNoise * 0.5f, Mathf.Lerp(1f, 2f, Mathf.InverseLerp(1f, 10f, damage)));
             }
         }
 
-        public static void CreateClusterBombs(Room room, int count, PhysicalObject sourceObject, Vector2 pos, int lifeTime, float rad, float force, float damage, float stun, float deafen, Creature killTagHolder, float killTagHolderDmgFactor, float minStun, float backgroundNoise)
+        public static void CreateClusterBombs(Room room, int count, PhysicalObject sourceObject, Vector2 pos, int lifeTime, float rad, float force, float damage, float stun, float deafen, Creature killTagHolder, float killTagHolderDmgFactor, float minStun, float backgroundNoise, float sizeFac)
         {
             var emitter = new ParticleEmitter(room);
 
@@ -68,7 +68,7 @@ namespace BuiltinBuffs.Duality
 
             emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
             emitter.ApplyParticleModule(new SetRandomPos(emitter, 0f));
-            emitter.ApplyParticleModule(new SetRandomScale(emitter, 4f, 5f));
+            emitter.ApplyParticleModule(new SetRandomScale(emitter, 4f * sizeFac, 5f * sizeFac));
             emitter.ApplyParticleModule(new SetRandomLife(emitter, 20, 120));
             emitter.ApplyParticleModule(new SetSphericalVelocity(emitter, force * 3, force * 3 + 1f));
             emitter.ApplyParticleModule(new ConstantAcc(emitter, new Vector2(0f, -9f)));

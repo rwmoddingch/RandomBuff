@@ -26,7 +26,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         private void Spear_Thrown(On.Spear.orig_Thrown orig, Spear self, Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             orig(self, thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
-            self.room?.AddObject(TailPool.GetMeteorTail(self,self.room));
+            
+            if(self.thrownBy is Player player && player.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+                self.room?.AddObject(TailPool.GetMeteorTail(self,self.room));
         }
 
         public override void StartGame(RainWorldGame game)

@@ -36,7 +36,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
             public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
             {
-                return new FateRainGraphicsModule();
+                if(module.Name == SlugcatStats.Name.White)
+                    return new FateRainGraphicsModule();
+                return null;
             }
 
         }

@@ -32,7 +32,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
     {
         public PlayerModulePart InitPart(PlayerModule module)
         {
-            return new SoapSlugModule();
+            if(module.Name == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)
+                return new SoapSlugModule();
+            return null;
         }
 
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)

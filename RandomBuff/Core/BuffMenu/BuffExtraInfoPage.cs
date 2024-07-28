@@ -182,6 +182,7 @@ namespace RandomBuff.Core.BuffMenu
             requestedMainInfo = string.Empty;
             requestedIcons.Clear();
             requestedInfos.Clear();
+            requestedIconColors.Clear();
 
             for(int i = 0;i < 2; i++)
             {
@@ -201,13 +202,13 @@ namespace RandomBuff.Core.BuffMenu
             menu.currentPage = index;
         }
 
-        public BuffExtraInfoPage AppendInfoEntry(string info, string element = "", Color? color = null)
+        public BuffExtraInfoPage AppendInfoEntry(string info, Color color, string element = "")
         {
             if (string.IsNullOrEmpty(element))
                 element = "buffassets/illustrations/uilozenge";
             requestedIcons.Add(element);
             requestedInfos.Add(info);
-            requestedIconColors.Add(color ?? Color.white);
+            requestedIconColors.Add(color);
             return this;
         }
 
@@ -219,7 +220,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public BuffExtraInfoPage AppendGachaInfo(string info, bool positive)
         {
-            return AppendInfoEntry(info, "buffassets/illustrations/cardpickicon", positive ? CardBasicAssets.PositiveColor : CardBasicAssets.NegativeColor);
+            return AppendInfoEntry(info,positive ? CardBasicAssets.PositiveColor : CardBasicAssets.NegativeColor, "buffassets/illustrations/cardpickicon");
         }
 
 

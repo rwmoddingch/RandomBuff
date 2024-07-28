@@ -1,6 +1,7 @@
 ﻿using Menu;
 using Menu.Remix;
 using Menu.Remix.MixedUI;
+using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
@@ -324,6 +325,7 @@ namespace RandomBuff.Core.BuffMenu
             subObjects.Add(settingButton = new SimpleButton(gameMenu, this, (BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
                 "NEWGAME_DETAIL_SELECT_MODE", new Vector2(683f - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
                 new Vector2(120, 40)));
+            subObjects.Add(new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 40f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
             settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
 
             subObjects.Add(nodeWrapper = new FNodeWrapper(gameMenu, this));
@@ -629,6 +631,7 @@ namespace RandomBuff.Core.BuffMenu
         public static Mission pickedMission;
         MissionInfoBox missionInfoBox;
         MissionSheetBox missionSheetBox;
+        SimpleImageButton extraInfoButton;
 
         RandomBuffFlagRenderer flagRenderer;
 
@@ -658,6 +661,7 @@ namespace RandomBuff.Core.BuffMenu
             missionSheetBox = new MissionSheetBox(menu, this, Vector2.zero);
             subObjects.Add(missionSheetBox);
 
+
             SetShow(false);
         }
 
@@ -681,6 +685,8 @@ namespace RandomBuff.Core.BuffMenu
 
             backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "NEWGAME_MISSION_BACK", new Vector2(1200f, 1400f), new Vector2(110f, 30f));
             subObjects.Add(backButton);
+
+            subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 1040f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
         }
 
         public void SetShow(bool show)
@@ -802,6 +808,7 @@ namespace RandomBuff.Core.BuffMenu
             base.Update();
             backButton.buttonBehav.greyedOut = MissionInfoBox.hasCardOnDisplay;
             backButton.pos = Vector2.Lerp(new Vector2(1200, 800), new Vector2(1200, 698), showAnim.Get());
+            extraInfoButton.pos.y = Mathf.Lerp(1040f, 40f, showAnim.Get());
 
             bool needUpdate = show || flagRenderer.NeedRenderUpdate;
             gameMenu.flagNeedUpdate[flagControlIndex] = needUpdate;
@@ -1721,6 +1728,77 @@ namespace RandomBuff.Core.BuffMenu
             positions.Clear();
             lastPositions.Clear();
             base.RemoveSprites();
+        }
+    }
+
+    public class SimpleImageButton : ButtonTemplate
+    {
+        public RoundedRect roundedRect;
+        public RoundedRect selectRect;
+        public FSprite sprite;
+        public string signalText;
+        public Color color;
+
+        public SimpleImageButton(Menu.Menu menu, MenuObject owner, Vector2 pos, Vector2 size, string element, string signalText) : base(menu, owner, pos, size)
+        {
+            this.signalText = signalText;
+            roundedRect = new RoundedRect(menu, this, new Vector2(0f, 0f), size, true);
+            subObjects.Add(this.roundedRect);
+            selectRect = new RoundedRect(menu, this, new Vector2(0f, 0f), size, false);
+            subObjects.Add(selectRect);
+            this.signalText = signalText;
+
+            sprite = new FSprite(element);
+            Container.AddChild(sprite);
+        }
+
+        public override void Clicked()
+        {
+            this.Singal(this, this.signalText);
+        }
+
+        public void SetSize(Vector2 newSize)
+        {
+            size = newSize;
+            roundedRect.size = size;
+            selectRect.size = size;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            buttonBehav.Update();
+            roundedRect.fillAlpha = Mathf.Lerp(0.3f, 0.6f, buttonBehav.col);
+            roundedRect.addSize = new Vector2(10f, 6f) * (buttonBehav.sizeBump + 0.5f * Mathf.Sin(buttonBehav.extraSizeBump * 3.1415927f)) * (buttonBehav.clicked ? 0f : 1f);
+            selectRect.addSize = new Vector2(2f, -2f) * (buttonBehav.sizeBump + 0.5f * Mathf.Sin(buttonBehav.extraSizeBump * 3.1415927f)) * (buttonBehav.clicked ? 0f : 1f);
+        }
+
+        // Token: 0x06002D8B RID: 11659 RVA: 0x0036F07C File Offset: 0x0036D27C
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+
+            Color color = Color.Lerp(Menu.Menu.MenuRGB(Menu.Menu.MenuColors.Black), Menu.Menu.MenuRGB(Menu.Menu.MenuColors.White), Mathf.Lerp(buttonBehav.lastFlash, buttonBehav.flash, timeStacker));
+            for (int i = 0; i < 9; i++)
+            {
+                roundedRect.sprites[i].color = color;
+            }
+            float num = 0.5f + 0.5f * Mathf.Sin(Mathf.Lerp(this.buttonBehav.lastSin, this.buttonBehav.sin, timeStacker) / 30f * 3.1415927f * 2f);
+            num *= buttonBehav.sizeBump;
+            for (int j = 0; j < 8; j++)
+            {
+                selectRect.sprites[j].color = this.MyColor(timeStacker);
+                selectRect.sprites[j].alpha = num;
+            }
+
+            Vector2 smoothPos = Vector2.Lerp(ScreenLastPos, ScreenPos, timeStacker);
+            sprite.SetPosition(smoothPos + size / 2f);
+        }
+
+        public override void RemoveSprites()
+        {
+            base.RemoveSprites();
+            sprite.RemoveFromContainer();
         }
     }
 }
