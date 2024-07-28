@@ -62,7 +62,7 @@ namespace TemplateGains
             var allTail = ((self.graphicsModule) as PlayerGraphics).tail;
             var tail = ((self.graphicsModule) as PlayerGraphics).tail[((self.graphicsModule) as PlayerGraphics).tail.Length - 1];
 
-            if (self.input[0].jmp && !self.input[1].jmp && tailBody.contactPoint.y >= 0&&self.wantToJump>0)//空中按跳提升飞行计数
+            if (self.input[0].jmp && !self.input[1].jmp && tailBody.contactPoint.y >= 0)//空中按跳提升飞行计数
             {
                 copter.flyCount += 40;
                 if (copter.flyCount > copter.flyLimit) copter.flyCount = copter.flyLimit;//如果超过上限就等于上限
@@ -136,51 +136,6 @@ namespace TemplateGains
 
         }
 
-        //老的飞行方式-----废案
-        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
-        {
-            orig.Invoke(self, eu);
-            if (!modules.TryGetValue(self, out var tailcopter))
-            {
-                modules.Add(self, new Tailcopter(self));
-                return;
-            }
-
-            var allTail = ((self.graphicsModule) as PlayerGraphics).tail;
-            var tail = ((self.graphicsModule) as PlayerGraphics).tail[((self.graphicsModule) as PlayerGraphics).tail.Length - 1];
-
-            //���ӷ��е���
-            if (self.wantToJump > 0 && tailcopter.flyCount < 80) tailcopter.flyCount += 3;
-            else if (tailcopter.flyCount > 0) tailcopter.flyCount--;
-
-            if (!(tailcopter.flyCount > 0)) return;
-            //�з��е��������
-            //�ȸı�ģʽ
-            self.animation = Player.AnimationIndex.ZeroGSwim;
-            bool flag = self.mainBodyChunk.pos.x > tail.pos.x;
-            //β��ҡ����
-            for (int i = 2; i < allTail.Length; i++)
-            {
-                allTail[i].vel += (flag ? Vector2.right : Vector2.left) * tailcopter.flyCount + Vector2.up * 1.5f;
-            }
-            self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
-            //������
-
-            //�������
-            self.bodyChunks[1].vel.y += 1.2f;
-            self.bodyChunks[0].vel.y -= 0.2f;
-            self.bodyChunks[0].vel.x += self.input[0].x / 7f;
-
-            //���⶯��
-            if (self.wantToJump > 0)
-            {
-                self.bodyChunks[1].vel.y += 1.5f;
-                self.room.PlaySound(SoundID.Slugcat_Flip_Jump, self.bodyChunks[1]);
-            }
-
-
-
-        }
     }
     public static class ExPlaye
     {
