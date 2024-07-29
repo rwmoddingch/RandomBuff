@@ -54,7 +54,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             base.InGameUpdate(game);
             if (game.AlivePlayers.Count != 0 && game.Players[0].state is PlayerState state)
             {
-                if (eatCount + game.session.characterStats.foodToHibernate < 20 && state.foodInStomach > 0)
+                if (eatCount + game.session.characterStats.foodToHibernate < targetCount && state.foodInStomach > 0)
                 {
                     eatCount += state.foodInStomach;
                     AyinBuff.forceEnableSub = true;
@@ -102,13 +102,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 if (ply != null)
                     ply.controller = new Player.NullController();
 
-            foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
-            {
-                if(crit == null || crit is Player || crit.inShortcut || crit.graphicsModule == null || crit.Template.smallCreature 
-                   || crit.Template.type == CreatureTemplate.Type.Overseer) continue;
-                crit.Destroy();
-                room.AddObject(new GhostEffect(crit.graphicsModule, 30, 1, 0));
-            }
         }
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -134,14 +127,19 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             base.Update(eu);
             counter++;
-            foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
-            {
-                if (crit == null || crit is Player || crit.inShortcut || crit.graphicsModule == null || crit.Template.smallCreature
-                    || crit.Template.type == CreatureTemplate.Type.Overseer) continue;
-                crit.Destroy();
-                room.AddObject(new GhostEffect(crit.graphicsModule, 30, 1, 0));
-            }
 
+            if (counter == 5 * 40)
+            {
+                AyinPost.Instance.toColor = Color.clear;
+                room.game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                {
+                    fadeOutTime = 4f,
+                    prio = 100,
+                    songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
+                    type = StopMusicEvent.Type.AllSongs
+                });
+            }
+     
             if (counter == 6 * 40)
             {
 
@@ -149,6 +147,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                     .GetMethod("CreateWinGamePackage", BindingFlags.NonPublic | BindingFlags.Instance)
                     .Invoke(BuffPoolManager.Instance, Array.Empty<object>());
                 room.game.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameWinScreen, 3f);
+
             }
         
 

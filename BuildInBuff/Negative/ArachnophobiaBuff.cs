@@ -33,7 +33,7 @@ namespace BuiltinBuffs.Negative
         private static void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
             if(self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Spider &&
-               self.abstractCreature.creatureTemplate.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MotherSpider)
+               self.abstractCreature.creatureTemplate.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MotherSpider && !self.dead)
             {
                 BuffUtils.Log(arachnophobiaID,"Arachnophobia Creature_Die");
                 int max = Random.Range(5, 12);

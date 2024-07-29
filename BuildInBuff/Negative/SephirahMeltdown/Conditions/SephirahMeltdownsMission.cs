@@ -114,6 +114,25 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
             }
 
+            else
+            {
+                MusicEvent musicEvent = new MusicEvent
+                {
+                    fadeInTime = 1f,
+                    roomsRange = -1,
+                    cyclesRest = 0,
+                    volume = 0.13f,
+                    prio = 10f,
+                    stopAtDeath = true,
+                    stopAtGate = false,
+                    loop = true,
+                    maxThreatLevel = 10,
+                    songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
+
+                };
+                game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+            }
+
 
             On.Music.MusicPlayer.GameRequestsSong += MusicPlayer_GameRequestsSong;
             base.EnterGame(game);
@@ -142,16 +161,31 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 BuffUtils.Log("SephirahMeltdown", "Add Final Test");
                 BuffPoolManager.Instance.GameSetting.conditions.RemoveAll(i => i is DeathCondition);
-                BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(game.session.characterStats));
+                BuffPoolManager.Instance.GameSetting.conditions.Add(
+                    new TreeOfLightCondition().SetTargetCount(game.session.characterStats));
                 AyinBuffData.Ayin.CreateNewBuff();
             }
             game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
             {
-                fadeOutTime = 1,
-                prio = 20,
+                fadeOutTime = 0.5f,
+                prio = 100,
+                songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
+                type = StopMusicEvent.Type.AllSongs
+            });
+            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            {
+                fadeOutTime = 0.5f,
+                prio = 100,
                 songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
                 type = StopMusicEvent.Type.AllSongs
-            });     
+            });
+            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            {
+                fadeOutTime = 0.5f,
+                prio = 100,
+                songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
+                type = StopMusicEvent.Type.AllSongs
+            });
             On.Music.MusicPlayer.GameRequestsSong -= MusicPlayer_GameRequestsSong;
         }
 
