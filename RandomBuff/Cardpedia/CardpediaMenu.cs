@@ -13,6 +13,7 @@ using RandomBuff.Core.Buff;
 using System.Runtime.CompilerServices;
 using RandomBuff.Cardpedia.PediaPage;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI;
 
 namespace RandomBuff.Cardpedia
 {
@@ -289,6 +290,7 @@ namespace RandomBuff.Cardpedia
         public override void Update()
         {
             base.Update();
+
             if (!inited)
             {
                 InitMenuElements();
