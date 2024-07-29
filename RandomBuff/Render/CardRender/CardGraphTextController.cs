@@ -50,7 +50,8 @@ namespace RandomBuff.Render.CardRender
                 _graphOuter.transform.localRotation = Quaternion.Euler(rotation);
                 _graphOuter.layer = 8;
                 _graphOuter.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardBasicShader;
-
+                if (_graphOuter.TryGetComponent<Collider>(out var collider))
+                    Destroy(collider);
 
                 _graphInner = CreatePrimitiveObject(primitiveType);
                 _graphInner.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
@@ -63,7 +64,8 @@ namespace RandomBuff.Render.CardRender
                 _graphInnerRenderer.material.color = Color.black * 0.8f + Color.white * 0.2f;
                 _graphInnerRenderer.material
                     .SetColor("_Color", paleBlack);
-
+                if (_graphInnerRenderer.TryGetComponent<Collider>(out var collider1))
+                    Destroy(collider1);
 
                 _stackerTextObj = new GameObject("StackerText");
                 _stackerTextObj.transform.parent = _hoverPoint.transform;
