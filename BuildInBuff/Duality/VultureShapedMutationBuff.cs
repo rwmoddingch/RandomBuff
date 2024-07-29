@@ -1215,9 +1215,14 @@ namespace BuiltinBuffs.Duality
 
         public void NewRoom(Room room)
         {
-            for (int i = 0; i < this.wings.GetLength(0); i++)
-                for (int j = 0; j < this.wings.GetLength(1); j++)
-                    this.wings[i, j].NewRoom(room);
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (this.wings != null)
+            {
+                for (int i = 0; i < this.wings.GetLength(0); i++)
+                    for (int j = 0; j < this.wings.GetLength(1); j++)
+                        this.wings[i, j].NewRoom(room);
+            }
             if (this.kingTusks != null)
             {
                 this.kingTusks.NewRoom(room);
