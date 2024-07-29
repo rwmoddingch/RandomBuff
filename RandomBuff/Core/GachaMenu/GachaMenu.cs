@@ -29,6 +29,8 @@ namespace RandomBuff.Core.GachaMenu
             this.lastID = lastID;
             this.game = game;
             inGameSlot = new BasicInGameBuffCardSlot();
+            InputAgency.Current.TakeFocus(inGameSlot.BaseInteractionManager);
+
             foreach(var id in BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter))
                 inGameSlot.AppendCard(id);
             container.AddChild(inGameSlot.Container);
@@ -157,6 +159,7 @@ namespace RandomBuff.Core.GachaMenu
         public override void ShutDownProcess()
         {
             base.ShutDownProcess();
+            InputAgency.AllRelease();
             if (manager.oldProcess != game)
             {
                 var all = BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter);

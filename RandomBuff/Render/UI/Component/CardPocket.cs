@@ -176,13 +176,10 @@ namespace RandomBuff.Render.UI.Component
         public TitleRect titleRect;
         public List<SideSingleSelectButton> buffTypeSwitchButtons = new List<SideSingleSelectButton>();
         public SideSingleSelectButton closeButton;
-        public FLabel testLabel;
-        int testDisplayMinRoll;
-        int testDisplayMaxRoll;
 
         public int maxSelectedCount = -1;
 
-        Helper.InputButtonTracker mouseClickTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0));
+        //Helper.InputButtonTracker mouseClickTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0));
 
         public int cardsInRoll;
         public float externGap;
@@ -253,10 +250,6 @@ namespace RandomBuff.Render.UI.Component
 
             SetBuffType(BuffType.Positive, false);
 
-            testLabel = new FLabel(Custom.GetDisplayFont(), "") { anchorX = 0f, anchorY = 1f};
-            testLabel.SetPosition(TopLeftPos);
-            pocket.Container.AddChild(testLabel);
-
             rectSprite = new RoundRectSprites(pocket.BottomContainer_1, BottomLeftPos + new Vector2(0f, - CardPocket.gap * 5f/2f), pocket.size +new Vector2(CardPocket.gap, CardPocket.gap * 5f)) { borderColor = Color.white };
 
             
@@ -310,7 +303,6 @@ namespace RandomBuff.Render.UI.Component
             }
         }
 
-
         public override void Update()
         {
             base.Update();
@@ -320,7 +312,7 @@ namespace RandomBuff.Render.UI.Component
                 button.Update();
             closeButton.Update();
 
-            mouseClickTracker.Update(out var single, out var _);
+            InputAgency.Current.GetMainFunctionButton(out var single, out _);
             if (single)
             {
                 foreach (var button in buffTypeSwitchButtons)
@@ -348,20 +340,14 @@ namespace RandomBuff.Render.UI.Component
 
             if (enableScroll && pocket.Show && mouseInside)
             {
-                if (Input.GetAxis("Mouse ScrollWheel") < 0)
+                float scroll = InputAgency.Current.GetScroll();
+                if (scroll < 0)
                     scrollVel = Mathf.Lerp(scrollVel, 30f, 0.25f);
-                else if (Input.GetAxis("Mouse ScrollWheel") > 0)
+                else if (scroll > 0)
                     scrollVel = Mathf.Lerp(scrollVel, -30f, 0.25f);
             }
 
-            //if (Input.GetKeyDown(KeyCode.P))
-            //    SetBuffType(BuffType.Positive);
-            //else if(Input.GetKeyDown(KeyCode.D))
-            //    SetBuffType(BuffType.Duality);
-            //else if(Input.GetKeyDown(KeyCode.N))
-            //    SetBuffType(BuffType.Negative);
-
-            testLabel.text = $"{currentType} - {CurrentTypeRolls.Count}\n{yPointer} - {actualDisplaySize.y} - {allContentSize[currentType]}\n{buffCardSize.x}_{buffCardSize.y}\n{testDisplayMinRoll}->{testDisplayMaxRoll}";
+            //testLabel.text = $"{currentType} - {CurrentTypeRolls.Count}\n{yPointer} - {actualDisplaySize.y} - {allContentSize[currentType]}\n{buffCardSize.x}_{buffCardSize.y}\n{testDisplayMinRoll}->{testDisplayMaxRoll}";
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -440,8 +426,6 @@ namespace RandomBuff.Render.UI.Component
             float downDisplayY = yPointer + actualDisplaySize.y;
             int minRoll = Mathf.Clamp(Mathf.CeilToInt(yPointer / singleRollHeight), 0, CurrentTypeRolls.Count - 1);
             int maxRoll = Mathf.Clamp(Mathf.CeilToInt(downDisplayY / singleRollHeight), 0, CurrentTypeRolls.Count - 1);
-            testDisplayMinRoll = minRoll;
-            testDisplayMaxRoll = maxRoll;
 
             (BaseInteractionManager as CardPocketInteratctionManager)!.UpdateDisplayRoll(minRoll, maxRoll);
         }
@@ -465,6 +449,7 @@ namespace RandomBuff.Render.UI.Component
             {
                 ScrollToTop();
                 UpdateDisplayRoll();
+                InputAgency.Current.TakeFocus(BaseInteractionManager);
             }
             else
             {
@@ -472,11 +457,18 @@ namespace RandomBuff.Render.UI.Component
                 {
                     RemoveCard(buff, true);
                 }
+                InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager);
             }
             (BaseInteractionManager as CardPocketInteratctionManager).SetShow(show);
             foreach (var button in buffTypeSwitchButtons)
                 button.enableInput = show;
             closeButton.enableInput = show;
+        }
+
+        public override void Destory()
+        {
+            InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
+            base.Destory();
         }
     }
 
@@ -581,12 +573,15 @@ namespace RandomBuff.Render.UI.Component
             {
                 rollsOfCards.Clear();
                 card2RollMapping.Clear();
+
+                InputAgency.Current.RecoverLastIfIsFocus(this);
             }
             else if(newState == State.Normal)
             {
                 foreach (var card in managedCards)
                     card.SetAnimatorState(BuffCard.AnimatorState.CardPocketSlot_Normal);
                 Slot.SetScrollEnable(true);
+                InputAgency.Current.TakeFocus(this);
             }
             else if(newState == State.Exclusive)
             {

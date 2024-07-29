@@ -37,10 +37,7 @@ namespace RandomBuff.Render.UI
         }
         public bool overrideDisabled;//是否被高级交互系统禁用
 
-        public Vector2 MousePos => new Vector2(Futile.mousePosition.x, Futile.mousePosition.y);
-
-        protected Helper.InputButtonTracker mouseLeftButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0), false, false, Double_ClickThreashold);
-        protected Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
+        public Vector2 MousePos => InputAgency.Current.GetMousePosition();
 
         protected bool enableMouseInput = true;
 
@@ -51,8 +48,8 @@ namespace RandomBuff.Render.UI
 
         public virtual void Update()
         {
-            mouseLeftButtonTracker.Update(out bool singleClick, out bool _);
-            mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
+            InputAgency.Current.GetMainFunctionButton(out _, out bool singleClick);
+            InputAgency.Current.GetSecondaryFunctionButton(out _, out bool mouseRightSingle);
 
             if (enableMouseInput && !overrideDisabled)
             {
@@ -299,7 +296,7 @@ namespace RandomBuff.Render.UI
         public List<BuffCard> PositiveBuffCards { get; } = new List<BuffCard>();
         public List<BuffCard> NegativeBuffCards { get; } = new List<BuffCard>();
 
-        Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
+        //Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
         //Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
 
         public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot, bool canTriggerBuff = false) : base(slot)
@@ -311,7 +308,8 @@ namespace RandomBuff.Render.UI
 
         public override void Update()
         {
-            toggleShowButtonTracker.Update(out bool showButtonSingle, out bool _);
+            base.Update();
+            InputAgency.Current.GetToggleHUDButton(out _, out bool showButtonSingle);
             //mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
 
             if (showButtonSingle && !overrideDisabled)
@@ -321,7 +319,6 @@ namespace RandomBuff.Render.UI
             //    OnMouseRightSingleClick();
 
             keyBinderProcessor?.Update();
-            base.Update();
         }
 
         protected override void UpdateFocusCard()
@@ -528,6 +525,7 @@ namespace RandomBuff.Render.UI
                 Slot.completeSlot.Title?.ChangeTitle("", true);
 
                 Slot.completeSlot?.SetGamePaused(false);
+                InputAgency.Current.RecoverLastIfIsFocus(this, false);
             }
             else if(newState == State.Show)
             {
@@ -544,6 +542,7 @@ namespace RandomBuff.Render.UI
                 Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
 
                 Slot.completeSlot?.SetGamePaused(true);
+                InputAgency.Current.TakeFocus(this);
             }
             else if(newState == State.ExclusiveShow)
             {

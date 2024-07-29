@@ -223,6 +223,12 @@ namespace RandomBuff.Render.UI
             HelpInfoProvider.CustomProviders += HelpInfoProvider_CustomProviders;
         }
 
+        public override void Destory()
+        {
+            InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
+            base.Destory();
+        }
+
         private static bool HelpInfoProvider_CustomProviders(HelpInfoProvider.HelpInfoID ID, out string helpInfo, params object[] Params)
         {
             helpInfo = "";
@@ -313,7 +319,9 @@ namespace RandomBuff.Render.UI
             InGameBuffCardSlot = inGameBuffCardSlot;
 
             BaseInteractionManager = new CardPickerInteractionManager(this);
-            if(InGameBuffCardSlot != null)
+            InputAgency.Current.TakeFocus(BaseInteractionManager);
+
+            if (InGameBuffCardSlot != null)
             {
                 InGameBuffCardSlot.BaseInteractionManager.SubManager = BaseInteractionManager;
             }
@@ -376,7 +384,7 @@ namespace RandomBuff.Render.UI
 
             foreach(var buffCard in cards)
             {
-                selectCardCallBack.Invoke(buffCard.ID);
+                selectCardCallBack?.Invoke(buffCard.ID);
    
                 if (InGameBuffCardSlot != null)
                 {
@@ -407,6 +415,12 @@ namespace RandomBuff.Render.UI
                     return card;
             }
             return null;
+        }
+
+        public override void Destory()
+        {
+            InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
+            base.Destory();
         }
     }
 
@@ -552,6 +566,7 @@ namespace RandomBuff.Render.UI
             Title = slotTitle;
             BuffCards = null;//不直接管理卡牌，所以设置为null来提前触发异常
             BaseInteractionManager = new DoNotingInteractionManager<CommmmmmmmmmmmmmpleteInGameSlot>(this);
+            InputAgency.Current.TakeFocus(BaseInteractionManager);
 
             BasicSlot = new BasicInGameBuffCardSlot(true, this);
             ActiveAnimSlot = new ActivateCardAnimSlot(this);
@@ -751,6 +766,7 @@ namespace RandomBuff.Render.UI
             ConditionHUD.Destroy();
             SandboxPocket?.Destroy();
             base.Destory();
+            InputAgency.AllRelease();
         }
 
         public void CardPocketCallBack(List<BuffID> all, List<BuffID> removed, List<BuffID> added)

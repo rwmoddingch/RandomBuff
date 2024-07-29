@@ -152,6 +152,7 @@ namespace RandomBuff
 
                     GachaTemplate.Init();
                     Condition.Init();
+                    InputAgency.Init();
                     TypeSerializer.Init();
                     QuestCondition.Init();
                     CosmeticUnlock.Init();
