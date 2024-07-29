@@ -168,7 +168,7 @@ namespace BuiltinBuffs.Duality
                     i--;
                 }
                 float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
-                newDamage *= scale;
+                newDamage *= 0.5f * scale;
                 newStunBonus *= scale;
                 newDirectionAndMomentum *= scale;
             }
