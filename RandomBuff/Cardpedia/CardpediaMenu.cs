@@ -287,7 +287,7 @@ namespace RandomBuff.Cardpedia
         public override void Update()
         {
             base.Update();
-
+            InputAgency.StaticUpdate();
             if (!inited)
             {
                 InitMenuElements();

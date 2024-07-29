@@ -182,7 +182,7 @@ namespace RandomBuff.Core.GachaMenu
 
             if (exitCounter != -1)
                 exitCounter++;
-
+            InputAgency.StaticUpdate();
         }
 
 
