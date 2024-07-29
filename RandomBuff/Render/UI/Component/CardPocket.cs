@@ -166,6 +166,11 @@ namespace RandomBuff.Render.UI.Component
             slot.Destory();
         }
 
+        public IEnumerable<Vector2> GetAllButtonPos()
+        {
+            return slot.GetAllButtonPos();
+        }
+
         public delegate void CardPocketCallBack(List<BuffID> allselectedBuffIDs, List<BuffID> removedBuffIDs, List<BuffID> addedBuffIDs);
     }
 
@@ -321,8 +326,10 @@ namespace RandomBuff.Render.UI.Component
             }
 
             mouseInside = false;
-            Vector2 delta = new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) - BottomLeftPos;
+            Vector2 delta = InputAgency.Current.GetMousePosition() - BottomLeftPos;
             if (delta.x > 0 && delta.x < pocket.size.x && delta.y > 0 && delta.y < pocket.size.y)
+                mouseInside = true;
+            if (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Gamepad)
                 mouseInside = true;
 
 
@@ -449,7 +456,7 @@ namespace RandomBuff.Render.UI.Component
             {
                 ScrollToTop();
                 UpdateDisplayRoll();
-                InputAgency.Current.TakeFocus(BaseInteractionManager);
+                //InputAgency.Current.TakeFocus(BaseInteractionManager);
             }
             else
             {
@@ -469,6 +476,16 @@ namespace RandomBuff.Render.UI.Component
         {
             InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
             base.Destory();
+        }
+
+        public IEnumerable<Vector2> GetAllButtonPos()
+        {
+            if (pocket.Show)
+            {
+                yield return closeButton.MiddleOfButton();
+                foreach (var button in buffTypeSwitchButtons)
+                    yield return button.MiddleOfButton();
+            }
         }
     }
 
@@ -582,6 +599,12 @@ namespace RandomBuff.Render.UI.Component
                     card.SetAnimatorState(BuffCard.AnimatorState.CardPocketSlot_Normal);
                 Slot.SetScrollEnable(true);
                 InputAgency.Current.TakeFocus(this);
+
+                //用于在动画完成时更新鼠标位置
+                AnimMachine.GetDelayCmpnt(30, autoDestroy: true).BindActions(OnAnimFinished: (d) =>
+                {
+                    InputAgency.Current.ResetToDefaultPos();
+                });
             }
             else if(newState == State.Exclusive)
             {
@@ -677,6 +700,14 @@ namespace RandomBuff.Render.UI.Component
         public float GetCorrectSymbolAlpha(BuffCard buffCard)
         {
             return Slot.IsBuffSelected(buffCard.ID) ? 1f : 0f;
+        }
+
+        public override IEnumerable<Vector2> GetAllFocusableObjectPos()
+        {
+            foreach(var item in base.GetAllFocusableObjectPos())
+                yield return item;
+            foreach (var item in Slot.GetAllButtonPos())
+                yield return item;
         }
 
         public enum State
@@ -1204,7 +1235,7 @@ namespace RandomBuff.Render.UI.Component
         public static float extendWidth = 10f;
         public static float selectedWidth = 55f;
 
-        HalfRectSprites rect;
+        internal HalfRectSprites rect;
         FSprite darkSprite;
         FLabel title;
         string signal;
@@ -1219,7 +1250,7 @@ namespace RandomBuff.Render.UI.Component
         float height;
         float lastHeight;
 
-        Vector2 pos;//TopRight;
+        internal Vector2 pos;//TopRight;
         Vector2 lastPos;
 
         bool lastMouseInside;
@@ -1266,7 +1297,7 @@ namespace RandomBuff.Render.UI.Component
 
             lastMouseInside = mouseInside;
             mouseInside = false;
-            Vector2 delta = new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) - pos;
+            Vector2 delta = InputAgency.Current.GetMousePosition() - pos;
             float x = Vector2.Dot(dir, delta);
             float y = Vector2.Dot(perpDir, delta);
 
@@ -1335,6 +1366,12 @@ namespace RandomBuff.Render.UI.Component
         public Vector2 LocalToGlobal(float x, float y)
         {
             return dir * x + perpDir * y;
+        }
+
+
+        public Vector2 MiddleOfButton()
+        {
+            return pos + LocalToGlobal(width / 2f, CardPocket.gap / 2f);
         }
     }
 
