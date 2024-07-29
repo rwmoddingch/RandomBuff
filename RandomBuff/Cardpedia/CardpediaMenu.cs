@@ -152,6 +152,9 @@ namespace RandomBuff.Cardpedia
                     continue;
 
                 var staticData = BuffConfigManager.GetStaticData(id);
+                if (staticData.NeedUnlocked)
+                    continue;
+
                 switch (staticData.BuffType)
                 {
                     case BuffType.Positive:

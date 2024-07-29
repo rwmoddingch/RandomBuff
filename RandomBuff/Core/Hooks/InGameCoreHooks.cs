@@ -92,7 +92,7 @@ namespace RandomBuff.Core.Hooks
         {
             "SL_C12", "SB_A14", "LF_A03", "SU_A43", "GW_A25", "SI_C02","HR_C01","Rock Bottom",
             "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL",
-            "SH_GOR02","SI_SAINTINTRO"
+            "SH_GOR02","SI_SAINTINTRO","GW_A24"
         };
     
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
@@ -156,10 +156,6 @@ namespace RandomBuff.Core.Hooks
                 {
                     BuffPlugin.LogDebug($"Force start pos:{pos}");
                     self.denPosition = self.lastVanillaDen = pos;
-                }
-                else if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-                {
-                    self.denPosition = self.lastVanillaDen = "SU_INTRO01";
                 }
             }
         }

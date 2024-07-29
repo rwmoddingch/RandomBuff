@@ -35,8 +35,27 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             {
                 On.SSOracleBehavior.SeePlayer += SSOracleBehavior_SeePlayer;
                 On.SLOracleBehavior.Update += SLOracleBehavior_Update;
+                On.MoreSlugcats.SSOracleRotBehavior.TalkToNoticedPlayer += SSOracleRotBehavior_TalkToNoticedPlayer;
+                On.MoreSlugcats.CLOracleBehavior.Update += CLOracleBehavior_Update;
 
             }
+        }
+
+        private void CLOracleBehavior_Update(On.MoreSlugcats.CLOracleBehavior.orig_Update orig, CLOracleBehavior self, bool eu)
+        {
+            orig(self, eu);
+            if (self.hasNoticedPlayer && !meetSS)
+            {
+                meetSS = true;
+                onLabelRefresh?.Invoke(this);
+            }
+        }
+
+        private void SSOracleRotBehavior_TalkToNoticedPlayer(On.MoreSlugcats.SSOracleRotBehavior.orig_TalkToNoticedPlayer orig, SSOracleRotBehavior self)
+        {
+            orig(self);
+            meetSS = true;
+            onLabelRefresh?.Invoke(this);
         }
 
         private void SLOracleBehavior_Update(On.SLOracleBehavior.orig_Update orig, SLOracleBehavior self, bool eu)
@@ -57,6 +76,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             {
                 On.SSOracleBehavior.SeePlayer -= SSOracleBehavior_SeePlayer;
                 On.SLOracleBehavior.Update -= SLOracleBehavior_Update;
+                On.MoreSlugcats.SSOracleRotBehavior.TalkToNoticedPlayer -= SSOracleRotBehavior_TalkToNoticedPlayer;
+                On.MoreSlugcats.CLOracleBehavior.Update -= CLOracleBehavior_Update;
             }
 
             currentCycle = save.cycleNumber + 1;
@@ -68,6 +89,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             if (self.oracle.ID == Oracle.OracleID.SS)
             {
                 meetSS = true;
+                onLabelRefresh?.Invoke(this);
+            }
+            else if (self.oracle.ID == MoreSlugcatsEnums.OracleID.DM)
+            {
+                meetSL = true;
                 onLabelRefresh?.Invoke(this);
             }
         }

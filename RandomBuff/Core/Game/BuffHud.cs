@@ -38,10 +38,13 @@ namespace RandomBuff.Core.Game
 
             Instance = this;
 
-            if(Custom.rainWorld.processManager.menuSetup.startGameCondition ==
-               ProcessManager.MenuSetup.StoryGameInitCondition.New)
+            if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
+                ProcessManager.MenuSetup.StoryGameInitCondition.New)
+            {
+                Custom.rainWorld.processManager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
+            }
         }
 
         public void NewGame(SlugcatStats.Name saveName)
