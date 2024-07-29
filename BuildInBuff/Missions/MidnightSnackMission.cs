@@ -32,7 +32,7 @@ namespace BuiltinBuffs.Missions
                 },
                 gachaTemplate = new NormalGachaTemplate(true)
             };
-            startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("Hell"));
+            //startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("Hell"))
             startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("FakeCreature"));
             startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("InvisibleKiller"));
             startBuffSet.Add(new RandomBuff.Core.Buff.BuffID("Ramenpede"));

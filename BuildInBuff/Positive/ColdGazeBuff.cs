@@ -256,6 +256,54 @@ namespace BuiltinBuffs.Positive
                         {
                             freeze.Update();
                             newFlag = freeze.ShouldSkipUpdate();
+                            if (newFlag && creature is Deer)
+                            {
+                                bool eu = true;
+                                Deer deer = (Deer) creature;
+                                if(deer.graphicsModule != null)
+                                {
+                                    for (int n = 0; n < deer.room.game.Players.Count; n++)
+                                    {
+                                        if (deer.room.game.Players[n].pos.room == deer.room.abstractRoom.index && 
+                                            deer.room.game.Players[n].realizedCreature != null && 
+                                            (deer.room.game.Players[n].realizedCreature as Player).wantToGrab > 0 && 
+                                            Custom.DistLess(deer.room.game.Players[n].realizedCreature.mainBodyChunk.pos, deer.antlers.pos, deer.antlers.rad))
+                                        {
+                                            (deer.room.game.Players[n].realizedCreature as Player).wantToGrab = 0;
+                                            bool flag2 = true;
+                                            int num5 = 0;
+                                            while (num5 < deer.playersInAntlers.Count && flag2)
+                                            {
+                                                flag2 = (deer.playersInAntlers[num5].player != deer.room.game.Players[n].realizedCreature as Player);
+                                                num5++;
+                                            }
+                                            if (flag2)
+                                            {
+                                                if ((deer.room.game.Players[n].realizedCreature as Player).playerInAntlers != null)
+                                                {
+                                                    (deer.room.game.Players[n].realizedCreature as Player).playerInAntlers.playerDisconnected = true;
+                                                }
+                                                deer.playersInAntlers.Add(new Deer.PlayerInAntlers(deer.room.game.Players[n].realizedCreature as Player, deer));
+                                            }
+                                        }
+                                    }
+                                    for (int num6 = deer.playersInAntlers.Count - 1; num6 >= 0; num6--)
+                                    {
+                                        if (deer.playersInAntlers[num6].playerDisconnected)
+                                        {
+                                            deer.playersInAntlers.RemoveAt(num6);
+                                        }
+                                        else
+                                        {
+                                            deer.playersInAntlers[num6].Update(eu);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    deer.playersInAntlers.Clear();
+                                }
+                            }
                         }
                         
                         return flag || newFlag;
@@ -849,13 +897,12 @@ namespace BuiltinBuffs.Positive
             foreach (var player in self.room.game.AlivePlayers.Select(i => i.realizedCreature as Player)
                                      .Where(i => i != null && i.graphicsModule != null))
             {
-                if (player == null || player.room == null)
-                    return false;
                 if (ColdGazeBuffEntry.ColdGazeFeatures.TryGetValue(player, out var coldGaze))
                 {
                     Vector2 headPos = (player.graphicsModule as PlayerGraphics).head.pos;
                     Vector2 LookDirection = coldGaze.LookDirection;
-                    if (Mathf.Abs(Custom.VecToDeg(self.mainBodyChunk.pos - headPos) - Custom.VecToDeg(LookDirection)) <= coldGaze.RangeAngle && //角度
+                    if (player != null && player.room != null &&
+                        Mathf.Abs(Custom.VecToDeg(self.mainBodyChunk.pos - headPos) - Custom.VecToDeg(LookDirection)) <= coldGaze.RangeAngle && //角度
                         Vector2.Dot(self.mainBodyChunk.pos - headPos, LookDirection) > 0 && //方向
                         Custom.DistLess(self.mainBodyChunk.pos, headPos, coldGaze.Radius(coldGaze.Level, 0f)) && //距离
                         (player.graphicsModule as PlayerGraphics).blink <= 0) //猫猫是否有睁眼

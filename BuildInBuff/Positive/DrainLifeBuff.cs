@@ -65,21 +65,24 @@ namespace BuiltinBuffs.Positive
         {
             orig(self, eu);
 
-            if (DrainLifeFeatures.TryGetValue(self, out var drainLife) &&
-                drainLife.LastHealth != -1)
+            if (DrainLifeFeatures.TryGetValue(self, out var drainLife))
             {
-                if (self.killTag != null &&
-                    self.killTag.realizedCreature != null &&
-                    self.killTag.realizedCreature is Player)
+                if (drainLife.LastHealth != -1)
                 {
-                    Player player = self.killTag.realizedCreature as Player;
-                    float damage = drainLife.LastHealth - (self.State as HealthState).health;
-                    for (int i = 0; i < Mathf.FloorToInt(StackLayer * damage / 0.25f); i++)
+                    if (self.killTag != null &&
+                        self.killTag.realizedCreature != null &&
+                        self.killTag.realizedCreature is Player)
                     {
-                        player.AddQuarterFood();
+                        Player player = self.killTag.realizedCreature as Player;
+                        float damage = drainLife.LastHealth - (self.State as HealthState).health;
+                        for (int i = 0; i < Mathf.FloorToInt(StackLayer * damage / 0.25f); i++)
+                        {
+                            player.AddQuarterFood();
+                        }
                     }
+
+                    drainLife.LastHealth = (self.State as HealthState).health;
                 }
-                drainLife.LastHealth = (self.State as HealthState).health;
             }
             else if (self.abstractCreature.state is HealthState)
             {

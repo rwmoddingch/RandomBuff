@@ -31,7 +31,26 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             forceEnableSub = false;
             TreeOfLightCondition.OnMoveToNextPart += TreeOfLightCondition_OnMoveToNextPart;
             if (BuffCustom.TryGetGame(out var game))
+            {
                 (game.Players[0].state as PlayerState).foodInStomach = 0;
+                foreach(var layer in game.cameras[0].SpriteLayers)
+                    ReplaceForContainer(layer);
+            }
+
+            void ReplaceForContainer(FContainer container)
+            {
+                if (container == null) return;
+                foreach (var node in container._childNodes)
+                {
+                    if (node is FFacetNode facet)
+                    {
+                        if (AyinHook.ReplacedShaders.Contains(facet.shader.name))
+                            facet.shader = Custom.rainWorld.Shaders[$"SephirahMeltdownEntry.{facet.shader.name}Rotation"];
+                    }
+                    else if(node is FContainer child)
+                        ReplaceForContainer(child);
+                }
+            }
         }
 
         private void TreeOfLightCondition_OnMoveToNextPart(int obj)
@@ -63,6 +82,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             base.Destroy();
             TreeOfLightCondition.OnMoveToNextPart -= TreeOfLightCondition_OnMoveToNextPart;
+            Shader.SetGlobalFloat("Buff_screenRotate", 0);
+
         }
 
         public static bool forceEnableSub = false;
@@ -81,8 +102,21 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             On.Player.SubtractFood += Player_SubtractFood;
 
             On.RainWorldGame.Update += RainWorldGame_Update;
+            On.FFacetRenderLayer.ctor += FFacetRenderLayer_ctor;
+            Shader.SetGlobalFloat("Buff_screenRotate", 0);
+
 
             counter = 0;
+        }
+
+        public static readonly HashSet<string> ReplacedShaders = new HashSet<string>()
+            { "FlatLightBehindTerrain", "LevelSnowShader", "LightSource" ,"LevelColor"};
+
+        private static void FFacetRenderLayer_ctor(On.FFacetRenderLayer.orig_ctor orig, FFacetRenderLayer self, FStage stage, FFacetType facetType, FAtlas atlas, FShader shader)
+        {
+            if (ReplacedShaders.Contains(shader.name))
+                shader = Custom.rainWorld.Shaders[$"SephirahMeltdownEntry.{shader.name}Rotation"];
+            orig(self,stage, facetType, atlas, shader);
         }
 
         private static int counter = 0;
@@ -154,6 +188,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             if(self.levelGraphic.shader != Custom.rainWorld.Shaders["SephirahMeltdownEntry.LevelColorRotation"])
                 self.levelGraphic.shader = Custom.rainWorld.Shaders["SephirahMeltdownEntry.LevelColorRotation"];
 
+           
+                
+         
         }
     }
 

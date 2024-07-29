@@ -94,6 +94,7 @@ totNegativeCard|Number of negative buffs acquired:
 totDualityCard|Number of duality buffs acquired:
 totTriggerCount|Number of buff triggers:
 RunCount|Number of games completed:
+InitPickCount|Initial draw count:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|Single click to check <BuffID> in detail

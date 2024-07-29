@@ -415,7 +415,6 @@ namespace RandomBuff.Core.Game
                 buffDictionary.Add(id, buff);
                 buffList.Add(buff);
                 BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.InGame);
-                BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                 return buff;
             }
             catch (Exception e)

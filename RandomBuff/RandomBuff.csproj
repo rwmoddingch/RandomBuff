@@ -106,6 +106,9 @@
       <HintPath>..\include\UnityEngine.JSONSerializeModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\include\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextCoreModule">
       <HintPath>..\include\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>

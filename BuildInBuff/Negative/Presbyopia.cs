@@ -46,7 +46,7 @@ namespace BuiltinBuffs.Negative
     internal class PresbyopiaBuffData : CountableBuffData
     {
         public override BuffID ID => PresbyopiaEntry.Presbyopia;
-        public override int MaxCycleCount => 3;
+        public override int MaxCycleCount => 5;
     }
 
     internal class PresbyopiaBuff : Buff<PresbyopiaBuff,PresbyopiaBuffData>

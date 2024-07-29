@@ -384,7 +384,14 @@ namespace RandomBuff.Render.UI
 
             foreach(var buffCard in cards)
             {
-                selectCardCallBack?.Invoke(buffCard.ID);
+                if (selectCardCallBack == null)
+                {
+
+                    //TODO:原因及修复
+                    BuffPlugin.LogWarning("null select card callback");
+                }
+                else
+                    selectCardCallBack.Invoke(buffCard.ID);
    
                 if (InGameBuffCardSlot != null)
                 {

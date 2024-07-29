@@ -97,9 +97,20 @@ namespace BuiltinBuffs.Positive
     {
         public override BuffID ID => StormIsApproachingEntry.StormIsApproaching;
 
-        private bool hasUse = false;
 
-        public override bool Triggerable => !hasUse;
+        public StormIsApproachingBuff()
+        {
+            MyTimer = new DownCountBuffTimer((timer, game) =>
+            {
+                canTrigger = true;
+
+            }, 240, autoReset: false);
+            MyTimer.Paused = true;
+        }
+
+        public override bool Triggerable => canTrigger;
+
+        private bool canTrigger = true;
 
         public override bool Trigger(RainWorldGame game)
         {
@@ -110,11 +121,11 @@ namespace BuiltinBuffs.Positive
                 player = game.Players.FirstOrDefault(i => i.realizedCreature is Player && i.realizedCreature.room != null)?.realizedCreature as Player;
             if (player == null)
                 return false;
-
-            hasUse = true;
+            canTrigger = false;
 
             player.room.AddObject(new JudgmentCut(player.room, player));
-
+            MyTimer.Reset();
+            MyTimer.Paused = false;
             return false;
         }
     }
@@ -283,7 +294,7 @@ namespace BuiltinBuffs.Positive
             dir = new Vector2(player.flipDirection, 0);
             if (player.bodyMode == Player.BodyModeIndex.ZeroG)
                 dir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
-            emitter = new JudgmentGhostPeriodicEmitter(player, room, 8, 1, 20, 0.4f);
+            emitter = new JudgmentGhostPeriodicEmitter(player, room, 8, 1, 20, 0.4f); 
             room.AddObject(emitter);
     
         }
@@ -298,7 +309,8 @@ namespace BuiltinBuffs.Positive
                 room.AddObject(new LightningBolt(origPos - dir*15, player.DangerPos + dir *20, 
                     0, 2, 0.75f, 0.5f, 200f / 360f, true)
                 { intensity = 1f });
-                player.SuperHardSetPosition(new Vector2(100, 100000));
+                player.SuperHardSetPosition(origPos);
+
                 emitter.Destroy();
                 Destroy();
 
@@ -596,7 +608,7 @@ namespace BuiltinBuffs.Positive
 
             }
             else if (counter == 8 + delay + cut)
-                BuffPostEffectManager.AddEffect(new CutEffect(0, duringTime - cut / 40f,0.3f,0.03f));
+                BuffPostEffectManager.AddEffect(new CutEffect(0, duringTime - cut / 40f,0.3f,0.03f) { IgnoreGameSpeed = true, IgnorePaused = true });
             else if (counter == 8 + delay + cut + 10)
             {
                 player.SuperHardSetPosition(pos);

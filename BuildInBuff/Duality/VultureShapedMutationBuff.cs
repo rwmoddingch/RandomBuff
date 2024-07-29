@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Numerics;
 using System.Runtime.Remoting.Messaging;
 using Newtonsoft.Json.Linq;
+using BuiltinBuffs.Negative;
 
 namespace BuiltinBuffs.Duality
 {
@@ -91,6 +92,9 @@ namespace BuiltinBuffs.Duality
             On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
             //On.VultureAI.DoIWantToBiteCreature += VultureAI_DoIWantToBiteCreature;
 
+            On.Player.CanEatMeat += Player_CanEatMeat;
+            On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten; 
+
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
@@ -109,7 +113,49 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
         }
+        public static void LongLifeCycleHookOn()
+        {
+            On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
+        }
         #region 额外特性
+
+        //允许吃肉
+        private static bool Player_CanEatMeat(On.Player.orig_CanEatMeat orig, Player self, Creature crit)
+        {
+            bool result = orig(self, crit);
+            if (self.EatMeatOmnivoreGreenList(crit) && crit.dead)
+            {
+                return !ModManager.MSC || self.pyroJumpCooldown <= 60f;
+            }
+            result = !(crit is IPlayerEdible) && crit.dead &&
+                     (!ModManager.CoopAvailable || !(crit is Player)) &&
+                     (!ModManager.MSC || self.pyroJumpCooldown <= 60f);
+            return result;
+        }
+
+        //修改获取的食物点数
+        private static int SlugcatStats_NourishmentOfObjectEaten(On.SlugcatStats.orig_NourishmentOfObjectEaten orig, SlugcatStats.Name slugcatIndex, IPlayerEdible eatenobject)
+        {
+            SlugcatStats.Name newSlugcatIndex = SlugcatStats.Name.Red;
+            int result = orig(newSlugcatIndex, eatenobject);
+            return result;
+        }
+        
+        //食量增大（需求+2，存储-1）
+        private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
+        {
+            IntVector2 origFoodRequirement = orig(slugcat);
+            int newHibernateRequirement = origFoodRequirement.y + 2;
+            int newTotalFoodRequirement = origFoodRequirement.x + 1;
+            if (newHibernateRequirement > newTotalFoodRequirement)
+            {
+                newHibernateRequirement++;
+                newTotalFoodRequirement = newHibernateRequirement;
+            }
+
+            return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
+        }
+
         //双手位置
         private static void SlugcatHand_Update(On.SlugcatHand.orig_Update orig, SlugcatHand self)
         {
@@ -1358,9 +1404,9 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.BigOneHand)
                 result = Player.ObjectGrabability.BigOneHand;
             else if (result == Player.ObjectGrabability.TwoHands)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
             else if (result == Player.ObjectGrabability.Drag)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
 
             return result;
         }
