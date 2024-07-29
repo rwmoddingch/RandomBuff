@@ -84,9 +84,6 @@ namespace BuiltinBuffs.Positive
                     c.Emit(OpCodes.Ldloc_S, (byte)11);
                     c.EmitDelegate<Func<Room, UpdatableAndDeletable, bool, bool>>((self, updatableAndDeletable, flag) =>
                     {
-                        if (Input.GetKeyDown(KeyCode.T) && BuffPlugin.DevEnabled)
-                            FlashShield.GetBuffData().Stack();
-
                         bool newFlag = false;
 
                         if ((updatableAndDeletable is Creature creature) &&
@@ -345,9 +342,25 @@ namespace BuiltinBuffs.Positive
                             }
                             else
                             {
-                                creature.Violence(this.owner.mainBodyChunk,
-                                Vector2.zero,//Custom.DirVec(this.owner.DangerPos, creature.DangerPos).normalized,//* Radius(level, 0f) / (Custom.Dist(this.owner.DangerPos, creature.DangerPos) + 0.5f * Radius(level, 0f))
-                                creature.mainBodyChunk, null, Creature.DamageType.Stab, 0.01f * level, 0f);
+                                creature.Violence(this.owner.mainBodyChunk, Vector2.zero, creature.mainBodyChunk, null, Creature.DamageType.Blunt, 0.01f * level, 0f);
+                                if (creature is Lizard)
+                                {
+                                    for(int m = 0; m < this.room.updateList.Count; m++)
+                                    {
+                                        if (this.room.updateList[m] is Spark && 
+                                            (this.room.updateList[m] as Spark).lizard == creature.graphicsModule &&
+                                            Custom.DistLess((this.room.updateList[m] as Spark).pos, this.owner.mainBodyChunk.pos, 30f))
+                                        {
+                                            this.room.updateList[m].Destroy();
+                                        }
+                                        else if (this.room.updateList[m] is StationaryEffect && 
+                                            (this.room.updateList[m] as StationaryEffect).lizard == creature.graphicsModule &&
+                                            Custom.DistLess((this.room.updateList[m] as StationaryEffect).pos, this.owner.mainBodyChunk.pos, 3f))
+                                        {
+                                            this.room.updateList[m].Destroy();
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -513,12 +526,36 @@ namespace BuiltinBuffs.Positive
                 {
                     case 0:
                     case 1:
-                        return 0.2f;
+                        return 0.05f;
                     case 2:
-                        return 0.25f;
+                        return 0.1f;
                     case 3:
+                        return 0.15f;
+                    case 4:
+                        return 0.2f;
                     default:
-                        return 0.33f;
+                        return 0.25f;
+                }
+            }
+        }
+
+        private float ColorRatio
+        {
+            get
+            {
+                switch (FlashShieldBuffEntry.StackLayer)
+                {
+                    case 0:
+                    case 1:
+                        return 0.4f;
+                    case 2:
+                        return 0.45f;
+                    case 3:
+                        return 0.5f;
+                    case 4:
+                        return 0.55f;
+                    default:
+                        return 0.6f;
                 }
             }
         }
@@ -535,7 +572,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return this.colorCount > Mathf.Max(0f, (1f - this.IlluminatedRatio) * this.colorCycle);
+                return this.colorCount > Mathf.Max(0f, (1f - this.ColorRatio) * this.colorCycle);
             }
         }
 
@@ -545,8 +582,8 @@ namespace BuiltinBuffs.Positive
             illuminatedCount = 0;
             illuminatedCycle = Mathf.RoundToInt(1f / IlluminatedRatio);
             isRecorded = false;
-            colorCount = 20;
-            colorCycle = 80;
+            colorCount = 10;
+            colorCycle = 30;
             oldColor = new Dictionary<FSprite, Color>();
             newColor = new Dictionary<FSprite, Color>();
             oldMeshColor = new Dictionary<FSprite, Color[]>();
@@ -570,7 +607,6 @@ namespace BuiltinBuffs.Positive
                 isRecorded = false;
             }
 
-
             if (colorCount > 0)
                 colorCount--;
             if (colorCount == 0 && ShouldBeFired())
@@ -579,7 +615,13 @@ namespace BuiltinBuffs.Positive
             //没有石化则逐渐解除冻结
             if (illuminatedCount > 0)
                 illuminatedCount--;
-
+            if (illuminatedCount == 0 && ShouldBeFired())
+            {
+                illuminatedCount = illuminatedCycle;
+                //图像
+                EmitterUpdate();
+            }
+            
             if (IsPetrified)
             {
                 foreach (var bodyChunk in creature.bodyChunks)
@@ -587,17 +629,6 @@ namespace BuiltinBuffs.Positive
                     bodyChunk.vel *= 0f;
                     bodyChunk.HardSetPosition(bodyChunk.pos);
                 }
-                if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
-                {
-                    heatModule.temperature = 0f;
-                }
-            }
-
-            if (illuminatedCount == 0 && ShouldBeFired())
-            {
-                illuminatedCount = illuminatedCycle;
-                //图像
-                EmitterUpdate();
             }
         }
 
@@ -613,7 +644,7 @@ namespace BuiltinBuffs.Positive
             if (IsColorPetrified && !isRecorded)
             {
                 isRecorded = true;
-                abstractCreature.realizedCreature.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Hard, abstractCreature.realizedCreature.mainBodyChunk);
+                abstractCreature.realizedCreature.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, abstractCreature.realizedCreature.mainBodyChunk.pos, 0.3f, 0.5f);
 
                 for (int i = 0; i < sLeaser.sprites.Length; i++)
                 {
@@ -624,7 +655,7 @@ namespace BuiltinBuffs.Positive
                         {
                             oldColor.Add(sLeaser.sprites[i], sLeaser.sprites[i].color == null ? backgroundColor : sLeaser.sprites[i].color);
                             Color.RGBToHSV(oldColor[sLeaser.sprites[i]], out var hue, out var s, out var light);
-                            newColor.Add(sLeaser.sprites[i], Color.HSVToRGB(hue, 0.3f * s, light));
+                            newColor.Add(sLeaser.sprites[i], Color.HSVToRGB(hue, 0.3f * s, Mathf.Min(1f, light + 0.3f)));
                         }
                         else
                         {
@@ -633,7 +664,7 @@ namespace BuiltinBuffs.Positive
                             for (int j = 0; j < mesh.vertices.Length; j++)
                             {
                                 Color.RGBToHSV(mesh.verticeColors[j], out var hue, out var s, out var light);
-                                hsvMeshColor[j] = Color.HSVToRGB(hue, 0.3f * s, light);
+                                hsvMeshColor[j] = Color.HSVToRGB(hue, 0.3f * s, Mathf.Min(1f, light + 0.3f));
                             }
                             newMeshColor.Add(sLeaser.sprites[i], hsvMeshColor);
                         }
@@ -642,13 +673,14 @@ namespace BuiltinBuffs.Positive
                     {
                         oldColor.Add(sLeaser.sprites[i], sLeaser.sprites[i].color == null ? backgroundColor : sLeaser.sprites[i].color);
                         Color.RGBToHSV(oldColor[sLeaser.sprites[i]], out var hue, out var s, out var light);
-                        newColor.Add(sLeaser.sprites[i], Color.HSVToRGB(hue, 0.3f * s, light));
+                        newColor.Add(sLeaser.sprites[i], Color.HSVToRGB(hue, 0.3f * s, Mathf.Min(1f, light + 0.3f)));
                     }
                 }
             }
             //石化
             if (IsColorPetrified)
             {
+                float colorLerp = (float)(this.colorCycle - this.colorCount) / ((1f - this.ColorRatio) * this.colorCycle);
                 for (int i = 0; i < sLeaser.sprites.Length; i++)
                 {
                     if (sLeaser.sprites[i] is TriangleMesh)
@@ -656,48 +688,72 @@ namespace BuiltinBuffs.Positive
                         var mesh = sLeaser.sprites[i] as TriangleMesh;
                         if (mesh.verticeColors == null && newColor.ContainsKey(sLeaser.sprites[i]))
                         {
-                            sLeaser.sprites[i].color = Color.Lerp(sLeaser.sprites[i].color, newColor[sLeaser.sprites[i]], 0.05f);
+                            sLeaser.sprites[i].color = Color.Lerp(oldColor[sLeaser.sprites[i]], newColor[sLeaser.sprites[i]], colorLerp);
                         }
                         else if (newMeshColor.ContainsKey(sLeaser.sprites[i]))
                         {
                             for (int j = 0; j < mesh.vertices.Length; j++)
-                                mesh.verticeColors[j] = Color.Lerp(mesh.verticeColors[j], newMeshColor[sLeaser.sprites[i]][j], 0.05f);
+                                mesh.verticeColors[j] = Color.Lerp(oldMeshColor[sLeaser.sprites[i]][j], newMeshColor[sLeaser.sprites[i]][j], colorLerp);
                         }
                     }
                     else if (newColor.ContainsKey(sLeaser.sprites[i]))
                     {
-                        sLeaser.sprites[i].color = Color.Lerp(sLeaser.sprites[i].color, newColor[sLeaser.sprites[i]], 0.05f);
+                        sLeaser.sprites[i].color = Color.Lerp(oldColor[sLeaser.sprites[i]], newColor[sLeaser.sprites[i]], colorLerp);
                     }
                 }
             }
             //还原
             else if (isRecorded)
             {
+                float colorLerp = (float)this.colorCount / (this.ColorRatio * this.colorCycle);
                 for (int i = 0; i < sLeaser.sprites.Length; i++)
                 {
                     if (sLeaser.sprites[i] is TriangleMesh)
                     {
                         var mesh = sLeaser.sprites[i] as TriangleMesh;
-                        if (mesh.verticeColors == null && oldColor.ContainsKey(sLeaser.sprites[i]))
+                        if (mesh.verticeColors == null && newColor.ContainsKey(sLeaser.sprites[i]))
                         {
-                            sLeaser.sprites[i].color = Color.Lerp(sLeaser.sprites[i].color, oldColor[sLeaser.sprites[i]], 0.05f);
+                            sLeaser.sprites[i].color = Color.Lerp(oldColor[sLeaser.sprites[i]], newColor[sLeaser.sprites[i]], colorLerp);
                         }
-                        else if (oldMeshColor.ContainsKey(sLeaser.sprites[i]))
+                        else if (newMeshColor.ContainsKey(sLeaser.sprites[i]))
                         {
                             for (int j = 0; j < mesh.vertices.Length; j++)
-                                mesh.verticeColors[j] = Color.Lerp(mesh.verticeColors[j], oldMeshColor[sLeaser.sprites[i]][j], 0.05f);
+                                mesh.verticeColors[j] = Color.Lerp(oldMeshColor[sLeaser.sprites[i]][j], newMeshColor[sLeaser.sprites[i]][j], colorLerp);
                         }
                     }
-                    else if (oldColor.ContainsKey(sLeaser.sprites[i]))
+                    else if (newColor.ContainsKey(sLeaser.sprites[i]))
                     {
-                        sLeaser.sprites[i].color = Color.Lerp(sLeaser.sprites[i].color, oldColor[sLeaser.sprites[i]], 0.05f);
+                        sLeaser.sprites[i].color = Color.Lerp(oldColor[sLeaser.sprites[i]], newColor[sLeaser.sprites[i]], colorLerp);
                     }
                 }
-                oldColor.Clear();
-                newColor.Clear();
-                oldMeshColor.Clear();
-                newMeshColor.Clear();
-                isRecorded = false;
+                if (this.colorCount <= 1f)
+                {
+                    for (int i = 0; i < sLeaser.sprites.Length; i++)
+                    {
+                        if (sLeaser.sprites[i] is TriangleMesh)
+                        {
+                            var mesh = sLeaser.sprites[i] as TriangleMesh;
+                            if (mesh.verticeColors == null && newColor.ContainsKey(sLeaser.sprites[i]))
+                            {
+                                sLeaser.sprites[i].color = oldColor[sLeaser.sprites[i]];
+                            }
+                            else if (newMeshColor.ContainsKey(sLeaser.sprites[i]))
+                            {
+                                for (int j = 0; j < mesh.vertices.Length; j++)
+                                    mesh.verticeColors[j] = oldMeshColor[sLeaser.sprites[i]][j];
+                            }
+                        }
+                        else if (newColor.ContainsKey(sLeaser.sprites[i]))
+                        {
+                            sLeaser.sprites[i].color = oldColor[sLeaser.sprites[i]];
+                        }
+                    }
+                    oldColor.Clear();
+                    newColor.Clear();
+                    oldMeshColor.Clear();
+                    newMeshColor.Clear();
+                    isRecorded = false;
+                }
             }
         }
 
@@ -722,7 +778,6 @@ namespace BuiltinBuffs.Positive
                 return false;
 
             bool shouldFire = true;
-            bool inRange = false;
             var self = abstractCreature.realizedCreature;
 
             foreach (var player in self.room.game.AlivePlayers.Select(i => i.realizedCreature as Player)
@@ -736,7 +791,7 @@ namespace BuiltinBuffs.Positive
                     return false;
             }
 
-            return shouldFire && inRange;
+            return shouldFire;
         }
 
         private void EmitterUpdate()
