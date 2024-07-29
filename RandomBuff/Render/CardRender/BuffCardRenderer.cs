@@ -148,9 +148,8 @@ namespace RandomBuff.Render.CardRender
             cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
             cardHighlightBackController.Init(this, _cardTextureBack, false);
             if (_cardQuadBack.TryGetComponent<Collider>(out var collider1))
-            {
                 Destroy(collider1);
-            }
+            
 
             Depth = 8.5f;
             Rotation = Vector2.zero;
