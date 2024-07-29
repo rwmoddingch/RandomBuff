@@ -4,7 +4,7 @@
     "BuffType": "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" :  true,
-    "Stackable" :  true,
+    "Stackable" :  false,
     "Color" : "#282a36",
     "Chinese":{
         "BuffName":"红包",

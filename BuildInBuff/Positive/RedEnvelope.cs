@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RWCustom;
@@ -14,6 +15,9 @@ namespace HotDogGains.Positive
     class RedEnvelopeBuff : Buff<RedEnvelopeBuff, RedEnvelopeBuffData>
     {
         public override BuffID ID => RedEnvelopeBuffEntry.RedEnvelopeID;
+
+
+
         public override bool Trigger(RainWorldGame game)
         {
             if (game.AlivePlayers.FirstOrDefault() != null && !game.AlivePlayers[0].realizedCreature.inShortcut &&
@@ -22,10 +26,16 @@ namespace HotDogGains.Positive
                 var player = game.AlivePlayers.FirstOrDefault().realizedCreature as Player;
                 for (int i = 0; i < Random.value*20; i++)
                 {
+                    var type = RXRandom.AnyItem(
+                        ExtEnum<DataPearl.AbstractDataPearl.DataPearlType>.values.entries.Where(s =>
+                            s != MoreSlugcatsEnums.DataPearlType.Spearmasterpearl.value &&
+                            s != DataPearl.AbstractDataPearl.DataPearlType.PebblesPearl.value).ToArray());
+
+
                     var pearl = new DataPearl.AbstractDataPearl(
                      game.world, AbstractPhysicalObject.AbstractObjectType.DataPearl, null,
                      player.room.GetWorldCoordinate(player.DangerPos), game.GetNewID(), -1, -1, null,
-                     new DataPearl.AbstractDataPearl.DataPearlType(ExtEnum<DataPearl.AbstractDataPearl.DataPearlType>.values.entries[Random.Range(0, ExtEnum<DataPearl.AbstractDataPearl.DataPearlType>.values.entries.Count)], false));
+                     new DataPearl.AbstractDataPearl.DataPearlType(type, false));
                     game.AlivePlayers[0].Room.AddEntity(pearl);
                     pearl.RealizeInRoom();
                     pearl.realizedObject.firstChunk.vel += Custom.RNV() * Random.value * 20;
@@ -35,6 +45,7 @@ namespace HotDogGains.Positive
             }
 
             return false;
+
         }
 
     }
