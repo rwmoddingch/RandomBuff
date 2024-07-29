@@ -70,11 +70,12 @@ namespace RandomBuff.Core.Hooks
 
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
-            if (Custom.rainWorld.BuffMode() && BuffCustom.TryGetGame(out var game))
+            if (Custom.rainWorld.BuffMode())
             {
+                _ = BuffCustom.TryGetGame(out var game);
                 self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
                 if (!IsCurrentFullRoomSettingNeed(BuffPoolManager.Instance?.GameSetting ??
-                                             BuffDataManager.Instance.GetGameSetting(game.StoryCharacter ??
+                                             BuffDataManager.Instance.GetGameSetting(game?.StoryCharacter ??
                                                  Custom.rainWorld.progression.PlayingAsSlugcat)) &&
                     RemoveRoomSettingList.Contains(self.abstractRoom.name))
                 {
@@ -91,7 +92,7 @@ namespace RandomBuff.Core.Hooks
         {
             "SL_C12", "SB_A14", "LF_A03", "SU_A43", "GW_A25", "SI_C02","HR_C01","Rock Bottom",
             "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL",
-            "SH_GOR02"
+            "SH_GOR02","SI_SAINTINTRO"
         };
     
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)

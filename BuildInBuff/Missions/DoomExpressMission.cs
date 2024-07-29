@@ -13,6 +13,7 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuffUtils;
+using TemplateGains;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
@@ -36,7 +37,7 @@ namespace BuiltinBuffs.Missions
                 }
             };
             startBuffSet.Add(RandomRainIBuffEntry.RandomRainBuffID);
-            startBuffSet.Add(HypothermiaIBuffEntry.HypothermiaID);
+            startBuffSet.Add(DequantizeBuffEntry.DequantizeID);
             startBuffSet.Add(FlyingAquaIBuffEntry.FlyingAquaBuffID);
             //startBuffSet.Add(); TODO:大洪水?
         }
