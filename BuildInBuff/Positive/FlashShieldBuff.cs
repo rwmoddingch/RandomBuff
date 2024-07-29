@@ -342,7 +342,7 @@ namespace BuiltinBuffs.Positive
                             }
                             else
                             {
-                                creature.Violence(this.owner.mainBodyChunk, Vector2.zero, creature.mainBodyChunk, null, Creature.DamageType.Blunt, 0.01f * level, 0f);
+                                creature.Violence(this.owner.mainBodyChunk, Vector2.zero, creature.mainBodyChunk, null, Creature.DamageType.Blunt, 0.007f + 0.003f * level, 0f);
                                 if (creature is Lizard)
                                 {
                                     for(int m = 0; m < this.room.updateList.Count; m++)
