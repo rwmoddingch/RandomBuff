@@ -373,6 +373,8 @@ namespace RandomBuff.Render.UI
                 {
                     cards.Add(card);
                     cards.Add(GetCardOfID(majorSelections[i]));
+
+                    BuffPlugin.Log($"CardPicked get id major : {card.ID}|{card}, {majorSelections[i]}|{GetCardOfID(majorSelections[i])}");
                 }
 
                 if (majorSelections[i] == card.ID)
@@ -380,6 +382,8 @@ namespace RandomBuff.Render.UI
                     cards.Add(card);
                     if (additionalSelections[i] != null)
                         cards.Add(GetCardOfID(additionalSelections[i]));
+
+                    BuffPlugin.Log($"CardPicked get id additional : {card.ID}|{card}, {additionalSelections[i]}|{GetCardOfID(additionalSelections[i])}");
                 }
             }
 

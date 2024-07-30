@@ -6,6 +6,7 @@ using RewiredConsts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -333,8 +334,28 @@ namespace RandomBuff
             return Mathf.Atan2(vec.y, vec.x);
         }
 
-      
-    
+        public static void TraceStack()
+        {
+            // 0 表示要忽略的帧数
+            // true 表示需要文件信息
+            var stack = new StackTrace(0, true);
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < stack.FrameCount; i++)
+            {
+                var frame = stack.GetFrame(i);
+                var trace = ""
+                    + "文件：" + frame.GetFileName()
+                    + "\n函数：" + frame.GetMethod().Name
+                    + "\n行号：" + frame.GetFileLineNumber()
+                    + "\n=>"
+                    ;
+                builder.AppendLine(trace);
+            }
+            builder.AppendLine("\n");
+            BuffPlugin.Log(builder.ToString());
+        }
+
         public static IEnumerable<BuffType> EnumBuffTypes()
         {
             yield return BuffType.Positive;

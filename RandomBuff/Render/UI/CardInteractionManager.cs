@@ -582,7 +582,7 @@ namespace RandomBuff.Render.UI
                     Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
                     Slot.completeSlot.SetPocketButtonShow(false);
                 }
-                Slot.completeSlot.Title?.ChangeTitle("", true);
+                Slot.completeSlot?.Title?.ChangeTitle("", true);
 
                 Slot.completeSlot?.SetGamePaused(false);
                 InputAgency.Current.RecoverLastIfIsFocus(this, false);
@@ -599,7 +599,7 @@ namespace RandomBuff.Render.UI
                     Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
                     Slot.completeSlot.SetPocketButtonShow(true);
                 }
-                Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
+                Slot.completeSlot?.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
 
                 Slot.completeSlot?.SetGamePaused(true);
                 InputAgency.Current.TakeFocus(this);
@@ -841,7 +841,7 @@ namespace RandomBuff.Render.UI
         public override void ManageCard(BuffCard card)
         {
             base.ManageCard(card);
-            BuffPlugin.Log($"Card picker manage card, {Slot.BuffCards.Count} in total");
+            BuffPlugin.Log($"Card picker manage card {card.ID}, {Slot.BuffCards.Count} in total");
         }
 
         public override void DismanageCard(BuffCard card)
@@ -852,7 +852,8 @@ namespace RandomBuff.Render.UI
             if (AdditionalCard.Contains(card))
                 Additional2MajorMapper.Remove(card);
             base.DismanageCard(card);
-            BuffPlugin.Log($"Card picker dismanage card, {Slot.BuffCards.Count} remains");
+            //Helper.TraceStack();
+            BuffPlugin.Log($"Card picker dismanage card {card.ID}, {Slot.BuffCards.Count} remains");
         }
 
         /// <summary>
@@ -927,17 +928,18 @@ namespace RandomBuff.Render.UI
                 CurrentFocusCard.OnMouseRightClick();
                 Slot.CardPicked(CurrentFocusCard);
 
-                if (Major2AdditionalMapper.TryGetValue(CurrentFocusCard, out var additional))
-                {
-                    additional.OnMouseRightClick();
-                    Slot.CardPicked(additional);
-                }
+                //if (Major2AdditionalMapper.TryGetValue(CurrentFocusCard, out var additional))
+                //{
+                //    BuffPlugin.Log($"{CurrentFocusCard.ID} => {additional.ID}");
+                //    additional.OnMouseRightClick();
+                //    Slot.CardPicked(additional);
+                //}
 
-                if (Additional2MajorMapper.TryGetValue(CurrentFocusCard, out var major))
-                {
-                    major.OnMouseRightClick();
-                    Slot.CardPicked(additional);
-                }
+                //if (Additional2MajorMapper.TryGetValue(CurrentFocusCard, out var major))
+                //{
+                //    major.OnMouseRightClick();
+                //    Slot.CardPicked(additional);
+                //}
             }
         }
     }
