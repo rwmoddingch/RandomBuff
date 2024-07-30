@@ -95,6 +95,12 @@ namespace RandomBuff.Render.UI.Component
         float startAlpha;
         public void SetShow(bool show)
         {
+            if (showAnim != null)
+            {
+                showAnim.Destroy();
+                showAnim = null;
+            }
+
             this.show = show;
             toggleShowCallBack?.Invoke(show);
             if (show)
@@ -153,6 +159,8 @@ namespace RandomBuff.Render.UI.Component
 
         public void SetSelectedBuffIDs(List<BuffID> buffIDs)
         {
+            currentSelectedBuffs.Clear();
+            lastSelectedBuffs.Clear();
             foreach (var buffID in buffIDs)
             {
                 currentSelectedBuffs.Add(buffID);
