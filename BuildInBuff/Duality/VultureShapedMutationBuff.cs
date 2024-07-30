@@ -1310,13 +1310,16 @@ namespace BuiltinBuffs.Duality
 
         public void Jump()
         {
-            for (int i = 0; i < this.wings.GetLength(0); i++)
+            if (this.wings != null)
             {
-                for (int j = 0; j < this.wings.GetLength(1); j++)
+                for (int i = 0; i < this.wings.GetLength(0); i++)
                 {
-                    if (this.wings[i, j].hasAnyGrip)
+                    for (int j = 0; j < this.wings.GetLength(1); j++)
                     {
-                        this.wings[i, j].ReleaseGrip();
+                        if (this.wings[i, j].hasAnyGrip)
+                        {
+                            this.wings[i, j].ReleaseGrip();
+                        }
                     }
                 }
             }

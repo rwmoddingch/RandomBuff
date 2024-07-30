@@ -9,6 +9,9 @@ using Mono.Cecil.Cil;
 using MoreSlugcats;
 using System.Linq;
 using System;
+using RandomBuff.Core.Game;
+using Mono.Cecil;
+using System.Reflection;
 
 namespace BuiltinBuffs.Negative
 {
@@ -24,6 +27,8 @@ namespace BuiltinBuffs.Negative
 
     internal class UpsideDownBuffEntry : IBuffEntry
     {
+        public static bool conflicted = false;
+        public static int detectCounter = 40;
         public static BuffID UpsideDownID = new BuffID("UpsideDown", true);
         public static ConditionalWeakTable<PlayerGraphics, HeadTailData> module = new ConditionalWeakTable<PlayerGraphics, HeadTailData>();
 
@@ -50,10 +55,12 @@ namespace BuiltinBuffs.Negative
             On.Player.Update += Player_Update;
         }
 
+        static FieldInfo fieldInfo;
         private static void Player_TerrainImpact(ILContext il)
         {
             ILCursor c = new ILCursor(il);
             ILLabel label = null;
+            fieldInfo = typeof(UpsideDownBuffEntry).GetField(nameof(conflicted), BindingFlags.Static | BindingFlags.Public);
             if (c.TryGotoNext(MoveType.After,
                 i => i.MatchLdarg((byte)3),
                 i => i.Match(OpCodes.Ldloc_0),
@@ -63,6 +70,8 @@ namespace BuiltinBuffs.Negative
                 c.Emit(OpCodes.Ldarg_1);
                 c.Emit(OpCodes.Ldc_I4_2);
                 c.Emit(OpCodes.Bge_S, label.Target);
+                c.Emit(OpCodes.Ldsfld, fieldInfo);
+                c.Emit(OpCodes.Brtrue, label.Target);
             }
 
             ILLabel label2 = null;
@@ -75,6 +84,8 @@ namespace BuiltinBuffs.Negative
                 c.Emit(OpCodes.Ldarg_1);
                 c.Emit(OpCodes.Ldc_I4_2);
                 c.Emit(OpCodes.Bge_S, label2.Target);
+                c.Emit(OpCodes.Ldsfld, fieldInfo);
+                c.Emit(OpCodes.Brtrue, label2.Target);
             }
         }
 
@@ -139,6 +150,21 @@ namespace BuiltinBuffs.Negative
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
+            detectCounter--;
+            if (!conflicted && detectCounter <= 0)
+            {
+                detectCounter = 40;
+                var poolInstance = BuffPoolManager.Instance.GetTemporaryBuffPool(UpsideDownID);
+                for (int i = 0; i < poolInstance.allBuffIDs.Count; i++)
+                {
+                    if (poolInstance.allBuffIDs[i].value == "SpringSlugID")
+                    {
+                        conflicted = true;
+                        break;
+                    }
+                }
+            }
+
             if (self.graphicsModule != null && module.TryGetValue(self.graphicsModule as PlayerGraphics, out var _module))
             {
                 if (self.tongue != null)

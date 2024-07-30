@@ -610,9 +610,12 @@ namespace RandomBuff.Render.UI
                 {
                     selectedAction = (s) =>
                     {
-                        SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
-                        SandboxPocket.SetShow(true);
-                        OpenPocketButton.SetSelected(false);
+                        if (!SandboxPocket.Show)
+                        {
+                            SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
+                            SandboxPocket.SetShow(true);
+                            OpenPocketButton.SetSelected(false);
+                        }
                     }
                 };
             }
@@ -783,10 +786,18 @@ namespace RandomBuff.Render.UI
 
         public void CardPocketCallBack(List<BuffID> all, List<BuffID> removed, List<BuffID> added)
         {
-            foreach(var buff in added)
-                BuffCore.CreateNewBuff(buff);
-            foreach(var buff in removed)
-                BuffPoolManager.Instance.UnstackBuff(buff);
+
+            foreach (var buff in added)
+            {
+                BuffPlugin.LogDebug($"add : {buff}");
+                buff.CreateNewBuff();
+            }
+
+            foreach (var buff in removed)
+            {
+                BuffPlugin.LogDebug($"remove : {buff}");
+                buff.UnstackBuff();
+            }
         }
 
         bool show;

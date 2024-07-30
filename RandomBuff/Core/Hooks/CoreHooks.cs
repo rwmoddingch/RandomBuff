@@ -73,33 +73,6 @@ namespace RandomBuff.Core.Hooks
             return orig(folder) || Directory.Exists(Path.Combine(folder, "buffplugins"));
         }
 
-        private static void ModApplyer_ApplyModsThread(ILContext il)
-        {
-            try
-            {
-                ILCursor c = new ILCursor(il);
-                c.GotoNext(MoveType.After,
-                    i => i.MatchLdsfld<ModManager>("InstalledMods"),
-                    i => i.MatchLdloc(8),
-                    i => i.Match(OpCodes.Callvirt),
-                    i => i.MatchLdfld<ModManager.Mod>("path"),
-                    i => i.MatchLdstr("plugins"),
-                    i => i.Match(OpCodes.Call),
-                    i => i.Match(OpCodes.Call),
-                    i=>i.Match(OpCodes.Brtrue_S));
-                var label = c.Previous.Operand as ILLabel;
-                c.Emit(OpCodes.Ldarg_0);
-                c.Emit(OpCodes.Ldloc_S,(byte)8);
-                c.EmitDelegate<Func<ModManager.ModApplyer, int, bool>>((self, i) =>
-                    Directory.Exists(Path.Combine(ModManager.InstalledMods[i].path, "buffplugins")));
-                c.Emit(OpCodes.Brtrue_S, label);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
 
         private static bool SlugcatStats_SlugcatUnlocked(On.SlugcatStats.orig_SlugcatUnlocked orig, SlugcatStats.Name i, RainWorld rainWorld)
         {

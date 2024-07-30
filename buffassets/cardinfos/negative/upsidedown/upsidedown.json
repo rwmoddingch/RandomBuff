@@ -5,6 +5,7 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "000000",
+      "Conflict": [ "SpringSlugID" ],
 
     "Chinese" : {
         "BuffName" : "本末倒置",

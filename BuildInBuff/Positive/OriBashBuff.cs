@@ -215,17 +215,17 @@ namespace BuiltinBuffs.Positive
 
             if (isBash)
             {
-                
+                var center = bashTarget ?? self;
                 dir = Vector3.Slerp(dir, GetInputDirection(self,sLeaser.sprites[startSprite].GetPosition()),0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
-                sLeaser.sprites[startSprite].x = Mathf.Lerp(self.mainBodyChunk.lastPos.x, self.mainBodyChunk.pos.x, timeStacker) - camPos.x;
-                sLeaser.sprites[startSprite].y = Mathf.Lerp(self.mainBodyChunk.lastPos.y, self.mainBodyChunk.pos.y, timeStacker) - camPos.y;
+                sLeaser.sprites[startSprite].x = Mathf.Lerp(center.mainBodyChunk.lastPos.x, center.mainBodyChunk.pos.x, timeStacker) - camPos.x;
+                sLeaser.sprites[startSprite].y = Mathf.Lerp(center.mainBodyChunk.lastPos.y, center.mainBodyChunk.pos.y, timeStacker) - camPos.y;
                 sLeaser.sprites[startSprite].scaleX = Mathf.Lerp(sLeaser.sprites[startSprite].scale,0.75f, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite].rotation = Custom.VecToDeg(Vector2.Perpendicular(dir));
                 sLeaser.sprites[startSprite + 1].scale = Mathf.Lerp(sLeaser.sprites[startSprite + 1].scale, 15, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite + 1].SetPosition(sLeaser.sprites[startSprite].GetPosition());
                 sLeaser.sprites[startSprite + 1].color = Color.white;
                 sLeaser.sprites[startSprite + 1].alpha = 1;
-
+                
                 if (!GetInput() || bashTarget == null || !self.Consious)
                 {
                     isBash = false;
@@ -348,6 +348,9 @@ namespace BuiltinBuffs.Positive
                                 bashTarget = creature.realizedCreature;
                                 OriBashBuffEntry.UpdateSpeed = 2;
                                 isBash = true;
+                                self.pyroParryCooldown = 0;
+                                self.canJump = 15;
+                                self.pyroJumpped = false;
                                 break;
                             }
                         }
@@ -355,7 +358,7 @@ namespace BuiltinBuffs.Positive
                 }
 
             }
-            else if (!Input.GetMouseButton(1))
+            else if (!GetInput())
             {
                 isPressUse = false;
             }

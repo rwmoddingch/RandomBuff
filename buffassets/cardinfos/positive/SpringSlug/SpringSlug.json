@@ -6,6 +6,7 @@
     "Triggerable" :  false,
     "Stackable" :  false,
     "Color" : "#282a36",
+    "Conflict": [ "UpsideDown" ],
     "Chinese":{
         "BuffName":"弹力蛞蝓",
         "Description":"摔落后会以一半的速度弹起"

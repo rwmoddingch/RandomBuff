@@ -84,7 +84,7 @@ namespace BuiltinBuffs.Positive
                         {
                             case 0:
                                 {
-                                    if (batteryModule.TryGetValue(self.Players[0].realizedCreature as Player, out var data0))
+                                    if (batteryModule.TryGetValue(self.Players[i].realizedCreature as Player, out var data0))
                                     {
                                         (buffData as SuperCapacitanceBuffData).energyRecord_1 = data0.energy;
                                     }
@@ -92,7 +92,7 @@ namespace BuiltinBuffs.Positive
                                 }
                             case 1:
                                 {
-                                    if (batteryModule.TryGetValue(self.Players[0].realizedCreature as Player, out var data1))
+                                    if (batteryModule.TryGetValue(self.Players[i].realizedCreature as Player, out var data1))
                                     {
                                         (buffData as SuperCapacitanceBuffData).energyRecord_2 = data1.energy;
                                     }
@@ -100,7 +100,7 @@ namespace BuiltinBuffs.Positive
                                 }
                             case 2:
                                 {
-                                    if (batteryModule.TryGetValue(self.Players[0].realizedCreature as Player, out var data2))
+                                    if (batteryModule.TryGetValue(self.Players[i].realizedCreature as Player, out var data2))
                                     {
                                         (buffData as SuperCapacitanceBuffData).energyRecord_3 = data2.energy;
                                     }
@@ -108,7 +108,7 @@ namespace BuiltinBuffs.Positive
                                 }
                             case 3:
                                 {
-                                    if (batteryModule.TryGetValue(self.Players[0].realizedCreature as Player, out var data3))
+                                    if (batteryModule.TryGetValue(self.Players[i].realizedCreature as Player, out var data3))
                                     {
                                         (buffData as SuperCapacitanceBuffData).energyRecord_4 = data3.energy;
                                     }
