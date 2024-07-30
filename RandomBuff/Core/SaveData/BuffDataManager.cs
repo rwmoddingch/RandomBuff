@@ -123,16 +123,16 @@ namespace RandomBuff.Core.SaveData
                     {
                         var data = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(id));
                         data.DataLoaded(true);
-                        BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                         if (BuffFile.Instance.LoadState == BuffFile.BuffFileLoadState.AfterLoad)
                         {
+                            BuffHookWarpper.EnableBuff(id, HookLifeTimeLevel.UntilQuit);
                             if (GetGameSetting(name).gachaTemplate is not SandboxGachaTemplate)
                             {
                                 BuffPlayerData.Instance.SlotRecord.AddCard(id.GetStaticData().BuffType);
                                 GetGameSetting(name).inGameRecord.AddCard(id.GetStaticData().BuffType);
                             }
                         }
-                        BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}");
+                        BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}, State:{BuffFile.Instance.LoadState.ToString()}");
                         allDatas[name].Add(id, data);
 
                     }
