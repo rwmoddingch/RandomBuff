@@ -782,7 +782,7 @@ namespace RandomBuff.Render.UI
             foreach(var buff in added)
                 BuffCore.CreateNewBuff(buff);
             foreach(var buff in removed)
-                BuffPoolManager.Instance.RemoveBuffAndData(buff);
+                BuffPoolManager.Instance.UnstackBuff(buff);
         }
 
         bool show;

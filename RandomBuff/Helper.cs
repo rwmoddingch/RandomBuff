@@ -333,41 +333,7 @@ namespace RandomBuff
             return Mathf.Atan2(vec.y, vec.x);
         }
 
-        public static IEnumerable<Type> SafeGetTypes(this Assembly assembly, bool logException = false)
-        {
-            Module[] modules;
-            Type[] types;
-            try
-            {
-                modules = assembly.GetModules(getResourceModules: false);
-            }
-            catch (Exception e)
-            {
-                if(logException)
-                    BuffPlugin.LogException(e);
-                modules = new Module[0];
-            }
-
-            for (int i = 0; i < modules.Length; i++)
-            {
-                try
-                {
-                    types = modules[i].GetTypes();
-                }
-                catch(Exception e)
-                {
-                    if (logException)
-                        BuffPlugin.LogException(e);
-                    types = new Type[0];
-                }
-
-                for (int j = 0; j < types.Length; j++)
-                {
-                    yield return types[j];
-                }
-            }
-            yield break;
-        }
+      
     
         public static IEnumerable<BuffType> EnumBuffTypes()
         {

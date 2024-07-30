@@ -42,11 +42,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 AbstractPhysicalObject.AbstractObjectType.Rock,
             };
             //TODO:暂时
-            //foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            //{
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
                 try
                 {
-                    foreach (var type in typeof(Player).Assembly.GetTypes())
+                    foreach (var type in assembly.SafeGetTypes())
                     {
                         var ba = type.BaseType;
                         if (type.IsSubclassOf(typeof(Creature)))
@@ -59,7 +59,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 {
                     BuffUtils.LogException("ExterminationCondition", ex);
                 }
-            //}
+            }
 
             foreach(var hook in creatureViolenceHooks)
             {
