@@ -37,7 +37,7 @@ namespace BuiltinBuffs.Positive
             On.Weapon.WeaponDeflect += Weapon_WeaponDeflect;
             On.Rock.DrawSprites += Rock_DrawSprites;
             On.Rock.HitSomething += Rock_HitSomething;
-            On.Player.Update += Player_Update;
+            //On.Player.Update += Player_Update;
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
