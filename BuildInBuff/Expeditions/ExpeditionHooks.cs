@@ -39,9 +39,9 @@ namespace BuiltinBuffs.Expeditions
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
                 {
-                    BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(self.session.characterStats));
-                    AyinBuffData.Ayin.CreateNewBuff();
-                    self.Win(false);
+                    //BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(self.session.characterStats));
+                    //AyinBuffData.Ayin.CreateNewBuff();
+                    //self.Win(false);
                     //foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
                     //{
                     //    if (con is FixedCycleCondition)
@@ -49,6 +49,7 @@ namespace BuiltinBuffs.Expeditions
 
                     //    con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
                     //}
+                    FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
@@ -63,7 +64,7 @@ namespace BuiltinBuffs.Expeditions
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.S))
                 {
-                    BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Fairy, 0);
+                    FakeCreatureBuffData.FakeCreatureID.UnstackBuff();
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )

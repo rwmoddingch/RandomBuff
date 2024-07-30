@@ -32,8 +32,10 @@ namespace BuiltinBuffs.Duality
         {
             if ((dataPearlType == DataPearl.AbstractDataPearl.DataPearlType.Misc || dataPearlType == DataPearl.AbstractDataPearl.DataPearlType.Misc2))
             {
+                
                 self.type = MoreSlugcatsEnums.AbstractObjectType.HalcyonPearl;
                 objType = MoreSlugcatsEnums.AbstractObjectType.HalcyonPearl;
+                dataPearlType = MoreSlugcatsEnums.DataPearlType.RM;
 
             }
             orig.Invoke(self, world, objType, realizedObject, pos, ID, originRoom, placedObjectIndex, consumableData, dataPearlType);

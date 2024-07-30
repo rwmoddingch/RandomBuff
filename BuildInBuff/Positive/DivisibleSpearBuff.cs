@@ -48,7 +48,7 @@ namespace BuiltinBuffs.Positive
 
         private static void Spear_ChangeMode(On.Spear.orig_ChangeMode orig, Spear self, Weapon.Mode newMode)
         {
-            if (modules.TryGetValue(self, out _))
+            if (modules.TryGetValue(self, out _) && newMode != Weapon.Mode.Thrown)
             {
                 self.Destroy();
                 BuffUtils.Log(DivisibleSpear, "Destroy split spear");
@@ -62,7 +62,7 @@ namespace BuiltinBuffs.Positive
         private class SpearModule{}
 
 
-        private static ConditionalWeakTable<Spear, SpearModule> modules = new ConditionalWeakTable<Spear, SpearModule>();
+        private static readonly ConditionalWeakTable<Spear, SpearModule> modules = new ConditionalWeakTable<Spear, SpearModule>();
 
     
 
@@ -78,7 +78,7 @@ namespace BuiltinBuffs.Positive
                 absSpaer.RealizeInRoom();
                 var newSpear = absSpaer.realizedObject as Spear;
                 newSpear.room = spear.room;
-                Vector2 vector = (self.firstChunk.pos + spear.throwDir.ToVector2() + dir) * 10f;
+                Vector2 vector = self.firstChunk.pos + (spear.throwDir.ToVector2() + dir) * 10f;
 
                 newSpear.Thrown(self, vector, null, spear.throwDir, Mathf.Lerp(1f, 1.5f, self.Adrenaline), false);
 
