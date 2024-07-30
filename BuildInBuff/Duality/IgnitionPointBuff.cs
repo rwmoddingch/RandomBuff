@@ -1309,15 +1309,9 @@ namespace BuiltinBuffs.Duality
 
                 //TODO: 这是一个临时的补充，不一定有效也不一定能解决根本问题
 
-                if (pos.x < fireIntensities.GetLength(0) && pos.y < fireIntensities.GetLength(1) && Random.value < 0.2f * fireIntensities[pos.x, pos.y])
+                if (pos.x >= 0 && pos.x < fireIntensities.GetLength(0) && pos.y >= 0 && pos.y < fireIntensities.GetLength(1) && Random.value < 0.2f * fireIntensities[pos.x, pos.y])
                     room.AddObject(new HolyFire.HolyFireSprite(middlePos + Random.value * 10f * Custom.RNV()));
             }
-
-            //for(int i = 0;i < burningTiles.Count; i++)
-            //{
-            //    labels[i].SetPosition(room.MiddleOfTile(burningTiles[i]) - room.game.cameras[0].pos);
-            //    labels[i].text = string.Format("{0:F1}", fireIntensities[burningTiles[i].x, burningTiles[i].y]);
-            //}
         }
 
         public override void Destroy()

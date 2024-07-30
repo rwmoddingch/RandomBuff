@@ -1,0 +1,17 @@
+{
+    "FaceName": "sensorbomb",
+    "BuffID" : "SensorBomb",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FF4A52",
+
+    "Chinese" : {
+        "BuffName" : "感应炸弹",
+        "Description" : "炸弹投出后不会再因为碰撞爆炸，而是在接近任意生物或速度接近静止时爆炸。"
+    },
+    "English": {
+        "BuffName" : "Sensor Bomb",
+        "Description" : "Instead of exploding from collision after being thrown, bombs explode when they are near any creature or at a speed close to static."
+    }
+}
