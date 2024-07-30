@@ -128,6 +128,7 @@ namespace RandomBuff.Render.UI
         public virtual void Destory()
         {
             BaseInteractionManager?.Destroy();
+            Container.RemoveAllChildren();
             Container.RemoveFromContainer();
         }
     }

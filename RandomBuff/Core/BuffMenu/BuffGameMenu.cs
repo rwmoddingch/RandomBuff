@@ -460,6 +460,8 @@ namespace RandomBuff.Core.BuffMenu
             if (!loaded)
                 return;
             base.Update();
+            InputAgency.StaticUpdate();
+
             menuSlot.Update();
 
             lastScroll = scroll;
@@ -595,12 +597,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public void TestFunction()
         {
-            if (extraInfoPage.Show)
-                extraInfoPage.EscLogic();
-            else if(newGameDetailPage.Show || continueDetailPage.Show || (missionPage.Show && BuffNewGameMissionPage.pickedMission != null))
-            {
-                ShowExtraInfo();
-            }
+            manager.RequestMainProcessSwitch(BuffEnums.ProcessID.CreditID);
         }
 
         public void EscLogic()
