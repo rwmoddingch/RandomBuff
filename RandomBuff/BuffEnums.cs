@@ -13,6 +13,7 @@ namespace RandomBuff
             public static ProcessManager.ProcessID TestStartGameMenu = new("TestStartGameMenu");
             public static ProcessManager.ProcessID BuffGameWinScreen = new ProcessManager.ProcessID("BuffGameWinScreen", true);
             public static ProcessManager.ProcessID Cardpedia = new ProcessManager.ProcessID("Cardpedia", true);
+            public static ProcessManager.ProcessID CreditID = new ProcessManager.ProcessID("RandomBufdCredit", true);
         }
     }
 }

@@ -137,7 +137,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Core\BuffMenu\MenuObjects\" />
-    <Folder Include="Credit\" />
   </ItemGroup>
   <ItemGroup>
     <Reference Update="System">

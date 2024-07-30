@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace RandomBuff.Render.UI
 {
-    internal abstract class CardInteractionManager
+    internal abstract class CardInteractionManager: IInputAgencyFocusable
     {
         //常量
         const int Double_ClickThreashold = 10;//单击双击阈值（逻辑帧） 
@@ -130,6 +130,66 @@ namespace RandomBuff.Render.UI
                 card.Destroy();
             }
             managedCards.Clear();
+        }
+
+        public virtual Vector2? CurrentFocusedObjectPos()
+        {
+            if (CurrentFocusCard != null)
+                return CurrentFocusCard.Position;
+            return null;
+        }
+
+        public virtual Vector2 GetNextFocusableOjectPos(Vector2 inputDirection)
+        {
+            inputDirection = inputDirection.normalized;
+            Vector2 currentPos = InputAgency.Current.GetMousePosition();
+
+            if (inputDirection == Vector2.zero)
+                return currentPos;
+
+            Vector2 nextSelectPosition = Vector2.zero;
+            float minAngleDistanceFactor = float.MaxValue;
+            //float minDistance = float.MaxValue;
+            //float minAngleDelta = float.MaxValue;
+
+            foreach (var buffcardPos in GetAllFocusableObjectPos())
+            {
+                if (Vector2.Distance(buffcardPos, currentPos) < 10f)
+                    continue;
+
+                Vector2 delta = buffcardPos - currentPos;
+                float angleFactor = Vector2.Dot(delta.normalized, inputDirection);
+
+                if (angleFactor <= 0)//小于等于0表明位于另一个方向上了
+                    continue;
+
+                angleFactor = Mathf.Lerp(1f, 0.2f, angleFactor);//防止等于0乘算导致距离影响因子无效
+                float angleDistanceFactor = angleFactor * delta.magnitude;
+
+                if (angleDistanceFactor < minAngleDistanceFactor)
+                {
+                    minAngleDistanceFactor = angleDistanceFactor;
+                    nextSelectPosition = buffcardPos;
+                }
+            }
+
+            if (nextSelectPosition != Vector2.zero)
+                return nextSelectPosition;
+
+            return currentPos;
+        }
+
+        public virtual Vector2 GetDefaultFocusableObjectPos()
+        {
+            if (managedCards.Count == 0)
+                return Vector2.zero;
+            return managedCards.First().Position;
+        }
+
+        public virtual IEnumerable<Vector2> GetAllFocusableObjectPos()
+        {
+            foreach(var buffcard in managedCards)
+                yield return buffcard.Position;
         }
     }
 
@@ -543,6 +603,12 @@ namespace RandomBuff.Render.UI
 
                 Slot.completeSlot?.SetGamePaused(true);
                 InputAgency.Current.TakeFocus(this);
+
+                //用于在动画完成时更新鼠标位置
+                AnimMachine.GetDelayCmpnt(30, autoDestroy: true).BindActions(OnAnimFinished: (d) =>
+                {
+                    InputAgency.Current.ResetToDefaultPos();
+                });
             }
             else if(newState == State.ExclusiveShow)
             {
@@ -554,6 +620,24 @@ namespace RandomBuff.Render.UI
 
                 Slot.completeSlot?.SetGamePaused(true);
             }
+        }
+
+        public override Vector2 GetNextFocusableOjectPos(Vector2 inputDirection)
+        {
+            if (currentState == State.ExclusiveShow)
+                return exclusiveShowCard.Position;
+            else if (currentState == State.Hide)
+                return Vector2.zero;
+            return base.GetNextFocusableOjectPos(inputDirection);
+        }
+
+        public override IEnumerable<Vector2> GetAllFocusableObjectPos()
+        {
+            foreach(var item in base.GetAllFocusableObjectPos())
+                yield return item;
+
+            if (Slot.completeSlot != null && Slot.completeSlot.OpenPocketButton != null)
+                yield return Slot.completeSlot.OpenPocketButton.MiddleOfButton();
         }
 
         public class KeyBinderProcessor

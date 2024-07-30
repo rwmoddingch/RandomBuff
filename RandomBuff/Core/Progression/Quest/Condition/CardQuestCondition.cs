@@ -84,7 +84,7 @@ namespace RandomBuff.Core.Progression.Quest.Condition
         [JsonProperty(PropertyName = "SingleRun")]
         private bool isSingleRun;
 
-        [JsonProperty(PropertyName = "TargetCount")] 
+        [JsonProperty] 
         private int count;
 
         private bool isAll;

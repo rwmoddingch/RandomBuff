@@ -46,12 +46,13 @@ namespace RandomBuff.Core.Game
             foreach(var type in types)
                 copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             copyUnique.RemoveAll(alreadyHas.Contains);
-      
             copyUnique.RemoveAll(i =>i.GetStaticData().NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
+
+
             copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁
 
-            copyUnique.RemoveAll(i => conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j)));//去除冲突
-
+            copyUnique.RemoveAll(i => conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j)));//去除冲突（类别或名称）
+            copyUnique.RemoveAll(i => i.GetStaticData().Conflict.Contains(name.value));//对应猫
             if (copyUnique.Count < pickCount)
             {
                 return null;

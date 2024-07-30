@@ -17,6 +17,7 @@ using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.StaticsScreen;
+using RandomBuff.Credit;
 using RWCustom;
 using UnityEngine;
 using static RandomBuff.Core.BuffMenu.BuffGameMenu;
@@ -167,6 +168,10 @@ namespace RandomBuff.Core.Hooks
             else if(ID == BuffEnums.ProcessID.BuffGameWinScreen)
             {
                 self.currentMainLoop = new BuffGameWinScreen(self);
+            }
+            else if(ID == BuffEnums.ProcessID.CreditID)
+            {
+                self.currentMainLoop = new BuffCreditMenu(self);
             }
             orig(self, ID);
       

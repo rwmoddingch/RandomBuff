@@ -31,15 +31,20 @@ namespace BuiltinBuffs.Negative
             int totalCreatureInRegin = 0;
             List<AbstractCreature> abstractCreaturesToAdd = new List<AbstractCreature>();
             Dictionary<AbstractCreature, AbstractRoom> cretToRoom = new Dictionary<AbstractCreature, AbstractRoom>();
+
+            foreach(var room in world.abstractRooms.Where((room) => !room.shelter && !room.gate))
+            {
+                totalCreatureInRegin += room.entities.Count((entity) => entity is AbstractCreature);
+                totalCreatureInRegin += room.entitiesInDens.Count((entity) => entity is AbstractCreature);
+            }
+
             foreach (var abRoom in world.abstractRooms)
             {
                 if (!abRoom.shelter && !abRoom.gate)
                 {
                     if (abRoom.entities.Count > 0)
                     {
-                        AbstractWorldEntity[] entityCopy = new AbstractWorldEntity[abRoom.entities.Count];
-                        abRoom.entities.CopyTo(entityCopy);
-                        foreach (var entity in entityCopy)
+                        foreach (var entity in abRoom.entities.ToArray())
                         {
                             if (totalCreatureInRegin > creatureLimit) break;
                             if (entity is AbstractCreature)

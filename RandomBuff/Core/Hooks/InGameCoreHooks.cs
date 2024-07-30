@@ -56,13 +56,17 @@ namespace RandomBuff.Core.Hooks
             On.Room.Loaded += Room_Loaded;
         }
 
+        private static bool lastBuffShowCursor = false;
+
+
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
-            if (BuffHud.Instance?.NeedShowCursor ?? false)
+            if ((BuffHud.Instance?.NeedShowCursor ?? false))
                 Cursor.visible = true;
-            else
+            else if(lastBuffShowCursor != (BuffHud.Instance?.NeedShowCursor ?? false))
                 Cursor.visible = self.devUI != null || !self.rainWorld.options.fullScreen;
+            lastBuffShowCursor = (BuffHud.Instance?.NeedShowCursor ?? false);
         }
 
 
@@ -91,8 +95,8 @@ namespace RandomBuff.Core.Hooks
         private static readonly HashSet<string> RemoveRoomSettingList = new()
         {
             "SL_C12", "SB_A14", "LF_A03", "SU_A43", "GW_A25", "SI_C02","HR_C01","Rock Bottom",
-            "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL",
-            "SH_GOR02","SI_SAINTINTRO"
+            "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL","SL_AI",
+            "SH_GOR02","SI_SAINTINTRO","GW_A24"
         };
     
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
@@ -156,10 +160,6 @@ namespace RandomBuff.Core.Hooks
                 {
                     BuffPlugin.LogDebug($"Force start pos:{pos}");
                     self.denPosition = self.lastVanillaDen = pos;
-                }
-                else if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-                {
-                    self.denPosition = self.lastVanillaDen = "SU_INTRO01";
                 }
             }
         }

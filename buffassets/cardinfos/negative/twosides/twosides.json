@@ -1,0 +1,17 @@
+{
+  "FaceName": "twosides",
+  "BuffID": "TwoSides",
+  "BuffType": "Negative",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Color": "333333",
+
+  "Chinese": {
+    "BuffName": "两面性",
+    "Description": "一发向前，一发向后。"
+  },
+  "English": {
+    "BuffName": "Two Sides",
+    "Description": "One shot forward, one shot back."
+  }
+}

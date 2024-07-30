@@ -160,7 +160,7 @@ namespace RandomBuff.Core.Game
 
             if (BuffConfigManager.GetStaticData(id).Stackable)
             {
-                BuffPlugin.LogError($"UnStack buff : {Game.StoryCharacter}");
+                BuffPlugin.Log($"UnStack buff : {Game.StoryCharacter}:{id}");
                 try
                 {
                     cycleDatas[id].UnStack();

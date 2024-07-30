@@ -10,6 +10,7 @@ using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI.Component;
+using RandomBuffUtils;
 
 namespace RandomBuff.Core.Game.Settings.Missions
 {
@@ -44,7 +45,8 @@ namespace RandomBuff.Core.Game.Settings.Missions
         {
             foreach (var _assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (var type in _assembly.GetTypes())
+        
+                foreach (var type in _assembly.SafeGetTypes())
                 {
                     if (type.GetInterfaces().Contains(typeof(IMissionEntry)))
                     {

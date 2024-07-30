@@ -55,6 +55,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             BinahScreenEffect = bundle.LoadAsset<Shader>("BinahScreenEffect");
             BinahScreenEffectTexture = bundle.LoadAsset<Texture2D>("CameraFilterPack_Blizzard1");
+            AyinScreenEffect = bundle.LoadAsset<Shader>("AyinPost");
 
             BuffSounds.LoadSound(BinahAtkStone, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
                 new BuffSoundData("Binah_Atk_Stone"));
@@ -85,6 +86,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
 
         public static Shader BinahScreenEffect;
+        public static Shader AyinScreenEffect;
+
         public static Texture2D BinahScreenEffectTexture;
 
     }

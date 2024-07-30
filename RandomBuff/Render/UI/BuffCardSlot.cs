@@ -128,6 +128,7 @@ namespace RandomBuff.Render.UI
         public virtual void Destory()
         {
             BaseInteractionManager?.Destroy();
+            Container.RemoveAllChildren();
             Container.RemoveFromContainer();
         }
     }
@@ -573,7 +574,7 @@ namespace RandomBuff.Render.UI
             Title = slotTitle;
             BuffCards = null;//不直接管理卡牌，所以设置为null来提前触发异常
             BaseInteractionManager = new DoNotingInteractionManager<CommmmmmmmmmmmmmpleteInGameSlot>(this);
-            InputAgency.Current.TakeFocus(BaseInteractionManager);
+            //InputAgency.Current.TakeFocus(BaseInteractionManager);
 
             BasicSlot = new BasicInGameBuffCardSlot(true, this);
             ActiveAnimSlot = new ActivateCardAnimSlot(this);
@@ -781,7 +782,7 @@ namespace RandomBuff.Render.UI
             foreach(var buff in added)
                 BuffCore.CreateNewBuff(buff);
             foreach(var buff in removed)
-                BuffPoolManager.Instance.RemoveBuffAndData(buff);
+                BuffPoolManager.Instance.UnstackBuff(buff);
         }
 
         bool show;
@@ -1131,6 +1132,7 @@ namespace RandomBuff.Render.UI
         {
             this.cardpediaMenu = cardpediaMenu;
             BaseInteractionManager = new ClickSignalInteractionManager<CardpediaSlot>(this);
+            InputAgency.Current.TakeFocus(BaseInteractionManager);
         }
 
         public void SwitchPage(params BuffID[] newPageIDs)
@@ -1149,6 +1151,12 @@ namespace RandomBuff.Render.UI
         public void AddListener(Action<BuffCard> mouseEvent)
         {
             (BaseInteractionManager as ClickSignalInteractionManager<CardpediaSlot>).OnBuffCardSingleClick += mouseEvent; 
+        }
+
+        public override void Destory()
+        {
+            base.Destory();
+            InputAgency.AllRelease();
         }
     }
 }

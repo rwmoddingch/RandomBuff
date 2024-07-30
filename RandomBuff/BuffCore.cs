@@ -160,5 +160,16 @@ namespace RandomBuff
             return BuffConfigManager.GetStaticData(id);
         }
 
+        public static bool UnstackBuff(this BuffID id)
+        {
+            if (BuffPoolManager.Instance != null && BuffPoolManager.Instance.TryGetBuff(id, out _))
+            {
+                BuffPoolManager.Instance.UnstackBuff(id);
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }
