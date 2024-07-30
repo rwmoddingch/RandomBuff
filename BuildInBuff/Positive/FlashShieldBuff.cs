@@ -342,7 +342,8 @@ namespace BuiltinBuffs.Positive
                             }
                             else
                             {
-                                creature.Violence(this.owner.mainBodyChunk, Vector2.zero, creature.mainBodyChunk, null, Creature.DamageType.Blunt, 0.007f + 0.003f * level, 0f);
+                                float damage = Custom.LerpMap((creature.State as HealthState).ClampedHealth, 0f, 10f, 0.002f + 0.001f * level, 0.007f + 0.0035f * level);
+                                creature.Violence(this.owner.mainBodyChunk, Vector2.zero, creature.mainBodyChunk, null, Creature.DamageType.Blunt, damage, 0f);
                                 if (creature is Lizard)
                                 {
                                     for(int m = 0; m < this.room.updateList.Count; m++)
