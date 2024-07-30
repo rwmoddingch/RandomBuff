@@ -108,6 +108,10 @@ namespace BuiltinBuffs.Negative
             World world = abRoom.world;
             CreatureTemplate.Type type = origCreature.creatureTemplate.type;
             if (type == null) return null;
+            else if (type == CreatureTemplate.Type.GarbageWorm)
+                return null;
+            else if (type == CreatureTemplate.Type.Slugcat)
+                return null;
 
             WorldCoordinate pos = origCreature.pos;
             AbstractCreature abstractCreature = new AbstractCreature(world, StaticWorld.GetCreatureTemplate(type), null, pos, world.game.GetNewID());

@@ -106,7 +106,7 @@ namespace BuiltinBuffs.Duality
                     //self.HypothermiaGain = Mathf.Lerp(0f, self.HypothermiaGain, Mathf.InverseLerp(-0.5f, self.room.game.IsStorySession ? 1f : 3.6f, self.room.world.rainCycle.CycleProgression));
                     self.HypothermiaGain *= Mathf.InverseLerp(50f, -10f, self.TotalMass);
                     if(self.Hypothermia > 0f) 
-                        self.HypothermiaGain *= 8f;
+                        self.HypothermiaGain *= self is Player ? 2f : 8f;
                 }
                 else
                 {
