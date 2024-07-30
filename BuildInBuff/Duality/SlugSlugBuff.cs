@@ -47,6 +47,14 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
         }
 
+        public static bool CanEatEdible(PhysicalObject physicalObject)
+        {
+            if (!(physicalObject is IPlayerEdible)) return false;
+            if (physicalObject is Hazer && !(physicalObject as Hazer).hasSprayed) return false;
+            if (physicalObject is VultureGrub && !(physicalObject as VultureGrub).dead) return false;
+            return true;
+        }
+
         private static void Creature_SuckedIntoShortCut(On.Creature.orig_SuckedIntoShortCut orig, Creature self, IntVector2 entrancePos, bool carriedByOther)
         {
             if (self is Player && slugSlugModule.TryGetValue(self as Player, out var module))
@@ -76,19 +84,27 @@ namespace BuiltinBuffs.Duality
 
                     module.grabCounter++;
 
-                    if (module.mouthGrasp.grabbed is IPlayerEdible)
+                    if ((module.mouthGrasp.grabbed is IPlayerEdible && (!(module.mouthGrasp.grabbed is Centipede) || (module.mouthGrasp.grabbed as Centipede).Small)) || module.mouthGrasp.grabbed is WaterNut)
                     {
                         if (module.grabCounter > 40)
                         {
-                            for (int i = 0; i < 3; i++)
-                            {
-                                self.room.AddObject(new WaterDrip(self.mainBodyChunk.pos, 5f * Custom.RNV(), false));
-                            }
-                            module.BiteEdibleObject(eu);
                             module.grabCounter = 0;
 
+                            if (self.FoodInStomach < self.MaxFoodInStomach && CanEatEdible(module.mouthGrasp.grabbed))
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    self.room.AddObject(new WaterDrip(self.mainBodyChunk.pos, 5f * Custom.RNV(), false));
+                                }
+                                module.BiteEdibleObject(eu);                               
+                            }
+                            else
+                            {
+                                //(module.mouthGrasp.grabbed as WaterNut).AbstrNut.Consume();
+                                //(module.mouthGrasp.grabbed as WaterNut).stalk = null;
+                               module.ReleaseGrasp();
+                            }
                         }
-
                     }
                     else
                     {
@@ -134,7 +150,7 @@ namespace BuiltinBuffs.Duality
                 if (slugSlugModule.TryGetValue(self as Player, out var module))
                 {
                     bool flag = obj is Creature && (self as Player).CanEatMeat(obj as Creature);
-                    bool flag2 = obj is IPlayerEdible;
+                    bool flag2 = obj is IPlayerEdible || obj is WaterNut;
                     if (!(flag || flag2)) return false;
 
                     if (module.mouthGrasp != null) return false;
@@ -147,6 +163,8 @@ namespace BuiltinBuffs.Duality
 
                     module.mouthGrasp = new Creature.Grasp(self, obj, 0, chunkGrabbed, shareability, dominance, pacifying);
                     obj.Grabbed(module.mouthGrasp);
+                    module.grabChunkCollisionRad = module.mouthGrasp.grabbed.collisionRange;
+                    obj.collisionRange = -200f;
                     new AbstractPhysicalObject.CreatureGripStick(self.abstractCreature, obj.abstractPhysicalObject, graspUsed, pacifying || obj.TotalMass < self.TotalMass);
                     return true;
                 }
@@ -172,9 +190,10 @@ namespace BuiltinBuffs.Duality
 
             if (slugSlugModule.TryGetValue(self.player, out var module))
             {
-                if (module.mouthGrasp != null && module.mouthGrasp.grabbed is IPlayerEdible)
+                if (module.mouthGrasp != null)
                 {
                     module.mouthGrasp.grabbed.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition() + camPos);
+                    module.mouthGrasp.grabbed.firstChunk.vel *= 0f;                    
                 }
             }
         }
@@ -184,6 +203,7 @@ namespace BuiltinBuffs.Duality
         {
             public Player self;
             public Creature.Grasp mouthGrasp;
+            public float grabChunkCollisionRad;
             public int grabCounter;
             public SlugSlugModule(Player player)
             {
@@ -193,7 +213,9 @@ namespace BuiltinBuffs.Duality
             public void ReleaseGrasp()
             {
                 try
-                {
+                {                 
+                    if (mouthGrasp != null) mouthGrasp.grabbed.collisionRange = grabChunkCollisionRad;
+                    grabChunkCollisionRad = -1f;
                     mouthGrasp?.Release();
                     mouthGrasp = null;
                 }
