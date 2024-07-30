@@ -67,7 +67,7 @@ namespace BuiltinBuffs.Duality
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
-            if (!slugSlugModule.TryGetValue(self, out var slugslug))
+            if (!slugSlugModule.TryGetValue(self, out var slugslug) && self.slugcatStats.name != MoreSlugcatsEnums.SlugcatStatsName.Spear)
             {
                 slugSlugModule.Add(self, new SlugSlugModule(self));
             }
@@ -175,21 +175,23 @@ namespace BuiltinBuffs.Duality
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!slugSlugModule.TryGetValue(self, out var module))
+            if (!slugSlugModule.TryGetValue(self, out var module) && self.slugcatStats.name != MoreSlugcatsEnums.SlugcatStatsName.Spear)
+            {
                 slugSlugModule.Add(self, new SlugSlugModule(self));
-            self.slugcatStats.corridorClimbSpeedFac *= 1.5f;
+                self.slugcatStats.corridorClimbSpeedFac *= 1.5f;
+            }            
         }
 
         private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            orig(self, sLeaser, rCam, timeStacker, camPos);
-            for (int i = 5; i <= 8; i++)
-            {
-                sLeaser.sprites[i].isVisible = false;
-            }
-
+            orig(self, sLeaser, rCam, timeStacker, camPos);           
             if (slugSlugModule.TryGetValue(self.player, out var module))
             {
+                for (int i = 5; i <= 8; i++)
+                {
+                    sLeaser.sprites[i].isVisible = false;
+                }
+
                 if (module.mouthGrasp != null)
                 {
                     module.mouthGrasp.grabbed.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition() + camPos);

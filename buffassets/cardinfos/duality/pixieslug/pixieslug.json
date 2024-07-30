@@ -8,10 +8,10 @@
     
     "Chinese" : {
         "BuffName" : "蛞蝓仙子",
-        "Description" : "玩家长出彩色蝠蝇翅膀，空中每次按跳跃可扇动一下（有短暂冷却），且无需进食，但很容易被攻击杀死"
+        "Description" : "玩家长出彩色蝠蝇翅膀，空中每次按跳跃可扇动一下（有短暂冷却），且无需进食，但很容易被攻击杀死，烟雾果的烟雾也将变得致命"
     },
     "English": {
         "BuffName" : "PixieSlug",
-        "Description" : "The slugcat will gain fansy batfly wings. You can flap by pressing jump in the air (has a short cooldown) and don't need to eat, but are easier to get killed."
+        "Description" : "The slugcat will gain fansy batfly wings. You can flap by pressing jump in the air (has a short cooldown) and don't need to eat, but are easier to get killed and will die from spore cloud like other insects."
     }
 }
