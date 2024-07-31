@@ -624,10 +624,13 @@ namespace RandomBuff.Core.ProgressionUI
         Vector2 lastMouseScreenPos;
 
         Vector2 setAnchor = new Vector2(0f, 1f);
-        Vector2 anchor = new Vector2(0f, 1f);//左上
+        Vector2 anchor = new Vector2(0f, 0f);//左上
         Vector2 lastAnchor = new Vector2(0f, 0f);
 
         Vector2 size = new Vector2(400f, 300f);
+
+        bool shouldHideHover;
+        QuestInfo? lastRequestedQuestInfo;
 
         QuestInfo currentInfo;
 
@@ -676,20 +679,6 @@ namespace RandomBuff.Core.ProgressionUI
                     alpha = setAlpha;
             }
 
-            //lastMouseScreenPos = mouseScreenPos;
-            //mouseScreenPos = Futile.mousePosition;
-
-
-            //计算边角坐标，切换锚点，防止超出屏幕
-            //float xAnchorBiasPos = (1f - setAnchor.x * 2f) * size.x + mouseScreenPos.x;
-            //float yAnchorBiasPos = (1f - setAnchor.y * 2f) * size.y + mouseScreenPos.y;
-
-            //if(xAnchorBiasPos < 0f || xAnchorBiasPos > Custom.rainWorld.options.ScreenSize.x)
-            //    setAnchor.x = 1f - setAnchor.x;
-
-            //if (yAnchorBiasPos < 0f || yAnchorBiasPos > Custom.rainWorld.options.ScreenSize.y)
-            //    setAnchor.y = 1f - setAnchor.y;
-
             lastAnchor = anchor;
             if (anchor != setAnchor)
             {
@@ -700,6 +689,19 @@ namespace RandomBuff.Core.ProgressionUI
                 }
             }
             questRendererManager.Update();
+
+            if(shouldHideHover)
+            {
+                shouldHideHover = false;
+                if (lastRequestedQuestInfo == null)
+                    _InternalHide();
+            }
+
+            if(lastRequestedQuestInfo != null)
+            {
+                _InternalDisplayInfo(lastRequestedQuestInfo.Value);
+                lastRequestedQuestInfo = null;
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -715,6 +717,7 @@ namespace RandomBuff.Core.ProgressionUI
 
             background.SetPosition(smoothPos);
             background.alpha = alpha;
+
 
             leftBound.SetPosition(smoothPos + new Vector2((-smoothAnchor.x) * size.x , (1f - smoothAnchor.y) * size.y));
             leftBound.scaleY = size.y;
@@ -792,7 +795,8 @@ namespace RandomBuff.Core.ProgressionUI
             questRendererManager.Destroy();
         }
 
-        public void DisplayInfo(QuestButton.QuestInfo questInfo)
+
+        void _InternalDisplayInfo(QuestInfo questInfo)
         {
             mouseScreenPos = Futile.mousePosition;
             setAlpha = 1.0f;
@@ -935,8 +939,17 @@ namespace RandomBuff.Core.ProgressionUI
                 yBias -= buffCardLeasers.First().rect.y + smallGap;
         }
 
+        public void DisplayInfo(QuestInfo questInfo)
+        {
+            lastRequestedQuestInfo = questInfo;
+        }
 
         public void Hide()
+        {
+            shouldHideHover = true;
+        }
+
+        void _InternalHide()
         {
             setAlpha = 0f;
         }

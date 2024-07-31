@@ -10,7 +10,7 @@ using static RandomBuffUtils.PlayerUtils;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
-    internal class CrownCosmetic : CosmeticUnlock
+    internal class BuffCrownCosmetic : CosmeticUnlock
     {
         public override CosmeticUnlockID UnlockID => CosmeticUnlockID.Crown;
 
@@ -40,10 +40,18 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public class CrownGraphicsModule : PlayerUtils.PlayerModuleGraphicPart
         {
+            Vector2 pos;
+            Vector2 lastPos;
             public override void InitSprites(SLeaserInstance sLeaserInstance, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
                 sLeaserInstance.sprites = new FSprite[1];
-                sLeaserInstance.sprites[0] = new FMesh(grown,"Futile_White",customColor: true);
+                sLeaserInstance.sprites[0] = new FMesh(grown, "buffassets/illustrations/crownTex", customColor: true)
+                {
+                    shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"]
+                };
+                var mesh = sLeaserInstance.sprites[0] as FMesh;
+                mesh.Scale3D = new Vector3(5f, 5f, 5f);
+                mesh.color = Color.yellow;
                 Reset(self);
             }
 
@@ -51,34 +59,31 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
                 float timeStacker, Vector2 camPos)
             {
                 base.DrawSprites(sLeaserInstance, self, sLeaser, rCam, timeStacker, camPos);
+                Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
                 var mesh = sLeaserInstance.sprites[0] as FMesh;
+                mesh.color = Color.yellow;
                 mesh.SetPosition(smoothPos - camPos + Mathf.Sin(timer/40f * Mathf.PI)*3f * Vector2.up);
-                mesh.rotation3D += new Vector3(0, 90, 0) * Time.deltaTime;
+                mesh.rotation3D += new Vector3(90, 0, 0) * Time.deltaTime;
             }
 
             public override void Update(PlayerGraphics playerGraphics)
             {
                 base.Update(playerGraphics);
-                toPos = playerGraphics.head.pos + Vector2.up * 5f;
-                smoothPos = Vector2.Lerp(smoothPos, toPos, 0.1f);
+                toPos = playerGraphics.head.pos + Vector2.up * 20f;
+                lastPos = pos;
+                pos = Vector2.Lerp(pos, toPos, 0.1f);
                 timer++;
             }
-
 
             public override void Reset(PlayerGraphics playerGraphics)
             {
                 base.Reset(playerGraphics);
-                smoothPos = toPos = playerGraphics.head.pos + Vector2.up * 5f;
+                lastPos = pos = toPos = playerGraphics.head.pos + Vector2.up * 5f;
             }
 
             private int timer = 0;
             private Vector2 toPos;
             private Vector2 smoothPos;
-
-
         }
-
     }
-
- 
 }

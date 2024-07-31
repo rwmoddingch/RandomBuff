@@ -1289,6 +1289,7 @@ namespace BuiltinBuffs.Duality
                             IntVector2 pos = new IntVector2(x, y);
                             if (burningTiles.Contains(pos))
                             {
+                                totalBurningTile--;
                                 int index = burningTiles.IndexOf(pos);
                                 burningTiles.RemoveAt(index);
                             }

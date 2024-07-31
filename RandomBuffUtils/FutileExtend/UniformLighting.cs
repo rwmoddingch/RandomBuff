@@ -78,7 +78,7 @@ namespace RandomBuffUtils.FutileExtend
             ID_PointLight_Intensity = Shader.PropertyToID("uniformSimpleLighting_PointLight_Intensity");
 
 
-            Shader.SetGlobalVector(ID_LightDir,new Vector3(1, 3,-2
+            Shader.SetGlobalVector(ID_LightDir,new Vector3(0.5f,0f,-1
                 ));
             Shader.SetGlobalColor(ID_SpecularColor, Color.white);
             Shader.SetGlobalColor(ID_LightColor, Color.white);
@@ -86,11 +86,24 @@ namespace RandomBuffUtils.FutileExtend
             Camera.main.depthTextureMode |= DepthTextureMode.Depth;
         }
 
+        static bool lastDown;
         private static void RoomCamera_Update(On.RoomCamera.orig_Update orig, RoomCamera self)
         {
             orig.Invoke(self);
             if (self.room == null)
                 return;
+            
+            //if(!lastDown && Input.GetKey(KeyCode.L))
+            //{
+            //    string[] lines = File.ReadAllLines(Application.streamingAssetsPath + Path.DirectorySeparatorChar + "DebugLighting.txt");
+            //    Vector3 v = Vector3.zero;
+            //    v.x = float.Parse(lines[0]);
+            //    v.y = float.Parse(lines[1]);
+            //    v.z = float.Parse(lines[2]);
+
+            //    LightDir = v;
+            //}
+            //lastDown = Input.GetKey(KeyCode.L);
 
             var lightSources = self.room.updateList
                 .OfType<LightSource>()

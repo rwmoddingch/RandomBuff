@@ -75,7 +75,7 @@ namespace RandomBuff.Core.Progression
         {
             //Register<TestCosmeticUnlock>();
             Register<FireworkCosmetic>();
-            Register<CrownCosmetic>();
+            Register<BuffCrownCosmetic>();
             Register<GlowingLeafCosmetic>();
             Register<HoloScoreCosmetic>();
             Register<AscendSparkleCosmetic>();
@@ -85,6 +85,7 @@ namespace RandomBuff.Core.Progression
             Register<MeteorSpearCosmetic>();
 
             grown = MeshManager.LoadMesh("grown", AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
+            Futile.atlasManager.LoadImage("buffassets/illustrations/crownTex");
             QuestRendererManager.AddProvider(new CosmeticQuestRendererProvider());
         }
 
