@@ -1058,6 +1058,8 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return false;
+            if (this.legs == null)
+                return false;
             int num = 0;
             for (int l = 0; l < this.legs.GetLength(0); l++)
             {
