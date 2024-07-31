@@ -336,13 +336,14 @@ namespace BuiltinBuffs.Positive
                         if (this.ShouldFired(creature))
                         {
                             creature.SetKillTag(this.owner.abstractCreature);
-                            if (creature.Template.smallCreature)
+                            if (creature.Template.smallCreature && !(creature.State is HealthState))
                             {
-                                creature.Die();
+                                if(Random.value < 0.016f + 0.008f * level)
+                                    creature.Die();
                             }
                             else
                             {
-                                float damage = Custom.LerpMap((creature.State as HealthState).ClampedHealth, 0f, 10f, 0.002f + 0.001f * level, 0.007f + 0.0035f * level);
+                                float damage = Custom.LerpMap((creature.State as HealthState).ClampedHealth, 0f, 10f, 0.001f + 0.0005f * level, 0.004f + 0.002f * level);
                                 creature.Violence(this.owner.mainBodyChunk, Vector2.zero, creature.mainBodyChunk, null, Creature.DamageType.Blunt, damage, 0f);
                                 if (creature is Lizard)
                                 {
