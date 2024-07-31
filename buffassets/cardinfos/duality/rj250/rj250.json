@@ -5,7 +5,9 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "FFAC00",
-
+    
+    "Tag" : ["ScavengerBomb Variant"],
+    "Conflict":["ScavengerBomb Variant"],
     "Chinese" : {
         "BuffName" : "RJ250",
         "Description" : "极大降低炸弹的爆炸伤害，修改炸弹的投掷方式并稳定爆炸的冲击力，让你可以跳的更高。"
