@@ -35,6 +35,11 @@ namespace RandomBuff.Core.Hooks
                 saveState.miscWorldSaveData.SLOracleState.playerEncounters = 0;
                 saveState.miscWorldSaveData.SLOracleState.neuronsLeft = 0;
             }
+            else if (gameSetting.MissionId == "TripleAffirmation")
+            {
+                saveState.deathPersistentSaveData.karma = 9;
+                saveState.deathPersistentSaveData.karmaCap = 9;
+            }
         }
 
         public static bool IsCurrentFullRoomSettingNeed(GameSetting gameSetting)
@@ -43,13 +48,21 @@ namespace RandomBuff.Core.Hooks
         }
 
 
+        public static void ClampKarmaForBuffMode(ref int karma,ref int karmaCap)
+        {
+            if (BuffPoolManager.Instance.GameSetting.MissionId is not "TripleAffirmation")
+            {
+                karmaCap = Mathf.Min(karmaCap, 4);
+                karma = Custom.IntClamp(karma, 0, 4);
+            }
+        }
+
 
         internal static void InGameHooksInit()
         {
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
             On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
-            On.StoryGameSession.ctor += StoryGameSession_ctor;
             On.SaveState.setDenPosition += SaveState_setDenPosition;
             On.SaveState.ctor += SaveState_setup;
             On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
@@ -107,7 +120,7 @@ namespace RandomBuff.Core.Hooks
         {
             "SL_C12", "SB_A14", "LF_A03", "SU_A43", "GW_A25", "SI_C02","HR_C01","Rock Bottom",
             "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL","SL_AI",
-            "SH_GOR02","SI_SAINTINTRO","GW_A24"
+            "SH_GOR02","SI_SAINTINTRO","GW_A24", "SB_E05SAINT",
         };
     
         private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
@@ -176,17 +189,6 @@ namespace RandomBuff.Core.Hooks
         }
 
 
-        private static void StoryGameSession_ctor(On.StoryGameSession.orig_ctor orig, StoryGameSession self, SlugcatStats.Name saveStateNumber, RainWorldGame game)
-        {
-            orig(self, saveStateNumber, game);
-            if (game.rainWorld.BuffMode())
-            {
-                self.saveState.deathPersistentSaveData.karmaCap =
-                    Mathf.Min(self.saveState.deathPersistentSaveData.karmaCap, 4);
-                self.saveState.deathPersistentSaveData.karma = 
-                    Custom.IntClamp(self.saveState.deathPersistentSaveData.karma, 0, 4);
-            }
-        }
 
         private static void RainWorldGame_GhostShutDown(On.RainWorldGame.orig_GhostShutDown orig, RainWorldGame self, GhostWorldPresence.GhostID ghostID)
         {

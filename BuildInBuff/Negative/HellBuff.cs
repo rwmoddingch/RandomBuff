@@ -1,4 +1,5 @@
 ﻿
+using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using UnityEngine;
@@ -18,6 +19,23 @@ namespace BuiltinBuffs.Negative
         {
             On.Room.Loaded += Room_Loaded;
             On.RoomCamera.ChangeRoom += RoomCamera_ChangeRoom;
+            On.RoomCamera.DrawUpdate += RoomCamera_DrawUpdate;
+            On.AbstractCreature.Update += AbstractCreature_Update;
+        }
+
+        private static void RoomCamera_DrawUpdate(On.RoomCamera.orig_DrawUpdate orig, RoomCamera self, float timeStacker, float timeSpeed)
+        {
+            orig(self,timeStacker, timeSpeed);
+            Shader.DisableKeyword("SNOW_ON");
+            Shader.EnableKeyword("HR");
+
+        }
+
+        private static void AbstractCreature_Update(On.AbstractCreature.orig_Update orig, AbstractCreature self, int time)
+        {
+            orig(self, time);
+            if (!self.lavaImmune && self.creatureTemplate.type != CreatureTemplate.Type.Slugcat)
+                self.lavaImmune = true;
         }
 
         private static void RoomCamera_ChangeRoom(On.RoomCamera.orig_ChangeRoom orig, RoomCamera self, Room newRoom, int cameraPosition)

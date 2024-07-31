@@ -41,7 +41,7 @@ namespace TemplateGains
         public static void WeaponWarp(Weapon weapon,Player slug)
         {
             weapon.myTurnWeapon().canWarp = false;
-            if (slug?.firstChunk != null && slug.room != null && slug.Consious && weapon.firstChunk != null && 
+            if (slug?.firstChunk != null && slug.room != null && slug.Consious && weapon?.firstChunk != null && 
                 !(weapon is Spear spr && spr.stuckInChunk?.owner is Creature crit && crit.inShortcut))
             {
                 weapon.firstChunk.pos = slug.firstChunk.pos;
