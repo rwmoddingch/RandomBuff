@@ -129,7 +129,7 @@ namespace RandomBuff.Core.SaveData
         /// <param name="buffId"></param>
         public void AddCollect(BuffID buffId)
         {
-            if (!collectData.Contains(buffId.value) && !buffId.GetStaticData().NeedUnlocked)
+            if (!collectData.Contains(buffId.value) && !buffId.GetStaticData().Hidden)
             {
                 BuffPlugin.Log($"Add buff:{buffId} collect to Save Slot");
                 collectData.Add(buffId.value);

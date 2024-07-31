@@ -233,6 +233,8 @@ namespace RandomBuff.Core.Hooks
                 {
                     if (BuffPoolManager.Instance == null)
                         BuffPoolManager.LoadGameBuff(game2);
+                    ClampKarmaForBuffMode(ref game2.GetStorySession.saveState.deathPersistentSaveData.karma,
+                        ref game2.GetStorySession.saveState.deathPersistentSaveData.karmaCap);
                 }
                 else
                 {

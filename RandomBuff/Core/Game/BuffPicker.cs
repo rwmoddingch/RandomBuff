@@ -46,7 +46,7 @@ namespace RandomBuff.Core.Game
             foreach(var type in types)
                 copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
             copyUnique.RemoveAll(alreadyHas.Contains);
-            copyUnique.RemoveAll(i =>i.GetStaticData().NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
+            copyUnique.RemoveAll(i =>i.GetStaticData().Hidden && !BuffPlayerData.Instance.IsCollected(i));
 
 
             copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁

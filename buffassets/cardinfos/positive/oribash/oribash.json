@@ -4,14 +4,15 @@
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : true,
+    "Stackable" : true,
     "Color" : "6459FF",
 
     "Chinese" : {
         "BuffName" : "奥日猛击",
-        "Description" : "靠近生物用鼠标或绑定按键按住右键选择方向后松开，可以将玩家向对应方向弹射，生物反方向弹射。"
+        "Description" : "靠近生物用鼠标或绑定按键按住右键选择方向后松开，可以将玩家向对应方向弹射，生物反方向弹射。在堆叠层数大于等于2后可以对物品进行猛击"
     },
     "English" : {
         "BuffName" : "Ori Bash",
-        "Description" : "Get close to a creature, hold down the right mouse button (or bind key) to select a direction, and then release it. This will launch the player in the corresponding direction and the creature in the opposite direction."
+        "Description" : "Get close to a creature, hold down the right mouse button (or bind key) to select a direction, and then release it. This will launch the player in the corresponding direction and the creature in the opposite direction. Once stack layers is greater than or equal to 2, you may use bash on the item."
     }
 }

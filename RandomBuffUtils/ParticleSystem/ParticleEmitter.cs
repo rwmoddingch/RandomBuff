@@ -62,7 +62,7 @@ namespace RandomBuffUtils.ParticleSystem
         void ActualDie()
         {
             room = null;
-            BuffUtils.Log("ParticleEmitter", "ActualDie");
+            //BuffUtils.Log("ParticleEmitter", "ActualDie");
             Particles.Clear();
             this.RecyclePool();
             system.managedEmitter.Remove(this);
@@ -70,7 +70,7 @@ namespace RandomBuffUtils.ParticleSystem
 
         public virtual void Die()
         {
-            BuffUtils.Log("ParticleEmitter", "Die");
+            //BuffUtils.Log("ParticleEmitter", "Die");
             slateForDeletion = true;
             OnEmitterDie?.Invoke(this);
             foreach (var module in EmitterModules)

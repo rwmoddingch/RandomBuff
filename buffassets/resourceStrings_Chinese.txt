@@ -134,6 +134,9 @@ DisplayName_MeltDownBinah|击败 Binah
 DisplayName_Extermination|使用{1}消灭 {0} 只生物
 DisplayName_Score|消灭生物获得{0}点分数
 DisplayName_TreeOfLight|集满能量（食物）
+DisplayName_Abyss|前往深渊
+DisplayName_Ascend|超度 {0} 个区域的生物
+DisplayName_AscendOracle|超度五块卵石和仰望皓月
 
 //BuffCondition_BuffTypes
 all types|所有类型
@@ -183,7 +186,7 @@ Mission_Display_DuelsOfSnipers|狙击对决
 Mission_Display_DoomExpress|末日速递
 Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
-
+Mission_Display_TripleAffirmation|三重肯定
 
 //BuffManual
 //BuffManual_Topic

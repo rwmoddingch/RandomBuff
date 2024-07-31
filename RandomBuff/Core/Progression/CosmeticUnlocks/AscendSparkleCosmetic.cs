@@ -41,10 +41,10 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             if(c1.TryGotoNext(MoveType.After,
                 (i) => i.MatchLdsfld<SoundID>("Firecracker_Bang")))
             {
-                BuffPlugin.Log("Player_ClassMechanicsSaint 1");
+                BuffPlugin.LogDebug("Player_ClassMechanicsSaint 1");
                 if(c1.TryGotoNext(MoveType.After, (i) => i.MatchPop()))
                 {
-                    BuffPlugin.Log("Player_ClassMechanicsSaint 2");
+                    BuffPlugin.LogDebug("Player_ClassMechanicsSaint 2");
                     c1.Emit(OpCodes.Ldarg_0);
                     c1.EmitDelegate<Action<Player>>((p) =>
                     {

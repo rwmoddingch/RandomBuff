@@ -16,6 +16,7 @@ using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Reflection.Emit;
+using BuiltinBuffs.Missions;
 using BuiltinBuffs.Negative;
 using BuiltinBuffs.Negative.SephirahMeltdown;
 using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
@@ -42,14 +43,14 @@ namespace BuiltinBuffs.Expeditions
                     //BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(self.session.characterStats));
                     //AyinBuffData.Ayin.CreateNewBuff();
                     //self.Win(false);
-                    //foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
-                    //{
-                    //    if (con is FixedCycleCondition)
-                    //        continue;
+                    foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
+                    {
+                        if (con is AbyssCondition)
+                            continue;
 
-                    //    con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
-                    //}
-                    FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
+                        con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
+                    }
+                    //FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))

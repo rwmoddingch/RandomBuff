@@ -38,7 +38,6 @@ namespace BuiltinBuffs.Missions
             };
             startBuffSet.Add(RandomRainIBuffEntry.RandomRainBuffID);
             startBuffSet.Add(DequantizeBuffEntry.DequantizeID);
-            startBuffSet.Add(DequantizeBuffEntry.DequantizeID);
             startBuffSet.Add(HypothermiaIBuffEntry.HypothermiaID);
             startBuffSet.Add(FlyingAquaIBuffEntry.FlyingAquaBuffID);
             //startBuffSet.Add(); TODO:大洪水?
