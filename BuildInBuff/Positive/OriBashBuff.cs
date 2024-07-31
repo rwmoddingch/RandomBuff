@@ -151,7 +151,7 @@ namespace BuiltinBuffs.Positive
 
     public class Bash
     {
-        Creature bashTarget;
+        PhysicalObject bashTarget;
         int outroTimer = 0;
         bool isBash = false;
         int startSprite = 0;
@@ -217,8 +217,8 @@ namespace BuiltinBuffs.Positive
             {
                 var center = bashTarget ?? self;
                 dir = Vector3.Slerp(dir, GetInputDirection(self,sLeaser.sprites[startSprite].GetPosition()),0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
-                sLeaser.sprites[startSprite].x = Mathf.Lerp(center.mainBodyChunk.lastPos.x, center.mainBodyChunk.pos.x, timeStacker) - camPos.x;
-                sLeaser.sprites[startSprite].y = Mathf.Lerp(center.mainBodyChunk.lastPos.y, center.mainBodyChunk.pos.y, timeStacker) - camPos.y;
+                sLeaser.sprites[startSprite].x = Mathf.Lerp(center.firstChunk.lastPos.x, center.firstChunk.pos.x, timeStacker) - camPos.x;
+                sLeaser.sprites[startSprite].y = Mathf.Lerp(center.firstChunk.lastPos.y, center.firstChunk.pos.y, timeStacker) - camPos.y;
                 sLeaser.sprites[startSprite].scaleX = Mathf.Lerp(sLeaser.sprites[startSprite].scale,0.75f, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite].rotation = Custom.VecToDeg(Vector2.Perpendicular(dir));
                 sLeaser.sprites[startSprite + 1].scale = Mathf.Lerp(sLeaser.sprites[startSprite + 1].scale, 15, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
@@ -241,6 +241,13 @@ namespace BuiltinBuffs.Positive
                         var centerPos = Vector2.Lerp(self.mainBodyChunk.pos, minChunk.pos,0.5f);
                         ParticleEmitter emitter = new ParticleEmitter(self.room)
                             { pos = centerPos, lastPos = centerPos };
+
+                        if (bashTarget is Weapon weapon)
+                        {
+                            weapon.ChangeMode(Weapon.Mode.Free);
+                            weapon.SetRandomSpin();
+                        }
+
                         emitter.ApplyEmitterModule(new SetEmitterLife(emitter,5,false));
 
                         emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, Random.Range(3, 6)));
@@ -330,22 +337,24 @@ namespace BuiltinBuffs.Positive
                 isPressUse = true;
                 if (self.room.abstractRoom != null)
                 {
-                    foreach (var creature in self.room.abstractRoom.creatures)
+
+                    if (OriBashBuff.Instance.Data.StackLayer >= 2)
                     {
-                        if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
-                            continue;
-                        if (creature.realizedCreature != null)
+                        foreach (var obj in self.room.updateList.OfType<PhysicalObject>())
                         {
+                            if (obj is Creature crit && crit.Template.type == CreatureTemplate.Type.Slugcat)
+                                continue;
+
                             bool can = false;
-                            foreach (var chunk in creature.realizedCreature.bodyChunks)
-                                if (Custom.DistLess(self.mainBodyChunk.pos, chunk.pos, 75))
+                            foreach (var chunk in obj.bodyChunks)
+                                if (IsDistLess(self.mainBodyChunk.pos, chunk, 75))
                                 {
                                     can = true;
                                     break;
                                 }
                             if (can)
                             {
-                                bashTarget = creature.realizedCreature;
+                                bashTarget = obj;
                                 OriBashBuffEntry.UpdateSpeed = 2;
                                 isBash = true;
                                 self.pyroParryCooldown = 0;
@@ -353,14 +362,52 @@ namespace BuiltinBuffs.Positive
                                 self.pyroJumpped = false;
                                 break;
                             }
+
                         }
                     }
+                    else
+                    {
+                        foreach (var creature in self.room.abstractRoom.creatures)
+                        {
+                            if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
+                                continue;
+                            if (creature.realizedCreature != null && !creature.realizedCreature.inShortcut)
+                            {
+                                bool can = false;
+                                foreach (var chunk in creature.realizedCreature.bodyChunks)
+                                    if (IsDistLess(self.mainBodyChunk.pos,chunk, 75))
+                                    {
+                                        can = true;
+                                        break;
+                                    }
+                                if (can)
+                                {
+                                    bashTarget = creature.realizedCreature;
+                                    OriBashBuffEntry.UpdateSpeed = 2;
+                                    isBash = true;
+                                    self.pyroParryCooldown = 0;
+                                    self.canJump = 15;
+                                    self.pyroJumpped = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
                 }
 
             }
             else if (!GetInput())
             {
                 isPressUse = false;
+            }
+
+            bool IsDistLess(Vector2 centerPos ,BodyChunk checkChunk,float dest, int delay = 5)
+            {
+                for (int i = 0; i < delay; i++)
+                    if (Custom.DistLess(centerPos, checkChunk.vel * i + checkChunk.pos, dest))
+                        return true;
+                return false;
             }
         }
     }

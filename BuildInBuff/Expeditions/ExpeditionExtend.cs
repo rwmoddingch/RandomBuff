@@ -247,6 +247,8 @@ namespace BuiltinBuffs.Expeditions
             il.Emit(OpCodes.Ldsfld, typeof(ExpeditionHooks).GetField(nameof(ExpeditionHooks.activeUnlocks), BindingFlags.Static | BindingFlags.Public));
             il.Emit(OpCodes.Ldstr, item);
             il.Emit(OpCodes.Callvirt, typeof(List<string>).GetMethod(nameof(List<string>.Remove), new[] { typeof(string) }));
+            il.Emit(OpCodes.Ldstr, item);
+            il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.ExpeditionBuffDestroy), new[] { typeof(string) }));
             il.Emit(OpCodes.Pop);
             il.Emit(OpCodes.Ret);
 
@@ -266,6 +268,27 @@ namespace BuiltinBuffs.Expeditions
         }
 
 
+        public static void ExpeditionBuffDestroy(string id)
+        {
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                switch (id)
+                {
+                    case "unl-backspear":
+                        foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
+                            if (ply != null && ply.slugcatStats.name != SlugcatStats.Name.Red)
+                            {
+                                ply.spearOnBack.DropSpear();
+                                ply.spearOnBack = null;
+                            }
+                        break;
+                    case "bur-pursued":
+                        ExpeditionGame.burdenTrackers.RemoveAll(i => i is ExpeditionGame.PursuedTracker);
+                        break;
+                }
+            }
+        }
+
         public static void ExpeditionBuffCtor(string id)
         {
             if (BuffCustom.TryGetGame(out var game))
@@ -278,6 +301,20 @@ namespace BuiltinBuffs.Expeditions
                                 ply.spearOnBack = new Player.SpearOnBack(ply);
                         break;
                     case "unl-agility":
+                        if (ModManager.CoopAvailable)
+                        {
+                            foreach (var stat in game.GetStorySession.characterStatsJollyplayer.Where(i => i != null))
+                            {
+                                stat.lungsFac = 0.15f;
+                                stat.runspeedFac = 1.75f;
+                                stat.poleClimbSpeedFac = 1.8f;
+                                stat.corridorClimbSpeedFac = 1.6f;
+                            }
+                        }
+                        game.session.characterStats.lungsFac = 0.15f;
+                        game.session.characterStats.runspeedFac = 1.75f;
+                        game.session.characterStats.poleClimbSpeedFac = 1.8f;
+                        game.session.characterStats.corridorClimbSpeedFac = 1.6f;
                         foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
                             if (ply != null)
                             {
