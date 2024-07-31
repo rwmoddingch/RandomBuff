@@ -41,7 +41,10 @@ namespace RandomBuff.Core.Hooks
         {
             return gameSetting.MissionId is "DoomExpress" or "EmergnshyTreatment";
         }
-        public static void InGameHooksInit()
+
+
+
+        internal static void InGameHooksInit()
         {
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
@@ -53,7 +56,15 @@ namespace RandomBuff.Core.Hooks
 
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 
+            On.Player.ctor += Player_ctor;
             On.Room.Loaded += Room_Loaded;
+        }
+
+        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
+        {
+            orig(self, abstractCreature,world);
+            if (Custom.rainWorld.BuffMode())
+                self.redsIllness = null;
         }
 
         private static bool lastBuffShowCursor = false;

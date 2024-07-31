@@ -96,7 +96,7 @@ namespace RandomBuff.Core.Progression
             {
                 try
                 {
-                    re.StartGame(game);
+                    re!.StartGame(game);
                 }
                 catch (Exception e)
                 {

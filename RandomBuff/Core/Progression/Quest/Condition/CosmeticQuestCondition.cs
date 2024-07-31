@@ -24,8 +24,9 @@ namespace RandomBuff.Core.Progression.Quest.Condition
 
         public override string ConditionMessage()
         {
-            return string.Format(BuffResourceString.Get("Quest_Display_CosmeticQuest"),
-                Custom.rainWorld.inGameTranslator.Translate(cosmeticId.value));
+            if (!BuffResourceString.TryGet($"CosmeticUnlock_{cosmeticId.value}", out var id))
+                id = Custom.rainWorld.inGameTranslator.Translate(cosmeticId.value);
+            return string.Format(BuffResourceString.Get("Quest_Display_CosmeticQuest"),id);
         }
 
         public override bool UpdateUnlockedState(WinGamePackage package)

@@ -262,7 +262,8 @@ namespace RandomBuff.Core.ProgressionUI
                 questInfo.rewards = new Dictionary<QuestUnlockedType, List<string>>();
 
                 var questData = BuffConfigManager.GetQuestData(questID);
-                questInfo.name = questData.QuestName;
+                if(!BuffResourceString.TryGet($"QuestName_{questData.QuestName}", out questInfo.name))
+                    questInfo.name = Custom.rainWorld.inGameTranslator.Translate(questData.QuestName);
                 questInfo.color = questData.QuestColor;
                 
                 foreach(var condition in questData.QuestConditions)
