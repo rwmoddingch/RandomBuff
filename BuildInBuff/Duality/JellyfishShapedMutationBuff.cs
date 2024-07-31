@@ -377,12 +377,27 @@ namespace BuiltinBuffs.Duality
                 Player player = (Player)shockObj;
                 if (!jellyfishCat.ImmuneShock)//如果已经在死亡触发里消耗了ImmuneShock，则短暂眩晕
                     player.Stun(6);
-                else//否则，没有触发死亡，则加一点饱食度
+                else//否则，没有触发死亡
                 {
                     jellyfishCat.ImmuneShock = false;
-                    player.AddQuarterFood();
                 }
-                player.stun = origStun + Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
+                //水蜈蚣是直接电击，在电击里已经算过饱食度和眩晕了，所以这里只算非水蜈蚣的蜈蚣电击
+                if (!self.AquaCenti)
+                {
+                    int i;
+                    for (i = Mathf.FloorToInt(self.TotalMass / shockObj.TotalMass * 4f); i >= 4; i -= 4)
+                    {
+                        player.AddFood(1);
+                    }
+                    while (i > 0)
+                    {
+                        player.AddQuarterFood();
+                        i--;
+                    }
+                    float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
+                    player.stun = origStun + Mathf.RoundToInt(player.stun * scale);
+                    //player.stun = origStun + Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
+                }
             }
         }
         #endregion
@@ -456,7 +471,6 @@ namespace BuiltinBuffs.Duality
                 if (jellyfishCat.ImmuneShock)
                 {
                     jellyfishCat.ImmuneShock = false;
-                    self.AddFood(1);
                     return;
                 }
             }
