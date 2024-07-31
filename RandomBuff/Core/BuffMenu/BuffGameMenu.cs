@@ -185,6 +185,7 @@ namespace RandomBuff.Core.BuffMenu
         //CheckBox restartCheckbox;
         SimpleButton jollyToggleConfigMenu;
         SimpleButton progressionMenu;
+        SimpleButton manualButton;
 
         public bool lastPausedButtonClicked;
         void InitButtonPage(Page page)
@@ -193,9 +194,6 @@ namespace RandomBuff.Core.BuffMenu
             page.subObjects.Add(backButton = new SimpleButton(this, page, base.Translate("BACK"), "BACK", new Vector2(200f, 668f), new Vector2(110f, 30f)));
             page.subObjects.Add(prevButton = new BigArrowButton(this, page, "PREV", new Vector2(200f, 50f), -1));
             page.subObjects.Add(nextButton = new BigArrowButton(this, page, "NEXT", new Vector2(1116f, 50f), 1));
-            //page.subObjects.Add(settingButton = new SimpleButton(this, page, Translate(BuffDataManager.Instance.GetGameSetting(CurrentName).TemplateName),
-            //    "SELECT_MODE", new Vector2(683 - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
-            //    new Vector2(120, 40)));
 
             float y = manager.rainWorld.screenSize.y - 100f;
             if (ModManager.JollyCoop)
@@ -208,18 +206,58 @@ namespace RandomBuff.Core.BuffMenu
                     new Vector2(1056f, y), new Vector2(110f, 30f)));
             y -= 40f;
 
-            page.subObjects.Add(new SimpleButton(this, page, base.Translate("MANUAL"), "MANUAL", new Vector2(1056f, y), new Vector2(110f, 30f)));
+            page.subObjects.Add(manualButton = new SimpleButton(this, page, base.Translate("MANUAL"), "MANUAL", new Vector2(1056f, y), new Vector2(110f, 30f)));
 
 
             page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));
             testLabel.label.alignment = FLabelAlignment.Center;
             testLabel.label.color = MenuColor(MenuColors.White).rgb;
-            
+
             //float restartTextWidth = SlugcatSelectMenu.GetRestartTextWidth(CurrLang);
             //float restartTextOffset = SlugcatSelectMenu.GetRestartTextOffset(CurrLang);
 
             //page.subObjects.Add(restartCheckbox = new CheckBox(this, page, this, new Vector2(this.startButton.pos.x + 200f + restartTextOffset, Mathf.Max(30f, manager.rainWorld.options.SafeScreenOffset.y)), restartTextWidth, base.Translate("Restart game"), "RESTART", false));
             //restartCheckbox.label.pos.x += (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
+            SetSelectables();
+        }
+
+        void SetSelectables()
+        {
+            startButton.nextSelectable[0] = prevButton;
+            startButton.nextSelectable[1] = backButton;
+            startButton.nextSelectable[2] = nextButton;
+            
+            prevButton.nextSelectable[1] = backButton;
+            prevButton.nextSelectable[2] = startButton;
+            
+            nextButton.nextSelectable[0] = startButton;
+            nextButton.nextSelectable[1] = manualButton;
+            
+            manualButton.nextSelectable[0] = backButton;
+            manualButton.nextSelectable[1] = progressionMenu;
+            manualButton.nextSelectable[3] = nextButton;
+            
+            progressionMenu.nextSelectable[0] = backButton;
+            progressionMenu.nextSelectable[1] = jollyToggleConfigMenu;
+            progressionMenu.nextSelectable[3] = manualButton;
+            
+            backButton.nextSelectable[2] = jollyToggleConfigMenu ?? progressionMenu;
+            backButton.nextSelectable[3] = prevButton;
+            
+            if (jollyToggleConfigMenu != null)
+            {
+                jollyToggleConfigMenu.nextSelectable[0] = backButton;
+                jollyToggleConfigMenu.nextSelectable[3] = progressionMenu;
+                Helper.LinkEmptyToSelf(jollyToggleConfigMenu);
+            }
+            selectedObject = startButton;
+
+            Helper.LinkEmptyToSelf(startButton);
+            Helper.LinkEmptyToSelf(prevButton);
+            Helper.LinkEmptyToSelf(nextButton);
+            Helper.LinkEmptyToSelf(manualButton);
+            Helper.LinkEmptyToSelf(progressionMenu);
+            Helper.LinkEmptyToSelf(backButton);
         }
 
         public void SetButtonsActive(bool active)
@@ -632,6 +670,11 @@ namespace RandomBuff.Core.BuffMenu
 
             //BuffPlugin.Log(info);
             PlaySound(SoundID.MENU_Switch_Page_Out);
+        }
+
+        public void ResetSelectables()
+        {
+            selectedObject = startButton;
         }
 
         public override void ShutDownProcess()

@@ -1589,11 +1589,20 @@ namespace RandomBuff.Core.BuffMenu
 
             subObjects.Add(defaultmodeButton = new SimpleButton(menu, this, BuffResourceString.Get("Mode_Free"), "DEFAULTMODE", new Vector2(493f, 900f), new Vector2(160f, 200f)));
             subObjects.Add(missionmodeButton = new SimpleButton(menu, this, BuffResourceString.Get("Mode_Mission"), "MISSIONMODE", new Vector2(733f, 900f), new Vector2(160f, 200f)));
+
+            defaultmodeButton.nextSelectable[2] = missionmodeButton;
+            missionmodeButton.nextSelectable[0] = defaultmodeButton;
+            Helper.LinkEmptyToSelf(defaultmodeButton);
+            Helper.LinkEmptyToSelf(missionmodeButton);
         }
 
         public void SetShow(bool show)
         {
             Show = show;
+            if (show)
+                menu.selectedObject = defaultmodeButton;
+            else
+                (menu as BuffGameMenu).ResetSelectables();
         }
 
         

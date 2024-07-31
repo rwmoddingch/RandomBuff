@@ -1,4 +1,5 @@
 ﻿using DevInterface;
+using Menu;
 using MonoMod.Utils;
 using MonoMod.Utils.Cil;
 using RandomBuff.Core.Buff;
@@ -354,6 +355,15 @@ namespace RandomBuff
             }
             builder.AppendLine("\n");
             BuffPlugin.Log(builder.ToString());
+        }
+
+        public static void LinkEmptyToSelf(MenuObject menuObject)
+        {
+            for(int i = 0;i < 4; i++)
+            {
+                if (menuObject.nextSelectable[i] == null)
+                    menuObject.nextSelectable[i] = menuObject;
+            }
         }
 
         public static IEnumerable<BuffType> EnumBuffTypes()

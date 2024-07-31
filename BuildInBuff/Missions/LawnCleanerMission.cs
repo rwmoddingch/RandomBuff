@@ -63,6 +63,9 @@ namespace BuiltinBuffs.Missions
         public int roomRequirements;
 
         public List<string> finishedRooms = new List<string>();
+        string progressionString;
+        bool requestClear;
+        bool requestProgression;
 
         public WormGrassWipeOutCondition()
         {
@@ -76,7 +79,7 @@ namespace BuiltinBuffs.Missions
 
         public override string InRangeDisplayProgress()
         {
-            return $"{finishedRooms.Count} / {roomRequirements}";
+            return $"[{finishedRooms.Count} / {roomRequirements}]{progressionString}";
         }
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
@@ -90,6 +93,24 @@ namespace BuiltinBuffs.Missions
             base.EnterGame(game);
             On.Room.Loaded += Room_Loaded;
             BuffUtils.Log("WormGrassWipeOutCondition", $"EnterGame");
+        }
+
+        public override void InGameUpdate(RainWorldGame game)
+        {
+            base.InGameUpdate(game);
+
+            if(requestProgression)
+            {
+                requestClear = false;
+                requestProgression = false;
+                onLabelRefresh?.Invoke(this);
+            }
+            if (requestClear)
+            {
+                requestClear = false;
+                progressionString = string.Empty;
+                onLabelRefresh?.Invoke(this);
+            }
         }
 
         private void Room_Loaded(On.Room.orig_Loaded orig, Room self)
@@ -117,14 +138,57 @@ namespace BuiltinBuffs.Missions
                 Finished = true;
             onLabelRefresh?.Invoke(this);
         }
+
+        public void RequestClearProgressionDisplay(bool forceClear = false)
+        {
+            if (forceClear)
+            {
+                requestProgression = false;
+            }
+            requestClear = true;
+        }
+
+        public void ReportProgression(string progressionString)
+        {
+            this.progressionString = progressionString;
+            requestProgression = true;
+        }
     }
 
     internal class RoomWormGrassWipeCheck : UpdatableAndDeletable, INoticeWormGrassWipedOut
     {
+        bool lastViewed;
         public RoomWormGrassWipeCheck(Room room)
         {
             this.room = room;
             BuffUtils.Log("RoomWormGrassWipeCheck", "ctor");
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            bool viewed = room.BeingViewed;
+            if (lastViewed && !viewed)
+            {
+                (BuffPoolManager.Instance.GameSetting.conditions.Find(c => c is WormGrassWipeOutCondition) as WormGrassWipeOutCondition).RequestClearProgressionDisplay();
+            }
+        }
+
+        public void NoticeWormGrassWipeProgression(List<int> progression, List<int> total)
+        {
+            if (!room.BeingViewed)
+                return;
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append('(');
+            for(int i = 0;i < total.Count;i++)
+            {
+                builder.Append(progression[i]).Append('/').Append(total[i]);
+                if (i < total.Count - 1)
+                    builder.Append("  ");
+            }
+            builder.Append(')');
+            (BuffPoolManager.Instance.GameSetting.conditions.Find(c => c is WormGrassWipeOutCondition) as WormGrassWipeOutCondition).ReportProgression(builder.ToString());
         }
 
         public void WormGrassWipedOut(WormGrass wormGrass)
@@ -136,7 +200,9 @@ namespace BuiltinBuffs.Missions
 
             if (room.updateList.Count(u => (u is WormGrass) && !u.slatedForDeletetion) == 0)
             {
-                (BuffPoolManager.Instance.GameSetting.conditions.Find(c => c is WormGrassWipeOutCondition) as WormGrassWipeOutCondition).NoticeRoomFinished(room);
+                var condition = (BuffPoolManager.Instance.GameSetting.conditions.Find(c => c is WormGrassWipeOutCondition) as WormGrassWipeOutCondition);
+                condition.NoticeRoomFinished(room);
+                condition.RequestClearProgressionDisplay(true);
             }
             Destroy();
         }

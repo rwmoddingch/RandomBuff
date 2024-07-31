@@ -57,9 +57,10 @@ namespace BuiltinBuffs.Positive
 
     internal class WormGrassProvider : TemperatrueModule.ITemperatureModuleProvider
     {
+
         public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
         {
-            return new WormGrassTempModule();
+            return new WormGrassTempModule(target as WormGrass);
         }
 
         public bool ProvideThisObject(UpdatableAndDeletable target)
@@ -73,8 +74,20 @@ namespace BuiltinBuffs.Positive
 
     internal class WormGrassTempModule : TemperatrueModule
     {
-        public WormGrassTempModule()
+        WormGrass.WormGrassPatch[] patchIndexs;
+
+        List<int> totalTiles = new List<int>();
+        List<int> tileProgression = new List<int>();
+
+        public WormGrassTempModule(WormGrass wormGrass)
         {
+            patchIndexs = new WormGrass.WormGrassPatch[wormGrass.patches.Count];
+            for(int i = 0; i < patchIndexs.Length; i++)
+            {
+                patchIndexs[i] = wormGrass.patches[i];
+                totalTiles.Add(wormGrass.patches[i].tiles.Count);
+                tileProgression.Add(0);
+            }
             BuffUtils.Log("WormGrassTemp","Init");
         }
 
@@ -125,7 +138,15 @@ namespace BuiltinBuffs.Positive
 
 
                             patch.tiles.RemoveAt(t);
+                            int patchIndex = patchIndexs.IndexOf(patch);
+                            tileProgression[patchIndex] = totalTiles[patchIndex] - patch.tiles.Count;
                             BuffUtils.Log("FlamePurification", $"Wormgrass patch tile wiped out, {patch.tiles.Count} left");
+
+                            foreach (var update in wormGrass.room.updateList.Where(u => u is INoticeWormGrassWipedOut).Select(u => u as INoticeWormGrassWipedOut))
+                            {
+                                update.NoticeWormGrassWipeProgression(tileProgression, totalTiles);
+                            }
+
                             var lst1 = patch.cosmeticWormLengths.ToList();
                             lst1.RemoveAt(t);
                             patch.cosmeticWormLengths = lst1.ToArray();
@@ -138,6 +159,7 @@ namespace BuiltinBuffs.Positive
                             patch.trackedCreatures.Clear();
                             if (patch.tiles.Count == 0)
                             {
+                                patchIndexs[patchIndexs.IndexOf(patch)] = null;
                                 wormGrass.patches.Remove(patch);
                                 BuffUtils.Log("FlamePurification", $"Wormgrass patch wiped out, {wormGrass.patches.Count} left");
                                 if (wormGrass.patches.Count == 0)
@@ -302,5 +324,7 @@ namespace BuiltinBuffs.Positive
     public interface INoticeWormGrassWipedOut
     {
         void WormGrassWipedOut(WormGrass wormGrass);
+
+        void NoticeWormGrassWipeProgression(List<int> progression, List<int> total);
     }
 }

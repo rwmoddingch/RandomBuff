@@ -134,9 +134,10 @@ namespace RandomBuff.Core.ProgressionUI
             {
                 Color col = (new HSLColor(currentHue, 1f, 0.8f)).rgb;
                 
-                OpLabel entryLabel = new OpLabel(span, contentSize - (current + 1) * labelHeight,      BuffResourceString.Get(pair.Key), true) { color = col };
+                OpLabel entryLabel = new OpLabel(span, contentSize - (current + 1) * labelHeight, BuffResourceString.Get(pair.Key), true) { color = col };
                 entryLabel.label.shader = Custom.rainWorld.Shaders["MenuTextCustom"];
-                OpLabel valueLabel = new OpLabel(size.x - span, contentSize - (current + 1) * labelHeight, pair.Value, true) { color = col };
+                float width = LabelTest.GetWidth(pair.Value, true);
+                OpLabel valueLabel = new OpLabel(size.x - span - width, contentSize - (current + 1) * labelHeight, pair.Value, true) { color = col };
                 valueLabel.label.shader = Custom.rainWorld.Shaders["MenuTextCustom"];
 
                 opScrollBox.AddItems(entryLabel, valueLabel);
