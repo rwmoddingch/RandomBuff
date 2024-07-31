@@ -160,6 +160,7 @@ Quest_Display_LevelQuest|Reach {0} level
 Quest_Display_RunCountQuest|complete {0} games
 Quest_Display_SingleRunCardQuest|Collect {1} {0} cards in a game (duplicates allowed)
 Quest_Display_CardQuest|Collect {1} {0} cards (duplicates allowed)
+Quest_Display_CosmeticQuest|Unlocked cosmtic: {0}
 
 //QuestRender
 QuestRender_FreePick|Free pick count +1
