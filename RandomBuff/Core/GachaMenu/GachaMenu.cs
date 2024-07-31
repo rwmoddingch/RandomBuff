@@ -129,8 +129,6 @@ namespace RandomBuff.Core.GachaMenu
                 for (int i=0;i< positiveCards.Count;i++)
                     negativeCards[i] = positiveCards[i].BuffProperty == BuffProperty.Special ? negativeCards[i] : null;
 
-                negativeCards = new BuffID[positiveCards.Count];
-                negativeCards[negativeCards.Length - 1] = new BuffID("SensorBomb");
 
                 pickerSlot = new CardPickerSlot(inGameSlot, Select,
                     positiveCards.Select(i => i.BuffID).ToArray(),
