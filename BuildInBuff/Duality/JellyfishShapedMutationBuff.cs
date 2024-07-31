@@ -33,11 +33,11 @@ namespace BuiltinBuffs.Duality
 
         public override BuffID ID => JellyfishShapedMutationBuffEntry.JellyfishShapedMutation;
 
-        public int JellyfishCatLevel
+        public float JellyfishCatLevel
         {
             get
             {
-                int num = 0;
+                float num = 1;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.BreathlessBuffEntry.Breathless))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.SuperCapacitanceBuffEntry.SuperCapacitance))
@@ -47,7 +47,7 @@ namespace BuiltinBuffs.Duality
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(HotDogBuff.WaterNobleBuffEntry.WaterNobleID))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HydrophobiaBuffEntry.Hydrophobia))
-                    num--;
+                    num = Mathf.Max(num * 0.5f, num - 1f);
                 return num;
             }
         }
@@ -276,7 +276,7 @@ namespace BuiltinBuffs.Duality
                     i--;
                 }
                 float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
-                newDamage *= 0.8f * scale;
+                newDamage *= scale;
                 newStunBonus *= scale;
                 newDirectionAndMomentum *= scale;
             }
