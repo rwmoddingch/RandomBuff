@@ -153,7 +153,7 @@ namespace RandomBuff.Cardpedia
                     continue;
 
                 var staticData = BuffConfigManager.GetStaticData(id);
-                if (staticData.NeedUnlocked)
+                if (staticData.Hidden)
                     continue;
 
                 switch (staticData.BuffType)

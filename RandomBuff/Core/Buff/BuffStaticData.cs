@@ -32,7 +32,7 @@ namespace RandomBuff.Core.Buff
         public BuffType BuffType { get; private set; } = BuffType.Positive;
         public BuffProperty BuffProperty { get; private set; } = BuffProperty.Normal;
         public bool Stackable { get; private set; } = false;
-        public bool NeedUnlocked { get; private set; } = false;
+        public bool Hidden { get; private set; } = false;
 
         public int MaxCycleCount { get; private set; } = -1;
         public bool Countable => MaxCycleCount != -1;
@@ -193,9 +193,9 @@ namespace RandomBuff.Core.Buff
                         newData.Color = Custom.hexToColor((string)rawData[loadState]);
                 }
 
-                if (rawData.ContainsKey(loadState = "NeedUnlocked"))
+                if (rawData.ContainsKey(loadState = "Hidden"))
                 {
-                    newData.NeedUnlocked = (bool)rawData[loadState];
+                    newData.Hidden = (bool)rawData[loadState];
                 }
 
                 if (rawData.ContainsKey(loadState = "MultiLayerFace"))
