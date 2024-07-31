@@ -141,7 +141,7 @@ namespace RandomBuff.Core.StaticsScreen
 
         public override void Singal(MenuObject sender, string message)
         {
-            if (message == "CONTINUE")
+            if (message == "CONTINUE" && newFinishedQuests.Count == 0)
             {
                 this.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
                 if (manager.musicPlayer != null)

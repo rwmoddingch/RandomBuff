@@ -86,6 +86,17 @@ namespace RandomBuff
             return Regex.Replace(orig, "<LINE>", "\n");
         }
 
+        public static bool TryGet(string orig, out string ret)
+        {
+            if (currentLangMapper.TryGetValue(orig,out ret))
+                return true;
+
+            if (engMapper.TryGetValue(orig, out ret))
+                return true;
+            ret = orig;
+            return false;
+        }
+
         public static string Get(string key, bool returnOrig = false)
         {
             if(currentLangMapper.ContainsKey(key))

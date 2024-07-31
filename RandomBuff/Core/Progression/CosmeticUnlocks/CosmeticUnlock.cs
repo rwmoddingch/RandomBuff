@@ -20,7 +20,7 @@ namespace RandomBuff.Core.Progression
         {
         }
         public static readonly CosmeticUnlockID FireWork = new("FireWork", true);//炸猫
-        public static readonly CosmeticUnlockID Test = new("Test", true);
+        //public static readonly CosmeticUnlockID Test = new("Test", true);
         public static readonly CosmeticUnlockID Crown = new("Crown", true);//全部
         public static readonly CosmeticUnlockID GlowingLeaf = new CosmeticUnlockID("GlowingLeaf", true);//黄猫
 
@@ -84,7 +84,7 @@ namespace RandomBuff.Core.Progression
             Register<SoapSlugCosmetic>();
             Register<MeteorSpearCosmetic>();
 
-            grown = MeshManager.LoadMesh("grown", AssetManager.ResolveFilePath("buffassets//meshs//grown.obj"));
+            grown = MeshManager.LoadMesh("grown", AssetManager.ResolveFilePath("buffassets//assetbundles//futileExtend//grown.obj"));
             Futile.atlasManager.LoadImage("buffassets/illustrations/crownTex");
             QuestRendererManager.AddProvider(new CosmeticQuestRendererProvider());
         }
@@ -96,7 +96,7 @@ namespace RandomBuff.Core.Progression
             {
                 try
                 {
-                    re.StartGame(game);
+                    re!.StartGame(game);
                 }
                 catch (Exception e)
                 {
