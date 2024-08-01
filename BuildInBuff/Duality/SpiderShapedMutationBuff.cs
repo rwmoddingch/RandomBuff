@@ -813,7 +813,8 @@ namespace BuiltinBuffs.Duality
                             (Custom.DistLess(wantPos, player.mainBodyChunk.pos, 20f) && 
                             Vector2.Dot(wantPos - player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - player.mainBodyChunk.pos) < 0 &&
                             !Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
-                            Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f))))
+                            Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f) &&
+                            player.room.gravity > 0.3f)))
                         {
                             Vector2 a = Custom.DirVec(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) * (Vector2.Distance(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
                             player.mainBodyChunk.pos += a * 0.8f;
@@ -1056,7 +1057,7 @@ namespace BuiltinBuffs.Duality
 
         private bool TileAccessibleToPlayer()
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return false;
             if (this.legs == null)
                 return false;
@@ -1066,13 +1067,14 @@ namespace BuiltinBuffs.Duality
                 for (int m = 0; m < this.legs.GetLength(1); m++)
                 {
                     if (this.legs[l, m].reachedSnapPosition &&
-                        Custom.DistLess(self.bodyChunks[0].pos, this.legs[l, m].pos, 1.1f * this.legLength))
+                        Custom.DistLess(player.bodyChunks[0].pos, this.legs[l, m].pos, 1.1f * this.legLength))
                     {
                         num++;
                     }
                 }
             }
-            if (num >= 2)
+            if (num >= 2 ||
+                (num >= 1 && player.room.gravity <= 0.3f))
                 return true;
             return false;
         }

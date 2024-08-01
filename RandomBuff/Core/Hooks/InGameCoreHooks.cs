@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Expedition;
@@ -14,6 +15,7 @@ using RandomBuff.Core.StaticsScreen;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Menu;
+using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Game.Settings;
 using RandomBuffUtils;
 
@@ -71,6 +73,16 @@ namespace RandomBuff.Core.Hooks
 
             On.Player.ctor += Player_ctor;
             On.Room.Loaded += Room_Loaded;
+
+            _ = new Hook(
+                typeof(StoryGameSession).GetProperty(nameof(StoryGameSession.RedIsOutOfCycles),
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).GetGetMethod(),
+                (Func<StoryGameSession, bool> orig, StoryGameSession self) =>
+                {
+                    if (Custom.rainWorld.BuffMode())
+                        return false;
+                    return orig(self);
+                });
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
