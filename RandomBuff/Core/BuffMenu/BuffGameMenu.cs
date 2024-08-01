@@ -576,7 +576,7 @@ namespace RandomBuff.Core.BuffMenu
             menuSlot.GrafUpdate(timeStacker);
             testNotification.GrafUpdate(timeStacker);
 
-            if(Input.GetKeyDown(KeyCode.N) /*&& BuffPlugin.DevEnabled*/)
+            if(Input.GetKeyDown(KeyCode.N) && BuffPlugin.DevEnabled)
             {
                 TestFunction();
             }

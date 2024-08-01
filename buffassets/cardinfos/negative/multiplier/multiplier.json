@@ -5,7 +5,9 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "4E00FF",
-    
+    "MultiLayerFace":true,
+    "FaceLayer":5,
+    "MaxFaceDepth":1.5,
     "Chinese" : {
         "BuffName" : "倍增器",
         "Description" : "每隔一段时间克隆区域内所有除了玩家外的生物直到达到一定的数量上限"

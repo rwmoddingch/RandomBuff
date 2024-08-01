@@ -1,12 +1,12 @@
 <Stage>Coding
-	<Name>Nullptr
-	<Detail>can't stop wawa too
+	<Name>诺普
+	<Detail> TODO: 请检查待办事项
 
 	<Name>哈维
-	<Detail>精灵龙天下第一！
+	<Detail> 精灵龙天下第一！
 
 	<Name>Quaeledy
-	<Detail>抱歉，但是离群者处于离线中
+	<Detail> 抱歉，但是离群者处于离线中
 
 	<Name>小风
 	<Detail> 我有俩，分你一个*递蛤蟆
@@ -15,7 +15,7 @@
 	<Detail> can't stop wawa three
 
 	<Name>寂空
-	<Detail> *广告位招租*
+	<Detail> 请提交本周期的降水报告和避难所维护日志
 <Stage>ArtWorks
 	<Name>墨阳
 	<Detail>产能不足
@@ -24,7 +24,7 @@
 	<Name>哈维
 	<Detail>一个真正的wawa screamer
 	
-<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
+	<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
 
 	<Name>小风
 	<Detail>我有俩，分你一个*递蛤蟆
@@ -35,8 +35,16 @@
 	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun
 	
 	<Name>寂空
-	<Detail>*广告位招租*
+	<Detail>请提交本周期的降水报告和避难所维护日志
 	<BuffIDs>ShortCircuits, TwoSides
+
+	<Name>ProjectMoon
+	<Detail>
+	<BuffIDs>Ayin, Binah, Chesed, Hod, Hokma, Malkuth, Netzach, Tiphereth, Yesod
+
+	<Name>琳
+	<Detail>线稿打在在草稿上（悲）
+	<BuffIDs>Multiplier
 
 <Stage>PlayTest
 	<Name>炖鸽子
@@ -96,3 +104,27 @@
 
 	<Name>十九轮回
 	<Detail>超验反转！超验反转！！
+
+	<Name>热木星
+	<Detail>什么，我的区域什么时候做好，咕咕咕~
+
+	<Name>凝殇
+	<Detail>我不是应该在做区域吗？怎么玩上随机卡牌了！豪丸！
+
+	<Name>雾
+	<Detail>用死亡来定义你的雨世界冒险喵！
+
+	<Name>芙尔塔雅
+	<Detail>晚安，小生灵。
+
+	<Name>山脊雪灵
+	<Detail>死亡并不是终点
+
+	<Name>墨色烟云
+	<Detail>千相终寂
+	
+	<Name>驯龙师
+	<Detail>虽说烈焰很难驯，但是烈焰真的很香（?）
+
+	<Name>淡淡的伤
+	<Detail>新DLC什么时候出

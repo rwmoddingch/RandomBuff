@@ -1,12 +1,12 @@
 <Stage>Coding
-	<Name>Nullptr
-	<Detail>can't stop wawa too
+	<Name>Pkuyo
+	<Detail> TODO: please check the to-do list.
 
 	<Name>Harvie
-	<Detail>elfin dragon is the best!
+	<Detail> elfin dragon is the best!
 
 	<Name>Quaeledy
-	<Detail>Sorry, but the Outsider is outside the network.
+	<Detail> Sorry, but the Outsider is outside the network.
 
 	<Name>CuteFatalis
 	<Detail> write stupid stuff
@@ -15,7 +15,7 @@
 	<Detail> can't stop wawa three
 
 	<Name>Seron
-	<Detail> cant stop wawa four
+	<Detail> -127.0.0.1-
 
 <Stage>ArtWorks
 	<Name>Moyang
@@ -24,8 +24,7 @@
 
 	<Name>Harvie
 	<Detail>a real wawa screamer
-	
-<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
+	<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
 
 	<Name>CuteFatalis
 	<Detail>I have two, this one is for you. *Handing over a toad
@@ -38,6 +37,14 @@
 	<Name>Seron
 	<Detail>-127.0.0.1-
 	<BuffIDs>ShortCircuit, TwoSides
+
+	<Name>ProjectMoon
+	<Detail>
+	<BuffIDs>Ayin, Binah, Chesed, Hod, Hokma, Malkuth, Netzach, Tiphereth, Yesod
+
+	<Name>Lin
+	<Detail>Outline on the draft (sad wawa)
+	<BuffIDs>Multiplier
 
 <Stage>PlayTest
 	<Name>Wings Echo
@@ -95,3 +102,27 @@
 
 	<Name>NR
 	<Detail>Transcendental Inversion! Transcendental Inversion!!
+
+	<Name>Hopiter
+	<Detail>When can I finish my region mod? IDK~
+
+	<Name>CACITE
+	<Detail>Yea I don't know what I'm doing, but I really should think about my region, NOW!
+
+	<Name>fog
+	<Detail>
+
+	<Name>PURE
+	<Detail>May you find peace and tranquility in every samsara
+
+	<Name>SRS
+	<Detail>death isn't the end
+
+	<Name>MoseYanyun
+	<Detail>Nothing forever
+
+	<Name>Dragon Trainer
+	<Detail>WHAT?!
+
+	<Name>z5356z
+	<Detail>When will the new DLC be released?
