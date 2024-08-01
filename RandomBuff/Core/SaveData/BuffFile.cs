@@ -356,6 +356,9 @@ namespace RandomBuff.Core.SaveData
 
         private static RainWorld rainWorld => Custom.rainWorld;
 
+        public static bool BackUpForceUpdate { get; set; }
+
+
         private static int CurrentSlot => rainWorld.BuffMode()
             ? (rainWorld.options.saveSlot)
             : rainWorld.options.saveSlot >= 0 ?
@@ -369,17 +372,23 @@ namespace RandomBuff.Core.SaveData
             BuffPlugin.Log("Buff File Hook Loaded");
         }
 
+
         private static void PlayerProgression_ctor_RainWorld_bool_bool_string(On.PlayerProgression.orig_ctor_RainWorld_bool_bool_string orig, PlayerProgression self, RainWorld rainWorld, bool tryLoad, bool saveAfterLoad, string overrideBaseDir)
         {
             orig.Invoke(self, rainWorld, tryLoad, saveAfterLoad, overrideBaseDir);
-            if (Instance?.UsedSlot != CurrentSlot)
+            if (Instance?.UsedSlot != CurrentSlot || BackUpForceUpdate)
             {
-                if (Instance != null)
+                if (Instance != null && !BackUpForceUpdate)
                 {
                     BuffPlugin.Log($"Save last slot file at slot {Instance.UsedSlot}, Before load file at Slot {CurrentSlot}");
                     Instance.SaveFile();
                 }
 
+                if (BackUpForceUpdate)
+                {
+                    BuffPlugin.Log("Load backup buff save");
+                    BackUpForceUpdate = false;
+                }
                 Instance = new BuffFile();
                 return;
             }

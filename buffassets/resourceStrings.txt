@@ -132,6 +132,9 @@ DisplayName_MeltDownBinah|Defeat An Arbiter
 DisplayName_Extermination|Kill {0} ceatures with {1}
 DisplayName_Score|Earn {0} points from creature kills
 DisplayName_TreeOfLight|Collect a full amount of energy (food)
+DisplayName_Abyss|Go to the depth
+DisplayName_Ascend|Ascend all creatures in {0} regions
+DisplayName_AscendOracle|Ascend Pebbles and Moon
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -160,6 +163,7 @@ Quest_Display_LevelQuest|Reach {0} level
 Quest_Display_RunCountQuest|complete {0} games
 Quest_Display_SingleRunCardQuest|Collect {1} {0} cards in a game (duplicates allowed)
 Quest_Display_CardQuest|Collect {1} {0} cards (duplicates allowed)
+Quest_Display_CosmeticQuest|Unlocked cosmtic: {0}
 
 //QuestRender
 QuestRender_FreePick|Free pick count +1
@@ -177,6 +181,7 @@ Mission_Display_DuelsOfSnipers|DUELS OF SNIPERS
 Mission_Display_DoomExpress|DOOM EXPRESS
 Mission_Display_RadiationCrisis|RADIATION CRISIS
 Mission_Display_LawnCleaner|LAWN CLEANER
+Mission_Display_TripleAffirmation|TRIPLE AFFIRMATION
 
 //Credit
 CreditTitle_Coding|Coding

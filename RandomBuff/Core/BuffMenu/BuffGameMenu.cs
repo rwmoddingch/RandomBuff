@@ -590,7 +590,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public void ShowExtraInfo()
         {
-            var gameSetting = (missionPage.Show)
+            var gameSetting = (missionPage.Show && BuffNewGameMissionPage.pickedMission != null)
                 ? BuffNewGameMissionPage.pickedMission.GameSetting
                 : BuffDataManager.Instance.GetGameSetting(CurrentName);
          
