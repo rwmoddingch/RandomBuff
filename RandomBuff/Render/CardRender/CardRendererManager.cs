@@ -66,7 +66,7 @@ namespace RandomBuff.Render.CardRender
             mostInavtiveRenderer.gameObject.SetActive(true);
             mostInavtiveRenderer.Init(mostInavtiveRenderer._id, BuffConfigManager.GetStaticData(buffID));
             inactiveCardRenderers.Remove(mostInavtiveRenderer);
-            BuffPlugin.LogDebug($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
+            //BuffPlugin.LogDebug($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
             return mostInavtiveRenderer;
 
             BuffCardRenderer GetNewRenderer(BuffID buffID)
@@ -80,7 +80,7 @@ namespace RandomBuff.Render.CardRender
                     totalRenderers.Add(renderer);
 
                     renderer.Init(id, BuffConfigManager.GetStaticData(buffID));
-                    BuffPlugin.LogDebug($"Get new card renderer of id {id}");
+                    //BuffPlugin.LogDebug($"Get new card renderer of id {id}");
                     return renderer;
                 }
                 catch(Exception e)

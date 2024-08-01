@@ -1,0 +1,97 @@
+<Stage>Coding
+	<Name>Nullptr
+	<Detail>can't stop wawa too
+
+	<Name>Harvie
+	<Detail>elfin dragon is the best!
+
+	<Name>Quaeledy
+	<Detail>Sorry, but the Outsider is outside the network.
+
+	<Name>CuteFatalis
+	<Detail> write stupid stuff
+
+	<Name>ShanKa
+	<Detail> can't stop wawa three
+
+	<Name>Seron
+	<Detail> cant stop wawa four
+
+<Stage>ArtWorks
+	<Name>Moyang
+	<Detail>under capacity
+	<BuffIDs>FakeCreature
+
+	<Name>Harvie
+	<Detail>a real wawa screamer
+	
+<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
+
+	<Name>CuteFatalis
+	<Detail>I have two, this one is for you. *Handing over a toad
+	<BuffIDs>DesperateEater, DelayedExplosion, UpsideDownPixieSlug, SlugSlug, TailCut, DreamTraveller, EatMore, SuperStomach, CountDownToDeath, LittleBoyNuke, Hell, RJ250, Napalm, InfiniteFirePower, ClusterBomb, WealthFinger, DudBomb, ButterFeet, PopingCandy, Hypothermia, PandoraBox
+
+	<Name>Quaeledy
+	<Detail>The number you reached The Outsider is outside the service area.
+	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun
+	
+	<Name>Seron
+	<Detail>-127.0.0.1-
+	<BuffIDs>ShortCircuit, TwoSides
+
+<Stage>PlayTest
+	<Name>Wings Echo
+	<Detail>SLIVER OF STRAW WAS A TRAITOR TO THE CAUSE
+
+	<Name>Facncycat
+	<Detail>Wawa.
+
+	<Name>Scavengercat
+	<Detail>Unit! Intelligent creatures of RW, Resist the tyranny of iterators!
+
+	<Name>Rademoline
+	<Detail>Caw?Guah! gagagagagagaaaguayya
+
+	<Name>catatu
+	<Detail>i luv u uwu
+
+	<Name>a slugcat
+	<Detail>This is a slugcat
+
+	<Name>Lin
+	<Detail>Everything is in a cycle, and we are no exception
+
+	<Name>MorskePrudzenja
+
+	<Name>Fei
+	<Detail>This moment, right here! lt is where slugcats are meant to be.
+
+	<Name>MeowMeowEmperor
+	<Detail>A new cycle is unfolding, and we don't have to be a part of it
+
+	<Name>Mo
+
+	<Name>Mon2tr
+	<Detail>Good morning,Rain World
+
+	<Name>Candy Colored Husky
+	<Detail>remember,think if it make some *interesting* before choose a card!
+
+	<Name>QWQ
+	<Detail>Fixed the bug where Sephirah Meltdown was overly easy
+
+	<Name>Penguin
+	<Detail>A scav with a pearl, so merry and free. Till the hunter's strike ends the scav's spree!
+
+	<Name>Silent Night
+	<Detail>I also have to write a message, right?
+
+
+	<Name>Red bean paste
+	<Detail>I want to fiercely control the five pebbles
+
+	<Name>leaf
+	<Detail>I see.I can't see.
+
+	<Name>NR
+	<Detail>Transcendental Inversion! Transcendental Inversion!!

@@ -16,7 +16,7 @@ namespace RandomBuff.Credit.CreditObject
 
         public BuffCreditStage CreditStage => owner as BuffCreditStage;
 
-        public float LifeParam => Mathf.Clamp01((CreditStage.StageTime - inStageEnterTime) / lifeTime);
+        public float LifeParam => (CreditStage.StageTime - inStageEnterTime) / lifeTime;
 
         public BuffCreditStageObject(Menu.Menu menu, BuffCreditStage owner, Vector2 pos, float inStageEnterTime, float lifeTime) : base(menu, owner, pos)
         {

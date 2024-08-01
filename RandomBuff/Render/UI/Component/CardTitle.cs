@@ -85,7 +85,7 @@ namespace RandomBuff.Render.UI.Component
                 width += newCardHandler.width + newCardHandler.spanToLeft;
             }
             rect.x = width;
-            rect.y = CardBasicAssets.RenderTextureSize.y * scale;
+            rect.y = CardBasicAssets.RenderTextureSize.y * scale * 0.6f;
 
             for (int i = 0;i< currentActiveHandlers.Count; i++)
                 currentActiveHandlers[i].CaculateDeltaPos(i, width, currentActiveHandlers.Count);

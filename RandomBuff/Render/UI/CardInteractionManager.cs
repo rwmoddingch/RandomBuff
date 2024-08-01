@@ -615,7 +615,7 @@ namespace RandomBuff.Render.UI
                 Slot.FrontDark = true;
                 exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Exclusive_Show);
 
-                Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_CardDetail"), true);
+                Slot.completeSlot?.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_CardDetail"), true);
                 if (SubManager != null) SubManager.overrideDisabled = true;
 
                 Slot.completeSlot?.SetGamePaused(true);

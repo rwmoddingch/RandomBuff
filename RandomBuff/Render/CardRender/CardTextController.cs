@@ -396,10 +396,10 @@ namespace RandomBuff.Render.CardRender
                 _minScrolledLength = 0f;
                 _scrolledLength = _minScrolledLength;
 
-                Debug.Log($"{yUp}, {yDown}");
+                //Debug.Log($"{yUp}, {yDown}");
             }
 
-            BuffPlugin.LogDebug($"Refresh Text Info, length:{textMeshLength}");
+            //BuffPlugin.LogDebug($"Refresh Text Info, length:{textMeshLength}");
             _textNeedRefresh = false;
         }
 
