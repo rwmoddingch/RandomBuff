@@ -336,9 +336,10 @@ namespace BuiltinBuffs.Positive
                         if (this.ShouldFired(creature))
                         {
                             creature.SetKillTag(this.owner.abstractCreature);
-                            if (creature.Template.smallCreature && !(creature.State is HealthState))
+                            if (creature.Template.smallCreature || !(creature.State is HealthState))
                             {
-                                if(Random.value < 0.016f + 0.008f * level)
+                                float chance = (0.016f + 0.008f * level) / (10f * creature.Template.bodySize);
+                                if (Random.value < chance)
                                     creature.Die();
                             }
                             else
