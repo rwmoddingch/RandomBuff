@@ -72,10 +72,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             foreach (var self in (BuffCustom.TryGetGame(out game) ? game.Players : new List<AbstractCreature>())
                 .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
             {
-                self.slugcatStats.corridorClimbSpeedFac *= Fac;
-                self.slugcatStats.poleClimbSpeedFac *= Fac;
-                self.slugcatStats.runspeedFac *= Fac;
-                if(self.room != null)
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", Fac);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", Fac);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac", Fac);
+                if (self.room != null)
                     self.room.AddObject(new BinahGuardBlackSmoke(self.room,self));
             }
 
@@ -134,15 +134,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             base.Destroy();
             MyTimer.Reset();
+            PlayerUtils.UndoAll(this);
             if (BuffCustom.TryGetGame(out var game))
             {
-                foreach (var self in game.Players
-                    .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
-                {
-                    self.slugcatStats.corridorClimbSpeedFac /= Fac;
-                    self.slugcatStats.poleClimbSpeedFac /= Fac;
-                    self.slugcatStats.runspeedFac /= Fac;
-                }
 
                 if (BuffPoolManager.Instance.GameSetting.MissionId == SephirahMeltdownsMission.SephirahMeltdowns.value)
                 {

@@ -11,12 +11,19 @@ using MoreSlugcats;
 using RWCustom;
 using MonoMod.RuntimeDetour;
 using System.Reflection;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Duality
 {
     internal class SlugSlugBuff : Buff<SlugSlugBuff, SlugSlugBuffData>
     {
         public override BuffID ID => SlugSlugBuffEntry.SlugSlugID;
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            PlayerUtils.UndoAll(this);
+        }
     }
 
     class SlugSlugBuffData : CountableBuffData
@@ -178,7 +185,7 @@ namespace BuiltinBuffs.Duality
             if (!slugSlugModule.TryGetValue(self, out var module) && self.slugcatStats.name != MoreSlugcatsEnums.SlugcatStatsName.Spear)
             {
                 slugSlugModule.Add(self, new SlugSlugModule(self));
-                self.slugcatStats.corridorClimbSpeedFac *= 1.5f;
+                self.slugcatStats.Modify(SlugSlugBuff.Instance,PlayerUtils.Multiply, "corridorClimbSpeedFac", 1.5f);
             }            
         }
 
