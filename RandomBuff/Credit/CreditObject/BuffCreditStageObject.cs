@@ -50,7 +50,7 @@ namespace RandomBuff.Credit.CreditObject
         }
 
         float enterStageTime;
-        public float StageTime => CreditMenu.time - enterStageTime;
+        public float StageTime => CreditMenu.Time - enterStageTime;
 
         public BuffCreditMenu CreditMenu => menu as BuffCreditMenu;
 

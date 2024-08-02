@@ -47,7 +47,7 @@ namespace RandomBuff.Credit.CreditObject
         Vector2 hangPos;
         Vector2 denPos;
 
-        public IndividualCardTitle(Menu.Menu menu, BuffCreditStage owner, string text, float inStageEnterTime, float lifeTime) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
+        public IndividualCardTitle(Menu.Menu menu, BuffCreditStage owner, string text, float inStageEnterTime, float lifeTime, bool noAnim = false) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
         {
             myContainer = new FContainer();
             menu.container.AddChild(myContainer);
@@ -56,20 +56,23 @@ namespace RandomBuff.Credit.CreditObject
             myContainer.SetPosition(ScreenSize / 2f);
             cardTitle.RequestSwitchTitle(text);
 
-            AnimMachine.GetDelayCmpnt(40 * 3, autoDestroy: true).BindActions(OnAnimFinished: (t) =>
+            if (!noAnim)
             {
-                hangPos = ScreenSize / 2f;
-                denPos = new Vector2(0f + (cardTitle.rect.x / 2f) * endScale, ScreenSize.y - cardTitle.rect.y * endScale /2f);
-
-                AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (ta, f) =>
+                AnimMachine.GetDelayCmpnt(40 * 3, autoDestroy: true).BindActions(OnAnimFinished: (t) =>
                 {
-                    float scale = Mathf.Lerp(1f, endScale, ta.Get());
-                    float x = Mathf.Lerp(hangPos.x, denPos.x, ta.Get());
-                    float y = Mathf.Lerp(hangPos.y, denPos.y, Mathf.Pow(ta.Get(), 3f));
-                    myContainer.SetPosition(x, y);
-                    myContainer.scale = scale;
-                }).BindModifier(Helper.EaseInOutCubic);
-            });
+                    hangPos = ScreenSize / 2f;
+                    denPos = new Vector2(0f + (cardTitle.rect.x / 2f) * endScale, ScreenSize.y - cardTitle.rect.y * endScale / 2f);
+
+                    AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (ta, f) =>
+                    {
+                        float scale = Mathf.Lerp(1f, endScale, ta.Get());
+                        float x = Mathf.Lerp(hangPos.x, denPos.x, ta.Get());
+                        float y = Mathf.Lerp(hangPos.y, denPos.y, Mathf.Pow(ta.Get(), 3f));
+                        myContainer.SetPosition(x, y);
+                        myContainer.scale = scale;
+                    }).BindModifier(Helper.EaseInOutCubic);
+                });
+            }
         }
 
         public override void Update()

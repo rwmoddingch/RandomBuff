@@ -22,6 +22,7 @@ namespace RandomBuff.Credit
                 realPath = AssetManager.ResolveFilePath($"buffassets/credit_{InGameTranslator.LanguageID.English}.txt");
 
             string[] lines = File.ReadAllLines(realPath);
+            creditStagesAndData.Add(new KeyValuePair<CreditStageType, CreditStageData>(CreditStageType.Intro, new CreditStageData() { stageType = CreditStageType.Intro }));
 
             foreach(var line in lines)
             {
@@ -114,7 +115,7 @@ namespace RandomBuff.Credit
             return r;
         }
 
-        public abstract class CreditStageData
+        public class CreditStageData
         {
             public CreditStageType stageType;
         }
@@ -144,6 +145,7 @@ namespace RandomBuff.Credit
         public static readonly CreditStageType Coding = new CreditStageType("Coding", true);
         public static readonly CreditStageType ArtWorks = new CreditStageType("ArtWorks", true);
         public static readonly CreditStageType PlayTest = new CreditStageType("PlayTest", true);
+        public static readonly CreditStageType Intro = new CreditStageType("Intro", true);
 
         public CreditStageType(string value, bool register = false) : base(value, register)
         {

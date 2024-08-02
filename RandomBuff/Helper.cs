@@ -4,6 +4,7 @@ using MonoMod.Utils;
 using MonoMod.Utils.Cil;
 using RandomBuff.Core.Buff;
 using RewiredConsts;
+using RWCustom;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,6 +59,7 @@ namespace RandomBuff
             /// </summary>
             /// <param name="triggleSingle">为true时表示单击触发</param>
             /// <param name="triggleDouble">为true时表示双击触发</param>
+            /// 
             public void Update(out bool triggleSingle, out bool triggleDouble)
             {
                 lastState = state;
@@ -355,6 +357,17 @@ namespace RandomBuff
             }
             builder.AppendLine("\n");
             BuffPlugin.Log(builder.ToString());
+        }
+
+        public static Vector2 GetContactPos(Vector2 pos, Vector2 dir, Room room)
+        {
+            Vector2 corner = Custom.RectCollision(pos, pos + dir * 100000f, room.RoomRect.Grow(200f)).GetCorner(FloatRect.CornerLabel.D);
+            IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(room, pos, corner);
+            if (intVector != null)
+            {
+                corner = Custom.RectCollision(corner, pos, room.TileRect(intVector.Value)).GetCorner(FloatRect.CornerLabel.D);
+            }
+            return corner;
         }
 
         public static void LinkEmptyToSelf(MenuObject menuObject)

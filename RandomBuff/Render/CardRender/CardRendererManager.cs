@@ -19,7 +19,7 @@ namespace RandomBuff.Render.CardRender
 {
     internal static class CardRendererManager
     {
-        static float maxDestroyTime = 60f;
+        static float maxDestroyTime = 120f;
         static List<BuffCardRendererBase> totalRenderers = new List<BuffCardRendererBase>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
         static List<SingleTextCardRenderer> inactiveSingleTextCardRenderer = new List<SingleTextCardRenderer>();

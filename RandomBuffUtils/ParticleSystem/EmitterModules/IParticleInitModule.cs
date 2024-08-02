@@ -64,6 +64,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
+    public class SetCustomPos : EmitterModule, IParticleInitModule
+    {
+        Func<Particle, Vector2> func;
+        public SetCustomPos(ParticleEmitter emitter, Func<Particle, Vector2> func) : base(emitter)
+        {
+            this.func = func;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.HardSetPos(func.Invoke(particle));
+        }
+    }
+
     public class SetMoveType : EmitterModule, IParticleInitModule
     {
         Particle.MoveType moveType;
@@ -170,6 +184,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         {
             float r = Mathf.Lerp(a, b, Random.value);
             particle.rotation = r;
+        }
+    }
+
+    public class SetCustomRotation : EmitterModule, IParticleInitModule
+    {
+        Func<Particle, float> func;
+        public SetCustomRotation(ParticleEmitter emitter, Func<Particle, float> func) : base(emitter)
+        {
+            this.func = func;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.HardSetRotation(func.Invoke(particle));
         }
     }
 

@@ -141,11 +141,18 @@ namespace RandomBuff.Core.StaticsScreen
 
         public override void Singal(MenuObject sender, string message)
         {
-            if (message == "CONTINUE" && newFinishedQuests.Count == 0)
+            if (message == "CONTINUE")
             {
-                this.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
-                if (manager.musicPlayer != null)
-                    manager.musicPlayer.FadeOutAllSongs(50f);
+                if(newFinishedQuests.Count == 0)
+                {
+                    this.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+                    if (manager.musicPlayer != null)
+                        manager.musicPlayer.FadeOutAllSongs(50f);
+                }
+                else
+                {
+                    scoreCaculator.fastCaculate = true;
+                }
                 
             }
         }

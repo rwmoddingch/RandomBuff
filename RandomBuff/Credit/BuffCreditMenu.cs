@@ -1,6 +1,11 @@
 ﻿using Menu;
 using Menu.Remix;
+using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
+using RandomBuff.Core.SaveData;
 using RandomBuff.Credit.CreditObject;
+using RandomBuff.Render.CardRender;
+using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
 using Rewired;
 using RWCustom;
@@ -16,7 +21,7 @@ namespace RandomBuff.Credit
     internal class BuffCreditMenu : Menu.Menu
     {
         RainEffect rainEffect;
-        public float time { get; private set; }
+        public float Time { get; private set; }
 
         BuffCreditStage stage;
         CreditFileReader creditFileReader;
@@ -33,18 +38,23 @@ namespace RandomBuff.Credit
             rainEffect = new RainEffect(this, pages[0]);
             pages[0].subObjects.Add(rainEffect);
 
-            //AnimMachine.GetDelayCmpnt(40 * 10, autoDestroy: true).BindActions(OnAnimFinished: (t) =>
-            //{
-            //    manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
-            //});
-            //foreach(var stageText in creditFileReader.creditStages)
-            //{
+            int count = 0;
+            List<BuffCardRenderer> renderers = new();
+            foreach(var idValue in BuffID.values.entries)
+            {
+                var id = new BuffID(idValue);
+                if (!BuffConfigManager.ContainsId(id))
+                    continue;
+                renderers.Add(CardRendererManager.GetRenderer(id));
+                count++;
+                if (count == 30)
+                    break;
+            }
 
-            //}
-
-            //pages[0].subObjects.Add(stage = new BuffCreditStage(this, pages[0], 0f));
-            //stage.AddObjectToStage(new IndividualCardTitle(this, stage, "Test Title", 0f, 10f));
-            //stage.AddObjectToStage(new NameDetailLabel(this, stage, new Vector2(200f, 200f), 3f, 6f, "Harvie", "This is wawa test"));
+            foreach(var renderer in renderers)
+            {
+                CardRendererManager.RecycleCardRenderer(renderer);
+            }
         }
 
         public override void Update()
@@ -88,13 +98,14 @@ namespace RandomBuff.Credit
         static int entriesAPage = 8;
         public void NextStage(CreditStageType creditStageType, CreditFileReader.CreditStageData stageData)
         {
-            stage = new BuffCreditStage(this, pages[0], time);
+            stage = new BuffCreditStage(this, pages[0], Time);
             pages[0].subObjects.Add(stage);
             Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
             rainEffect.LightningSpike(Mathf.Pow(1f, 2f) * 0.85f, Mathf.Lerp(20f, 120f, 1f));
 
             int y = 0;
             float inStageEnterTime = 4f;
+            bool titleHasAnim = true;
             BuffPlugin.Log($"inStage : {creditStageType} {inStageEnterTime + 1f * y}");
             if (creditStageType == CreditStageType.Coding)
             {
@@ -145,9 +156,15 @@ namespace RandomBuff.Credit
                 }
                 inStageEnterTime += 8f;
             }
+            else if(creditStageType == CreditStageType.Intro)
+            {
+                stage.AddObjectToStage(new FlagHolder(this, stage, 0f, 10f));
+                inStageEnterTime = 8f;
+                titleHasAnim = false;
+            }
 
             
-            stage.AddObjectToStage(new IndividualCardTitle(this, stage, BuffResourceString.Get($"CreditTitle_{creditStageType.value}",true), 0f,1f + inStageEnterTime));
+            stage.AddObjectToStage(new IndividualCardTitle(this, stage, BuffResourceString.Get($"CreditTitle_{creditStageType.value}",true), 0f,1f + inStageEnterTime, !titleHasAnim));
         }
 
         public void EndCredit()
@@ -159,12 +176,8 @@ namespace RandomBuff.Credit
         public override void RawUpdate(float dt)
         {
             base.RawUpdate(dt);
-            time += dt;
-            rainEffect.rainFade = Custom.SCurve(Mathf.InverseLerp(0f, 6f, time), 0.8f) * 0.5f;
+            Time += dt;
+            rainEffect.rainFade = Custom.SCurve(Mathf.InverseLerp(0f, 6f, Time), 0.8f) * 0.5f;
         }
-
     }
-
-
-    
 }

@@ -33,7 +33,7 @@ namespace RandomBuff.Core.StaticsScreen
 
         public int indexInCurrentState = 0;
 
-
+        public bool fastCaculate;
         //Dictionary<CreatureTemplate.Type, int[]> killsAndCounts = new();
         //CreatureTemplate.Type[] kills;
 
@@ -153,6 +153,8 @@ namespace RandomBuff.Core.StaticsScreen
                 {
                     expBar.setAlpha = 1f;
                     state = ScoreCaculatorState.ShowLevelProgression;
+                    scoreBoard.HardSet();
+                    fastCaculate = false;
                 }
             }
             else if(state == ScoreCaculatorState.ShowLevelProgression)
@@ -162,10 +164,18 @@ namespace RandomBuff.Core.StaticsScreen
                     state = ScoreCaculatorState.AddScoreToLevel;
                     expBar.Exp += scoreBoard.score;
                     scoreBoard.score = 0;
+                    fastCaculate = false;
                 }
             }
             else if(state == ScoreCaculatorState.AddScoreToLevel)
             {
+                if (fastCaculate)
+                {
+                    expBar.HardSet();
+                    scoreBoard.HardSet();
+                    fastCaculate = false;
+
+                }
                 if(expBar.FinishState)
                 {
                     state = ScoreCaculatorState.Finish;
@@ -338,7 +348,7 @@ namespace RandomBuff.Core.StaticsScreen
 
                 if (alphaAnim == null && state == ScoreInstanceState.Prepare)
                 {
-                    alphaAnim = AnimMachine.GetTickAnimCmpnt(0, 60, autoDestroy: true).BindModifier(Helper.EaseInOutCubic)
+                    alphaAnim = AnimMachine.GetTickAnimCmpnt(0, caculator.fastCaculate ? 5 : 60, autoDestroy: true).BindModifier(Helper.EaseInOutCubic)
                         .BindActions(OnAnimGrafUpdate: (t, f) =>
                         {
                             param = t.Get();
@@ -347,6 +357,8 @@ namespace RandomBuff.Core.StaticsScreen
                             param = 1f;
                             state = ScoreInstanceState.UpdateScore;
                             caculator.scoreBoard.score += score;
+                            if (caculator.fastCaculate)
+                                caculator.scoreBoard.HardSet();
                             alphaAnim = null;
 
                             lastAlpha = param;
@@ -381,7 +393,7 @@ namespace RandomBuff.Core.StaticsScreen
             public virtual void UpdateScoreUpdate()
             {
                 updateScoreCounter++;
-                if (updateScoreCounter >= UpdateScoreTime)
+                if (updateScoreCounter >= (caculator.fastCaculate ? 1 : UpdateScoreTime))
                     state = ScoreInstanceState.FadeOut;
             }
 
@@ -630,6 +642,11 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 scoreDisplay.GrafUpdate(timeStacker);
                 lineSprite.alpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+            }
+
+            public void HardSet()
+            {
+                scoreDisplay.HardSet();
             }
 
             public void ClearSprites()
