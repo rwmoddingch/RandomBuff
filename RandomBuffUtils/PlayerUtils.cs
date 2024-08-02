@@ -1,16 +1,15 @@
-﻿using RWCustom;
+﻿using JetBrains.Annotations;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace RandomBuffUtils
 {
-    public class PlayerUtils
+    public static partial class PlayerUtils
     {
         static ConditionalWeakTable<Player, PlayerModule> weakTable = new ConditionalWeakTable<Player, PlayerModule>();
         public static List<IOWnPlayerUtilsPart> owners = new List<IOWnPlayerUtilsPart>();
@@ -26,6 +25,8 @@ namespace RandomBuffUtils
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
             On.RoomCamera.SpriteLeaser.CleanSpritesAndRemove += SpriteLeaser_CleanSpritesAndRemove;
+
+            InitOperations();
         }
 
         
@@ -402,6 +403,259 @@ namespace RandomBuffUtils
         {
             [CanBeNull] PlayerModulePart InitPart(PlayerModule module);
             [CanBeNull] PlayerModuleGraphicPart InitGraphicPart(PlayerModule module);
+        }
+    }
+
+    public static partial class PlayerUtils
+    {
+        public delegate float OperatorDelegate(float origValue, float execValue);
+
+        public static readonly List<OperatorDelegate> OperatorDelegates = new ();
+
+        public static readonly ConditionalWeakTable<SlugcatStats, SlugcatStatStack> SlugcatStatsModifiedStack = new();
+        public static readonly ConditionalWeakTable<object, HashSet<SlugcatStatModifer>> SignalKeyMap = new();
+
+        public static readonly OperatorDelegate Max = Mathf.Max;
+        public static readonly OperatorDelegate Min = Mathf.Min;
+
+
+        public static readonly OperatorDelegate Add = (value, execValue) => value + execValue;
+        public static readonly OperatorDelegate Subtraction = (value, execValue) => value - execValue;
+
+        public static readonly OperatorDelegate Multiply = (value, execValue) => value * execValue;
+        public static readonly OperatorDelegate Division = (value, execValue) => value / execValue;
+
+        public static void InitOperations()
+        {
+            OperatorDelegates.Clear();
+            OperatorDelegates.Add(Max);
+            OperatorDelegates.Add(Min);
+            OperatorDelegates.Add(Add);
+            OperatorDelegates.Add(Subtraction);
+            OperatorDelegates.Add(Multiply);
+            OperatorDelegates.Add(Division);
+        }
+
+        public static void AddNewOperation(OperatorDelegate op, int priority = -1)
+        {
+            if (priority == -1)
+                OperatorDelegates.Add(op);
+            if (priority < OperatorDelegates.Count)
+                OperatorDelegates.Insert(priority, op);
+        }
+
+
+        public static SlugcatStats Clone(this SlugcatStats origStats)
+        {
+            return new SlugcatStats(origStats.name, origStats.malnourished)
+            {
+                bodyWeightFac = origStats.bodyWeightFac,
+                corridorClimbSpeedFac = origStats.corridorClimbSpeedFac,
+                foodToHibernate = origStats.foodToHibernate,
+                generalVisibilityBonus = origStats.generalVisibilityBonus,
+                loudnessFac = origStats.loudnessFac,
+                lungsFac = origStats.lungsFac,
+                malnourished = origStats.malnourished,
+                maxFood = origStats.maxFood,
+                poleClimbSpeedFac = origStats.poleClimbSpeedFac,
+                throwingSkill = origStats.throwingSkill,
+                visualStealthInSneakMode = origStats.visualStealthInSneakMode,
+                runspeedFac = origStats.runspeedFac
+
+            };
+        }
+        public static void CopyTo(this SlugcatStats origStats, SlugcatStats destStats)
+        {
+            destStats.runspeedFac = origStats.runspeedFac;
+            destStats.bodyWeightFac = origStats.bodyWeightFac;
+            destStats.corridorClimbSpeedFac = origStats.corridorClimbSpeedFac;
+            destStats.foodToHibernate = origStats.foodToHibernate;
+            destStats.generalVisibilityBonus = origStats.generalVisibilityBonus;
+            destStats.loudnessFac = origStats.loudnessFac;
+            destStats.lungsFac = origStats.lungsFac;
+            destStats.malnourished = origStats.malnourished;
+            destStats.maxFood = origStats.maxFood;
+            destStats.poleClimbSpeedFac = origStats.poleClimbSpeedFac;
+            destStats.throwingSkill = origStats.throwingSkill;
+            destStats.visualStealthInSneakMode = origStats.visualStealthInSneakMode;
+        }
+
+
+        public static void Apply(SlugcatStats stats)
+        {
+            if(SlugcatStatsModifiedStack.TryGetValue(stats, out var stack))
+                stack.Apply();
+        }
+
+        public static SlugcatStatModifer Modify(this SlugcatStats stats, object signalKey, OperatorDelegate op,
+            string fieldName, float value)
+        {
+            return Modify(stats, op, fieldName, value, signalKey);
+        }
+
+        public static SlugcatStatModifer Modify(this SlugcatStats stats, OperatorDelegate op, string fieldName, float value, object signalKey = null)
+        {
+            if (typeof(SlugcatStats).GetField(fieldName,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance) == null)
+            {
+                BuffUtils.LogError("PlayerUtils", $"can't find field named [{fieldName}] in slugcatStats");
+                return null;
+            }
+            if(!SlugcatStatsModifiedStack.TryGetValue(stats,out var stack))
+                SlugcatStatsModifiedStack.Add(stats, stack = new(stats));
+
+            if(!OperatorDelegates.Contains(op))
+                OperatorDelegates.Add(op);
+
+            var re = new SlugcatStatModifer(stack, op, fieldName, value, signalKey);
+
+            if (signalKey != null)
+                SignalKeyMap.GetValue(signalKey,(key => new HashSet<SlugcatStatModifer>())).Add(re);
+            
+
+            stack.Add(re);
+            return re;
+        }
+
+
+        public static int Undo(this SlugcatStats stats,[NotNull] object signalKey)
+        {
+            if (SlugcatStatsModifiedStack.TryGetValue(stats, out var stack))
+            {
+                var re = stack.RemoveAll(signalKey);
+
+                if (SignalKeyMap.TryGetValue(signalKey, out var modiferList))
+                    modiferList.RemoveWhere(i => i.IsDeletion);
+
+                return re;
+            }
+
+            return 0;
+        }
+
+        public static int UndoAll([NotNull] object signalKey)
+        {
+            if (SignalKeyMap.TryGetValue(signalKey, out var list))
+            {
+                SignalKeyMap.Remove(signalKey);
+                foreach (var modifer in list)
+                    modifer.Undo();
+                return list.Count;
+                
+            }
+
+            return 0;
+        }
+
+
+        public class SlugcatStatStack
+        {
+
+            public SlugcatStatStack(SlugcatStats origStats)
+            {
+                this.origStats = origStats.Clone();
+                targetRef = new WeakReference<SlugcatStats>(origStats);
+            }
+
+            private readonly SlugcatStats origStats;
+
+            private readonly WeakReference<SlugcatStats> targetRef;
+
+            private readonly HashSet<SlugcatStatModifer> container = new();
+
+            public void Apply()
+            {
+                if (targetRef.TryGetTarget(out var target))
+                {
+                    BuffUtils.Log("PlayerUtils", $"apply modify, count :{container.Count}");
+                    origStats.CopyTo(target);
+                    foreach (var modify in container.OrderBy(i => i.Index))
+                    {
+                        var field = typeof(SlugcatStats).GetField(modify.fieldName,
+                            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+
+                        field.SetValue(target,
+                            Convert.ChangeType(modify.op.Invoke((float)field.GetValue(target), modify.ExecValue),
+                                field.FieldType));
+                    }
+                }
+            }
+
+            public void Remove(SlugcatStatModifer modifer)
+            {
+                container.Remove(modifer);
+                if (modifer.signalKey != null && SignalKeyMap.TryGetValue(modifer.signalKey, out var list))
+                    list.Remove(modifer);
+                Apply();
+            }
+            public int RemoveAll(object signalKey)
+            {
+                BuffUtils.Log("PlayerUtils", $"apply undo by key, Orig count :{container.Count}");
+                var re = container.RemoveWhere(i =>
+                {
+                    if (i.signalKey != null)
+                    {
+                        if (i.signalKey.TryGetTarget(out var obj))
+                            return obj == signalKey;
+                        i.IsDeletion = true;
+                        return true;
+                    }
+
+                    return false;
+                });
+                Apply();
+                return re;
+            }
+            public void Add(SlugcatStatModifer modifer)
+            {
+                container.Add(modifer);
+                Apply();
+            }
+
+        }
+
+
+        public class SlugcatStatModifer
+        {
+            public float ExecValue
+            {
+                get => execValue;
+                set
+                {
+                    if (value != this.execValue)
+                    {
+                        this.execValue = value;
+                        if (!IsDeletion)
+                            stack.Apply();
+                    }
+                }
+            }
+
+            private float execValue;
+            public int Index => OperatorDelegates.IndexOf(op);
+
+            public readonly OperatorDelegate op;
+            public readonly string fieldName;
+            public readonly SlugcatStatStack stack;
+            public readonly WeakReference<object> signalKey;
+
+            internal SlugcatStatModifer(SlugcatStatStack stack, OperatorDelegate op, string fieldName, float execValue, object signalKey = null)
+            {
+                this.op = op;
+                this.signalKey = signalKey == null ? null : new(signalKey);
+                this.fieldName = fieldName;
+                this.execValue = execValue;
+                this.stack = stack;
+            }
+
+
+            public void Undo()
+            {
+                stack.Remove(this);
+                IsDeletion = true;
+            }
+
+            public bool IsDeletion { get; internal set; }
         }
     }
 }

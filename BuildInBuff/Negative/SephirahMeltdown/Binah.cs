@@ -72,10 +72,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             foreach (var self in (BuffCustom.TryGetGame(out game) ? game.Players : new List<AbstractCreature>())
                 .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
             {
-                self.slugcatStats.corridorClimbSpeedFac *= Fac;
-                self.slugcatStats.poleClimbSpeedFac *= Fac;
-                self.slugcatStats.runspeedFac *= Fac;
-                if(self.room != null)
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", Fac);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", Fac);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac", Fac);
+                if (self.room != null)
                     self.room.AddObject(new BinahGuardBlackSmoke(self.room,self));
             }
 
@@ -134,15 +134,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             base.Destroy();
             MyTimer.Reset();
+            PlayerUtils.UndoAll(this);
             if (BuffCustom.TryGetGame(out var game))
             {
-                foreach (var self in game.Players
-                    .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
-                {
-                    self.slugcatStats.corridorClimbSpeedFac /= Fac;
-                    self.slugcatStats.poleClimbSpeedFac /= Fac;
-                    self.slugcatStats.runspeedFac /= Fac;
-                }
 
                 if (BuffPoolManager.Instance.GameSetting.MissionId == SephirahMeltdownsMission.SephirahMeltdowns.value)
                 {
@@ -304,7 +298,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             }
         }
 
-        private FLabel[] debugLabels;
 
         public override void Update(HUD.HUD hud)
         {
@@ -795,7 +788,13 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             while (ChainSprites.Count < ChainRoomIndices.Count)
             {
-                ChainSprites.Add(new FSprite("Futile_White"));
+                ChainSprites.Add(new FSprite("Futile_White")
+                {
+                    element = SephirahMeltdownEntry.UITarget,
+                    width = 25,
+                    height = 25,
+                    color = RainWorld.SaturatedGold
+                });
                 map.container.AddChild(ChainSprites[ChainSprites.Count - 1]);
             }
 
@@ -2023,7 +2022,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
     internal class BinahStrike : CosmeticSprite
     {
-        private const int WaitCounter = 80;
+        private const int WaitCounter = 120;
         private const int OutCounter = 6;
 
         private int counter = 0;
@@ -2037,9 +2036,17 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             base.InitiateSprites(sLeaser, rCam);
     
-            sLeaser.sprites = new FSprite[2];
+            sLeaser.sprites = new FSprite[3];
             sLeaser.sprites[0] = new FSprite("Binah.StrikeFog"){height = 25,width = 150,alpha = 0};
             sLeaser.sprites[1] = new FSprite("Binah.Strike") { height = 0, width = 150, anchorY = 0 };
+            sLeaser.sprites[2] = new FSprite("Futile_White")
+            {
+                shader = rCam.game.rainWorld.Shaders["FlatLight"],
+                height = 350,
+                width = 350,
+                color = Color.red,
+                alpha = 0f
+            };
             AddToContainer(sLeaser,rCam,rCam.ReturnFContainer("Water"));
         }
 
@@ -2054,9 +2061,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             sLeaser.sprites[0].SetPosition(pos - camPos + Vector2.down*5* alpha);
             sLeaser.sprites[1].SetPosition(pos - camPos);
             sLeaser.sprites[1].height = alpha * 200;
+            sLeaser.sprites[2].color = ((Mathf.Sin((counter + timeStacker) / 30 * Mathf.PI) + 1) / 2 + 1) * Color.red;
+           sLeaser.sprites[2].alpha = Mathf.Lerp(sLeaser.sprites[2].alpha, counter > WaitCounter + OutCounter ? 0 : 0.25F, 0.05f);
             sLeaser.sprites[0].alpha =
                 Mathf.Lerp(sLeaser.sprites[0].alpha, counter > WaitCounter + OutCounter ? 0 : 1, 0.05f);
-
+            sLeaser.sprites[2].SetPosition(pos - camPos);
         }
 
         public override void Update(bool eu)

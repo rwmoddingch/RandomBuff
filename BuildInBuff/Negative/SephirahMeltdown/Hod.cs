@@ -28,10 +28,16 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             foreach (var self in (BuffCustom.TryGetGame(out var game) ? game.Players : new List<AbstractCreature>())
                      .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
             {
-                self.slugcatStats.corridorClimbSpeedFac *= fac;
-                self.slugcatStats.poleClimbSpeedFac *= fac;
-                self.slugcatStats.runspeedFac *= fac;
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", fac);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", fac);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac", fac);
             }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            PlayerUtils.UndoAll(Instance);
         }
 
         public static void HookOn()
@@ -43,9 +49,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             orig(self,abstractCreature,world);
             var fac = HodBuffData.Hod.GetBuffData<HodBuffData>().SpeedFac;
-            self.slugcatStats.corridorClimbSpeedFac *= fac;
-            self.slugcatStats.poleClimbSpeedFac *= fac;
-            self.slugcatStats.runspeedFac *= fac;
+            self.slugcatStats.Modify(Instance, PlayerUtils.Multiply, "corridorClimbSpeedFac", fac);
+            self.slugcatStats.Modify(Instance, PlayerUtils.Multiply, "poleClimbSpeedFac", fac);
+            self.slugcatStats.Modify(Instance, PlayerUtils.Multiply, "runspeedFac", fac);
         }
     }
 }

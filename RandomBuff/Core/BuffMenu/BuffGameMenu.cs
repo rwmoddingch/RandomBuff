@@ -576,7 +576,7 @@ namespace RandomBuff.Core.BuffMenu
             menuSlot.GrafUpdate(timeStacker);
             testNotification.GrafUpdate(timeStacker);
 
-            if(Input.GetKeyDown(KeyCode.N) /*&& BuffPlugin.DevEnabled*/)
+            if(Input.GetKeyDown(KeyCode.N) && BuffPlugin.DevEnabled)
             {
                 TestFunction();
             }
@@ -590,7 +590,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public void ShowExtraInfo()
         {
-            var gameSetting = (missionPage.Show)
+            var gameSetting = (missionPage.Show && BuffNewGameMissionPage.pickedMission != null)
                 ? BuffNewGameMissionPage.pickedMission.GameSetting
                 : BuffDataManager.Instance.GetGameSetting(CurrentName);
          

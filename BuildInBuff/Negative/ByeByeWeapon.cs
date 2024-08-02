@@ -30,9 +30,15 @@ namespace HotDogBuff.Negative
 
         private static void Player_ThrowObject(On.Player.orig_ThrowObject orig, Player self, int grasp, bool eu)
         {
-            var weapon = (self.grasps[grasp].grabbed as Weapon);
-            orig.Invoke(self, grasp, eu);
-            if (weapon!=null)weapon.ChangeMode(Weapon.Mode.Free);
+            if (self.grasps[grasp].grabbed is Weapon weapon)
+            {
+                self.TossObject(grasp, eu);
+                weapon.SetRandomSpin(); 
+                self.ReleaseGrasp(grasp);
+            }
+            else
+                orig.Invoke(self, grasp, eu);
+
         }
 
         

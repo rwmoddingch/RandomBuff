@@ -29,6 +29,7 @@ namespace BuiltinBuffs.Positive
         {
             base.Destroy();
             PlayerUtils.RemovePart(this);
+            PlayerUtils.UndoAll(this);
         }
 
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
@@ -141,7 +142,6 @@ namespace BuiltinBuffs.Positive
         internal class ShockingSpeedModule : PlayerModulePart
         {
             public int counter;
-            float origSpeedFactor;
 
             public override void Update(Player player, bool eu)
             {
@@ -151,7 +151,7 @@ namespace BuiltinBuffs.Positive
                     counter--;
                     if (counter == 0)
                     {
-                        player.slugcatStats.runspeedFac = origSpeedFactor;
+                        player.slugcatStats.Undo(Instance);
                         if (PlayerUtils.TryGetGraphicPart<ShockingSpeedGraphicModule>(player, ShockingSpeedBuff.Instance, out var module))
                         {
                             module.shocked = false;
@@ -164,8 +164,8 @@ namespace BuiltinBuffs.Positive
             {
                 if(counter == 0)
                 {
-                    origSpeedFactor = player.slugcatStats.runspeedFac;
-                    player.slugcatStats.runspeedFac *= 3f;
+                    
+                    player.slugcatStats.Modify(Multiply, "runspeedFac",3,Instance);
 
                     //if (PlayerUtils.TryGetGraphicPart<ShockingSpeedGraphicModule>(player, ShockingSpeedBuff.Instance, out var module))
                     //{

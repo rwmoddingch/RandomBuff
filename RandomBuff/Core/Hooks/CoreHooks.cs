@@ -50,7 +50,10 @@ namespace RandomBuff.Core.Hooks
             On.JollyCoop.JollyMenu.JollyPlayerSelector.Update += JollyPlayerSelector_Update;
             On.ModManager.ModFolderHasDLLContent += ModManager_ModFolderHasDLLContent;
 
+            On.PlayerProgression.CopySaveFile += PlayerProgression_CopySaveFile;
+            On.Menu.BackupManager.RestoreSaveFile += BackupManager_RestoreSaveFile;
 
+            On.Options.GetSaveFileName_SavOrExp += Options_GetSaveFileName_SavOrExp;
             InGameHooksInit();
 
 
@@ -58,6 +61,60 @@ namespace RandomBuff.Core.Hooks
 
             //TestStartGameMenu = new("TestStartGameMenu");
 
+        }
+
+        private static string Options_GetSaveFileName_SavOrExp(On.Options.orig_GetSaveFileName_SavOrExp orig, Options self)
+        {
+            var re = orig(self);
+            if(self.saveSlot >= 100)
+                return $"buffMain{self.saveSlot}";
+            return re;
+        }
+
+        private static void BackupManager_RestoreSaveFile(On.Menu.BackupManager.orig_RestoreSaveFile orig, BackupManager self, string sourceName)
+        {
+            orig(self, sourceName);
+            if (sourceName.StartsWith("sav"))
+            {
+                sourceName = sourceName.Replace("sav", "");
+                if (string.IsNullOrEmpty(sourceName)) sourceName = "1";
+                if (int.TryParse(sourceName, out var result))
+                {
+                    orig(self, $"buffMain{result + 99}");
+                    orig(self, $"buffsave{result + 99}");
+                    BuffPlugin.Log($"restored buff sav at slot:{result}");
+                    BuffFile.BackUpForceUpdate = true;
+                }
+                else
+                {
+                    BuffPlugin.LogWarning($"unknown file name:sav{sourceName}");
+                }
+            }
+        }
+
+        private static void PlayerProgression_CopySaveFile(On.PlayerProgression.orig_CopySaveFile orig, PlayerProgression self, string sourceName, string destinationDirectory)
+        {
+            if (File.Exists(Path.Combine(destinationDirectory, sourceName)))
+                return;
+            orig(self, sourceName, destinationDirectory);
+            if (sourceName.StartsWith("sav"))
+            {
+                sourceName = sourceName.Replace("sav", "");
+                if (string.IsNullOrEmpty(sourceName)) sourceName = "1";
+                if (int.TryParse(sourceName, out var result))
+                {
+                    if(!File.Exists(Path.Combine(destinationDirectory, $"buffMain{result + 99}")))
+                        orig(self, $"buffMain{result+99}", destinationDirectory);
+
+                    if (!File.Exists(Path.Combine(destinationDirectory, $"buffsave{result + 99}")))
+                        orig(self, $"buffsave{result+99}", destinationDirectory);
+                    BuffPlugin.Log($"backup buff sav at slot:{result}, folder:{destinationDirectory}");
+                }
+                else
+                {
+                    BuffPlugin.LogWarning($"unknown file name:sav{sourceName}");
+                }
+            }
         }
 
         private static void JollyPlayerSelector_Update(On.JollyCoop.JollyMenu.JollyPlayerSelector.orig_Update orig, JollyCoop.JollyMenu.JollyPlayerSelector self)

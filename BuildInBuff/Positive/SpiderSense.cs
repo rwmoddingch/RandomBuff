@@ -138,11 +138,10 @@ namespace HotDogGains.Positive
 
             float num3 = CrossHeight(player.mainBodyChunk.pos.x, weapon.firstChunk.lastPos, weapon.firstChunk.pos, (weapon is Spear) ? 0.45f : 0.9f);
 
-            Vector2[] array = new Vector2[]
-            {
-            player.bodyChunks[0].pos,
-            player.bodyChunks[1].pos,
-            };
+            Vector2[] array = new Vector2[player.bodyChunks.Length];
+
+            for (int i = 0; i < array.Length; i++)
+                array[i] = player.bodyChunks[i].pos;
 
             if (player.room.aimap.getAItile(player.bodyChunks[1].pos).acc == AItile.Accessibility.Floor)
             {

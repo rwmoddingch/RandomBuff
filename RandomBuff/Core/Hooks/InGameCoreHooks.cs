@@ -67,7 +67,7 @@ namespace RandomBuff.Core.Hooks
             On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
             On.SaveState.setDenPosition += SaveState_setDenPosition;
             On.SaveState.ctor += SaveState_setup;
-            On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
+            On.World.SpawnGhost += World_SpawnGhost;
 
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 
@@ -83,6 +83,14 @@ namespace RandomBuff.Core.Hooks
                         return false;
                     return orig(self);
                 });
+        }
+
+        private static void World_SpawnGhost(On.World.orig_SpawnGhost orig, World self)
+        {
+            if (Custom.rainWorld.BuffMode() && (Custom.rainWorld.progression.currentSaveState.cycleNumber == 0 || BuffDataManager.Instance.GetGameSetting(self.game.StoryCharacter) != null))
+                return;
+            orig(self);
+
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -134,13 +142,7 @@ namespace RandomBuff.Core.Hooks
             "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL","SL_AI",
             "SH_GOR02","SI_SAINTINTRO","GW_A24", "SB_E05SAINT",
         };
-    
-        private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
-        {
-            if (Custom.rainWorld.BuffMode() && Custom.rainWorld.progression.currentSaveState.cycleNumber == 0)
-                return false;
-            return orig(ghostID,karma, karmaCap, ghostPreviouslyEncountered, playingAsRed);
-        }
+        
 
         private static void SaveState_setup(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
         {

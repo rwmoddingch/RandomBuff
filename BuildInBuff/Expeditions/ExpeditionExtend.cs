@@ -244,11 +244,16 @@ namespace BuiltinBuffs.Expeditions
 
         private static void BuildILDestroy(ILProcessor il, string item)
         {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, typeof(RuntimeBuff).GetMethod(nameof(RuntimeBuff.Destroy), BindingFlags.Public | BindingFlags.Instance));
             il.Emit(OpCodes.Ldsfld, typeof(ExpeditionHooks).GetField(nameof(ExpeditionHooks.activeUnlocks), BindingFlags.Static | BindingFlags.Public));
+
             il.Emit(OpCodes.Ldstr, item);
             il.Emit(OpCodes.Callvirt, typeof(List<string>).GetMethod(nameof(List<string>.Remove), new[] { typeof(string) }));
+
+            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldstr, item);
-            il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.ExpeditionBuffDestroy), new[] { typeof(string) }));
+            il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.ExpeditionBuffDestroy), new[] { typeof(RuntimeBuff), typeof(string) }));
             il.Emit(OpCodes.Pop);
             il.Emit(OpCodes.Ret);
 
@@ -259,16 +264,18 @@ namespace BuiltinBuffs.Expeditions
             il.Emit(OpCodes.Ldsfld, typeof(ExpeditionHooks).GetField(nameof(ExpeditionHooks.activeUnlocks), BindingFlags.Static | BindingFlags.Public));
             il.Emit(OpCodes.Ldstr, item);
             il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.AddUnique), new[] { typeof(List<string>), typeof(string) }));
+
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldstr, item);
-            il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.ExpeditionBuffCtor), new[] { typeof(string) }));
+            il.Emit(OpCodes.Callvirt, typeof(ExpeditionExtend).GetMethod(nameof(ExpeditionExtend.ExpeditionBuffCtor), new[] { typeof(RuntimeBuff),typeof(string) }));
 
+            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, typeof(RuntimeBuff).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First());
             il.Emit(OpCodes.Ret);
         }
 
 
-        public static void ExpeditionBuffDestroy(string id)
+        public static void ExpeditionBuffDestroy(RuntimeBuff buff, string id)
         {
             if (BuffCustom.TryGetGame(out var game))
             {
@@ -285,11 +292,14 @@ namespace BuiltinBuffs.Expeditions
                     case "bur-pursued":
                         ExpeditionGame.burdenTrackers.RemoveAll(i => i is ExpeditionGame.PursuedTracker);
                         break;
+                    case "unl-agility":
+                        PlayerUtils.UndoAll(buff);
+                        break;
                 }
             }
         }
 
-        public static void ExpeditionBuffCtor(string id)
+        public static void ExpeditionBuffCtor(RuntimeBuff buff, string id)
         {
             if (BuffCustom.TryGetGame(out var game))
             {
@@ -304,25 +314,9 @@ namespace BuiltinBuffs.Expeditions
                         if (ModManager.CoopAvailable)
                         {
                             foreach (var stat in game.GetStorySession.characterStatsJollyplayer.Where(i => i != null))
-                            {
-                                stat.lungsFac = 0.15f;
-                                stat.runspeedFac = 1.75f;
-                                stat.poleClimbSpeedFac = 1.8f;
-                                stat.corridorClimbSpeedFac = 1.6f;
-                            }
+                                OverrideForAgility(stat);
                         }
-                        game.session.characterStats.lungsFac = 0.15f;
-                        game.session.characterStats.runspeedFac = 1.75f;
-                        game.session.characterStats.poleClimbSpeedFac = 1.8f;
-                        game.session.characterStats.corridorClimbSpeedFac = 1.6f;
-                        foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
-                            if (ply != null)
-                            {
-                                ply.slugcatStats.lungsFac = 0.15f;
-                                ply.slugcatStats.runspeedFac = 1.75f;
-                                ply.slugcatStats.poleClimbSpeedFac = 1.8f;
-                                ply.slugcatStats.corridorClimbSpeedFac = 1.6f;
-                            }
+                        OverrideForAgility(game.session.characterStats);
                         break;
                     case "unl-glow":
                         game.GetStorySession.saveState.theGlow = true;
@@ -335,9 +329,16 @@ namespace BuiltinBuffs.Expeditions
                             ExpeditionGame.burdenTrackers.Add(new ExpeditionGame.PursuedTracker(game));
                         break;
                 }
+
+                void OverrideForAgility(SlugcatStats stat)
+                {
+                    stat.Modify(PlayerUtils.Max, "lungsFac", 0.15f, buff);
+                    stat.Modify(PlayerUtils.Max, "runspeedFac", 1.75f, buff);
+                    stat.Modify(PlayerUtils.Max, "poleClimbSpeedFac", 1.8f, buff);
+                    stat.Modify(PlayerUtils.Max, "corridorClimbSpeedFac", 1.6f, buff);
+                }
             }
         }
-
 
 
         public static void AddUnique(List<string> self, string item)

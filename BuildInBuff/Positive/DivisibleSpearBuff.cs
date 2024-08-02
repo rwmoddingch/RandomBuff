@@ -77,6 +77,9 @@ namespace BuiltinBuffs.Positive
                 spear.room.abstractRoom.AddEntity(absSpaer);
                 absSpaer.RealizeInRoom();
                 var newSpear = absSpaer.realizedObject as Spear;
+                if(spear.IsNeedle)
+                    newSpear.Spear_makeNeedle(spear.spearmasterNeedleType,spear.spearmasterNeedle_hasConnection);
+
                 newSpear.room = spear.room;
                 Vector2 vector = self.firstChunk.pos + (spear.throwDir.ToVector2() + dir) * 10f;
 
