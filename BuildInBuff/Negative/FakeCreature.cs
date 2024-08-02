@@ -301,7 +301,9 @@ namespace BuiltinBuffs.Negative
                         break;
                     foreach (var chunk in creature.bodyChunks)
                     {
-                        if (ply.bodyChunks.Any(i => Custom.DistLess(i.pos, chunk.pos, (i.rad + chunk.rad))))
+                        if(chunk == null)
+                            continue;
+                        if (ply.bodyChunks.Any(i =>i != null && Custom.DistLess(i.pos, chunk.pos, (i.rad + chunk.rad))))
                         {
                             SuckIntoShortCut();
                             needBreak = true;
