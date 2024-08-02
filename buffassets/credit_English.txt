@@ -40,7 +40,7 @@
 
 	<Name>Seron
 	<Detail>-127.0.0.1-
-	<BuffIDs>ShortCircuit, TwoSides
+	<BuffIDs>ShortCircuit, TwoSides, TurboPropulsion
 
 	<Name>Lin
 	<Detail>Outline on the draft (sad wawa)

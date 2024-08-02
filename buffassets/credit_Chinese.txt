@@ -16,6 +16,7 @@
 
 	<Name>寂空
 	<Detail> 请提交本周期的降水报告和避难所维护日志
+	
 <Stage>ArtWorks
 	<Name>哈维
 	<Detail>一个真正的wawa screamer
@@ -39,7 +40,7 @@
 
 	<Name>寂空
 	<Detail>请提交本周期的降水报告和避难所维护日志
-	<BuffIDs>ShortCircuits, TwoSides
+	<BuffIDs>ShortCircuits, TwoSides, TurboPropulsion
 
 	<Name>琳
 	<Detail>线稿打在在草稿上（悲）

@@ -56,6 +56,8 @@ namespace RandomBuff.Core.StaticsScreen
 
         int titleShowDelay = 20;
 
+        private bool showCredit = false;
+
         public BuffGameWinScreen(ProcessManager manager) : base(manager, BuffEnums.ProcessID.BuffGameWinScreen)
         {
             pages = new List<Page>();
@@ -130,8 +132,9 @@ namespace RandomBuff.Core.StaticsScreen
 
 
                 newFinishedQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
+                showCredit = newFinishedQuests.Any(i => i.QuestId == "builtin.quest.Crown");
                 foreach (var quest in newFinishedQuests)
-                    BuffPlugin.Log($"accomplish quest: {quest.QuestName}");
+                    BuffPlugin.Log($"accomplish quest: {quest.QuestName}:{quest.QuestId}");
 
             }
 
@@ -145,7 +148,7 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 if(newFinishedQuests.Count == 0)
                 {
-                    this.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+                    this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu);
                     if (manager.musicPlayer != null)
                         manager.musicPlayer.FadeOutAllSongs(50f);
                 }

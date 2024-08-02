@@ -1,0 +1,22 @@
+{
+  "FaceName": "turbopropulsion",
+  "BuffID": "TurboPropulsion",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Color": "40E0D0",
+
+  "MultiLayerFace": true,
+  "FaceLayer": 9,
+  "MaxFaceDepth": 0.8,
+  "FaceBackgroundColor": "000000",
+
+  "Chinese": {
+    "BuffName": "涡轮推进",
+    "Description": "你的尾巴可以成为你在水下或失重环境中的高效动力，你所需要做的就是按住跳跃键。除此之外，你将不必担心溺亡，但还请尽可能避免因氧气耗尽而被困水下。"
+  },
+  "English": {
+    "BuffName": "Turbo Propulsion",
+    "Description": "Your tail can be an efficient propulsion for you underwater or in a zero-G environment, all you need to do is hold down the jump key.Also, you won't have to worry about drowning, but you still need to avoid running out of air to avoid being trapped underwater."
+  }
+}
