@@ -53,6 +53,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             Futile.atlasManager.LoadAtlas(Path.Combine(ChesedBuffData.Chesed.GetStaticData().AssetPath, "ChesedTex"));
             Futile.atlasManager.LoadAtlas(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahTex"));
 
+            UITarget = Futile.atlasManager
+                .LoadImage(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahUITarget")).elements[0];
+
             BinahScreenEffect = bundle.LoadAsset<Shader>("BinahScreenEffect");
             BinahScreenEffectTexture = bundle.LoadAsset<Texture2D>("CameraFilterPack_Blizzard1");
             AyinScreenEffect = bundle.LoadAsset<Shader>("AyinPost");
@@ -78,6 +81,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly SoundID BinahAtkFairy = new SoundID(nameof(BinahAtkFairy), true);
         public static readonly SoundID BinahAtkStrike = new SoundID(nameof(BinahAtkStrike), true);
 
+
+        public static FAtlasElement UITarget;
 
         public static readonly SoundID BinahAtkFinalStart = new SoundID(nameof(BinahAtkFinalStart), true);
         public static readonly SoundID BinahAtkFinalLoop = new SoundID(nameof(BinahAtkFinalLoop), true);

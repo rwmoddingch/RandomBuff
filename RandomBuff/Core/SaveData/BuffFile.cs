@@ -168,10 +168,13 @@ namespace RandomBuff.Core.SaveData
 
         public void DeleteAllFile()
         {
-            LoadFailedFallBack(true); 
-            if(File.Exists(Application.persistentDataPath + "/sav" + (CurrentSlot+1)))
-                File.Delete(Application.persistentDataPath + "/sav" + (CurrentSlot + 1));
-            BuffPlugin.Log($"Delete save data {Application.persistentDataPath + "/sav" + (CurrentSlot + 1)}");
+            LoadFailedFallBack(true);
+            if (File.Exists(Path.Combine(UserData.GetPersistentDataPath(), $"buffMain{CurrentSlot}")))
+            {
+                File.Delete(Path.Combine(UserData.GetPersistentDataPath(), $"buffMain{CurrentSlot}"));
+                BuffPlugin.Log($"Delete save data {Path.Combine(UserData.GetPersistentDataPath(), $"buffMain{CurrentSlot}")}");
+            }
+
             SaveFile();
             
         }

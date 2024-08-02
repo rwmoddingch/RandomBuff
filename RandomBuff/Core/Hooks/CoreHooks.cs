@@ -52,6 +52,8 @@ namespace RandomBuff.Core.Hooks
 
             On.PlayerProgression.CopySaveFile += PlayerProgression_CopySaveFile;
             On.Menu.BackupManager.RestoreSaveFile += BackupManager_RestoreSaveFile;
+
+            On.Options.GetSaveFileName_SavOrExp += Options_GetSaveFileName_SavOrExp;
             InGameHooksInit();
 
 
@@ -61,6 +63,14 @@ namespace RandomBuff.Core.Hooks
 
         }
 
+        private static string Options_GetSaveFileName_SavOrExp(On.Options.orig_GetSaveFileName_SavOrExp orig, Options self)
+        {
+            var re = orig(self);
+            if(self.saveSlot >= 100)
+                return $"buffMain{self.saveSlot}";
+            return re;
+        }
+
         private static void BackupManager_RestoreSaveFile(On.Menu.BackupManager.orig_RestoreSaveFile orig, BackupManager self, string sourceName)
         {
             orig(self, sourceName);
@@ -68,9 +78,9 @@ namespace RandomBuff.Core.Hooks
             {
                 sourceName = sourceName.Replace("sav", "");
                 if (string.IsNullOrEmpty(sourceName)) sourceName = "1";
-                if (float.TryParse(sourceName, out var result))
+                if (int.TryParse(sourceName, out var result))
                 {
-                    orig(self, $"sav{result + 100}");
+                    orig(self, $"buffMain{result + 99}");
                     orig(self, $"buffsave{result + 99}");
                     BuffPlugin.Log($"restored buff sav at slot:{result}");
                     BuffFile.BackUpForceUpdate = true;
@@ -84,15 +94,20 @@ namespace RandomBuff.Core.Hooks
 
         private static void PlayerProgression_CopySaveFile(On.PlayerProgression.orig_CopySaveFile orig, PlayerProgression self, string sourceName, string destinationDirectory)
         {
+            if (File.Exists(Path.Combine(destinationDirectory, sourceName)))
+                return;
             orig(self, sourceName, destinationDirectory);
             if (sourceName.StartsWith("sav"))
             {
                 sourceName = sourceName.Replace("sav", "");
                 if (string.IsNullOrEmpty(sourceName)) sourceName = "1";
-                if (float.TryParse(sourceName, out var result))
+                if (int.TryParse(sourceName, out var result))
                 {
-                    orig(self, $"sav{result+100}", destinationDirectory);
-                    orig(self, $"buffsave{result+99}", destinationDirectory);
+                    if(!File.Exists(Path.Combine(destinationDirectory, $"buffMain{result + 99}")))
+                        orig(self, $"buffMain{result+99}", destinationDirectory);
+
+                    if (!File.Exists(Path.Combine(destinationDirectory, $"buffsave{result + 99}")))
+                        orig(self, $"buffsave{result+99}", destinationDirectory);
                     BuffPlugin.Log($"backup buff sav at slot:{result}, folder:{destinationDirectory}");
                 }
                 else

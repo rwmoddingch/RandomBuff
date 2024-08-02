@@ -34,6 +34,7 @@ using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
 using RandomBuff.Render.Quest;
 using System.Drawing;
+using Kittehface.Framework20;
 using Steamworks;
 using RandomBuff.Render.UI;
 
@@ -214,7 +215,7 @@ namespace RandomBuff
                     }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
-                    BuffConfigManager.InitTemplateStaticData();
+                    BuffConfigManager.InitTemplateStaticData()  ;
                     BuffRegister.LoadBuffPluginAsset();
 
                     //这个会用到template数据（嗯
@@ -228,7 +229,7 @@ namespace RandomBuff
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
-                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_01\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
+                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_02\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
                         {
                             Alignment = TMPro.TextAlignmentOptions.BottomLeft,
                             Pivot = new Vector2(0f, 0f),
@@ -239,6 +240,18 @@ namespace RandomBuff
                         Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
                         devVersion.AddChild(label);
                     };
+                    foreach (var file in Directory.GetFiles(UserData.GetPersistentDataPath(), "sav*"))
+                    {
+                        if (int.TryParse(Path.GetFileName(file).Substring(3), out var slot))
+                        {
+                            if (slot >= 100)
+                            {
+                                File.Copy(file, $"{UserData.GetPersistentDataPath()}/buffMain{slot-1}");
+                                File.Delete(file);
+                            }
+                        }
+                    }
+
                     /****************************************/
                     isPostLoaded = true;
                 }
