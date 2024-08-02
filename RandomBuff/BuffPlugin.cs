@@ -243,7 +243,6 @@ namespace RandomBuff
                         devVersion.AddChild(label);
 
                     };
-                    SteamUserStats.GetAchievementName((uint)RainWorld.AchievementID.Win);
                     foreach (var file in Directory.GetFiles(UserData.GetPersistentDataPath(), "sav*"))
                     {
                         if (int.TryParse(Path.GetFileName(file).Substring(3), out var slot))
