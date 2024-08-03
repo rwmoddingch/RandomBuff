@@ -1240,6 +1240,7 @@ namespace BuiltinBuffs.Duality
 
     public class RoomFlame : UpdatableAndDeletable, IHeatingCreature, IAccessibilityModifier
     {
+        public static readonly List<CreatureTemplate.Type> FireImmuneCreature = new List<CreatureTemplate.Type>();
         static ConditionalWeakTable<Room, RoomFlame> flameMapper = new ConditionalWeakTable<Room, RoomFlame>();
 
         float[,] fireIntensities;
@@ -1471,6 +1472,9 @@ namespace BuiltinBuffs.Duality
 
         public bool IsTileAccessible(IntVector2 tile, CreatureTemplate crit)
         {
+            if (FireImmuneCreature.Contains(crit.type))
+                return true;
+
             if (tile.x < 0 || tile.x >= fireIntensities.GetLength(0) || tile.y < 0 || tile.y >= fireIntensities.GetLength(1))
                 return true;
             return fireIntensities[tile.x, tile.y] == 0;

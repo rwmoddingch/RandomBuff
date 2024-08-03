@@ -37,6 +37,7 @@ using System.Drawing;
 using Kittehface.Framework20;
 using Steamworks;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -83,6 +84,7 @@ namespace RandomBuff
         {
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
             ExceptionTracker.Singleton?.Update();
+            BuffExceptionTracker.Singleton?.RawUpdate();
             
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();

@@ -33,6 +33,12 @@ namespace RandomBuff.Credit
             : base(manager, BuffEnums.ProcessID.CreditID)
         {
             creditFileReader = new CreditFileReader();
+            foreach(var line in creditFileReader.lines)
+            {
+                foreach (var chara in line)
+                    CardBasicAssets.TitleFont.HasCharacter(chara, false, true);
+            }
+            CardBasicAssets.PauseLoadFont = true;
 
             pages.Add(new Page(this, null, "main", 0));
             rainEffect = new RainEffect(this, pages[0]);
@@ -170,6 +176,7 @@ namespace RandomBuff.Credit
         public void EndCredit()
         {
             quiteCredit = true;
+            CardBasicAssets.PauseLoadFont = false;
             manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
         }
 

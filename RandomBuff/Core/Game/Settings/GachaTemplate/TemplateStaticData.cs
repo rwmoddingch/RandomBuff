@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using System;
 using System.Collections.Generic;
 using System.IO;

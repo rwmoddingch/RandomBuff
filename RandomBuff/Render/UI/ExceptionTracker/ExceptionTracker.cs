@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace RandomBuff.Render.UI.Component
+namespace RandomBuff.Render.UI.ExceptionTracker
 {
     public class ExceptionTracker
     {
@@ -44,7 +44,7 @@ namespace RandomBuff.Render.UI.Component
         public ExceptionTracker()
         {
             Singleton = this;
-            stage = new FStage("RandomGain_ExceptionTracker");
+            stage = new FStage("RandomBuff_ExceptionTracker");
             container = new FContainer();
             Futile.AddStage(stage);
             stage.MoveToFront();
@@ -152,8 +152,8 @@ namespace RandomBuff.Render.UI.Component
 
 
                 textBox.Enabled = true;
-                nextButton.Enabled = (currentTracker < allTrackers.Count - 1);
-                prevButton.Enabled = (currentTracker > 0) && show;
+                nextButton.Enabled = currentTracker < allTrackers.Count - 1;
+                prevButton.Enabled = currentTracker > 0 && show;
                 toggleTextButton.Enabled = show;
             }
             else
@@ -196,20 +196,21 @@ namespace RandomBuff.Render.UI.Component
 
         public static void TrackExceptionNew(string stackTrace, string streamlineInfo)
         {
-            string key = stackTrace + streamlineInfo;
-            if (exceptions.ContainsKey(key))
-            {
-                exceptions[key].count++;
-            }
-            else
-            {
-                var tracker = new TrackedException( streamlineInfo, stackTrace);
-                exceptions.Add(key, tracker);
-                allTrackers.Add(tracker);
-            }
+            //string key = stackTrace + streamlineInfo;
+            //if (exceptions.ContainsKey(key))
+            //{
+            //    exceptions[key].count++;
+            //}
+            //else
+            //{
+            //    var tracker = new TrackedException(streamlineInfo, stackTrace);
+            //    exceptions.Add(key, tracker);
+            //    allTrackers.Add(tracker);
+            //}
 
-            if (Singleton != null)
-                Singleton.Signal("NewTracker", null);
+            //if (Singleton != null)
+            //    Singleton.Signal("NewTracker", null);
+            BuffExceptionTracker.TrackExceptionNew(stackTrace, streamlineInfo);
         }
         /// <summary>
         /// 右上角定位
@@ -305,9 +306,9 @@ namespace RandomBuff.Render.UI.Component
 
                 Vector2 mousePos = Futile.mousePosition;
                 if (mousePos.x < pos.x &&
-                    mousePos.x > (pos.x - size.x) &&
+                    mousePos.x > pos.x - size.x &&
                     mousePos.y < pos.y &&
-                    mousePos.y > (pos.y - size.y))
+                    mousePos.y > pos.y - size.y)
                 {
                     if (tracker.MouseClicked)
                     {
@@ -352,7 +353,8 @@ namespace RandomBuff.Render.UI.Component
             while (Custom.rainWorld.processManager.currentMainLoop == null || Custom.rainWorld.processManager.currentMainLoop.ID != ProcessManager.ProcessID.MainMenu)
                 yield return new WaitForSeconds(1);
 
-            new ExceptionTracker();
+            //new ExceptionTracker();
+            new BuffExceptionTracker();
             yield break;
         }
     }

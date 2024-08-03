@@ -9,7 +9,7 @@ using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.Quest;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using RandomBuffUtils;
 
 namespace RandomBuff.Core.Game.Settings.Missions

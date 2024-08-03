@@ -236,6 +236,8 @@ namespace RandomBuff.Render.CardRender
         static string GB2312;//加载完字体后销毁节省内存
         static bool[] corounteFlags = new bool[2] { false, false };
 
+        public static bool PauseLoadFont { get; set; }
+
         /// <summary>
         /// 从文件中加载资源
         /// </summary>
@@ -424,6 +426,12 @@ namespace RandomBuff.Render.CardRender
             
             while (pointer < GB2312.Length)
             {
+                if(PauseLoadFont)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 fontToLoad.HasCharacter(GB2312[pointer], true, true);
                 //Debug.Log($"{GB2312[pointer]} {fontToLoad.HasCharacter(GB2312[pointer], false, true)}");
                 end = DateTime.Now;

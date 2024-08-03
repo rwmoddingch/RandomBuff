@@ -12,8 +12,8 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using UnityEngine;
-using RandomBuff.Render.UI.Component;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff.Core.SaveData
 {

@@ -1,5 +1,6 @@
 ﻿using DevInterface;
 using Menu;
+using Menu.Remix.MixedUI;
 using MonoMod.Utils;
 using MonoMod.Utils.Cil;
 using RandomBuff.Core.Buff;
@@ -384,6 +385,28 @@ namespace RandomBuff
             yield return BuffType.Positive;
             yield return BuffType.Duality;
             yield return BuffType.Negative;
+        }
+
+        public static float GetLabelHeight(string text, bool bigText = false)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return 0f;
+            }
+
+            string[] lines = text.Split('\n');
+            return lines.Length * (bigText ? 40f : 21f);
+
+            FFont fontWithName = Futile.atlasManager.GetFontWithName(LabelTest.GetFont(bigText));
+            float height = 0f;
+            FLetterQuadLine[] quadInfoForText = fontWithName.GetQuadInfoForText(text, new FTextParams());
+            for (int i = 0; i < quadInfoForText.Length; i++)
+            {
+                FLetterQuadLine fLetterQuadLine = quadInfoForText[i];
+                height += fLetterQuadLine.bounds.height;
+            }
+
+            return height;
         }
     }
 }

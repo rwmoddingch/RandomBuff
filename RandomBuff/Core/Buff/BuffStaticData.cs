@@ -13,7 +13,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Kittehface.Framework20;
 using RandomBuff.Core.Entry;
 using RandomBuff.Render.CardRender;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff.Core.Buff
 {

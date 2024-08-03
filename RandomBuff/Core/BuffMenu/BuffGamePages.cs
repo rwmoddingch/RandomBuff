@@ -11,6 +11,7 @@ using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using RWCustom;
 using System;
 using System.Collections.Generic;

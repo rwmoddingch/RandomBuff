@@ -23,7 +23,7 @@ using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using RandomBuffUtils;
 using UnityEngine;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -31,7 +31,7 @@ using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace RandomBuff.Core.Entry
 {
-    
+
 
     public enum HookLifeTimeLevel
     {

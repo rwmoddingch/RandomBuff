@@ -14,6 +14,7 @@ namespace RandomBuff.Credit
     internal class CreditFileReader
     {
         public readonly List<KeyValuePair<CreditStageType, CreditStageData>> creditStagesAndData = new List<KeyValuePair<CreditStageType, CreditStageData>>();
+        public string[] lines;
 
         public CreditFileReader()
         {
@@ -21,7 +22,7 @@ namespace RandomBuff.Credit
             if(!File.Exists(realPath)) 
                 realPath = AssetManager.ResolveFilePath($"buffassets/credit_{InGameTranslator.LanguageID.English}.txt");
 
-            string[] lines = File.ReadAllLines(realPath);
+            lines = File.ReadAllLines(realPath);
             creditStagesAndData.Add(new KeyValuePair<CreditStageType, CreditStageData>(CreditStageType.Intro, new CreditStageData() { stageType = CreditStageType.Intro }));
 
             foreach(var line in lines)

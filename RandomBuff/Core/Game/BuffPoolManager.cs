@@ -9,7 +9,7 @@ using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Record;
 using RandomBuff.Core.SaveData;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using RandomBuffUtils;
 using UnityEngine;
 

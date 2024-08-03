@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using RWCustom;
 using UnityEngine;
 using System.Linq;
-using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff.Render.CardRender
 {
