@@ -222,3 +222,20 @@ BuffManual_GameMode_Content_2|可以选择0到5个条件进行游戏，每个成
 BuffManual_GameMode_Content_3|条件选择方式与普通模式相同，但每隔30秒会进行一次完全随机的抽取。<LINE>当卡牌数量超过一定数量后会自动移除最早抽到的buff。<LINE>初始房间会在目前所有区域的避难所中随机选择。
 BuffManual_GameMode_Content_4|条件选择方式与普通模式相同。但开始游戏时可以选择一定数量的初始buff，之后每度过一个雨循环都会额外增加一个负面buff。<LINE>初始房间的选取方式与快速模式相同。
 BuffManual_GameMode_Content_5|固定条件和初始增益的模式，分为通用使命和专属使命。<LINE>专属使命只能由特定的蛞蝓猫完成，通用使命可以使用任意蛞蝓猫完成。<LINE>完成使命除了可以和自由模式一样提升等级，一般来说也可以解锁特殊的收集品
+
+
+//Remix
+Remix_Title|随机增益
+Remix_CardSlotKey|查看卡牌按键
+Remix_KeyBindKey|卡牌绑键按键
+Remix_ShowExceptionLog|提示报错
+Remix_Cheat|作弊
+Remix_CheatAllCards|解锁全部卡牌
+Remix_CheatAllCosmetics|解锁全部装饰品
+Remix_Credit|致谢
+
+Remix_CardSlotKey_Desc|按下此键可以在局内查看所持有的卡牌
+Remix_KeyBindKey_Desc|点开允许绑定按键的卡牌后，按住此键后可再按另一个键，为该卡牌的功能绑定后者按键
+Remix_ShowExceptionLog_Desc|在当雨世界出现异常 (exceptionLog.txt) 时，在右上角出现感叹号，点开可详细查看log内容
+Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取对于卡牌一次以解锁
+Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁

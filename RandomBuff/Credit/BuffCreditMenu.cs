@@ -99,6 +99,11 @@ namespace RandomBuff.Credit
             {
                 rainEffect.LightningSpike(Mathf.Pow(UnityEngine.Random.value, 2f) * 0.85f, Mathf.Lerp(20f, 120f, UnityEngine.Random.value));
             }
+
+            if (RWInput.CheckPauseButton(0) && manager.upcomingProcess == null)
+            {
+                manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+            }
         }
 
         static int entriesAPage = 8;

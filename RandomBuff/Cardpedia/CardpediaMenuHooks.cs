@@ -9,6 +9,37 @@ using Menu;
 
 namespace RandomBuff.Cardpedia
 {
+    internal class IconButton : SimpleButton
+    {
+        public IconButton(Menu.Menu menu, MenuObject owner, string spriteName, string singalText, Vector2 pos, Vector2 size,float sizeFac = 0.5f) : base(menu, owner, "", singalText, pos, size)
+        {
+            Container.AddChild(icon = new FSprite(spriteName)
+            {
+                x = pos.x + size.x * (1 - sizeFac) * 0.5f - 3f, 
+                y = pos.y + size.y * (1 - sizeFac) * 0.5f,
+                width = size.x * sizeFac, 
+                height = size.y * sizeFac, 
+                anchorY = 0, 
+                anchorX = 0
+            });
+        }
+
+        public override void RemoveSprites()
+        {
+            base.RemoveSprites();
+            icon.RemoveFromContainer();
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+            icon.color = MyColor(timeStacker);
+        }
+
+        private readonly FSprite icon;
+    }
+
+
     public static class CardpediaMenuHooks
     {
         public static MainMenu menu;

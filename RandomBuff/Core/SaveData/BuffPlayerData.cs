@@ -14,6 +14,7 @@ using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.Progression.Record;
 using static RandomBuff.Render.UI.Component.RandomBuffFlag;
 using System.Reflection;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -161,7 +162,8 @@ namespace RandomBuff.Core.SaveData
         /// <param name="buffId"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsCollected(BuffID buffId) => collectData.Contains(buffId.value) || BuffPlugin.AllCardDisplay;
+        public bool IsCollected(BuffID buffId) => collectData.Contains(buffId.value) || (BuffOptionInterface.Instance.CheatAllCards.Value
+            && (buffId.GetStaticData() == null || !buffId.GetStaticData().Hidden));
 
         /// <summary>
         /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()

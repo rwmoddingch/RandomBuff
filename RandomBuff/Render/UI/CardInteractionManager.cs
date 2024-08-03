@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Option;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI
@@ -307,8 +308,8 @@ namespace RandomBuff.Render.UI
     internal class InGameSlotInteractionManager : CardInteractionManager
     {
         //静态信息
-        public static KeyCode ToggleShowButton = KeyCode.Tab;
-        public static KeyCode BindKeyButton = KeyCode.CapsLock;
+ 
+      
         public static int maxCardBiasCount = 5;
 
         bool canTriggerBuff;
@@ -673,7 +674,7 @@ namespace RandomBuff.Render.UI
             {
                 if (manager.currentState == State.ExclusiveShow)
                 {
-                    if (Input.GetKey(BindKeyButton))
+                    if (BuffInput.GetKey(BuffOptionInterface.Instance.KeyBindKey.Value))
                     {
                         if (!listenerEnable)
                             EnableListen();
@@ -746,7 +747,7 @@ namespace RandomBuff.Render.UI
             {
                 if (key.StartsWith("Mouse"))
                     return true;
-                if (key == "CapsLock")
+                if (key == BuffOptionInterface.Instance.KeyBindKey.Value)
                     return true;
                 if(key.Contains("Command"))
                     return true;

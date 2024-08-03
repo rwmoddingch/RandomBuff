@@ -35,6 +35,18 @@ namespace RandomBuff.Core.Hooks
             On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
             On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
 
+            On.Menu.MainMenu.Singal += MainMenu_Singal;
+
+            On.Menu.MainMenu.ctor += (orig, self, manager, bkg) =>
+            {
+                orig(self, manager, bkg);
+                var button = self.mainMenuButtons.First(i => i.signalText == "BUFF");
+                var infoButton = new IconButton(self, self.pages[0], "Kill_Slugcat", "CARDPEDIA_ICON",
+                    button.pos + Vector2.right * (button.size.x+5), new Vector2(30, 30));
+                CardpediaMenuHooks.menu = self;
+                self.pages[0].subObjects.Add(infoButton);
+            };
+
             IL.Menu.MainMenu.ctor += (il) =>
             {
                 InsertMainMenuButtonAfter(il, "STORY", self =>
@@ -42,28 +54,30 @@ namespace RandomBuff.Core.Hooks
                     float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
                     Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
                     Vector2 size = new Vector2(buttonWidth, 30f);
-                    self.AddMainMenuButton(
-                        new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos,
-                            size), () =>
+                    
+                    self.AddMainMenuButton(new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos,
+                        size)
+                        , () =>
                         {
                             self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameMenu);
                             self.PlaySound(SoundID.MENU_Switch_Page_In);
                         }, 0);
+
                 });
             };
 
-            IL.Menu.MainMenu.ctor += (il) =>
-            {
-                InsertMainMenuButtonAfter(il, "COLLECTION", self =>
-                {
-                    float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
-                    Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
-                    Vector2 size = new Vector2(buttonWidth, 30f);
-                    SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
-                    CardpediaMenuHooks.menu = self;
-                    self.AddMainMenuButton(collectionButton, new Action(CardpediaMenuHooks.CollectionButtonPressed), 0);
-                });
-            };
+            //IL.Menu.MainMenu.ctor += (il) =>
+            //{
+            //    InsertMainMenuButtonAfter(il, "COLLECTION", self =>
+            //    {
+            //        float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
+            //        Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
+            //        Vector2 size = new Vector2(buttonWidth, 30f);
+            //        SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
+            //        CardpediaMenuHooks.menu = self;
+            //        self.AddMainMenuButton(collectionButton, new Action(CardpediaMenuHooks.CollectionButtonPressed), 0);
+            //    });
+            //};
 
             IL.Menu.MainMenu.AddMainMenuButton += (il) =>
             {
@@ -83,7 +97,6 @@ namespace RandomBuff.Core.Hooks
                     BuffPlugin.LogError("Hook MainMenu AddMainMenuButton Failed");
                 }
             };
-            On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
 
             On.Menu.SlugcatSelectMenu.SlugcatUnlocked += SlugcatSelectMenu_SlugcatUnlocked;
             On.Menu.SlugcatSelectMenu.SlugcatPage.Scroll += SlugcatPage_Scroll;
@@ -109,6 +122,14 @@ namespace RandomBuff.Core.Hooks
 
         }
 
+        private static void MainMenu_Singal(On.Menu.MainMenu.orig_Singal orig, MainMenu self, MenuObject sender, string message)
+        {
+            if (message == "CARDPEDIA_ICON")
+            {
+                CardpediaMenuHooks.CollectionButtonPressed();
+            }
+            orig(self, sender, message);
+        }
 
         private static void InsertMainMenuButtonAfter(ILContext il, string beforeName,
             Action<MainMenu> createDeg)
@@ -242,27 +263,7 @@ namespace RandomBuff.Core.Hooks
             }
         }
 
-        private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
-        {
-            if (ID == BuffEnums.ProcessID.BuffGameMenu)
-            {
-                self.currentMainLoop = new BuffGameMenu(self, ID);
-            }
-            else if(ID == BuffEnums.ProcessID.Cardpedia)
-            {
-                self.currentMainLoop = new CardpediaMenu(self);
-            }
-            else if(ID == BuffEnums.ProcessID.BuffGameWinScreen)
-            {
-                self.currentMainLoop = new BuffGameWinScreen(self);
-            }
-            else if(ID == BuffEnums.ProcessID.CreditID)
-            {
-                self.currentMainLoop = new BuffCreditMenu(self);
-            }
-            orig(self, ID);
-      
-        }
+    
 
  
 
@@ -300,6 +301,23 @@ namespace RandomBuff.Core.Hooks
 
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
+            if (ID == BuffEnums.ProcessID.BuffGameMenu)
+            {
+                self.currentMainLoop = new BuffGameMenu(self, ID);
+            }
+            else if (ID == BuffEnums.ProcessID.Cardpedia)
+            {
+                self.currentMainLoop = new CardpediaMenu(self);
+            }
+            else if (ID == BuffEnums.ProcessID.BuffGameWinScreen)
+            {
+                self.currentMainLoop = new BuffGameWinScreen(self);
+            }
+            else if (ID == BuffEnums.ProcessID.CreditID)
+            {
+                self.currentMainLoop = new BuffCreditMenu(self);
+            }
+
             if (BuffPoolManager.Instance != null &&
                 self.oldProcess is RainWorldGame game)
             {

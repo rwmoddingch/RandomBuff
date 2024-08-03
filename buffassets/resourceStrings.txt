@@ -217,3 +217,19 @@ BuffManual_GameMode_Content_2|You can choose from 0 to 5 conditions to play, eac
 BuffManual_GameMode_Content_3|The conditions are selected in the same way as normal mode, but a completely randomized draw will be made every 30 seconds. <LINE>The earliest drawn buff will be automatically removed when the number of cards exceeds a certain number.<LINE>The initial room will be randomly selected from all shelters in the current area.
 BuffManual_GameMode_Content_4|Conditions are selected in the same way as normal mode. However, you can choose a certain number of initial buffs when you start the game, and every time you go through a rain cycle after that, an additional negative buff will be added.<LINE>The initial rooms are selected in the same way as in Quick Mode.
 BuffManual_GameMode_Content_5|The mode of fixed conditions and initial gains is divided into generic missions and exclusive missions. <LINE>Exclusive missions can only be completed by specific slug cats, while general missions can be completed by any slug cat. <LINE>Completing missions not only allows you to level up as in Free Mode, but also unlocks special collectibles!
+
+//Remix
+Remix_Title|Random Buff
+Remix_CardSlotKey|View Card Slot Key
+Remix_KeyBindKey|Card Binding Key
+Remix_ShowExceptionLog|Exception Notifications
+Remix_Cheat|Cheats
+Remix_CheatAllCards|Unlock All Cards
+Remix_CheatAllCosmetics|Unlock All Cosmetics
+Remix_Credit|Credit
+
+Remix_CardSlotKey_Desc|Press this key to view the cards you hold in-game.
+Remix_KeyBindKey_Desc|After selecting a card that allows key binding, hold this key and press another key to bind the latter key to the card's trigger function.
+Remix_ShowExceptionLog_Desc|When an exception occurs (exceptionLog.txt), an exclamation mark will appear in the top-right corner. Click it to view the log details.
+Remix_CheatAllCards_Desc|Allows free card drawing in sandbox mode. Cards usually need to be obtained once to unlock.
+Remix_CheatAllCosmetics_Desc|Usually requires completing specific missions to unlock.
