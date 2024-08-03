@@ -16,18 +16,18 @@ namespace RandomBuff.Core.GachaMenu
 {
     internal class GachaMenu : Menu.Menu
     {
-        public static ProcessManager.ProcessID GachaMenuID = new ("GachaMenu", true);
 
         private List<BuffID> picked = new ();
         BuffSlotTitle slotTitle;
 
-        public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, GachaMenuID)
+        public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, BuffEnums.ProcessID.GachaMenuID)
         {
             pages.Add(new Menu.Page(this, null, "GachaMenu", 0));
             pages[0].subObjects.Add(exitButton = new SimpleButton(this, pages[0], "Exit", "ExitButton", 
                 new Vector2(ContinueAndExitButtonsXPos - 320f - manager.rainWorld.options.SafeScreenOffset.x, 50f), new Vector2(100f, 30f)));
             this.lastID = lastID;
             this.game = game;
+            pages[0].selectables.Remove(exitButton);
             inGameSlot = new BasicInGameBuffCardSlot();
             InputAgency.Current.TakeFocus(inGameSlot.BaseInteractionManager);
 
@@ -43,15 +43,7 @@ namespace RandomBuff.Core.GachaMenu
             NewPicker();
         }
 
-        public override void Singal(MenuObject sender, string message)
-        {
-            base.Singal(sender, message);
-            if(message == "ExitButton" && exitCounter >= 0)
-            {
-                manager.RequestMainProcessSwitch(lastID);
-                ShutDownProcess();
-            }
-        }
+
 
         public void Select(BuffID id)
         {
@@ -75,11 +67,13 @@ namespace RandomBuff.Core.GachaMenu
                     if (currentPacket.negative.pickTimes != 0)
                     {
                         selectCount = 0;
+                        pages[0].selectables.Add(exitButton);
                         needNew = true;
                     }
                     else
                     {
                         exitCounter = 0;
+                        pages[0].selectables.Add(exitButton);
                         return;
                     }
                 }
@@ -92,6 +86,7 @@ namespace RandomBuff.Core.GachaMenu
                     if (currentPacket.negative.pickTimes == 0)
                     {
                         exitCounter = 0;
+                        pages[0].selectables.Add(exitButton);
                         return;
                     }
                     needNew = true;
@@ -144,6 +139,7 @@ namespace RandomBuff.Core.GachaMenu
                 if (pickList == null)
                 {
                     exitCounter = 0;
+                    pages[0].selectables.Add(exitButton);
                     return;
                 }
 
@@ -172,6 +168,20 @@ namespace RandomBuff.Core.GachaMenu
                 BuffFile.Instance.SaveFile();
                 manager.oldProcess = game;
             }
+            foreach(var pick in pickerSlots.Where(i => i != null))
+                pick.Destory();
+            inGameSlot.Destory();
+            slotTitle.Destroy();
+        }
+
+        public override void Singal(MenuObject sender, string message)
+        {
+            base.Singal(sender, message);
+            if (message == "ExitButton" && exitCounter >= 0)
+            {
+                manager.RequestMainProcessSwitch(lastID);
+                ShutDownProcess();
+            }
         }
 
         public override void Update()
@@ -181,7 +191,7 @@ namespace RandomBuff.Core.GachaMenu
                 pickerSlots[i]?.Update();
             inGameSlot?.Update();
             slotTitle.Update();
-
+            exitButton.inactive = exitCounter <= 0;
             if (exitCounter != -1)
                 exitCounter++;
             InputAgency.StaticUpdate();
@@ -198,8 +208,7 @@ namespace RandomBuff.Core.GachaMenu
 
             //一个很笨的淡入
             if (exitCounter < 40)
-                exitButton.roundedRect.borderColor = exitButton.labelColor =
-                    new HSLColor(0, 0, Custom.LerpMap(exitCounter + timeStacker, 0, 40, 0, 1f, 0.75f));
+                exitButton.black = Custom.LerpMap(exitCounter + timeStacker, 0, 40, 1, 0f, 0.75f);
         }
 
 

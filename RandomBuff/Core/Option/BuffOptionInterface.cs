@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Menu;
 using Menu.Remix.MixedUI;
 using RandomBuffUtils.MixedUI;
 using RWCustom;
@@ -43,21 +44,14 @@ namespace RandomBuff.Core.Option
             foreach (var configurable in config.configurables)
                 configurable.Value.info = new ConfigurableInfo(BuffResourceString.Get($"Remix_{configurable.Key}_Desc", true));
 
-            float yIndex = 1.5f;
-            OpTab option = new OpTab(this, "Options");
-            Tabs = new[] { option };
+            OpTab option = InitNewTab(BuffResourceString.Get("Remix_Option", true));
+            OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
+        
 
-            //Title
-            AppendItems(option,0,600, ref yIndex,
-                new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_Title", true),
-                    FLabelAlignment.Center,true));
-
-            AppendItems(option,ref yIndex,
-                new OpLabel(Vector2.zero, Vector2.zero, "Version 1.0.0",FLabelAlignment.Left),
-                new OpLabel(Vector2.zero, Vector2.zero, "By: RWModdingCH", FLabelAlignment.Right));
-
-
-            yIndex += 2;
+            Tabs = new[] { option , cheat };
+            
+            const float initYIndex = 1.5f + 1f + 2f;
+            float yIndex = initYIndex;
 
             //Options
             AppendItems(option, ref yIndex,
@@ -74,18 +68,18 @@ namespace RandomBuff.Core.Option
 
 
 
-            yIndex += 1;
+            yIndex = initYIndex;
 
             //Cheats
-            AppendItems(option,ref yIndex,
+            AppendItems(cheat,ref yIndex,
                 cheatButton = new OpHoldButton(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_Cheat", true)){colorEdge = CheatColor});
-
-            AppendItems(option, ref yIndex,
+            yIndex -= 1;
+            AppendItems(cheat, ref yIndex,
                 AppendToCheatList(
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_CheatAllCards", true), FLabelAlignment.Left) { color = CheatColor },
                 new OpCheckBox(CheatAllCards, Vector2.zero) { colorEdge = CheatColor }));
 
-            AppendItems(option, ref yIndex,
+            AppendItems(cheat, ref yIndex,
                 AppendToCheatList(
                     new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_CheatAllCosmetics", true), FLabelAlignment.Left) { color = CheatColor },
                     new OpCheckBox(CheatAllCosmetics, Vector2.zero) { colorEdge = CheatColor }));
@@ -120,6 +114,21 @@ namespace RandomBuff.Core.Option
                 ele.Show();
         }
 
+        private OpTab InitNewTab(string name,Color? color = null)
+        {
+            color ??= MenuColorEffect.rgbMediumGrey;
+            OpTab tab = new OpTab(this, name) { colorButton = color.Value };
+            float yIndex = 1.5f;
+
+            AppendItems(tab, 0, 600, ref yIndex,
+                new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_Title", true),
+                    FLabelAlignment.Center, true){color = color.Value});
+
+            AppendItems(tab, ref yIndex,
+                new OpLabel(Vector2.zero, Vector2.zero, "Version 1.0.0", FLabelAlignment.Left){color = color.Value},
+                new OpLabel(Vector2.zero, Vector2.zero, "By: RWModdingCH", FLabelAlignment.Right) { color = color.Value });
+            return tab;
+        }
 
         private UIelement[] AppendToCheatList(params UIelement[] elements)
         {

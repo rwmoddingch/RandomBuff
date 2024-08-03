@@ -13,6 +13,12 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
     internal class MissionGachaTemplate : NormalGachaTemplate
     {
+
+        public MissionGachaTemplate()
+        {
+            CanStackByPassage = false;
+        }
+
         public override GachaTemplateID ID => GachaTemplateID.Mission;
 
         public override void EnterGame(RainWorldGame game)

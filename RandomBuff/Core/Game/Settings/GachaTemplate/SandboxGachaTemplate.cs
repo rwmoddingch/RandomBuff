@@ -16,6 +16,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             TemplateDescription = "GachaTemplate_Desc_Sandbox";
             PocketPackMultiply = 0;
             ExpMultiply = 0f;
+            CanStackByPassage = false;
         }
 
 

@@ -777,7 +777,7 @@ namespace RandomBuff.Core.BuffMenu
                 BuffHookWarpper.CheckAndDisableAllHook();
                 gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);
                 BuffDataManager.Instance.SetGameSetting(gameMenu.CurrentName, currentGameSetting = pickedMission.GameSetting.Clone());
-                currentGameSetting.MissionId = pickedMission.ID.value;
+                //currentGameSetting.MissionId = pickedMission.ID.value;
                 gameMenu.manager.rainWorld.progression.currentSaveState = null;
                 menu.manager.arenaSitting = null;
                 gameMenu.manager.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat =

@@ -19,6 +19,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
@@ -264,6 +265,16 @@ namespace RandomBuff.Core.Entry
             {
                 BuffPlugin.LogException(e, $"Exception when register condition {id}");
             }
+        }
+
+        /// <summary>
+        /// 注册新的使命
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="mission"></param>
+        public static void RegisterMission(MissionID ID, Mission mission)
+        {
+            MissionRegister.RegisterMission(ID,mission);
         }
     }
 

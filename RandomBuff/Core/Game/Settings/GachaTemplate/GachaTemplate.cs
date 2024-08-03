@@ -108,9 +108,13 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             get
             {
                 if(PocketPackMultiply == 0)
-                    return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "<ENTRY>", ExpMultiply);
+                    return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "<ENTRY>", ExpMultiply,
+                        BuffResourceString.Get(CanStackByPassage ? "GachaTemplate_Detail_Base_Yes" : "GachaTemplate_Detail_Base_No"));
                 return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base") + "<ENTRY>", ExpMultiply,
-                    PocketPackMultiply);
+                    PocketPackMultiply,
+                    BuffResourceString.Get(CanStackByPassage
+                        ? "GachaTemplate_Detail_Base_Yes"
+                        : "GachaTemplate_Detail_Base_No"));
             }
         }
 
@@ -126,6 +130,12 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         [JsonProperty]
         public CachaPacket CurrentPacket { get; protected set; } = new ();
 
+        /// <summary>
+        /// 是否能消耗通行证来堆叠
+        /// </summary>
+        [JsonProperty]
+        public bool CanStackByPassage = true;
+
         public class CachaPacket
         {
             public (int selectCount, int showCount, int pickTimes) positive;
@@ -133,6 +143,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
             public bool NeedMenu => positive.pickTimes + negative.pickTimes != 0;
         }
+
+
     }
 
     public abstract partial class GachaTemplate

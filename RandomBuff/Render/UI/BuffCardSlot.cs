@@ -309,7 +309,8 @@ namespace RandomBuff.Render.UI
         /// <param name="majorSelections">主抽卡选项</param>
         /// <param name="additionalSelections">附加抽卡选项，需要和主抽卡选项的长度一致</param>
         /// <param name="numOfChoices">完成本次抽卡需要抽取的卡牌数量</param>
-        public CardPickerSlot(BasicInGameBuffCardSlot inGameBuffCardSlot, Action<BuffID> selectCardCallBack ,BuffID[] majorSelections, BuffID[] additionalSelections, int numOfChoices = 1, BuffSlotTitle slotTitle = null, bool resumeTitle = false)
+        public CardPickerSlot(BasicInGameBuffCardSlot inGameBuffCardSlot, Action<BuffID> selectCardCallBack ,BuffID[] majorSelections, BuffID[] additionalSelections, int numOfChoices = 1, BuffSlotTitle slotTitle = null, 
+            bool resumeTitle = false, string customTile = "")
         {
             this.majorSelections = majorSelections;
             this.additionalSelections = additionalSelections;
@@ -348,10 +349,18 @@ namespace RandomBuff.Render.UI
             (BaseInteractionManager as CardPickerInteractionManager).FinishManage();
             if(Title != null)
             {
-                string title = BuffResourceString.Get("CardPickSlot_SlotTitle");
-                title = Regex.Replace(title, "<Cards>", numOfChoices.ToString());
-                title = Regex.Replace(title, "<Type>", BuffConfigManager.GetStaticData(majorSelections[0]).BuffType.ToString());
-                Title.ChangeTitle(title, false);
+                if (string.IsNullOrEmpty(customTile))
+                {
+                    string title = BuffResourceString.Get("CardPickSlot_SlotTitle");
+                    title = Regex.Replace(title, "<Cards>", numOfChoices.ToString());
+                    title = Regex.Replace(title, "<Type>",
+                        BuffConfigManager.GetStaticData(majorSelections[0]).BuffType.ToString());
+                    Title.ChangeTitle(title, false);
+                }
+                else
+                {
+                    Title.ChangeTitle(customTile, false);
+                }
             }  
         }
 

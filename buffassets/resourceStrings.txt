@@ -110,9 +110,11 @@ GachaTemplate_Desc_Quick|No card draws; a card is randomly added every 30 second
 GachaTemplate_Desc_Sandbox|No card draws; cards can be freely added or removed, with no rewards given.
 GachaTemplate_Desc_Survival|Except for the initial card draw, only negative or duality cards are drawn.
 GachaTemplate_Desc_SephirahMeltdowns|Every four rounds constitute a stage. At the start of each stage, a specific negative card is obtained, and at the end of the stage, two positive cards can be drawn.
-GachaTemplate_Detail_Base|<Color=FFC300>Experience multiplier: {0}<LINE>Initial draw multiplier: {1}
-GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>Experience multiplier: {0}<LINE>No initial draw
-GachaTemplate_Detail_Normal|<GachaPositive>Positive card draws: {0}<LINE><GachaNonPositive>Negative or duality card draws: {1}
+GachaTemplate_Detail_Base|<Color=FFC300>Experience multiplier: {0}<ENTRY><Color=FFE180>Initial draw multiplier: {1}<ENTRY>{2} use passage stack or remove cards
+GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>Experience multiplier: {0}<ENTRY><Color=FFE180>No initial draw<ENTRY>{1} use passage stack or remove cards
+GachaTemplate_Detail_Normal|<GachaPositive>Positive card draws: {0}<ENTRY><GachaNonPositive>Negative or duality card draws: {1}
+GachaTemplate_Detail_Base_Yes|Can
+GachaTemplate_Detail_Base_No|Can't
 
 //BuffCondition
 DisplayName_Achievement|Earn {0} passage
@@ -220,6 +222,7 @@ BuffManual_GameMode_Content_5|The mode of fixed conditions and initial gains is 
 
 //Remix
 Remix_Title|Random Buff
+Remix_Option|Option
 Remix_CardSlotKey|View Card Slot Key
 Remix_KeyBindKey|Card Binding Key
 Remix_ShowExceptionLog|Exception Notifications
@@ -233,3 +236,9 @@ Remix_KeyBindKey_Desc|After selecting a card that allows key binding, hold this 
 Remix_ShowExceptionLog_Desc|When an exception occurs (exceptionLog.txt), an exclamation mark will appear in the top-right corner. Click it to view the log details.
 Remix_CheatAllCards_Desc|Allows free card drawing in sandbox mode. Cards usually need to be obtained once to unlock.
 Remix_CheatAllCosmetics_Desc|Usually requires completing specific missions to unlock.
+
+//SleepMenu
+SleepMenu_Stack|Stack Card
+SleepMenu_UnStack|Remove Card
+SleepMenu_Stack_Title|Pick 1 card to stack
+SleepMenu_UnStack_Title|Pick 1 card to remove
