@@ -170,6 +170,10 @@ namespace BuiltinBuffs.Negative
             AbstractCreature abstractCreature = new AbstractCreature(world, StaticWorld.GetCreatureTemplate(type), null, pos, world.game.GetNewID());
             origCreature.Room.AddEntity(abstractCreature);
             abstractCreature.RealizeInRoom();
+
+            if(origCreature.realizedCreature != null && abstractCreature.realizedCreature != null)
+                FakeCreatureEntry.TryAddFakeCreatureModule(origCreature.realizedCreature,abstractCreature.realizedCreature);
+
             return type != origCreature.creatureTemplate.type;
         }
     }

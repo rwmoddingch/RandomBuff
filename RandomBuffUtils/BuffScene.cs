@@ -5,6 +5,7 @@ using Music;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using JetBrains.Annotations;
 using RWCustom;
 using UnityEngine;
 
@@ -120,7 +121,7 @@ namespace RandomBuffUtils
         private static void MenuScene_BuildScene(On.Menu.MenuScene.orig_BuildScene orig, MenuScene self)
         {
             orig(self);
-            if(MenuSceneReg.TryGetValue(self.sceneID,out var func))
+            if(self.sceneID != null && MenuSceneReg.TryGetValue(self.sceneID,out var func))
                 func?.Invoke(self);
         }
 

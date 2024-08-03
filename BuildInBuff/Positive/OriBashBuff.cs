@@ -342,6 +342,8 @@ namespace BuiltinBuffs.Positive
                     {
                         foreach (var obj in self.room.updateList.OfType<PhysicalObject>())
                         {
+                            if(obj.grabbedBy.Any(i => i.grabber == self))
+                                continue;
                             if (obj is Creature crit && crit.Template.type == CreatureTemplate.Type.Slugcat)
                                 continue;
 
@@ -373,6 +375,8 @@ namespace BuiltinBuffs.Positive
                                 continue;
                             if (creature.realizedCreature != null && !creature.realizedCreature.inShortcut)
                             {
+                                if (creature.realizedCreature.grabbedBy.Any(i => i.grabber == self))
+                                    continue;
                                 bool can = false;
                                 foreach (var chunk in creature.realizedCreature.bodyChunks)
                                     if (IsDistLess(self.mainBodyChunk.pos,chunk, 75))
