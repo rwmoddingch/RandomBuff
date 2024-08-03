@@ -11,7 +11,7 @@ namespace RandomBuff.Cardpedia
 {
     public static class CardpediaMenuHooks
     {
-        private static MainMenu menu;
+        public static MainMenu menu;
         public static Shader InvertColor;
         public static Shader SquareBlinking;
         public static Shader UIBlur;
@@ -25,22 +25,7 @@ namespace RandomBuff.Cardpedia
         public static Shader FateRain;
         public static Texture2D RBNoiseTex;
 
-        public static void Hook()
-        {
-            On.Menu.MainMenu.ctor += MainMenu_ctor;
-        }
-
-        private static void MainMenu_ctor(On.Menu.MainMenu.orig_ctor orig, MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
-        {
-            orig(self, manager, showRegionSpecificBkg);
-            float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
-            Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
-            Vector2 size = new Vector2(buttonWidth, 30f);
-            SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
-            menu = self;
-            self.AddMainMenuButton(collectionButton, new Action(CollectionButtonPressed), 0);
-        }
-
+ 
         public static void CollectionButtonPressed()
         {
             if (menu != null)

@@ -16,14 +16,10 @@
 
 	<Name>寂空
 	<Detail> 请提交本周期的降水报告和避难所维护日志
+	
 <Stage>ArtWorks
-	<Name>墨阳
-	<Detail>产能不足
-	<BuffIDs>FakeCreature
-
 	<Name>哈维
 	<Detail>一个真正的wawa screamer
-	
 	<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
 
 	<Name>小风
@@ -34,17 +30,30 @@
 	<Detail>您拨打的号码[离群者]已离开服务区
 	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun
 	
+	<Name>日天菌
+	<Detail>神明智慧吞噬者σ( ᑒ )
+	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
+
+	<Name>墨阳
+	<Detail>产能不足
+	<BuffIDs>FakeCreature
+
 	<Name>寂空
 	<Detail>请提交本周期的降水报告和避难所维护日志
-	<BuffIDs>ShortCircuits, TwoSides
+	<BuffIDs>ShortCircuits, TwoSides, TurboPropulsion
+
+	<Name>琳
+	<Detail>线稿打在在草稿上（悲）
+	<BuffIDs>Multiplier
+	
+	<Name>花花猫
+	<Detail>感谢大家:3
+	<BuffIDs>LavaImmune, SensorBomb
 
 	<Name>ProjectMoon
 	<Detail>
 	<BuffIDs>Ayin, Binah, Chesed, Hod, Hokma, Malkuth, Netzach, Tiphereth, Yesod
 
-	<Name>琳
-	<Detail>线稿打在在草稿上（悲）
-	<BuffIDs>Multiplier
 
 <Stage>PlayTest
 	<Name>炖鸽子
@@ -128,3 +137,6 @@
 
 	<Name>淡淡的伤
 	<Detail>新DLC什么时候出
+
+	<Name>狐松
+	<Detail>讨厌蜘蛛还有“辣条”

@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
+using static BuiltinBuffs.Positive.TurboPropulsionIBuffEntry;
 
 namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
 {
@@ -36,6 +37,7 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
         /*-----------------------------------------------------字段-----------------------------------------------------*/
         //设置BuffID
         public static BuffID highCaliberBuffID = new BuffID("HighCaliber", true);
+        public static ParticleEmitter emitter;
         /*-----------------------------------------------------挂钩-----------------------------------------------------*/
         public static void HookOn()
         {
@@ -45,8 +47,9 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
             On.ScavengerBomb.Thrown += ScavengerBomb_Thrown;
             //炸弹触地（加大爆炸范围和威力）
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
+            //炸弹更新（控制粒子效果）
+            On.ScavengerBomb.Update += ScavengerBomb_Update;
         }
-
         /*-----------------------------------------------------方法-----------------------------------------------------*/
         //发射效果实现
         private static void Player_Throwblast(On.Player.orig_ThrowObject orig,Player self,int grasp,bool eu)
@@ -123,8 +126,68 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
             orig.Invoke(self, thrownBy, thrownPos,firstFrameTraceFromPos,throwDir,frc, eu);
             if(thrownBy is Player)
             {
+                if(Mathf.Abs(self.throwDir.x) > Mathf.Abs(self.throwDir.y))
+                {
                     self.firstChunk.vel = new Vector2(self.firstChunk.vel.x * 5f, self.firstChunk.vel.y);
+                }
+                else if (Mathf.Abs(self.throwDir.x) < Mathf.Abs(self.throwDir.y))
+                {
+                    self.firstChunk.vel = new Vector2(self.firstChunk.vel.x, self.firstChunk.vel.y * 5f);
+                }
+                if (emitter == null && self.room != null)
+                {
+                    emitter = new ParticleEmitter(self.room);
+                }
+                if (self.Submersion <= 0.1f)
+                {
+                    //弹道粒子效果-初始化
+                    emitter = new ParticleEmitter(self.room);
+                    emitter.vel = self.bodyChunks[0].vel;
+                    emitter.lastPos = emitter.pos = self.bodyChunks[0].pos;
+
+                    emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 9999, false));
+                    emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, self));
+                    emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 255, 160));
+                    emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("EndGameCircle", "", 8, 0.85f)));
+                    emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f)));
+                    emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                    emitter.ApplyParticleModule(new SetRandomLife(emitter, 40, 40));
+                    emitter.ApplyParticleModule(new SetConstColor(emitter, Color.HSVToRGB(0.00f, 0.35f, 0.95f)));
+                    emitter.ApplyParticleModule(new SetConstVelociy(emitter, Vector2.zero));
+                    emitter.ApplyParticleModule(new SetRandomPos(emitter, 0f));
+                    emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, l) =>
+                    {
+                        if (l > 0.5f)
+                            return (1f - l) * 2f;
+                        else
+                            return 1f;
+                    }));
+                    emitter.ApplyParticleModule(new ScaleXYOverLife(emitter, (p, l) =>
+                    {
+                        return new Vector2(1f - 0.5f * l, (0.5f - 0.2f * l) * (1f - 0.5f * l));
+                    }));
+                    emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, l) =>
+                    {
+                        return UnityEngine.Color.HSVToRGB(0.00f + 0.1f * l, 0.35f + 0.25f * l, 0.95f - 0.45f * l);
+                    }));
+                    //启动————
+                    ParticleSystem.ApplyEmitterAndInit(emitter);
+                }
             }            
+        }
+        //飞行粒子更新
+        private static void ScavengerBomb_Update(On.ScavengerBomb.orig_Update orig, ScavengerBomb self, bool eu)
+        {
+            orig.Invoke(self, eu);
+            if(self.thrownBy is Player)
+            {
+                emitter.ApplyParticleModule(new SetRandomRotation(emitter, Custom.VecToDeg(self.bodyChunks[0].vel), Custom.VecToDeg(self.bodyChunks[0].vel)));
+                //这边需要实现一下速度太低就去除粒子的功能
+                if (self.bodyChunks[0].vel.magnitude <= 25f && emitter != null)
+                {
+                    emitter.Die();
+                }
+            }
         }
         //触地效果实现
         private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
@@ -137,7 +200,7 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
             if(self.thrownBy is Player)
             {
                 //152mm榴弹爆炸-
-                room.AddObject(new Explosion(room, self, pos, 7, 325f, 6f, 200f, 280f, 0f, self.thrownBy, 0.7f, 160f, 1f));
+                room.AddObject(new Explosion(room, self, pos, 7, 325f, 6f, 100f, 280f, 0f, self.thrownBy, 0.7f, 160f, 1f));
                 //闪光效果-
                 room.AddObject(new Explosion.ExplosionLight(pos, 1500f, 1f, 5, new Color(1f, 1f, 1f)));
                 //尖刺效果-

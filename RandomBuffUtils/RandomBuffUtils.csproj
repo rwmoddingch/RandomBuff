@@ -18,6 +18,9 @@
       <HintPath>..\include\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>..\include\com.rlabrecque.steamworks.net.dll</HintPath>
+    </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\include\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>

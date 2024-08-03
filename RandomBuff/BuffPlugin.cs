@@ -82,6 +82,7 @@ namespace RandomBuff
 
         private void Update()
         {
+
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
             ExceptionTracker.Singleton?.Update();
             BuffExceptionTracker.Singleton?.RawUpdate();
@@ -171,7 +172,6 @@ namespace RandomBuff
                     //TODO : 测试用
                     //DevEnabled = true;
 
-                    CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
                     SoapBubblePool.Hook();
 
@@ -189,7 +189,7 @@ namespace RandomBuff
             }
         }
 
-      
+     
 
         private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
         {
@@ -225,7 +225,6 @@ namespace RandomBuff
                     BuffConfigManager.InitQuestData();
 
                     BuffRegister.BuildAllDataStaticWarpper();
-
                     /****************************************/
 
                     On.StaticWorld.InitCustomTemplates += orig =>
@@ -239,8 +238,11 @@ namespace RandomBuff
                             x = 5,
                             alpha = 0.3f
                         };
-                        Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
+
+                        Futile.AddStage(devVersion = new FStage("BUFF_DEV")); 
+                        Custom.rainWorld.processManager.CueAchievement(RainWorld.AchievementID.AllGhostsEncountered,0);
                         devVersion.AddChild(label);
+
                     };
                     foreach (var file in Directory.GetFiles(UserData.GetPersistentDataPath(), "sav*"))
                     {
@@ -264,7 +266,7 @@ namespace RandomBuff
             }
         }
 
-
+        
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception)

@@ -184,6 +184,7 @@ Mission_Display_MidnightSnack|午夜凶粮
 Mission_Display_ArtOfExplosion|爆破艺术
 Mission_Display_DuelsOfSnipers|狙击对决
 Mission_Display_DoomExpress|末日速递
+Mission_Display_TripleAffirmation|三重肯定
 Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
 

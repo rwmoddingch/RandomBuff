@@ -30,6 +30,8 @@ namespace RandomBuff.Core.Hooks
             {
                 saveState.miscWorldSaveData.moonHeartRestored = false;
                 saveState.miscWorldSaveData.pebblesEnergyTaken = false;
+                BuffPlugin.LogDebug("Init DoomExpress saveState");
+
             }
             else if (gameSetting.MissionId == "EmergnshyTreatment")
             {
@@ -149,6 +151,7 @@ namespace RandomBuff.Core.Hooks
             orig(self, saveStateNumber, progression);
             if (Custom.rainWorld.BuffMode())
             {
+                BuffPlugin.LogDebug("Init buff saveState");
                 self.deathPersistentSaveData.PoleMimicEverSeen = true;
                 self.deathPersistentSaveData.ScavTollMessage = true;
                 self.deathPersistentSaveData.KarmaFlowerMessage = true;

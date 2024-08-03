@@ -104,6 +104,7 @@ namespace BuiltinBuffs.Expeditions
             "unl-sing",
             "unl-gun",
             "bur-doomed",
+            "unl-glow",
             "unl-passage"
         };
 
@@ -317,9 +318,6 @@ namespace BuiltinBuffs.Expeditions
                                 OverrideForAgility(stat);
                         }
                         OverrideForAgility(game.session.characterStats);
-                        break;
-                    case "unl-glow":
-                        game.GetStorySession.saveState.theGlow = true;
                         break;
                     case "unl-karma":
                         game.GetStorySession.saveState.deathPersistentSaveData.reinforcedKarma = true;

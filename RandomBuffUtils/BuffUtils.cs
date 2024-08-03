@@ -42,6 +42,7 @@ namespace RandomBuffUtils
             BuffRegionGateEvent.OnEnable();
             BuffExtraDialogBoxEvent.OnEnable();
             ObjectExtendHooks.OnEnable();
+            SteamHelper.InitCallBack();
             BuffSounds.OnEnable();
             MeshManager.OnModsInit();
             BuffScene.OnModsInit();
