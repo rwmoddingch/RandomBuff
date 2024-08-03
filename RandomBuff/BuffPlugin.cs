@@ -170,7 +170,6 @@ namespace RandomBuff
                     //TODO : 测试用
                     //DevEnabled = true;
 
-                    CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
                     SoapBubblePool.Hook();
 

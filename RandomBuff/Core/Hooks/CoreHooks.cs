@@ -35,8 +35,54 @@ namespace RandomBuff.Core.Hooks
             On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
             On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
 
-      
-            On.Menu.MainMenu.ctor += MainMenu_ctor;
+            IL.Menu.MainMenu.ctor += (il) =>
+            {
+                InsertMainMenuButtonAfter(il, "STORY", self =>
+                {
+                    float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
+                    Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
+                    Vector2 size = new Vector2(buttonWidth, 30f);
+                    self.AddMainMenuButton(
+                        new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos,
+                            size), () =>
+                        {
+                            self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameMenu);
+                            self.PlaySound(SoundID.MENU_Switch_Page_In);
+                        }, 0);
+                });
+            };
+
+            IL.Menu.MainMenu.ctor += (il) =>
+            {
+                InsertMainMenuButtonAfter(il, "COLLECTION", self =>
+                {
+                    float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
+                    Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
+                    Vector2 size = new Vector2(buttonWidth, 30f);
+                    SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
+                    CardpediaMenuHooks.menu = self;
+                    self.AddMainMenuButton(collectionButton, new Action(CardpediaMenuHooks.CollectionButtonPressed), 0);
+                });
+            };
+
+            IL.Menu.MainMenu.AddMainMenuButton += (il) =>
+            {
+                if (il.Body.Variables.Count >= 2 &&
+                    il.Body.Variables[1].VariableType == il.Module.TypeSystem.Int32)
+                {
+                    ILCursor c = new ILCursor(il);
+                    while (c.TryGotoNext(MoveType.After, i => i.MatchStloc(1)))
+                    {
+                        c.Emit(OpCodes.Ldloc_1);
+                        c.EmitDelegate<Func<int, int>>(orig => Mathf.Min(11, orig + 2));
+                        c.Emit(OpCodes.Stloc_1);
+                    }
+                }
+                else
+                {
+                    BuffPlugin.LogError("Hook MainMenu AddMainMenuButton Failed");
+                }
+            };
             On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
 
             On.Menu.SlugcatSelectMenu.SlugcatUnlocked += SlugcatSelectMenu_SlugcatUnlocked;
@@ -59,8 +105,19 @@ namespace RandomBuff.Core.Hooks
 
             BuffPlugin.Log("Core Hook Loaded");
 
-            //TestStartGameMenu = new("TestStartGameMenu");
+            //BuffGameMenu = new("BuffGameMenu");
 
+        }
+
+
+        private static void InsertMainMenuButtonAfter(ILContext il, string beforeName,
+            Action<MainMenu> createDeg)
+        {
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(i => i.MatchLdstr(beforeName));
+            c.GotoNext(MoveType.After, i => i.MatchCall<MainMenu>(nameof(MainMenu.AddMainMenuButton)));
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(createDeg.Invoke);
         }
 
         private static string Options_GetSaveFileName_SavOrExp(On.Options.orig_GetSaveFileName_SavOrExp orig, Options self)
@@ -187,7 +244,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
-            if (ID == BuffEnums.ProcessID.TestStartGameMenu)
+            if (ID == BuffEnums.ProcessID.BuffGameMenu)
             {
                 self.currentMainLoop = new BuffGameMenu(self, ID);
             }
@@ -207,20 +264,7 @@ namespace RandomBuff.Core.Hooks
       
         }
 
-        
-        private static void MainMenu_ctor(On.Menu.MainMenu.orig_ctor orig, Menu.MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
-        {
-            orig(self, manager, showRegionSpecificBkg);
-
-            float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
-            Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
-            Vector2 size = new Vector2(buttonWidth, 30f);
-            self.AddMainMenuButton(new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos, size), () =>
-            {
-                self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.TestStartGameMenu);
-                self.PlaySound(SoundID.MENU_Switch_Page_In);
-            }, 0);
-        }
+ 
 
         private static void ProcessManager_PreSwitchMainProcess(On.ProcessManager.orig_PreSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {

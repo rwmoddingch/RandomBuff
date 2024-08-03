@@ -31,8 +31,8 @@
 	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun
 	
 	<Name>日天菌
-	<Detail>Five pebbles可以吃吗
-	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain
+	<Detail>神明智慧吞噬者σ( ᑒ )
+	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
 
 	<Name>墨阳
 	<Detail>产能不足
@@ -45,6 +45,10 @@
 	<Name>琳
 	<Detail>线稿打在在草稿上（悲）
 	<BuffIDs>Multiplier
+	
+	<Name>花花猫
+	<Detail>感谢大家:3
+	<BuffIDs>LavaImmune, SensorBomb
 
 	<Name>ProjectMoon
 	<Detail>
@@ -133,3 +137,6 @@
 
 	<Name>淡淡的伤
 	<Detail>新DLC什么时候出
+
+	<Name>狐松
+	<Detail>讨厌蜘蛛还有“辣条”
