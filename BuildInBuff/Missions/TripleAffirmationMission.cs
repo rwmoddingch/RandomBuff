@@ -154,6 +154,13 @@ namespace BuiltinBuffs.Missions
             base.EnterGame(game);
             On.SaveState.AddCreatureToRespawn += SaveState_AddCreatureToRespawn;
             IL.Player.ClassMechanicsSaint += Player_ClassMechanicsSaint;
+            On.Player.ClassMechanicsSaint += Player_ClassMechanicsSaint1;
+        }
+
+        private void Player_ClassMechanicsSaint1(On.Player.orig_ClassMechanicsSaint orig, Player self)
+        {
+            orig(self);
+            isAscended = false;
         }
 
         private void Player_ClassMechanicsSaint(ILContext il)
@@ -212,6 +219,8 @@ namespace BuiltinBuffs.Missions
             base.SessionEnd(save);
             On.SaveState.AddCreatureToRespawn -= SaveState_AddCreatureToRespawn;
             IL.Player.ClassMechanicsSaint -= Player_ClassMechanicsSaint;
+            On.Player.ClassMechanicsSaint -= Player_ClassMechanicsSaint1;
+
         }
 
         public override string DisplayName(InGameTranslator translator)
@@ -227,6 +236,7 @@ namespace BuiltinBuffs.Missions
 
         [JsonProperty] 
         private bool isHidden = true;
+
 
         public override ConditionID ID => Abyss;
 
@@ -245,9 +255,71 @@ namespace BuiltinBuffs.Missions
 
         private void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
+            if (self.roomSettings.DangerType == RoomRain.DangerType.AerieBlizzard ||
+                self.roomSettings.DangerType == MoreSlugcatsEnums.RoomRainDangerType.Blizzard)
+                self.roomSettings.DangerType = self.water ? RoomRain.DangerType.Flood : RoomRain.DangerType.None;
+
+            self.roomSettings.effects.RemoveAll(i => i.type == RoomSettings.RoomEffect.Type.HeatWave
+                                                     || i.type == RoomSettings.RoomEffect.Type.FireFlies
+                                                     || i.type == RoomSettings.RoomEffect.Type.FairyParticles
+                                                     || i.type == RoomSettings.RoomEffect.Type.Coldness);
+            
+            if(self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.VoidMelt))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.VoidMelt, 0.2f,
+                false));
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.Bloom))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.Bloom, 0.2f,
+                    false));
+
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.DarkenLights))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.DarkenLights, 0.2f,
+                    false));
+            self.roomSettings.placedObjects.RemoveAll(i => i.type == PlacedObject.Type.FairyParticleSettings);
+
+            var setting = new PlacedObject(PlacedObject.Type.FairyParticleSettings, null) { active = true };
+            setting.data = new PlacedObject.FairyParticleData(setting)
+            {
+                colorHmax = 0.14f,
+                colorSmax = 1,
+                colorLmax = 0.52f,
+                colorHmin = 0.19f,
+                colorSmin = 1f,
+                colorLmin = 0.43f,
+                dirLerpType = FairyParticle.LerpMethod.SIN_IO,
+                dirDevMax = 19,
+                dirDevMin = 0,
+                dirMax = 23,
+                dirMin = 0,
+                scaleMax = 2,
+                scaleMin = 1,
+                glowStrength = 100,
+                glowRad = 8,
+                speedLerpType = FairyParticle.LerpMethod.SIN_IO,
+                numKeyframes = 9,
+                alphaTrans = 0.27f,
+                spriteType = PlacedObject.FairyParticleData.SpriteType.Leaf,
+                absPulse = true,
+                pulseRate = 0,
+                pulseMax = 37,
+                pulseMin = 7,
+                interpTrans = 0.7f,
+                interpDurMax = 180,
+                interpDurMin = 60,
+                interpDistMax = 100,
+                interpDistMin = 40,
+            };
+            self.roomSettings.placedObjects.Add(setting);
+            self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.HeatWave, 0.3f,
+                false));
+            self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.FairyParticles, 0.13f,
+                false));
+            self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.FireFlies, 1f,
+                false));
             orig(self);
-            if (     self.abstractRoom.name == "SB_E05SAINT")
+            if (self.abstractRoom.name == "SB_E05SAINT")
                 self.AddObject(new MissionEnding(self));
+
+       
         }
 
         public override void SessionEnd(SaveState save)
