@@ -284,7 +284,8 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
                         float magnification = (i + 1) / allTail.Length;
                         allTail[i].vel += Custom.DirVec(allTail[i].pos, rotatePos) * Custom.LerpMap(Vector2.Distance(allTail[i].pos, rotatePos), 1, 100, 1, 100 * magnification);
                     }
-                    self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
+                    //音效暂时弃用
+                    //self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
                     tailT += 1;
                 }
                 else
