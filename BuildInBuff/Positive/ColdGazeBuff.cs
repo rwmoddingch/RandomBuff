@@ -755,7 +755,7 @@ namespace BuiltinBuffs.Positive
                 }
                 if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
                 {
-                    heatModule.temperature = 0f;
+                    heatModule.temperature = Mathf.Max(0f, heatModule.temperature - 0.01f);
                 }
             }
 

@@ -135,7 +135,8 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return owner.mainBodyChunk.submersion <= 0.5;
+                return owner.mainBodyChunk.submersion <= 0.5 ||
+                       FireShieldBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HellIBuffEntry.hellBuffID);
             }
         }
 
