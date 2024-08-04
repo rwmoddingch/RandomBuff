@@ -61,7 +61,7 @@ namespace BuiltinBuffs.Missions
 
         public static readonly ConditionID SaveMoon = new ConditionID(nameof(SaveMoon), true);
         public override ConditionID ID => SaveMoon;
-        public override int Exp => 100;//TODO
+        public override int Exp => 250;//TODO
 
         [JsonProperty]
         private int currentCycle;

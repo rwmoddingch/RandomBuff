@@ -16,7 +16,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
 
-        public override int Exp => 20 * killCount;//TODO
+        public override int Exp => 7 * killCount;//TODO
 
         [JsonProperty] 
         public CreatureTemplate.Type type;
@@ -62,14 +62,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 return ConditionState.Fail;
             }
 
-            killCount = (int)Mathf.Lerp(3f, 15f,Mathf.Pow(difficulty, 2.5f));
+            killCount = (int)Mathf.Lerp(10f, 45f,Mathf.Pow(difficulty, 2.5f));
             if (expeditionCreature.points < 7)
                 killCount += UnityEngine.Random.Range(3, 6);
             
             if (killCount > expeditionCreature.spawns)
                 killCount = expeditionCreature.spawns;
             
-            if (killCount > 25) killCount = 25;
+            if (killCount > 45f) killCount = 45;
 
             type = expeditionCreature.creature;
 

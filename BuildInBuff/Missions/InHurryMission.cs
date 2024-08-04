@@ -124,7 +124,7 @@ namespace BuiltinBuffs.Missions
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
-            targetTileCount = Random.Range(200, 1000);
+            targetTileCount = Random.Range(2000, 10000);
             return ConditionState.Ok_NoMore;
         }
 

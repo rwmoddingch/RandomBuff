@@ -52,7 +52,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
 
         public override ConditionID ID => MeltdownHunt;
-        public override int Exp => 400;
+        public override int Exp => 100;
         public override string InRangeDisplayName()
         {
 
