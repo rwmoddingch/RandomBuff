@@ -42,8 +42,8 @@ namespace RandomBuff.Core.Hooks
             {
                 orig(self, manager, bkg);
                 var button = self.mainMenuButtons.First(i => i.signalText == "BUFF");
-                var infoButton = new IconButton(self, self.pages[0], "Kill_Slugcat", "CARDPEDIA_ICON",
-                    button.pos + Vector2.right * (button.size.x+5), new Vector2(30, 30));
+                var infoButton = new IconButton(self, self.pages[0], "buffassets/illustrations/RandomBuff_Cardpedia", "CARDPEDIA_ICON",
+                    button.pos + Vector2.right * (button.size.x+5), new Vector2(30, 30), 0.5f);
                 CardpediaMenuHooks.menu = self;
                 self.pages[0].subObjects.Add(infoButton);
             };
