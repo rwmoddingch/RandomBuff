@@ -37,7 +37,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                float num = 1;
+                float num = JellyfishShapedMutationBuffEntry.JellyfishShapedMutation.GetBuffData().StackLayer;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.BreathlessBuffEntry.Breathless))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.SuperCapacitanceBuffEntry.SuperCapacitance))
@@ -1809,7 +1809,7 @@ namespace BuiltinBuffs.Duality
             self.SubtractFood(1);
             creature.Violence(self.firstChunk,
                              new Vector2?(Custom.DirVec(self.firstChunk.pos, creature.firstChunk.pos) * 5f),
-                             creature.firstChunk, null, Creature.DamageType.Electric, 0.1f,
+                             creature.firstChunk, null, Creature.DamageType.Electric, 0.05f + 0.05f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel,
                              (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));//(creature is Player) ? 140f : (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));
             self.room.AddObject(new CreatureSpasmer(creature, false, creature.stun));
             self.room.AddObject(new Explosion.ExplosionLight(self.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
