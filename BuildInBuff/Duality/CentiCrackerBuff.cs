@@ -74,7 +74,7 @@ namespace BuiltinBuffs.Duality
             }
             catch(Exception ex)
             {
-                UnityEngine.Debug.LogException(ex);
+                //UnityEngine.Debug.LogException(ex);
             }           
             orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
                       

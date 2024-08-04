@@ -230,7 +230,7 @@ namespace RandomBuff
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
-                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_02\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
+                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_04\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
                         {
                             Alignment = TMPro.TextAlignmentOptions.BottomLeft,
                             Pivot = new Vector2(0f, 0f),
@@ -250,7 +250,8 @@ namespace RandomBuff
                         {
                             if (slot >= 100)
                             {
-                                File.Copy(file, $"{UserData.GetPersistentDataPath()}/buffMain{slot-1}");
+                                if (!File.Exists($"{UserData.GetPersistentDataPath()}/buffMain{slot - 1}"))
+                                    File.Copy(file, $"{UserData.GetPersistentDataPath()}/buffMain{slot - 1}");
                                 File.Delete(file);
                             }
                         }

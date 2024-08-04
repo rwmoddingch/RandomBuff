@@ -61,7 +61,7 @@ namespace BuiltinBuffs.Missions
         public override void SessionEnd(SaveState save)
         {
             base.SessionEnd(save);
-            On.RainWorldGame.ForceSaveNewDenLocation -= RainWorldGame_ForceSaveNewDenLocation; ;
+            On.RainWorldGame.ForceSaveNewDenLocation -= RainWorldGame_ForceSaveNewDenLocation; 
         }
 
         private void RainWorldGame_ForceSaveNewDenLocation(On.RainWorldGame.orig_ForceSaveNewDenLocation orig, RainWorldGame game, string roomName, bool saveWorldStates)

@@ -79,7 +79,6 @@ namespace BuiltinBuffs.Positive
 
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
-            On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
         }
 
 
@@ -94,12 +93,7 @@ namespace BuiltinBuffs.Positive
             if (!BashFeatures.TryGetValue(self, out _))
                 BashFeatures.Add(self, new Bash(self));
         }
-        private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
-        {
-            orig(self, sLeaser, rCam, palette);
-            if (BashFeatures.TryGetValue(self.player, out var bash))
-                bash.ApplyPalette(sLeaser, rCam, palette);
-        }
+  
 
         private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, UnityEngine.Vector2 camPos)
         {
@@ -186,8 +180,8 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[startSprite + 1].alpha = 0f;
 
 
-            rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[startSprite]);
-            rCam.ReturnFContainer("HUD").AddChild(sLeaser.sprites[startSprite + 1]);
+            rCam.ReturnFContainer("ForegroundLights").AddChild(sLeaser.sprites[startSprite]);
+            rCam.ReturnFContainer("ForegroundLights").AddChild(sLeaser.sprites[startSprite + 1]);
         }
 
         public Vector2 GetInputDirection(Player player,Vector2 sourcePos)
@@ -293,10 +287,7 @@ namespace BuiltinBuffs.Positive
             
         }
 
-        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
-        {
-            sLeaser.sprites[startSprite].color = Color.white;
-        }
+ 
 
 
         public void Update()

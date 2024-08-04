@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using Menu;
 using RWCustom;
-using Menu;
+using UnityEngine;
 
 namespace RandomBuff.Cardpedia
 {
@@ -15,14 +10,16 @@ namespace RandomBuff.Cardpedia
         {
             Container.AddChild(icon = new FSprite(spriteName)
             {
-                x = pos.x + size.x * (1 - sizeFac) * 0.5f - 1f, 
-                y = pos.y + size.y * (1 - sizeFac) * 0.5f - 1f,
-                width = size.x * sizeFac * 1.2f, 
-                height = size.y * sizeFac * 1.2f, 
+                x = pos.x + size.x * (1 - sizeFac) * 0.5f, 
+                y = pos.y + size.y * (1 - sizeFac) * 0.5f,
+                width = size.x * sizeFac, 
+                height = size.y * sizeFac, 
                 anchorY = 0, 
                 anchorX = 0
             });
+            this.sizeFac = sizeFac;
         }
+
 
         public override void RemoveSprites()
         {
@@ -33,10 +30,12 @@ namespace RandomBuff.Cardpedia
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+            icon.SetPosition(DrawPos(timeStacker) + size* (1 - sizeFac) * 0.5f);
             icon.color = MyColor(timeStacker);
         }
 
         private readonly FSprite icon;
+        private readonly float sizeFac;
     }
 
 

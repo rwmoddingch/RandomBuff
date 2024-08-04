@@ -39,7 +39,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             if (creature.Template.type == type || creature.Template.TopAncestor().type == type)
             {
                 currentKillCount++;
-                if (currentKillCount >= killCount || !Finished)
+                if (currentKillCount >= killCount && !Finished)
                     Finished = true;
                 onLabelRefresh?.Invoke(this);
             }

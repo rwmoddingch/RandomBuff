@@ -22,18 +22,22 @@ namespace RandomBuffUtils
 
         public static void RequestUserAvatar(ulong steamID, [NotNull] ReceiveAvatarCallBack callBack)
         {
-            if (CallBackMaps.ContainsKey(steamID))
-                return;
-            if (!SteamFriends.RequestUserInformation(new CSteamID(steamID), false))
+            if (SteamAPI.IsSteamRunning())
             {
-                var index = SteamFriends.GetLargeFriendAvatar(new CSteamID(steamID));
-                if (index != -1)
-                {
-                    callBack.Invoke(GetSteamImageAsTexture2D(index));
+                if (CallBackMaps.ContainsKey(steamID))
                     return;
+                if (!SteamFriends.RequestUserInformation(new CSteamID(steamID), false))
+                {
+                    var index = SteamFriends.GetLargeFriendAvatar(new CSteamID(steamID));
+                    if (index != -1)
+                    {
+                        callBack.Invoke(GetSteamImageAsTexture2D(index));
+                        return;
+                    }
                 }
+
+                CallBackMaps.Add(steamID, callBack);
             }
-            CallBackMaps.Add(steamID, callBack);
         }
 
         private static void OnPersonaStateChanged(PersonaStateChange_t param)

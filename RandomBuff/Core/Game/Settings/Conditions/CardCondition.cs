@@ -68,7 +68,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             base.InGameUpdate(game);
             timer++;
-            if (timer == 5)
+            if (timer >= 5)
             {
                 int count = 0;
                 if (all)
@@ -82,7 +82,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     onLabelRefresh?.Invoke(this);
                     
                 }
-                Finished = count >= needCard;
+                Finished = currentCard >= needCard;
                 timer = 0;
             }
         }
