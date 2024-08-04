@@ -88,6 +88,30 @@ namespace BuiltinBuffs.Duality
                         module.ReleaseGrasp();
                         return;
                     }
+                    
+                    if (module.mouthGrasp.grabbed is Player && !self.slugOnBack.HasASlug)
+                    {
+                        var slug = module.mouthGrasp.grabbed as Player;
+                        bool canPickUp = false;
+                        if (!slug.dead)
+                        {
+                            canPickUp = true;
+                        }
+                        else
+                        {
+                            if (self.FoodInStomach >= self.MaxFoodInStomach)
+                            {
+                                canPickUp = true;
+                            }
+                        }
+
+                        if (canPickUp)
+                        {
+                            slug.slugOnBack.DropSlug();
+                            self.slugOnBack.SlugToBack(slug);
+                            module.ReleaseGrasp();
+                        }
+                    }
 
                     module.grabCounter++;
 
@@ -161,7 +185,7 @@ namespace BuiltinBuffs.Duality
                     if (!(flag || flag2)) return false;
 
                     if (module.mouthGrasp != null) return false;
-                    if (obj.slatedForDeletetion || obj is Creature && !(obj as Creature).CanBeGrabbed(self))
+                    if (obj.slatedForDeletetion || obj is Creature && !(obj is Player) && !(obj as Creature).CanBeGrabbed(self))
                     {
                         return false;
                     }
