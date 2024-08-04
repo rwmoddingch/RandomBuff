@@ -37,7 +37,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public override void Destroy()
         {
             base.Destroy();
-            PlayerUtils.UndoAll(Instance);
+            PlayerUtils.UndoAll(this);
         }
 
         public static void HookOn()

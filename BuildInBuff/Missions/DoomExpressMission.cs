@@ -12,6 +12,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
 using TemplateGains;
 using UnityEngine;
@@ -64,6 +65,7 @@ namespace BuiltinBuffs.Missions
             if (roomName == "MS_bitterstart")
             {
                  BuffUtils.Log(nameof(BatteryCondition),"Player finished battery condition");
+                 BuffFile.Instance.SaveFile();
                  Finished = true;
             }
         }
