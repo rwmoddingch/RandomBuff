@@ -107,7 +107,7 @@ namespace RandomBuff.Core.GachaMenu
                     BuffType.Positive);
 
                 var negativeCardsList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
-                    BuffType.Negative, BuffType.Duality);
+                    BuffType.Negative);
 
                 //卡牌库存不足
                 if (positiveCards == null || negativeCardsList == null)
@@ -133,7 +133,7 @@ namespace RandomBuff.Core.GachaMenu
             else
             {
                 var pickList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.negative.showCount,
-                    BuffType.Negative, BuffType.Duality);
+                    BuffType.Negative);
 
                 //卡牌库存不足
                 if (pickList == null)

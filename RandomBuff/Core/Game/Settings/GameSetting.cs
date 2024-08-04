@@ -369,7 +369,7 @@ namespace RandomBuff.Core.Game.Settings
             {
                 fallbackPick.AddRange(
                     BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative, 
-                        BuffType.Duality, BuffType.Negative).Select(i => i.BuffID));
+                         BuffType.Negative).Select(i => i.BuffID));
             }
             var positive = gachaTemplate.CurrentPacket.negative.pickTimes *
                            gachaTemplate.CurrentPacket.negative.selectCount;
@@ -384,7 +384,7 @@ namespace RandomBuff.Core.Game.Settings
                 {
                     fallbackPick.AddRange(
                         BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negCount,
-                            BuffType.Duality, BuffType.Negative).Select(i => i.BuffID));
+                             BuffType.Negative).Select(i => i.BuffID));
                 }
             }
         }

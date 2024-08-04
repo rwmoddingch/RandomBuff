@@ -82,7 +82,7 @@ namespace RandomBuff.Core.Game
                     var positiveCards = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.positive.showCount,
                         BuffType.Positive);
                     var negativeCardsList = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.positive.showCount,
-                        BuffType.Negative, BuffType.Duality);
+                        BuffType.Negative);
 
                     if (positiveCards == null || negativeCardsList == null)
                         break;
@@ -102,7 +102,7 @@ namespace RandomBuff.Core.Game
                 for (int i = 0; i < setting.CurrentPacket.negative.pickTimes; i++)
                 {
                     var pickList = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.negative.showCount, 
-                        BuffType.Negative, BuffType.Duality);
+                        BuffType.Negative);
                     if (pickList == null)
                         break;
                     inGameSlot.RequestPickCards((id) =>

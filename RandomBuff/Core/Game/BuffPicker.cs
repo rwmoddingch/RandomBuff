@@ -22,6 +22,12 @@ namespace RandomBuff.Core.Game
     {
         public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
         {
+            if (types.Any(i => i == BuffType.Duality))
+            {
+                types = types.Where(i => i != BuffType.Duality).ToArray();
+                BuffPlugin.LogError("Now buff picker don't use Duality");
+            }
+
             IEnumerable<BuffID> alreadyHas;
             IEnumerable<string> conflict = new List<string>();
             if (BuffPoolManager.Instance == null)
@@ -43,8 +49,12 @@ namespace RandomBuff.Core.Game
 
             var list = new List<BuffStaticData>();
             var copyUnique = new List<BuffID>();
-            foreach(var type in types)
-                copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
+            foreach (var type in types)
+            {
+                copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToArray());
+                copyUnique.AddRange(BuffConfigManager.buffTypeTable[BuffType.Duality].Where(i => i.GetStaticData().AsPositive == (type == BuffType.Positive)));
+            }
+
             copyUnique.RemoveAll(alreadyHas.Contains);
             copyUnique.RemoveAll(i =>i.GetStaticData().Hidden && !BuffPlayerData.Instance.IsCollected(i));
 
