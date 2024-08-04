@@ -9,10 +9,10 @@
 
   "Chinese": {
     "BuffName": "冰冷凝视",
-    "Description": "在你注视中的生物将行动困难。"
+    "Description": "在你注视中的生物将行动困难。此卡牌堆叠到三层以上时，你将变成真正的美杜莎。"
   },
   "English": {
     "BuffName": "Cold Gaze",
-    "Description": "Creatures in the your gaze will have difficulty moving."
+    "Description": "Creatures in the your gaze will have difficulty moving. When this card is stacked above three layers, you will become a true Medusa."
   }
 }
