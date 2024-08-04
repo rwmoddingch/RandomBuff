@@ -30,6 +30,8 @@ namespace RandomBuff.Core.Buff
         public string FaceName { get; private set; } = null;
         public Color Color { get; private set; } = Color.white;
         public BuffType BuffType { get; private set; } = BuffType.Positive;
+        public bool AsPositive { get; private set; } = false;
+
         public BuffProperty BuffProperty { get; private set; } = BuffProperty.Normal;
         public bool Stackable { get; private set; } = false;
         public bool Hidden { get; private set; } = false;
@@ -184,6 +186,8 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "BuffProperty"))
                     newData.BuffProperty = (BuffProperty)Enum.Parse(typeof(BuffProperty), (string)rawData[loadState]);
 
+                if (rawData.ContainsKey(loadState = "AsPositive"))
+                    newData.AsPositive = bool.Parse(rawData[loadState] as string);
 
                 if (rawData.ContainsKey(loadState = "Color"))
                 {

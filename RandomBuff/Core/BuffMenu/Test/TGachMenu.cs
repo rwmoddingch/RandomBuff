@@ -26,7 +26,7 @@ namespace RandomBuff.Core.BuffMenu.Test
             var cards = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 3, BuffType.Positive);
             
             //获取中性/减益
-            var cards2 = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 3, BuffType.Duality, BuffType.Negative);
+            var cards2 = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 3,  BuffType.Negative);
 
             for (int i = 0; i < 3; i++)
             {
