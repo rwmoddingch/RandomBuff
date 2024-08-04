@@ -12,6 +12,7 @@ using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -33,7 +34,7 @@ namespace BuiltinBuffs.Missions
             {
                 conditions = new List<Condition>()
                 {
-                    new DistanceCondition(){targetTileCount = 5000},
+                    new DistanceCondition(){targetTileCount = 500, needFaster = true},
                     new DeathCondition(){deathCount = 5}
                 }
             };
@@ -70,17 +71,21 @@ namespace BuiltinBuffs.Missions
         public static readonly ConditionID Distance = new ConditionID(nameof(Distance), true);
 
         public override ConditionID ID => Distance;
-        public override int Exp => Mathf.RoundToInt(targetTileCount / 25f);
+        public override int Exp => Mathf.RoundToInt(targetTileCount / (needFaster ? 2.5f : 25f));
 
 
         [JsonProperty]
         private float moveTiles;
 
-        private int lastMoveTiles;
 
+        [JsonProperty] 
+        public bool needFaster;
 
         [JsonProperty]
         public int targetTileCount;
+
+
+        private int lastMoveTiles;
 
 
         public override void HookOn()
@@ -93,6 +98,9 @@ namespace BuiltinBuffs.Missions
         {
             orig(self, eu);
             if (self.isNPC) return;
+
+            if (needFaster && self.slugcatStats.runspeedFac <= self.slugcatStats.Original().runspeedFac) return;
+
             if (!modules.TryGetValue(self, out var module))
                 modules.Add(self, module = new PlayerModule());
             if (module.lastPos == null)
@@ -124,7 +132,8 @@ namespace BuiltinBuffs.Missions
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
-            targetTileCount = Random.Range(2000, 10000);
+            needFaster = Random.value > 0.5f;
+            targetTileCount = Random.Range(2000, 10000) / (needFaster ? 10 : 1);
             return ConditionState.Ok_NoMore;
         }
 
@@ -135,7 +144,7 @@ namespace BuiltinBuffs.Missions
 
         public override string DisplayName(InGameTranslator translator)
         {
-            return string.Format(BuffResourceString.Get("DisplayName_Distance"), targetTileCount);
+            return string.Format(BuffResourceString.Get($"DisplayName_Distance{(needFaster ? "_Faster" : "")}"), targetTileCount);
         }
 
 

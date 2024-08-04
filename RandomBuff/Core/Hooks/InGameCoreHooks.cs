@@ -318,7 +318,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
         {
-            BuffPoolManager.Instance?.WinGame();
+            BuffPoolManager.Instance?.WinGame(malnourished);
             orig(self, malnourished);
         }
 

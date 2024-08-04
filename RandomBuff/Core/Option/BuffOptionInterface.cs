@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Menu;
 using Menu.Remix.MixedUI;
+using Menu.Remix.MixedUI.ValueTypes;
 using RandomBuffUtils.MixedUI;
 using RWCustom;
 using UnityEngine;
@@ -24,9 +25,11 @@ namespace RandomBuff.Core.Option
         {
             CardSlotKey = config.Bind(nameof(CardSlotKey), KeyCode.Tab.ToString());
             KeyBindKey = config.Bind(nameof(KeyBindKey), KeyCode.CapsLock.ToString());
-
+            
             ShowExceptionLog = config.Bind(nameof(ShowExceptionLog), true);
 
+            EnableExpeditionExtend = config.Bind(nameof(EnableExpeditionExtend), true);
+            EnableExpeditionModExtend = config.Bind(nameof(EnableExpeditionModExtend), false);
 
             CheatAllCards = config.Bind(nameof(CheatAllCards), false);
             CheatAllCosmetics = config.Bind(nameof(CheatAllCosmetics), false);
@@ -66,7 +69,17 @@ namespace RandomBuff.Core.Option
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_ShowExceptionLog", true),FLabelAlignment.Left),
                 new OpCheckBox(ShowExceptionLog,Vector2.zero));
 
+            yIndex++;
 
+
+            AppendItems(option, ref yIndex,
+                new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionExtend", true), FLabelAlignment.Left),
+                mainExpedition = new OpCheckBox(EnableExpeditionExtend, Vector2.zero));
+
+
+            AppendItems(option, ref yIndex,
+                new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionModExtend", true), FLabelAlignment.Left),
+               modExpedition = new OpCheckBox(EnableExpeditionModExtend, Vector2.zero));
 
             yIndex = initYIndex;
 
@@ -101,6 +114,23 @@ namespace RandomBuff.Core.Option
 
 
         }
+
+
+        public override void Update()
+        {
+            base.Update();
+            if (!mainExpedition.GetValueBool() && !modExpedition.IsInactive)
+            {
+                if(modExpedition.GetValueBool())
+                    modExpedition.SetValueBool(false);
+                modExpedition.Deactivate();
+            }
+            else if (mainExpedition.GetValueBool() && modExpedition.IsInactive)
+            {
+                modExpedition.Reactivate();
+            }
+        }
+
         public void SwitchToCredit(UIfocusable trigger)
         {
             config.Save();
@@ -177,6 +207,11 @@ namespace RandomBuff.Core.Option
 
         public Configurable<bool> CheatAllCards { get; private set; }
         public Configurable<bool> CheatAllCosmetics { get; private set; }
+
+        public Configurable<bool> EnableExpeditionExtend {get; private set; }
+        public Configurable<bool> EnableExpeditionModExtend { get; private set; }
+
+        private OpCheckBox mainExpedition, modExpedition;
 
         private OpHoldButton cheatButton;
         private readonly List<UIelement> cheatList = new();
