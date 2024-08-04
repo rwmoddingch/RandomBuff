@@ -63,7 +63,6 @@ namespace RandomBuff.Credit
             }
         }
 
-        bool lastEscDown;
         public override void Update()
         {
             base.Update();
@@ -101,8 +100,7 @@ namespace RandomBuff.Credit
                 rainEffect.LightningSpike(Mathf.Pow(UnityEngine.Random.value, 2f) * 0.85f, Mathf.Lerp(20f, 120f, UnityEngine.Random.value));
             }
 
-            bool escDown = Input.GetKey(KeyCode.Escape);
-            if (escDown && !lastEscDown)
+            if (RWInput.CheckPauseButton(0))
             {
                 EndCredit();
                 if (stage != null)
