@@ -94,6 +94,18 @@ namespace BuiltinBuffs.Negative
 
         public static FShader Turbulent;
 
+        public static void TryAddFakeCreatureModule(Creature source, Creature target)
+        {
+            if (FakeCreatureHook.modules == null)
+                return;
+            if (FakeCreatureHook.modules.TryGetValue(source, out _))
+            {
+                var module = new FakeCreatureModule(target);
+                target.CollideWithObjects = false;
+                FakeCreatureHook.modules.Add(target, module);
+            }
+        }
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<FakeCreatureBuff, FakeCreatureBuffData, FakeCreatureHook>(FakeCreatureBuffData.FakeCreatureID);

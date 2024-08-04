@@ -6,6 +6,11 @@
     "Triggerable" : false,
     "Color" : "FF0001",
 
+    "MultiLayerFace" : true,
+    "FaceLayer" : 3,
+    "MaxFaceDepth" : 0.6,
+    "FaceBackgroundColor" : "000000",
+
     "Chinese" : {
         "BuffName" : "限行日",
         "Description" : "本次雨循环所有业力门将无法开启"

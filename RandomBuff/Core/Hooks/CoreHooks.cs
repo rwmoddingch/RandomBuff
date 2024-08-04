@@ -14,6 +14,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.GachaMenu;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.StaticsScreen;
@@ -35,6 +36,18 @@ namespace RandomBuff.Core.Hooks
             On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
             On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
 
+            On.Menu.MainMenu.Singal += MainMenu_Singal;
+
+            On.Menu.MainMenu.ctor += (orig, self, manager, bkg) =>
+            {
+                orig(self, manager, bkg);
+                var button = self.mainMenuButtons.First(i => i.signalText == "BUFF");
+                var infoButton = new IconButton(self, self.pages[0], "buffassets/illustrations/RandomBuff_Cardpedia", "CARDPEDIA_ICON",
+                    button.pos + Vector2.right * (button.size.x+5), new Vector2(30, 30), 0.5f);
+                CardpediaMenuHooks.menu = self;
+                self.pages[0].subObjects.Add(infoButton);
+            };
+
             IL.Menu.MainMenu.ctor += (il) =>
             {
                 InsertMainMenuButtonAfter(il, "STORY", self =>
@@ -42,28 +55,30 @@ namespace RandomBuff.Core.Hooks
                     float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
                     Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
                     Vector2 size = new Vector2(buttonWidth, 30f);
-                    self.AddMainMenuButton(
-                        new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos,
-                            size), () =>
+                    
+                    self.AddMainMenuButton(new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Buff"), "BUFF", pos,
+                        size)
+                        , () =>
                         {
                             self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameMenu);
                             self.PlaySound(SoundID.MENU_Switch_Page_In);
                         }, 0);
+
                 });
             };
 
-            IL.Menu.MainMenu.ctor += (il) =>
-            {
-                InsertMainMenuButtonAfter(il, "COLLECTION", self =>
-                {
-                    float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
-                    Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
-                    Vector2 size = new Vector2(buttonWidth, 30f);
-                    SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
-                    CardpediaMenuHooks.menu = self;
-                    self.AddMainMenuButton(collectionButton, new Action(CardpediaMenuHooks.CollectionButtonPressed), 0);
-                });
-            };
+            //IL.Menu.MainMenu.ctor += (il) =>
+            //{
+            //    InsertMainMenuButtonAfter(il, "COLLECTION", self =>
+            //    {
+            //        float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
+            //        Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
+            //        Vector2 size = new Vector2(buttonWidth, 30f);
+            //        SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
+            //        CardpediaMenuHooks.menu = self;
+            //        self.AddMainMenuButton(collectionButton, new Action(CardpediaMenuHooks.CollectionButtonPressed), 0);
+            //    });
+            //};
 
             IL.Menu.MainMenu.AddMainMenuButton += (il) =>
             {
@@ -83,13 +98,11 @@ namespace RandomBuff.Core.Hooks
                     BuffPlugin.LogError("Hook MainMenu AddMainMenuButton Failed");
                 }
             };
-            On.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
 
             On.Menu.SlugcatSelectMenu.SlugcatUnlocked += SlugcatSelectMenu_SlugcatUnlocked;
             On.Menu.SlugcatSelectMenu.SlugcatPage.Scroll += SlugcatPage_Scroll;
             On.Menu.SlugcatSelectMenu.SlugcatPage.NextScroll += SlugcatPage_NextScroll;
 
-            On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
 
             On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
             On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
@@ -98,8 +111,8 @@ namespace RandomBuff.Core.Hooks
 
             On.PlayerProgression.CopySaveFile += PlayerProgression_CopySaveFile;
             On.Menu.BackupManager.RestoreSaveFile += BackupManager_RestoreSaveFile;
-
             On.Options.GetSaveFileName_SavOrExp += Options_GetSaveFileName_SavOrExp;
+
             InGameHooksInit();
 
 
@@ -109,21 +122,14 @@ namespace RandomBuff.Core.Hooks
 
         }
 
+   
 
-        private static void InsertMainMenuButtonAfter(ILContext il, string beforeName,
-            Action<MainMenu> createDeg)
-        {
-            ILCursor c = new ILCursor(il);
-            c.GotoNext(i => i.MatchLdstr(beforeName));
-            c.GotoNext(MoveType.After, i => i.MatchCall<MainMenu>(nameof(MainMenu.AddMainMenuButton)));
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate(createDeg.Invoke);
-        }
+        #region SaveSlot
 
         private static string Options_GetSaveFileName_SavOrExp(On.Options.orig_GetSaveFileName_SavOrExp orig, Options self)
         {
             var re = orig(self);
-            if(self.saveSlot >= 100)
+            if (self.saveSlot >= 100)
                 return $"buffMain{self.saveSlot}";
             return re;
         }
@@ -160,11 +166,11 @@ namespace RandomBuff.Core.Hooks
                 if (string.IsNullOrEmpty(sourceName)) sourceName = "1";
                 if (int.TryParse(sourceName, out var result))
                 {
-                    if(!File.Exists(Path.Combine(destinationDirectory, $"buffMain{result + 99}")))
-                        orig(self, $"buffMain{result+99}", destinationDirectory);
+                    if (!File.Exists(Path.Combine(destinationDirectory, $"buffMain{result + 99}")))
+                        orig(self, $"buffMain{result + 99}", destinationDirectory);
 
                     if (!File.Exists(Path.Combine(destinationDirectory, $"buffsave{result + 99}")))
-                        orig(self, $"buffsave{result+99}", destinationDirectory);
+                        orig(self, $"buffsave{result + 99}", destinationDirectory);
                     BuffPlugin.Log($"backup buff sav at slot:{result}, folder:{destinationDirectory}");
                 }
                 else
@@ -174,18 +180,63 @@ namespace RandomBuff.Core.Hooks
             }
         }
 
-        private static void JollyPlayerSelector_Update(On.JollyCoop.JollyMenu.JollyPlayerSelector.orig_Update orig, JollyCoop.JollyMenu.JollyPlayerSelector self)
+        private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
         {
             orig(self);
-            if(self.menu.manager.rainWorld.BuffMode() && self.index == 0)
-                self.classButton.GetButtonBehavior.greyedOut = true;
+            BuffDataManager.Instance.DeleteAll();
+            BuffPlayerData.LoadBuffPlayerData("", BuffPlugin.saveVersion);
+            BuffConfigManager.LoadConfig("", BuffPlugin.saveVersion);
+            BuffFile.Instance.DeleteAllFile();
 
         }
+
+        private static void PlayerProgression_WipeSaveState(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
+        {
+            orig(self, saveStateNumber);
+            if (self.rainWorld.BuffMode())
+                BuffDataManager.Instance.DeleteSaveData(saveStateNumber);
+        }
+        #endregion
+
+        #region DllContent
 
         private static bool ModManager_ModFolderHasDLLContent(On.ModManager.orig_ModFolderHasDLLContent orig, string folder)
         {
             return orig(folder) || Directory.Exists(Path.Combine(folder, "buffplugins"));
         }
+
+        #endregion
+
+        #region MainMenu
+
+        private static void MainMenu_Singal(On.Menu.MainMenu.orig_Singal orig, MainMenu self, MenuObject sender, string message)
+        {
+            if (message == "CARDPEDIA_ICON")
+            {
+                CardpediaMenuHooks.CollectionButtonPressed();
+            }
+            orig(self, sender, message);
+        }
+
+        private static void InsertMainMenuButtonAfter(ILContext il, string beforeName,
+            Action<MainMenu> createDeg)
+        {
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(i => i.MatchLdstr(beforeName));
+            c.GotoNext(MoveType.After, i => i.MatchCall<MainMenu>(nameof(MainMenu.AddMainMenuButton)));
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(createDeg.Invoke);
+        }
+
+
+        private static void JollyPlayerSelector_Update(On.JollyCoop.JollyMenu.JollyPlayerSelector.orig_Update orig, JollyCoop.JollyMenu.JollyPlayerSelector self)
+        {
+            orig(self);
+            if (self.menu.manager.rainWorld.BuffMode() && self.index == 0)
+                self.classButton.GetButtonBehavior.greyedOut = true;
+
+        }
+
 
 
         private static bool SlugcatStats_SlugcatUnlocked(On.SlugcatStats.orig_SlugcatUnlocked orig, SlugcatStats.Name i, RainWorld rainWorld)
@@ -197,12 +248,12 @@ namespace RandomBuff.Core.Hooks
 
         private static SlugcatStats.Name JollyCustom_SlugClassMenu(On.JollyCoop.JollyCustom.orig_SlugClassMenu orig, int playerNumber, SlugcatStats.Name fallBack)
         {
-            if(!Custom.rainWorld.BuffMode())
-                return orig(playerNumber,fallBack);
+            if (!Custom.rainWorld.BuffMode())
+                return orig(playerNumber, fallBack);
 
             SlugcatStats.Name name = JollyCustom.JollyOptions(playerNumber).playerClass;
             if (name == null ||
-                SlugcatStats.HiddenOrUnplayableSlugcat(name) || 
+                SlugcatStats.HiddenOrUnplayableSlugcat(name) ||
                 (SlugcatStats.IsSlugcatFromMSC(name) && !ModManager.MSC))
             {
                 JollyCustom.JollyOptions(playerNumber).playerClass = fallBack;
@@ -232,39 +283,10 @@ namespace RandomBuff.Core.Hooks
             return orig(self, i);
         }
 
-        private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
-        {
-            orig(self, cam);
-            if (self.rainWorld.BuffMode())
-            {
-                self.AddPart(new BuffHud(self));
-                //self.AddPart(new TConditionHud(self));
-            }
-        }
 
-        private static void ProcessManager_PostSwitchMainProcess1(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
-        {
-            if (ID == BuffEnums.ProcessID.BuffGameMenu)
-            {
-                self.currentMainLoop = new BuffGameMenu(self, ID);
-            }
-            else if(ID == BuffEnums.ProcessID.Cardpedia)
-            {
-                self.currentMainLoop = new CardpediaMenu(self);
-            }
-            else if(ID == BuffEnums.ProcessID.BuffGameWinScreen)
-            {
-                self.currentMainLoop = new BuffGameWinScreen(self);
-            }
-            else if(ID == BuffEnums.ProcessID.CreditID)
-            {
-                self.currentMainLoop = new BuffCreditMenu(self);
-            }
-            orig(self, ID);
-      
-        }
+        #endregion
 
- 
+        #region Process
 
         private static void ProcessManager_PreSwitchMainProcess(On.ProcessManager.orig_PreSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
@@ -280,26 +302,29 @@ namespace RandomBuff.Core.Hooks
             orig(self, ID);
         }
 
-        private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
-        {
-            orig(self);
-            BuffDataManager.Instance.DeleteAll();
-            BuffPlayerData.LoadBuffPlayerData("",BuffPlugin.saveVersion);
-            BuffConfigManager.LoadConfig("", BuffPlugin.saveVersion);
-            BuffFile.Instance.DeleteAllFile();
-
-        }
-
-        private static void PlayerProgression_WipeSaveState(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
-        {
-            orig(self,saveStateNumber);
-            if(self.rainWorld.BuffMode())
-                BuffDataManager.Instance.DeleteSaveData(saveStateNumber);
-        }
-
-
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
         {
+            if (ID == BuffEnums.ProcessID.BuffGameMenu)
+            {
+                self.currentMainLoop = new BuffGameMenu(self, ID);
+            }
+            else if (ID == BuffEnums.ProcessID.Cardpedia)
+            {
+                self.currentMainLoop = new CardpediaMenu(self);
+            }
+            else if (ID == BuffEnums.ProcessID.BuffGameWinScreen)
+            {
+                self.currentMainLoop = new BuffGameWinScreen(self);
+            }
+            else if (ID == BuffEnums.ProcessID.CreditID)
+            {
+                self.currentMainLoop = new BuffCreditMenu(self);
+            }
+            else if ((ID == BuffEnums.ProcessID.StackMenu || ID == BuffEnums.ProcessID.UnstackMenu) &&
+                     self.oldProcess is SleepAndDeathScreen sleep)
+            {
+                self.currentMainLoop = new StackAndUnstackMenu(self, sleep.saveState.saveStateNumber, ID);
+            }
             if (BuffPoolManager.Instance != null &&
                 self.oldProcess is RainWorldGame game)
             {
@@ -308,7 +333,7 @@ namespace RandomBuff.Core.Hooks
                     (ID == ProcessManager.ProcessID.SleepScreen || ID == ProcessManager.ProcessID.Dream))
                 {
                     self.currentMainLoop = new GachaMenu.GachaMenu(ID, game, self);
-                    ID = GachaMenu.GachaMenu.GachaMenuID;
+                    ID = BuffEnums.ProcessID.GachaMenuID;
                 }
             }
 
@@ -319,13 +344,13 @@ namespace RandomBuff.Core.Hooks
                     foreach (var buff in BuffCore.GetAllBuffIds(screen.saveState.saveStateNumber))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
-                else if(self.oldProcess is RainWorldGame game3)
+                else if (self.oldProcess is RainWorldGame game3)
                 {
                     foreach (var buff in BuffCore.GetAllBuffIds(game3.StoryCharacter))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
             }
-            
+
 
             orig(self, ID);
             if (self.currentMainLoop is RainWorldGame game2)
@@ -343,5 +368,8 @@ namespace RandomBuff.Core.Hooks
                 }
             }
         }
+
+        #endregion
+
     }
 }

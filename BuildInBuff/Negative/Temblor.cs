@@ -45,7 +45,7 @@ namespace HotDogGains.Negative
 
                         if (room.PlayersInRoom!=null)
                         {
-                            foreach (var player in room.PlayersInRoom)
+                            foreach (var player in room.PlayersInRoom.Where(i => i != null))
                             {
                                 if (player.bodyMode == Player.BodyModeIndex.Stand && power > 0.8f && Random.value > 0.4f)
                                 {

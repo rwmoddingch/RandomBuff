@@ -151,6 +151,31 @@ namespace RandomBuff.Core.SaveData
             return allDatas[name][id];
         }
 
+        internal bool RemoveBuffData(SlugcatStats.Name name, BuffID id)
+        {
+            if (allDatas.TryGetValue(name, out var maps))
+            {
+                if (maps.TryGetValue(id, out var data))
+                {
+                    if (id.GetStaticData().Stackable && data.StackLayer > 1)
+                    {
+                        data.StackLayer--;
+                        BuffPlugin.LogDebug($"Unstack buff data outside of game, ID:{id}, Name:{name}");
+                    }
+                    else
+                    {
+                        maps.Remove(id);
+                        BuffPlugin.LogDebug($"Remove buff data outside of game, ID:{id}, Name:{name}");
+
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
 
         /// <summary>

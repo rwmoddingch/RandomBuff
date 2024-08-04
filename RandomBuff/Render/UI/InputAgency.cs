@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Option;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI
@@ -12,6 +14,7 @@ namespace RandomBuff.Render.UI
     {
         static DefaultInput defaultInput = new DefaultInput();
         static GamepadInput gamepadInput = new GamepadInput();
+
 
         public static InputAgency Current { get; private set; } = gamepadInput;
         public static AgencyType CurrentAgencyType { get; private set; } = AgencyType.Gamepad;
@@ -185,8 +188,8 @@ namespace RandomBuff.Render.UI
         {
             mainFuncButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0));
             secondaryFuncButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1));
-            toggleHUDButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(KeyCode.Tab));
-            keyBinderButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(KeyCode.CapsLock));
+            toggleHUDButtonTracker = new Helper.InputButtonTracker(() => BuffInput.GetKey(BuffOptionInterface.Instance.CardSlotKey.Value));
+            keyBinderButtonTracker = new Helper.InputButtonTracker(() => BuffInput.GetKey(BuffOptionInterface.Instance.KeyBindKey.Value));
         }
 
         public override Vector2 GetMousePosition()
@@ -240,10 +243,11 @@ namespace RandomBuff.Render.UI
             secFuncDown = Input.GetMouseButton(1);
 
             toggleHUDButtonTracker.Update(out toggleHUDTrigger, out _);
-            toggleHUDDown = Input.GetKey(KeyCode.Tab);
+            toggleHUDDown = BuffInput.GetKey(BuffOptionInterface.Instance.CardSlotKey.Value);
+
 
             keyBinderButtonTracker.Update(out keyBinderDown, out _);
-            keyBinderDown = Input.GetKey(KeyCode.CapsLock);
+            keyBinderDown = BuffInput.GetKey(BuffOptionInterface.Instance.KeyBindKey.Value);
         }
     }
 
@@ -278,8 +282,8 @@ namespace RandomBuff.Render.UI
         {
             mainFuncButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0));
             secondaryFuncButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1));
-            toggleHUDButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(KeyCode.Tab));
-            keyBinderButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(KeyCode.CapsLock));
+            toggleHUDButtonTracker = new Helper.InputButtonTracker(() => BuffInput.GetKey(BuffOptionInterface.Instance.CardSlotKey.Value));
+            keyBinderButtonTracker = new Helper.InputButtonTracker(() => BuffInput.GetKey(BuffOptionInterface.Instance.KeyBindKey.Value));
             escButtonTracker = new Helper.InputButtonTracker(() => RWInput.CheckPauseButton(0));
         }
 
@@ -294,10 +298,10 @@ namespace RandomBuff.Render.UI
             _currentPackage = RWInput.PlayerInput(0);
 
             toggleHUDButtonTracker.Update(out toggleHUDTrigger, out _);
-            toggleHUDDown = Input.GetKey(KeyCode.Tab);
+            toggleHUDDown = BuffInput.GetKey(BuffOptionInterface.Instance.CardSlotKey.Value);
 
             keyBinderButtonTracker.Update(out keyBinderDown, out _);
-            keyBinderDown = Input.GetKey(KeyCode.CapsLock);
+            keyBinderDown = BuffInput.GetKey(BuffOptionInterface.Instance.KeyBindKey.Value);
 
             escButtonTracker.Update(out bool esc, out _);
 

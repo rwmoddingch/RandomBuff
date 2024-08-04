@@ -232,7 +232,7 @@ namespace BuiltinBuffs.Negative
                     heatstroke = Mathf.Min(1f, heatModule.temperature / heatModule.ignitingPoint);
                 }
 
-                if (!self.Stunned && Random.Range(0, 801f + 10f * heatstroke) > 800f)
+                if (!self.Stunned && Random.Range(0, 800 + 1f * num + 10f * heatstroke) > 800f)
                 {
                     ScorchingSunBuff.Instance.TriggerSelf();
                     self.Stun(80);

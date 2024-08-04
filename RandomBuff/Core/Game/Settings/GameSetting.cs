@@ -48,6 +48,8 @@ namespace RandomBuff.Core.Game.Settings
 
         public string MissionId { get; set; }
 
+        public bool CanStackByPassage => MissionId is null && gachaTemplate.CanStackByPassage;
+
         public InGameRecord inGameRecord = new ();
 
         public bool Win
@@ -63,8 +65,17 @@ namespace RandomBuff.Core.Game.Settings
         public float Difficulty { get; private set; } = 0.5f;
 
 
-        public string Description => gachaTemplate.TemplateDetail + "<ENTRY>" +
-                                     BuffResourceString.Get(gachaTemplate.TemplateDescription);
+        public string Description
+        {
+            get
+            {
+                if (MissionId is not null)
+                    gachaTemplate.CanStackByPassage = false;
+
+                return gachaTemplate.TemplateDetail + "<ENTRY>" +
+                       BuffResourceString.Get(gachaTemplate.TemplateDescription);
+            }
+        }
 
 
         public GameSetting(SlugcatStats.Name name, string gachaTemplate = "Normal", string startPos = null)

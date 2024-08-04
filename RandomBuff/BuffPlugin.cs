@@ -35,6 +35,7 @@ using RandomBuffUtils.FutileExtend;
 using RandomBuff.Render.Quest;
 using System.Drawing;
 using Kittehface.Framework20;
+using RandomBuff.Core.Option;
 using Steamworks;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.ExceptionTracker;
@@ -60,7 +61,8 @@ namespace RandomBuff
 
         internal static BuffPlugin Instance { get; private set; }
 
-        public static bool AllCardDisplay { get; private set; }
+
+        public static BuffOptionInterface Option { get; private set; }
 
         public const string ModId = "randombuff";
 
@@ -68,11 +70,15 @@ namespace RandomBuff
         {
             LogInstance = this.Logger;
             Instance = this;
+            
+
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
                 On.RainWorld.PostModsInit += RainWorld_PostModsInit;
-           
+                Option = new BuffOptionInterface();
+
+
             }
             catch (Exception e)
             {
@@ -82,7 +88,6 @@ namespace RandomBuff
 
         private void Update()
         {
-
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
             ExceptionTracker.Singleton?.Update();
             BuffExceptionTracker.Singleton?.RawUpdate();
@@ -139,12 +144,6 @@ namespace RandomBuff
                         LogWarning("Debug Enable");
                     }
 
-                    if (File.Exists(AssetManager.ResolveFilePath("buffallcards.txt")))
-                    {
-                        AllCardDisplay = true;
-                        LogWarning("Displayed all cards");
-
-                    }
 
                     Application.logMessageReceived += Application_logMessageReceived;
 
@@ -177,6 +176,7 @@ namespace RandomBuff
 
                     AnimMachine.Init();
 
+                    MachineConnector.SetRegisteredOI(ModId, Option);
                     StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());
 
                     isLoaded = true;
@@ -269,7 +269,7 @@ namespace RandomBuff
         
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            if (type == LogType.Exception)
+            if (type == LogType.Exception && BuffOptionInterface.Instance.ShowExceptionLog.Value)
                 ExceptionTracker.TrackExceptionNew(stackTrace,condition);
             
         }

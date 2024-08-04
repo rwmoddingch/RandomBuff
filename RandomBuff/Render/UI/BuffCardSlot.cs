@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RandomBuff.Core.Option;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI
@@ -240,7 +241,7 @@ namespace RandomBuff.Render.UI
                 helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
                 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
 
 
                 return true;
@@ -249,26 +250,26 @@ namespace RandomBuff.Render.UI
             {
                 BuffID id = Params[0] as BuffID;
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnCardExclusiveShow");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
 
                 if(BuffConfigManager.GetStaticData(id).Triggerable)
                 {
                     helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_BindKey");
-                    helpInfo = Regex.Replace(helpInfo, "<KEYBINDER_KEY>", KeyCode.CapsLock.ToString());
+                    helpInfo = Regex.Replace(helpInfo, "<KEYBINDER_KEY>", BuffOptionInterface.Instance.KeyBindKey.Value);
                     helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
                 }
 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
                 return true;
             }
             else if (ID == InGame_NoCardFocus)
             {
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_NoCardFocus");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
                 return true;
             }
             return false;
@@ -308,7 +309,8 @@ namespace RandomBuff.Render.UI
         /// <param name="majorSelections">主抽卡选项</param>
         /// <param name="additionalSelections">附加抽卡选项，需要和主抽卡选项的长度一致</param>
         /// <param name="numOfChoices">完成本次抽卡需要抽取的卡牌数量</param>
-        public CardPickerSlot(BasicInGameBuffCardSlot inGameBuffCardSlot, Action<BuffID> selectCardCallBack ,BuffID[] majorSelections, BuffID[] additionalSelections, int numOfChoices = 1, BuffSlotTitle slotTitle = null, bool resumeTitle = false)
+        public CardPickerSlot(BasicInGameBuffCardSlot inGameBuffCardSlot, Action<BuffID> selectCardCallBack ,BuffID[] majorSelections, BuffID[] additionalSelections, int numOfChoices = 1, BuffSlotTitle slotTitle = null, 
+            bool resumeTitle = false, string customTile = "")
         {
             this.majorSelections = majorSelections;
             this.additionalSelections = additionalSelections;
@@ -347,10 +349,18 @@ namespace RandomBuff.Render.UI
             (BaseInteractionManager as CardPickerInteractionManager).FinishManage();
             if(Title != null)
             {
-                string title = BuffResourceString.Get("CardPickSlot_SlotTitle");
-                title = Regex.Replace(title, "<Cards>", numOfChoices.ToString());
-                title = Regex.Replace(title, "<Type>", BuffConfigManager.GetStaticData(majorSelections[0]).BuffType.ToString());
-                Title.ChangeTitle(title, false);
+                if (string.IsNullOrEmpty(customTile))
+                {
+                    string title = BuffResourceString.Get("CardPickSlot_SlotTitle");
+                    title = Regex.Replace(title, "<Cards>", numOfChoices.ToString());
+                    title = Regex.Replace(title, "<Type>",
+                        BuffConfigManager.GetStaticData(majorSelections[0]).BuffType.ToString());
+                    Title.ChangeTitle(title, false);
+                }
+                else
+                {
+                    Title.ChangeTitle(customTile, false);
+                }
             }  
         }
 

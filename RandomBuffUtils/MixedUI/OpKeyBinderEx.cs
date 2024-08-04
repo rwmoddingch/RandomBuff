@@ -54,6 +54,7 @@ namespace RandomBuffUtils.MixedUI
                     return;
                 }
                 base.value = value.Replace("Controller", "");
+                BuffUtils.Log("OpKeyBindEx", $"set new value:{base.value}, at:{cfgEntry.key}");
                 Menu.PlaySound(SoundID.MENU_Button_Successfully_Assigned);
                 Change();
             }

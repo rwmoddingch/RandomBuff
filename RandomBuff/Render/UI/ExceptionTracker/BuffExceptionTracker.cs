@@ -248,28 +248,7 @@ namespace RandomBuff.Render.UI.ExceptionTracker
 
         public void RawUpdate(float dt)
         {
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                try
-                {
-                    throw new NotImplementedException("wawa test");
-                }
-                catch (Exception e)
-                {
-                    BuffPlugin.LogException(e);
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                try
-                {
-                    throw new NullReferenceException("wawa test 2");
-                }
-                catch (Exception e)
-                {
-                    BuffPlugin.LogException(e);
-                }
-            }
+           
 
             if (!Enable)
                 return;
