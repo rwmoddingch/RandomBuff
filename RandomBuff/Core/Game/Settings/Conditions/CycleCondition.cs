@@ -11,7 +11,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     internal class CycleCondition : Condition
     {
         public override ConditionID ID => ConditionID.Cycle;
-        public override int Exp => cycle * 40;
+        public override int Exp => cycle * 10;
 
         public int SetCycle
         {
@@ -38,7 +38,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> conditions = null)
         {
-            cycle = (int)Random.Range(Mathf.Lerp(5, 15, difficulty), Mathf.Lerp(10, 30, difficulty));
+            cycle = (int)Random.Range(5, 30);
             BuffPlugin.LogDebug($"Add Cycle Condition {cycle}");
             return ConditionState.Ok_NoMore;
         }

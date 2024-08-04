@@ -7,14 +7,16 @@ using Expedition;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuffUtils;
+using RWCustom;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
     internal class ScoreCondition : Condition
     {
         public override ConditionID ID => ConditionID.Score;
-        public override int Exp => (int)(targetScore / 10f); //TODO
+        public override int Exp => (int)(targetScore / Custom.LerpMap(targetScore,200,100,10,7f)); //TODO
 
         [JsonProperty]
         public float targetScore;
@@ -58,7 +60,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
-            targetScore = Mathf.RoundToInt(Mathf.Lerp(200f, 500f, difficulty) / 10f) * 10;
+            targetScore = Mathf.RoundToInt(Random.Range(200, 1000f));
             return ConditionState.Ok_NoMore;
         }
 

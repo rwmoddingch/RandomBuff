@@ -72,7 +72,7 @@ namespace BuiltinBuffs.Missions
 
         public static readonly ConditionID Battery = new ConditionID(nameof(Battery), true);
         public override ConditionID ID => Battery;
-        public override int Exp => 500; //TODO
+        public override int Exp => 350; //TODO
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             if (name == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)

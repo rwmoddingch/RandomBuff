@@ -15,7 +15,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public override ConditionID ID => ConditionID.Card;
 
-        public override int Exp => needCard * 50;
+        public override int Exp => needCard * 10;
 
         public override void GachaEnd(List<BuffID> picked, List<BuffID> allCards)
         {
@@ -45,7 +45,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 type = (BuffType)Enum.Parse(typeof(BuffType), current);
             }
 
-            needCard = (int)Random.Range(Mathf.Lerp(5, 10, difficulty), Mathf.Lerp(10, 15, difficulty)) / (all ? 1: 2);
+            needCard = (int) Mathf.Lerp(10, 25, difficulty) / (all ? 1: 2);
             BuffPlugin.LogDebug($"Add Card Condition {needCard}:{current}");
             if (list.Count != 1)
                 return ConditionState.Ok_More;

@@ -12,7 +12,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     {
         public override ConditionID ID => ConditionID.MeetSS_SL;
 
-        public override int Exp => 150;
+        public override int Exp => 200;
 
         [JsonProperty]
         public int cycleRequirement;

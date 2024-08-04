@@ -22,7 +22,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public static readonly ConditionID TreeOfLight = new ConditionID(nameof(TreeOfLight), true);
         public override ConditionID ID => TreeOfLight;
-        public override int Exp => 750;
+        public override int Exp => 150;
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             return ConditionState.Fail;
