@@ -39,7 +39,7 @@
 	<BuffIDs>FakeCreature
 
 	<Name>寂空
-	<Detail>请提交本周期的降水报告和避难所维护日志
+	<Detail>「广告位招租」
 	<BuffIDs>ShortCircuits, TwoSides, TurboPropulsion
 
 	<Name>琳
@@ -140,3 +140,6 @@
 
 	<Name>狐松
 	<Detail>讨厌蜘蛛还有“辣条”
+
+	<Name>黑咪 o.o
+	<Detail>准备好进入这场精彩的梦中了吗~

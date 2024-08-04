@@ -137,6 +137,7 @@ DisplayName_TreeOfLight|Collect a full amount of energy (food)
 DisplayName_Abyss|Go to the depth
 DisplayName_Ascend|Ascend all creatures in {0} regions
 DisplayName_AscendOracle|Ascend Pebbles and Moon
+DisplayName_Distance|Move at least {0} meters
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -184,6 +185,7 @@ Mission_Display_DoomExpress|DOOM EXPRESS
 Mission_Display_RadiationCrisis|RADIATION CRISIS
 Mission_Display_LawnCleaner|LAWN CLEANER
 Mission_Display_TripleAffirmation|TRIPLE AFFIRMATION
+Mission_Display_InHurry|HURRIED AND FLUSTERED
 
 //Credit
 CreditTitle_Intro|Random Buff

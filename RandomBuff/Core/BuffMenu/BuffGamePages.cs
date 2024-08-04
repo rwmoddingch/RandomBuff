@@ -799,7 +799,7 @@ namespace RandomBuff.Core.BuffMenu
                 
                 
                 gameMenu.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
-                gameMenu.PlaySound(SoundID.MENU_Start_New_Game);
+                gameMenu.PlaySound(SoundID.MENU_Start_New_Game);    
             }
             
         }

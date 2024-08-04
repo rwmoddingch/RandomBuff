@@ -1,0 +1,18 @@
+{
+    "FaceName": "IntenseSituation",
+    "BuffID": "IntenseSituation",
+    "BuffType": "Positive",
+    "BuffProperty": "Normal",
+    "Triggerable": false,
+    "Stackable": true,
+    "Color": "ED1C24",
+  
+    "Chinese": {
+      "BuffName": "紧张局势",
+      "Description": "距离有敌意的生物越近，投矛伤害越高，投掷速度越快，移动速度越快"
+    },
+    "English": {
+      "BuffName": "Intense Situation",
+      "Description": "The closer you are to the hostile creature, the higher the spear damage, the faster the throwing speed, and the faster the movement speed."
+    }
+  }
