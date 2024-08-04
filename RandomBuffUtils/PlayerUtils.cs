@@ -567,7 +567,7 @@ namespace RandomBuffUtils
             {
                 if (targetRef.TryGetTarget(out var target))
                 {
-                    BuffUtils.Log("PlayerUtils", $"apply modify, count :{container.Count}");
+                    //BuffUtils.Log("PlayerUtils", $"apply modify, count :{container.Count}");
                     origStats.CopyTo(target);
                     foreach (var modify in container.OrderBy(i => i.Index))
                     {

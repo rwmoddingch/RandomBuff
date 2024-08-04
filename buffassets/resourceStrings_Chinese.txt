@@ -138,6 +138,7 @@ DisplayName_TreeOfLight|集满能量（食物）
 DisplayName_Abyss|前往深渊
 DisplayName_Ascend|超度 {0} 个区域的生物
 DisplayName_AscendOracle|超度五块卵石和仰望皓月
+DisplayName_Distance|移动至少 {0} 米
 
 //BuffCondition_BuffTypes
 all types|所有类型
@@ -176,8 +177,6 @@ Quest_Display_CosmeticQuest|解锁 {0} 收藏品
 QuestRender_FreePick|自由抽卡数 +1
 
 //mission
-Mission_Display_Meltdown|核心抑制
-Mission_Display_DodgeTheRock|石头快跑
 Mission_Display_Druid|与龙共舞
 Mission_Display_Strayer|异邦浪客
 Mission_Display_EmergnshyTreatment|紧稽救援
@@ -186,8 +185,12 @@ Mission_Display_ArtOfExplosion|爆破艺术
 Mission_Display_DuelsOfSnipers|狙击对决
 Mission_Display_DoomExpress|末日速递
 Mission_Display_TripleAffirmation|三重肯定
+
+Mission_Display_DodgeTheRock|石头快跑
+Mission_Display_Meltdown|核心抑制
 Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
+Mission_Display_InHurry|着急忙慌
 
 //Credit
 CreditTitle_Coding|代码

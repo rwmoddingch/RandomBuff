@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using Newtonsoft.Json;
+using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -35,7 +37,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            if(Custom.rainWorld.progression.currentSaveState is not null)
+                currentDeathCount = Custom.rainWorld.progression.currentSaveState.deathPersistentSaveData.deaths + Custom.rainWorld.progression.currentSaveState.deathPersistentSaveData.quits;
 
+        }
 
         public override string DisplayProgress(InGameTranslator translator)
         {
