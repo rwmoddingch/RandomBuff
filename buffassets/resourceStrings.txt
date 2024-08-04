@@ -186,9 +186,12 @@ Mission_Display_LawnCleaner|LAWN CLEANER
 Mission_Display_TripleAffirmation|TRIPLE AFFIRMATION
 
 //Credit
+CreditTitle_Intro|Random Buff
 CreditTitle_Coding|Coding
 CreditTitle_ArtWorks|ArtWorks
 CreditTitle_PlayTest|PlayTest
+CreditTitle_SpecialThanks|SpecialThanks
+
 
 //BuffManual
 //BuffManual_Topic

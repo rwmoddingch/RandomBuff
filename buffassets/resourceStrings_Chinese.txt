@@ -190,9 +190,12 @@ Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
 
 //Credit
+CreditTitle_Intro|Random Buff
 CreditTitle_Coding|代码
 CreditTitle_ArtWorks|美术
 CreditTitle_PlayTest|游玩测试
+CreditTitle_SpecialThanks|特别感谢
+
 
 //BuffManual
 //BuffManual_Topic

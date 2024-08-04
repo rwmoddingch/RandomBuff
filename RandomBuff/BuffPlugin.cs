@@ -169,6 +169,12 @@ namespace RandomBuff
                     BuffUtils.OnEnable();
 
                     //TODO : 测试用
+                    for(int i =0;i < 15; i++)
+                    {
+                        int exp = BuffPlayerData.Level2Exp(i);
+                        int l = BuffPlayerData.Exp2Level(exp);
+                        BuffPlugin.Log($"{i} - {exp} - {l}");
+                    }
                     //DevEnabled = true;
 
                     CardpediaMenuHooks.LoadAsset();

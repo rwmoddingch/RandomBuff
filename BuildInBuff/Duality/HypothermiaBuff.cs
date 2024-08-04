@@ -29,7 +29,7 @@ namespace BuiltinBuffs.Duality
 
             //On.AbstractCreature.Update += AbstractCreature_Update;
             On.Creature.HypothermiaUpdate += Creature_HypothermiaUpdate;
-            //IL.Creature.HypothermiaUpdate += Creature_HypothermiaUpdate1;
+            IL.Creature.HypothermiaUpdate += Creature_HypothermiaUpdate1;
         }
 
         private static void Creature_HypothermiaUpdate1(MonoMod.Cil.ILContext il)
@@ -62,11 +62,11 @@ namespace BuiltinBuffs.Duality
 
         private static void Creature_HypothermiaUpdate(On.Creature.orig_HypothermiaUpdate orig, Creature self)
         {
-            float origHypothermia = self.Hypothermia;
+            //float origHypothermia = self.Hypothermia;
             orig.Invoke(self);
 
-            if (self.Submersion > 0f)
-                self.Hypothermia = origHypothermia;
+            //if (self.Submersion > 0f)
+            //    self.Hypothermia = origHypothermia;
             self.HypothermiaGain = 0f;
             if (self.abstractCreature.creatureTemplate.type == CreatureTemplate.Type.Overseer)
             {
@@ -74,21 +74,10 @@ namespace BuiltinBuffs.Duality
                 self.Hypothermia = 0f;
                 return;
             }
+            else if (self.abstractCreature.creatureTemplate.BlizzardAdapted)
+                return;
             if (ModManager.MSC && self.Submersion > 0f)
             {
-                foreach (IProvideWarmth blizzardHeatSource in self.room.blizzardHeatSources)
-                {
-                    float num = Vector2.Distance(self.firstChunk.pos, blizzardHeatSource.Position());
-                    if (self.abstractCreature.Hypothermia > 0.001f && blizzardHeatSource.loadedRoom == self.room && num < blizzardHeatSource.range)
-                    {
-                        float num2 = Mathf.InverseLerp(blizzardHeatSource.range, blizzardHeatSource.range * 0.2f, num);
-                        self.abstractCreature.Hypothermia -= Mathf.Lerp(blizzardHeatSource.warmth * num2, 0f, self.HypothermiaExposure);
-                        if (self.abstractCreature.Hypothermia < 0f)
-                        {
-                            self.abstractCreature.Hypothermia = 0f;
-                        }
-                    }
-                }
                 if (!self.dead)
                 {
                     self.HypothermiaGain = Mathf.Lerp(0f, RainWorldGame.DefaultHeatSourceWarmth * 0.1f, Mathf.InverseLerp(0.1f, 0.95f, self.room.world.rainCycle.CycleProgression));
@@ -101,12 +90,12 @@ namespace BuiltinBuffs.Duality
                     Color blizzardPixel = new Color(1f, 1f, 1f);
                     self.HypothermiaGain += blizzardPixel.g / Mathf.Lerp(9100f, 5350f, Mathf.InverseLerp(0f, (float)self.room.world.rainCycle.cycleLength + 4300f, (float)self.room.world.rainCycle.timer));
                     self.HypothermiaGain += blizzardPixel.b / 8200f;
-                    self.HypothermiaExposure = 1f;
+                    self.HypothermiaExposure = 0.5f;
                     self.HypothermiaGain += self.Submersion / 7000f;
                     //self.HypothermiaGain = Mathf.Lerp(0f, self.HypothermiaGain, Mathf.InverseLerp(-0.5f, self.room.game.IsStorySession ? 1f : 3.6f, self.room.world.rainCycle.CycleProgression));
                     self.HypothermiaGain *= Mathf.InverseLerp(50f, -10f, self.TotalMass);
                     if(self.Hypothermia > 0f) 
-                        self.HypothermiaGain *= self is Player ? 2f : 8f;
+                        self.HypothermiaGain *= self is Player ? 1f : 3f;
                 }
                 else
                 {
