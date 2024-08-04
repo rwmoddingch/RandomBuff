@@ -11,6 +11,7 @@ using MonoMod.Utils;
 using System.Reflection;
 using Mono.Cecil;
 using On.Menu;
+using RandomBuff.Core.Game.Settings.Conditions;
 using UnityEngine;
 
 namespace RandomBuff.Core.Entry
@@ -36,6 +37,16 @@ namespace RandomBuff.Core.Entry
                     (il) => RegisterHook_Impl(id, type, il, method, HookLifeTimeLevel.UntilQuit));
             }
         }
+
+        public static void RegisterConditionHook<TCondition>() where TCondition : Condition
+        {
+            var type = typeof(TCondition);
+            var origMethod = type.GetMethod("HookOn", BindingFlags.Public | BindingFlags.Instance);
+            if (origMethod?.DeclaringType != type)
+                return;
+            RegisterConditionHook_Impl<TCondition>(type, origMethod);
+        }
+
 
         public static void CheckAndDisableAllHook()
         {
@@ -106,11 +117,77 @@ namespace RandomBuff.Core.Entry
         }
 
 
+        public static void DisableCondition(Condition condition)
+        {
+            if (RegistedRemoveCondition.TryGetValue(condition.GetType(), out var method))
+                method.Invoke(condition);
+        }
+
     }
 
     internal static partial class BuffHookWarpper
     {
 
+        private static void RegisterConditionHook_Impl<TCondition>(Type type, MethodInfo origMethod) where TCondition : Condition
+        {
+            DynamicMethodDefinition method = new(origMethod);
+            method.Definition.Body.Instructions.Clear();
+            ILProcessor ilProcessor = method.GetILProcessor();
+            List<(Instruction target, Instruction from)> labelList = new();
+
+
+            _ = new ILHook(origMethod, (il) =>
+            {
+
+                foreach (var str in il.Instrs)
+                {
+
+                    if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add") &&
+                        TryGetRemoveMethod(origMethod, m, out var removeMethod))
+                    {
+                        ilProcessor.Emit(OpCodes.Call, removeMethod);
+                    }
+                    else if (str.MatchNewobj<Hook>() && str.MatchNewobj(out var ctor))
+                    {
+                        for (int i = 0; i < ctor.Parameters.Count; i++)
+                            ilProcessor.Emit(OpCodes.Pop);
+                        ilProcessor.Emit(OpCodes.Ldnull);
+                    }
+                    else if (str.MatchBr(out var label) || str.MatchBrtrue(out label) || str.MatchBrfalse(out label))
+                    {
+                        var from = ilProcessor.Create(str.OpCode, str);
+                        ilProcessor.Append(from);
+                        labelList.Add(new(label.Target, from));
+                        BuffPlugin.LogWarning("Find Branch in HookOn, maybe cause error!");
+                    }
+                    else
+                    {
+                        ilProcessor.Append(str);
+                    }
+
+                    foreach (var pair in labelList)
+                    {
+                        if (str == pair.target)
+                            pair.from.Operand = ilProcessor.Body.Instructions.Last();
+                    }
+                }
+
+                ILCursor c = new ILCursor(il);
+                while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj<Hook>()))
+                {
+                    c.Emit(OpCodes.Dup);
+                    c.Emit(OpCodes.Ldarg_0);
+                    c.Emit(OpCodes.Ldfld,
+                        typeof(Condition).GetField("runtimeHooks", BindingFlags.Instance | BindingFlags.NonPublic));
+                    c.Emit(OpCodes.Call, typeof(List<Hook>).GetMethod(nameof(List<Hook>.Add)));
+                }
+
+                RegistedRemoveCondition.Add(type, (condition => method.Generate().CreateDelegate<Action<TCondition>>().Invoke(condition as TCondition)));
+;
+
+
+            });
+        }
 
 
         private static void RegisterHook_Impl(BuffID id, Type type, ILContext il, MethodBase origMethod, HookLifeTimeLevel level)
@@ -199,7 +276,7 @@ namespace RandomBuff.Core.Entry
             }
         }
 
-        private static bool TryGetRemoveMethod(MethodBase origMethod, MethodReference methodRef, out MethodInfo method)
+        internal static bool TryGetRemoveMethod(MethodBase origMethod, MethodReference methodRef, out MethodInfo method)
         {
             method = hookAssembly.GetType(methodRef.DeclaringType.FullName)?.
                 GetMethod(methodRef.Name.Replace("add", "remove"));
@@ -262,6 +339,9 @@ namespace RandomBuff.Core.Entry
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, Action>> RegistedRemoveHooks = new();
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, List<Hook>>> RegistedRuntimeHooks = new();
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, bool>> HasEnabled = new();
+
+
+        private static readonly Dictionary<Type,Action<Condition>> RegistedRemoveCondition = new();
 
     }
 }

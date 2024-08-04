@@ -35,6 +35,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
+
+
         public override string DisplayProgress(InGameTranslator translator)
         {
             return $"({currentDeathCount}/{deathCount})";

@@ -88,11 +88,10 @@ namespace BuiltinBuffs.Missions
             return ConditionState.Ok_NoMore;
         }
 
-        public override void EnterGame(RainWorldGame game)
+        public override void HookOn()
         {
-            base.EnterGame(game);
+            base.HookOn();
             On.Room.Loaded += Room_Loaded;
-            BuffUtils.Log("WormGrassWipeOutCondition", $"EnterGame");
         }
 
         public override void InGameUpdate(RainWorldGame game)
@@ -123,11 +122,6 @@ namespace BuiltinBuffs.Missions
             }
         }
 
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            On.Room.Loaded -= Room_Loaded;
-        }
 
         public void NoticeRoomFinished(Room room)
         {

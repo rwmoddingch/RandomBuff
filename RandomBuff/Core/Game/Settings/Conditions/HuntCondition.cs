@@ -27,10 +27,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         [JsonProperty]
         public int killCount;
 
-        public override void EnterGame(RainWorldGame game)
+        public override void HookOn()
         {
-            base.EnterGame(game);
+            base.HookOn();
             BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+
         }
 
 
@@ -105,12 +106,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         }
 
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
-        }
-
+  
         public override string DisplayName(InGameTranslator translator)
         {
             if (ChallengeTools.creatureNames == null)

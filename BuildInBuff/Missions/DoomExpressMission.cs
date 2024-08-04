@@ -52,16 +52,10 @@ namespace BuiltinBuffs.Missions
 
     public class BatteryCondition : Condition
     {
-        public override void EnterGame(RainWorldGame game)
+        public override void HookOn()
         {
-            base.EnterGame(game);
+            base.HookOn();
             On.RainWorldGame.ForceSaveNewDenLocation += RainWorldGame_ForceSaveNewDenLocation;
-        }
-
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            On.RainWorldGame.ForceSaveNewDenLocation -= RainWorldGame_ForceSaveNewDenLocation; 
         }
 
         private void RainWorldGame_ForceSaveNewDenLocation(On.RainWorldGame.orig_ForceSaveNewDenLocation orig, RainWorldGame game, string roomName, bool saveWorldStates)

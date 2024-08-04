@@ -166,6 +166,30 @@ namespace RandomBuff.Core.Game.Settings
             }
         }
 
+        public void OnDestroy()
+        {
+            try
+            {
+                gachaTemplate.OnDestroy();
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception In {gachaTemplate.ID}:OnDestroy");
+            }
+
+            foreach (var condition in conditions)
+            {
+                try
+                {
+                    condition.OnDestroy();
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e, $"Exception In {condition.ID}:OnDestroy");
+                }
+            }
+        }
+
         public GameSetting Clone()
         {
             if (!TryLoadGameSetting(name,SaveToString(), out var setting))

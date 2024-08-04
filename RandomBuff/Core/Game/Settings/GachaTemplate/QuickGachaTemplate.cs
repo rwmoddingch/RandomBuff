@@ -56,7 +56,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                         BuffType.Positive)[0].BuffID;
                 else
                     buffId = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, 1,
-                        BuffType.Negative, BuffType.Duality)[0].BuffID;
+                        BuffType.Negative)[0].BuffID;
                 isPositive = !isPositive;
                 BuffPlugin.LogDebug($"Quick Mode : New Buff {buffId}");
 

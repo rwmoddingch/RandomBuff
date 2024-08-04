@@ -247,9 +247,10 @@ namespace BuiltinBuffs.Missions
             return ConditionState.Fail;
         }
 
-        public override void EnterGame(RainWorldGame game)
+
+        public override void HookOn()
         {
-            base.EnterGame(game);
+            base.HookOn();
             On.Room.Loaded += Room_Loaded;
         }
 
@@ -322,11 +323,7 @@ namespace BuiltinBuffs.Missions
        
         }
 
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            On.Room.Loaded -= Room_Loaded;
-        }
+    
 
         public override void InGameUpdate(RainWorldGame game)
         {

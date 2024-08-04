@@ -29,8 +29,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override void EnterGame(RainWorldGame game)
         {
-            base.EnterGame(game);
             currentCycle = game.GetStorySession.saveState.cycleNumber;
+            base.EnterGame(game);
+        }
+
+        public override void HookOn()
+        {
+            base.HookOn();
             if (currentCycle <= cycleRequirement)
             {
                 On.SSOracleBehavior.SeePlayer += SSOracleBehavior_SeePlayer;
@@ -40,6 +45,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
             }
         }
+
 
         private void CLOracleBehavior_Update(On.MoreSlugcats.CLOracleBehavior.orig_Update orig, CLOracleBehavior self, bool eu)
         {
@@ -71,15 +77,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override void SessionEnd(SaveState save)
         {
             base.SessionEnd(save);
-
-            if (currentCycle <= cycleRequirement)
-            {
-                On.SSOracleBehavior.SeePlayer -= SSOracleBehavior_SeePlayer;
-                On.SLOracleBehavior.Update -= SLOracleBehavior_Update;
-                On.MoreSlugcats.SSOracleRotBehavior.TalkToNoticedPlayer -= SSOracleRotBehavior_TalkToNoticedPlayer;
-                On.MoreSlugcats.CLOracleBehavior.Update -= CLOracleBehavior_Update;
-            }
-
             currentCycle = save.cycleNumber + 1;
         }
 

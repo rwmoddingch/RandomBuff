@@ -187,7 +187,12 @@ namespace RandomBuff.Core.Buff
                     newData.BuffProperty = (BuffProperty)Enum.Parse(typeof(BuffProperty), (string)rawData[loadState]);
 
                 if (rawData.ContainsKey(loadState = "AsPositive"))
-                    newData.AsPositive = bool.Parse(rawData[loadState] as string);
+                {
+                    if (rawData[loadState] is bool)
+                        newData.Stackable = (bool)rawData[loadState];
+                    else
+                        newData.AsPositive = bool.Parse(rawData[loadState] as string);
+                }
 
                 if (rawData.ContainsKey(loadState = "Color"))
                 {

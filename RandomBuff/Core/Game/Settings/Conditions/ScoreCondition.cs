@@ -38,14 +38,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
 
             name = game.StoryCharacter;
+        }
+
+        public override void HookOn()
+        {
+            base.HookOn();
             BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
         }
 
-        public override void SessionEnd(SaveState save)
-        {
-            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
-            base.SessionEnd(save);
-        }
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {

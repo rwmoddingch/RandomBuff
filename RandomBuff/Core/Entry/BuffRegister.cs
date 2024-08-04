@@ -260,6 +260,7 @@ namespace RandomBuff.Core.Entry
                     return;
                 }
                 ConditionTypes.Add(id, new ConditionType(id, typeof(TConditionType), GetConditionType(parentId), displayName,isHidden));
+                BuffHookWarpper.RegisterConditionHook<TConditionType>();
             }
             catch (Exception e)
             {

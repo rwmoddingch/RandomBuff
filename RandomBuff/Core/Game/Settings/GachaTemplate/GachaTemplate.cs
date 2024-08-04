@@ -93,6 +93,11 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         public virtual void EnterGame(RainWorldGame game) {}
 
         /// <summary>
+        /// 在任何删除时候触发
+        /// </summary>
+        public virtual void OnDestroy(){}
+
+        /// <summary>
         /// 当数据读取完成触发
         /// </summary>
         /// <returns>返回false证明数据损坏</returns>

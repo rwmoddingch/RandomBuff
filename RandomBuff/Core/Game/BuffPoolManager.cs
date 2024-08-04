@@ -316,10 +316,11 @@ namespace RandomBuff.Core.Game
             {
                 int num = PlayerUtils.owners.Count;
                 for (int i = 0; i < num; i++)
-                {
                     PlayerUtils.RemovePart(PlayerUtils.owners[0]);
-                }
+                
             }
+
+            GameSetting.OnDestroy();
         }
 
 
