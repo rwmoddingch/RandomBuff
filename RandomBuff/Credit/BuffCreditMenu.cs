@@ -27,7 +27,7 @@ namespace RandomBuff.Credit
         CreditFileReader creditFileReader;
 
         int currentStageIndex;
-        bool quiteCredit;
+        bool quitCredit;
 
         public BuffCreditMenu(ProcessManager manager)
             : base(manager, BuffEnums.ProcessID.CreditID)
@@ -63,10 +63,11 @@ namespace RandomBuff.Credit
             }
         }
 
+        bool lastEscDown;
         public override void Update()
         {
             base.Update();
-            if (quiteCredit)
+            if (quitCredit)
                 return;
 
             if(stage == null)
@@ -98,6 +99,17 @@ namespace RandomBuff.Credit
             if (UnityEngine.Random.value < 0.00625f)
             {
                 rainEffect.LightningSpike(Mathf.Pow(UnityEngine.Random.value, 2f) * 0.85f, Mathf.Lerp(20f, 120f, UnityEngine.Random.value));
+            }
+
+            bool escDown = Input.GetKey(KeyCode.Escape);
+            if (escDown && !lastEscDown)
+            {
+                EndCredit();
+                if (stage != null)
+                {
+                    stage.RequestRemove();
+                    stage.RemoveSprites();
+                }
             }
         }
 
@@ -175,15 +187,15 @@ namespace RandomBuff.Credit
 
         public void EndCredit()
         {
-            quiteCredit = true;
+            quitCredit = true;
             CardBasicAssets.PauseLoadFont = false;
             manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
         }
 
         public override void RawUpdate(float dt)
         {
-            base.RawUpdate(dt);
             Time += dt;
+            base.RawUpdate(dt);
             rainEffect.rainFade = Custom.SCurve(Mathf.InverseLerp(0f, 6f, Time), 0.8f) * 0.5f;
         }
     }

@@ -42,6 +42,8 @@ namespace RandomBuff.Credit.CreditObject
         public override void Update()
         {
             base.Update();
+            if (removed)
+                return;
             if(updatePosCounter > 0)
             {
                 updatePosCounter--;
@@ -94,6 +96,8 @@ namespace RandomBuff.Credit.CreditObject
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+            if (removed)
+                return;
             Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
             nameLabel.SetPosition(smoothPos);
             detailLabel.SetPosition(smoothPos + new Vector2(width1, 0f));
@@ -111,6 +115,8 @@ namespace RandomBuff.Credit.CreditObject
 
         public override void RemoveSprites()
         {
+            if (removed)
+                return;
             nameLabel.RemoveFromContainer();
             detailLabel.RemoveFromContainer();
             base.RemoveSprites();

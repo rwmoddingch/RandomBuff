@@ -11,6 +11,7 @@ namespace RandomBuff.Credit.CreditObject
     internal class BuffCreditStageObject : PositionedMenuObject
     {
         public bool ableToRemove;
+        public bool removed;
         public float inStageEnterTime;
         public float lifeTime;
 
@@ -26,6 +27,12 @@ namespace RandomBuff.Credit.CreditObject
 
         public virtual void RequestRemove()
         {
+        }
+
+        public override void RemoveSprites()
+        {
+            base.RemoveSprites();
+            removed = true;
         }
     }
 

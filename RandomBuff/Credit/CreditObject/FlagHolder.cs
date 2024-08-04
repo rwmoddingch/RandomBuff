@@ -31,9 +31,10 @@ namespace RandomBuff.Credit.CreditObject
         public override void Update()
         {
             base.Update();
+            if (removed)
+                return;
 
-
-            if(LifeParam >= 0f && LifeParam < 1f && !ableToRemove)
+            if (LifeParam >= 0f && LifeParam < 1f && !ableToRemove)
             {
                 float detlaTime = CreditStage.StageTime - inStageEnterTime;
 
@@ -75,12 +76,16 @@ namespace RandomBuff.Credit.CreditObject
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+            if (removed)
+                return;
             if(!ableToRemove)
                 flagRenderer.GrafUpdate(timeStacker);
         }
 
         public override void RemoveSprites()
         {
+            if (removed)
+                return;
             base.RemoveSprites();
             flagRenderer.container.RemoveFromContainer();
             flag = null;

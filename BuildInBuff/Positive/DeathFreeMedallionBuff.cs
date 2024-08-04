@@ -24,7 +24,8 @@ namespace BuiltinBuffs.Positive
 
         public override bool Trigger(RainWorldGame game)
         {
-            triggerdThisCycle = true;
+            if(!BuffPlugin.DevEnabled)
+                triggerdThisCycle = true;
             return base.Trigger(game);
         }
 
@@ -401,7 +402,13 @@ namespace BuiltinBuffs.Positive
             float value = Vector2.Distance(tilePos, startPos);
             value += Custom.LerpMap(Vector2.Distance(tilePos, startPos), 0f, 160f, 400f, 0f);
 
-            foreach(var obj in room.updateList)
+            if (!room.aimap.AnyExitReachableFromTile(tile, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly)))
+                return float.MaxValue;
+
+            if (room.PointSubmerged(tilePos))
+                value += 10f * Mathf.Abs(tilePos.y - room.waterObject.DetailedWaterLevel(pos.x));
+
+            foreach (var obj in room.updateList)
             {
                 if ((obj is Creature creature))
                 {

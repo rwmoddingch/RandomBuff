@@ -45,7 +45,14 @@ namespace RandomBuff.Credit.CreditObject
         public Vector2 ScreenSize => Custom.rainWorld.options.ScreenSize;
 
         Vector2 hangPos;
-        Vector2 denPos;
+        Vector2 denPos = Vector2.zero;
+
+        bool noAnim;
+        bool updpateDenPos;
+
+        float scale;
+        float t;
+
 
         public IndividualCardTitle(Menu.Menu menu, BuffCreditStage owner, string text, float inStageEnterTime, float lifeTime, bool noAnim = false) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
         {
@@ -56,28 +63,35 @@ namespace RandomBuff.Credit.CreditObject
             myContainer.SetPosition(ScreenSize / 2f);
             cardTitle.RequestSwitchTitle(text);
 
-            if (!noAnim)
-            {
-                AnimMachine.GetDelayCmpnt(40 * 3, autoDestroy: true).BindActions(OnAnimFinished: (t) =>
-                {
-                    hangPos = ScreenSize / 2f;
-                    denPos = new Vector2(0f + (cardTitle.rect.x / 2f) * endScale, ScreenSize.y - cardTitle.rect.y * endScale / 2f);
+            hangPos = ScreenSize / 2f;
+            
 
-                    AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (ta, f) =>
-                    {
-                        float scale = Mathf.Lerp(1f, endScale, ta.Get());
-                        float x = Mathf.Lerp(hangPos.x, denPos.x, ta.Get());
-                        float y = Mathf.Lerp(hangPos.y, denPos.y, Mathf.Pow(ta.Get(), 3f));
-                        myContainer.SetPosition(x, y);
-                        myContainer.scale = scale;
-                    }).BindModifier(Helper.EaseInOutCubic);
-                });
-            }
+            this.noAnim = noAnim;
+
+            //if (!noAnim)
+            //{
+            //    AnimMachine.GetDelayCmpnt(40 * 3, autoDestroy: true).BindActions(OnAnimFinished: (t) =>
+            //    {
+            //        hangPos = ScreenSize / 2f;
+            //        denPos = new Vector2(0f + (cardTitle.rect.x / 2f) * endScale, ScreenSize.y - cardTitle.rect.y * endScale / 2f);
+
+            //        AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (ta, f) =>
+            //        {
+            //            float scale = Mathf.Lerp(1f, endScale, ta.Get());
+            //            float x = Mathf.Lerp(hangPos.x, denPos.x, ta.Get());
+            //            float y = Mathf.Lerp(hangPos.y, denPos.y, Mathf.Pow(ta.Get(), 3f));
+            //            myContainer.SetPosition(x, y);
+            //            myContainer.scale = scale;
+            //        }).BindModifier(Helper.EaseInOutCubic);
+            //    });
+            //}
         }
 
         public override void Update()
         {
             base.Update();
+            if (removed)
+                return;
             cardTitle.Update();
 
             if (LifeParam >= 1f && !slateForDeletion)
@@ -95,14 +109,40 @@ namespace RandomBuff.Credit.CreditObject
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+            if (removed)
+                return;
+
+            if (LifeParam >= 0f && !noAnim)
+            {
+                if(!updpateDenPos && cardTitle.rect != Vector2.zero)
+                {
+                    denPos = new Vector2(0f + (cardTitle.rect.x / 2f) * endScale, ScreenSize.y - (cardTitle.rect.y / 2f) * endScale);
+                    updpateDenPos = true;
+                }
+
+                float deltaTime = CreditStage.StageTime - inStageEnterTime;
+                if (deltaTime > 3f)
+                {
+                    t = Mathf.Clamp01((deltaTime - 3f) / (2f));
+                }
+            }
+            t= Helper.EaseInOutCubic(t);
+            float x = Mathf.Lerp(hangPos.x, denPos.x, t);
+            float y = Mathf.Lerp(hangPos.y, denPos.y, Mathf.Pow(t, 3f));
+            scale = Mathf.Lerp(1f, endScale, t);
+
+            myContainer.SetPosition(x, y);
+            myContainer.scale = scale;
             cardTitle.GrafUpdate(timeStacker);
         }
 
         public override void RemoveSprites()
         {
+            if (removed)
+                return;
+            base.RemoveSprites();
             cardTitle.Destroy();
             cardTitle = null;
-            base.RemoveSprites();
         }
 
         public override void RequestRemove()

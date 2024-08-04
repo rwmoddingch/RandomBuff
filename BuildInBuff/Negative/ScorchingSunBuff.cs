@@ -17,11 +17,11 @@ using RandomBuff;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class ScorchingSunBuff : Buff<ScorchingSunBuff, ScorchingSunBuffData>
+    internal class ScorchingSunBuff : IgnitionPointBaseBuff<ScorchingSunBuff, ScorchingSunBuffData>
     {
         public override BuffID ID => ScorchingSunBuffEntry.ScorchingSun;
 
-        public ScorchingSunBuff()
+        public ScorchingSunBuff() : base()
         {
         }
 
@@ -75,6 +75,7 @@ namespace BuiltinBuffs.Negative
         {
             On.Room.Update += Room_Update;
             On.Player.Update += Player_Update;
+            On.ThreatTracker.ThreatOfTile += ThreatTracker_ThreatOfTile;
             /*
             #region 标签
             On.Creature.Update += Creature_Update;
@@ -106,6 +107,28 @@ namespace BuiltinBuffs.Negative
             };
             #endregion
             */
+        }
+
+        private static float ThreatTracker_ThreatOfTile(On.ThreatTracker.orig_ThreatOfTile orig, ThreatTracker self, WorldCoordinate coord, bool accountThreatCreatureAccessibility)
+        {
+            float threat = orig.Invoke(self, coord, accountThreatCreatureAccessibility);
+            if(self.AI.creature.realizedCreature != null && self.AI.creature.realizedCreature.room != null)
+            {
+                var creature = self.AI.creature.realizedCreature;
+                var room = creature.room;
+
+                if (OutdoorLevel(room) < 2f)
+                    return threat;
+
+                if (IsBeingExposedToSunlight(room, room.MiddleOfTile(coord)))
+                {
+                    IntVector2 skyTile = new IntVector2(room.Width / 2, room.Height);
+                    threat += Mathf.InverseLerp(0f, 20f, Custom.ManhattanDistance(skyTile, coord.Tile));
+                }
+                    
+            }
+
+            return threat;
         }
 
         private static void Room_Update(On.Room.orig_Update orig, Room self)
@@ -154,12 +177,12 @@ namespace BuiltinBuffs.Negative
                             
                             if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
                             {
-                                float heatAdd = heatModule.coolOffRate * num / 3f;
-                                float pow = 0.95f;
-                                if (IsBeingExposedToSunlight(self, creature))
-                                    pow = 0.85f;
-                                heatAdd = (2.5f / Mathf.Pow(num, pow)) * heatAdd;
-                                heatModule.AddTemperature(heatAdd / 40f);
+                                float mul = 1f;
+                                if (!IsBeingExposedToSunlight(self, creature))
+                                    mul = 0.95f;
+
+                                float heatAdd = (heatModule.coolOffRate/40f) * Mathf.Lerp(1.1f, 1.5f, Mathf.InverseLerp(num, 1, 3)) * mul;
+                                heatModule.AddTemperature(heatAdd);
                             }
                             else
                             {
@@ -240,12 +263,17 @@ namespace BuiltinBuffs.Negative
 
         private static bool IsBeingExposedToSunlight(Room room, Creature creature)
         {
+            return IsBeingExposedToSunlight(room, creature.mainBodyChunk.pos);
+        }
+
+        private static bool IsBeingExposedToSunlight(Room room, Vector2 pos)
+        {
             if (room.abstractRoom.skyExits < 1)
             {
                 return false;
             }
-            Vector2 corner = Custom.RectCollision(creature.mainBodyChunk.pos, creature.mainBodyChunk.pos + 100000f * Vector2.up, room.RoomRect).GetCorner(FloatRect.CornerLabel.D);
-            if (SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(room, creature.mainBodyChunk.pos, corner) != null)
+            Vector2 corner = Custom.RectCollision(pos, pos + 100000f * Vector2.up, room.RoomRect).GetCorner(FloatRect.CornerLabel.D);
+            if (SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(room, pos, corner) != null)
             {
                 return false;
             }
