@@ -275,7 +275,17 @@ namespace RandomBuff.Core.BuffMenu
             var select = Helper.GetUninit<SlugcatSelectMenu>();
             select.manager = this.manager;
             select.SetSlugcatColorOrder();
+            RemoveCantUse(ref select.slugcatColorOrder);
             slugNameOrders = select.slugcatColorOrder;
+        }
+
+        private void RemoveCantUse(ref List<SlugcatStats.Name> list)
+        {
+            list.Remove(new SlugcatStats.Name("delicious"));
+            list.Remove(new SlugcatStats.Name("nightowl"));
+            if(!list.Contains(MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel))
+                list.Add(MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel);
+
         }
 
         private bool IsInactive => manager.rainWorld.progression.IsThereASavedGame(CurrentName) && !restartCurrent;

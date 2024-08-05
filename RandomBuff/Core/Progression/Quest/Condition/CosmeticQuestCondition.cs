@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Option;
 using RandomBuff.Core.SaveData;
 using RWCustom;
 
@@ -31,7 +32,7 @@ namespace RandomBuff.Core.Progression.Quest.Condition
 
         public override bool UpdateUnlockedState(WinGamePackage package)
         {
-            return !BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, cosmeticId.value);
+            return !BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, cosmeticId.value) && !BuffOptionInterface.Instance.CheatAllCosmetics.Value;
         }
 
         public override bool VerifyData()

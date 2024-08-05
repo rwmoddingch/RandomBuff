@@ -115,7 +115,7 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
                 room.AddObject(new ExplosionSpikes(room, pos, 14, 35f, 10f, 10f, 40f, new Color(0f, 0f, 0f)));
                 room.ScreenMovement(pos, throwDir, 20f);
                 //音效
-                room.PlaySound(SoundID.Bomb_Explode, pos, 2.5f + UnityEngine.Random.value * 0.5f, 0.4f + UnityEngine.Random.value * 0.4f);
+                room.PlaySound(SoundID.Bomb_Explode, pos, 1.5f + UnityEngine.Random.value * 0.5f, 0.4f + UnityEngine.Random.value * 0.4f);
             }
             //先判断丢了什么要不要加特效 然后再真的丢出去
             orig.Invoke(self, grasp, eu);

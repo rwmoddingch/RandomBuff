@@ -96,7 +96,7 @@ namespace BuiltinBuffs.Positive
             foreach (var crit in player.room.updateList.OfType<Creature>())
             {
                 if(crit is Player) continue;
-                if (crit.abstractCreature.abstractAI?.RealAI.friendTracker is FriendTracker tracker &&
+                if (crit.abstractCreature.abstractAI?.RealAI?.friendTracker is FriendTracker tracker &&
                     tracker.friend == player)
                     continue;
                 
