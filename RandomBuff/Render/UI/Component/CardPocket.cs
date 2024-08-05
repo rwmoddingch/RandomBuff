@@ -693,7 +693,7 @@ namespace RandomBuff.Render.UI.Component
             int roll = card2RollMapping[card];
             int x = rollsOfCards[roll].IndexOf(card);
 
-            BuffPlugin.Log($"{card.ID}, x:{x}, roll:{roll}");
+            //BuffPlugin.Log($"{card.ID}, x:{x}, roll:{roll}");
             return new Vector2(x * (CardPocket.gap + Slot.buffCardSize.x) + (CardPocket.gap + Slot.buffCardSize.x / 2f),
                 roll * (Slot.buffCardSize.y + CardPocket.gap));
         }

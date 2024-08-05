@@ -100,8 +100,8 @@ namespace BuiltinBuffs.Positive
                     tracker.friend == player)
                     continue;
                 
-                re = Mathf.Max(re, Custom.LerpMap(crit.bodyChunks.Min(i => Custom.Dist(i.pos, player.DangerPos)), 75,
-                    300, 1,
+                re = Mathf.Max(re, Custom.LerpMap(crit.bodyChunks.Min(i => Custom.Dist(i.pos, player.DangerPos)), 80,
+                    200, 1,
                     0) * crit.Template.dangerousToPlayer * 2);
 
             }
