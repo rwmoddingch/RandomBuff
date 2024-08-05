@@ -362,6 +362,15 @@ namespace BuiltinBuffs.Positive
                     }
                 }
 
+                if (bigStomach.TryGetValue(self, out var stomach))
+                {
+                    if (self.room != null)
+                    {
+                        self.Hypothermia -= stomach.LanternsHeat(self);
+                        if (self.Hypothermia < 0) self.Hypothermia = 0;
+                    }                    
+                }
+
                 /*
                 if (bigStomach.TryGetValue(self, out var _module))
                 {
@@ -465,6 +474,17 @@ namespace BuiltinBuffs.Positive
         public BigStomach()
         {
             objectsInStomach = new List<AbstractPhysicalObject>();
+        }
+
+        public float LanternsHeat(Player player)
+        {
+            if (objectsInStomach.Count == 0) return 0f;
+            int num = 0;
+            for (int i = 0; i < objectsInStomach.Count; i++)
+            {
+                if (objectsInStomach[i].type == AbstractPhysicalObject.AbstractObjectType.Lantern) num++;
+            }
+            return RainWorldGame.DefaultHeatSourceWarmth * Mathf.Lerp(Mathf.Min(num, Mathf.Pow(num, 0.4f)), 0f, 0.2f * player.HypothermiaExposure);
         }
 
         public string ToSaveString

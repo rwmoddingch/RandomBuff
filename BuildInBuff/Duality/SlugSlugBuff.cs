@@ -99,7 +99,7 @@ namespace BuiltinBuffs.Duality
                         }
                         else
                         {
-                            if (self.FoodInStomach >= self.MaxFoodInStomach)
+                            if (!self.CanEatMeat(slug) || self.FoodInStomach >= self.MaxFoodInStomach)
                             {
                                 canPickUp = true;
                             }
