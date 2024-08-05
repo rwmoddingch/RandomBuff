@@ -219,7 +219,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         {
             if (newContatiner == null)
             {
-                rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[0]);
+                rCam.ReturnFContainer("Bloom").AddChild(sLeaser.sprites[0]);
             }
             else
             {
