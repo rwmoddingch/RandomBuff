@@ -180,8 +180,8 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[startSprite + 1].alpha = 0f;
 
 
-            rCam.ReturnFContainer("ForegroundLights").AddChild(sLeaser.sprites[startSprite]);
-            rCam.ReturnFContainer("ForegroundLights").AddChild(sLeaser.sprites[startSprite + 1]);
+            rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[startSprite]);
+            rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[startSprite + 1]);
         }
 
         public Vector2 GetInputDirection(Player player,Vector2 sourcePos)
