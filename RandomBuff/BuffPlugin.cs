@@ -236,17 +236,23 @@ namespace RandomBuff
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
-                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_05\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
-                        {
-                            Alignment = TMPro.TextAlignmentOptions.BottomLeft,
-                            Pivot = new Vector2(0f, 0f),
-                            y = 5,
-                            x = 5,
-                            alpha = 0.3f
-                        };
 
-                        Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
-                        devVersion.AddChild(label);
+                        if (devVersion == null && !File.Exists(AssetManager.ResolveFilePath("disableDevMark.txt")))
+                        {
+                            TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
+                                $"Random Buff, Build: 2024_08_05_2\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                new Vector2(1000, 200), 0.4f)
+                            {
+                                Alignment = TMPro.TextAlignmentOptions.BottomLeft,
+                                Pivot = new Vector2(0f, 0f),
+                                y = 5,
+                                x = 5,
+                                alpha = 0.3f
+                            };
+
+                            Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
+                            devVersion.AddChild(label);
+                        }
 
                     };
                     foreach (var file in Directory.GetFiles(UserData.GetPersistentDataPath(), "sav*"))
