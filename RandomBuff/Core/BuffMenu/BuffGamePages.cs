@@ -831,15 +831,6 @@ namespace RandomBuff.Core.BuffMenu
             {
                 flagRenderer.GrafUpdate(timeStacker);
             }
-
-
-
-            //if (Show && RWInput.CheckPauseButton(0))
-            //{
-            //    SetShow(false);
-            //    menu.PlaySound(SoundID.MENU_Switch_Page_Out);
-            //    (menu as BuffGameMenu)!.lastPausedButtonClicked = true;
-            //}
         }
 
         public void EscLogic()

@@ -15,6 +15,7 @@ namespace RandomBuff.Render.CardRender
     {
         static float fadeInOutModeLength = 1f;
         static float changeScrollDirModeLength = 4f;
+        static float switchToAutoWaitLength = 5;
 
         public TMP_Text textMesh;
         BuffCardRenderer _renderer;
@@ -53,6 +54,9 @@ namespace RandomBuff.Render.CardRender
         float _minScrolledLength;
         float _maxScrolledLength;
         bool _scrollReverse;
+
+        float _commitedScroll;
+        float _scrollVel;
 
 
         float _alpha;
@@ -248,13 +252,35 @@ namespace RandomBuff.Render.CardRender
                     }
                 }
             }
-            if (currentMode == Mode.ChangeScrollDir)
+            else if (currentMode == Mode.ChangeScrollDir)
             {
                 if (_modeTimer < changeScrollDirModeLength)
                     _modeTimer += Time.deltaTime;
                 else
                 {
                     _scrollReverse = !_scrollReverse;
+                    SwitchMode(Mode.Scroll);
+                }
+            }
+            else if(currentMode == Mode.Manually)
+            {
+                if(_modeTimer < switchToAutoWaitLength)
+                {
+                    _modeTimer += Time.deltaTime;
+
+                    _scrollVel = Mathf.Lerp(_scrollVel, _commitedScroll * 60f, Time.deltaTime);
+                    _scrolledLength += _scrollVel * Time.deltaTime;
+
+                    if (_scrolledLength < _minScrolledLength)
+                        _scrolledLength = _minScrolledLength;
+                    else if(_scrolledLength > _maxScrolledLength)
+                        _scrolledLength = _maxScrolledLength;
+                    UpdateTextMesh();
+                }
+                else
+                {
+                    _commitedScroll = 0f;
+                    _scrollVel = 0f;
                     SwitchMode(Mode.Scroll);
                 }
             }
@@ -266,6 +292,8 @@ namespace RandomBuff.Render.CardRender
                 return;
             currentMode = newMode;
             _modeTimer = 0f;
+            _scrollVel = 0f;
+            _commitedScroll = 0f;
         }
 
         /// <summary>
@@ -396,10 +424,7 @@ namespace RandomBuff.Render.CardRender
                 _minScrolledLength = 0f;
                 _scrolledLength = _minScrolledLength;
 
-                //Debug.Log($"{yUp}, {yDown}");
             }
-
-            //BuffPlugin.LogDebug($"Refresh Text Info, length:{textMeshLength}");
             _textNeedRefresh = false;
         }
 
@@ -411,11 +436,21 @@ namespace RandomBuff.Render.CardRender
             meshInfoVertices = null;
         }
 
+        public void CommitScroll(float scroll)
+        {
+            if(scroll != 0f)
+            {
+                SwitchMode(Mode.Manually);
+                _modeTimer = 0f;
+            }
+            _commitedScroll = -scroll;//反过来才对，不知道为什么
+        }
         internal enum Mode
         {
             Wait,
             Scroll,
             ChangeScrollDir,
+            Manually
         }
     }
 }

@@ -757,6 +757,11 @@ namespace BuiltinBuffs.Positive
                 {
                     heatModule.temperature = Mathf.Max(0f, heatModule.temperature - 0.025f);
                 }
+                for(int i = 0; i < creature.grasps.Length; i++)
+                {
+                    if (creature.grasps[i] != null)
+                        creature.grasps[i].Release();
+                }
             }
 
             if (freezeCount == 0 && ShouldBeFired())

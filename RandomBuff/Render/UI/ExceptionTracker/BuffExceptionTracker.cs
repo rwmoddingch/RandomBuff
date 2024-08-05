@@ -155,6 +155,7 @@ namespace RandomBuff.Render.UI.ExceptionTracker
                         b.active = true;
                 }
             });
+            AddObject(new TrackerBrowseProgress(new Vector2(panelWidth / 2f, 30f)));
             alphaContainer.MoveToFront();
         }
 
