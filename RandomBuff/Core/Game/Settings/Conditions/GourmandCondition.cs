@@ -8,7 +8,7 @@ using RandomBuffUtils;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class GourmandCondition : Condition
+    public class GourmandCondition : Condition
     {
         public override ConditionID ID => ConditionID.Gourmand;
         public override int Exp => 400;

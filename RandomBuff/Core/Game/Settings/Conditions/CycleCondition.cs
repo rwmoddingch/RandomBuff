@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class CycleCondition : Condition
+    public class CycleCondition : Condition
     {
         public override ConditionID ID => ConditionID.Cycle;
         public override int Exp => cycle * 10;

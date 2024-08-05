@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
-    internal class NormalGachaTemplate : GachaTemplate
+    public class NormalGachaTemplate : GachaTemplate
     {
         public override GachaTemplateID ID => GachaTemplateID.Normal;
 

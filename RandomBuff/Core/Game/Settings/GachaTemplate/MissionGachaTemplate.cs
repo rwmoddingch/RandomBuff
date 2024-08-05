@@ -11,7 +11,7 @@ using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
-    internal class MissionGachaTemplate : NormalGachaTemplate
+    public class MissionGachaTemplate : NormalGachaTemplate
     {
 
         public MissionGachaTemplate()

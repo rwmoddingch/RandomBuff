@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class AchievementCondition : Condition
+    public class AchievementCondition : Condition
     {
         public override void EnterGame(RainWorldGame game)
         {

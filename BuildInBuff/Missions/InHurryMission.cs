@@ -51,7 +51,7 @@ namespace BuiltinBuffs.Missions
         }
     }
 
-    internal class DistanceCondition : Condition
+    public class DistanceCondition : Condition
     {
 
         class PlayerModule
