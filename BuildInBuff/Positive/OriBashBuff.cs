@@ -316,7 +316,7 @@ namespace BuiltinBuffs.Positive
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return;
-            if (!self.Consious)
+            if (!self.Consious || self.grabbedBy.Any())
             {
                 if (isBash)
                 {
