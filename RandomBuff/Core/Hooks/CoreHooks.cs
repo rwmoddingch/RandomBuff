@@ -349,6 +349,7 @@ namespace RandomBuff.Core.Hooks
                     foreach (var buff in BuffCore.GetAllBuffIds(game3.StoryCharacter))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
+                BuffDataManager.Instance.CleanMalnourishedData();
             }
 
 

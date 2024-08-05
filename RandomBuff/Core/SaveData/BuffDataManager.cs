@@ -106,7 +106,6 @@ namespace RandomBuff.Core.SaveData
 
         internal BuffData GetOrCreateBuffData(SlugcatStats.Name name, BuffID id, bool createOrStack = false)
         {
-
             if (!allDatas.ContainsKey(name))
             {
                 if (createOrStack)
@@ -115,7 +114,9 @@ namespace RandomBuff.Core.SaveData
                     return null;
             }
 
-            if (!allDatas[name].ContainsKey(id))
+            Dictionary<BuffID, BuffData> cardInfos = IsHasMalnourished(name) ? malnourishedData!.Value.cardInfos : allDatas[name];
+
+            if (!cardInfos.ContainsKey(id))
             {
                 if (createOrStack)
                 {
@@ -133,7 +134,7 @@ namespace RandomBuff.Core.SaveData
                             }
                         }
                         BuffPlugin.Log($"Add new buff data. ID: {id}, Character :{name}, State:{BuffFile.Instance.LoadState.ToString()}");
-                        allDatas[name].Add(id, data);
+                        cardInfos.Add(id, data);
 
                     }
                     catch (Exception e)
@@ -146,33 +147,36 @@ namespace RandomBuff.Core.SaveData
                     return null;
             }
             if (createOrStack)
-                allDatas[name][id].Stack();
+                cardInfos[id].Stack();
 
-            return allDatas[name][id];
+            return cardInfos[id];
         }
 
         internal bool RemoveBuffData(SlugcatStats.Name name, BuffID id)
         {
-            if (allDatas.TryGetValue(name, out var maps))
+            Dictionary<BuffID, BuffData> cardInfos = null;
+            if (IsHasMalnourished(name))
+                cardInfos = malnourishedData!.Value.cardInfos;
+            else
+                allDatas.TryGetValue(name, out cardInfos);
+            
+
+
+            if (cardInfos != null && cardInfos.TryGetValue(id, out var data))
             {
-                if (maps.TryGetValue(id, out var data))
+                if (id.GetStaticData().Stackable && data.StackLayer > 1)
                 {
-                    if (id.GetStaticData().Stackable && data.StackLayer > 1)
-                    {
-                        data.StackLayer--;
-                        BuffPlugin.LogDebug($"Unstack buff data outside of game, ID:{id}, Name:{name}");
-                    }
-                    else
-                    {
-                        maps.Remove(id);
-                        BuffPlugin.LogDebug($"Remove buff data outside of game, ID:{id}, Name:{name}");
-
-                    }
-
-                    return true;
+                    data.StackLayer--;
+                    BuffPlugin.LogDebug($"Unstack buff data outside of game, ID:{id}, Name:{name}");
                 }
-            }
+                else
+                {
+                    cardInfos.Remove(id);
+                    BuffPlugin.LogDebug($"Remove buff data outside of game, ID:{id}, Name:{name}");
+                }
 
+                return true;
+            }
             return false;
         }
 
@@ -203,17 +207,24 @@ namespace RandomBuff.Core.SaveData
         /// 负责把临时数据转移到永久
         /// </summary>
         /// <param name="name"></param>
-        internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, GameSetting setting)
+        internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, GameSetting setting, bool malnourished)
         {
             var name = manager.Game.StoryCharacter;
 
-            if(!allDatas.ContainsKey(name)) allDatas.Add(name, new());
-            allDatas[name] = tempDatas;
-            gameSettings[name] = setting;
+            if (!malnourished)
+            {
+                if (!allDatas.ContainsKey(name)) allDatas.Add(name, new());
+                allDatas[name] = tempDatas;
+                gameSettings[name] = setting;
 
-            foreach(var id in allDatas[name].Keys)
-                BuffPlayerData.Instance.AddCollect(id);
-
+                foreach (var id in allDatas[name].Keys)
+                    BuffPlayerData.Instance.AddCollect(id);
+            }
+            else
+            {
+                malnourishedData = (name, tempDatas, setting);
+                BuffPlugin.Log($"SAVE MALNOURISHED DATA, Name:{name}");
+            }
             foreach (var data in allDatas[name].ToArray())
             {
                 try
@@ -236,6 +247,10 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         internal Dictionary<BuffID, BuffData> GetDataDictionary(SlugcatStats.Name name)
         {
+
+            if (IsHasMalnourished(name))
+                return malnourishedData!.Value.cardInfos;
+
             if (!allDatas.ContainsKey(name))
                 allDatas.Add(name, new());
 
@@ -250,6 +265,9 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         internal GameSetting GetGameSetting(SlugcatStats.Name name)
         {
+            if (IsHasMalnourished(name))
+                return malnourishedData!.Value.setting;
+
             if(!gameSettings.ContainsKey(name))
                 gameSettings.Add(name, new GameSetting(name));
             return gameSettings[name];
@@ -266,6 +284,29 @@ namespace RandomBuff.Core.SaveData
                 gameSettings[name] = gameSetting;
             else
                 gameSettings.Add(name,gameSetting);
+        }
+
+        /// <summary>
+        /// 是否存在挨饿存档
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool IsHasMalnourished(SlugcatStats.Name name)
+        {
+            return malnourishedData != null && malnourishedData.Value.name == name;
+        }
+
+
+        /// <summary>
+        /// 删除挨饿存档
+        /// </summary>
+        public void CleanMalnourishedData()
+        {
+            if (malnourishedData != null)
+            {
+                BuffPlugin.Log($"clean malnourished data, Name:{malnourishedData.Value.name}");
+                malnourishedData = null;
+            }
         }
     }
 
@@ -576,13 +617,15 @@ namespace RandomBuff.Core.SaveData
 
         }
 
+
+
         /// <summary>
         /// 该存档槽下全部猫的存档数据
         /// </summary>
         private readonly Dictionary<SlugcatStats.Name, Dictionary<BuffID, BuffData>> allDatas = new();
 
-        
 
+        private (SlugcatStats.Name name, Dictionary<BuffID, BuffData> cardInfos, GameSetting setting)? malnourishedData;
 
         /// 如果被卸载导致slugcat name或data缺失，则暂时储存在此处
         private readonly List<string> ukSlugcatDatas = new();

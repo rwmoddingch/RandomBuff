@@ -444,6 +444,13 @@ namespace RandomBuffUtils
                 OperatorDelegates.Insert(priority, op);
         }
 
+        public static SlugcatStats Original(this SlugcatStats stats)
+        {
+            if (SlugcatStatsModifiedStack.TryGetValue(stats, out var stack))
+                return stack.GetOriginal();
+            return stats;
+        }
+
 
         public static SlugcatStats Clone(this SlugcatStats origStats)
         {
@@ -556,6 +563,8 @@ namespace RandomBuffUtils
                 this.origStats = origStats.Clone();
                 targetRef = new WeakReference<SlugcatStats>(origStats);
             }
+
+            public SlugcatStats GetOriginal() => origStats.Clone();
 
             private readonly SlugcatStats origStats;
 

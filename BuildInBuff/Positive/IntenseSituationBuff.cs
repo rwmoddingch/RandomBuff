@@ -44,7 +44,7 @@ namespace BuiltinBuffs.Positive
 
                 foreach (var item in list)
                 {
-                    if(Mathf.Abs(item.ExecValue - value) > 0.05f)
+                    if(Mathf.Abs(item.ExecValue - value) > 0.05f || value == 1)
                         item.ExecValue = value;
                 }
             }
@@ -101,7 +101,7 @@ namespace BuiltinBuffs.Positive
                     continue;
                 
                 re = Mathf.Max(re, Custom.LerpMap(crit.bodyChunks.Min(i => Custom.Dist(i.pos, player.DangerPos)), 75,
-                    500, 1,
+                    300, 1,
                     0) * crit.Template.dangerousToPlayer * 2);
 
             }

@@ -112,11 +112,13 @@ GachaTemplate_Desc_Quick|无抽卡，每30秒随机添加一张卡牌，正面�
 GachaTemplate_Desc_Sandbox|无抽卡，可自由添加或删除卡牌，不会获得奖励
 GachaTemplate_Desc_Survival|除初始抽卡外，只抽取负面或中性卡牌
 GachaTemplate_Desc_SephirahMeltdowns|每四轮为一个阶段，每阶段开始时获得特定负面卡牌，阶段结束时可以抽取两张正面卡牌
+GachaTemplate_Desc_SurvivalOfFittest|每隔五轮回随机获取鹫形突变, 蛛形突变, 蛞蝓仙子, 鲊形突变, 蛞蝓蛞蝓中的其中一张并叠加至最大
 GachaTemplate_Detail_Base|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>初始抽卡倍率:{1}<ENTRY>{2}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>无初始抽卡<ENTRY>{1}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Normal|<GachaPositive>正面抽卡数:{0}<ENTRY><GachaNonPositive>负面或中性抽卡数:{1}
 GachaTemplate_Detail_Base_Yes|
 GachaTemplate_Detail_Base_No|不
+
 //BuffCondition
 DisplayName_Achievement|获取{0}通行证
 DisplayName_Cycle|生存至少{0}个雨循环
@@ -139,7 +141,7 @@ DisplayName_Abyss|前往深渊
 DisplayName_Ascend|超度 {0} 个区域的生物
 DisplayName_AscendOracle|超度五块卵石和仰望皓月
 DisplayName_Distance|移动至少 {0} 米
-
+DisplayName_Distance_Faster|在卡牌提供加速的情况下移动至少 {0} 米
 //BuffCondition_BuffTypes
 all types|所有类型
 Negative|负面
@@ -191,6 +193,7 @@ Mission_Display_Meltdown|核心抑制
 Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
 Mission_Display_InHurry|着急忙慌
+Mission_Display_SurvivalOfFittest|适者生存
 
 //Credit
 CreditTitle_Intro|Random Buff
@@ -237,6 +240,8 @@ Remix_Option|配置
 Remix_CardSlotKey|查看卡牌按键
 Remix_KeyBindKey|卡牌绑键按键
 Remix_ShowExceptionLog|提示报错
+Remix_EnableExpeditionExtend|实验性 - DLC探险效果转化卡牌
+Remix_EnableExpeditionModExtend|实验性 - MOD探险效果转化卡牌
 Remix_Cheat|作弊
 Remix_CheatAllCards|解锁全部卡牌
 Remix_CheatAllCosmetics|解锁全部装饰品
@@ -244,9 +249,10 @@ Remix_Credit|致谢
 Remix_CardSlotKey_Desc|按下此键可以在局内查看所持有的卡牌
 Remix_KeyBindKey_Desc|点开允许绑定按键的卡牌后，按住此键后可再按另一个键，为该卡牌的功能绑定后者按键
 Remix_ShowExceptionLog_Desc|在当雨世界出现异常 (exceptionLog.txt) 时，在右上角出现感叹号，点开可详细查看log内容
-Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取对于卡牌一次以解锁
+Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取对应卡牌一次以解锁
 Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁
-
+Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫扩展的增益和诅咒转化为卡牌
+Remix_EnableExpeditionModExtend_Desc|需要重启以应用，将其他mod的增益和诅咒转化为卡牌，可能存在兼容性问题
 
 //SleepMenu
 SleepMenu_Stack|叠加卡牌

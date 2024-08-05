@@ -18,6 +18,7 @@ using System.Runtime.InteropServices.ComTypes;
 using Modding.Expedition;
 using MoreSlugcats;
 using RandomBuff;
+using RandomBuff.Core.Option;
 
 namespace BuiltinBuffs.Expeditions
 {
@@ -68,9 +69,10 @@ namespace BuiltinBuffs.Expeditions
         private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
         {
             orig(self);
+            BuffPlugin.Log($"Current Expedition Extend state: Main:{BuffOptionInterface.Instance.EnableExpeditionExtend.Value}, Mod:{BuffOptionInterface.Instance.EnableExpeditionModExtend.Value}");
             try
             {
-                if (!isLoaded)
+                if (!isLoaded && BuffOptionInterface.Instance.EnableExpeditionExtend.Value)
                 {
                     ExpeditionProgression.SetupPerkGroups();
                     ExpeditionProgression.SetupBurdenGroups();
@@ -128,8 +130,13 @@ namespace BuiltinBuffs.Expeditions
         {
             foreach (var group in ExpeditionProgression.perkGroups)
             {
+                if (!BuffOptionInterface.Instance.EnableExpeditionModExtend.Value && group.Key != "expedition" &&
+                    group.Key != "moreslugcats")
+                    continue;
+                
                 foreach (var item in group.Value)
                 {
+                  
                     if (IsUselessID(item)) continue;
                     var re = BuffBuilder.GenerateBuffType("BuffExtend", item,
                         true, (il) => BuildILBuffCtor(il, item));
@@ -141,6 +148,9 @@ namespace BuiltinBuffs.Expeditions
 
             foreach (var group in ExpeditionProgression.burdenGroups)
             {
+                if (!BuffOptionInterface.Instance.EnableExpeditionModExtend.Value && group.Key != "expedition" &&
+                    group.Key != "moreslugcats")
+                    continue;
                 foreach (var item in group.Value)
                 {
                     if (IsUselessID(item)) continue;

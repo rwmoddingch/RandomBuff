@@ -109,7 +109,8 @@ GachaTemplate_Desc_Normal|Standard card draw mode; cards can be drawn at the end
 GachaTemplate_Desc_Quick|No card draws; a card is randomly added every 30 seconds, alternating between positive and negative or duality.
 GachaTemplate_Desc_Sandbox|No card draws; cards can be freely added or removed, with no rewards given.
 GachaTemplate_Desc_Survival|Except for the initial card draw, only negative or duality cards are drawn.
-GachaTemplate_Desc_SephirahMeltdowns|Every four rounds constitute a stage. At the start of each stage, a specific negative card is obtained, and at the end of the stage, two positive cards can be drawn.
+GachaTemplate_Desc_SurvivalOfFittest|Every five cycles, randomly obtain one of the following cards: VultureShapedMutation, SpiderShapedMutation, PixieSlug, JellyfishShapedMutation, SlugSlug, and stack it to the maximum.
+GachaTemplate_Desc_SephirahMeltdowns|Every four cycles constitute a stage. At the start of each stage, a specific negative card is obtained, and at the end of the stage, two positive cards can be drawn.
 GachaTemplate_Detail_Base|<Color=FFC300>Experience multiplier: {0}<ENTRY><Color=FFE180>Initial draw multiplier: {1}<ENTRY>{2} use passage stack or remove cards
 GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>Experience multiplier: {0}<ENTRY><Color=FFE180>No initial draw<ENTRY>{1} use passage stack or remove cards
 GachaTemplate_Detail_Normal|<GachaPositive>Positive card draws: {0}<ENTRY><GachaNonPositive>Negative or duality card draws: {1}
@@ -138,6 +139,7 @@ DisplayName_Abyss|Go to the depth
 DisplayName_Ascend|Ascend all creatures in {0} regions
 DisplayName_AscendOracle|Ascend Pebbles and Moon
 DisplayName_Distance|Move at least {0} meters
+DisplayName_Distance_Faster|Move at least {0} meters while the card grants a speed boost
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -186,7 +188,7 @@ Mission_Display_RadiationCrisis|RADIATION CRISIS
 Mission_Display_LawnCleaner|LAWN CLEANER
 Mission_Display_TripleAffirmation|TRIPLE AFFIRMATION
 Mission_Display_InHurry|HURRIED AND FLUSTERED
-
+Mission_Display_SurvivalOfFittest|SURVIVAL OF THE FITTEST
 //Credit
 CreditTitle_Intro|Random Buff
 CreditTitle_Coding|Coding
@@ -231,10 +233,14 @@ Remix_Option|Option
 Remix_CardSlotKey|View Card Slot Key
 Remix_KeyBindKey|Card Binding Key
 Remix_ShowExceptionLog|Exception Notifications
+Remix_EnableExpeditionExtend|Experimental - DLC Expedition Effects Conversion Cards
+Remix_EnableExpeditionModExtend|Experimental - MOD Expedition Effect Conversion Cards
 Remix_Cheat|Cheats
 Remix_CheatAllCards|Unlock All Cards
 Remix_CheatAllCosmetics|Unlock All Cosmetics
 Remix_Credit|Credit
+Remix_EnableExpeditionExtend_Desc|NEED RESTART TO APPLY, Converts expedition and multi-cat expansion perks and burdens into cards.
+Remix_EnableExpeditionModExtend_Desc|NEED RESTART TO APPLY, Converts perks and burdens from other mods into cards; it may occur compatibility issues.
 
 Remix_CardSlotKey_Desc|Press this key to view the cards you hold in-game.
 Remix_KeyBindKey_Desc|After selecting a card that allows key binding, hold this key and press another key to bind the latter key to the card's trigger function.
