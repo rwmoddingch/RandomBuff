@@ -101,7 +101,6 @@ namespace RandomBuff.Core.Game.Settings
             //BuffPlugin.LogDebug($"GameSetting Desc: {Description}");
             name ??= game.StoryCharacter;
             gachaTemplate.EnterGame(game);
-
             foreach (var condition in conditions)
             {
                 try

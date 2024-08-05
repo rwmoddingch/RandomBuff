@@ -444,6 +444,13 @@ namespace RandomBuffUtils
                 OperatorDelegates.Insert(priority, op);
         }
 
+        public static SlugcatStats Original(this SlugcatStats stats)
+        {
+            if (SlugcatStatsModifiedStack.TryGetValue(stats, out var stack))
+                return stack.GetOriginal();
+            return stats;
+        }
+
 
         public static SlugcatStats Clone(this SlugcatStats origStats)
         {
@@ -557,6 +564,8 @@ namespace RandomBuffUtils
                 targetRef = new WeakReference<SlugcatStats>(origStats);
             }
 
+            public SlugcatStats GetOriginal() => origStats.Clone();
+
             private readonly SlugcatStats origStats;
 
             private readonly WeakReference<SlugcatStats> targetRef;
@@ -567,7 +576,7 @@ namespace RandomBuffUtils
             {
                 if (targetRef.TryGetTarget(out var target))
                 {
-                    BuffUtils.Log("PlayerUtils", $"apply modify, count :{container.Count}");
+                    //BuffUtils.Log("PlayerUtils", $"apply modify, count :{container.Count}");
                     origStats.CopyTo(target);
                     foreach (var modify in container.OrderBy(i => i.Index))
                     {

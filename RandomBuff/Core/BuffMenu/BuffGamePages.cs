@@ -799,7 +799,7 @@ namespace RandomBuff.Core.BuffMenu
                 
                 
                 gameMenu.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
-                gameMenu.PlaySound(SoundID.MENU_Start_New_Game);
+                gameMenu.PlaySound(SoundID.MENU_Start_New_Game);    
             }
             
         }
@@ -832,6 +832,8 @@ namespace RandomBuff.Core.BuffMenu
                 flagRenderer.GrafUpdate(timeStacker);
             }
 
+
+
             //if (Show && RWInput.CheckPauseButton(0))
             //{
             //    SetShow(false);
@@ -858,10 +860,17 @@ namespace RandomBuff.Core.BuffMenu
             Vector2 showPos;
             Vector2 hidePos;
 
+            FSprite finishSymbol;
+
             public MissionButton(Mission mission, Menu.Menu menu, MenuObject owner, string displayText, string signal, Vector2 pos, Vector2 size, AnimateComponentBase animCmpnt = null) : base(menu, owner, displayText, signal, pos, size)
             {
                 bindMission = mission;
                 this.animCmpnt = animCmpnt;
+
+                if (BuffPlayerData.Instance.finishedMission.Contains(mission.ID.value))
+                {
+                    Container.AddChild(finishSymbol = new FSprite("buffassets/illustrations/correctSymbol", true) { alpha = 0f, scale = 0.5f });
+                }
 
                 SetPos(pos);
             }
@@ -915,6 +924,13 @@ namespace RandomBuff.Core.BuffMenu
                     roundedRect.sprites[roundedRect.SideSprite(i)].alpha = smoothAlpha;
                     roundedRect.sprites[roundedRect.CornerSprite(i)].alpha = smoothAlpha;
                 }
+
+                if(finishSymbol != null)
+                {
+                    finishSymbol.color = MyColor(timeStacker);
+                    finishSymbol.alpha = smoothAlpha;
+                    finishSymbol.SetPosition(DrawPos(timeStacker) + new Vector2(size.x * 0.9f, 15f));
+                }
             }
 
             public override void Update()
@@ -925,6 +941,13 @@ namespace RandomBuff.Core.BuffMenu
                 {
                     pos = Vector2.Lerp(hidePos, showPos, animCmpnt.Get());
                 }
+            }
+
+            public override void RemoveSprites()
+            {
+                base.RemoveSprites();
+                if (finishSymbol != null)
+                    finishSymbol.RemoveFromContainer();
             }
         }
 

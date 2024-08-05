@@ -240,7 +240,7 @@ namespace BuiltinBuffs.Missions
 
         public override ConditionID ID => Abyss;
 
-        public override int Exp => 100;
+        public override int Exp => 50;
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {

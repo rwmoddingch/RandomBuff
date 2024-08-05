@@ -8,7 +8,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     internal class FixedCycleCondition : Condition
     {
         public override ConditionID ID => ConditionID.FixedCycle;
-        public override int Exp => 300;
+        public override int Exp => 200;
 
         public int SetCycle
         {

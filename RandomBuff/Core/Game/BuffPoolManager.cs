@@ -124,6 +124,8 @@ namespace RandomBuff.Core.Game
 
             }
 
+            BuffDataManager.Instance.CleanMalnourishedData();
+
 
             foreach (var value in CosmeticUnlockID.values.entries.Where(BuffConfigManager.IsCosmeticCanUse))
             {
@@ -328,7 +330,7 @@ namespace RandomBuff.Core.Game
         /// 周期结束后的移除或更新
         /// 若 NeedDeletion == true 则移除Buff
         /// </summary>
-        internal void WinGame()
+        internal void WinGame(bool malnourished)
         {
             if (Game.manager.upcomingProcess != null)
                 return;
@@ -345,9 +347,10 @@ namespace RandomBuff.Core.Game
             GameSetting.SessionEnd(Game);
             GameSetting.inGameRecord += record;
 
-            BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting);
+            //先进行CycleEnd
+            BuffDataManager.Instance.WinGame(this, cycleDatas, GameSetting, malnourished);
 
-
+            //后处理删除
             for (int i = buffList.Count-1;i>=0;i--)
             {
                 var buff = buffList[i];

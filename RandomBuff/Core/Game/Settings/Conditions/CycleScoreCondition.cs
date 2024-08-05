@@ -7,6 +7,7 @@ using Expedition;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuffUtils;
+using RWCustom;
 using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
@@ -14,7 +15,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
     internal class CycleScoreCondition : Condition
     {
         public override ConditionID ID => ConditionID.CycleScore;
-        public override int Exp => (int)(targetScore / 3f); //TODO
+        public override int Exp => (int)(targetScore / Custom.LerpMap(targetScore,50,150,2,1)); //TODO
 
         [JsonProperty]
         public float targetScore;
@@ -57,7 +58,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
-            targetScore = Mathf.RoundToInt(Mathf.Lerp(20f, 125f, difficulty) / 10f) * 10;
+            targetScore = Mathf.RoundToInt(UnityEngine.Random.Range(50f, 300f));
             return ConditionState.Ok_NoMore;
         }
 

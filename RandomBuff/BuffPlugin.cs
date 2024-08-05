@@ -169,6 +169,12 @@ namespace RandomBuff
                     BuffUtils.OnEnable();
 
                     //TODO : 测试用
+                    for(int i =0;i < 15; i++)
+                    {
+                        int exp = BuffPlayerData.Level2Exp(i);
+                        int l = BuffPlayerData.Exp2Level(exp);
+                        BuffPlugin.Log($"{i} - {exp} - {l}");
+                    }
                     //DevEnabled = true;
 
                     CardpediaMenuHooks.LoadAsset();
@@ -230,7 +236,7 @@ namespace RandomBuff
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
-                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_04\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
+                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_08_05\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
                         {
                             Alignment = TMPro.TextAlignmentOptions.BottomLeft,
                             Pivot = new Vector2(0f, 0f),
@@ -239,8 +245,7 @@ namespace RandomBuff
                             alpha = 0.3f
                         };
 
-                        Futile.AddStage(devVersion = new FStage("BUFF_DEV")); 
-                        Custom.rainWorld.processManager.CueAchievement(RainWorld.AchievementID.AllGhostsEncountered,0);
+                        Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
                         devVersion.AddChild(label);
 
                     };

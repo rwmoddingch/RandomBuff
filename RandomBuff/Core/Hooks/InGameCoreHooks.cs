@@ -79,6 +79,8 @@ namespace RandomBuff.Core.Hooks
             On.Menu.SleepAndDeathScreen.AddPassageButton += SleepAndDeathScreen_AddPassageButton;
             On.Menu.SleepAndDeathScreen.Singal += SleepAndDeathScreen_Singal;
 
+            On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
+
             On.Player.ctor += Player_ctor;
             _ = new Hook(
                 typeof(StoryGameSession).GetProperty(nameof(StoryGameSession.RedIsOutOfCycles),
@@ -89,6 +91,19 @@ namespace RandomBuff.Core.Hooks
                         return false;
                     return orig(self);
                 });
+        }
+
+        private static void DreamsState_StaticEndOfCycleProgress(On.DreamsState.orig_StaticEndOfCycleProgress orig, SaveState saveState, string currentRegion, string denPosition, ref int cyclesSinceLastDream, ref int cyclesSinceLastFamilyDream, ref int cyclesSinceLastGuideDream, ref int inGWOrSHCounter, ref DreamsState.DreamID upcomingDream, ref DreamsState.DreamID eventDream, ref bool everSleptInSB, ref bool everSleptInSB_S01, ref bool guideHasShownHimselfToPlayer, ref int guideThread, ref bool guideHasShownMoonThisRound, ref int familyThread)
+        {
+            if (Custom.rainWorld.BuffMode())
+            {
+                upcomingDream = null;
+                return;
+            };
+            orig(saveState, currentRegion, denPosition, ref cyclesSinceLastDream, ref cyclesSinceLastFamilyDream,
+                ref cyclesSinceLastGuideDream, ref inGWOrSHCounter, ref upcomingDream, ref eventDream,
+                ref everSleptInSB, ref everSleptInSB_S01, ref guideHasShownHimselfToPlayer, ref guideThread,
+                ref guideHasShownMoonThisRound, ref familyThread);
         }
 
 
@@ -270,7 +285,7 @@ namespace RandomBuff.Core.Hooks
                 //self.miscWorldSaveData.SSaiThrowOuts = -1;
                 progression.miscProgressionData.beaten_Gourmand = true;
                 GameSettingSpecialSetup(self, BuffDataManager.Instance.GetGameSetting(saveStateNumber));
-                self.dreamsState = null;
+                //self.dreamsState = null;
             }
         }
 
@@ -303,7 +318,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
         {
-            BuffPoolManager.Instance?.WinGame();
+            BuffPoolManager.Instance?.WinGame(malnourished);
             orig(self, malnourished);
         }
 

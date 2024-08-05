@@ -137,3 +137,6 @@
 
 	<Name>Vorry
 	<Detail>Everyday to keep happy?
+
+	<Name>BlackCat o.o
+	<Detail>Are you ready to enter this wonderful dream? ~
