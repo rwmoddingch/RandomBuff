@@ -288,7 +288,7 @@ namespace BuiltinBuffs.Positive
             }
             else
             {
-                if (emitter != null || emitter.room != owner.room)
+                if (emitter != null && (owner.room == null || emitter.room != owner.room))
                 {
                     emitter.Die();
                     emitter = null;
