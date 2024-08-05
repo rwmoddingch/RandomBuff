@@ -34,14 +34,16 @@ namespace BuiltinBuffs.Missions
             {
                 conditions = new List<Condition>()
                 {
-                    new DistanceCondition(){targetTileCount = 500, needFaster = true},
+                    new DistanceCondition(){targetTileCount = 1500, needFaster = true},
                     new DeathCondition(){deathCount = 5}
                 }
             };
             startBuffSet.Add(ShockingSpeedBuffEntry.shockingSpeedBuffID);
             startBuffSet.Add(ThundThrowBuffEntry.thundTHrowBuffID);
             startBuffSet.Add(IntenseSituationBuffEntry.IntenseSituation);
-            startBuffSet.Add(SuperConductorBuffEntry.superConductorBuffID);     
+            startBuffSet.Add(SuperConductorBuffEntry.superConductorBuffID);
+            startBuffSet.Add(Negative.MobileAssaultIBuffEntry.mobileAssaultBuffID);
+            startBuffSet.Add(Negative.ChronoLizardIBuffEntry.ChronoLizardBuffID);
         }
 
         public void RegisterMission()
