@@ -64,7 +64,7 @@ namespace BuiltinBuffs.Missions
 
 
  
-    internal class AscendOracleCondition : Condition
+    public class AscendOracleCondition : Condition
     {
 
         public static readonly ConditionID AscendOracle = new ConditionID(nameof(AscendOracle), true);
@@ -112,7 +112,7 @@ namespace BuiltinBuffs.Missions
         }
     }
 
-    internal class AscendCondition : Condition
+    public class AscendCondition : Condition
     {
 
         public static readonly ConditionID Ascend = new ConditionID(nameof(Ascend), true);
@@ -229,7 +229,7 @@ namespace BuiltinBuffs.Missions
         }
     }
 
-    internal class AbyssCondition : Condition
+    public class AbyssCondition : Condition
     {
         public static readonly ConditionID Abyss = new ConditionID(nameof(Abyss), true);
 

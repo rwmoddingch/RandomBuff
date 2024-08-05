@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class DeathCondition : Condition
+    public class DeathCondition : Condition
     {
         public override ConditionID ID => ConditionID.Death;
         public override int Exp => (int)Custom.LerpMap(deathCount,5,20,250,100);

@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class LikeCondition : Condition
+    public class LikeCondition : Condition
     {
         public override ConditionID ID => ConditionID.Like;
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class MeetSS_SLCondition : Condition
+    public class MeetSS_SLCondition : Condition
     {
         public override ConditionID ID => ConditionID.MeetSS_SL;
 

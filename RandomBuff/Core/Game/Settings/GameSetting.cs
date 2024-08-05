@@ -73,7 +73,7 @@ namespace RandomBuff.Core.Game.Settings
                     gachaTemplate.CanStackByPassage = false;
 
                 return gachaTemplate.TemplateDetail + "<ENTRY>" +
-                       BuffResourceString.Get(gachaTemplate.TemplateDescription);
+                       Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDescription ?? "",true));
             }
         }
 
