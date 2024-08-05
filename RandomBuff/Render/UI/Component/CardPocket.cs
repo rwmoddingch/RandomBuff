@@ -511,6 +511,15 @@ namespace RandomBuff.Render.UI.Component
         {
         }
 
+        public override void Update()
+        {
+            base.Update();
+            if(currentState == State.Exclusive)
+            {
+                exclusiveShowCard._cardRenderer.cardTextBackController.CommitScroll(InputAgency.Current.GetScroll() * (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default ? 2f : 1f));
+            }
+        }
+
         protected override void UpdateFocusCard()
         {
             if (currentState == State.Normal)

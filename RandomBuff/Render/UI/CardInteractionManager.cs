@@ -308,8 +308,6 @@ namespace RandomBuff.Render.UI
     internal class InGameSlotInteractionManager : CardInteractionManager
     {
         //静态信息
- 
-      
         public static int maxCardBiasCount = 5;
 
         bool canTriggerBuff;
@@ -376,10 +374,12 @@ namespace RandomBuff.Render.UI
             if (showButtonSingle && !overrideDisabled)
                 OnToggleShowButtonSingleClick();
 
-            //if (mouseRightSingle && !overrideDisabled)
-            //    OnMouseRightSingleClick();
-
             keyBinderProcessor?.Update();
+
+            if(currentState == State.ExclusiveShow)
+            {
+                exclusiveShowCard._cardRenderer.cardTextBackController.CommitScroll(InputAgency.Current.GetScroll() * (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default ? 2f : 1f));
+            }
         }
 
         protected override void UpdateFocusCard()
