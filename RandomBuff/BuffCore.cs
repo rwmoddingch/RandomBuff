@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
@@ -105,6 +106,23 @@ namespace RandomBuff
         }
 
         /// <summary>
+        /// 删除或减少卡牌叠层
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static bool UnstackBuff(this BuffID id)
+        {
+            if (BuffPoolManager.Instance != null && BuffPoolManager.Instance.TryGetBuff(id, out _))
+            {
+                BuffPoolManager.Instance.UnstackBuff(id);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
         /// 获取ID对应的BuffData,可能为空
         /// </summary>
         /// <param name="id"></param>
@@ -143,6 +161,12 @@ namespace RandomBuff
             return null;
         }
 
+
+        /// <summary>
+        /// 获取全部的Buff，特定猫
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         internal static List<BuffID> GetAllBuffIds(SlugcatStats.Name name)
         {
             if (BuffPoolManager.Instance != null && BuffPoolManager.Instance.Game.StoryCharacter == name)
@@ -150,25 +174,45 @@ namespace RandomBuff
             return BuffDataManager.Instance.GetAllBuffIds(name);
         }
 
+
+        /// <summary>
+        /// 是否是卡牌模式
+        /// </summary>
+        /// <param name="rainWorld"></param>
+        /// <returns></returns>
         public static bool BuffMode(this RainWorld rainWorld)
         {
             return rainWorld.options.saveSlot >= 100;
         }
 
-        internal static BuffStaticData GetStaticData(this BuffID id)
+
+        /// <summary>
+        /// 获取静态信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static BuffStaticData GetStaticData(this BuffID id)
         {
             return BuffConfigManager.GetStaticData(id);
         }
 
-        public static bool UnstackBuff(this BuffID id)
-        {
-            if (BuffPoolManager.Instance != null && BuffPoolManager.Instance.TryGetBuff(id, out _))
-            {
-                BuffPoolManager.Instance.UnstackBuff(id);
-                return true;
-            }
 
-            return false;
+
+        /// <summary>
+        /// 在游戏内请求抽卡
+        /// </summary>
+        /// <param name="pickedCallBack"></param>
+        /// <param name="buffs"></param>
+        /// <param name="selectNumber"></param>
+        /// <returns></returns>
+        internal static bool RequestPickerInGame(Action<BuffID> pickedCallBack, List<(BuffID major, BuffID additive)> buffs, int selectNumber)
+        {
+            if (BuffHud.Instance == null || 
+                buffs.Any(i => !BuffConfigManager.ContainsId(i.major) || (i.additive!=null && !BuffConfigManager.ContainsId(i.additive))))
+                return false;
+            BuffHud.Instance.RequestNewPick(pickedCallBack, buffs, selectNumber);
+
+            return true;
         }
 
     }

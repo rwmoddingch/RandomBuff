@@ -25,6 +25,7 @@ namespace RandomBuff.Core.Game
 
         public BuffHud(HUD.HUD hud) : base(hud)
         {
+            
             slotTitle = new BuffSlotTitle();
             inGameSlot = new CommmmmmmmmmmmmmpleteInGameSlot(slotTitle);
             hud.fContainers[1].AddChild(inGameSlot.Container);
@@ -114,6 +115,13 @@ namespace RandomBuff.Core.Game
             }
         }
 
+
+        public void RequestNewPick(Action<BuffID> pickedCallBack, List<(BuffID major, BuffID additive)> buffs, int selectNumber)
+        {
+            inGameSlot.RequestPickCards(pickedCallBack, buffs.Select(i => i.major).ToArray(),
+                buffs.Select(i => i.additive).ToArray(), selectNumber);
+        }
+
         public void AppendNewCard(BuffID id)
         {
             inGameSlot.AppendCard(id);
@@ -130,6 +138,7 @@ namespace RandomBuff.Core.Game
 
         public override void Update()
         {
+            InputAgency.StaticUpdate();
             if (BuffCustom.TryGetGame(out var game) && (inGameSlot.WaitingPickCard || (pocket?.Show ?? false)))
             {
                 if (!pausedLocked)
@@ -204,6 +213,7 @@ namespace RandomBuff.Core.Game
             }
             hudParts.Clear();
             id2hudParts.Clear();
+            InputAgency.AllRelease();
         }
 
         public void HandleAddBuffHUD(BuffID id)
