@@ -115,6 +115,13 @@ namespace RandomBuff.Core.Game
             }
         }
 
+
+        public void RequestNewPick(Action<BuffID> pickedCallBack, List<(BuffID major, BuffID additive)> buffs, int selectNumber)
+        {
+            inGameSlot.RequestPickCards(pickedCallBack, buffs.Select(i => i.major).ToArray(),
+                buffs.Select(i => i.additive).ToArray(), selectNumber);
+        }
+
         public void AppendNewCard(BuffID id)
         {
             inGameSlot.AppendCard(id);
