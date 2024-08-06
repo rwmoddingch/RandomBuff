@@ -7,6 +7,7 @@ using BuiltinBuffs.Duality;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
@@ -83,7 +84,7 @@ namespace BuiltinBuffs.Missions
             {
                 var id = RXRandom.AnyItem(randomIds);
                 for(int i =0;i<4;i++)
-                    BuffDataManager.Instance.GetOrCreateBuffData(id);
+                    BuffPoolManager.Instance.CreateBuff(id,true);
             }
         }
 
