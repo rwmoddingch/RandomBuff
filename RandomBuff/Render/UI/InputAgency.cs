@@ -58,7 +58,7 @@ namespace RandomBuff.Render.UI
 
         internal static void Init()
         {
-            On.MainLoopProcess.Update += MainLoopProcess_Update;
+            //On.MainLoopProcess.Update += MainLoopProcess_Update;
         }
 
         static void MainLoopProcess_Update(On.MainLoopProcess.orig_Update orig, MainLoopProcess self)
