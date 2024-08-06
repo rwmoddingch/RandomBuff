@@ -203,29 +203,69 @@ BuffManual_Introduction|Introduction
 BuffManual_Gameplay|Gameplay
 BuffManual_Buff|Buff
 BuffManual_Condition|Condition
-BuffManual_Gamemode|Gamemode
+BuffManual_FreeMode|FreeMode
+BuffManual_MissionMode|MissionMode
+BuffManual_BuffAndCard|Buff & BuffCards
+BuffManual_Progression|Progression
 
 //BuffManual_SubpageTitle
 BuffManual_Introduction_0|Introduction
-BuffManual_Gameplay_0|Gameplay
-BuffManual_Buff_0|Buff
+BuffManual_Gameplay_0|Buff Gameplay
+BuffManual_Gameplay_1|Game Mode
+BuffManual_Gameplay_2|Conditions
 BuffManual_Condition_0|Condition
 BuffManual_Gamemode_0|GameMode Introduction
-BuffManual_Gamemode_1|FreeMode
-BuffManual_Gamemode_2|FreeMode-Normal
-BuffManual_Gamemode_3|FreeMode-Quick
-BuffManual_Gamemode_4|FreeMode-Survival
-BuffManual_Gamemode_5|MissionMode
+BuffManual_FreeMode_0|FreeMode
+BuffManual_FreeMode_1|FreeMode-Normal
+BuffManual_FreeMode_2|FreeMode-Fast
+BuffManual_FreeMode_3|FreeMode-Survival
+BuffManual_FreeMode_4|FreeMode-Sandbox
+BuffManual_FreeMode_5|Mode Detail
+BuffManual_MissionMode_0|Mission Mode
+BuffManual_MissionMode_1|Select Mission
+BuffManual_MissionMode_2|Mission Condition
+BuffManual_MissionMode_3|Preset buffs
+BuffManual_MissionMode_4|Mode Detail
+BuffManual_BuffAndCard_0|Buff & BuffCards
+BuffManual_BuffAndCard_1|Cycles Remain
+BuffManual_BuffAndCard_2|Stack Count
+BuffManual_BuffAndCard_3|Triggerable
+BuffManual_Progression_0|Progression
+BuffManual_Progression_1|Records
+BuffManual_Progression_2|Quests
+BuffManual_Progression_3|Cosmetics
+BuffManual_CardPedia_0|Cardpedia
+BuffManual_CardPedia_1|Browse BuffCard
 
 //BuffManual_Summary
-BuffManual_Summary_Content_0|RandomBuff is a game mode that is played with randomized gain effect pairings. You can add challenges for yourself or complete special missions to unlock rewards.
-//BuffManual_Gamemode
-BuffManual_GameMode_Content_0|There are two modes of random buff, divided into normal mode and mission mode.
-BuffManual_GameMode_Content_1|The most conventional way to play the game.<LINE>If you succeed in making a settlement, you will only settle the experience value to level up based on the completed conditions, number of kills and number of cards held.<LINE>Sub-modes can be switched in the lower left corner of the interface.
-BuffManual_GameMode_Content_2|You can choose from 0 to 5 conditions to play, each successful rain sleep will be drawn in a round, and the rain sleep will be settled when all conditions are completed. <LINE>No settlement will be made at 0 conditions. <LINE>Depending on the slug cat selected, the initial room is the same as the initial room of the selected slug cat in Campaign Mode.
-BuffManual_GameMode_Content_3|The conditions are selected in the same way as normal mode, but a completely randomized draw will be made every 30 seconds. <LINE>The earliest drawn buff will be automatically removed when the number of cards exceeds a certain number.<LINE>The initial room will be randomly selected from all shelters in the current area.
-BuffManual_GameMode_Content_4|Conditions are selected in the same way as normal mode. However, you can choose a certain number of initial buffs when you start the game, and every time you go through a rain cycle after that, an additional negative buff will be added.<LINE>The initial rooms are selected in the same way as in Quick Mode.
-BuffManual_GameMode_Content_5|The mode of fixed conditions and initial gains is divided into generic missions and exclusive missions. <LINE>Exclusive missions can only be completed by specific slug cats, while general missions can be completed by any slug cat. <LINE>Completing missions not only allows you to level up as in Free Mode, but also unlocks special collectibles!
+BuffManual_Summary_Content_0|Random Buff is a game mode that is played with a random mix of gain effects. You can add challenges for yourself or complete special missions to unlock rewards.
+BuffManual_Gameplay_Content_0|The gameplay is affected to a greater or lesser extent by enabling different buffs. <LINE> Most changes are dynamic, and different buffs can be combined to produce unexpected effects.
+BuffManual_Gameplay_Content_1|You can choose from two different modes to play Random Buff, Free Mode and Mission Mode.
+BuffManual_Gameplay_Content_2|Different game modes have conditions that can be completed. <LINE> Each condition has its own requirements and progression, and completing them earns different amounts of experience.
+BuffManual_FreeMode_Content_0|The most conventional way to play. <LINE>If you succeed in making a settlement, you will only settle experience points to level up based on the completed conditions, number of kills, and number of cards held. <LINE>Sub-modes can be switched in the lower left corner of the screen.
+BuffManual_FreeMode_Content_1|You can choose from 0 to 5 conditions to play, each successful rain sleep will be drawn in a round, and the rain sleep will be settled when all conditions are completed. <LINE>No settlement will be made at 0 conditions. <LINE>Depending on the slug cat selected, the initial room is the same as the initial room of the selected slug cat in Drama Mode.
+BuffManual_FreeMode_Content_2|The conditions are selected in the same way as normal mode, but a completely randomized draw will be made every 30 seconds. <LINE>The earliest drawn buff will be automatically removed when the number of cards exceeds a certain number.<LINE>The initial room will be randomly selected from all shelters in the current area.
+BuffManual_FreeMode_Content_3|Conditions are selected in the same way as normal mode. However, you can choose a certain number of initial buffs when you start the game, and every time you go through a rain cycle after that, an additional negative buff will be added.<LINE>The initial rooms are selected in the same way as in Quick Mode.
+BuffManual_FreeMode_Content_4|Conditions are selected in the same way as in normal mode, but no experience will be gained. <LINE> No card draws will take place while the game is in progress, and will be replaced by a sandbox card pack with buffs that can be freely enabled and disabled. <LINE> Initial rooms are selected in the same way as in Normal Mode, and there is no settlement.
+BuffManual_FreeMode_Content_5|Details of this mode can be viewed via the button in the lower right corner
+BuffManual_MissionMode_Content_0|The mode of fixed conditions and initial gains is divided into generic missions and exclusive missions. <LINE>Exclusive missions can only be completed by specific slug cats, while general missions can be completed by any slug cat. <LINE>Completing missions not only allows you to level up as in Free Mode, but also unlocks special collectibles!
+BuffManual_MissionMode_Content_1|There are a total of two missions to choose from above:<LINE> Exclusive mission: can only be completed by the currently selected slugcat<LINE> General mission: can be completed by all slugcats.
+BuffManual_MissionMode_Content_2|Each mission has different specified conditions, which can be viewed in the conditions section, and the mission can only be completed if you fulfill the requirements of the conditions.
+BuffManual_MissionMode_Content_3|Each mission has a different initial deck, which can be viewed in the deck bar.
+BuffManual_MissionMode_Content_4|Details of this mode can be viewed via the button in the lower right corner
+BuffManual_BuffAndCard_Content_0|The buffs in the Mod are divided into three main categories: positive, neutral, and negative. <LINE>The effects of different buffs vary greatly, and cards can be used to display information about them. <LINE>Each buff has a card that represents it, and the card can display the cover, name, and details of the buff. <LINE>In addition to this, the cards also have the ability to display other additional information.
+BuffManual_BuffAndCard_Content_1|When a circular mark appears on the card, this indicates that the buff is time-sensitive. The number in the <LINE> graphic indicates how many more rain cycles the buff can take effect.
+BuffManual_BuffAndCard_Content_2|When a diamond-shaped mark appears on the card, this indicates that the buff is stackable. <LINE>The number in the graphic indicates the current stacking level of the buff <LINE>The exact effect of the stacking level depends on how the different buffs are implemented.
+BuffManual_BuffAndCard_Content_3|When a hexagonal mark appears on the card, this indicates that the buff is actively triggerable. <LINE> If the graphic is marked with a >> mark, this indicates that you have not bound any trigger shortcuts to him. <LINE>Shortcuts can be bound by pressing the key specified in the configuration menu. Once bound, you can use the shortcut to trigger the buff. <LINE>Additionally, you can right-click on a card to trigger a buff.
+BuffManual_Progression_Content_0|Random Buff has a separate progress system for levels, records, collectibles, and decorations <LINE> where levels are visible on all three pages, with the current level and experience displayed on the left, and the experience needed for the next level displayed on the right.
+BuffManual_Progression_Content_1|The logging page displays some special progress that can be used to count the number of events triggered when playing some random buff.
+BuffManual_Progression_Content_2|The collectibles screen displays the collection of collectibles. You can hover over the collectibles button to view the details.
+BuffManual_Progression_Content_3|The ornament screen displays all the ornaments that have been collected. You can toggle the decorations on and off by clicking the decorations button. Decorations enabled by <LINE> will appear in the game and will only take effect on the slug cat corresponding to the slug cat avatar on the left. Gray avatars are enabled for all cats. <LINE>Enabled ornament buttons have a green color stroke.
+BuffManual_CardPedia_Content_0|Card Art can be used to view all the buff cards you've unlocked or drawn <LINE> Also, Card Art can be used to count the progress of your buff card collection.
+BuffManual_CardPedia_Content_1|After selecting any type of buff, you can view the details of the corresponding buff by clicking on the buff card.
+
+
+
 
 //Remix
 Remix_Title|Random Buff

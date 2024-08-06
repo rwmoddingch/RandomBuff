@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class CardCondition : Condition
+    public class CardCondition : Condition
     {
         public override ConditionID ID => ConditionID.Card;
 
@@ -93,7 +93,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public int needCard;
 
         [JsonProperty] 
-        public int currentCard;
+        private int currentCard;
 
         [JsonProperty]
         public bool all = true;

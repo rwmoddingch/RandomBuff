@@ -320,6 +320,8 @@ namespace RandomBuff.Core.Entry
 
         private static readonly List<Type> allEntry = new();
 
+        public static readonly List<Assembly> allBuffAssemblies = new();
+
         private static bool IsDerivedType(this Type checkType, Type baseType)
         {
             var aType = checkType?.BaseType;
@@ -360,6 +362,7 @@ namespace RandomBuff.Core.Entry
         internal static void InitAllBuffPlugin()
         {
             allEntry.Clear();
+            allBuffAssemblies.Clear();
             foreach (var mod in ModManager.ActiveMods)
             {
              
@@ -374,6 +377,7 @@ namespace RandomBuff.Core.Entry
                 {
 
                     Assembly assembly = Assembly.LoadFile(file.FullName);
+                    allBuffAssemblies.Add(assembly);
 
                     foreach (var type in assembly.GetTypes())
                     {

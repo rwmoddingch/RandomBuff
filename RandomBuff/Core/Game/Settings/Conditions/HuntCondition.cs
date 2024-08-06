@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class HuntCondition : Condition
+    public class HuntCondition : Condition
     {
         public override ConditionID ID => ConditionID.Hunt;
 

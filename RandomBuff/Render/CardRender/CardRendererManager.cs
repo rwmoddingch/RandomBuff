@@ -222,6 +222,8 @@ namespace RandomBuff.Render.CardRender
 
         public static Texture TextBack { get; private set; }
 
+        public static string MissingFaceTexture { get; private set; }
+
         public static Color PositiveColor { get; } = Helper.GetRGBColor(27, 178, 196);
         public static Color NegativeColor { get; } = Helper.GetRGBColor(183, 56, 73);
         public static Color DualityColor { get; } = Helper.GetRGBColor(177, 170, 187);
@@ -341,6 +343,7 @@ namespace RandomBuff.Render.CardRender
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
             TextBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/textback").texture;
+            MissingFaceTexture = Futile.atlasManager.LoadImage("buffassets/cardbacks/missing").name;
 
             BuffPlugin.Log($"tex name : {FPBack.name}, {FPBack.texelSize}");
         }

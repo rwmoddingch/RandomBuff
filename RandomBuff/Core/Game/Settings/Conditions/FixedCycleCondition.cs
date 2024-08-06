@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class FixedCycleCondition : Condition
+    public class FixedCycleCondition : Condition
     {
         public override ConditionID ID => ConditionID.FixedCycle;
         public override int Exp => 200;

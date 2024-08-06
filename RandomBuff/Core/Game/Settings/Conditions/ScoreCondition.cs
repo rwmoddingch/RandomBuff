@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class ScoreCondition : Condition
+    public class ScoreCondition : Condition
     {
         public override ConditionID ID => ConditionID.Score;
         public override int Exp => (int)(targetScore / Custom.LerpMap(targetScore,200,100,10,7f)); //TODO

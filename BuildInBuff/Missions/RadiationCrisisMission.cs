@@ -44,7 +44,7 @@ namespace BuiltinBuffs.Missions
 
         public void RegisterMission()
         {
-            MissionRegister.RegisterMission(radiationCrisisMissionID, this);
+            MissionRegister.RegisterMission(radiationCrisisMissionID, new RadiationCrisisMission());
         }
     }
 }

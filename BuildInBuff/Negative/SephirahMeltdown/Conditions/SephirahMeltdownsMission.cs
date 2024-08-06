@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Expedition;
+using HotDogGains.Negative;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -12,6 +13,7 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
 using UnityEngine;
 
@@ -32,7 +34,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 conditions = new List<Condition>()
                 {
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedCentipede},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = BuffConfigManager.ContainsId(new BuffID("bur-pursued")) ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
                     new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 20}
@@ -45,7 +47,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {
                             TipherethBuffData.Tiphereth.value,
                             ChesedBuffData.Chesed.value,
-                            "bur-pursued"
+                            BuffConfigManager.ContainsId(new BuffID("bur-pursued")) ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
                         }},
                         {8, new List<string>()
                         {
@@ -151,7 +153,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             if (game.GetStorySession.saveState.cycleNumber == 7)
             {
-                BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("bur-pursued"));
+                if(BuffCore.GetAllBuffIds().Contains(new BuffID("bur-pursued")))
+                    BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("bur-pursued"));
+                else
+                    BuffPoolManager.Instance.RemoveBuffAndData(ArmedKingVultureBuffEntry.ArmedKingVultureID);
+
                 BuffUtils.Log("SephirahMeltdown","Remove bur-pursued at 8 cycles");
             }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?

@@ -549,8 +549,8 @@ namespace BuiltinBuffs.Positive
             endPos = player.bodyChunks[1].pos;
             room.AddObject(new JudgmentCutStartFlash(room, pos));
             room.AddObject(new JudgmentCutMoveTrail(room, player));
-            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound1, 0, 0.9f, 1);
-            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound2, 0, 0.9f, 1);
+            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound1, 0, 0.3f, 1);
+            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound2, 0, 0.3f, 1);
 
         }
         private int delay = 2;
@@ -623,8 +623,8 @@ namespace BuiltinBuffs.Positive
                     (pos - room.game.cameras[0].pos) / Custom.rainWorld.screenSize, 0.1f));
                 BuffPostEffectManager.AddEffect(new HueEffect(2, 0.3f, 0.001f, 0.2f, 1f, 0.2f));
                 room.game.cameras[0].ScreenMovement(pos,Custom.RNV()*40,30);
-                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound1, 0, 0.9f, 1);
-                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 0, 0.9f, 1);
+                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound1, 0, 0.3f, 1);
+                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 0, 0.3f, 1);
 
 
             }

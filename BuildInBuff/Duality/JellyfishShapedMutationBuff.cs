@@ -146,7 +146,7 @@ namespace BuiltinBuffs.Duality
                         jellyfishCat.DehydrationCycle++;
                     else
                         jellyfishCat.DehydrationCycle = 0;
-                    BuffPlugin.Log("JellyfishShapedMutation DehydrationCycle: " + jellyfishCat.DehydrationCycle);
+                    BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation DehydrationCycle: " + jellyfishCat.DehydrationCycle);
                 }
             }
             orig(self, game, survived, newMalnourished);
@@ -168,7 +168,7 @@ namespace BuiltinBuffs.Duality
             }
             if (dehydrationNum > 0)
             {
-                BuffPlugin.Log("JellyfishShapedMutation Die of Dehydration! Number of players who have died due to dehydration: " + dehydrationNum);
+                BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Number of players who have died due to dehydration: " + dehydrationNum);
                 if (ModManager.CoopAvailable)
                 {
                     //简单模式和普通模式下，无人存活则死亡
@@ -177,7 +177,7 @@ namespace BuiltinBuffs.Duality
                     {
                         if (self.room.game.AlivePlayers.Count <= 0)
                         {
-                            BuffPlugin.Log("JellyfishShapedMutation Die of Dehydration! Failed Save!");
+                            BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Failed Save!");
                             self.room.game.GoToDeathScreen();
                             return;
                         }
@@ -185,7 +185,7 @@ namespace BuiltinBuffs.Duality
                     //困难模式下，任意一人死亡则死亡
                     else
                     {
-                        BuffPlugin.Log("JellyfishShapedMutation Die of Dehydration! Failed Save!");
+                        BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Failed Save!");
                         self.room.game.GoToDeathScreen();
                         return;
                     }
@@ -193,7 +193,7 @@ namespace BuiltinBuffs.Duality
                 //非联机模式，死了肯定就是死了
                 else
                 {
-                    BuffPlugin.Log("JellyfishShapedMutation Die of Dehydration! Failed Save!");
+                    BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Failed Save!");
                     self.room.game.GoToDeathScreen();
                     return;
                 }
@@ -1537,7 +1537,7 @@ namespace BuiltinBuffs.Duality
                 {
                     StartPos.y = (float)(player.room.defaultWaterLevel + 1) * 20f;
                 }
-                BuffPlugin.Log("Jelly home at " + StartPos.ToString());
+                BuffUtils.Log("JellyfishShapedMutation","Jelly home at " + StartPos.ToString());
             }*/
             if (driftGoalPos == Vector2.zero)//abstractState.DriftPos
             {
@@ -1552,8 +1552,8 @@ namespace BuiltinBuffs.Duality
                 driftGoalPos.y = (float)(player.room.defaultWaterLevel + 1) * 4f;
             }*/
             /*
-            BuffPlugin.Log("Jelly goal at " + driftGoalPos.ToString());
-            BuffPlugin.Log("Jelly on surf " + surfaceMode.ToString());*/
+            BuffUtils.Log("JellyfishShapedMutation","Jelly goal at " + driftGoalPos.ToString());
+            BuffUtils.Log("JellyfishShapedMutation","Jelly on surf " + surfaceMode.ToString());*/
             driftMaxim = Vector2.Distance(newBody[0].pos, driftGoalPos);
 
             for (int i = 0; i < newBody.Length; i++)
@@ -1738,7 +1738,7 @@ namespace BuiltinBuffs.Duality
             {
                 this.hasContactWater = true;
                 this.dehydrationCycle = 0;
-                BuffPlugin.Log("JellyfishCat has contact with water!");
+                BuffUtils.Log("JellyfishShapedMutation","JellyfishCat has contact with water!");
             }
             if (this.dehydrationCycle >= 2)
             {
@@ -1776,7 +1776,7 @@ namespace BuiltinBuffs.Duality
                 {
                     this.effect = new JellyfishCatIllnessEffect(player, player.room);
                     player.room.AddObject(this.effect);
-                    BuffPlugin.Log("JellyfishCat has add IllnessEffect!");
+                    BuffUtils.Log("JellyfishShapedMutation","JellyfishCat has add IllnessEffect!");
                 }
             }
             else
@@ -1912,7 +1912,7 @@ namespace BuiltinBuffs.Duality
                     }
                     if (latchOnToBodyChunks[i, j] != null && latchOnToBodyChunks[i, j].owner is Creature && (latchOnToBodyChunks[i, j].owner as Creature).enteringShortCut.HasValue)
                     {
-                        BuffPlugin.Log($"JellyCat released door traveling object {latchOnToBodyChunks[i, j].owner}");
+                        BuffUtils.Log("JellyfishShapedMutation",$"JellyCat released door traveling object {latchOnToBodyChunks[i, j].owner}");
                         latchOnToBodyChunks[i, j] = null;
                     }
                     if (latchOnToBodyChunks[i, j] != null)
@@ -2250,7 +2250,7 @@ namespace BuiltinBuffs.Duality
                 return;
             if (mooCounter < 0)
             {
-                BuffPlugin.Log("Moo!");
+                BuffUtils.Log("JellyfishShapedMutation","Moo!");
                 mooCounter = 140;
                 player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
                 player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);

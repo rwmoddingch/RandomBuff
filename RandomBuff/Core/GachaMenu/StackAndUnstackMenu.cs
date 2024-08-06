@@ -28,7 +28,6 @@ namespace RandomBuff.Core.GachaMenu
             var allIds = BuffDataManager.Instance.GetAllBuffIds(name);
             foreach (var id in allIds)
                 inGameSlot.AppendCard(id);
-            container.AddChild(inGameSlot.Container);
 
             if (ID == BuffEnums.ProcessID.StackMenu)
             {
@@ -64,6 +63,8 @@ namespace RandomBuff.Core.GachaMenu
                 exitCounter = 0;
                 pages[0].selectables.Add(exitButton);
             }
+            container.AddChild(inGameSlot.Container);
+
         }
 
         public override void Singal(MenuObject sender, string message)

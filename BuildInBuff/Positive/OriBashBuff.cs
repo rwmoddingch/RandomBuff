@@ -79,8 +79,8 @@ namespace BuiltinBuffs.Positive
 
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+            On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
         }
-
 
 
         public static void LoadAssets()
@@ -90,7 +90,7 @@ namespace BuiltinBuffs.Positive
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!BashFeatures.TryGetValue(self, out _))
+            if (!BashFeatures.TryGetValue(self, out _) && !self.isNPC)
                 BashFeatures.Add(self, new Bash(self));
         }
   
@@ -106,9 +106,18 @@ namespace BuiltinBuffs.Positive
         {
             orig(self, sLeaser, rCam);
             if (BashFeatures.TryGetValue(self.player, out var bash))
+            {
                 bash.InitiateSprites(sLeaser, rCam);
+                self.AddToContainer(sLeaser, rCam, null);
+            }
         }
 
+        private static void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            orig(self,sLeaser,rCam, newContatiner);
+            if (BashFeatures.TryGetValue(self.player, out var bash))
+                bash.AddToContainer(sLeaser, rCam);
+        }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
@@ -148,7 +157,7 @@ namespace BuiltinBuffs.Positive
         PhysicalObject bashTarget;
         int outroTimer = 0;
         bool isBash = false;
-        int startSprite = 0;
+        int startSprite = int.MaxValue;
 
         int bashTimer = 0;
         bool isPressUse;
@@ -179,10 +188,19 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[startSprite + 1].scale = 15;
             sLeaser.sprites[startSprite + 1].alpha = 0f;
 
-
-            rCam.ReturnFContainer("ForegroundLights").AddChild(sLeaser.sprites[startSprite]);
-            rCam.ReturnFContainer("ForegroundLights").AddChild(sLeaser.sprites[startSprite + 1]);
+            
+           
         }
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            if (startSprite < sLeaser.sprites.Length)
+            {
+                rCam.ReturnFContainer("Bloom").AddChild(sLeaser.sprites[startSprite]);
+                rCam.ReturnFContainer("Bloom").AddChild(sLeaser.sprites[startSprite + 1]);
+            }
+        }
+
 
         public Vector2 GetInputDirection(Player player,Vector2 sourcePos)
         {
@@ -281,6 +299,10 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[startSprite + 1].color = Color.Lerp(Color.black, Color.white, Mathf.Pow(num, 0.5f));
                 sLeaser.sprites[startSprite].scaleX = Mathf.Pow(Mathf.InverseLerp(3, 10, outroTimer), 0.5f) * 0.75f;
             }
+            else
+            {
+                sLeaser.sprites[startSprite + 1].alpha = 0;
+            }
 
             
             sLeaser.sprites[startSprite].isVisible = sLeaser.sprites[startSprite].scaleX > 0.01f;
@@ -294,7 +316,7 @@ namespace BuiltinBuffs.Positive
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return;
-            if (!self.Consious)
+            if (!self.Consious || self.grabbedBy.Any())
             {
                 if (isBash)
                 {
@@ -333,7 +355,7 @@ namespace BuiltinBuffs.Positive
                     {
                         foreach (var obj in self.room.updateList.OfType<PhysicalObject>())
                         {
-                            if(obj.grabbedBy.Any(i => i.grabber == self))
+                            if(obj.grabbedBy.Any(i => i.grabber == self) || self.slugOnBack?.slugcat == obj || self.spearOnBack?.spear == obj)
                                 continue;
                             if (obj is Creature crit && crit.Template.type == CreatureTemplate.Type.Slugcat)
                                 continue;
@@ -366,7 +388,7 @@ namespace BuiltinBuffs.Positive
                                 continue;
                             if (creature.realizedCreature != null && !creature.realizedCreature.inShortcut)
                             {
-                                if (creature.realizedCreature.grabbedBy.Any(i => i.grabber == self))
+                                if (creature.realizedCreature.grabbedBy.Any(i => i.grabber == self) || self.slugOnBack?.slugcat == creature.realizedCreature)
                                     continue;
                                 bool can = false;
                                 foreach (var chunk in creature.realizedCreature.bodyChunks)

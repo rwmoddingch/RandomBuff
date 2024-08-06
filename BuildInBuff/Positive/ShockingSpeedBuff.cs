@@ -35,7 +35,6 @@ namespace BuiltinBuffs.Positive
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
         {
             return null;
-            return new ShockingSpeedGraphicModule();
         }
 
         public PlayerModulePart InitPart(PlayerModule module)
@@ -142,13 +141,15 @@ namespace BuiltinBuffs.Positive
         internal class ShockingSpeedModule : PlayerModulePart
         {
             public int counter;
-
+            ParticleEmitter shockEmitter;
             public override void Update(Player player, bool eu)
             {
                 base.Update(player, eu);
                 if(counter > 0)
                 {
                     counter--;
+                    if (player.stun > 0)
+                        player.stun = 0;
                     if (counter == 0)
                     {
                         player.slugcatStats.Undo(Instance);
@@ -157,54 +158,64 @@ namespace BuiltinBuffs.Positive
                             module.shocked = false;
                         }
                     }
-                }    
+                }
+                if (shockEmitter == null)
+                {
+                    if (counter > 0 && player.room != null)
+                        shockEmitter = CreateEmitter(player, counter);
+                }
+                else
+                {
+                    if (shockEmitter.slateForDeletion)
+                        shockEmitter = null;
+                }
+            }
+
+            ParticleEmitter CreateEmitter(Player player, int counter)
+            {
+                var emitter = new ParticleEmitter(player.room);
+                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, counter, false));
+                emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, player));
+
+
+                emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 30));
+
+
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
+                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f)));
+                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+                emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
+                emitter.ApplyParticleModule(new SetRandomColor(emitter, 0.5f, 0.6f, 1f, 0.5f));
+                emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
+                emitter.ApplyParticleModule(new SetRandomRotation(emitter, 0f, 360f));
+                emitter.ApplyParticleModule(new SetRandomPos(emitter, 30f));
+
+
+                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
+                {
+                    return p.setScaleXY * (1f - a);
+                }));
+
+                emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, a) =>
+                {
+                    Color color = Color.Lerp(Color.white, p.setColor, a);
+                    color.a = 1f - a;
+                    return color;
+                }));
+
+                ParticleSystem.ApplyEmitterAndInit(emitter);
+                return emitter;
             }
 
             public void GetShocked(Player player)
             {
                 if(counter == 0)
                 {
-                    
                     player.slugcatStats.Modify(Multiply, "runspeedFac",3,Instance);
 
-                    //if (PlayerUtils.TryGetGraphicPart<ShockingSpeedGraphicModule>(player, ShockingSpeedBuff.Instance, out var module))
-                    //{
-                    //    module.Reset(player.graphicsModule as PlayerGraphics);
-                    //    module.shocked = true;
-                    //}
                     if (player.room == null)
                         return;
-                    var emitter = new ParticleEmitter(player.room);
-                    emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 160, false));
-                    emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, player));
-
-
-                    emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 30));
-
-
-                    emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
-                    emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f)));
-                    emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
-                    emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
-                    emitter.ApplyParticleModule(new SetRandomColor(emitter, 0.5f, 0.6f, 1f, 0.5f));
-                    emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
-                    emitter.ApplyParticleModule(new SetRandomRotation(emitter, 0f, 360f));
-                    emitter.ApplyParticleModule(new SetRandomPos(emitter, 30f));
-
-
-                    emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
-                    {
-                        return p.setScaleXY * (1f - a);
-                    }));
-
-                    emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, a) =>
-                    {
-                        Color color = Color.Lerp(Color.white, p.setColor,  a);
-                        color.a = 1f - a;
-                        return color;
-                    }));
-
-                    ParticleSystem.ApplyEmitterAndInit(emitter);
+                    
                 }
                 counter = 160;
             }

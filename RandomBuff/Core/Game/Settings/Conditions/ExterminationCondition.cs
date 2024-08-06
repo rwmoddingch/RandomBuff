@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class ExterminationCondition : Condition
+    public class ExterminationCondition : Condition
     {
         public static List<AbstractPhysicalObject.AbstractObjectType> weaponSelections;
         static ConditionalWeakTable<Creature, CreatureDmgSourceRecord> dmgSourceMapper = new ConditionalWeakTable<Creature, CreatureDmgSourceRecord>();

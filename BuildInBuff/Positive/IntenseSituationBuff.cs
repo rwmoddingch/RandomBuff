@@ -96,12 +96,12 @@ namespace BuiltinBuffs.Positive
             foreach (var crit in player.room.updateList.OfType<Creature>())
             {
                 if(crit is Player) continue;
-                if (crit.abstractCreature.abstractAI?.RealAI.friendTracker is FriendTracker tracker &&
+                if (crit.abstractCreature.abstractAI?.RealAI?.friendTracker is FriendTracker tracker &&
                     tracker.friend == player)
                     continue;
                 
-                re = Mathf.Max(re, Custom.LerpMap(crit.bodyChunks.Min(i => Custom.Dist(i.pos, player.DangerPos)), 75,
-                    300, 1,
+                re = Mathf.Max(re, Custom.LerpMap(crit.bodyChunks.Min(i => Custom.Dist(i.pos, player.DangerPos)), 80,
+                    200, 1,
                     0) * crit.Template.dangerousToPlayer * 2);
 
             }

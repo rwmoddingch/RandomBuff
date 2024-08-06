@@ -52,6 +52,13 @@ namespace RandomBuff.Core.Buff
         //帮助方法
         internal Texture GetFaceTexture()
         {
+            var atlas = Futile.atlasManager.GetAtlasWithName(FaceName);
+            //BuffPlugin.LogError($"Get face for {BuffID} {FaceName}");
+            if (!atlas.isSingleImage)
+            {
+                BuffPlugin.LogError($"Get face for {BuffID} {FaceName}, but get nonsingleimage : {atlas.name}");
+                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFaceTexture).texture;
+            }
             return Futile.atlasManager.GetAtlasWithName(FaceName).texture;
         }
 
@@ -159,7 +166,7 @@ namespace RandomBuff.Core.Buff
                 }
                 else
                 {
-                    newData.FaceName = "Futile_White";
+                    newData.FaceName = CardBasicAssets.MissingFaceTexture;
                     BuffPlugin.LogWarning($"Can't find faceName At {jsonFile.Name}");
                 }
 
@@ -228,6 +235,8 @@ namespace RandomBuff.Core.Buff
                     foreach (var obj in tagObj)
                     {
                         newData.Tag.Add((string)obj);
+                        BuffPlugin.LogDebug($"Tag:{obj}");
+
                     }
                 }
 

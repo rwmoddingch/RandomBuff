@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class CycleScoreCondition : Condition
+    public class CycleScoreCondition : Condition
     {
         public override ConditionID ID => ConditionID.CycleScore;
         public override int Exp => (int)(targetScore / Custom.LerpMap(targetScore,50,150,2,1)); //TODO
