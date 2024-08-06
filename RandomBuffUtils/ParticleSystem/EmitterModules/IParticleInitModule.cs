@@ -183,7 +183,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public void ApplyInit(Particle particle)
         {
             float r = Mathf.Lerp(a, b, Random.value);
-            particle.rotation = r;
+            particle.HardSetRotation(r);
         }
     }
 
