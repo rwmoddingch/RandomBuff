@@ -142,6 +142,7 @@ DisplayName_Ascend|超度 {0} 个区域的生物
 DisplayName_AscendOracle|超度五块卵石和仰望皓月
 DisplayName_Distance|移动至少 {0} 米
 DisplayName_Distance_Faster|在卡牌提供加速的情况下移动至少 {0} 米
+DisplayName_ScorchCreature|利用高温烧死至少 {0} 只生物
 //BuffCondition_BuffTypes
 all types|所有类型
 Negative|负面
@@ -194,6 +195,7 @@ Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
 Mission_Display_InHurry|着急忙慌
 Mission_Display_SurvivalOfFittest|适者生存
+Mission_Display_SlugOfTheFlame|烈焰之蝓
 
 //Credit
 CreditTitle_Intro|Random Buff

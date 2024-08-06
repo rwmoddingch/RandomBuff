@@ -21,7 +21,7 @@ namespace BuiltinBuffs.Missions
         public static readonly MissionID SurvivalOfFittest = new MissionID(nameof(SurvivalOfFittest), true);
         public override MissionID ID => SurvivalOfFittest;
         public override SlugcatStats.Name BindSlug { get; }
-        public override Color TextCol { get; }
+        public override Color TextCol => Color.white;
         public override string MissionName => BuffResourceString.Get("Mission_Display_SurvivalOfFittest");
 
 

@@ -320,6 +320,11 @@ namespace RandomBuff
             return new Color(r / 255f, g / 255f, b / 255f);
         }
 
+        public static Vector3 Color2RGB(Color color)
+        {
+            return new Vector3(Mathf.FloorToInt(color.r * 255f), Mathf.FloorToInt(color.g * 255f), Mathf.FloorToInt(color.b * 255f));
+        }
+
         public static bool IsZhChar(string ch)
         {
             byte[] byte_len = System.Text.Encoding.Default.GetBytes(ch);
