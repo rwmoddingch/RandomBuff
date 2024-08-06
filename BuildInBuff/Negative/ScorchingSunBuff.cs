@@ -35,11 +35,6 @@ namespace BuiltinBuffs.Negative
 
             base.Destroy();
         }
-
-        public void ScorchingSunCheck()
-        {
-            GetTemporaryBuffPool().CreateTemporaryBuff(IgnitionPointBuffEntry.ignitionPointBuffID);
-        }
     }
 
     internal class ScorchingSunBuffData : CountableBuffData
@@ -51,7 +46,6 @@ namespace BuiltinBuffs.Negative
     internal class ScorchingSunBuffEntry : IBuffEntry
     {
         public static BuffID ScorchingSun = new BuffID("ScorchingSun", true);
-        private static bool isChecked = false;
         private static ScorchingSunSingleColorEffect effect;
 
         public static ScorchingSunSingleColorEffect Effect 
@@ -133,9 +127,6 @@ namespace BuiltinBuffs.Negative
 
         private static void Room_Update(On.Room.orig_Update orig, Room self)
         {
-            if (!isChecked)
-                ScorchingSunBuff.Instance.ScorchingSunCheck();
-
             orig(self); 
 
             if(self != null)
@@ -198,9 +189,6 @@ namespace BuiltinBuffs.Negative
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
-            if (!isChecked)
-                ScorchingSunBuff.Instance.ScorchingSunCheck();
-
             orig.Invoke(self, eu);
 
             if (self.room != null)
