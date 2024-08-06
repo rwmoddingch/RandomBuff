@@ -8,10 +8,10 @@
 
     "Chinese" : {
         "BuffName" : "天外援兵",
-        "Description" : "与拾荒的好感达到酋长时，可以使用来召唤一只拾荒增援小队"
+        "Description" : "与拾荒的好感达到酋长时，免除拾荒对你的直接友伤，并可以使用来召唤一只精英拾荒增援小队"
     },
     "English" : {
         "BuffName" : "Reinforce",
-        "Description" : "Can be used to summon a ScavengerReinforcement Squad when your are Chieftain."
+        "Description" : "When your are Chieftain, allow you to avoid direct friendly-fire from scavangers, and can be used to summon a ScavengerReinforcement Squad ."
     }
 }
