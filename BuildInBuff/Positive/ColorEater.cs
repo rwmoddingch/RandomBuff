@@ -17,6 +17,7 @@ namespace BuildInBuff.Positive
     {
         public override BuffID ID => ColorEaterBuffEntry.ColorEaterID;
       
+        //按下按键可以吸取周围的颜色
         public override bool Trigger(RainWorldGame game)
         {
             if (game.AlivePlayers.Count > 0)
@@ -70,13 +71,13 @@ namespace BuildInBuff.Positive
                     mesh.verticeColors[i] = self.player.EatPlate().MainColor;
                 }
             }
-
         }
+
         private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig.Invoke(self, sLeaser, rCam, timeStacker, camPos);
 
-            ChangeColor(self, sLeaser);
+            //ChangeColor(self, sLeaser);
         }
 
         private static Color Player_ShortCutColor(On.Player.orig_ShortCutColor orig, Player self)
