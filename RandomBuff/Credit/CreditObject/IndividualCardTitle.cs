@@ -54,12 +54,12 @@ namespace RandomBuff.Credit.CreditObject
         float t;
 
 
-        public IndividualCardTitle(Menu.Menu menu, BuffCreditStage owner, string text, float inStageEnterTime, float lifeTime, bool noAnim = false) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
+        public IndividualCardTitle(Menu.Menu menu, BuffCreditStage owner, string text, float inStageEnterTime, float lifeTime, bool noAnim = false, bool longString = false) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
         {
             myContainer = new FContainer();
             menu.container.AddChild(myContainer);
 
-            cardTitle = new CardTitle(myContainer, CardTitle.GetNormScale(0.5f), Vector2.zero, 0.1f, 0.5f, CardTitle.GetNormFlipCounter(false), CardTitle.GetNormFlipDelay(false), CardTitle.GetNormSpanAdjust(0.5f));
+            cardTitle = new CardTitle(myContainer, CardTitle.GetNormScale(0.5f), Vector2.zero, 0.1f, 0.5f, CardTitle.GetNormFlipCounter(longString), CardTitle.GetNormFlipDelay(longString), CardTitle.GetNormSpanAdjust(0.5f));
             myContainer.SetPosition(ScreenSize / 2f);
             cardTitle.RequestSwitchTitle(text);
 

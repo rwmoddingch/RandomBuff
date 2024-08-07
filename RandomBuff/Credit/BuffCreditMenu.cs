@@ -111,7 +111,7 @@ namespace RandomBuff.Credit
             }
         }
 
-        static int entriesAPage = 8;
+
         public void NextStage(CreditStageType creditStageType, CreditFileReader.CreditStageData stageData)
         {
             stage = new BuffCreditStage(this, pages[0], Time);
@@ -119,10 +119,15 @@ namespace RandomBuff.Credit
             Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
             rainEffect.LightningSpike(Mathf.Pow(1f, 2f) * 0.85f, Mathf.Lerp(20f, 120f, 1f));
 
+            int entriesAPage = 8;
             int y = 0;
             float inStageEnterTime = 4f;
             bool titleHasAnim = true;
+            bool titleLongString = false;
+            string? repalceTitle = null;
             BuffPlugin.Log($"inStage : {creditStageType} {inStageEnterTime + 1f * y}");
+
+
             if (creditStageType == CreditStageType.Coding)
             {
                 int page = 0;
@@ -156,6 +161,7 @@ namespace RandomBuff.Credit
             }
             else if(creditStageType == CreditStageType.PlayTest)
             {
+                entriesAPage = 11;
                 int page = 0;
                 var data = stageData as CreditFileReader.PlayTestStageData;
                 for (int i = 0; i < data.names.Count; i++)
@@ -172,15 +178,54 @@ namespace RandomBuff.Credit
                 }
                 inStageEnterTime += 8f;
             }
+            else if (creditStageType == CreditStageType.SpecialThanks)
+            {
+                int page = 0;
+                var data = stageData as CreditFileReader.SpecialThanksStageData;
+
+                for(int j = 0;j < data.entries.Count; j++)
+                {
+                    if (data.entries[j].Contains("NextPage"))
+                    {
+                        page++;
+                        y = 0;
+                        inStageEnterTime += 8f;
+                        continue;
+                    }
+
+                    int currentEntireItems = data.entryNames[j].Count();
+                    float currentEntryLastTime = (currentEntireItems + 1) * 0.5f + 8f;
+                    stage.AddObjectToStage(new EntryDetailLabel(this, stage, new Vector2(150f, screenSize.y - 60f * (y + 2)), inStageEnterTime, currentEntryLastTime, data.entries[j] + ":", ""));
+                    y++;
+                    for (int i = 0;i < currentEntireItems; i++)
+                    {
+                        stage.AddObjectToStage(new NameDetailLabel(this, stage, new Vector2(200f, screenSize.y - 60f * (y + 2)), inStageEnterTime + 0.5f * (i + 1), currentEntryLastTime - (i + 1) * 0.5f, data.entryNames[j][i], data.entryDetails[j][i]));
+                        y++;
+                    }
+                    inStageEnterTime += 0.5f * (currentEntireItems + 1);
+                }
+                inStageEnterTime += 8f;
+            }
             else if(creditStageType == CreditStageType.Intro)
             {
                 stage.AddObjectToStage(new FlagHolder(this, stage, 0f, 10f));
                 inStageEnterTime = 8f;
                 titleHasAnim = false;
             }
+            else if(creditStageType == CreditStageType.ThankYou)
+            {
+                titleHasAnim = false;
+                titleLongString = true;
+                repalceTitle = GetCreditThanksString();
+            }
 
             
-            stage.AddObjectToStage(new IndividualCardTitle(this, stage, BuffResourceString.Get($"CreditTitle_{creditStageType.value}",true), 0f,1f + inStageEnterTime, !titleHasAnim));
+            stage.AddObjectToStage(new IndividualCardTitle(this, stage, repalceTitle ?? BuffResourceString.Get($"CreditTitle_{creditStageType.value}",true), 0f,1f + inStageEnterTime, !titleHasAnim, titleLongString));
+        }
+
+        public string GetCreditThanksString()
+        {
+            return BuffResourceString.Get("CreditTitle_ThanksForPlaying");
         }
 
         public void EndCredit()
@@ -193,6 +238,8 @@ namespace RandomBuff.Credit
         public override void RawUpdate(float dt)
         {
             Time += dt;
+            if (Input.GetKey(KeyCode.S))
+                Time += dt * 5f;
             base.RawUpdate(dt);
             rainEffect.rainFade = Custom.SCurve(Mathf.InverseLerp(0f, 6f, Time), 0.8f) * 0.5f;
         }

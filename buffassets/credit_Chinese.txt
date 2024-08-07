@@ -143,3 +143,17 @@
 
 	<Name>黑咪 o.o
 	<Detail>准备好进入这场精彩的梦中了吗~
+<Stage>SpecialThanks
+	<Entry>宣传
+		<Name>寂空
+		<Detail>请提交本周期的降水报告和避难所维护日志
+		<Name>Whoking
+		<Detail>wawa 2
+	<Entry>早期宣传
+		<Name>气球
+	<Entry>字体使用
+		<Name>峰广明锐体
+		<Name>NotoSans Hans
+	<Entry><NextPage>
+	<Entry>buff设计灵感
+		<Name> 非常感谢各位积极提供灵感
