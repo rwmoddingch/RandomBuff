@@ -61,7 +61,7 @@ BuffConditionHUD_WinInfo|sleep to finish game
 BuffConditionHUD_WinTitle|WIN
 
 //BuffHUD
-BuffHUD_FreePick|Select initial cards (no more than {0} cards)
+BuffHUD_FreePick|Select initial cards ({0}/{1})
 
 //BuffModeSelect
 Mode_Free|FREE MODE
