@@ -92,13 +92,16 @@ namespace RandomBuff.Core.StaticsScreen
                     killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(kill.Key.critType, new int[3] { unlock, kill.Value, kill.Key.intData }));
                 }
             }
+
+            int tempScore = 0;
             foreach(var kill in killsAndCounts)
             {
                 if (kill.Value[0] != -1)
-                    totalScore += defaultScores[kill.Value[0]] * kill.Value[1];
+                    tempScore += defaultScores[kill.Value[0]] * kill.Value[1];
                 else
                     BuffPlugin.LogDebug($"Can't get creature for no sandbox creature, type:{kill.Key}");
             }
+            totalScore += LogClampKillScore(tempScore);
 
             //获取卡牌分数
             foreach(var buffID in winPackage.winWithBuffs)
@@ -195,6 +198,7 @@ namespace RandomBuff.Core.StaticsScreen
                 {
                     state = ScoreCaculatorState.AddBuffScore;
                     indexInCurrentState = 0;
+                    scoreBoard.score = LogClampKillScore(indexInCurrentState);
                     return;
                 }
 
@@ -266,6 +270,11 @@ namespace RandomBuff.Core.StaticsScreen
             expBar.GrafUpdate(timeStacker);
             for (int i = activeInstances.Count - 1; i >= 0; i--)
                 activeInstances[i].GrafUpdate(timeStacker);
+        }
+
+        public static int LogClampKillScore(int orig)
+        {
+            return Mathf.CeilToInt(Mathf.Min(orig, Mathf.Log(orig + 1, 1.05f) + 100));
         }
 
 
