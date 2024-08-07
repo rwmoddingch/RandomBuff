@@ -1,4 +1,4 @@
-﻿
+﻿using MonoMod.Cil;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mono.Cecil.Cil;
+using RandomBuff;
 
 namespace HotDogGains.Negative
 {
@@ -32,17 +34,29 @@ namespace HotDogGains.Negative
         public static void HookOn()
         {
             On.Player.ObjectEaten += Player_ObjectEaten;//吃小东西会晕
-            On.Player.EatMeatUpdate += Player_EatMeatUpdate;//吃大东西会晕
+            IL.Player.EatMeatUpdate += Player_EatMeatUpdateIL;//吃大东西会晕
         }
 
-        private static void Player_EatMeatUpdate(On.Player.orig_EatMeatUpdate orig, Player self, int graspIndex)
+        private static void Player_EatMeatUpdateIL(ILContext il)
         {
-            if (self.grasps[graspIndex] == null || !(self.grasps[graspIndex].grabbed is Creature))
+            try
             {
-                return;
+                ILCursor c = new ILCursor(il);
+                if (c.TryGotoNext(MoveType.After,
+                    (i) => i.MatchCall<Player>("AddFood"),
+                    (i) => i.Match(OpCodes.Ldarg_0)))
+                {
+                    c.EmitDelegate<Action<Player>>((self) =>
+                    {
+                        self.Stun(80);
+                    });
+                    c.Emit(OpCodes.Ldarg_0);
+                }
             }
-            if (self.eatMeat > 40 && self.eatMeat % 15 == 3) self.Stun(80);
-            orig.Invoke(self, self.eatMeat);
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+            }
         }
 
         private static void Player_ObjectEaten(On.Player.orig_ObjectEaten orig, Player self, IPlayerEdible edible)

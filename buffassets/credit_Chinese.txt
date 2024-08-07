@@ -28,7 +28,7 @@
 
 	<Name>Quaeledy
 	<Detail>您拨打的号码[离群者]已离开服务区
-	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun
+	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun, PupaLizard, IntenseSituation, FlameThrower, FlamePurification, BombMania
 	
 	<Name>日天菌
 	<Detail>神明智慧吞噬者σ( ᑒ )
@@ -48,7 +48,7 @@
 	
 	<Name>花花猫
 	<Detail>感谢大家:3
-	<BuffIDs>LavaImmune, SensorBomb
+	<BuffIDs>LavaImmune, SensorBomb, ShortSighted, Presbyopia
 
 	<Name>ProjectMoon
 	<Detail>
@@ -143,6 +143,10 @@
 
 	<Name>黑咪 o.o
 	<Detail>准备好进入这场精彩的梦中了吗~
+
+	<Name>异格凯尔嘻
+	<Detail>这是什么抛瓦？
+
 <Stage>SpecialThanks
 	<Entry>宣传
 		<Name>寂空

@@ -28,7 +28,7 @@
 
 	<Name>Quaeledy
 	<Detail>The number you reached The Outsider is outside the service area.
-	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun
+	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun, PupaLizard, IntenseSituation, FlameThrower, FlamePurification, BombMania
 	
 	<Name>Sunday
 	<Detail>Devourer of divine wisdom σ( ᑒ )
@@ -48,7 +48,7 @@
 
 	<Name>Fancycat
 	<Detail>Thank you all:3
-	<BuffIDs>LavaImmune, SensorBomb
+	<BuffIDs>LavaImmune, SensorBomb, ShortSighted, Presbyopia
 
 	<Name>ProjectMoon
 	<Detail>
@@ -140,6 +140,10 @@
 
 	<Name>BlackCat o.o
 	<Detail>Are you ready to enter this wonderful dream? ~
+
+	<Name>sp.Kal'tist:)
+	<Detail>What form of the POWER is this？
+
 <Stage>SpecialThanks
 	<Entry>Publicize
 		<Name>Serion

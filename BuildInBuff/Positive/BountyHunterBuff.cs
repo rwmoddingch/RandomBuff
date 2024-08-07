@@ -74,7 +74,9 @@ namespace BuiltinBuffs.Positive
                 foreach(var creature in room.creatures)
                 {
                     if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat ||
-                        creature.creatureTemplate.type == CreatureTemplate.Type.Overseer)
+                        creature.creatureTemplate.type == CreatureTemplate.Type.Overseer ||
+                        creature.creatureTemplate.smallCreature || 
+                        creature.state.dead)
                         continue;
                     lst.Add(creature);
                 }
