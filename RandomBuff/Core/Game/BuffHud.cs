@@ -48,18 +48,23 @@ namespace RandomBuff.Core.Game
             }
         }
 
+        string FormateFreePickTitle(int pickedcount)
+        {
+            return string.Format(
+                        BuffResourceString.Get("BuffHUD_FreePick"), pickedcount,
+                        BuffConfigManager.GetFreePickCount(BuffPoolManager.Instance.GameSetting.gachaTemplate.PocketPackMultiply));
+        }
+
         public void NewGame(SlugcatStats.Name saveName)
         {
             var setting = BuffPoolManager.Instance.GameSetting.gachaTemplate;
 
             if (BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply) != 0)
             {
-                pocket = new CardPocket(new List<BuffID>(), string.Format(
-                        BuffResourceString.Get("BuffHUD_FreePick"),
-                        BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply)), (
+                pocket = new CardPocket(new List<BuffID>(), FormateFreePickTitle(0), (
                         (all, _, _) =>
                         {
-                            if(all == null)
+                            if (all == null)
                                 return;
                             foreach (var card in all)
                                 card.CreateNewBuff();
@@ -68,7 +73,13 @@ namespace RandomBuff.Core.Game
                         }),
                     BuffCard.normalScale * 0.5f, new Vector2(400f, Custom.rainWorld.screenSize.y - 200),
                     new Vector2(Custom.rainWorld.screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f),
-                    BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply));
+                    BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply))
+                { 
+                    onSelectedBuffChange = (lst) =>
+                    {
+                        pocket.Title = FormateFreePickTitle(lst.Count);
+                    }
+                };
                 hud.fContainers[1].AddChild(pocket.Container);
                 pocket.SetShow(true);
 

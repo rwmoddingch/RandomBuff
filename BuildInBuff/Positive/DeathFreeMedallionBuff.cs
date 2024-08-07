@@ -91,44 +91,6 @@ namespace BuiltinBuffs.Positive
     internal class DeathFreeMedallionBuffData : BuffData
     {
         public override BuffID ID => DeathFreeMedallionIBuffEntry.deathFreeMedallionBuffID;
-
-        [CustomBuffConfigEnum(typeof(CreatureTemplate.Type),"Slugcat")]
-        public CreatureTemplate.Type WawaTest
-        {
-            get;
-            set;
-        }
-
-        [CustomBuffConfigRange(1f, 0f, 3f)]
-        [CustomBuffConfigInfo("RangeTest", "this is a range value test")]
-        public float WawaValueRangeTest
-        {
-            get;
-        }
-
-        public DeathFreeMedallionBuffData()
-        {
-            //WawaTest = CreatureTemplate.Type.BigEel;
-            //BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
-
-            //try
-            //{
-            //    throw new Exception("Sdsdsd");
-            //}
-            //catch (Exception e)
-            //{
-
-            //    BuffPlugin.LogError(e);
-            //}
-
-        }
-
-        public override void DataLoaded(bool newData)
-        {
-            base.DataLoaded(newData);
-            //BuffPlugin.Log($"Get wawaTest : {WawaTest}");
-
-        }
     }
 
     internal class DeathFreeMedallionIBuffEntry : IBuffEntry
@@ -314,7 +276,7 @@ namespace BuiltinBuffs.Positive
                 //creature.Die();
             }
 
-            if (room.game.cameras[0].room == room)
+            if (room.BeingViewed)
             {
                 room.game.cameras[0].ApplyFade();
 
@@ -323,6 +285,8 @@ namespace BuiltinBuffs.Positive
                 else
                     effect.amount = 1f;
             }
+            else
+                effect.amount = 0f;
   
             if (currentStage == Stage.Prepare)
                 PrepareUpdate();

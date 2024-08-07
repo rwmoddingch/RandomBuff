@@ -64,7 +64,7 @@ BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
 
 //BuffHUD
-BuffHUD_FreePick|选择初始卡牌（不多于{0}张）
+BuffHUD_FreePick|选择初始卡牌（{0}/{1}）
 
 //BuffModeSelect
 Mode_Free|自由模式

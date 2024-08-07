@@ -24,6 +24,7 @@ namespace RandomBuff.Render.UI.Component
         public Vector2 hoverPos;
         public Vector2 anchor;
         public CardPocketCallBack updateSelectedBuffsCallBack;
+        public Action<List<BuffID>> onSelectedBuffChange;
         public Action<bool> toggleShowCallBack;
 
         bool show = false;
@@ -448,9 +449,15 @@ namespace RandomBuff.Render.UI.Component
         public void ToggleSelectBuff(BuffID buffID)
         {
             if(CurrentSelectedBuffs.Contains(buffID))
+            {
                 CurrentSelectedBuffs.Remove(buffID);
+                pocket.onSelectedBuffChange?.Invoke(CurrentSelectedBuffs);
+            }
             else if(maxSelectedCount == -1 || CurrentSelectedBuffs.Count < maxSelectedCount)
+            {
                 CurrentSelectedBuffs.Add(buffID);
+                pocket.onSelectedBuffChange?.Invoke(CurrentSelectedBuffs);
+            }
         }
 
         public bool IsBuffSelected(BuffID buffID)
@@ -1433,7 +1440,7 @@ namespace RandomBuff.Render.UI.Component
                 widthChangeAnim.Destroy();
 
             initWidth = width;
-            targetWidth = LabelTest.GetWidth(title.text) + CardPocket.gap * 2f;
+            targetWidth = LabelTest.GetWidth(title.text, true) + CardPocket.gap * 2f;
 
             widthChangeAnim = AnimMachine.GetTickAnimCmpnt(0, 10, autoDestroy: true).BindActions(OnAnimUpdate: WidthChangeAnimUpdateFunc, OnAnimFinished: WidthChangeAnimFinishFunc).BindModifier(Helper.LerpEase);
         }

@@ -10,6 +10,7 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using UnityEngine;
 using RWCustom;
+using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Positive
 {
@@ -45,6 +46,9 @@ namespace BuiltinBuffs.Positive
             c1.Emit(OpCodes.Ldloc, 73);
             c1.EmitDelegate<Action<AbstractSpear>>((abSpear) =>
             {
+                if (Random.value > 0.2f)
+                    return;
+
                 abSpear.explosive = false;
                 abSpear.electric = false;
                 abSpear.hue = Mathf.Lerp(0.35f, 0.6f, Custom.ClampedRandomVariation(0.5f, 0.5f, 2f));
