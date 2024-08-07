@@ -16,13 +16,18 @@ namespace RandomBuff.Core.GachaMenu
 {
     internal class GachaMenu : Menu.Menu
     {
-
         private List<BuffID> picked = new ();
+
         BuffSlotTitle slotTitle;
+        RainEffect rainEffect;
 
         public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, BuffEnums.ProcessID.GachaMenuID)
         {
             pages.Add(new Menu.Page(this, null, "GachaMenu", 0));
+
+            rainEffect = new RainEffect(this, pages[0]);
+            pages[0].subObjects.Add(rainEffect);
+
             pages[0].subObjects.Add(exitButton = new SimpleButton(this, pages[0], "Exit", "ExitButton", 
                 new Vector2(ContinueAndExitButtonsXPos - 320f - manager.rainWorld.options.SafeScreenOffset.x, 50f), new Vector2(100f, 30f)));
             this.lastID = lastID;
@@ -40,6 +45,12 @@ namespace RandomBuff.Core.GachaMenu
             currentPacket = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket;
             if(currentPacket.positive.pickTimes == 0)
                 positive = false;
+
+            AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>
+            {
+                rainEffect.rainFade = Custom.SCurve(t.Get(), 0.8f) * 0.3f;
+            });
+
             NewPicker();
         }
 

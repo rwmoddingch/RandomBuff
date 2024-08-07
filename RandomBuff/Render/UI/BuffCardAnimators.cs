@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI
@@ -118,15 +119,11 @@ namespace RandomBuff.Render.UI
     #region InGameSlot
     internal class InGameSlotHideAnimator : BuffCardAnimator
     {
-        bool rotationFinished;
-        bool positionFinished;
-        bool scaleFinished;
-
         float targetScale;
         Vector2 targetPosition;
 
         InGameSlotInteractionManager InGameSlotInteractionManager => buffCard.interactionManager as InGameSlotInteractionManager;
-
+        BuffCardTransformSmoother smoother;
         public InGameSlotHideAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
             buffCard.Highlight = false;
@@ -136,32 +133,24 @@ namespace RandomBuff.Render.UI
             buffCard.KeyBinderFlash = false;
             buffCard.UpdateGrey();
 
+            smoother = new BuffCardTransformSmoother(buffCard);
+
             targetScale = BuffCard.normalScale * 0.1f;
             targetPosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * InGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
         }
 
+        public override void Update()
+        {
+            smoother.LerpRotation(Vector3.zero, 0.15f);
+            smoother.LerpPos(targetPosition, 0.15f);
+            smoother.LerpScale(targetScale, 0.15f);
+        }
+
         public override void GrafUpdate(float timeStacker)
         {
-            if (!rotationFinished)
-            {
-                buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, Vector3.zero, 0.1f);
-                if (Mathf.Abs(buffCard.Rotation.x) < 0.01f && Mathf.Abs(buffCard.Rotation.y) < 0.01f)
-                    rotationFinished = true;
-            }
-
-            if (!positionFinished)
-            {
-                buffCard.Position = Vector2.Lerp(buffCard.Position, targetPosition, 0.1f);
-                if (Mathf.Abs(buffCard.Position.x - targetPosition.x) < 0.01f && Mathf.Abs(buffCard.Position.y - targetPosition.y) < 0.01f)
-                    positionFinished = true;
-            }
-
-            if (!scaleFinished)
-            {
-                buffCard.Scale = Mathf.Lerp(buffCard.Scale, targetScale, 0.1f);
-                if (Mathf.Abs(buffCard.Scale - targetScale) < 0.01f)
-                    scaleFinished = true;
-            }
+            buffCard.Rotation = smoother.SmoothRotation(timeStacker);
+            buffCard.Position = smoother.SmoothPos(timeStacker);
+            buffCard.Scale = smoother.SmoothScale(timeStacker);
         }
     }
 
@@ -183,6 +172,7 @@ namespace RandomBuff.Render.UI
         Vector3 targetRotation = Vector3.zero;
 
         InGameSlotInteractionManager inGameSlotInteractionManager;
+        BuffCardTransformSmoother smoother;
 
         public InGameSlotShowAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -193,6 +183,7 @@ namespace RandomBuff.Render.UI
             buffCard.KeyBinderFlash = false;
             buffCard.UpdateGrey();
 
+            smoother = new BuffCardTransformSmoother(buffCard);
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
         }
 
@@ -202,18 +193,17 @@ namespace RandomBuff.Render.UI
                 buffCard.Highlight = true;
             else if (!buffCard.CurrentFocused && buffCard.Highlight)
                 buffCard.Highlight = false;
+
+            smoother.LerpRotation(targetRotation, 0.15f);
+            smoother.LerpPos(TargetPosition, 0.15f);
+            smoother.LerpScale(TargetScale, 0.15f);
         }
 
         public override void GrafUpdate(float timeStacker)
         {
-            if (Mathf.Abs(buffCard.Position.x - TargetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - TargetPosition.y) > 0.01f)
-                buffCard.Position = Vector2.Lerp(buffCard.Position, TargetPosition, 0.1f);
-
-            if (Mathf.Abs(buffCard.Scale - TargetScale) > 0.01f)
-                buffCard.Scale = Mathf.Lerp(buffCard.Scale, TargetScale, 0.1f);
-
-            if (Mathf.Abs(buffCard.Rotation.x - targetRotation.x) > 0.01f || Mathf.Abs(buffCard.Rotation.y - targetRotation.y) > 0.01f)
-                buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, targetRotation, 0.1f);
+            buffCard.Rotation = smoother.SmoothRotation(timeStacker);
+            buffCard.Position = smoother.SmoothPos(timeStacker);
+            buffCard.Scale = smoother.SmoothScale(timeStacker);
         }
     }
 
@@ -228,6 +218,7 @@ namespace RandomBuff.Render.UI
         bool flip;
 
         InGameSlotInteractionManager inGameSlotInteractionManager;
+        BuffCardTransformSmoother smoother;
 
         public InGameSlotExclusiveShowAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -241,6 +232,7 @@ namespace RandomBuff.Render.UI
             buffCard.UpdateGraphText();
             buffCard.StackerAddOne = false;
 
+            smoother = new BuffCardTransformSmoother(buffCard);
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
             buffCard.onMouseSingleClick += OnSingleClickFlip;
         }
@@ -252,18 +244,17 @@ namespace RandomBuff.Render.UI
                 buffCard.KeyBinderFlash = true;
             else
                 buffCard.KeyBinderFlash = false;
+
+            smoother.LerpRotation(TargetRotation, 0.15f);
+            smoother.LerpPos(targetPosition, 0.15f);
+            smoother.LerpScale(targetScale, 0.15f);
         }
 
         public override void GrafUpdate(float timeStacker)
         {
-            if (Mathf.Abs(buffCard.Rotation.x - TargetRotation.x) > 0.01f || Mathf.Abs(buffCard.Rotation.y - TargetRotation.y) > 0.01f)
-                buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, TargetRotation, 0.1f);
-
-            if (Mathf.Abs(buffCard.Position.x - targetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - targetPosition.y) > 0.01f)
-                buffCard.Position = Vector2.Lerp(buffCard.Position, targetPosition, 0.1f);
-
-            if (Mathf.Abs(buffCard.Scale - targetScale) > 0.01f)
-                buffCard.Scale = Mathf.Lerp(buffCard.Scale, targetScale, 0.1f);
+            buffCard.Rotation = smoother.SmoothRotation(timeStacker);
+            buffCard.Position = smoother.SmoothPos(timeStacker);
+            buffCard.Scale = smoother.SmoothScale(timeStacker);
         }
 
         void OnSingleClickFlip()
@@ -327,6 +318,7 @@ namespace RandomBuff.Render.UI
         Vector3 TargetRotation => basicRotation + (buffCard.CurrentFocused ? new Vector3((30f * buffCard.LocalMousePos.y - 15f) * (flip ? -1f : 1f), -(30f * buffCard.LocalMousePos.x - 15f), 0f) : Vector3.zero);
 
         bool flip;
+        BuffCardTransformSmoother smoother;
 
         public CardPickerShowAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -348,6 +340,11 @@ namespace RandomBuff.Render.UI
                 linkedCard = additional;
             if (cardPickerInteractionManager.Additional2MajorMapper.TryGetValue(buffCard, out var major))
                 linkedCard = major;
+
+            buffCard.Scale = 0f;
+            buffCard.Rotation = basicRotation;
+            buffCard.Position = TargetPosition + Vector2.down * 200f;
+            smoother = new BuffCardTransformSmoother(buffCard);
         }
 
         public override void Update()
@@ -371,12 +368,17 @@ namespace RandomBuff.Render.UI
                     basicRotation = new Vector3(0f, 360f, 0f);
                     initFlipTimer++;
                 }
+                smoother.LerpScale(TargetScale, 0.15f);
+                smoother.LerpRotation(TargetRotation, 0.15f);
+                smoother.LerpPos(TargetPosition, 0.15f);
             }
 
             if (CurrentFocused && !buffCard.Highlight)
                 buffCard.Highlight = true;
             if (!CurrentFocused && buffCard.Highlight)
                 buffCard.Highlight = false;
+
+            
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -384,14 +386,9 @@ namespace RandomBuff.Render.UI
             if (delayTimer < initDelay)
                 return;
 
-            if (Mathf.Abs(buffCard.Rotation.x - TargetRotation.x) > 0.01f || Mathf.Abs(buffCard.Rotation.y - TargetRotation.y) > 0.01f)
-                buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, TargetRotation, 0.1f);
-
-            if (Mathf.Abs(buffCard.Position.x - TargetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - TargetPosition.y) > 0.01f)
-                buffCard.Position = Vector2.Lerp(buffCard.Position, TargetPosition, 0.1f);
-
-            if (Mathf.Abs(buffCard.Scale - TargetScale) > 0.01f)
-                buffCard.Scale = Mathf.Lerp(buffCard.Scale, TargetScale, 0.1f);
+            buffCard.Rotation = smoother.SmoothRotation(timeStacker);
+            buffCard.Position = smoother.SmoothPos(timeStacker);
+            buffCard.Scale = smoother.SmoothScale(timeStacker);
         }
 
         void OnSingleClickFlip()
@@ -420,6 +417,8 @@ namespace RandomBuff.Render.UI
     {
         bool finished;
         float f = 0f;
+        float lastF = 0f;
+        int counter;
 
         public CardPickerDisappearAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -430,21 +429,36 @@ namespace RandomBuff.Render.UI
             buffCard.Highlight = false;
         }
 
-        public override void GrafUpdate(float timeStacker)
+        public override void Update()
         {
+            base.Update();
             if (finished)
             {
                 buffCard.interactionManager.DismanageCard(buffCard);
                 buffCard.Destroy();
             }
 
-            f = Mathf.Lerp(f, 1f, 0.05f);
+            lastF = f;
+            if(counter < 40)
+            {
+                counter++;
+                if (counter == 40)
+                    finished = true;
+            }
+            f = counter / 40f;
+        }
 
-            buffCard.Rotation = Vector3.Lerp(initRotation, Vector3.zero, f);
-            buffCard.Position = Vector2.Lerp(initPosition, new Vector2(2000, -200), f);
-            buffCard.Alpha = 1f - f;
-            if (Mathf.Abs(f - 1) < 0.01f)
-                finished = true;
+        public override void GrafUpdate(float timeStacker)
+        {
+            float smoothF = Helper.EaseInOutCubic(Mathf.Lerp(lastF, f, timeStacker));
+
+            buffCard.Rotation = Vector3.Lerp(initRotation, Vector3.zero, smoothF);
+
+            float x = Mathf.Lerp(initPosition.x, -200, Mathf.Pow(smoothF, 3f));
+            float y = Mathf.Lerp(initPosition.y, -200, smoothF);
+
+            buffCard.Position = new Vector2(x, y);
+            buffCard.Alpha = 1f - smoothF;
         }
     }
     #endregion
@@ -643,12 +657,12 @@ namespace RandomBuff.Render.UI
             if(currentState == State.FlyIn)
             {
                 float t = Mathf.Lerp((float)lastTimer / flyInTime, (float)timer / flyInTime, timeStacker);
-                buffCard.Position = Vector2.Lerp(initPosition, targetPosition, Helper.LerpEase(t));
+                buffCard.Position = Vector2.Lerp(initPosition, targetPosition, Helper.EaseInOutCubic(t));
             }
             else if(currentState == State.Turn)
             {
                 float t = Mathf.Lerp((float)lastTimer / turnTime, (float)timer / turnTime, timeStacker);
-                buffCard.Rotation = Vector3.Lerp(initRotation, targetRotation, Helper.LerpEase(t));
+                buffCard.Rotation = Vector3.Lerp(initRotation, targetRotation, Helper.EaseInOutCubic(t));
             }
         }
 
@@ -665,6 +679,8 @@ namespace RandomBuff.Render.UI
         static int hideTimer = 120;
         static int totalDisplayTime = 160;
 
+        BuffCardTransformSmoother smoother;
+
         CommmmmmmmmmmmmmpleteInGameSlot.TriggerBuffAnimSlot Slot;
 
         Vector2 halfScreen = Custom.rainWorld.screenSize / 2f;
@@ -679,6 +695,7 @@ namespace RandomBuff.Render.UI
         float targetScale;
         float targetAlpha;
         int timer;
+        float alpha, lastAlpha;
 
         float lerpMulti = 1f;
 
@@ -708,6 +725,8 @@ namespace RandomBuff.Render.UI
             buffCard.Alpha = 0f;
             targetAlpha = 1f;
             lerpMulti = 2f;
+            smoother = new BuffCardTransformSmoother(buffCard);
+            lastAlpha = alpha = buffCard.Alpha;
         }
 
         public override void Update()
@@ -732,6 +751,11 @@ namespace RandomBuff.Render.UI
                 targetAlpha = 0f;
                 lerpMulti = 1f;
             }
+            smoother.LerpRotation(targetRotation, 0.15f);
+            smoother.LerpPos(TargetPosition, 0.15f);
+            smoother.LerpScale(targetScale, 0.15f);
+            lastAlpha = alpha;
+            alpha = Mathf.Lerp(alpha, targetAlpha, 0.15f * lerpMulti);
         }
 
         void IntoStage2()
@@ -749,17 +773,12 @@ namespace RandomBuff.Render.UI
         {
             base.GrafUpdate(timeStacker);
 
-            if (Mathf.Abs(buffCard.Rotation.x - targetRotation.x) > 0.01f || Mathf.Abs(buffCard.Rotation.y - targetRotation.y) > 0.01f)
-                buffCard.Rotation = Vector3.Lerp(buffCard.Rotation, targetRotation, 0.1f * lerpMulti);
+            buffCard.Rotation = smoother.SmoothRotation(timeStacker);
+            buffCard.Position = smoother.SmoothPos(timeStacker);
+            buffCard.Scale = smoother.SmoothScale(timeStacker);
 
-            if (Mathf.Abs(buffCard.Position.x - TargetPosition.x) > 0.01f || Mathf.Abs(buffCard.Position.y - TargetPosition.y) > 0.01f)
-                buffCard.Position = Vector2.Lerp(buffCard.Position, TargetPosition, 0.1f * lerpMulti);
-
-            if (Mathf.Abs(buffCard.Scale - targetScale) > 0.01f)
-                buffCard.Scale = Mathf.Lerp(buffCard.Scale, targetScale, 0.1f * lerpMulti);
-
-            if (Mathf.Abs(buffCard.Alpha - targetAlpha) > 0.01f)
-                buffCard.Alpha = Mathf.Lerp(buffCard.Alpha, targetAlpha, 0.1f * lerpMulti);
+            float smoothalpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+            buffCard.Alpha = smoothalpha;
         }
     }
 
@@ -895,4 +914,51 @@ namespace RandomBuff.Render.UI
         }
     }
     #endregion
+
+    internal class BuffCardTransformSmoother
+    {
+        Vector2 lastPos, pos;
+        Vector3 lastRotation, rotation;
+        float lastScale, scale;
+
+        public BuffCardTransformSmoother(BuffCard buffCard)
+        {
+            lastPos = pos = buffCard.Position;
+            lastRotation = rotation = buffCard.Rotation;
+            lastScale = scale = buffCard.Scale;
+        }
+
+        public void LerpPos(Vector2 target, float t)
+        {
+            lastPos = pos;
+            pos = Vector2.Lerp(pos, target, t);
+        }
+
+        public Vector2 SmoothPos(float timeStacker)
+        {
+            return Vector2.Lerp(lastPos, pos, timeStacker);
+        }
+
+        public void LerpRotation(Vector3 target, float t)
+        {
+            lastRotation = rotation;
+            rotation = Vector3.Lerp(rotation, target, t);
+        }
+
+        public Vector3 SmoothRotation(float timeStacker)
+        {
+            return Vector3.Lerp(lastRotation, rotation, timeStacker);
+        }
+
+        public void LerpScale(float target, float t)
+        {
+            lastScale = scale;
+            scale = Mathf.Lerp(scale, target, t);
+        }
+
+        public float SmoothScale(float timeStacker)
+        {
+            return Mathf.Lerp(lastScale, scale, timeStacker);
+        }
+    }
 }

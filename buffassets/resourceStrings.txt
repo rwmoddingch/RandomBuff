@@ -140,6 +140,7 @@ DisplayName_Ascend|Ascend all creatures in {0} regions
 DisplayName_AscendOracle|Ascend Pebbles and Moon
 DisplayName_Distance|Move at least {0} meters
 DisplayName_Distance_Faster|Move at least {0} meters while the card grants a speed boost
+DisplayName_ScorchCreature|Using heat to burn {0} creatures
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -189,6 +190,8 @@ Mission_Display_LawnCleaner|LAWN CLEANER
 Mission_Display_TripleAffirmation|TRIPLE AFFIRMATION
 Mission_Display_InHurry|HURRIED AND FLUSTERED
 Mission_Display_SurvivalOfFittest|SURVIVAL OF THE FITTEST
+Mission_Display_SlugOfTheFlame|SLUG OF THE FLAME
+
 //Credit
 CreditTitle_Intro|Random Buff
 CreditTitle_Coding|Coding

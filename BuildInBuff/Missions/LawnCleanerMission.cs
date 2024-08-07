@@ -27,7 +27,7 @@ namespace BuiltinBuffs.Missions
 
         public override SlugcatStats.Name BindSlug => null;
 
-        public override Color TextCol => Color.white;
+        public override Color TextCol => Helper.GetRGBColor(74, 185, 109);
 
         public override string MissionName => BuffResourceString.Get("Mission_Display_LawnCleaner");
 

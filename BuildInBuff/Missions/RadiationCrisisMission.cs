@@ -17,13 +17,13 @@ namespace BuiltinBuffs.Missions
     internal class RadiationCrisisMission : Mission, IMissionEntry
     {
         public static MissionID radiationCrisisMissionID = new MissionID("RadiationCrisis", true);
-        public static Color missionCol = Helper.GetRGBColor(153, 100, 100);
+        public static Color missionCol = Helper.GetRGBColor(35, 255, 153);
 
         public override MissionID ID => radiationCrisisMissionID;
 
         public override SlugcatStats.Name BindSlug => null;
 
-        public override Color TextCol => Color.white;
+        public override Color TextCol => missionCol;
 
         public override string MissionName => BuffResourceString.Get("Mission_Display_RadiationCrisis");
 

@@ -25,7 +25,7 @@ namespace BuiltinBuffs.Missions
 
         public override MissionID ID => InHurry;
         public override SlugcatStats.Name BindSlug { get; }
-        public override Color TextCol { get; }
+        public override Color TextCol => Helper.GetRGBColor(168, 175, 255);
         public override string MissionName => BuffResourceString.Get("Mission_Display_InHurry");
 
         public InHurryMission()

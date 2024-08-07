@@ -23,7 +23,7 @@ namespace RandomBuff.Render.UI
             Vector2 screenSize = Custom.rainWorld.screenSize;
             titlePos = new Vector2(screenSize.x * 0.5f, screenSize.y * 0.8f);
 
-            cardTitle = new CardTitle(Container, BuffCard.normalScale * 0.2f, titlePos, 0.2f, 0.5f, 10, 3);
+            cardTitle = new CardTitle(Container, CardTitle.GetNormScale(0.2f), titlePos, 0.2f, 0.5f, CardTitle.GetNormFlipCounter(false), CardTitle.GetNormFlipDelay(false), CardTitle.GetNormSpanAdjust(0.2f));
         }
 
         public void ChangeTitle(string newTitle, bool recordAsLast)

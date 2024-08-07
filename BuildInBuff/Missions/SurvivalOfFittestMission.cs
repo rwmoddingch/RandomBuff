@@ -7,6 +7,7 @@ using BuiltinBuffs.Duality;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
@@ -21,7 +22,7 @@ namespace BuiltinBuffs.Missions
         public static readonly MissionID SurvivalOfFittest = new MissionID(nameof(SurvivalOfFittest), true);
         public override MissionID ID => SurvivalOfFittest;
         public override SlugcatStats.Name BindSlug { get; }
-        public override Color TextCol { get; }
+        public override Color TextCol => Color.white;
         public override string MissionName => BuffResourceString.Get("Mission_Display_SurvivalOfFittest");
 
 
@@ -83,7 +84,7 @@ namespace BuiltinBuffs.Missions
             {
                 var id = RXRandom.AnyItem(randomIds);
                 for(int i =0;i<4;i++)
-                    BuffDataManager.Instance.GetOrCreateBuffData(id);
+                    BuffPoolManager.Instance.CreateBuff(id,true);
             }
         }
 
