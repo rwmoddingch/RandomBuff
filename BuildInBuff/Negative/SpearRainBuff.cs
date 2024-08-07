@@ -173,7 +173,7 @@ namespace BuiltinBuffs.Negative
             emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
             emitter.ApplyParticleModule(new SetRandomLife(emitter, 40 * 5, 40 * 6));
 
-            emitter.ApplyParticleModule(new SetConstColor(emitter, spearColor));
+            emitter.ApplyParticleModule(new FollowColor(emitter, this));
             emitter.ApplyParticleModule(new DispatchSpearPos(emitter, this));
             emitter.ApplyParticleModule(new SetRandomScale(emitter, 1f, 1f));
             emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, l) =>
@@ -228,6 +228,20 @@ namespace BuiltinBuffs.Negative
                         emitter.SpawnParticle();
                     }
                 }
+            }
+        }
+
+        internal class FollowColor : EmitterModule, IParticleInitModule
+        {
+            SpearRainModule spearRainModule;
+            public FollowColor(ParticleEmitter emitter, SpearRainModule spearRainModule) : base(emitter)
+            {
+                this.spearRainModule = spearRainModule;
+            }
+
+            public void ApplyInit(Particle particle)
+            {
+                particle.HardSetColor(spearRainModule.spearColor);
             }
         }
 
