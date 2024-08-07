@@ -236,9 +236,13 @@ namespace RandomBuff.Render.UI
             helpInfo = "";
             if(ID == InGame_OnMouseFocus)
             {
+              
                 BuffID id = Params[0] as BuffID;
+                var name = id.GetStaticData().CardInfos[InGameTranslator.LanguageID.English];
+                if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out var newName))
+                    name = newName;
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnMouseFocus");
-                helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<BuffID>", name.BuffName);
                 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
                 helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
@@ -254,9 +258,13 @@ namespace RandomBuff.Render.UI
 
                 if(BuffConfigManager.GetStaticData(id).Triggerable)
                 {
+                    var name = id.GetStaticData().CardInfos[InGameTranslator.LanguageID.English];
+                    if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage,out var newName))
+                        name = newName;
+
                     helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_BindKey");
                     helpInfo = Regex.Replace(helpInfo, "<KEYBINDER_KEY>", BuffOptionInterface.Instance.KeyBindKey.Value);
-                    helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
+                    helpInfo = Regex.Replace(helpInfo, "<BuffID>", name.BuffName);
                 }
 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
