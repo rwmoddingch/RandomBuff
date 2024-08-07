@@ -151,7 +151,6 @@
 		<Detail>wawa 2
 	<Entry>早期宣传
 		<Name>气球
-		<Detail>wawa 3
 	<Entry>字体使用
 		<Name>峰广明锐体
 		<Name>NotoSans Hans

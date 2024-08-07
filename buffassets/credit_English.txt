@@ -147,8 +147,7 @@
 		<Name>Whoking
 		<Detail>wawa 2
 	<Entry>Early publicize
-		<Name>气球
-		<Detail>wawa 3
+		<Name>qiqiu
 	<Entry>Font use
 		<Name>峰广明锐体
 		<Name>NotoSans Hans
