@@ -40,8 +40,10 @@ namespace RandomBuff.Credit
                         data = new CodingStageData() { stageType = CreditStageType.Coding };
                     else if (creditStageType == CreditStageType.ArtWorks)
                         data = new ArtWorksStageData() { stageType = CreditStageType.ArtWorks };
-                    else if(creditStageType == CreditStageType.PlayTest)
+                    else if (creditStageType == CreditStageType.PlayTest)
                         data = new PlayTestStageData() { stageType = CreditStageType.PlayTest };
+                    else if (creditStageType == CreditStageType.SpecialThanks)
+                        data = new SpecialThanksStageData() { stageType = CreditStageType.SpecialThanks };
 
                     creditStagesAndData.Add(new KeyValuePair<CreditStageType, CreditStageData>(creditStageType, data));
                 }
@@ -65,6 +67,12 @@ namespace RandomBuff.Credit
                         (data as PlayTestStageData).names.Add(result);
                         (data as PlayTestStageData).details.Add(string.Empty);
                     }
+                    else if(type == CreditStageType.SpecialThanks)
+                    {
+                        BuffPlugin.Log($"new name at specialthanks : {result}");
+                        (data as SpecialThanksStageData).entryNames.Last().Add(result);
+                        (data as SpecialThanksStageData).entryDetails.Last().Add(string.Empty);
+                    }
                 }
                 else if(MatchAndReplaceMark(trimedLine, "<Detail>", out result))
                 {
@@ -82,6 +90,12 @@ namespace RandomBuff.Credit
                     {
                         (data as PlayTestStageData).details[(data as PlayTestStageData).details.Count - 1] = result;
                     }
+                    else if (type == CreditStageType.SpecialThanks)
+                    {
+                        var sData = data as SpecialThanksStageData;
+                        int lastIndex = sData.entryNames.Last().Count - 1;
+                        sData.entryDetails.Last()[lastIndex] = result;
+                    }
                 }
                 else if(MatchAndReplaceMark(trimedLine, "<BuffIDs>", out result))
                 {
@@ -97,7 +111,16 @@ namespace RandomBuff.Credit
                     }
                     data.buffIDs[data.buffIDs.Count - 1] = buffIDs.ToArray();
                 }
+                else if(MatchAndReplaceMark(trimedLine, "<Entry>", out result))
+                {
+                    var data = creditStagesAndData.Last().Value as SpecialThanksStageData;
+
+                    data.entries.Add(result);
+                    data.entryNames.Add(new List<string>());
+                    data.entryDetails.Add(new List<string>());
+                }
             }
+            creditStagesAndData.Add(new KeyValuePair<CreditStageType, CreditStageData>(CreditStageType.ThankYou, new CreditStageData() { stageType = CreditStageType.ThankYou }));
         }
 
         public bool MatchAndReplaceMark(string orig, string mark, out string result)
@@ -139,6 +162,12 @@ namespace RandomBuff.Credit
             public List<string> names = new List<string>();
             public List<string> details = new List<string>();
         }
+        public sealed class SpecialThanksStageData : CreditStageData
+        {
+            public List<string> entries = new List<string>();
+            public List<List<string>> entryNames = new List<List<string>>();
+            public List<List<string>> entryDetails = new List<List<string>>();
+        }
     }
 
     public class CreditStageType : ExtEnum<CreditStageType>
@@ -147,6 +176,8 @@ namespace RandomBuff.Credit
         public static readonly CreditStageType ArtWorks = new CreditStageType("ArtWorks", true);
         public static readonly CreditStageType PlayTest = new CreditStageType("PlayTest", true);
         public static readonly CreditStageType Intro = new CreditStageType("Intro", true);
+        public static readonly CreditStageType SpecialThanks = new CreditStageType("SpecialThanks", true);
+        public static readonly CreditStageType ThankYou = new CreditStageType("ThankYou", true);
 
         public CreditStageType(string value, bool register = false) : base(value, register)
         {

@@ -9,10 +9,13 @@ namespace RandomBuff.Credit.CreditObject
 {
     internal class NameDetailLabel : BuffCreditStageObject
     {
-        static float gap = 15f;
+        protected static float gap = 15f;
 
-        TMProFLabel nameLabel;
-        TMProFLabel detailLabel;
+        protected string string1;
+        protected string string2;
+
+        protected TMProFLabel label_1;
+        protected TMProFLabel label_2;
 
         float width1;
 
@@ -28,15 +31,27 @@ namespace RandomBuff.Credit.CreditObject
         float t;
         int updatePosCounter = 4;
 
-        public NameDetailLabel(Menu.Menu menu, BuffCreditStage owner, Vector2 endPos, float inStageEnterTime, float lifeTime, string name, string detail) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
+        public NameDetailLabel(Menu.Menu menu, BuffCreditStage owner, Vector2 endPos, float inStageEnterTime, float lifeTime, string string1, string string2) : base(menu, owner, Vector2.zero, inStageEnterTime, lifeTime)
         {
             denPos = endPos;
             hangPos = endPos + Vector2.right * 100f;
             lastPos = pos = hangPos;
+            this.string1 = string1;
+            this.string2 = string2;
 
-            Container.AddChild(nameLabel = new TMProFLabel(CardBasicAssets.TitleFont, name, new Vector2(1000f, 100f), 0.8f) { color = Color.white, alpha = 0f, Pivot = new Vector2(0f, 0.5f), Alignment = TMPro.TextAlignmentOptions.Left});
-            Container.AddChild(detailLabel = new TMProFLabel(CardBasicAssets.TitleFont, detail, new Vector2(1000f, 100f), 0.8f) { color = Color.white * 0.3f + Color.black * 0.7f, alpha = 0f, Pivot = new Vector2(0f, 0.5f), Alignment = TMPro.TextAlignmentOptions.Left });
-            width1 = nameLabel.TextRect.x + gap;
+            InitLabels();
+        }
+
+        public virtual void InitLabels()
+        {
+            Container.AddChild(label_1 = new TMProFLabel(CardBasicAssets.TitleFont, string1, new Vector2(1000f, 100f), 0.8f) { color = Color.white, alpha = 0f, Pivot = new Vector2(0f, 0.5f), Alignment = TMPro.TextAlignmentOptions.Left });
+            Container.AddChild(label_2 = new TMProFLabel(CardBasicAssets.TitleFont, string2, new Vector2(1000f, 100f), 0.8f) { color = Color.white * 0.3f + Color.black * 0.7f, alpha = 0f, Pivot = new Vector2(0f, 0.5f), Alignment = TMPro.TextAlignmentOptions.Left });
+            width1 = label_1.TextRect.x + gap;
+        }
+
+        public virtual void RecaculateTextRectParam()
+        {
+            width1 = label_1.TextRect.x + gap;
         }
 
         public override void Update()
@@ -49,12 +64,7 @@ namespace RandomBuff.Credit.CreditObject
                 updatePosCounter--;
                 if(updatePosCounter == 0)
                 {
-                    width1 = nameLabel.TextRect.x + gap;
-                    //nameLabel.tmpText.color = Color.white;
-                    //nameLabel.alpha = 0f;
-                    //detailLabel.tmpText.color = Color.white * 0.3f + Color.black * 0.7f;
-                    //detailLabel.alpha = 0f;
-                    BuffPlugin.Log($"NameDetailLabel  {detailLabel.Text}-{width1}");
+                    RecaculateTextRectParam();
                 }
             }
 
@@ -99,12 +109,12 @@ namespace RandomBuff.Credit.CreditObject
             if (removed)
                 return;
             Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
-            nameLabel.SetPosition(smoothPos);
-            detailLabel.SetPosition(smoothPos + new Vector2(width1, 0f));
+            label_1.SetPosition(smoothPos);
+            label_2.SetPosition(smoothPos + new Vector2(width1, 0f));
             
             float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
-            nameLabel.alpha = smoothAlpha;
-            detailLabel.alpha = smoothAlpha;
+            label_1.alpha = smoothAlpha;
+            label_2.alpha = smoothAlpha;
         }
 
         public override void RequestRemove()
@@ -117,8 +127,8 @@ namespace RandomBuff.Credit.CreditObject
         {
             if (removed)
                 return;
-            nameLabel.RemoveFromContainer();
-            detailLabel.RemoveFromContainer();
+            label_1.RemoveFromContainer();
+            label_2.RemoveFromContainer();
             base.RemoveSprites();
         }
     }

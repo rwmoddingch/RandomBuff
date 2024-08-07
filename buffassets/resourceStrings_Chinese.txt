@@ -203,6 +203,7 @@ CreditTitle_Coding|代码
 CreditTitle_ArtWorks|美术
 CreditTitle_PlayTest|游玩测试
 CreditTitle_SpecialThanks|特别感谢
+CreditTitle_ThanksForPlaying|感谢游玩！
 
 
 //BuffManual
