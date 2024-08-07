@@ -160,6 +160,8 @@ namespace RandomBuff.Core.GachaMenu
             }
             pickerSlots.Add(pickerSlot);
             container.AddChild(pickerSlot.Container);
+            if (pickerSlots.Count >= 2)
+                pickerSlot.Container.MoveBehindOtherNode(pickerSlots[pickerSlots.Count-1].Container); 
             inGameSlot.Container.MoveToFront();
         }
 
