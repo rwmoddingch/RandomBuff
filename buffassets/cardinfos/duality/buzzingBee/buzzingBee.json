@@ -1,0 +1,21 @@
+{
+    "FaceName": "BuzzingBee",
+    "ID" : "BuzzingBee",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFC90E",
+    
+  "MultiLayerFace": true,
+  "FaceLayer": 5,
+  "MaxFaceDepth": 1.7,
+  "FaceBackgroundColor": "120E01",
+    "Chinese" : {
+        "BuffName" : "扯线蜂到处飞",
+        "Description" : "扯线蜂的持续时间延长10倍"
+    },
+    "English": {
+        "BuffName" : "Bee is everywhere",
+        "Description" : "The duration of the Bee is increased by 10 times"
+    }
+}

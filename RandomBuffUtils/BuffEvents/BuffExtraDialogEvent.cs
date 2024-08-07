@@ -1,13 +1,7 @@
 ﻿using HUD;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static RandomBuffUtils.BuffEvent;
-using static System.Net.Mime.MediaTypeNames;
 using Random = UnityEngine.Random;
 
 namespace RandomBuffUtils.BuffEvents
@@ -44,7 +38,7 @@ namespace RandomBuffUtils.BuffEvents
 
     internal partial class BuffExtraDialogBoxEvent
     {
-        internal static Dictionary<SlugcatStats.Name, ExtraDialogBox> initedDialogBoxes = new Dictionary<SlugcatStats.Name, ExtraDialogBox>();
+        internal static Dictionary<int, ExtraDialogBox> initedDialogBoxes = new Dictionary<int, ExtraDialogBox>();
         internal static List<ExtraDialogBoxInstance> dialogBoxInstances = new List<ExtraDialogBoxInstance>();
         internal static List<ExtraDialogBox> extraDialogBoxes = new List<ExtraDialogBox>();
 
@@ -98,18 +92,19 @@ namespace RandomBuffUtils.BuffEvents
                 }
             }
             if (missingInstance)
-                dialogBoxInstances.Add(new ExtraDialogBoxInstance(player.slugcatStats.name));
+                dialogBoxInstances.Add(new ExtraDialogBoxInstance(player.slugcatStats.name, player.playerState.playerNumber));
         }
 
         static void CreateDialogBoxSingle(RoomCamera roomCamera, Player player)
         {
             var bindInstance = dialogBoxInstances.Find((instance) => instance.BindSlugcat == player.slugcatStats.name);
 
+
             if (bindInstance.actuallyCreateDialogBox)
             {
                 var dialogBox = new ExtraDialogBox(roomCamera.hud, roomCamera, player, Color.white);
 
-                initedDialogBoxes.Add(player.slugcatStats.name, dialogBox);
+                initedDialogBoxes.Add(player.playerState.playerNumber, dialogBox);
                 extraDialogBoxes.Add(dialogBox);
                 
                 roomCamera.hud.parts.Add(dialogBox);
@@ -133,20 +128,23 @@ namespace RandomBuffUtils.BuffEvents
 
     public class ExtraDialogBoxInstance//与slugcat绑定
     {
-        public SlugcatStats.Name BindSlugcat { get; private set; }
+        public SlugcatStats.Name BindSlugcat { get; }
+
+        public int BindPlayer { get; }
 
         public Color DefaultColor { get; internal set; } = Color.white;
         public Color CurrentColor => HasValue ? Value.currentColor : DefaultColor;
 
-        public bool HasValue => BuffExtraDialogBoxEvent.initedDialogBoxes.ContainsKey(BindSlugcat);
-        internal ExtraDialogBox Value => BuffExtraDialogBoxEvent.initedDialogBoxes[BindSlugcat];
+        public bool HasValue => BuffExtraDialogBoxEvent.initedDialogBoxes.ContainsKey(BindPlayer);
+        internal ExtraDialogBox Value => BuffExtraDialogBoxEvent.initedDialogBoxes[BindPlayer];
 
         internal bool actuallyCreateDialogBox;
 
-        internal ExtraDialogBoxInstance(SlugcatStats.Name name)
+        internal ExtraDialogBoxInstance(SlugcatStats.Name name, int bindPlayer)
         {
             BindSlugcat = name;
             BuffUtils.Log("BuffExtraDialogBoxEvent", $"Create instance for {name}, HasValue : {HasValue}");
+            BindPlayer = bindPlayer;
         }
 
         public void NewMessage(string text, float xOrientation, float yPos, int extraLinger)

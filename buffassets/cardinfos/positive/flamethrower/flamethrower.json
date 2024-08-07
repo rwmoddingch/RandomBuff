@@ -10,8 +10,8 @@
         "BuffName" : "喷火器",
         "Description" : "前置为燃点；触发后获得一个仅能同时存在一个的喷火器，重复召唤将会删去上一个"
     },
-    "English" : {
-        "BuffName" : "EjectionRock",
-        "Description" : "Pre-set to IgnitionPoint; triggered to gain a flamethrower that can only exist one at a time; repeated summoning will delete the previous one"
-    }
+  "English": {
+    "BuffName": "FlameThrower",
+    "Description": "Pre-set to IgnitionPoint; triggered to gain a flamethrower that can only exist one at a time; repeated summoning will delete the previous one"
+  }
 }

@@ -22,6 +22,8 @@ using BuiltinBuffs.Positive;
 using CustomSaveTx;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using static MonoMod.InlineRT.MonoModRule;
+using JollyCoop;
 
 namespace BuiltinBuffs.Duality
 {
@@ -31,11 +33,11 @@ namespace BuiltinBuffs.Duality
 
         public override BuffID ID => JellyfishShapedMutationBuffEntry.JellyfishShapedMutation;
 
-        public int JellyfishCatLevel
+        public float JellyfishCatLevel
         {
             get
             {
-                int num = 0;
+                float num = JellyfishShapedMutationBuffEntry.JellyfishShapedMutation.GetBuffData().StackLayer;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.BreathlessBuffEntry.Breathless))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.SuperCapacitanceBuffEntry.SuperCapacitance))
@@ -45,7 +47,7 @@ namespace BuiltinBuffs.Duality
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(HotDogBuff.WaterNobleBuffEntry.WaterNobleID))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HydrophobiaBuffEntry.Hydrophobia))
-                    num--;
+                    num = Mathf.Max(num * 0.5f, num - 1f);
                 return num;
             }
         }
@@ -88,8 +90,10 @@ namespace BuiltinBuffs.Duality
     {
         public override BuffID ID => JellyfishShapedMutationBuffEntry.JellyfishShapedMutation;
 
-        [JsonProperty]
-        public int dehydrationCycle;
+        [JsonProperty] public int dehydrationCycle_1;
+        [JsonProperty] public int dehydrationCycle_2;
+        [JsonProperty] public int dehydrationCycle_3;
+        [JsonProperty] public int dehydrationCycle_4;
     }
 
     internal class JellyfishShapedMutationBuffEntry : IBuffEntry
@@ -105,6 +109,10 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             On.SaveState.SessionEnded += SaveState_SessionEnded;
+            On.ShelterDoor.DoorClosed += ShelterDoor_DoorClosed;
+            On.RainWorldGame.Win += RainWorldGame_Win;
+
+            On.Creature.Violence += Creature_Violence;
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
@@ -135,15 +143,144 @@ namespace BuiltinBuffs.Duality
                 if (JellyfishCatFeatures.TryGetValue(player, out var jellyfishCat))
                 {
                     if (!jellyfishCat.HasContactWater)
-                        (BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData).dehydrationCycle++;
+                        jellyfishCat.DehydrationCycle++;
                     else
-                        (BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData).dehydrationCycle = 0;
-
-                    if ((BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData).dehydrationCycle == 2)
-                        survived = false;
+                        jellyfishCat.DehydrationCycle = 0;
+                    BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation DehydrationCycle: " + jellyfishCat.DehydrationCycle);
                 }
             }
             orig(self, game, survived, newMalnourished);
+        }
+
+        private static void ShelterDoor_DoorClosed(On.ShelterDoor.orig_DoorClosed orig, ShelterDoor self)
+        {
+            int dehydrationNum = 0;
+            foreach (var player in self.room.game.AlivePlayers.Select(i => i.realizedCreature as Player).Where(i => i != null))
+            {
+                if (JellyfishCatFeatures.TryGetValue(player, out var jellyfishCat))
+                {
+                    if (jellyfishCat.DehydrationCycle >= 2)
+                    {
+                        player.Die();
+                        dehydrationNum++;
+                    }
+                }
+            }
+            if (dehydrationNum > 0)
+            {
+                BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Number of players who have died due to dehydration: " + dehydrationNum);
+                if (ModManager.CoopAvailable)
+                {
+                    //简单模式和普通模式下，无人存活则死亡
+                    if (Custom.rainWorld.options.jollyDifficulty == Options.JollyDifficulty.EASY ||
+                        Custom.rainWorld.options.jollyDifficulty == Options.JollyDifficulty.NORMAL)
+                    {
+                        if (self.room.game.AlivePlayers.Count <= 0)
+                        {
+                            BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Failed Save!");
+                            self.room.game.GoToDeathScreen();
+                            return;
+                        }
+                    }
+                    //困难模式下，任意一人死亡则死亡
+                    else
+                    {
+                        BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Failed Save!");
+                        self.room.game.GoToDeathScreen();
+                        return;
+                    }
+                }
+                //非联机模式，死了肯定就是死了
+                else
+                {
+                    BuffUtils.Log("JellyfishShapedMutation","JellyfishShapedMutation Die of Dehydration! Failed Save!");
+                    self.room.game.GoToDeathScreen();
+                    return;
+                }
+            }
+            orig(self);
+        }
+
+        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+        {
+            try
+            {
+                JellyfishShapedMutationBuffData buffData = BuffCore.GetBuffData(JellyfishShapedMutation) as JellyfishShapedMutationBuffData;
+                if (buffData != null)
+                {
+                    for (int i = 0; i < self.Players.Count; i++)
+                    {
+                        if (self.Players[i].realizedCreature == null) continue;
+                        switch (i)
+                        {
+                            case 0:
+                                {
+                                    if (JellyfishCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var module0))
+                                    {
+                                        buffData.dehydrationCycle_1 = module0.DehydrationCycle;
+                                    }
+                                    continue;
+                                }
+                            case 1:
+                                {
+                                    if (JellyfishCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var module1))
+                                    {
+                                        buffData.dehydrationCycle_2 = module1.DehydrationCycle;
+                                    }
+                                    continue;
+                                }
+                            case 2:
+                                {
+                                    if (JellyfishCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var module2))
+                                    {
+                                        buffData.dehydrationCycle_3 = module2.DehydrationCycle;
+                                    }
+                                    continue;
+                                }
+                            case 3:
+                                {
+                                    if (JellyfishCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var module3))
+                                    {
+                                        buffData.dehydrationCycle_4 = module3.DehydrationCycle;
+                                    }
+                                    continue;
+                                }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+            }
+            orig(self, malnourished);
+        }
+
+        //电击抵抗
+        private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            UnityEngine.Vector2? newDirectionAndMomentum = directionAndMomentum;
+            float newDamage = damage;
+            float newStunBonus = stunBonus;
+
+            if (type == Creature.DamageType.Electric && self is Player player && JellyfishCatFeatures.TryGetValue(self as Player, out var jellyfishCat))
+            {
+                int i;
+                for (i = Mathf.FloorToInt(damage * 4f); i >= 4; i -= 4)
+                {
+                    (self as Player).AddFood(1);
+                }
+                while (i > 0)
+                {
+                    (self as Player).AddQuarterFood();
+                    i--;
+                }
+                float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
+                newDamage *= scale;
+                newStunBonus *= scale;
+                newDirectionAndMomentum *= scale;
+            }
+            orig(self, source, newDirectionAndMomentum, hitChunk, hitAppendage, type, newDamage, newStunBonus);
         }
 
         //双手位置
@@ -223,7 +360,7 @@ namespace BuiltinBuffs.Duality
         //玩家逐渐免疫蜈蚣的攻击
         private static void Centipede_Shock(On.Centipede.orig_Shock orig, Centipede self, PhysicalObject shockObj)
         {
-            int origStun = -1;
+            int origStun = 0;
             if (shockObj is Player &&
                JellyfishCatFeatures.TryGetValue(shockObj as Player, out var jellyfishCat))
             {
@@ -234,16 +371,33 @@ namespace BuiltinBuffs.Duality
 
             orig(self, shockObj);
 
-            if (shockObj is Player && origStun != -1 &&
+            if (shockObj is Player &&
                JellyfishCatFeatures.TryGetValue(shockObj as Player, out jellyfishCat))
             {
                 Player player = (Player)shockObj;
-                if (!jellyfishCat.ImmuneShock)
+                if (!jellyfishCat.ImmuneShock)//如果已经在死亡触发里消耗了ImmuneShock，则短暂眩晕
                     player.Stun(6);
-                else
+                else//否则，没有触发死亡
+                {
                     jellyfishCat.ImmuneShock = false;
-                player.stun = Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
-                player.AddQuarterFood();
+                }
+                //水蜈蚣是直接电击，在电击里已经算过饱食度和眩晕了，所以这里只算非水蜈蚣的蜈蚣电击
+                if (!self.AquaCenti)
+                {
+                    int i;
+                    for (i = Mathf.FloorToInt(self.TotalMass / shockObj.TotalMass * 4f); i >= 4; i -= 4)
+                    {
+                        player.AddFood(1);
+                    }
+                    while (i > 0)
+                    {
+                        player.AddQuarterFood();
+                        i--;
+                    }
+                    float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
+                    player.stun = origStun + Mathf.RoundToInt(player.stun * scale);
+                    //player.stun = origStun + Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
+                }
             }
         }
         #endregion
@@ -275,7 +429,7 @@ namespace BuiltinBuffs.Duality
                     self.bodyChunks[1].pos -= addPos;
                 }
 
-                if (self.grabbedBy.Count > 0)
+                if (self.grabbedBy.Count > 0 && jellyfishCat.TryToAttack)
                 {
                     for (int i = 0; i < self.grabbedBy.Count; i++)
                     {
@@ -317,7 +471,6 @@ namespace BuiltinBuffs.Duality
                 if (jellyfishCat.ImmuneShock)
                 {
                     jellyfishCat.ImmuneShock = false;
-                    self.AddFood(1);
                     return;
                 }
             }
@@ -384,11 +537,65 @@ namespace BuiltinBuffs.Duality
     {
         WeakReference<Player> ownerRef;
 
-        #region 行动相关
-        private JellyfishCatState abstractState;
-        
+        #region 脱水相关
+        public JellyfishCatIllnessEffect effect;
         private bool hasContactWater;
         private int dehydrationCycle;
+
+        public float timeFac;
+        public float fit;
+        public float fitLength;
+        public float fitSeverity;
+        public int counter;
+        public bool fadeOutSlow;
+
+        public float TimeFactor
+        {
+            get
+            {
+                if (!ownerRef.TryGetTarget(out var player))
+                    return 0f;
+                return 1f - 0.9f * Mathf.Max(Mathf.Max(this.fadeOutSlow ? Mathf.Pow(Mathf.InverseLerp(0f, 0.5f, player.abstractCreature.world.game.manager.fadeToBlack), 0.65f) : 0f, Mathf.InverseLerp(40f * Mathf.Lerp(12f, 21f, this.Severity), 40f, (float)this.counter) * Mathf.Lerp(0.2f, 0.5f, this.Severity)), this.CurrentFitIntensity * 0.5f);
+            }
+        }
+
+        public int DehydrationCycle
+        {
+            get
+            {
+                return dehydrationCycle;
+            }
+            set
+            {
+                dehydrationCycle = value;
+            }
+        }
+
+        public float Severity
+        {
+            get
+            {
+                return Custom.LerpMap(this.timeFac, 0f, 6f, 0f, 1f, 0.75f);
+                //return Mathf.Lerp(Custom.LerpMap(this.timeFac, 0f, 6f, 0f, 1f, 0.75f), 0.75f, Mathf.InverseLerp(2720f, 120f, (float)this.counter) * 0.5f);
+            }
+        }
+
+        public float CurrentFitIntensity
+        {
+            get
+            {
+                return Mathf.Pow(Mathf.Clamp01(Mathf.Sin(this.fit * 3.1415927f) * 1.2f), 1.6f) * this.fitSeverity;
+            }
+        }
+
+        public void AbortFit()
+        {
+            this.fit = 0f;
+        }
+        #endregion
+
+        #region 行动相关
+        private JellyfishCatState abstractState;
 
         private bool goHome;
         private bool tryToAttack;
@@ -662,7 +869,42 @@ namespace BuiltinBuffs.Duality
             Random.InitState(player.abstractCreature.ID.RandomSeed);
             abstractState = new JellyfishCatState(player.abstractCreature);
             this.hasContactWater = false;
-            this.dehydrationCycle = (BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData).dehydrationCycle;
+
+            JellyfishShapedMutationBuffData buffData = BuffCore.GetBuffData(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation) as JellyfishShapedMutationBuffData;
+            if (buffData != null)
+            {
+                if (player.IsJollyPlayer)
+                {
+                    switch (player.playerState.playerNumber)
+                    {
+                        case 1:
+                            {
+                                this.dehydrationCycle = buffData.dehydrationCycle_1;
+                                break;
+                            }
+                        case 2:
+                            {
+                                this.dehydrationCycle = buffData.dehydrationCycle_2;
+                                break;
+                            }
+                        case 3:
+                            {
+                                this.dehydrationCycle = buffData.dehydrationCycle_3;
+                                break;
+                            }
+                        case 4:
+                            {
+                                this.dehydrationCycle = buffData.dehydrationCycle_4;
+                                break;
+                            }
+                    }
+                }
+                else
+                {
+                    this.dehydrationCycle = buffData.dehydrationCycle_1;
+                }
+            }
+
             minTGap = 0.96f;//2.4f;
             maxTGap = 2.84f;//7.1f;
             coreLength = 24f; 
@@ -1231,11 +1473,8 @@ namespace BuiltinBuffs.Duality
                 player.ReleaseGrasp(1);
             }
 
-            if (player.Submersion > 0.1f && !this.hasContactWater)
-            {
-                this.hasContactWater = true;
-                BuffPlugin.Log("JellyfishCat has contact with water!");
-            }
+            this.DehydrationUpdate();
+
             if (!this.Electric)
             {
                 this.electricCounter--;
@@ -1298,7 +1537,7 @@ namespace BuiltinBuffs.Duality
                 {
                     StartPos.y = (float)(player.room.defaultWaterLevel + 1) * 20f;
                 }
-                BuffPlugin.Log("Jelly home at " + StartPos.ToString());
+                BuffUtils.Log("JellyfishShapedMutation","Jelly home at " + StartPos.ToString());
             }*/
             if (driftGoalPos == Vector2.zero)//abstractState.DriftPos
             {
@@ -1313,8 +1552,8 @@ namespace BuiltinBuffs.Duality
                 driftGoalPos.y = (float)(player.room.defaultWaterLevel + 1) * 4f;
             }*/
             /*
-            BuffPlugin.Log("Jelly goal at " + driftGoalPos.ToString());
-            BuffPlugin.Log("Jelly on surf " + surfaceMode.ToString());*/
+            BuffUtils.Log("JellyfishShapedMutation","Jelly goal at " + driftGoalPos.ToString());
+            BuffUtils.Log("JellyfishShapedMutation","Jelly on surf " + surfaceMode.ToString());*/
             driftMaxim = Vector2.Distance(newBody[0].pos, driftGoalPos);
 
             for (int i = 0; i < newBody.Length; i++)
@@ -1491,6 +1730,65 @@ namespace BuiltinBuffs.Duality
             this.TryToAttack = false;
         }
 
+        public void DehydrationUpdate()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (player.Submersion > 0.1f && !this.hasContactWater)
+            {
+                this.hasContactWater = true;
+                this.dehydrationCycle = 0;
+                BuffUtils.Log("JellyfishShapedMutation","JellyfishCat has contact with water!");
+            }
+            if (this.dehydrationCycle >= 2)
+            {
+                this.counter++;
+                this.timeFac = 6f * (float)player.room.game.world.rainCycle.timer / (float)player.room.game.world.rainCycle.cycleLength;
+                if (this.fit > 0f)
+                {
+                    this.fit += 1f / this.fitLength;
+
+                    //很严重时将不再减弱特效
+                    if (UnityEngine.Random.value < 1.2f * this.Severity && this.fit > 0.5f)
+                    {
+                        this.fit -= 1f / this.fitLength;
+                        this.fitSeverity = Mathf.Lerp(this.fitSeverity, Mathf.Pow(this.fitSeverity, Custom.SCurve(Mathf.Pow(UnityEngine.Random.value, Mathf.Lerp(3.4f, 0.4f, this.Severity)), 0.7f)), 0.01f);
+                    }
+
+                    player.aerobicLevel = Mathf.Max(player.aerobicLevel, Mathf.Pow(this.CurrentFitIntensity, 1.5f));
+                    if (this.CurrentFitIntensity > 0.7f)
+                    {
+                        player.Blink(6);
+                    }
+                    if (this.fit > 1f)
+                    {
+                        this.fit = 0f;
+                    }
+                }
+                else if (UnityEngine.Random.value < 1f / (1f + 60f * (1f - this.Severity) + Mathf.Lerp(0.1f, 0.001f, this.Severity) * Mathf.Clamp((float)this.counter, 120f, 2720f)))
+                {
+                    this.fitSeverity = Custom.SCurve(Mathf.Pow(UnityEngine.Random.value, Mathf.Lerp(3.4f, 0.4f, this.Severity)), 0.7f);
+                    this.fitLength = Mathf.Lerp(80f, 240f, Mathf.Pow(UnityEngine.Random.value, Mathf.Lerp(1.6f, 0.4f, (this.fitSeverity + this.Severity) / 2f)));
+                    this.fitSeverity = Mathf.Pow(this.fitSeverity, Mathf.Lerp(1.4f, 0.4f, this.Severity));
+                    this.fit += 1f / this.fitLength;
+                }
+                if (this.effect == null && this.CurrentFitIntensity > 0f && JellyfishCatIllnessEffect.CanShowPlayer(player))
+                {
+                    this.effect = new JellyfishCatIllnessEffect(player, player.room);
+                    player.room.AddObject(this.effect);
+                    BuffUtils.Log("JellyfishShapedMutation","JellyfishCat has add IllnessEffect!");
+                }
+            }
+            else
+            {
+                this.fit = Mathf.Max(0f, this.fit - 1f / this.fitLength);
+            }
+            if (this.effect != null && (!JellyfishCatIllnessEffect.CanShowPlayer(player) || this.effect.slatedForDeletetion))
+            {
+                this.effect = null;
+            }
+        }
+
         public bool TryElectricAttack(Creature creature)
         {
             if (!ownerRef.TryGetTarget(out var self) || creature is BigEel || creature is Player)
@@ -1511,7 +1809,7 @@ namespace BuiltinBuffs.Duality
             self.SubtractFood(1);
             creature.Violence(self.firstChunk,
                              new Vector2?(Custom.DirVec(self.firstChunk.pos, creature.firstChunk.pos) * 5f),
-                             creature.firstChunk, null, Creature.DamageType.Electric, 0.1f,
+                             creature.firstChunk, null, Creature.DamageType.Electric, 0.05f + 0.05f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel,
                              (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));//(creature is Player) ? 140f : (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));
             self.room.AddObject(new CreatureSpasmer(creature, false, creature.stun));
             self.room.AddObject(new Explosion.ExplosionLight(self.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
@@ -1614,7 +1912,7 @@ namespace BuiltinBuffs.Duality
                     }
                     if (latchOnToBodyChunks[i, j] != null && latchOnToBodyChunks[i, j].owner is Creature && (latchOnToBodyChunks[i, j].owner as Creature).enteringShortCut.HasValue)
                     {
-                        BuffPlugin.Log($"JellyCat released door traveling object {latchOnToBodyChunks[i, j].owner}");
+                        BuffUtils.Log("JellyfishShapedMutation",$"JellyCat released door traveling object {latchOnToBodyChunks[i, j].owner}");
                         latchOnToBodyChunks[i, j] = null;
                     }
                     if (latchOnToBodyChunks[i, j] != null)
@@ -1777,9 +2075,9 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.BigOneHand)
                 result = Player.ObjectGrabability.BigOneHand;
             else if (result == Player.ObjectGrabability.TwoHands)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
             else if (result == Player.ObjectGrabability.Drag)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
 
             return result;
         }
@@ -1952,7 +2250,7 @@ namespace BuiltinBuffs.Duality
                 return;
             if (mooCounter < 0)
             {
-                BuffPlugin.Log("Moo!");
+                BuffUtils.Log("JellyfishShapedMutation","Moo!");
                 mooCounter = 140;
                 player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
                 player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
@@ -2007,5 +2305,130 @@ namespace BuiltinBuffs.Duality
         public Vector2 DriftPos;
         public Vector2[,] deadArmDriftPos;
         public bool bodyReleasedGoo;
+    }
+
+    public class JellyfishCatIllnessEffect : CosmeticSprite
+    {
+        public float TotFade(float timeStacker)
+        {
+            return Mathf.Lerp(this.lastFade, this.fade, timeStacker) * Mathf.Lerp(this.lastViableFade, this.viableFade, timeStacker);
+        }
+
+        public JellyfishCatIllnessEffect(Player player, Room room)
+        {
+            this.player = player;
+            this.room = room;
+            this.rotDir = ((Random.value < 0.5f) ? -1f : 1f);
+        }
+
+        public static bool CanShowPlayer(Player player)
+        {
+            return !player.inShortcut && player.room != null && player.room.ViewedByAnyCamera(player.firstChunk.pos, 100f) && !player.dead;
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            if (this.room == null)
+            {
+                return;
+            }
+            if (!JellyfishShapedMutationBuffEntry.JellyfishCatFeatures.TryGetValue(player, out var jellyfishCat))
+                return;
+            this.lastFade = this.fade;
+            this.lastViableFade = this.viableFade;
+            this.lastRot = this.rot;
+            this.sin += 1f / Mathf.Lerp(120f, 30f, this.fluc3);
+            this.fluc = Custom.LerpAndTick(this.fluc, this.fluc1, 0.02f, 0.016666668f);
+            this.fluc1 = Custom.LerpAndTick(this.fluc1, this.fluc2, 0.02f, 0.016666668f);
+            this.fluc2 = Custom.LerpAndTick(this.fluc2, this.fluc3, 0.02f, 0.016666668f);
+            if (Mathf.Abs(this.fluc2 - this.fluc3) < 0.01f)
+            {
+                this.fluc3 = Random.value;
+            }
+            this.fade = Mathf.Pow(jellyfishCat.CurrentFitIntensity * (0.85f + 0.15f * Mathf.Sin(this.sin * 3.1415927f * 2f)), Mathf.Lerp(1.5f, 0.5f, this.fluc));
+            this.rot += this.rotDir * this.fade * (0.5f + 0.5f * this.fluc) * 7f * (0.1f + 0.9f * Mathf.InverseLerp(1f, 4f, Vector2.Distance(this.player.firstChunk.lastLastPos, this.player.firstChunk.pos)));
+            if (!RedsIllness.RedsIllnessEffect.CanShowPlayer(this.player) || this.player.room != this.room || jellyfishCat.effect != this)
+            {
+                this.viableFade = Mathf.Max(0f, this.viableFade - 0.033333335f);
+                if (this.viableFade <= 0f && this.lastViableFade <= 0f)
+                {
+                    jellyfishCat.AbortFit();
+                    this.Destroy();
+                }
+            }
+            else
+            {
+                this.viableFade = Mathf.Min(1f, this.viableFade + 0.033333335f);
+                this.pos = (this.room.game.Players[0].realizedCreature.firstChunk.pos * 2f + this.room.game.Players[0].realizedCreature.bodyChunks[1].pos) / 3f;
+            }
+            if (this.fade == 0f && this.lastFade > 0f)
+            {
+                this.rotDir = ((Random.value < 0.5f) ? -1f : 1f);
+            }
+            if (this.soundLoop == null && this.fade > 0f)
+            {
+                this.soundLoop = new DisembodiedDynamicSoundLoop(this);
+                this.soundLoop.sound = SoundID.Reds_Illness_LOOP;
+                this.soundLoop.VolumeGroup = 1;
+                return;
+            }
+            if (this.soundLoop != null)
+            {
+                this.soundLoop.Update();
+                this.soundLoop.Volume = Custom.LerpAndTick(this.soundLoop.Volume, Mathf.Pow((this.fade + jellyfishCat.CurrentFitIntensity) / 2f, 0.5f), 0.06f, 0.14285715f);
+            }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            if (this.soundLoop != null && this.soundLoop.emitter != null)
+            {
+                this.soundLoop.emitter.slatedForDeletetion = true;
+            }
+        }
+
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            base.InitiateSprites(sLeaser, rCam);
+            sLeaser.sprites = new FSprite[1];
+            sLeaser.sprites[0] = new FSprite("Futile_White", true);
+            sLeaser.sprites[0].shader = rCam.game.rainWorld.Shaders["RedsIllness"];
+            this.AddToContainer(sLeaser, rCam, rCam.ReturnFContainer("GrabShaders"));
+        }
+
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            float num = this.TotFade(timeStacker);
+            if (num == 0f)
+            {
+                sLeaser.sprites[0].isVisible = false;
+                return;
+            }
+            sLeaser.sprites[0].isVisible = true;
+            sLeaser.sprites[0].x = Mathf.Clamp(Mathf.Lerp(this.lastPos.x, this.pos.x, timeStacker) - camPos.x, 0f, rCam.sSize.x);
+            sLeaser.sprites[0].y = Mathf.Clamp(Mathf.Lerp(this.lastPos.y, this.pos.y, timeStacker) - camPos.y, 0f, rCam.sSize.y);
+            sLeaser.sprites[0].rotation = Mathf.Lerp(this.lastRot, this.rot, timeStacker);
+            sLeaser.sprites[0].scaleX = (rCam.sSize.x * (6f - 3f * num) + 2f) / 16f;
+            sLeaser.sprites[0].scaleY = (rCam.sSize.x * (6f - 3f * num) + 2f) / 16f;
+            sLeaser.sprites[0].color = new Color(0f, num, num, 0f);
+        }
+
+        Player player;
+        public float fade;
+        public float lastFade;
+        public float viableFade;
+        public float lastViableFade;
+        private float rot;
+        private float lastRot;
+        private float rotDir;
+        private float sin;
+        public float fluc;
+        public float fluc1;
+        public float fluc2;
+        public float fluc3;
+        public DisembodiedDynamicSoundLoop soundLoop;
     }
 }

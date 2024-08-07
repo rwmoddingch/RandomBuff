@@ -60,7 +60,7 @@ namespace RandomBuff
                 else
                 {
                     componentRefs.RemoveAt(i);
-                    BuffPlugin.LogDebug($"Remove componenetRef due to no value");
+                    //BuffPlugin.LogDebug($"Remove componenetRef due to no value");
                 }
             }
         }
@@ -76,7 +76,7 @@ namespace RandomBuff
                 else
                 {
                     componentRefs.RemoveAt(i);
-                    BuffPlugin.LogDebug($"Remove componenetRef due to no value");
+                    //BuffPlugin.LogDebug($"Remove componenetRef due to no value");
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace RandomBuff
             {
                 WeakReference<AnimateComponentBase> result;
                 componentRefs.Add(result = new WeakReference<AnimateComponentBase>(animateComponentBase));
-                BuffPlugin.Log($"{animateComponentBase} add new weakreference");
+                //BuffPlugin.Log($"{animateComponentBase} add new weakreference");
                 return result;
             }
             else
@@ -119,7 +119,7 @@ namespace RandomBuff
             if(reference != null)
             {
                 componentRefs.Remove(reference);
-                BuffPlugin.Log($"AnimMachine remove weakref of {animateComponentBase} successfully");
+                //BuffPlugin.Log($"AnimMachine remove weakref of {animateComponentBase} successfully");
             }
             else
                 BuffPlugin.LogWarning($"WeakReference for {animateComponentBase} not exist in componentRefs");
@@ -177,7 +177,7 @@ namespace RandomBuff
         public void SetEnable(bool enable)
         {
             this.enable = enable;
-            BuffPlugin.Log($"{this} set enable {enable}");
+            //BuffPlugin.Log($"{this} set enable {enable}");
             if (enable && firstHandleInMachine)
                 HandleInMachine();
         }
@@ -225,13 +225,13 @@ namespace RandomBuff
             if(weakReference == null)
             {
                 AnimMachine.AddRef(this);
-                BuffPlugin.Log($"{this} handleInMachine with new weakref : enable-{enable}");
+                //BuffPlugin.Log($"{this} handleInMachine with new weakref : enable-{enable}");
 
             }
             else
             {
                 weakReference.SetTarget(this);
-                BuffPlugin.Log($"{this} handleInMachine with exist weakref : enable-{enable}");
+                //BuffPlugin.Log($"{this} handleInMachine with exist weakref : enable-{enable}");
             }
             firstHandleInMachine = false;
             inMachine = true;
@@ -241,7 +241,7 @@ namespace RandomBuff
         //手动删除方法，弱使用自动动画请在离开动画对象作用域时调用该方法
         public virtual void Destroy()
         {
-            BuffPlugin.Log($"{this} destroy");
+            //BuffPlugin.Log($"{this} destroy");
             AnimateComponentBase cmpntInMachine = this;
             while (!cmpntInMachine.inMachine)
                 cmpntInMachine = cmpntInMachine.lastCmpnt;
@@ -261,7 +261,7 @@ namespace RandomBuff
         //处理删除
         protected virtual void HandleDestroy()
         {
-            BuffPlugin.Log($"{this} HandleDestroy");
+            //BuffPlugin.Log($"{this} HandleDestroy");
             inMachine = false;
             AnimMachine.RemoveRef(this);
         }

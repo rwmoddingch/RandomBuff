@@ -10,13 +10,13 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class HuntCondition : Condition
+    public class HuntCondition : Condition
     {
         public override ConditionID ID => ConditionID.Hunt;
 
 
 
-        public override int Exp => 20 * killCount;//TODO
+        public override int Exp => 7 * killCount;//TODO
 
         [JsonProperty] 
         public CreatureTemplate.Type type;
@@ -27,10 +27,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         [JsonProperty]
         public int killCount;
 
-        public override void EnterGame(RainWorldGame game)
+        public override void HookOn()
         {
-            base.EnterGame(game);
+            base.HookOn();
             BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+
         }
 
 
@@ -39,7 +40,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             if (creature.Template.type == type || creature.Template.TopAncestor().type == type)
             {
                 currentKillCount++;
-                if (currentKillCount == killCount)
+                if (currentKillCount >= killCount && !Finished)
                     Finished = true;
                 onLabelRefresh?.Invoke(this);
             }
@@ -61,14 +62,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 return ConditionState.Fail;
             }
 
-            killCount = (int)Mathf.Lerp(3f, 15f,Mathf.Pow(difficulty, 2.5f));
+            killCount = (int)Mathf.Lerp(10f, 45f,Mathf.Pow(difficulty, 2.5f));
             if (expeditionCreature.points < 7)
                 killCount += UnityEngine.Random.Range(3, 6);
             
             if (killCount > expeditionCreature.spawns)
                 killCount = expeditionCreature.spawns;
             
-            if (killCount > 25) killCount = 25;
+            if (killCount > 45f) killCount = 45;
 
             type = expeditionCreature.creature;
 
@@ -105,12 +106,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         }
 
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
-        }
-
+  
         public override string DisplayName(InGameTranslator translator)
         {
             if (ChallengeTools.creatureNames == null)

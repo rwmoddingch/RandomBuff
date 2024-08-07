@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Option;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData.BuffConfig;
@@ -165,7 +166,10 @@ namespace RandomBuff.Core.SaveData
         internal static List<string> GetQuestIDList() => questDatas.Keys.ToList();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => (lockedMap[unlockedType].ContainsKey(itemName) && !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName])) && !BuffPlugin.AllCardDisplay;
+        internal static bool IsItemLocked(QuestUnlockedType unlockedType,string itemName) => (lockedMap[unlockedType].ContainsKey(itemName) && 
+                !BuffPlayerData.Instance.IsQuestUnlocked(lockedMap[unlockedType][itemName])) && 
+            (!BuffOptionInterface.Instance.CheatAllCosmetics.Value || unlockedType != QuestUnlockedType.Cosmetic) &&
+            (!BuffOptionInterface.Instance.CheatAllCards.Value || unlockedType != QuestUnlockedType.Card);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsSpecialItemLocked(string itemName) => IsItemLocked(QuestUnlockedType.Special,itemName);
@@ -176,7 +180,7 @@ namespace RandomBuff.Core.SaveData
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetFreePickCount(float multiply) =>
-            (int)((0.5f + (BuffPlugin.AllCardDisplay ? 5 : 0) + lockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value))) * multiply);
+            (int)((0.5f + lockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value))) * multiply);
 
         internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
 

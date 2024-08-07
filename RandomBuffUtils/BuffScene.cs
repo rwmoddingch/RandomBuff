@@ -1,14 +1,12 @@
-﻿using MonoMod.Cil;
+﻿using Menu;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using Music;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Menu;
-using Mono.Cecil.Cil;
-using Music;
-using Mono.Cecil;
+using JetBrains.Annotations;
+using RWCustom;
 using UnityEngine;
 
 namespace RandomBuffUtils
@@ -60,7 +58,7 @@ namespace RandomBuffUtils
 
         private static void SubTrack_Update(On.Music.MusicPiece.SubTrack.orig_Update orig, MusicPiece.SubTrack self)        
         {
-            if (!self.readyToPlay && self.piece.musicPlayer.assetBundlesLoaded)
+            if (!self.readyToPlay)
             {
                 foreach (var end in FileEnd)
                 {
@@ -76,7 +74,22 @@ namespace RandomBuffUtils
                 }
             }
 
-            orig(self);
+            try
+            {
+                orig(self);
+
+            }          
+            catch
+            {
+                BuffUtils.LogError(nameof(BuffScene),$"Null at {self.trackName}");
+                Custom.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                {
+                    fadeOutTime = 0.001f,
+                    prio = float.MaxValue,
+                    songName = self.trackName,
+                    type = StopMusicEvent.Type.AllSongs
+                });
+            }
 
         }
 
@@ -108,7 +121,7 @@ namespace RandomBuffUtils
         private static void MenuScene_BuildScene(On.Menu.MenuScene.orig_BuildScene orig, MenuScene self)
         {
             orig(self);
-            if(MenuSceneReg.TryGetValue(self.sceneID,out var func))
+            if(self.sceneID != null && MenuSceneReg.TryGetValue(self.sceneID,out var func))
                 func?.Invoke(self);
         }
 

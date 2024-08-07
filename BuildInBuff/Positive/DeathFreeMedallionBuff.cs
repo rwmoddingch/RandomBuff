@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -24,7 +25,8 @@ namespace BuiltinBuffs.Positive
 
         public override bool Trigger(RainWorldGame game)
         {
-            triggerdThisCycle = true;
+            if(!BuffPlugin.DevEnabled)
+                triggerdThisCycle = true;
             return base.Trigger(game);
         }
 
@@ -38,50 +40,57 @@ namespace BuiltinBuffs.Positive
                 spawnlater.RealizeInRoom();
                 spawnlater = null;
             }
+
+            //if (Input.GetKeyDown(KeyCode.T)&& BuffPlugin.DevEnabled)
+            //{
+            //    game.cameras[0].room.AddObject(new ScoreTester(game.cameras[0].room, game.FirstRealizedPlayer));
+            //}
+        }
+
+        internal class ScoreTester : CosmeticSprite
+        {
+            FLabel label;
+            Player player;
+            public ScoreTester(Room room, Player player)
+            {
+                this.room = room;
+                this.player = player;
+            }
+
+            public override void Update(bool eu)
+            {
+                base.Update(eu);
+                lastPos = pos;
+                pos = Futile.mousePosition;
+                pos += room.game.cameras[0].pos;
+                var tile = room.GetTilePosition(pos);
+                if (label != null)
+                {
+                    label.text = $"{tile.x},{tile.y} - {DeathPreventer.TileScore(room, player.abstractCreature, player.DangerPos, tile)}";
+                }
+            }
+
+            public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+            {
+                base.InitiateSprites(sLeaser, rCam);
+                label = new FLabel(Custom.GetFont(), "") { anchorX = 0f };
+                rCam.ReturnFContainer("HUD").AddChild(label);
+            }
+
+            public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+            {
+                base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+                if(label != null)
+                {
+                    label.SetPosition(Vector2.Lerp(lastPos, pos, timeStacker) - camPos);
+                }
+            }
         }
     }
 
     internal class DeathFreeMedallionBuffData : BuffData
     {
         public override BuffID ID => DeathFreeMedallionIBuffEntry.deathFreeMedallionBuffID;
-
-        [CustomBuffConfigEnum(typeof(CreatureTemplate.Type),"Slugcat")]
-        public CreatureTemplate.Type WawaTest
-        {
-            get;
-            set;
-        }
-
-        [CustomBuffConfigRange(1f, 0f, 3f)]
-        [CustomBuffConfigInfo("RangeTest", "this is a range value test")]
-        public float WawaValueRangeTest
-        {
-            get;
-        }
-
-        public DeathFreeMedallionBuffData()
-        {
-            //WawaTest = CreatureTemplate.Type.BigEel;
-            //BuffPlugin.Log($"Ctor Get wawaTest : {WawaTest}, WawaValueRangeTest : {WawaValueRangeTest}");
-
-            //try
-            //{
-            //    throw new Exception("Sdsdsd");
-            //}
-            //catch (Exception e)
-            //{
-
-            //    BuffPlugin.LogError(e);
-            //}
-
-        }
-
-        public override void DataLoaded(bool newData)
-        {
-            base.DataLoaded(newData);
-            //BuffPlugin.Log($"Get wawaTest : {WawaTest}");
-
-        }
     }
 
     internal class DeathFreeMedallionIBuffEntry : IBuffEntry
@@ -267,7 +276,7 @@ namespace BuiltinBuffs.Positive
                 //creature.Die();
             }
 
-            if (room.game.cameras[0].room == room)
+            if (room.BeingViewed)
             {
                 room.game.cameras[0].ApplyFade();
 
@@ -276,6 +285,8 @@ namespace BuiltinBuffs.Positive
                 else
                     effect.amount = 1f;
             }
+            else
+                effect.amount = 0f;
   
             if (currentStage == Stage.Prepare)
                 PrepareUpdate();
@@ -296,7 +307,8 @@ namespace BuiltinBuffs.Positive
                     for(int x = 0; x < room.Width; x++)
                     {
                         IntVector2 testTile = new IntVector2(x, currentScanY);
-                        float score = TileScore(testTile);
+                        float score = TileScore(room, bindAbPlayer, startPos, testTile);
+                        //BuffUtils.Log("DeathPreventer", $"{testTile.x},{testTile.y} - {score}|{bestEndPosScore}");
                         if (score < bestEndPosScore)
                         {
                             bestEndPosScore = score;
@@ -320,6 +332,7 @@ namespace BuiltinBuffs.Positive
 
             void ReSpawnUpdate()
             {
+                //BuffUtils.Log("DeathPreventer", $"selected {endPosTile.x},{endPosTile.y} for {bestEndPosScore}");
                 blink = false;
                 pos = room.MiddleOfTile(endPosTile);
                 aimAlpha = 0f;
@@ -381,42 +394,55 @@ namespace BuiltinBuffs.Positive
             origEffects.Clear();
         }
 
-        public float TileScore(IntVector2 tile)
+        public static float TileScore(Room room, AbstractCreature player, Vector2 startPos, IntVector2 tile)
         {
             if(room.GetTile(tile).Solid)
                 return float.MaxValue;
 
+            if (room.GetTile(tile).wormGrass)
+                return float.MaxValue;
+
+            Vector2 tilePos = room.MiddleOfTile(tile);
+            float value = Vector2.Distance(tilePos, startPos);
+            //value += Custom.LerpMap(Vector2.Distance(tilePos, startPos), 0f, 160f, 400f, 0f);
+
             bool completlyInAir = true;
-            for(int y = 1; y < 4; y++)
+            for (int y = 1; y < 4; y++)
             {
                 if (tile.y - y < 0)
                     break;
                 if (room.GetTile(new IntVector2(tile.x, tile.y - y)).Solid)
                     completlyInAir = false;
             }
-            if(completlyInAir)
+            if (completlyInAir)
+                value += 1000f;
+
+            if (room.aimap.getAItile(tile).narrowSpace)
+                value += 100f;
+
+
+            if (!room.aimap.AnyExitReachableFromTile(tile, StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)))
                 return float.MaxValue;
 
-            Vector2 tilePos = room.MiddleOfTile(tile);
-            float value = Vector2.Distance(tilePos, startPos);
-            value += Custom.LerpMap(Vector2.Distance(tilePos, startPos), 0f, 160f, 400f, 0f);
+            if (room.PointSubmerged(tilePos))
+                value += 10f * Mathf.Abs(tilePos.y - room.waterObject.DetailedWaterLevel(tilePos.x));
 
-            foreach(var obj in room.updateList)
+            foreach (var obj in room.updateList)
             {
                 if ((obj is Creature creature))
                 {
                     if (obj is Player)
                         continue;
-                    value += CreatureDangerScore(creature.abstractCreature, tilePos);
+                    value += CreatureDangerScore(room, player, creature.abstractCreature, tilePos);
                 }
                 else
-                    value += ObjectDangerScore(obj, tilePos);
+                    value += ObjectDangerScore(room, obj, tilePos);
             }
 
             return value;
         }
 
-        float ObjectDangerScore(UpdatableAndDeletable obj, Vector2 testPos)
+        static float ObjectDangerScore(Room room, UpdatableAndDeletable obj, Vector2 testPos)
         {
             if(obj is ZapCoil zapCoil)
             {
@@ -426,23 +452,23 @@ namespace BuiltinBuffs.Positive
                 float distance = Vector2.Distance(testPos, mid);
                 return -distance;
             }
-            if(obj is WormGrass wormGrass)
-            {
-                float result = 0f;
+            //if(obj is WormGrass wormGrass)
+            //{
+            //    float result = 0f;
 
-                for(int i = 0;i < 3; i++)
-                {
-                    WormGrass.Worm randomWorm = wormGrass.worms[Random.Range(0, wormGrass.worms.Count)];
-                    if (randomWorm != null)
-                    {
-                        float distance = Vector2.Distance(randomWorm.basePos, testPos);
-                        result -= distance;
-                    }
-                    else
-                        result += 100000f;
-                }
-                return result;
-            }
+            //    for(int i = 0;i < 3; i++)
+            //    {
+            //        WormGrass.Worm randomWorm = wormGrass.worms[Random.Range(0, wormGrass.worms.Count)];
+            //        if (randomWorm != null)
+            //        {
+            //            float distance = Vector2.Distance(randomWorm.basePos, testPos);
+            //            result -= distance;
+            //        }
+            //        else
+            //            result += 100000f;
+            //    }
+            //    return result;
+            //}
             if(obj is DaddyCorruption corruption)
             {
                 float result = 0f;
@@ -456,7 +482,7 @@ namespace BuiltinBuffs.Positive
             return 0f;
         }
 
-        private float CreatureDangerScore(AbstractCreature creature, Vector2 testPos)
+        private static float CreatureDangerScore(Room room, AbstractCreature player, AbstractCreature creature, Vector2 testPos)
         {
             bool flag = room.ViewedByAnyCamera(creature.realizedCreature.DangerPos, 60f);
             if (creature.creatureTemplate.type == CreatureTemplate.Type.PoleMimic && (creature.realizedCreature as PoleMimic).mimic > 0.5f)
@@ -478,7 +504,7 @@ namespace BuiltinBuffs.Positive
             }
             if (creature.abstractAI != null && creature.abstractAI.RealAI != null)
             {
-                num *= creature.abstractAI.RealAI.CurrentPlayerAggression(bindAbPlayer);
+                num *= creature.abstractAI.RealAI.CurrentPlayerAggression(player);
             }
             num *= Vector2.Distance(creature.realizedCreature.DangerPos, testPos);
             if (num == 0f)
@@ -505,6 +531,11 @@ namespace BuiltinBuffs.Positive
 
             Vector2 c = Vector2.Lerp(a2, b2, t);
             return c.y;
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 

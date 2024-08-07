@@ -46,7 +46,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return 4f * Custom.LerpMap(StackLayer,0,3,1,3,1);
+                return 4f * Custom.LerpMap(StackLayer, 0, 3, 1, 3, 1);
             }
         }
 

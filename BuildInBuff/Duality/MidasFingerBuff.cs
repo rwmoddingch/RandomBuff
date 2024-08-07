@@ -47,7 +47,7 @@ namespace BuiltinBuffs.Duality
                         {
                             if (self.grasps[i] != null)
                             {
-                                if (self.grasps[i].grabbed != null && self.grasps[i].grabbed is Rock)
+                                if (self.grasps[i].grabbed != null && self.grasps[i].grabbed is Rock && !(self.grasps[i].grabbed is WaterNut))
                                 {
                                     Vector2 pos = self.grasps[i].grabbed.firstChunk.pos;
                                     self.room.AddObject(new SmallShiny(self.room, pos));

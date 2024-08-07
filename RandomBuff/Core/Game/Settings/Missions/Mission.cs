@@ -27,7 +27,14 @@ namespace RandomBuff.Core.Game.Settings.Missions
 
         public List<BuffID> startBuffSet = new();
 
-        public GameSetting GameSetting => gameSetting;
+        public GameSetting GameSetting
+        {
+            get
+            {
+                gameSetting.MissionId = ID.value;
+                return gameSetting;
+            }
+        }
 
         MissionQuestRenderer questRenderer;
         public virtual QuestRenderer Renderer => questRenderer;

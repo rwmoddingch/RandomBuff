@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using RWCustom;
 using UnityEngine;
 using System.Linq;
-using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff.Render.CardRender
 {
@@ -133,6 +133,9 @@ namespace RandomBuff.Render.CardRender
             _cardQuadFront.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
             cardHighlightFrontController = _cardQuadFront.AddComponent<CardHighlightController>();
             _meshFilterFront = _cardQuadFront.GetComponent<MeshFilter>();
+            if(_cardQuadFront.TryGetComponent<Collider>(out var collider))
+                Destroy(collider);
+            
             //cardHighlightFrontController.Init(this, _cardTextureFront);
 
             _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -144,6 +147,9 @@ namespace RandomBuff.Render.CardRender
             _cardQuadBack.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
             cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
             cardHighlightBackController.Init(this, _cardTextureBack, false);
+            if (_cardQuadBack.TryGetComponent<Collider>(out var collider1))
+                Destroy(collider1);
+            
 
             Depth = 8.5f;
             Rotation = Vector2.zero;

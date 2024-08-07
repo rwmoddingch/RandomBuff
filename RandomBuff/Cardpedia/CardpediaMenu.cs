@@ -13,6 +13,7 @@ using RandomBuff.Core.Buff;
 using System.Runtime.CompilerServices;
 using RandomBuff.Cardpedia.PediaPage;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI;
 
 namespace RandomBuff.Cardpedia
 {
@@ -152,6 +153,9 @@ namespace RandomBuff.Cardpedia
                     continue;
 
                 var staticData = BuffConfigManager.GetStaticData(id);
+                if (staticData.Hidden)
+                    continue;
+
                 switch (staticData.BuffType)
                 {
                     case BuffType.Positive:
@@ -286,6 +290,7 @@ namespace RandomBuff.Cardpedia
         public override void Update()
         {
             base.Update();
+            InputAgency.StaticUpdate();
             if (!inited)
             {
                 InitMenuElements();

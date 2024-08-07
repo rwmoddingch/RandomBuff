@@ -149,12 +149,9 @@ namespace BuiltinBuffs.Positive
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
-            if (WallNutBowlingFeatures.TryGetValue(self, out var wallNutBowling) &&
-                self.animation == Player.AnimationIndex.Roll && self.input[0].x != 0)
+            if (WallNutBowlingFeatures.TryGetValue(self, out var wallNutBowling))
             {
-                self.rollCounter = 0;
-                self.stopRollingCounter = 0;
-                wallNutBowling.EmitterUpdate();
+                wallNutBowling.Update();
             }
         }
     }
@@ -165,52 +162,70 @@ namespace BuiltinBuffs.Positive
 
         private Color color = new Color(227f / 255f, 171f / 255f, 78f / 255f);
         private HSLColor hsvColor = new HSLColor(37f / 359f, 60f / 100f, 89f / 100f);
-        private int counter;
+        private ParticleEmitter emitter;
 
         public WallNutBowling(Player player)
         {
             ownerRef = new WeakReference<Player>(player);
         }
 
-        public void EmitterUpdate()
+        public void CreateEmitter()
         {
             if (!ownerRef.TryGetTarget(out var self) || self.room == null)
                 return;
-            if (counter > 0)
-                counter--;
-            if (counter == 0)
+            var emitter = new ParticleEmitter(self.room);
+            emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, self));
+            emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 20));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f)));
+
+            emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
+            emitter.ApplyParticleModule(new SetRandomVelocity(emitter, 15 * (-self.input[0].x) * Vector2.right, (15 * (-self.input[0].x) + 2f) * Vector2.right));
+            emitter.ApplyParticleModule(new SetRandomColor(emitter, hsvColor.hue - 0.05f, hsvColor.hue + 0.05f, hsvColor.saturation, hsvColor.lightness));
+            emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
+            emitter.ApplyParticleModule(new SetRandomRotation(emitter, Custom.VecToDeg((-self.input[0].x) * Vector2.right) - 90f, Custom.VecToDeg((-self.input[0].x) * Vector2.right) - 90f));
+            emitter.ApplyParticleModule(new SetRandomPos(emitter, 20f));
+
+
+            emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
             {
-                counter = 40;
-                var emitter = new ParticleEmitter(self.room);
-                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 60, false));
-                emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, self));
+                return p.setScaleXY * (1f - a);
+            }));
 
-                emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 20));
+            emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, a) =>
+            {
+                Color color = Color.Lerp(Color.white, p.setColor, a);
+                color.a = 1f - a;
+                return color;
+            }));
 
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "")));
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f)));
-                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
-                emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
-                emitter.ApplyParticleModule(new SetRandomVelocity(emitter, 15 * (-self.input[0].x) * Vector2.right, (15 * (-self.input[0].x) + 2f) * Vector2.right));
-                emitter.ApplyParticleModule(new SetRandomColor(emitter, hsvColor.hue - 0.05f, hsvColor.hue + 0.05f, hsvColor.saturation, hsvColor.lightness));
-                emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 2f), new Vector2(26f, 2f)));
-                emitter.ApplyParticleModule(new SetRandomRotation(emitter, Custom.VecToDeg((-self.input[0].x) * Vector2.right) - 90f, Custom.VecToDeg((-self.input[0].x) * Vector2.right) - 90f));
-                emitter.ApplyParticleModule(new SetRandomPos(emitter, 20f));
+            ParticleSystem.ApplyEmitterAndInit(emitter);
+            this.emitter = emitter;
+        }
 
+        public void Update()
+        {
+            if (!ownerRef.TryGetTarget(out var self) || self.room == null)
+                return;
 
-                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) =>
+            if (self.animation == Player.AnimationIndex.Roll)
+            {
+                if (self.input[0].x != 0)
                 {
-                    return p.setScaleXY * (1f - a);
-                }));
-
-                emitter.ApplyParticleModule(new ColorOverLife(emitter, (p, a) =>
+                    self.rollCounter = 0;
+                    self.stopRollingCounter = 0;
+                }
+                if (this.emitter == null)
+                    CreateEmitter();
+            }
+            else 
+            {
+                if (this.emitter != null)
                 {
-                    Color color = Color.Lerp(Color.white, p.setColor, a);
-                    color.a = 1f - a;
-                    return color;
-                }));
-
-                ParticleSystem.ApplyEmitterAndInit(emitter);
+                    this.emitter.Die();
+                    this.emitter = null;
+                }
             }
         }
     }

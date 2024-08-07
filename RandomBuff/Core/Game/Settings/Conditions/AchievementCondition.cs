@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class AchievementCondition : Condition
+    public class AchievementCondition : Condition
     {
         public override void EnterGame(RainWorldGame game)
         {
@@ -25,7 +25,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override ConditionID ID => ConditionID.Achievement;
 
-        public override int Exp => 100;
+        public override int Exp => 150;
 
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty,
             List<Condition> conditions = null)

@@ -285,6 +285,7 @@ namespace RandomBuff.Render.UI
         public void Destroy()
         {
             CardRendererManager.RecycleCardRenderer(_cardRenderer);
+            Container.RemoveAllChildren();
             Container.RemoveFromContainer();
         }
 

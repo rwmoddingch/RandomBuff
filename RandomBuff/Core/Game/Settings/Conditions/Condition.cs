@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 
@@ -101,7 +102,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         protected Action<Condition> onLabelRefresh;
 
         //轮回结束结算
-        public virtual void SessionEnd(SaveState save){}
+        public virtual void SessionEnd(SaveState save) {}
+
+
+        //在任何退出or结算时触发
+        public virtual void OnDestroy() => DisableHook();
 
         //轮回间抽卡结算
         public virtual void GachaEnd(List<BuffID> picked, List<BuffID> allCards){}
@@ -122,8 +127,28 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
 
         //游戏开始
-        public virtual void EnterGame(RainWorldGame game){}
+        public virtual void EnterGame(RainWorldGame game)
+        {
+            BuffPlugin.LogDebug($"Enable Condition Hook for Name: {TypeName}");
+            HookOn();
+        }
 
+        //添加hook，会在游戏开始后调用
+        public virtual void HookOn() { }
+
+
+
+        //禁用所有hook
+        internal void DisableHook()
+        {
+            runtimeHooks.ForEach(i => i.Dispose());
+            runtimeHooks.Clear();
+            BuffPlugin.LogDebug($"Disable Condition Hook for Name: {TypeName}");
+            BuffHookWarpper.DisableCondition(this);
+        }
+
+
+        private List<Hook> runtimeHooks = new();
 
         //绑定状态更新
         internal void BindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)

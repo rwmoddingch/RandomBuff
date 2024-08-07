@@ -12,7 +12,9 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
+using TemplateGains;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
@@ -36,6 +38,7 @@ namespace BuiltinBuffs.Missions
                 }
             };
             startBuffSet.Add(RandomRainIBuffEntry.RandomRainBuffID);
+            startBuffSet.Add(DequantizeBuffEntry.DequantizeID);
             startBuffSet.Add(HypothermiaIBuffEntry.HypothermiaID);
             startBuffSet.Add(FlyingAquaIBuffEntry.FlyingAquaBuffID);
             //startBuffSet.Add(); TODO:大洪水?
@@ -50,16 +53,10 @@ namespace BuiltinBuffs.Missions
 
     public class BatteryCondition : Condition
     {
-        public override void EnterGame(RainWorldGame game)
+        public override void HookOn()
         {
-            base.EnterGame(game);
+            base.HookOn();
             On.RainWorldGame.ForceSaveNewDenLocation += RainWorldGame_ForceSaveNewDenLocation;
-        }
-
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            On.RainWorldGame.ForceSaveNewDenLocation -= RainWorldGame_ForceSaveNewDenLocation; ;
         }
 
         private void RainWorldGame_ForceSaveNewDenLocation(On.RainWorldGame.orig_ForceSaveNewDenLocation orig, RainWorldGame game, string roomName, bool saveWorldStates)
@@ -68,13 +65,14 @@ namespace BuiltinBuffs.Missions
             if (roomName == "MS_bitterstart")
             {
                  BuffUtils.Log(nameof(BatteryCondition),"Player finished battery condition");
+                 BuffFile.Instance.SaveFile();
                  Finished = true;
             }
         }
 
         public static readonly ConditionID Battery = new ConditionID(nameof(Battery), true);
         public override ConditionID ID => Battery;
-        public override int Exp => 500; //TODO
+        public override int Exp => 350; //TODO
         public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
         {
             if (name == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)

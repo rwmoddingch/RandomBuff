@@ -20,10 +20,11 @@ namespace RandomBuff.Render.UI.Component
         public float scale;
         public Vector2 lastPos;
         public Vector2 pos;
+        public Vector2 rect;
 
         public float spanShrink;
         public float spanAdjust;
-        bool readyForSwitch;
+        internal bool readyForSwitch;
         int handlerCount;
         protected List<SingleCardHandler> currentActiveHandlers = new List<SingleCardHandler>();
 
@@ -73,6 +74,7 @@ namespace RandomBuff.Render.UI.Component
         void SwitchTitle(string text)
         {
             switchTitleRequest.Clear();
+            rect = Vector2.zero;
             handlerCount = text.Length;
             float width = 0f;
             for(int i = 0;i < text.Length; i++)
@@ -82,8 +84,10 @@ namespace RandomBuff.Render.UI.Component
 
                 width += newCardHandler.width + newCardHandler.spanToLeft;
             }
+            rect.x = width;
+            rect.y = CardBasicAssets.RenderTextureSize.y * scale * 0.6f;
 
-            for(int i = 0;i< currentActiveHandlers.Count; i++)
+            for (int i = 0;i< currentActiveHandlers.Count; i++)
                 currentActiveHandlers[i].CaculateDeltaPos(i, width, currentActiveHandlers.Count);
 
         }
@@ -154,7 +158,7 @@ namespace RandomBuff.Render.UI.Component
                 card.CardTexture.shader = Custom.rainWorld.Shaders["MenuText"];
                 delay = index * -title.flipDelay;
                 //deltaPos = new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (index -(title.handlerCount - 1) / 2f), 0f) + new Vector2(CardBasicAssets.RenderTextureSize.x * 0.5f * title.spanShrink * title.scale * 1.1f * (0.5f - title.anchorX) * title.handlerCount, 0f);
-
+                
                 width = CardBasicAssets.RenderTextureSize.x * title.scale * 0.8f * (Helper.IsZhChar(text) ? 1f : 0.7f);
                 
                 if (index == 0)

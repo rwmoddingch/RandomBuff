@@ -91,29 +91,29 @@ namespace BuiltinBuffs.Duality
                 room.AddObject(new Explosion(room, sourceObject, p.pos, 7, rad, force, damage, stun, deafen, killTagHolder, killTagHolderDmgFactor, minStun, backgroundNoise));
                 room.AddObject(new Explosion.ExplosionLight(p.pos, 280f * damage, 1f, 7, Color.black));
                 room.AddObject(new Explosion.ExplosionLight(p.pos, 230f * damage, 1f, 3, new Color(1f, 1f, 1f)));
-                room.AddObject(new ExplosionSpikes(room, p.pos, 14, 30f * damage, 9f, 7f * damage, 170f * damage, Color.black));
-                room.AddObject(new ShockWave(p.pos, 330f * damage, 0.045f * damage, 5, false));
+                //room.AddObject(new ExplosionSpikes(room, p.pos, 14, 30f * damage, 9f, 7f * damage, 170f * damage, Color.black));
+                room.AddObject(new ShockWave(p.pos, 330f * damage, 0.0035f * damage, 5, false));
 
-                for (int i = 0; i < 25; i++)
-                {
-                    Vector2 a = Custom.RNV();
-                    if (room.GetTile(p.pos + a * 20f).Solid)
-                    {
-                        if (!room.GetTile(p.pos - a * 20f).Solid)
-                        {
-                            a *= -1f;
-                        }
-                        else
-                        {
-                            a = Custom.RNV();
-                        }
-                    }
-                    for (int j = 0; j < 3; j++)
-                    {
-                        room.AddObject(new Spark(p.pos + a * Mathf.Lerp(30f, 60f, Random.value), a * Mathf.Lerp(7f, 38f, Random.value) + Custom.RNV() * 20f * Random.value, Color.Lerp(Color.black, new Color(1f, 1f, 1f), Random.value), null, 11, 28));
-                    }
-                    room.AddObject(new Explosion.FlashingSmoke(p.pos + a * 40f * Random.value, a * Mathf.Lerp(1f, 5f, Mathf.Pow(Random.value, 2f)), 1f + 0.05f * Random.value, new Color(1f, 1f, 1f), Color.black, Random.Range(3, 11)));
-                }
+                //for (int i = 0; i < 25; i++)
+                //{
+                //    Vector2 a = Custom.RNV();
+                //    if (room.GetTile(p.pos + a * 20f).Solid)
+                //    {
+                //        if (!room.GetTile(p.pos - a * 20f).Solid)
+                //        {
+                //            a *= -1f;
+                //        }
+                //        else
+                //        {
+                //            a = Custom.RNV();
+                //        }
+                //    }
+                //    for (int j = 0; j < 3; j++)
+                //    {
+                //        room.AddObject(new Spark(p.pos + a * Mathf.Lerp(30f, 60f, Random.value), a * Mathf.Lerp(7f, 38f, Random.value) + Custom.RNV() * 20f * Random.value, Color.Lerp(Color.black, new Color(1f, 1f, 1f), Random.value), null, 11, 28));
+                //    }
+                //    //room.AddObject(new Explosion.FlashingSmoke(p.pos + a * 40f * Random.value, a * Mathf.Lerp(1f, 5f, Mathf.Pow(Random.value, 2f)), 1f + 0.05f * Random.value, new Color(1f, 1f, 1f), Color.black, Random.Range(3, 11)));
+                //}
                 room.ScreenMovement(new Vector2?(p.pos), default(Vector2), 1.3f * damage);
                 room.PlaySound(SoundID.Bomb_Explode, p.pos, 0.5f + Random.value * 0.2f, 1f + Random.value * 0.2f);
             };

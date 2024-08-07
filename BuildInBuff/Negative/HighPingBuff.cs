@@ -49,8 +49,10 @@ namespace BuiltinBuffs.Negative
 
             public void CheckInput(Player player)
             {
+                var maxCount = (player.abstractCreature.world.game.Players.Count > 1) ? 10 : 15;
+                    
                 input.Enqueue(player.input[0]);
-                if (input.Count < 20)
+                if (input.Count < maxCount)
                     player.input[0] = new Player.InputPackage();
                 else
                     player.input[0] = input.Dequeue();

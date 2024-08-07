@@ -100,9 +100,7 @@ namespace BuiltinBuffs.Positive
                             break;
                         }
                     }
-                        
                 }
-
             }
         }
 
@@ -156,7 +154,6 @@ namespace BuiltinBuffs.Positive
         Player owner;
         public int stackIndex;
         int disappearCount;
-        int emitterCount;
         float averageVoice;
         Color color;
 
@@ -184,7 +181,7 @@ namespace BuiltinBuffs.Positive
             this.totalSprites = 1;
             this.getToExpand = 1f;
             this.getToPush = 1f;
-            this.emitterCount = 30;
+            this.emitter = null;
         }
 
         public Vector2 CenterPos => Center(0);
@@ -262,12 +259,11 @@ namespace BuiltinBuffs.Positive
 
             if (disappearCount > 0)
                 disappearCount--;
-            if (emitterCount > 0)
-                emitterCount--;
 
             if (IsExisting && owner.room != null)
             {
-                EmitterUpdate();
+                if (this.emitter == null)
+                    CreateEmitter();
 
                 List<PhysicalObject>[] physicalObjects = owner.room.physicalObjects;
                 for (int i = 0; i < physicalObjects.Length; i++)
@@ -292,7 +288,7 @@ namespace BuiltinBuffs.Positive
             }
             else
             {
-                if (emitter != null)
+                if (emitter != null && (owner.room == null || emitter.room != owner.room))
                 {
                     emitter.Die();
                     emitter = null;
@@ -312,48 +308,50 @@ namespace BuiltinBuffs.Positive
             disappearCount = 1200;
         }
 
-        private void EmitterUpdate()
+        private void CreateEmitter()
         {
-            if (emitterCount == 0)
+            Color.RGBToHSV(this.color, out var h, out var s, out var v);
+            var emitter = new ParticleEmitter(this.room);
+            emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, this.owner));
+
+            emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, Mathf.FloorToInt(4f * AverageRadius(this.stackIndex)), Mathf.FloorToInt(4f * AverageRadius(this.stackIndex))));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "", 11, 1f, 1f, this.color)));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.2f, this.color)));
+
+            emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 20, 40));
+            emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 3f), new Vector2(6f, 4f)));
+            emitter.ApplyParticleModule(new SetRandomColor(emitter, h - 0.1f, h + 0.1f, s, v));
+            emitter.ApplyParticleModule(new SetRingPos(emitter, AverageRadius(this.stackIndex)));
+            emitter.ApplyParticleModule(new SetRingRotation(emitter, emitter.pos, 0f));
+            emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0f));
+
+            emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, a) =>
             {
-                emitterCount = 240;
-                var emitter = new ParticleEmitter(this.room);
-                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 240, false));
-                emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, this.owner));
+                if (Custom.Dist(emitter.pos, this.owner.mainBodyChunk.pos) > 10f)
+                    return Mathf.Max(0f, p.alpha - 0.05f);
+                if (a < 0.2f)
+                    return Mathf.Min(1f, p.alpha + 0.02f);
+                else if (a > 0.5f)
+                    return Mathf.Max(0f, p.alpha - 0.01f);
+                else
+                    return Mathf.Min(1f, p.alpha + 0.05f);
+            }));
+            emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) => p.setScaleXY * 4f * a * (1f - a)));
+            emitter.ApplyParticleModule(new PositionOverLife(emitter, (p, a) => (p.pos - emitter.pos).normalized * Radius(this.stackIndex, 0f) + emitter.pos));
+            emitter.ApplyParticleModule(new RotationOverLife(emitter, (p, a) => Custom.VecToDeg(p.pos - emitter.pos)));
 
-                emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, Mathf.FloorToInt(4f * Radius(this.stackIndex, 0f)), Mathf.FloorToInt(4f * Radius(this.stackIndex, 0f))));
-
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "", 11 , 1f, 1f, this.color)));
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 0.15f, this.color)));
-                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
-                emitter.ApplyParticleModule(new SetRandomLife(emitter, 20, 40));
-                emitter.ApplyParticleModule(new SetRandomScale(emitter, new Vector2(8f, 3f), new Vector2(6f, 4f)));
-                emitter.ApplyParticleModule(new SetRingPos(emitter, Radius(this.stackIndex, 0f)));
-                emitter.ApplyParticleModule(new SetRingRotation(emitter, emitter.pos, 0f));
-                emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0f));
-
-                emitter.ApplyParticleModule(new AlphaOverLife(emitter, (p, a) =>
-                {
-                    if (Custom.Dist(emitter.pos, this.owner.mainBodyChunk.pos) > 10f)
-                        return Mathf.Max(0f, p.alpha - 0.05f);
-                    if (a < 0.2f)
-                        return Mathf.Min(1f, p.alpha + 0.02f);
-                    else if (a > 0.5f)
-                        return Mathf.Max(0f, p.alpha - 0.01f);
-                    else
-                        return Mathf.Min(1f, p.alpha + 0.05f);
-                }));
-                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (p, a) => p.setScaleXY * 4f * a * (1f - a)));
-                emitter.ApplyParticleModule(new PositionOverLife(emitter, (p, a) => (p.pos - emitter.pos).normalized * Radius(this.stackIndex, 0f) + emitter.pos));
-                emitter.ApplyParticleModule(new RotationOverLife(emitter, (p, a) => Custom.VecToDeg(p.pos - emitter.pos)));
-
-                ParticleSystem.ApplyEmitterAndInit(emitter);
-                this.emitter = emitter;
-            }
+            ParticleSystem.ApplyEmitterAndInit(emitter);
+            this.emitter = emitter;
         }
 
         public override void Destroy()
         {
+            if (emitter != null)
+            {
+                emitter.Die();
+                emitter = null;
+            }
             base.Destroy();
         }
 
@@ -366,6 +364,11 @@ namespace BuiltinBuffs.Positive
         public float Radius(float ring, float timeStacker)
         {
             return (3f + ring + Mathf.Lerp(this.lastPush, this.push, timeStacker) - 0.5f * this.averageVoice) * Mathf.Lerp(this.lastExpand, this.expand, timeStacker) * 10f;
+        }
+
+        public float AverageRadius(float ring)
+        {
+            return (3f + ring + this.getToPush - 0.5f * this.averageVoice) * this.getToExpand * 10f;
         }
     }
 

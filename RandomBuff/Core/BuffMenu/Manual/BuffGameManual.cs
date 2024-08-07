@@ -17,10 +17,10 @@ namespace RandomBuff.Core.BuffMenu.Manual
         public static Dictionary<string, int> topicKeys = new Dictionary<string, int>
         {
             { "BuffManual_Introduction", 1 },
-            { "BuffManual_Gameplay", 1 },
-            { "BuffManual_Buff", 1 },
-            { "BuffManual_Condition", 1 },
-            { "BuffManual_Gamemode", 6 }
+            { "BuffManual_Gameplay", 3 },
+            { "BuffManual_FreeMode", 5 },
+            { "BuffManual_MissionMode", 5 },
+            { "BuffManual_BuffAndCard",4}
         };
 
         public CardTitle manualPageTitle;
@@ -63,12 +63,16 @@ namespace RandomBuff.Core.BuffMenu.Manual
                 pages[1].RemoveSubObject(currentTopicPage);
             }
 
-            if (topic == "BuffManual_Gameplay")
-                currentTopicPage = new BuffGamePlayManualPage(this, pageNumber, pages[1]);
-            else if(topic == "BuffManual_Introduction")
+            if (topic == "BuffManual_Introduction")
                 currentTopicPage = new BuffGameSummaryPage(this, pageNumber, pages[1]);
-            else if(topic == "BuffManual_Gamemode")
-                currentTopicPage = new BuffGameModeManualPage(this, pageNumber, pages[1]);
+            else if (topic == "BuffManual_FreeMode")
+                currentTopicPage = new BuffGameFreeModeManualPage(this, pageNumber, pages[1]);
+            else if (topic == "BuffManual_BuffAndCard")
+                currentTopicPage = new BuffGameBuffCardPage(this, pageNumber, pages[1]);
+            else if (topic == "BuffManual_MissionMode")
+                currentTopicPage = new BuffGameMissionModeManual(this, pageNumber, pages[1]);
+            else if (topic == "BuffManual_Gameplay")
+                currentTopicPage = new BuffGameGamePlayManual(this, pageNumber, pages[1]);
             else
                 currentTopicPage = new BuffManualPage(this, pageNumber, pages[1]);
             pages[1].subObjects.Add(this.currentTopicPage);

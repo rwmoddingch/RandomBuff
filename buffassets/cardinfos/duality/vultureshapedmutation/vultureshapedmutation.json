@@ -2,7 +2,8 @@
   "FaceName": "vultureshapedmutation",
   "BuffID": "VultureShapedMutation",
   "BuffType": "Duality",
-  "BuffProperty": "Normal",
+  "BuffProperty": "Special",
+  "AsPositive": true,
   "Triggerable": false,
   "Stackable": false,
   "Color": "6ABFE5",
@@ -11,10 +12,10 @@
 
   "Chinese": {
     "BuffName": "鹫形突变",
-    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。按跳跃键以在空中开启飞行和结束飞行。当你持有面具时，秃鹫类生物对你不再有敌意。"
+    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。同时，你的食量增大，并倾向于食肉。按跳跃键以在空中开启飞行和结束飞行。当你持有面具时，秃鹫类生物对你不再有敌意。"
   },
   "English": {
     "BuffName": "VultureShapedMutation",
-    "Description": "Your hands have turned into wings, allowing you to fly freely, but now you can only hold a thing in your mouth. Press the jump button to start and end the flight in the air. When you has a mask, Vulture creatures no longer have hostility towards you."
+    "Description": "Your hands have turned into wings, allowing you to fly freely, but now you can only hold a thing in your mouth. At the same time, your appetite increases and you tend to eat meat. Press the jump button to start and end the flight in the air. When you has a mask, Vulture creatures no longer have hostility towards you."
   }
 }

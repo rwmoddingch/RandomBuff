@@ -46,13 +46,19 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 bundle.LoadAsset<Shader>("BinahWave")));
             Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.Bar", FShader.CreateShader("SephirahMeltdownEntry.Bar",
                 bundle.LoadAsset<Shader>("BinahBar")));
-            Custom.rainWorld.Shaders.Add("SephirahMeltdownEntry.LevelColorRotation", FShader.CreateShader("SephirahMeltdownEntry.LevelColorRotation",
-                bundle.LoadAsset<Shader>("LevelColorRotation")));
+
+            foreach(var shader in AyinHook.ReplacedShaders)
+                Custom.rainWorld.Shaders.Add($"SephirahMeltdownEntry.{shader}Rotation", FShader.CreateShader($"SephirahMeltdownEntry.{shader}Rotation",
+                 bundle.LoadAsset<Shader>($"{shader}Rotation")));
             Futile.atlasManager.LoadAtlas(Path.Combine(ChesedBuffData.Chesed.GetStaticData().AssetPath, "ChesedTex"));
             Futile.atlasManager.LoadAtlas(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahTex"));
 
+            UITarget = Futile.atlasManager
+                .LoadImage(Path.Combine(BinahBuffData.Binah.GetStaticData().AssetPath, "BinahUITarget")).elements[0];
+
             BinahScreenEffect = bundle.LoadAsset<Shader>("BinahScreenEffect");
             BinahScreenEffectTexture = bundle.LoadAsset<Texture2D>("CameraFilterPack_Blizzard1");
+            AyinScreenEffect = bundle.LoadAsset<Shader>("AyinPost");
 
             BuffSounds.LoadSound(BinahAtkStone, BinahBuffData.Binah.GetStaticData().AssetPath, new BuffSoundGroupData(),
                 new BuffSoundData("Binah_Atk_Stone"));
@@ -76,6 +82,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly SoundID BinahAtkStrike = new SoundID(nameof(BinahAtkStrike), true);
 
 
+        public static FAtlasElement UITarget;
+
         public static readonly SoundID BinahAtkFinalStart = new SoundID(nameof(BinahAtkFinalStart), true);
         public static readonly SoundID BinahAtkFinalLoop = new SoundID(nameof(BinahAtkFinalLoop), true);
         public static readonly SoundID BinahAtkFinalEnd = new SoundID(nameof(BinahAtkFinalEnd), true);
@@ -83,6 +91,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
 
         public static Shader BinahScreenEffect;
+        public static Shader AyinScreenEffect;
+
         public static Texture2D BinahScreenEffectTexture;
 
     }

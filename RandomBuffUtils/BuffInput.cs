@@ -18,11 +18,20 @@ namespace RandomBuffUtils
         {
             if (action.StartsWith("Axis"))
             {
+                action = action.Replace("Joystick", "");
+                var colIndex = action[0];
+                if (char.IsDigit(colIndex))
+                    action = action.Substring(1);
+
                 action = action.Replace("Axis ", "");
                 if (ReInput.controllers?.Joysticks == null)
                     return false;
-                return ReInput.controllers.Joysticks.Any(col => col.GetAxisTimeActiveById(action[0] - '0') != 0 &&
-                                                                col.GetAxisLastTimeActiveById(action[0] - '0') == 0);
+                else if (char.IsDigit(colIndex) && ReInput.controllers.Joysticks.Count > colIndex - '0')
+                    return ReInput.controllers.Joysticks[colIndex - '0'].GetAxisTimeActiveById(action[0] - '0') != 0 &&
+                           ReInput.controllers.Joysticks[colIndex - '0'].GetAxisLastTimeActiveById(action[0] - '0') == 0;
+                else
+                    return ReInput.controllers.Joysticks.Any(col => col.GetAxisTimeActiveById(action[0] - '0') != 0 &&
+                                                                    col.GetAxisLastTimeActiveById(action[0] - '0') == 0);
             }
             return Input.GetKeyDown((KeyCode)Enum.Parse(typeof(KeyCode), action));
         }
@@ -35,12 +44,20 @@ namespace RandomBuffUtils
         /// <returns></returns>
         public static bool GetKey(string action)
         {
-            if (action.StartsWith("Axis"))
+            if (action.Contains("Axis"))
             {
+                action = action.Replace("Joystick", "");
+                var colIndex = action[0];
+                if (char.IsDigit(colIndex))
+                    action = action.Substring(1);
+
                 action = action.Replace("Axis ", "");
                 if (ReInput.controllers?.Joysticks == null)
                     return false;
-                return ReInput.controllers.Joysticks.Any(col => col.GetAxisTimeActiveById(action[0] - '0') != 0);
+                else if (char.IsDigit(colIndex) && ReInput.controllers.Joysticks.Count > colIndex - '0')
+                    return ReInput.controllers.Joysticks[colIndex - '0'].GetAxisTimeActiveById(action[0] - '0') != 0;
+                else
+                    return ReInput.controllers.Joysticks.Any(col => col.GetAxisTimeActiveById(action[0] - '0') != 0);
             }
             return Input.GetKey((KeyCode)Enum.Parse(typeof(KeyCode), action));
         }

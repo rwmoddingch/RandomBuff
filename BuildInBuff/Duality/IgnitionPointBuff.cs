@@ -490,6 +490,7 @@ namespace BuiltinBuffs.Duality
 
     public partial class TemperatrueModule
     {
+        public static float hypothermiaToTemperatureParam = 100f;
         public float temperature;
 
         public float ignitingPoint;
@@ -501,6 +502,9 @@ namespace BuiltinBuffs.Duality
         public float unfreezePoint;//负数
         public float warmUpRate;
         public bool freeze;
+
+        public int freezeCD;
+        public int maxFreezeCD;
 
         public Color lastFreezeCol = Color.blue * 0.3f + Color.white * 0.7f;
 
@@ -567,6 +571,7 @@ namespace BuiltinBuffs.Duality
             freezePoint = creature.TotalMass * Mathf.Lerp(1f, 2f, Mathf.InverseLerp(0f, 10f, creature.Template.bodySize)) * (creature.Template.BlizzardAdapted ? 2f : 1f);
             unfreezePoint = freezePoint * (0.6f + 0.2f * Mathf.InverseLerp(0f, 5f, creature.Template.bodySize));
             warmUpRate = creature.bodyChunks.Length * 0.4f;
+            maxFreezeCD = 20;
         }
 
         public override void Update(UpdatableAndDeletable updateable)
@@ -580,6 +585,24 @@ namespace BuiltinBuffs.Duality
             {
                 AddTemperature(heatSource.GetHeat(creature, creature.mainBodyChunk.pos));
             }
+
+
+            if (creature.Hypothermia > 0f)
+            {
+                float hypothermiaCool = creature.Hypothermia * hypothermiaToTemperatureParam;
+
+                creature.Hypothermia = 0f;
+
+                if(freezeCD > 0 && temperature < 0f)
+                {
+                    temperature = Mathf.Max(-unfreezePoint, temperature - hypothermiaCool);
+                }
+                else
+                    temperature -= hypothermiaCool;
+            }
+
+            if (freezeCD > 0)
+                freezeCD--;
 
             if (temperature > 0)
             {
@@ -607,7 +630,7 @@ namespace BuiltinBuffs.Duality
             }
             else if(temperature < 0)
             {
-                float rateWarmUp = temperature + warmUpRate / 40f;
+                float rateWarmUp = temperature + warmUpRate / 40f * (1f - creature.Submersion / 2f);
 
                 temperature = rateWarmUp;
 
@@ -616,11 +639,12 @@ namespace BuiltinBuffs.Duality
 
                 if (!freeze)
                 {
-                    if (temperature < -freezePoint)
+                    if (temperature < -freezePoint && freezeCD == 0)
                         freeze = true;
                 }
                 else
                 {
+                    freezeCD = maxFreezeCD;
                     if (temperature > -unfreezePoint)
                         freeze = false;
                 }
@@ -728,6 +752,7 @@ namespace BuiltinBuffs.Duality
                 unfreezePoint = extinguishPoint = 7f;
                 warmUpRate = coolOffRate = 0.3f;
             }
+            maxFreezeCD = 160;
         }
 
         public override void Update(UpdatableAndDeletable u)
@@ -1016,7 +1041,7 @@ namespace BuiltinBuffs.Duality
             emitter.pos = pos;
             emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 40, false));
 
-            emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 260, 20));
+            emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 260, 5));
 
             emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", alpha: 0.5f)));
             emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "", constCol: Color.white)));
@@ -1240,6 +1265,7 @@ namespace BuiltinBuffs.Duality
 
     public class RoomFlame : UpdatableAndDeletable, IHeatingCreature, IAccessibilityModifier
     {
+        public static readonly List<CreatureTemplate.Type> FireImmuneCreature = new List<CreatureTemplate.Type>();
         static ConditionalWeakTable<Room, RoomFlame> flameMapper = new ConditionalWeakTable<Room, RoomFlame>();
 
         float[,] fireIntensities;
@@ -1289,6 +1315,7 @@ namespace BuiltinBuffs.Duality
                             IntVector2 pos = new IntVector2(x, y);
                             if (burningTiles.Contains(pos))
                             {
+                                totalBurningTile--;
                                 int index = burningTiles.IndexOf(pos);
                                 burningTiles.RemoveAt(index);
                             }
@@ -1309,15 +1336,9 @@ namespace BuiltinBuffs.Duality
 
                 //TODO: 这是一个临时的补充，不一定有效也不一定能解决根本问题
 
-                if (pos.x < fireIntensities.GetLength(0) && pos.y < fireIntensities.GetLength(1) && Random.value < 0.2f * fireIntensities[pos.x, pos.y])
+                if (pos.x >= 0 && pos.x < fireIntensities.GetLength(0) && pos.y >= 0 && pos.y < fireIntensities.GetLength(1) && Random.value < 0.2f * fireIntensities[pos.x, pos.y])
                     room.AddObject(new HolyFire.HolyFireSprite(middlePos + Random.value * 10f * Custom.RNV()));
             }
-
-            //for(int i = 0;i < burningTiles.Count; i++)
-            //{
-            //    labels[i].SetPosition(room.MiddleOfTile(burningTiles[i]) - room.game.cameras[0].pos);
-            //    labels[i].text = string.Format("{0:F1}", fireIntensities[burningTiles[i].x, burningTiles[i].y]);
-            //}
         }
 
         public override void Destroy()
@@ -1476,6 +1497,9 @@ namespace BuiltinBuffs.Duality
 
         public bool IsTileAccessible(IntVector2 tile, CreatureTemplate crit)
         {
+            if (FireImmuneCreature.Contains(crit.type))
+                return true;
+
             if (tile.x < 0 || tile.x >= fireIntensities.GetLength(0) || tile.y < 0 || tile.y >= fireIntensities.GetLength(1))
                 return true;
             return fireIntensities[tile.x, tile.y] == 0;

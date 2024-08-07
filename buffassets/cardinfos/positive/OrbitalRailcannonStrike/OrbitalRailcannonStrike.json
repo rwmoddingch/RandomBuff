@@ -8,10 +8,10 @@
 
     "Chinese" : {
         "BuffName" : "轨道炮攻击",
-        "Description" : "主动触发卡牌且玩家手中仍有空位时，会给予玩家一个只能在当前房间使用的信标，投出后若上方没有遮挡则会在落地时激活轨道炮。轨道炮会自动锁定附近最大的目标并攻击。冷却240秒"
+        "Description" : "主动触发buff且玩家手中仍有空位时，会给予玩家一个只能在本轮回使用的信标，投出后若上方没有遮挡则会在落地时激活轨道炮。轨道炮会自动锁定附近最大的目标并攻击。冷却240秒"
     },
     "English" : {
         "BuffName" : "Orbital Railcannon Strike",
-        "Description" : "TODO"
+        "Description" : "When this buff is activated by the player and there is an empty slot in their hand, it grants the player a beacon usable only during this turn. Upon deployment, if there is no obstruction above, it activates the orbital railcannon strike upon landing. The railcannon automatically locks onto and attacks the largest nearby target. Cooldown: 240 seconds."
     }
 }

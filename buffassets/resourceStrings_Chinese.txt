@@ -64,7 +64,7 @@ BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
 
 //BuffHUD
-BuffHUD_FreePick|选择初始卡牌（不多于{0}张）
+BuffHUD_FreePick|选择初始卡牌（{0}/{1}）
 
 //BuffModeSelect
 Mode_Free|自由模式
@@ -97,6 +97,7 @@ totNegativeCard|获取的负面Buff数量：
 totDualityCard|获取的双向Buff数量：
 totTriggerCount|Buff触发的次数:
 RunCount|完成的游戏局数:
+InitPickCount|最大初始抽卡数:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|单击左键以查看 <BuffID> 的详情
@@ -111,16 +112,19 @@ GachaTemplate_Desc_Quick|无抽卡，每30秒随机添加一张卡牌，正面�
 GachaTemplate_Desc_Sandbox|无抽卡，可自由添加或删除卡牌，不会获得奖励
 GachaTemplate_Desc_Survival|除初始抽卡外，只抽取负面或中性卡牌
 GachaTemplate_Desc_SephirahMeltdowns|每四轮为一个阶段，每阶段开始时获得特定负面卡牌，阶段结束时可以抽取两张正面卡牌
-GachaTemplate_Detail_Base|<Color=FFC300>经验倍率:{0}<ENTRY>初始抽卡倍率:{1}
-GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>经验倍率:{0}<ENTRY>无初始抽卡
+GachaTemplate_Desc_SurvivalOfFittest|每隔五轮回随机获取鹫形突变, 蛛形突变, 蛞蝓仙子, 鲊形突变, 蛞蝓蛞蝓中的其中一张并叠加至最大
+GachaTemplate_Detail_Base|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>初始抽卡倍率:{1}<ENTRY>{2}可以使用通行证进行堆叠或删除卡
+GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>无初始抽卡<ENTRY>{1}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Normal|<GachaPositive>正面抽卡数:{0}<ENTRY><GachaNonPositive>负面或中性抽卡数:{1}
+GachaTemplate_Detail_Base_Yes|
+GachaTemplate_Detail_Base_No|不
 
 //BuffCondition
 DisplayName_Achievement|获取{0}通行证
 DisplayName_Cycle|生存至少{0}个雨循环
 DisplayName_Card|获取{0}张{1}的buff卡
 DisplayName_Like|与{0}达到最高好感
-DisplayName_MeetSS_SL|在{0}循环内见到五块卵石和仰望皎月
+DisplayName_MeetSS_SL|在{0}循环内见到五块卵石和仰望皓月
 DisplayName_Gourmand|完成胖猫食谱
 DisplayName_Interval_OutRange|在{0}-{1}轮回内完成任务，当前隐藏
 DisplayName_FixCycle|在{0}轮回完成使命
@@ -133,7 +137,12 @@ DisplayName_MeltDownBinah|击败 Binah
 DisplayName_Extermination|使用{1}消灭 {0} 只生物
 DisplayName_Score|消灭生物获得{0}点分数
 DisplayName_TreeOfLight|集满能量（食物）
-
+DisplayName_Abyss|前往深渊
+DisplayName_Ascend|超度 {0} 个区域的生物
+DisplayName_AscendOracle|超度五块卵石和仰望皓月
+DisplayName_Distance|移动至少 {0} 米
+DisplayName_Distance_Faster|在卡牌提供加速的情况下移动至少 {0} 米
+DisplayName_ScorchCreature|利用高温烧死至少 {0} 只生物
 //BuffCondition_BuffTypes
 all types|所有类型
 Negative|负面
@@ -165,13 +174,12 @@ Quest_Display_LevelQuest|达到 {0} 等级
 Quest_Display_RunCountQuest|完成 {0} 局游戏
 Quest_Display_SingleRunCardQuest|在一局游戏内获取 {1} 张{0}卡（可重复）
 Quest_Display_CardQuest|总计获取 {1} 张{0}卡（可重复）
+Quest_Display_CosmeticQuest|解锁 {0} 收藏品
 
 //QuestRender
 QuestRender_FreePick|自由抽卡数 +1
 
 //mission
-Mission_Display_Meltdown|核心抑制
-Mission_Display_DodgeTheRock|石头快跑
 Mission_Display_Druid|与龙共舞
 Mission_Display_Strayer|异邦浪客
 Mission_Display_EmergnshyTreatment|紧稽救援
@@ -179,8 +187,23 @@ Mission_Display_MidnightSnack|午夜凶粮
 Mission_Display_ArtOfExplosion|爆破艺术
 Mission_Display_DuelsOfSnipers|狙击对决
 Mission_Display_DoomExpress|末日速递
+Mission_Display_TripleAffirmation|三重肯定
+
+Mission_Display_DodgeTheRock|石头快跑
+Mission_Display_Meltdown|核心抑制
 Mission_Display_RadiationCrisis|辐射危机
 Mission_Display_LawnCleaner|草坪清洁工
+Mission_Display_InHurry|着急忙慌
+Mission_Display_SurvivalOfFittest|适者生存
+Mission_Display_SlugOfTheFlame|烈焰之蝓
+
+//Credit
+CreditTitle_Intro|Random Buff
+CreditTitle_Coding|代码
+CreditTitle_ArtWorks|美术
+CreditTitle_PlayTest|游玩测试
+CreditTitle_SpecialThanks|特别感谢
+CreditTitle_ThanksForPlaying|感谢游玩！
 
 
 //BuffManual
@@ -189,26 +212,89 @@ BuffManual_Introduction|简介
 BuffManual_Gameplay|游戏机制
 BuffManual_Buff|增益
 BuffManual_Condition|条件
-BuffManual_Gamemode|游戏模式
+BuffManual_FreeMode|自由模式
+BuffManual_MissionMode|使命模式
+BuffManual_BuffAndCard|Buff&卡牌
+BuffManual_Progression|进度
 
 //BuffManual_SubpageTitle
 BuffManual_Introduction_0|简介
-BuffManual_Gameplay_0|游戏机制
-BuffManual_Buff_0|增益
+BuffManual_Gameplay_0|buff机制简介
+BuffManual_Gameplay_1|游戏模式简介
+BuffManual_Gameplay_2|条件
 BuffManual_Condition_0|条件
 BuffManual_Gamemode_0|游戏模式简介
-BuffManual_Gamemode_1|自由模式
-BuffManual_Gamemode_2|自由模式-普通
-BuffManual_Gamemode_3|自由模式-快速
-BuffManual_Gamemode_4|自由模式-生存
-BuffManual_Gamemode_5|使命模式
+BuffManual_FreeMode_0|自由模式
+BuffManual_FreeMode_1|自由模式-普通
+BuffManual_FreeMode_2|自由模式-快速
+BuffManual_FreeMode_3|自由模式-生存
+BuffManual_FreeMode_4|自由模式-沙盒
+BuffManual_FreeMode_5|模式详情
+BuffManual_MissionMode_0|使命模式
+BuffManual_MissionMode_1|选择使命
+BuffManual_MissionMode_2|使命条件
+BuffManual_MissionMode_3|初始卡组
+BuffManual_MissionMode_4|模式详情
+BuffManual_BuffAndCard_0|Buff & 卡牌
+BuffManual_BuffAndCard_1|卡牌剩余轮回
+BuffManual_BuffAndCard_2|卡牌堆叠数
+BuffManual_BuffAndCard_3|可触发卡牌
+BuffManual_Progression_0|进度系统
+BuffManual_Progression_1|记录
+BuffManual_Progression_2|收集品
+BuffManual_Progression_3|装饰品
+BuffManual_CardPedia_0|卡牌图鉴
+BuffManual_CardPedia_1|浏览卡牌
 
 //BuffManual_Summary
 BuffManual_Summary_Content_0|随机增益是以随机的增益效果搭配为玩法的游戏模式。你可以为自己添加挑战，也可以完成特殊的使命来解锁奖励。
-//BuffManual_Gamemode
-BuffManual_GameMode_Content_0|随机增益一共有两种模式，分为普通模式和使命模式。
-BuffManual_GameMode_Content_1|最常规的游玩方式。<LINE>如果成功进行结算，只会根据完成的条件、击杀数量和持有卡牌数量结算经验值提升等级。<LINE>可在界面左下角切换子模式。
-BuffManual_GameMode_Content_2|可以选择0到5个条件进行游戏，每个成功的雨眠会进行一轮抽取，当完成所有条件后雨眠即可进行结算。<LINE>0个条件时不会进行结算。<LINE>根据选择的蛞蝓猫，初始房间与选择的蛞蝓猫在剧情模式的初始房间相同。
-BuffManual_GameMode_Content_3|条件选择方式与普通模式相同，但每隔30秒会进行一次完全随机的抽取。<LINE>当卡牌数量超过一定数量后会自动移除最早抽到的buff。<LINE>初始房间会在目前所有区域的避难所中随机选择。
-BuffManual_GameMode_Content_4|条件选择方式与普通模式相同。但开始游戏时可以选择一定数量的初始buff，之后每度过一个雨循环都会额外增加一个负面buff。<LINE>初始房间的选取方式与快速模式相同。
-BuffManual_GameMode_Content_5|固定条件和初始增益的模式，分为通用使命和专属使命。<LINE>专属使命只能由特定的蛞蝓猫完成，通用使命可以使用任意蛞蝓猫完成。<LINE>完成使命除了可以和自由模式一样提升等级，一般来说也可以解锁特殊的收集品
+BuffManual_Gameplay_Content_0|通过启用不同的buff来对游戏玩法产生或大或小的影响。<LINE>大部分的更改都是动态的，不同的buff也有可能组合产生意外的效果。
+BuffManual_Gameplay_Content_1|你可以选择两种不同的模式来游玩Random Buff，分别自由模式和使命模式。
+BuffManual_Gameplay_Content_2|不同游戏模式均存在可以完成的条件。<LINE>每个条件都有自己的需求和进度，完成条件可以获取不同数量的经验值。
+BuffManual_FreeMode_Content_0|最常规的游玩方式。<LINE>如果成功进行结算，只会根据完成的条件、击杀数量和持有卡牌数量结算经验值提升等级。<LINE>可在界面左下角切换子模式。
+BuffManual_FreeMode_Content_1|可以选择0到5个条件进行游戏，每个成功的雨眠会进行一轮抽取，当完成所有条件后雨眠即可进行结算。<LINE>0个条件时不会进行结算。<LINE>根据选择的蛞蝓猫，初始房间与选择的蛞蝓猫在剧情模式的初始房间相同。
+BuffManual_FreeMode_Content_2|条件选择方式与普通模式相同，但每隔30秒会进行一次完全随机的抽取。<LINE>当卡牌数量超过一定数量后会自动移除最早抽到的buff。<LINE>初始房间会在目前所有区域的避难所中随机选择。
+BuffManual_FreeMode_Content_3|条件选择方式与普通模式相同。但开始游戏时可以选择一定数量的初始buff，之后每度过一个雨循环都会额外增加一个负面buff。<LINE>初始房间的选取方式与快速模式相同。
+BuffManual_FreeMode_Content_4|条件选择方式与普通模式相同，但不会获得任何经验。<LINE>游戏进行时不会进行任何抽卡，而是由一个可以自由启用、停用buff的沙盒卡包替代。<LINE>初始房间的选取方式与普通模式相同，且不进行结算。
+BuffManual_FreeMode_Content_5|该模式的详情可以通过右下角的按钮查看
+BuffManual_MissionMode_Content_0|固定条件和初始增益的模式，分为通用使命和专属使命。<LINE>专属使命只能由特定的蛞蝓猫完成，通用使命可以使用任意蛞蝓猫完成。<LINE>完成使命除了可以和自由模式一样提升等级，一般来说也可以解锁特殊的收集品
+BuffManual_MissionMode_Content_1|一共有两种使命可以在上方选择：<LINE>专属使命：只能由当前选择的蛞蝓猫完成<LINE>通用使命：可以由所有蛞蝓猫完成。
+BuffManual_MissionMode_Content_2|每个使命都有不同的指定条件，可以在条件栏查看，只有完成条件的要求才能完成使命。
+BuffManual_MissionMode_Content_3|每个使命都有不同的初始卡组，可以在卡组栏查看。
+BuffManual_MissionMode_Content_4|该模式的详情可以通过右下角的按钮查看
+BuffManual_BuffAndCard_Content_0|Mod中的buff一共分为正面、中性、负面三大类。<LINE>不同buff产生的效果大相径庭，卡牌可以用于展示它们的信息。<LINE>每个buff都会有一个代表它的卡牌，卡牌可以展示buff的封面、名字以及详细信息。<LINE>除此之外，卡牌还具有展示其他额外信息的功能。
+BuffManual_BuffAndCard_Content_1|当卡牌上出现圆形标记时，这表明该buff是有时效性的。<LINE>图形中的数字表明了该buff还可以生效多少个雨循环。
+BuffManual_BuffAndCard_Content_2|当卡牌上出现菱形标记时，这表明该buff是可堆叠的。<LINE>图形中的数字表明了该buff当前的堆叠层数<LINE>堆叠层数具体的效果取决于不同buff的实现方式。
+BuffManual_BuffAndCard_Content_3|当卡牌上出现六边形标记时，这表明该buff是可主动触发的。<LINE>若图形中为>>标记，则说明你没有给他绑定任何触发快捷键。<LINE>快捷键可以通过按下配置菜单指定的按键来绑定。绑定后即可使用快捷键来触发buff效果。<LINE>此外你也可以右键卡牌来触发buff的效果。
+BuffManual_Progression_Content_0|Random Buff拥有一套独立的进度系统，包含等级、记录、收集品和装饰品<LINE>其中等级在三个页面中均可见，左侧展示当前等级和经验，右侧展示下一级需要的经验。
+BuffManual_Progression_Content_1|记录页面会展示一些特殊的进度，可以用来统计一些游玩random buff时触发的事件次数。
+BuffManual_Progression_Content_2|收集品界面会展示收集品的收集情况。可以用鼠标悬停在收集品按钮上来查看详细信息。
+BuffManual_Progression_Content_3|装饰品界面会展示所有已经收集到的装饰品。可以通过点击装饰品按钮来切换装饰品的开关。<LINE>启用的装饰品会在游戏内出现，且只会对左侧蛞蝓猫头像对应的蛞蝓猫生效。灰色头像则是对所有猫均生效。<LINE>启用的装饰品按钮描边会变为绿色。
+BuffManual_CardPedia_Content_0|卡牌图鉴可以用来查看你所有已经解锁或抽取过的buff卡牌<LINE>同时卡牌图鉴可以统计buff卡牌收集进度
+BuffManual_CardPedia_Content_1|选择任意一类buff后，可以通过点击buff卡牌来查看对应buff的详细信息。
+
+//Remix
+Remix_Title|Random Buff
+Remix_Option|配置
+Remix_CardSlotKey|查看卡牌按键
+Remix_KeyBindKey|卡牌绑键按键
+Remix_ShowExceptionLog|提示报错
+Remix_EnableExpeditionExtend|实验性 - DLC探险效果转化卡牌
+Remix_EnableExpeditionModExtend|实验性 - MOD探险效果转化卡牌
+Remix_Cheat|作弊
+Remix_CheatAllCards|解锁全部卡牌
+Remix_CheatAllCosmetics|解锁全部装饰品
+Remix_Credit|致谢
+Remix_CardSlotKey_Desc|按下此键可以在局内查看所持有的卡牌
+Remix_KeyBindKey_Desc|点开允许绑定按键的卡牌后，按住此键后可再按另一个键，为该卡牌的功能绑定后者按键
+Remix_ShowExceptionLog_Desc|在当雨世界出现异常 (exceptionLog.txt) 时，在右上角出现感叹号，点开可详细查看log内容
+Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取对应卡牌一次以解锁
+Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁
+Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫扩展的增益和负担转化为卡牌
+Remix_EnableExpeditionModExtend_Desc|需要重启以应用，将其他mod的增益和负担转化为卡牌，可能存在兼容性问题
+
+//SleepMenu
+SleepMenu_Stack|叠加卡牌
+SleepMenu_UnStack|删除卡牌
+SleepMenu_Stack_Title|选择一张卡叠加
+SleepMenu_UnStack_Title|选择一张卡删除

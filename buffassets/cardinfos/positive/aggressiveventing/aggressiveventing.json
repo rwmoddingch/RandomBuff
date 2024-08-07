@@ -1,0 +1,18 @@
+{
+  "FaceName": "aggressiveventing",
+  "BuffID": "AggressiveVenting",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": true,
+  "Stackable": false,
+  "Color": "FFEA42",
+
+  "Chinese": {
+    "BuffName": "暴力散热",
+    "Description": "前置为燃点；触发时会立刻清空玩家的正温度，并全部转移到附近其他生物上，冷却时间30秒"
+  },
+  "English": {
+    "BuffName": "AggressiveVenting",
+    "Description": "Pre-set to IgnitionPoint; when triggered it immediately clears the player's positive temperature and transfers it all to other nearby creatures, cooldown 30 seconds"
+  }
+}

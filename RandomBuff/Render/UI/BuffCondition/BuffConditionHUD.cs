@@ -609,6 +609,7 @@ namespace RandomBuff.Render.UI.BuffCondition
 
             public void Destroy()
             {
+                renderer.container.RemoveAllChildren();
                 renderer.container.RemoveFromContainer();
             }
         }

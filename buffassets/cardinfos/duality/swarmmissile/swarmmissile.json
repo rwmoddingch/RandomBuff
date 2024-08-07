@@ -1,0 +1,17 @@
+{
+    "FaceName": "swarmmissile",
+    "BuffID" : "SwarmMissile",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "00FF9C",
+
+    "Chinese" : {
+        "BuffName" : "蜂巢导弹",
+        "Description" : "扯线蜂窝激活后将不再产生蜜蜂，而是产生大量具有锁定功能的蜂巢导弹。导弹会造成少量爆炸伤害。当玩家吞下蜂巢后，将会以恒定频率生成蜂巢炸弹。"
+    },
+    "English": {
+        "BuffName" : "SwarmMissile",
+        "Description" : "Spore plant activation will no longer spawn bees, but instead spawn a large number of swarm missiles with a lock-on feature. The missiles will deal a small amount of explosive damage. When the player swallows the spore plant, it will spawn missiles at a constant frequency."
+    }
+}

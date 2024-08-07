@@ -48,6 +48,8 @@ namespace RandomBuff.Core.Game.Settings
 
         public string MissionId { get; set; }
 
+        public bool CanStackByPassage => MissionId is null && gachaTemplate.CanStackByPassage;
+
         public InGameRecord inGameRecord = new ();
 
         public bool Win
@@ -63,8 +65,17 @@ namespace RandomBuff.Core.Game.Settings
         public float Difficulty { get; private set; } = 0.5f;
 
 
-        public string Description => gachaTemplate.TemplateDetail + "<ENTRY>" +
-                                     BuffResourceString.Get(gachaTemplate.TemplateDescription);
+        public string Description
+        {
+            get
+            {
+                if (MissionId is not null)
+                    gachaTemplate.CanStackByPassage = false;
+
+                return gachaTemplate.TemplateDetail + "<ENTRY>" +
+                       Custom.rainWorld.inGameTranslator.Translate(BuffResourceString.Get(gachaTemplate.TemplateDescription ?? "",true));
+            }
+        }
 
 
         public GameSetting(SlugcatStats.Name name, string gachaTemplate = "Normal", string startPos = null)
@@ -90,7 +101,6 @@ namespace RandomBuff.Core.Game.Settings
             //BuffPlugin.LogDebug($"GameSetting Desc: {Description}");
             name ??= game.StoryCharacter;
             gachaTemplate.EnterGame(game);
-
             foreach (var condition in conditions)
             {
                 try
@@ -151,6 +161,30 @@ namespace RandomBuff.Core.Game.Settings
                 catch (Exception e)
                 {
                     BuffPlugin.LogException(e, $"Exception In {condition.ID}:SessionEnd");
+                }
+            }
+        }
+
+        public void OnDestroy()
+        {
+            try
+            {
+                gachaTemplate.OnDestroy();
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception In {gachaTemplate.ID}:OnDestroy");
+            }
+
+            foreach (var condition in conditions)
+            {
+                try
+                {
+                    condition.OnDestroy();
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e, $"Exception In {condition.ID}:OnDestroy");
                 }
             }
         }
@@ -358,7 +392,7 @@ namespace RandomBuff.Core.Game.Settings
             {
                 fallbackPick.AddRange(
                     BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative, 
-                        BuffType.Duality, BuffType.Negative).Select(i => i.BuffID));
+                         BuffType.Negative).Select(i => i.BuffID));
             }
             var positive = gachaTemplate.CurrentPacket.negative.pickTimes *
                            gachaTemplate.CurrentPacket.negative.selectCount;
@@ -373,7 +407,7 @@ namespace RandomBuff.Core.Game.Settings
                 {
                     fallbackPick.AddRange(
                         BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negCount,
-                            BuffType.Duality, BuffType.Negative).Select(i => i.BuffID));
+                             BuffType.Negative).Select(i => i.BuffID));
                 }
             }
         }

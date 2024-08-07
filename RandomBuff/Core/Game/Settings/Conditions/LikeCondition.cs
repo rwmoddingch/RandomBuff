@@ -9,11 +9,11 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class LikeCondition : Condition
+    public class LikeCondition : Condition
     {
         public override ConditionID ID => ConditionID.Like;
 
-        public override int Exp => 200;
+        public override int Exp => communityID == CreatureCommunities.CommunityID.Cicadas ? 1000 : 150;
 
         List<CreatureCommunities.CommunityID> exclusiveIDs = new();
 

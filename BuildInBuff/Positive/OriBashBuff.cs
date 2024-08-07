@@ -79,9 +79,8 @@ namespace BuiltinBuffs.Positive
 
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
-            On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
+            On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
         }
-
 
 
         public static void LoadAssets()
@@ -91,15 +90,10 @@ namespace BuiltinBuffs.Positive
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!BashFeatures.TryGetValue(self, out _))
+            if (!BashFeatures.TryGetValue(self, out _) && !self.isNPC)
                 BashFeatures.Add(self, new Bash(self));
         }
-        private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
-        {
-            orig(self, sLeaser, rCam, palette);
-            if (BashFeatures.TryGetValue(self.player, out var bash))
-                bash.ApplyPalette(sLeaser, rCam, palette);
-        }
+  
 
         private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, UnityEngine.Vector2 camPos)
         {
@@ -112,9 +106,18 @@ namespace BuiltinBuffs.Positive
         {
             orig(self, sLeaser, rCam);
             if (BashFeatures.TryGetValue(self.player, out var bash))
+            {
                 bash.InitiateSprites(sLeaser, rCam);
+                self.AddToContainer(sLeaser, rCam, null);
+            }
         }
 
+        private static void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            orig(self,sLeaser,rCam, newContatiner);
+            if (BashFeatures.TryGetValue(self.player, out var bash))
+                bash.AddToContainer(sLeaser, rCam);
+        }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
@@ -151,10 +154,10 @@ namespace BuiltinBuffs.Positive
 
     public class Bash
     {
-        Creature bashTarget;
+        PhysicalObject bashTarget;
         int outroTimer = 0;
         bool isBash = false;
-        int startSprite = 0;
+        int startSprite = int.MaxValue;
 
         int bashTimer = 0;
         bool isPressUse;
@@ -185,10 +188,19 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[startSprite + 1].scale = 15;
             sLeaser.sprites[startSprite + 1].alpha = 0f;
 
-
-            rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[startSprite]);
-            rCam.ReturnFContainer("HUD").AddChild(sLeaser.sprites[startSprite + 1]);
+            
+           
         }
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            if (startSprite < sLeaser.sprites.Length)
+            {
+                rCam.ReturnFContainer("Bloom").AddChild(sLeaser.sprites[startSprite]);
+                rCam.ReturnFContainer("Bloom").AddChild(sLeaser.sprites[startSprite + 1]);
+            }
+        }
+
 
         public Vector2 GetInputDirection(Player player,Vector2 sourcePos)
         {
@@ -215,17 +227,17 @@ namespace BuiltinBuffs.Positive
 
             if (isBash)
             {
-                
+                var center = bashTarget ?? self;
                 dir = Vector3.Slerp(dir, GetInputDirection(self,sLeaser.sprites[startSprite].GetPosition()),0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
-                sLeaser.sprites[startSprite].x = Mathf.Lerp(self.mainBodyChunk.lastPos.x, self.mainBodyChunk.pos.x, timeStacker) - camPos.x;
-                sLeaser.sprites[startSprite].y = Mathf.Lerp(self.mainBodyChunk.lastPos.y, self.mainBodyChunk.pos.y, timeStacker) - camPos.y;
+                sLeaser.sprites[startSprite].x = Mathf.Lerp(center.firstChunk.lastPos.x, center.firstChunk.pos.x, timeStacker) - camPos.x;
+                sLeaser.sprites[startSprite].y = Mathf.Lerp(center.firstChunk.lastPos.y, center.firstChunk.pos.y, timeStacker) - camPos.y;
                 sLeaser.sprites[startSprite].scaleX = Mathf.Lerp(sLeaser.sprites[startSprite].scale,0.75f, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite].rotation = Custom.VecToDeg(Vector2.Perpendicular(dir));
                 sLeaser.sprites[startSprite + 1].scale = Mathf.Lerp(sLeaser.sprites[startSprite + 1].scale, 15, 0.02f / (rCam.game.paused ? 1 : BuffCustom.TimeSpeed));
                 sLeaser.sprites[startSprite + 1].SetPosition(sLeaser.sprites[startSprite].GetPosition());
                 sLeaser.sprites[startSprite + 1].color = Color.white;
                 sLeaser.sprites[startSprite + 1].alpha = 1;
-
+                
                 if (!GetInput() || bashTarget == null || !self.Consious)
                 {
                     isBash = false;
@@ -241,6 +253,13 @@ namespace BuiltinBuffs.Positive
                         var centerPos = Vector2.Lerp(self.mainBodyChunk.pos, minChunk.pos,0.5f);
                         ParticleEmitter emitter = new ParticleEmitter(self.room)
                             { pos = centerPos, lastPos = centerPos };
+
+                        if (bashTarget is Weapon weapon)
+                        {
+                            weapon.ChangeMode(Weapon.Mode.Free);
+                            weapon.SetRandomSpin();
+                        }
+
                         emitter.ApplyEmitterModule(new SetEmitterLife(emitter,5,false));
 
                         emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, Random.Range(3, 6)));
@@ -280,23 +299,24 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[startSprite + 1].color = Color.Lerp(Color.black, Color.white, Mathf.Pow(num, 0.5f));
                 sLeaser.sprites[startSprite].scaleX = Mathf.Pow(Mathf.InverseLerp(3, 10, outroTimer), 0.5f) * 0.75f;
             }
+            else
+            {
+                sLeaser.sprites[startSprite + 1].alpha = 0;
+            }
 
             
             sLeaser.sprites[startSprite].isVisible = sLeaser.sprites[startSprite].scaleX > 0.01f;
             
         }
 
-        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
-        {
-            sLeaser.sprites[startSprite].color = Color.white;
-        }
+ 
 
 
         public void Update()
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return;
-            if (!self.Consious)
+            if (!self.Consious || self.grabbedBy.Any())
             {
                 if (isBash)
                 {
@@ -330,34 +350,81 @@ namespace BuiltinBuffs.Positive
                 isPressUse = true;
                 if (self.room.abstractRoom != null)
                 {
-                    foreach (var creature in self.room.abstractRoom.creatures)
+
+                    if (OriBashBuff.Instance.Data.StackLayer >= 2)
                     {
-                        if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
-                            continue;
-                        if (creature.realizedCreature != null)
+                        foreach (var obj in self.room.updateList.OfType<PhysicalObject>())
                         {
+                            if(obj.grabbedBy.Any(i => i.grabber == self) || self.slugOnBack?.slugcat == obj || self.spearOnBack?.spear == obj)
+                                continue;
+                            if (obj is Creature crit && crit.Template.type == CreatureTemplate.Type.Slugcat)
+                                continue;
+
                             bool can = false;
-                            foreach (var chunk in creature.realizedCreature.bodyChunks)
-                                if (Custom.DistLess(self.mainBodyChunk.pos, chunk.pos, 75))
+                            foreach (var chunk in obj.bodyChunks)
+                                if (IsDistLess(self.mainBodyChunk.pos, chunk, 75))
                                 {
                                     can = true;
                                     break;
                                 }
                             if (can)
                             {
-                                bashTarget = creature.realizedCreature;
+                                bashTarget = obj;
                                 OriBashBuffEntry.UpdateSpeed = 2;
                                 isBash = true;
+                                self.pyroParryCooldown = 0;
+                                self.canJump = 15;
+                                self.pyroJumpped = false;
                                 break;
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        foreach (var creature in self.room.abstractRoom.creatures)
+                        {
+                            if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
+                                continue;
+                            if (creature.realizedCreature != null && !creature.realizedCreature.inShortcut)
+                            {
+                                if (creature.realizedCreature.grabbedBy.Any(i => i.grabber == self) || self.slugOnBack?.slugcat == creature.realizedCreature)
+                                    continue;
+                                bool can = false;
+                                foreach (var chunk in creature.realizedCreature.bodyChunks)
+                                    if (IsDistLess(self.mainBodyChunk.pos,chunk, 75))
+                                    {
+                                        can = true;
+                                        break;
+                                    }
+                                if (can)
+                                {
+                                    bashTarget = creature.realizedCreature;
+                                    OriBashBuffEntry.UpdateSpeed = 2;
+                                    isBash = true;
+                                    self.pyroParryCooldown = 0;
+                                    self.canJump = 15;
+                                    self.pyroJumpped = false;
+                                    break;
+                                }
                             }
                         }
                     }
+                    
                 }
 
             }
-            else if (!Input.GetMouseButton(1))
+            else if (!GetInput())
             {
                 isPressUse = false;
+            }
+
+            bool IsDistLess(Vector2 centerPos ,BodyChunk checkChunk,float dest, int delay = 5)
+            {
+                for (int i = 0; i < delay; i++)
+                    if (Custom.DistLess(centerPos, checkChunk.vel * i + checkChunk.pos, dest))
+                        return true;
+                return false;
             }
         }
     }

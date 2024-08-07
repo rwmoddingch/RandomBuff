@@ -88,7 +88,8 @@ namespace BuiltinBuffs.Duality
             On.SporeCloud.Update += SporeCloud_Update;
             On.SlugcatStats.SlugcatCanMaul += SlugcatStats_SlugcatCanMaul;
             On.Player.CanEatMeat += Player_CanEatMeat;
-            On.Player.BiteEdibleObject += Player_BiteEdibleObject;
+            On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
+            //On.Player.BiteEdibleObject += Player_BiteEdibleObject;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -104,6 +105,11 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
+        }
+
+        public static void LongLifeCycleHookOn()
+        {
+            On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
         }
         #region 额外特性
         //被闪光果致死
@@ -188,7 +194,25 @@ namespace BuiltinBuffs.Duality
             return result;
         }
 
-        //修改食谱
+        //修改获取的食物点数
+        private static int SlugcatStats_NourishmentOfObjectEaten(On.SlugcatStats.orig_NourishmentOfObjectEaten orig, SlugcatStats.Name slugcatIndex, IPlayerEdible eatenobject)
+        {
+            SlugcatStats.Name newSlugcatIndex = SlugcatStats.Name.Red;
+            int result = orig(newSlugcatIndex, eatenobject);
+            return result;
+        }
+
+        //食量增大（需求+2，存储+1）
+        private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
+        {
+            IntVector2 origFoodRequirement = orig(slugcat);
+            int newHibernateRequirement = origFoodRequirement.y + 2;
+            int newTotalFoodRequirement = origFoodRequirement.x + 3;
+
+            return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
+        }
+
+        //修改食谱（不再使用）
         private static void Player_BiteEdibleObject(On.Player.orig_BiteEdibleObject orig, Player self, bool eu)
         {
             for (int i = 0; i < 2; i++)
@@ -789,7 +813,8 @@ namespace BuiltinBuffs.Duality
                             (Custom.DistLess(wantPos, player.mainBodyChunk.pos, 20f) && 
                             Vector2.Dot(wantPos - player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - player.mainBodyChunk.pos) < 0 &&
                             !Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
-                            Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f))))
+                            Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f) &&
+                            player.room.gravity > 0.3f)))
                         {
                             Vector2 a = Custom.DirVec(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) * (Vector2.Distance(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
                             player.mainBodyChunk.pos += a * 0.8f;
@@ -1032,7 +1057,9 @@ namespace BuiltinBuffs.Duality
 
         private bool TileAccessibleToPlayer()
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
+                return false;
+            if (this.legs == null)
                 return false;
             int num = 0;
             for (int l = 0; l < this.legs.GetLength(0); l++)
@@ -1040,13 +1067,14 @@ namespace BuiltinBuffs.Duality
                 for (int m = 0; m < this.legs.GetLength(1); m++)
                 {
                     if (this.legs[l, m].reachedSnapPosition &&
-                        Custom.DistLess(self.bodyChunks[0].pos, this.legs[l, m].pos, 1.1f * this.legLength))
+                        Custom.DistLess(player.bodyChunks[0].pos, this.legs[l, m].pos, 1.1f * this.legLength))
                     {
                         num++;
                     }
                 }
             }
-            if (num >= 2)
+            if (num >= 2 ||
+                (num >= 1 && player.room.gravity <= 0.3f))
                 return true;
             return false;
         }

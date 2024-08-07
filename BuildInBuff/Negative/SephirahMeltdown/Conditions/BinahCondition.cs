@@ -18,14 +18,16 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         public override void EnterGame(RainWorldGame game)
         {
             base.EnterGame(game);
-            BinahGlobalManager.OnBinahDie += BinahGlobalManager_OnBinahDie;
+            if(IsCanUse)
+                BinahGlobalManager.OnBinahDie += BinahGlobalManager_OnBinahDie;
 
         }
 
         public override void SessionEnd(SaveState save)
         {
             base.SessionEnd(save);
-            BinahGlobalManager.OnBinahDie += BinahGlobalManager_OnBinahDie;
+            if (IsCanUse)
+                BinahGlobalManager.OnBinahDie -= BinahGlobalManager_OnBinahDie;
 
         }
 

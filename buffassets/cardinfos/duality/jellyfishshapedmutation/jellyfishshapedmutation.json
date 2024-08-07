@@ -2,7 +2,8 @@
   "FaceName": "jellyfishshapedmutation",
   "BuffID": "JellyfishShapedMutation",
   "BuffType": "Duality",
-  "BuffProperty": "Normal",
+  "BuffProperty": "Special",
+  "AsPositive": true,
   "Triggerable": true,
   "Stackable": false,
   "Color": "6ABFE5",
@@ -16,10 +17,10 @@
 
   "Chinese": {
     "BuffName": "鲊形突变",
-    "Description": "你长出水母的触须，在被生物抓出时会自动电击生物，也可以长按拾取键以通过方向键移动你的触须，并设置按键主动电击你的触须抓住的生物。你的每次电击减少1格饱食度，饱食度为0时无法触发。你开始对电击产生抵抗力，在水中不会再窒息，但游泳速度降低50%，并且超过2循环未接触水将干枯而死。水蛭和巨型水母不再对你有敌意。"
+    "Description": "你长出水母的触须，可以设置按键，在被生物抓出时电击生物，也可以长按拾取键以通过方向键移动你的触须，并主动电击你的触须抓住的生物。你的每次电击减少1格饱食度，饱食度为0时无法触发，但你被足够强的电流击中时可以获取饱食度。你开始对电击产生抵抗力，在水中不会再窒息，但游泳速度降低50%，并且超过2循环未接触水将干枯而死。水蛭和巨型水母不再对你有敌意。"
   },
   "English": {
     "BuffName": "JellyfishShapedMutation",
-    "Description": "You grow the tentacles of jellyfish, which will automatically shock the creature when it is caught. You can also long press the pick button to move your tentacles through the directional keys, and set a button to actively shock the creatures your tentacles are grabbing. Each time you strike, your satiety is reduced by 1 grid. It cannot be triggered when satiety is 0. You begin to develop resistance to electric shock, no longer suffocating in water, but swimming speed decreases by 50%, and if you do not come into contact with water for more than 2 cycles, you will dry up and die. Leeches and giant jellyfish no longer have hostility towards you."
+    "Description": "You grow jellyfish tentacles, and you can set a button to stun a creature when it grabs you, or long press the pick button to move your tentacles through the directional keys and actively stun the creature caught by your tentacles. Each time you release an electric shock, your food points decreases by 1 grid. When your food points is 0, the electric shock cannot be triggered. But when you are hit by a strong enough current, you can obtain food points. You begin to develop resistance to electric shock, no longer suffocating in water, but swimming speed decreases by 50%, and if you do not come into contact with water for more than 2 cycles, you will dry up and die. Leeches and giant jellyfish no longer have hostility towards you."
   }
 }

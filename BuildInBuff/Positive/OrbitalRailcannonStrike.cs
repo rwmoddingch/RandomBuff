@@ -96,6 +96,7 @@ namespace BuiltinBuffs.Positive
             AbstractRailStrike rail = new AbstractRailStrike(player.abstractCreature.world,
                 AbstractRailStrike.RailStrike, null, player.abstractCreature.pos, game.GetNewID());
             player.room.abstractRoom.AddEntity(rail);
+            railStrikes.Add(rail);
             rail.RealizeInRoom();
             if (player.FreeHand() != -1 && !player.dead)
                 player.SlugcatGrab(rail.realizedObject, player.FreeHand());
@@ -106,6 +107,21 @@ namespace BuiltinBuffs.Positive
             MyTimer.Paused = false;
             return false;
         }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            railStrikes.ForEach(i =>
+            {
+                if (i.realizedObject != null)
+                    i.realizedObject.Destroy();
+                else
+                    i.Destroy();
+            });
+            railStrikes.Clear();
+        }
+
+        private readonly List<AbstractRailStrike> railStrikes = new List<AbstractRailStrike>();
     }
 
     internal class OrbitalRailcannonStrikeBuffData : BuffData
@@ -203,6 +219,11 @@ namespace BuiltinBuffs.Positive
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            if (slatedForDeletetion)
+            {
+                sLeaser.CleanSpritesAndRemove();
+                return;
+            }
             var rot = Vector2.Lerp(lastRotation, rotation, timeStacker);
             var hRot = Vector2.Perpendicular(rot);
             var degRot = Custom.AimFromOneVectorToAnother(Vector2.zero, rot);

@@ -14,6 +14,7 @@ using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.Progression.Record;
 using static RandomBuff.Render.UI.Component.RandomBuffFlag;
 using System.Reflection;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.SaveData
 {
@@ -129,7 +130,7 @@ namespace RandomBuff.Core.SaveData
         /// <param name="buffId"></param>
         public void AddCollect(BuffID buffId)
         {
-            if (!collectData.Contains(buffId.value) && !buffId.GetStaticData().NeedUnlocked)
+            if (!collectData.Contains(buffId.value) && !buffId.GetStaticData().Hidden)
             {
                 BuffPlugin.Log($"Add buff:{buffId} collect to Save Slot");
                 collectData.Add(buffId.value);
@@ -161,7 +162,8 @@ namespace RandomBuff.Core.SaveData
         /// <param name="buffId"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsCollected(BuffID buffId) => collectData.Contains(buffId.value) || BuffPlugin.AllCardDisplay;
+        public bool IsCollected(BuffID buffId) => collectData.Contains(buffId.value) || (BuffOptionInterface.Instance.CheatAllCards.Value
+            && (buffId.GetStaticData() == null || !buffId.GetStaticData().Hidden));
 
         /// <summary>
         /// 获取按键绑定，若不存在则返回KeyCode.None.ToString()
@@ -293,20 +295,18 @@ namespace RandomBuff.Core.SaveData
         {
             if (exp > ExpBeforeConstDelta)
             {
-                return (exp - ExpBeforeConstDelta) / 400 + 10;
+                return (exp - ExpBeforeConstDelta) / constLevelExp + stayConstLevel;
             }
-            return Mathf.FloorToInt((-295 + Mathf.Sqrt(295f * 295f + 4f * 5f * exp)) / (2f * 5f));
+            return Mathf.FloorToInt((-paramB + Mathf.Sqrt(squareParamB + 8 * increasePerLevel * exp)) / (2 * increasePerLevel));
         }
 
         public static int Level2Exp(int level)
         {
-            if (level <= 10)//等差
-                return /*(300 + 300 + 10 * (level - 1)) * level / 2;*/ 295 * level + 5 * (level * level);
+            if (level <= stayConstLevel)//等差
+                return (2 * initExp + increasePerLevel * (level - 1)) * level / 2;
             else
-                return ExpBeforeConstDelta + (level - 10) * 400;
+                return ExpBeforeConstDelta + (level - stayConstLevel) * constLevelExp;
         }
-
-
 
 
         public int playerTotExp = 0;
@@ -333,9 +333,16 @@ namespace RandomBuff.Core.SaveData
 
         private readonly HashSet<string> finishedQuest = new();
 
-
         private const string PlayerDataSplit = "<Bpd>";
         private const string PlayerDataSubSplit = "<BpdI>";
-        private const int ExpBeforeConstDelta = 295 * 10 + 5 * (10 * 10);
+        private static int ExpBeforeConstDelta = (initExp + initExp + increasePerLevel * stayConstLevel) * stayConstLevel / 2;
+        private static int constLevelExp = initExp + increasePerLevel * stayConstLevel;
+        public static int squareInitExp = initExp * initExp;
+        public static int paramB = 2 * initExp - increasePerLevel;
+        public static int squareParamB = paramB * paramB;
+
+        const int initExp = 400;
+        const int increasePerLevel = 100;
+        const int stayConstLevel = 10;
     }
 }

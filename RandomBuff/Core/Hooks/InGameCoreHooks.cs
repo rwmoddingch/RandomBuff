@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Expedition;
@@ -14,6 +15,7 @@ using RandomBuff.Core.StaticsScreen;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Menu;
+using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Game.Settings;
 using RandomBuffUtils;
 
@@ -28,6 +30,8 @@ namespace RandomBuff.Core.Hooks
             {
                 saveState.miscWorldSaveData.moonHeartRestored = false;
                 saveState.miscWorldSaveData.pebblesEnergyTaken = false;
+                BuffPlugin.LogDebug("Init DoomExpress saveState");
+
             }
             else if (gameSetting.MissionId == "EmergnshyTreatment")
             {
@@ -35,46 +39,197 @@ namespace RandomBuff.Core.Hooks
                 saveState.miscWorldSaveData.SLOracleState.playerEncounters = 0;
                 saveState.miscWorldSaveData.SLOracleState.neuronsLeft = 0;
             }
+            else if (gameSetting.MissionId == "TripleAffirmation")
+            {
+                saveState.deathPersistentSaveData.karma = 9;
+                saveState.deathPersistentSaveData.karmaCap = 9;
+            }
         }
 
         public static bool IsCurrentFullRoomSettingNeed(GameSetting gameSetting)
         {
             return gameSetting.MissionId is "DoomExpress" or "EmergnshyTreatment";
         }
-        public static void InGameHooksInit()
+
+
+        public static void ClampKarmaForBuffMode(ref int karma,ref int karmaCap)
+        {
+            if (BuffPoolManager.Instance.GameSetting.MissionId is not "TripleAffirmation")
+            {
+                karmaCap = Mathf.Min(karmaCap, 4);
+                karma = Custom.IntClamp(karma, 0, 4);
+            }
+        }
+
+
+        internal static void InGameHooksInit()
         {
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
-            On.RainWorldGame.GhostShutDown += RainWorldGame_GhostShutDown;
-            On.StoryGameSession.ctor += StoryGameSession_ctor;
+
+
             On.SaveState.setDenPosition += SaveState_setDenPosition;
             On.SaveState.ctor += SaveState_setup;
-            On.GhostWorldPresence.SpawnGhost += GhostWorldPresence_SpawnGhost;
+            On.World.SpawnGhost += World_SpawnGhost;
+            On.Room.Loaded += Room_Loaded;
 
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+            On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
 
-            On.Room.Loaded += Room_Loaded;
+            On.Menu.SleepAndDeathScreen.AddPassageButton += SleepAndDeathScreen_AddPassageButton;
+            On.Menu.SleepAndDeathScreen.Singal += SleepAndDeathScreen_Singal;
+
+            On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
+
+            On.Player.ctor += Player_ctor;
+            _ = new Hook(
+                typeof(StoryGameSession).GetProperty(nameof(StoryGameSession.RedIsOutOfCycles),
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).GetGetMethod(),
+                (Func<StoryGameSession, bool> orig, StoryGameSession self) =>
+                {
+                    if (Custom.rainWorld.BuffMode())
+                        return false;
+                    return orig(self);
+                });
         }
+
+        private static void DreamsState_StaticEndOfCycleProgress(On.DreamsState.orig_StaticEndOfCycleProgress orig, SaveState saveState, string currentRegion, string denPosition, ref int cyclesSinceLastDream, ref int cyclesSinceLastFamilyDream, ref int cyclesSinceLastGuideDream, ref int inGWOrSHCounter, ref DreamsState.DreamID upcomingDream, ref DreamsState.DreamID eventDream, ref bool everSleptInSB, ref bool everSleptInSB_S01, ref bool guideHasShownHimselfToPlayer, ref int guideThread, ref bool guideHasShownMoonThisRound, ref int familyThread)
+        {
+            if (Custom.rainWorld.BuffMode())
+            {
+                upcomingDream = null;
+                return;
+            };
+            orig(saveState, currentRegion, denPosition, ref cyclesSinceLastDream, ref cyclesSinceLastFamilyDream,
+                ref cyclesSinceLastGuideDream, ref inGWOrSHCounter, ref upcomingDream, ref eventDream,
+                ref everSleptInSB, ref everSleptInSB_S01, ref guideHasShownHimselfToPlayer, ref guideThread,
+                ref guideHasShownMoonThisRound, ref familyThread);
+        }
+
+
+
+
+
+        #region Menu
+
+        private static void SleepAndDeathScreen_AddPassageButton(On.Menu.SleepAndDeathScreen.orig_AddPassageButton orig, SleepAndDeathScreen self, bool buttonBlack)
+        {
+            orig(self, buttonBlack);
+            if (self.manager.rainWorld.BuffMode() && BuffDataManager.Instance.GetGameSetting(self.saveState.saveStateNumber).CanStackByPassage)
+            {
+                if (BuffCore.GetAllBuffIds(self.saveState.saveStateNumber).Any(i => i.GetStaticData().Stackable))
+                {
+                    self.pages[0].subObjects.Add(new SimpleButton(self, self.pages[0],
+                        BuffResourceString.Get("SleepMenu_Stack"),
+                        "BUFF_STACK_PASSAGE",
+                        new Vector2(self.LeftHandButtonsPosXAdd + self.manager.rainWorld.options.SafeScreenOffset.x,
+                            Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f) + 40*2),
+                        new Vector2(110f, 30f)));
+                
+                }
+                self.pages[0].subObjects.Add(new SimpleButton(self, self.pages[0], BuffResourceString.Get("SleepMenu_UnStack"),
+                    "BUFF_UNSTACK_PASSAGE",
+                    new Vector2(self.LeftHandButtonsPosXAdd + self.manager.rainWorld.options.SafeScreenOffset.x,
+                        Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)+40), new Vector2(110f, 30f)));
+            }
+        }
+
+        private static void SleepAndDeathScreen_Singal(On.Menu.SleepAndDeathScreen.orig_Singal orig, SleepAndDeathScreen self, MenuObject sender, string message)
+        {
+            orig(self, sender, message);
+
+            if (self.endGameSceneCounter < 1 && self.manager.upcomingProcess is null)
+            {
+                switch (message)
+                {
+                    case "BUFF_STACK_PASSAGE":
+                        self.proceedWithEndgameID ??= self.winState.GetNextEndGame();
+                        if (self.proceedWithEndgameID != null)
+                        {
+                            self.endgameTokens.Passage(self.proceedWithEndgameID);
+                            self.winState.ConsumeEndGame();
+                            self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
+                            self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.StackMenu);
+                            self.PlaySound(SoundID.MENU_Passage_Button);
+                        }
+
+                        break;
+                    case "BUFF_UNSTACK_PASSAGE":
+                        self.proceedWithEndgameID ??= self.winState.GetNextEndGame();
+                        if (self.proceedWithEndgameID != null)
+                        {
+                            self.endgameTokens.Passage(self.proceedWithEndgameID);
+                            self.winState.ConsumeEndGame();
+                            self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
+                            self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.UnstackMenu);
+                            self.PlaySound(SoundID.MENU_Passage_Button);
+                        }
+                        break;
+                }
+            }
+        }
+
+        #endregion
+
+
+
+
+
+        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
+        {
+            orig(self, abstractCreature,world);
+            if (Custom.rainWorld.BuffMode())
+                self.redsIllness = null;
+        }
+
+
+
+        #region HUD
+
+        private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
+        {
+            orig(self, cam);
+            if (self.rainWorld.BuffMode())
+            {
+                self.AddPart(new BuffHud(self));
+                //self.AddPart(new TConditionHud(self));
+            }
+        }
+
+
+        private static bool lastBuffShowCursor = false;
 
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
-            if (BuffHud.Instance?.NeedShowCursor ?? false)
+            if ((BuffHud.Instance?.NeedShowCursor ?? false))
                 Cursor.visible = true;
-            else
+            else if (lastBuffShowCursor != (BuffHud.Instance?.NeedShowCursor ?? false))
                 Cursor.visible = self.devUI != null || !self.rainWorld.options.fullScreen;
+            lastBuffShowCursor = (BuffHud.Instance?.NeedShowCursor ?? false);
         }
 
+        #endregion
 
 
+        #region StoryState
+
+        private static void World_SpawnGhost(On.World.orig_SpawnGhost orig, World self)
+        {
+            if (Custom.rainWorld.BuffMode() && (Custom.rainWorld.progression.currentSaveState.cycleNumber == 0 || BuffDataManager.Instance.GetGameSetting(self.game.StoryCharacter) != null))
+                return;
+            orig(self);
+
+        }
 
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
-            if (Custom.rainWorld.BuffMode() && BuffCustom.TryGetGame(out var game))
+            if (Custom.rainWorld.BuffMode())
             {
+                _ = BuffCustom.TryGetGame(out var game);
                 self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
                 if (!IsCurrentFullRoomSettingNeed(BuffPoolManager.Instance?.GameSetting ??
-                                             BuffDataManager.Instance.GetGameSetting(game.StoryCharacter ??
+                                             BuffDataManager.Instance.GetGameSetting(game?.StoryCharacter ??
                                                  Custom.rainWorld.progression.PlayingAsSlugcat)) &&
                     RemoveRoomSettingList.Contains(self.abstractRoom.name))
                 {
@@ -90,22 +245,17 @@ namespace RandomBuff.Core.Hooks
         private static readonly HashSet<string> RemoveRoomSettingList = new()
         {
             "SL_C12", "SB_A14", "LF_A03", "SU_A43", "GW_A25", "SI_C02","HR_C01","Rock Bottom",
-            "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL",
-            "SH_GOR02"
+            "SI_A07", "RM_CORE","MS_CORE","OE_FINAL03","LC_FINAL","SL_AI",
+            "SH_GOR02","SI_SAINTINTRO","GW_A24", "SB_E05SAINT",
         };
-    
-        private static bool GhostWorldPresence_SpawnGhost(On.GhostWorldPresence.orig_SpawnGhost orig, GhostWorldPresence.GhostID ghostID, int karma, int karmaCap, int ghostPreviouslyEncountered, bool playingAsRed)
-        {
-            if (Custom.rainWorld.BuffMode() && Custom.rainWorld.progression.currentSaveState.cycleNumber == 0)
-                return false;
-            return orig(ghostID,karma, karmaCap, ghostPreviouslyEncountered, playingAsRed);
-        }
+
 
         private static void SaveState_setup(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
         {
             orig(self, saveStateNumber, progression);
             if (Custom.rainWorld.BuffMode())
             {
+                BuffPlugin.LogDebug("Init buff saveState");
                 self.deathPersistentSaveData.PoleMimicEverSeen = true;
                 self.deathPersistentSaveData.ScavTollMessage = true;
                 self.deathPersistentSaveData.KarmaFlowerMessage = true;
@@ -134,8 +284,8 @@ namespace RandomBuff.Core.Hooks
                 //self.miscWorldSaveData.cyclesSinceSSai = 10;
                 //self.miscWorldSaveData.SSaiThrowOuts = -1;
                 progression.miscProgressionData.beaten_Gourmand = true;
-                GameSettingSpecialSetup(self,BuffDataManager.Instance.GetGameSetting(saveStateNumber));
-                self.dreamsState = null;
+                GameSettingSpecialSetup(self, BuffDataManager.Instance.GetGameSetting(saveStateNumber));
+                //self.dreamsState = null;
             }
         }
 
@@ -151,40 +301,24 @@ namespace RandomBuff.Core.Hooks
                         ExpeditionGame.ExpeditionRandomStarts(self.progression.rainWorld, self.saveStateNumber);
                     self.denPosition = self.lastVanillaDen = name;
                 }
-                else if (BuffDataManager.Instance.GetGameSetting(self.saveStateNumber).gachaTemplate.ForceStartPos is {} pos)
+                else if (BuffDataManager.Instance.GetGameSetting(self.saveStateNumber).gachaTemplate.ForceStartPos is { } pos)
                 {
                     BuffPlugin.LogDebug($"Force start pos:{pos}");
                     self.denPosition = self.lastVanillaDen = pos;
                 }
-                else if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-                {
-                    self.denPosition = self.lastVanillaDen = "SU_INTRO01";
-                }
             }
         }
 
 
-        private static void StoryGameSession_ctor(On.StoryGameSession.orig_ctor orig, StoryGameSession self, SlugcatStats.Name saveStateNumber, RainWorldGame game)
-        {
-            orig(self, saveStateNumber, game);
-            if (game.rainWorld.BuffMode())
-            {
-                self.saveState.deathPersistentSaveData.karmaCap =
-                    Mathf.Min(self.saveState.deathPersistentSaveData.karmaCap, 4);
-                self.saveState.deathPersistentSaveData.karma = 
-                    Custom.IntClamp(self.saveState.deathPersistentSaveData.karma, 0, 4);
-            }
-        }
 
-        private static void RainWorldGame_GhostShutDown(On.RainWorldGame.orig_GhostShutDown orig, RainWorldGame self, GhostWorldPresence.GhostID ghostID)
-        {
-            //BuffPoolManager.Instance?.WinGame();
-            orig(self, ghostID);
-        }
+        #endregion
+
+
+        #region PoolManager
 
         private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
         {
-            BuffPoolManager.Instance?.WinGame();
+            BuffPoolManager.Instance?.WinGame(malnourished);
             orig(self, malnourished);
         }
 
@@ -193,7 +327,10 @@ namespace RandomBuff.Core.Hooks
         {
             orig(self);
             BuffPoolManager.Instance?.Update(self);
-
         }
+
+        #endregion
+
+
     }
 }

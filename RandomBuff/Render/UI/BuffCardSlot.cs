@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RandomBuff.Core.Option;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI
@@ -128,6 +129,7 @@ namespace RandomBuff.Render.UI
         public virtual void Destory()
         {
             BaseInteractionManager?.Destroy();
+            Container.RemoveAllChildren();
             Container.RemoveFromContainer();
         }
     }
@@ -223,17 +225,27 @@ namespace RandomBuff.Render.UI
             HelpInfoProvider.CustomProviders += HelpInfoProvider_CustomProviders;
         }
 
+        public override void Destory()
+        {
+            InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
+            base.Destory();
+        }
+
         private static bool HelpInfoProvider_CustomProviders(HelpInfoProvider.HelpInfoID ID, out string helpInfo, params object[] Params)
         {
             helpInfo = "";
             if(ID == InGame_OnMouseFocus)
             {
+              
                 BuffID id = Params[0] as BuffID;
+                var name = id.GetStaticData().CardInfos[InGameTranslator.LanguageID.English];
+                if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out var newName))
+                    name = newName;
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnMouseFocus");
-                helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<BuffID>", name.BuffName);
                 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
 
 
                 return true;
@@ -242,26 +254,30 @@ namespace RandomBuff.Render.UI
             {
                 BuffID id = Params[0] as BuffID;
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnCardExclusiveShow");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
 
                 if(BuffConfigManager.GetStaticData(id).Triggerable)
                 {
+                    var name = id.GetStaticData().CardInfos[InGameTranslator.LanguageID.English];
+                    if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage,out var newName))
+                        name = newName;
+
                     helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_BindKey");
-                    helpInfo = Regex.Replace(helpInfo, "<KEYBINDER_KEY>", KeyCode.CapsLock.ToString());
-                    helpInfo = Regex.Replace(helpInfo, "<BuffID>", id.ToString());
+                    helpInfo = Regex.Replace(helpInfo, "<KEYBINDER_KEY>", BuffOptionInterface.Instance.KeyBindKey.Value);
+                    helpInfo = Regex.Replace(helpInfo, "<BuffID>", name.BuffName);
                 }
 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
                 return true;
             }
             else if (ID == InGame_NoCardFocus)
             {
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_NoCardFocus");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
 
                 helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_ExitHUD");
-                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", KeyCode.Tab.ToString());
+                helpInfo = Regex.Replace(helpInfo, "<HUD_KEY>", BuffOptionInterface.Instance.CardSlotKey.Value);
                 return true;
             }
             return false;
@@ -301,7 +317,8 @@ namespace RandomBuff.Render.UI
         /// <param name="majorSelections">主抽卡选项</param>
         /// <param name="additionalSelections">附加抽卡选项，需要和主抽卡选项的长度一致</param>
         /// <param name="numOfChoices">完成本次抽卡需要抽取的卡牌数量</param>
-        public CardPickerSlot(BasicInGameBuffCardSlot inGameBuffCardSlot, Action<BuffID> selectCardCallBack ,BuffID[] majorSelections, BuffID[] additionalSelections, int numOfChoices = 1, BuffSlotTitle slotTitle = null, bool resumeTitle = false)
+        public CardPickerSlot(BasicInGameBuffCardSlot inGameBuffCardSlot, Action<BuffID> selectCardCallBack ,BuffID[] majorSelections, BuffID[] additionalSelections, int numOfChoices = 1, BuffSlotTitle slotTitle = null, 
+            bool resumeTitle = false, string customTile = "")
         {
             this.majorSelections = majorSelections;
             this.additionalSelections = additionalSelections;
@@ -313,7 +330,9 @@ namespace RandomBuff.Render.UI
             InGameBuffCardSlot = inGameBuffCardSlot;
 
             BaseInteractionManager = new CardPickerInteractionManager(this);
-            if(InGameBuffCardSlot != null)
+            InputAgency.Current.TakeFocus(BaseInteractionManager);
+
+            if (InGameBuffCardSlot != null)
             {
                 InGameBuffCardSlot.BaseInteractionManager.SubManager = BaseInteractionManager;
             }
@@ -338,10 +357,18 @@ namespace RandomBuff.Render.UI
             (BaseInteractionManager as CardPickerInteractionManager).FinishManage();
             if(Title != null)
             {
-                string title = BuffResourceString.Get("CardPickSlot_SlotTitle");
-                title = Regex.Replace(title, "<Cards>", numOfChoices.ToString());
-                title = Regex.Replace(title, "<Type>", BuffConfigManager.GetStaticData(majorSelections[0]).BuffType.ToString());
-                Title.ChangeTitle(title, false);
+                if (string.IsNullOrEmpty(customTile))
+                {
+                    string title = BuffResourceString.Get("CardPickSlot_SlotTitle");
+                    title = Regex.Replace(title, "<Cards>", numOfChoices.ToString());
+                    title = Regex.Replace(title, "<Type>",
+                        BuffConfigManager.GetStaticData(majorSelections[0]).BuffType.ToString());
+                    Title.ChangeTitle(title, false);
+                }
+                else
+                {
+                    Title.ChangeTitle(customTile, false);
+                }
             }  
         }
 
@@ -364,6 +391,8 @@ namespace RandomBuff.Render.UI
                 {
                     cards.Add(card);
                     cards.Add(GetCardOfID(majorSelections[i]));
+
+                    BuffPlugin.Log($"CardPicked get id major : {card.ID}|{card}, {majorSelections[i]}|{GetCardOfID(majorSelections[i])}");
                 }
 
                 if (majorSelections[i] == card.ID)
@@ -371,12 +400,21 @@ namespace RandomBuff.Render.UI
                     cards.Add(card);
                     if (additionalSelections[i] != null)
                         cards.Add(GetCardOfID(additionalSelections[i]));
+
+                    BuffPlugin.Log($"CardPicked get id additional : {card.ID}|{card}, {additionalSelections[i]}|{GetCardOfID(additionalSelections[i])}");
                 }
             }
 
             foreach(var buffCard in cards)
             {
-                selectCardCallBack.Invoke(buffCard.ID);
+                if (selectCardCallBack == null)
+                {
+
+                    //TODO:原因及修复
+                    BuffPlugin.LogWarning("null select card callback");
+                }
+                else
+                    selectCardCallBack.Invoke(buffCard.ID);
    
                 if (InGameBuffCardSlot != null)
                 {
@@ -407,6 +445,12 @@ namespace RandomBuff.Render.UI
                     return card;
             }
             return null;
+        }
+
+        public override void Destory()
+        {
+            InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
+            base.Destory();
         }
     }
 
@@ -552,6 +596,7 @@ namespace RandomBuff.Render.UI
             Title = slotTitle;
             BuffCards = null;//不直接管理卡牌，所以设置为null来提前触发异常
             BaseInteractionManager = new DoNotingInteractionManager<CommmmmmmmmmmmmmpleteInGameSlot>(this);
+            //InputAgency.Current.TakeFocus(BaseInteractionManager);
 
             BasicSlot = new BasicInGameBuffCardSlot(true, this);
             ActiveAnimSlot = new ActivateCardAnimSlot(this);
@@ -583,9 +628,12 @@ namespace RandomBuff.Render.UI
                 {
                     selectedAction = (s) =>
                     {
-                        SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
-                        SandboxPocket.SetShow(true);
-                        OpenPocketButton.SetSelected(false);
+                        if (!SandboxPocket.Show)
+                        {
+                            SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
+                            SandboxPocket.SetShow(true);
+                            OpenPocketButton.SetSelected(false);
+                        }
                     }
                 };
             }
@@ -751,14 +799,23 @@ namespace RandomBuff.Render.UI
             ConditionHUD.Destroy();
             SandboxPocket?.Destroy();
             base.Destory();
+            InputAgency.AllRelease();
         }
 
         public void CardPocketCallBack(List<BuffID> all, List<BuffID> removed, List<BuffID> added)
         {
-            foreach(var buff in added)
-                BuffCore.CreateNewBuff(buff);
-            foreach(var buff in removed)
-                BuffPoolManager.Instance.RemoveBuffAndData(buff);
+
+            foreach (var buff in added)
+            {
+                BuffPlugin.LogDebug($"add : {buff}");
+                buff.CreateNewBuff();
+            }
+
+            foreach (var buff in removed)
+            {
+                BuffPlugin.LogDebug($"remove : {buff}");
+                buff.UnstackBuff();
+            }
         }
 
         bool show;
@@ -1108,6 +1165,7 @@ namespace RandomBuff.Render.UI
         {
             this.cardpediaMenu = cardpediaMenu;
             BaseInteractionManager = new ClickSignalInteractionManager<CardpediaSlot>(this);
+            InputAgency.Current.TakeFocus(BaseInteractionManager);
         }
 
         public void SwitchPage(params BuffID[] newPageIDs)
@@ -1126,6 +1184,12 @@ namespace RandomBuff.Render.UI
         public void AddListener(Action<BuffCard> mouseEvent)
         {
             (BaseInteractionManager as ClickSignalInteractionManager<CardpediaSlot>).OnBuffCardSingleClick += mouseEvent; 
+        }
+
+        public override void Destory()
+        {
+            base.Destory();
+            InputAgency.AllRelease();
         }
     }
 }

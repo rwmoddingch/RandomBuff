@@ -8,11 +8,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuff.Core.Option;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI
 {
-    internal abstract class CardInteractionManager
+    internal abstract class CardInteractionManager: IInputAgencyFocusable
     {
         //常量
         const int Double_ClickThreashold = 10;//单击双击阈值（逻辑帧） 
@@ -37,10 +38,7 @@ namespace RandomBuff.Render.UI
         }
         public bool overrideDisabled;//是否被高级交互系统禁用
 
-        public Vector2 MousePos => new Vector2(Futile.mousePosition.x, Futile.mousePosition.y);
-
-        protected Helper.InputButtonTracker mouseLeftButtonTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(0), false, false, Double_ClickThreashold);
-        protected Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
+        public Vector2 MousePos => InputAgency.Current.GetMousePosition();
 
         protected bool enableMouseInput = true;
 
@@ -51,8 +49,8 @@ namespace RandomBuff.Render.UI
 
         public virtual void Update()
         {
-            mouseLeftButtonTracker.Update(out bool singleClick, out bool _);
-            mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
+            InputAgency.Current.GetMainFunctionButton(out _, out bool singleClick);
+            InputAgency.Current.GetSecondaryFunctionButton(out _, out bool mouseRightSingle);
 
             if (enableMouseInput && !overrideDisabled)
             {
@@ -133,6 +131,66 @@ namespace RandomBuff.Render.UI
                 card.Destroy();
             }
             managedCards.Clear();
+        }
+
+        public virtual Vector2? CurrentFocusedObjectPos()
+        {
+            if (CurrentFocusCard != null)
+                return CurrentFocusCard.Position;
+            return null;
+        }
+
+        public virtual Vector2 GetNextFocusableOjectPos(Vector2 inputDirection)
+        {
+            inputDirection = inputDirection.normalized;
+            Vector2 currentPos = InputAgency.Current.GetMousePosition();
+
+            if (inputDirection == Vector2.zero)
+                return currentPos;
+
+            Vector2 nextSelectPosition = Vector2.zero;
+            float minAngleDistanceFactor = float.MaxValue;
+            //float minDistance = float.MaxValue;
+            //float minAngleDelta = float.MaxValue;
+
+            foreach (var buffcardPos in GetAllFocusableObjectPos())
+            {
+                if (Vector2.Distance(buffcardPos, currentPos) < 10f)
+                    continue;
+
+                Vector2 delta = buffcardPos - currentPos;
+                float angleFactor = Vector2.Dot(delta.normalized, inputDirection);
+
+                if (angleFactor <= 0)//小于等于0表明位于另一个方向上了
+                    continue;
+
+                angleFactor = Mathf.Lerp(1f, 0.2f, angleFactor);//防止等于0乘算导致距离影响因子无效
+                float angleDistanceFactor = angleFactor * delta.magnitude;
+
+                if (angleDistanceFactor < minAngleDistanceFactor)
+                {
+                    minAngleDistanceFactor = angleDistanceFactor;
+                    nextSelectPosition = buffcardPos;
+                }
+            }
+
+            if (nextSelectPosition != Vector2.zero)
+                return nextSelectPosition;
+
+            return currentPos;
+        }
+
+        public virtual Vector2 GetDefaultFocusableObjectPos()
+        {
+            if (managedCards.Count == 0)
+                return Vector2.zero;
+            return managedCards.First().Position;
+        }
+
+        public virtual IEnumerable<Vector2> GetAllFocusableObjectPos()
+        {
+            foreach(var buffcard in managedCards)
+                yield return buffcard.Position;
         }
     }
 
@@ -250,8 +308,6 @@ namespace RandomBuff.Render.UI
     internal class InGameSlotInteractionManager : CardInteractionManager
     {
         //静态信息
-        public static KeyCode ToggleShowButton = KeyCode.Tab;
-        public static KeyCode BindKeyButton = KeyCode.CapsLock;
         public static int maxCardBiasCount = 5;
 
         bool canTriggerBuff;
@@ -299,7 +355,7 @@ namespace RandomBuff.Render.UI
         public List<BuffCard> PositiveBuffCards { get; } = new List<BuffCard>();
         public List<BuffCard> NegativeBuffCards { get; } = new List<BuffCard>();
 
-        Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
+        //Helper.InputButtonTracker toggleShowButtonTracker = new Helper.InputButtonTracker(() => Input.GetKey(ToggleShowButton), false);
         //Helper.InputButtonTracker mouseButtonRightTracker = new Helper.InputButtonTracker(() => Input.GetMouseButton(1), false);
 
         public InGameSlotInteractionManager(BasicInGameBuffCardSlot slot, bool canTriggerBuff = false) : base(slot)
@@ -311,17 +367,19 @@ namespace RandomBuff.Render.UI
 
         public override void Update()
         {
-            toggleShowButtonTracker.Update(out bool showButtonSingle, out bool _);
+            base.Update();
+            InputAgency.Current.GetToggleHUDButton(out _, out bool showButtonSingle);
             //mouseButtonRightTracker.Update(out bool mouseRightSingle, out bool _);
 
             if (showButtonSingle && !overrideDisabled)
                 OnToggleShowButtonSingleClick();
 
-            //if (mouseRightSingle && !overrideDisabled)
-            //    OnMouseRightSingleClick();
-
             keyBinderProcessor?.Update();
-            base.Update();
+
+            if(currentState == State.ExclusiveShow)
+            {
+                exclusiveShowCard._cardRenderer.cardTextBackController.CommitScroll(InputAgency.Current.GetScroll() * (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default ? 2f : 1f));
+            }
         }
 
         protected override void UpdateFocusCard()
@@ -525,9 +583,10 @@ namespace RandomBuff.Render.UI
                     Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Refresh);
                     Slot.completeSlot.SetPocketButtonShow(false);
                 }
-                Slot.completeSlot.Title?.ChangeTitle("", true);
+                Slot.completeSlot?.Title?.ChangeTitle("", true);
 
                 Slot.completeSlot?.SetGamePaused(false);
+                InputAgency.Current.RecoverLastIfIsFocus(this, false);
             }
             else if(newState == State.Show)
             {
@@ -541,20 +600,45 @@ namespace RandomBuff.Render.UI
                     Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
                     Slot.completeSlot.SetPocketButtonShow(true);
                 }
-                Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
+                Slot.completeSlot?.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
 
                 Slot.completeSlot?.SetGamePaused(true);
+                InputAgency.Current.TakeFocus(this);
+
+                //用于在动画完成时更新鼠标位置
+                AnimMachine.GetDelayCmpnt(30, autoDestroy: true).BindActions(OnAnimFinished: (d) =>
+                {
+                    InputAgency.Current.ResetToDefaultPos();
+                });
             }
             else if(newState == State.ExclusiveShow)
             {
                 Slot.FrontDark = true;
                 exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Exclusive_Show);
 
-                Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_CardDetail"), true);
+                Slot.completeSlot?.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_CardDetail"), true);
                 if (SubManager != null) SubManager.overrideDisabled = true;
 
                 Slot.completeSlot?.SetGamePaused(true);
             }
+        }
+
+        public override Vector2 GetNextFocusableOjectPos(Vector2 inputDirection)
+        {
+            if (currentState == State.ExclusiveShow)
+                return exclusiveShowCard.Position;
+            else if (currentState == State.Hide)
+                return Vector2.zero;
+            return base.GetNextFocusableOjectPos(inputDirection);
+        }
+
+        public override IEnumerable<Vector2> GetAllFocusableObjectPos()
+        {
+            foreach(var item in base.GetAllFocusableObjectPos())
+                yield return item;
+
+            if (Slot.completeSlot != null && Slot.completeSlot.OpenPocketButton != null)
+                yield return Slot.completeSlot.OpenPocketButton.MiddleOfButton();
         }
 
         public class KeyBinderProcessor
@@ -590,7 +674,7 @@ namespace RandomBuff.Render.UI
             {
                 if (manager.currentState == State.ExclusiveShow)
                 {
-                    if (Input.GetKey(BindKeyButton))
+                    if (BuffInput.GetKey(BuffOptionInterface.Instance.KeyBindKey.Value))
                     {
                         if (!listenerEnable)
                             EnableListen();
@@ -663,7 +747,7 @@ namespace RandomBuff.Render.UI
             {
                 if (key.StartsWith("Mouse"))
                     return true;
-                if (key == "CapsLock")
+                if (key == BuffOptionInterface.Instance.KeyBindKey.Value)
                     return true;
                 if(key.Contains("Command"))
                     return true;
@@ -758,7 +842,7 @@ namespace RandomBuff.Render.UI
         public override void ManageCard(BuffCard card)
         {
             base.ManageCard(card);
-            BuffPlugin.Log($"Card picker manage card, {Slot.BuffCards.Count} in total");
+            BuffPlugin.Log($"Card picker manage card {card.ID}, {Slot.BuffCards.Count} in total");
         }
 
         public override void DismanageCard(BuffCard card)
@@ -769,7 +853,8 @@ namespace RandomBuff.Render.UI
             if (AdditionalCard.Contains(card))
                 Additional2MajorMapper.Remove(card);
             base.DismanageCard(card);
-            BuffPlugin.Log($"Card picker dismanage card, {Slot.BuffCards.Count} remains");
+            //Helper.TraceStack();
+            BuffPlugin.Log($"Card picker dismanage card {card.ID}, {Slot.BuffCards.Count} remains");
         }
 
         /// <summary>
@@ -844,17 +929,18 @@ namespace RandomBuff.Render.UI
                 CurrentFocusCard.OnMouseRightClick();
                 Slot.CardPicked(CurrentFocusCard);
 
-                if (Major2AdditionalMapper.TryGetValue(CurrentFocusCard, out var additional))
-                {
-                    additional.OnMouseRightClick();
-                    Slot.CardPicked(additional);
-                }
+                //if (Major2AdditionalMapper.TryGetValue(CurrentFocusCard, out var additional))
+                //{
+                //    BuffPlugin.Log($"{CurrentFocusCard.ID} => {additional.ID}");
+                //    additional.OnMouseRightClick();
+                //    Slot.CardPicked(additional);
+                //}
 
-                if (Additional2MajorMapper.TryGetValue(CurrentFocusCard, out var major))
-                {
-                    major.OnMouseRightClick();
-                    Slot.CardPicked(additional);
-                }
+                //if (Additional2MajorMapper.TryGetValue(CurrentFocusCard, out var major))
+                //{
+                //    major.OnMouseRightClick();
+                //    Slot.CardPicked(additional);
+                //}
             }
         }
     }

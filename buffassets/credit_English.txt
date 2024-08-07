@@ -1,0 +1,161 @@
+<Stage>Coding
+	<Name>Pkuyo
+	<Detail> TODO: please check the to-do list.
+
+	<Name>Harvie
+	<Detail> elfin dragon is the best!
+
+	<Name>Quaeledy
+	<Detail> Sorry, but the Outsider is outside the network.
+
+	<Name>CuteFatalis
+	<Detail> write stupid stuff
+
+	<Name>ShanKa
+	<Detail> can't stop wawa three
+
+	<Name>Seron
+	<Detail> -127.0.0.1-
+
+<Stage>ArtWorks
+	<Name>Harvie
+	<Detail>a real wawa screamer
+	<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
+
+	<Name>CuteFatalis
+	<Detail>I have two, this one is for you. *Handing over a toad
+	<BuffIDs>DesperateEater, DelayedExplosion, UpsideDownPixieSlug, SlugSlug, TailCut, DreamTraveller, EatMore, SuperStomach, CountDownToDeath, LittleBoyNuke, Hell, RJ250, Napalm, InfiniteFirePower, ClusterBomb, WealthFinger, DudBomb, ButterFeet, PopingCandy, Hypothermia, PandoraBox
+
+	<Name>Quaeledy
+	<Detail>The number you reached The Outsider is outside the service area.
+	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun, PupaLizard, IntenseSituation, FlameThrower, FlamePurification, BombMania
+	
+	<Name>Sunday
+	<Detail>Devourer of divine wisdom σ( ᑒ )
+	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
+
+	<Name>Moyang
+	<Detail>under capacity
+	<BuffIDs>FakeCreature
+
+	<Name>Seron
+	<Detail>-127.0.0.1-
+	<BuffIDs>ShortCircuit, TwoSides, TurboPropulsion
+
+	<Name>Lin
+	<Detail>Outline on the draft (sad wawa)
+	<BuffIDs>Multiplier
+
+	<Name>Fancycat
+	<Detail>Thank you all:3
+	<BuffIDs>LavaImmune, SensorBomb, ShortSighted, Presbyopia
+
+	<Name>ProjectMoon
+	<Detail>
+	<BuffIDs>Ayin, Binah, Chesed, Hod, Hokma, Malkuth, Netzach, Tiphereth, Yesod
+
+<Stage>PlayTest
+	<Name>Wings Echo
+	<Detail>SLIVER OF STRAW WAS A TRAITOR TO THE CAUSE
+
+	<Name>Facncycat
+	<Detail>Wawa.
+
+	<Name>Scavengercat
+	<Detail>Unit! Intelligent creatures of RW, Resist the tyranny of iterators!
+
+	<Name>Rademoline
+	<Detail>Caw?Guah! gagagagagagaaaguayya
+
+	<Name>catatu
+	<Detail>i luv u uwu
+
+	<Name>a slugcat
+	<Detail>This is a slugcat
+
+	<Name>Lin
+	<Detail>Everything is in a cycle, and we are no exception
+
+	<Name>MorskePrudzenja
+
+	<Name>Fei
+	<Detail>This moment, right here! lt is where slugcats are meant to be.
+
+	<Name>MeowMeowEmperor
+	<Detail>A new cycle is unfolding, and we don't have to be a part of it
+
+	<Name>Mo
+
+	<Name>Mon2tr
+	<Detail>Good morning,Rain World
+
+	<Name>Candy Colored Husky
+	<Detail>remember,think if it make some *interesting* before choose a card!
+
+	<Name>QWQ
+	<Detail>Fixed the bug where Sephirah Meltdown was overly easy
+
+	<Name>Penguin
+	<Detail>A scav with a pearl, so merry and free. Till the hunter's strike ends the scav's spree!
+
+	<Name>Silent Night
+	<Detail>I also have to write a message, right?
+
+
+	<Name>Red bean paste
+	<Detail>I want to fiercely control the five pebbles
+
+	<Name>leaf
+	<Detail>I see.I can't see.
+
+	<Name>NR
+	<Detail>Transcendental Inversion! Transcendental Inversion!!
+
+	<Name>Hopiter
+	<Detail>When can I finish my region mod? IDK~
+
+	<Name>CACITE
+	<Detail>Yea I don't know what I'm doing, but I really should think about my region, NOW!
+
+	<Name>fog
+	<Detail>
+
+	<Name>PURE
+	<Detail>May you find peace and tranquility in every samsara
+
+	<Name>SRS
+	<Detail>death isn't the end
+
+	<Name>MoseYanyun
+	<Detail>Nothing forever
+
+	<Name>Dragon Trainer
+	<Detail>WHAT?!
+
+	<Name>z5356z
+	<Detail>When will the new DLC be released?
+
+	<Name>Vorry
+	<Detail>Everyday to keep happy?
+
+	<Name>BlackCat o.o
+	<Detail>Are you ready to enter this wonderful dream? ~
+
+	<Name>sp.Kal'tist:)
+	<Detail>What form of the POWER is this？
+
+<Stage>SpecialThanks
+	<Entry>Publicize
+		<Name>Serion
+		<Detail>wawa
+		<Name>Whoking
+		<Detail>wawa 2
+	<Entry>Early publicize
+		<Name>qiqiu
+	<Entry>Font use
+		<Name>峰广明锐体
+		<Name>NotoSans Hans
+	<Entry><NextPage>
+	<Entry>Else
+		<Name> wawa4
+		<Detail> no wawa

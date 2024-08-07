@@ -8,12 +8,19 @@ using RandomBuff.Core;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using System.Runtime.CompilerServices;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Duality
 {
     internal class ButterFeetBuff : Buff<ButterFeetBuff, ButterFeetBuffData>
     {
         public override BuffID ID => ButterFeetBuffEntry.ButterFeet;
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            PlayerUtils.UndoAll(this);
+        }
     }
 
     class ButterFeetBuffData : CountableBuffData
@@ -55,9 +62,8 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, abstractCreature, world);
             butterModule.Add(self, new ButterSpeedModule());
-            self.slugcatStats.runspeedFac *= 1.5f;
-            //self.slugcatStats.poleClimbSpeedFac *= 1.5f;
-            //self.slugcatStats.corridorClimbSpeedFac *= 1.5f;            
+
+            self.slugcatStats.Modify(ButterFeetBuff.Instance, PlayerUtils.Multiply, "runspeedFac", 1.5f);
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)

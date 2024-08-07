@@ -11,11 +11,11 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class CardCondition : Condition
+    public class CardCondition : Condition
     {
         public override ConditionID ID => ConditionID.Card;
 
-        public override int Exp => needCard * 50;
+        public override int Exp => needCard * 10;
 
         public override void GachaEnd(List<BuffID> picked, List<BuffID> allCards)
         {
@@ -45,7 +45,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 type = (BuffType)Enum.Parse(typeof(BuffType), current);
             }
 
-            needCard = (int)Random.Range(Mathf.Lerp(5, 10, difficulty), Mathf.Lerp(10, 15, difficulty)) / (all ? 1: 2);
+            needCard = (int) Mathf.Lerp(10, 25, difficulty) / (all ? 1: 2);
             BuffPlugin.LogDebug($"Add Card Condition {needCard}:{current}");
             if (list.Count != 1)
                 return ConditionState.Ok_More;
@@ -68,7 +68,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             base.InGameUpdate(game);
             timer++;
-            if (timer == 5)
+            if (timer >= 5)
             {
                 int count = 0;
                 if (all)
@@ -82,7 +82,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     onLabelRefresh?.Invoke(this);
                     
                 }
-                Finished = count >= needCard;
+                Finished = currentCard >= needCard;
                 timer = 0;
             }
         }
@@ -93,7 +93,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public int needCard;
 
         [JsonProperty] 
-        public int currentCard;
+        private int currentCard;
 
         [JsonProperty]
         public bool all = true;

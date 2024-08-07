@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>portable</DebugType>
@@ -106,6 +106,9 @@
       <HintPath>..\include\UnityEngine.JSONSerializeModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\include\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextCoreModule">
       <HintPath>..\include\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
@@ -134,7 +137,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Core\BuffMenu\MenuObjects\" />
-    <Folder Include="Credit\" />
   </ItemGroup>
   <ItemGroup>
     <Reference Update="System">

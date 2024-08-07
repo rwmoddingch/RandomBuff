@@ -25,6 +25,7 @@ namespace RandomBuff.Core.Game
 
         public BuffHud(HUD.HUD hud) : base(hud)
         {
+            
             slotTitle = new BuffSlotTitle();
             inGameSlot = new CommmmmmmmmmmmmmpleteInGameSlot(slotTitle);
             hud.fContainers[1].AddChild(inGameSlot.Container);
@@ -38,10 +39,20 @@ namespace RandomBuff.Core.Game
 
             Instance = this;
 
-            if(Custom.rainWorld.processManager.menuSetup.startGameCondition ==
-               ProcessManager.MenuSetup.StoryGameInitCondition.New)
+            if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
+                ProcessManager.MenuSetup.StoryGameInitCondition.New)
+            {
+                Custom.rainWorld.processManager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
+            }
+        }
+
+        string FormateFreePickTitle(int pickedcount)
+        {
+            return string.Format(
+                        BuffResourceString.Get("BuffHUD_FreePick"), pickedcount,
+                        BuffConfigManager.GetFreePickCount(BuffPoolManager.Instance.GameSetting.gachaTemplate.PocketPackMultiply));
         }
 
         public void NewGame(SlugcatStats.Name saveName)
@@ -50,12 +61,10 @@ namespace RandomBuff.Core.Game
 
             if (BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply) != 0)
             {
-                pocket = new CardPocket(BuffCore.GetAllBuffIds(), string.Format(
-                        BuffResourceString.Get("BuffHUD_FreePick"),
-                        BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply)), (
+                pocket = new CardPocket(new List<BuffID>(), FormateFreePickTitle(0), (
                         (all, _, _) =>
                         {
-                            if(all == null)
+                            if (all == null)
                                 return;
                             foreach (var card in all)
                                 card.CreateNewBuff();
@@ -64,7 +73,13 @@ namespace RandomBuff.Core.Game
                         }),
                     BuffCard.normalScale * 0.5f, new Vector2(400f, Custom.rainWorld.screenSize.y - 200),
                     new Vector2(Custom.rainWorld.screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f),
-                    BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply));
+                    BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply))
+                { 
+                    onSelectedBuffChange = (lst) =>
+                    {
+                        pocket.Title = FormateFreePickTitle(lst.Count);
+                    }
+                };
                 hud.fContainers[1].AddChild(pocket.Container);
                 pocket.SetShow(true);
 
@@ -79,7 +94,7 @@ namespace RandomBuff.Core.Game
                     var positiveCards = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.positive.showCount,
                         BuffType.Positive);
                     var negativeCardsList = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.positive.showCount,
-                        BuffType.Negative, BuffType.Duality);
+                        BuffType.Negative);
 
                     if (positiveCards == null || negativeCardsList == null)
                         break;
@@ -99,7 +114,7 @@ namespace RandomBuff.Core.Game
                 for (int i = 0; i < setting.CurrentPacket.negative.pickTimes; i++)
                 {
                     var pickList = BuffPicker.GetNewBuffsOfType(saveName, setting.CurrentPacket.negative.showCount, 
-                        BuffType.Negative, BuffType.Duality);
+                        BuffType.Negative);
                     if (pickList == null)
                         break;
                     inGameSlot.RequestPickCards((id) =>
@@ -109,6 +124,13 @@ namespace RandomBuff.Core.Game
                         new BuffID[setting.CurrentPacket.negative.showCount], setting.CurrentPacket.negative.selectCount);
                 }
             }
+        }
+
+
+        public void RequestNewPick(Action<BuffID> pickedCallBack, List<(BuffID major, BuffID additive)> buffs, int selectNumber)
+        {
+            inGameSlot.RequestPickCards(pickedCallBack, buffs.Select(i => i.major).ToArray(),
+                buffs.Select(i => i.additive).ToArray(), selectNumber);
         }
 
         public void AppendNewCard(BuffID id)
@@ -127,6 +149,7 @@ namespace RandomBuff.Core.Game
 
         public override void Update()
         {
+            InputAgency.StaticUpdate();
             if (BuffCustom.TryGetGame(out var game) && (inGameSlot.WaitingPickCard || (pocket?.Show ?? false)))
             {
                 if (!pausedLocked)
@@ -201,6 +224,7 @@ namespace RandomBuff.Core.Game
             }
             hudParts.Clear();
             id2hudParts.Clear();
+            InputAgency.AllRelease();
         }
 
         public void HandleAddBuffHUD(BuffID id)

@@ -61,7 +61,7 @@ namespace BuiltinBuffs.Missions
 
         public static readonly ConditionID SaveMoon = new ConditionID(nameof(SaveMoon), true);
         public override ConditionID ID => SaveMoon;
-        public override int Exp => 100;//TODO
+        public override int Exp => 250;//TODO
 
         [JsonProperty]
         private int currentCycle;
@@ -81,6 +81,14 @@ namespace BuiltinBuffs.Missions
             return $"({currentCycle}/{targetCycle})";
         }
 
+        public override void HookOn()
+        {
+            base.HookOn();
+            if (currentCycle <= targetCycle)
+                On.SLOracleWakeUpProcedure.NextPhase += SLOracleWakeUpProcedure_NextPhase;
+        }
+
+
         public override string DisplayName(InGameTranslator translator)
         {
             return string.Format(BuffResourceString.Get("DisplayName_SaveMoon"), targetCycle);
@@ -89,8 +97,7 @@ namespace BuiltinBuffs.Missions
         public override void EnterGame(RainWorldGame game)
         {
             currentCycle = game.GetStorySession.saveState.cycleNumber;
-            if(currentCycle <=  targetCycle)
-                On.SLOracleWakeUpProcedure.NextPhase += SLOracleWakeUpProcedure_NextPhase;
+            base.EnterGame(game);
         }
 
         private void SLOracleWakeUpProcedure_NextPhase(On.SLOracleWakeUpProcedure.orig_NextPhase orig, SLOracleWakeUpProcedure self)
@@ -103,7 +110,6 @@ namespace BuiltinBuffs.Missions
         public override void SessionEnd(SaveState save)
         {
             currentCycle = save.cycleNumber + 1;
-            On.SLOracleWakeUpProcedure.NextPhase -= SLOracleWakeUpProcedure_NextPhase;
 
         }
     }

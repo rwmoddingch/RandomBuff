@@ -1,0 +1,163 @@
+<Stage>Coding
+	<Name>诺普
+	<Detail> TODO: 请检查待办事项
+
+	<Name>哈维
+	<Detail> 精灵龙天下第一！
+
+	<Name>Quaeledy
+	<Detail> 抱歉，但是离群者处于离线中
+
+	<Name>小风
+	<Detail> 我有俩，分你一个*递蛤蟆
+
+	<Name>闪卡
+	<Detail> can't stop wawa three
+
+	<Name>寂空
+	<Detail> 请提交本周期的降水报告和避难所维护日志
+	
+<Stage>ArtWorks
+	<Name>哈维
+	<Detail>一个真正的wawa screamer
+	<BuffIDs>BounceSpear,DeathPreventer,DesolateDive,DivineBeing,ShockingSpeed,DangleBomb,EjectionRock,RandomRoom,HighCaliber,SwarmMissile,MobileAssault,Upgradation
+
+	<Name>小风
+	<Detail>我有俩，分你一个*递蛤蟆
+	<BuffIDs>DesperateEater, DelayedExplosion, UpsideDownPixieSlug, SlugSlug, TailCut, DreamTraveller, EatMore, SuperStomach, CountDownToDeath, LittleBoyNuke, Hell, RJ250, Napalm, InfiniteFirePower, ClusterBomb, WealthFinger, DudBomb, ButterFeet, PopingCandy, Hypothermia, PandoraBox
+
+	<Name>Quaeledy
+	<Detail>您拨打的号码[离群者]已离开服务区
+	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun, PupaLizard, IntenseSituation, FlameThrower, FlamePurification, BombMania
+	
+	<Name>日天菌
+	<Detail>神明智慧吞噬者σ( ᑒ )
+	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
+
+	<Name>墨阳
+	<Detail>产能不足
+	<BuffIDs>FakeCreature
+
+	<Name>寂空
+	<Detail>「广告位招租」
+	<BuffIDs>ShortCircuits, TwoSides, TurboPropulsion
+
+	<Name>琳
+	<Detail>线稿打在在草稿上（悲）
+	<BuffIDs>Multiplier
+	
+	<Name>花花猫
+	<Detail>感谢大家:3
+	<BuffIDs>LavaImmune, SensorBomb, ShortSighted, Presbyopia
+
+	<Name>ProjectMoon
+	<Detail>
+	<BuffIDs>Ayin, Binah, Chesed, Hod, Hokma, Malkuth, Netzach, Tiphereth, Yesod
+
+
+<Stage>PlayTest
+	<Name>炖鸽子
+	<Detail>茅草裂片是事业的叛徒！
+
+	<Name>花花猫
+	<Detail>人生结束了，雨世界也会继续！
+
+	<Name>拾荒猫
+	<Detail>雨世界智慧生物，联合起来！
+
+	<Name>牙鸦鸟
+	<Detail>嘎嘎嘎嘎嘎嘎
+
+	<Name>catatu
+	<Detail>我喜欢你uwu
+
+	<Name>一只蛞蝓猫
+	<Detail>只是只蛞蝓猫，什么都不知道
+
+	<Name>琳
+	<Detail>一切都在轮回，我们也不例外
+
+	<Name>洋流
+	<Detail>你看到了这段文字，那么祝你好运
+
+
+	<Name>空白的飞
+	<Detail>此时！此地！才是蛞蝓猫该去的地方。
+
+	<Name>喵喵大帝
+	<Detail>一个新的循环已经开始，而我们不必成为其中一部分
+
+	<Name>貘
+
+	<Name>Mon3tr
+	<Detail>早上好雨世界
+
+	<Name>糖果色二哈
+	<Detail>记住，选择卡牌前寻思一下会不会打出叠加！！
+
+	<Name>QWQ
+	<Detail>修复了核心抑制过于简单的bug
+
+	<Name>企鹅君
+	<Detail>猴捡珍珠乐逍遥，猎手一击猴生消！
+
+	<Name>静夜
+	<Detail>什么，还要写一段话？
+
+
+	<Name>Stars
+	<Detail>我要狠狠的控FP！
+
+	<Name>leaf
+	<Detail>蛛型突变豪丸，很对我xp（什
+
+	<Name>十九轮回
+	<Detail>超验反转！超验反转！！
+
+	<Name>热木星
+	<Detail>什么，我的区域什么时候做好，咕咕咕~
+
+	<Name>凝殇
+	<Detail>我不是应该在做区域吗？怎么玩上随机卡牌了！豪丸！
+
+	<Name>雾
+	<Detail>用死亡来定义你的雨世界冒险喵！
+
+	<Name>芙尔塔雅
+	<Detail>晚安，小生灵。
+
+	<Name>山脊雪灵
+	<Detail>死亡并不是终点
+
+	<Name>墨色烟云
+	<Detail>千相终寂
+	
+	<Name>驯龙师
+	<Detail>虽说烈焰很难驯，但是烈焰真的很香（?）
+
+	<Name>淡淡的伤
+	<Detail>新DLC什么时候出
+
+	<Name>狐松
+	<Detail>讨厌蜘蛛还有“辣条”
+
+	<Name>黑咪 o.o
+	<Detail>准备好进入这场精彩的梦中了吗~
+
+	<Name>异格凯尔嘻
+	<Detail>这是什么抛瓦？
+
+<Stage>SpecialThanks
+	<Entry>宣传
+		<Name>寂空
+		<Detail>请提交本周期的降水报告和避难所维护日志
+		<Name>Whoking
+		<Detail>wawa 2
+	<Entry>早期宣传
+		<Name>气球
+	<Entry>字体使用
+		<Name>峰广明锐体
+		<Name>NotoSans Hans
+	<Entry><NextPage>
+	<Entry>buff设计灵感
+		<Name> 非常感谢各位积极提供灵感

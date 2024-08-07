@@ -1,11 +1,15 @@
 ﻿using DevInterface;
+using Menu;
+using Menu.Remix.MixedUI;
 using MonoMod.Utils;
 using MonoMod.Utils.Cil;
 using RandomBuff.Core.Buff;
 using RewiredConsts;
+using RWCustom;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -56,6 +60,7 @@ namespace RandomBuff
             /// </summary>
             /// <param name="triggleSingle">为true时表示单击触发</param>
             /// <param name="triggleDouble">为true时表示双击触发</param>
+            /// 
             public void Update(out bool triggleSingle, out bool triggleDouble)
             {
                 lastState = state;
@@ -315,6 +320,11 @@ namespace RandomBuff
             return new Color(r / 255f, g / 255f, b / 255f);
         }
 
+        public static Vector3 Color2RGB(Color color)
+        {
+            return new Vector3(Mathf.FloorToInt(color.r * 255f), Mathf.FloorToInt(color.g * 255f), Mathf.FloorToInt(color.b * 255f));
+        }
+
         public static bool IsZhChar(string ch)
         {
             byte[] byte_len = System.Text.Encoding.Default.GetBytes(ch);
@@ -333,47 +343,75 @@ namespace RandomBuff
             return Mathf.Atan2(vec.y, vec.x);
         }
 
-        public static IEnumerable<Type> SafeGetTypes(this Assembly assembly, bool logException = false)
+        public static void TraceStack()
         {
-            Module[] modules;
-            Type[] types;
-            try
-            {
-                modules = assembly.GetModules(getResourceModules: false);
-            }
-            catch (Exception e)
-            {
-                if(logException)
-                    BuffPlugin.LogException(e);
-                modules = new Module[0];
-            }
+            // 0 表示要忽略的帧数
+            // true 表示需要文件信息
+            var stack = new StackTrace(0, true);
+            StringBuilder builder = new StringBuilder();
 
-            for (int i = 0; i < modules.Length; i++)
+            for (int i = 0; i < stack.FrameCount; i++)
             {
-                try
-                {
-                    types = modules[i].GetTypes();
-                }
-                catch(Exception e)
-                {
-                    if (logException)
-                        BuffPlugin.LogException(e);
-                    types = new Type[0];
-                }
-
-                for (int j = 0; j < types.Length; j++)
-                {
-                    yield return types[j];
-                }
+                var frame = stack.GetFrame(i);
+                var trace = ""
+                    + "文件：" + frame.GetFileName()
+                    + "\n函数：" + frame.GetMethod().Name
+                    + "\n行号：" + frame.GetFileLineNumber()
+                    + "\n=>"
+                    ;
+                builder.AppendLine(trace);
             }
-            yield break;
+            builder.AppendLine("\n");
+            BuffPlugin.Log(builder.ToString());
         }
-    
+
+        public static Vector2 GetContactPos(Vector2 pos, Vector2 dir, Room room)
+        {
+            Vector2 corner = Custom.RectCollision(pos, pos + dir * 100000f, room.RoomRect.Grow(200f)).GetCorner(FloatRect.CornerLabel.D);
+            IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(room, pos, corner);
+            if (intVector != null)
+            {
+                corner = Custom.RectCollision(corner, pos, room.TileRect(intVector.Value)).GetCorner(FloatRect.CornerLabel.D);
+            }
+            return corner;
+        }
+
+        public static void LinkEmptyToSelf(MenuObject menuObject)
+        {
+            for(int i = 0;i < 4; i++)
+            {
+                if (menuObject.nextSelectable[i] == null)
+                    menuObject.nextSelectable[i] = menuObject;
+            }
+        }
+
         public static IEnumerable<BuffType> EnumBuffTypes()
         {
             yield return BuffType.Positive;
             yield return BuffType.Duality;
             yield return BuffType.Negative;
+        }
+
+        public static float GetLabelHeight(string text, bool bigText = false)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return 0f;
+            }
+
+            string[] lines = text.Split('\n');
+            return lines.Length * (bigText ? 40f : 21f);
+
+            FFont fontWithName = Futile.atlasManager.GetFontWithName(LabelTest.GetFont(bigText));
+            float height = 0f;
+            FLetterQuadLine[] quadInfoForText = fontWithName.GetQuadInfoForText(text, new FTextParams());
+            for (int i = 0; i < quadInfoForText.Length; i++)
+            {
+                FLetterQuadLine fLetterQuadLine = quadInfoForText[i];
+                height += fLetterQuadLine.bounds.height;
+            }
+
+            return height;
         }
     }
 }

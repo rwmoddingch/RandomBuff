@@ -7,11 +7,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace HotDogGains.Positive
 {
-    class SpiderSenseBuff : Buff<SpiderSenseBuff, SpiderSenseBuffData> { public override BuffID ID => SpiderSenseBuffEntry.SpiderSenseID; }
+    class SpiderSenseBuff : Buff<SpiderSenseBuff, SpiderSenseBuffData>
+    {
+        public override BuffID ID => SpiderSenseBuffEntry.SpiderSenseID;
+
+        public Weapon weapon;
+
+        public void TriggerWithWeapon(Weapon weapon)
+        {
+            if(this.weapon == weapon) return;
+            this.weapon = weapon;
+            TriggerSelf(true);
+        }
+
+    }
     class SpiderSenseBuffData : BuffData { public override BuffID ID => SpiderSenseBuffEntry.SpiderSenseID; }
     class SpiderSenseBuffEntry : IBuffEntry
     {
@@ -23,7 +37,18 @@ namespace HotDogGains.Positive
         public static void HookOn()
         {
             On.Weapon.Update += Weapon_Update;
+            On.Weapon.ChangeMode += Weapon_ChangeMode;
             On.Player.Update += Player_Update;
+        }
+
+        private static void Weapon_ChangeMode(On.Weapon.orig_ChangeMode orig, Weapon self, Weapon.Mode newMode)
+        {
+           orig(self, newMode);
+           if (newMode != Weapon.Mode.Thrown)
+           {
+               if (SpiderSenseBuff.Instance.weapon == self)
+                   SpiderSenseBuff.Instance.weapon = null;
+           }
         }
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
@@ -55,7 +80,7 @@ namespace HotDogGains.Positive
     }
     public class SpiderSense
     {
-        Player player;
+        WeakReference<Player> playerRef;
         float dodgeSkill = 1;
         public float dodgeDelay = 0;
 
@@ -74,7 +99,7 @@ namespace HotDogGains.Positive
             return Custom.VerticalCrossPoint(weaponLast, weaponNext, xPos).y - gravity * num * num;
         }
 
-        public bool OutOfDanger(Vector2 weaponLast, Vector2 weaponNext, Vector2[] tryPositions, float weaponRad, float gravity)
+        public bool OutOfDanger(Player player,Vector2 weaponLast, Vector2 weaponNext, Vector2[] tryPositions, float weaponRad, float gravity)
         {
             for (int i = 0; i < tryPositions.Length; i++)
             {
@@ -88,10 +113,14 @@ namespace HotDogGains.Positive
 
         public void FlyingWeapon(Weapon weapon)
         {
+            if(!playerRef.TryGetTarget(out var player) || player.room == null || player.inShortcut)
+                return;
+            
+
             float num = Mathf.Max(0, dodgeSkill) * (0.3f + 0.7f * Mathf.Pow(1, 0.3f));
 
             if (dodgeDelay > 0 || !player.Consious || Mathf.Abs(weapon.firstChunk.pos.y - player.mainBodyChunk.pos.y) > 120f || !Custom.DistLess(weapon.firstChunk.pos, player.mainBodyChunk.pos, 400f + 400f * num) || Mathf.Abs(weapon.firstChunk.pos.x - weapon.firstChunk.lastPos.x) < 1f || !weapon.HeavyWeapon || weapon.firstChunk.pos.x < weapon.firstChunk.lastPos.x != player.mainBodyChunk.pos.x < weapon.firstChunk.pos.x)
-                {
+            {
                 return;
             }
             float num2 = Mathf.Abs(player.mainBodyChunk.pos.x - weapon.firstChunk.pos.x) / Mathf.Abs(weapon.firstChunk.pos.x - weapon.firstChunk.lastPos.x);
@@ -109,11 +138,10 @@ namespace HotDogGains.Positive
 
             float num3 = CrossHeight(player.mainBodyChunk.pos.x, weapon.firstChunk.lastPos, weapon.firstChunk.pos, (weapon is Spear) ? 0.45f : 0.9f);
 
-            Vector2[] array = new Vector2[]
-            {
-            player.bodyChunks[0].pos,
-            player.bodyChunks[1].pos,
-            };
+            Vector2[] array = new Vector2[player.bodyChunks.Length];
+
+            for (int i = 0; i < array.Length; i++)
+                array[i] = player.bodyChunks[i].pos;
 
             if (player.room.aimap.getAItile(player.bodyChunks[1].pos).acc == AItile.Accessibility.Floor)
             {
@@ -124,10 +152,10 @@ namespace HotDogGains.Positive
                     {
                         array[l].y = num4 + player.bodyChunks[l].rad;
                     }
-                    if (OutOfDanger(weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
+                    if (OutOfDanger(player,weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
                     {
-                        //SpiderSenseBuff.Instance.TriggerSelf(true);
-                        Debug.Log("DUCK!");
+                        SpiderSenseBuff.Instance.TriggerWithWeapon(weapon);
+                        //BuffUtils.Log(SpiderSenseBuffEntry.SpiderSenseID,"DUCK!");
                         dodgeDelay = (int)Mathf.Lerp(25f, 1f, dodgeSkill);
                         for (int m = 0; m < player.bodyChunks.Length; m++)
                         {
@@ -155,10 +183,10 @@ namespace HotDogGains.Positive
                             array[n].y = Mathf.Lerp(array[n].y, vector.y, 0.75f);
                         }
                     }
-                    if (OutOfDanger(weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f) )
+                    if (OutOfDanger(player, weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f) )
                     {
-                        //SpiderSenseBuff.Instance.TriggerSelf(true);
-                        Debug.Log("UP DODGE!");
+                        SpiderSenseBuff.Instance.TriggerWithWeapon(weapon);
+                        //BuffUtils.Log(SpiderSenseBuffEntry.SpiderSenseID,"UP DODGE!");
                         dodgeDelay = (int)Mathf.Lerp(25f, 1f, dodgeSkill);
                         for (int num5 = 0; num5 < player.bodyChunks.Length; num5++)
                         {
@@ -187,10 +215,10 @@ namespace HotDogGains.Positive
                         array2[num7].y = array2[num7].y - 25f;
                     }
                 }
-                if (OutOfDanger(weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
+                if (OutOfDanger(player, weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
                 {
-                    //SpiderSenseBuff.Instance.TriggerSelf(true);
-                    Debug.Log("DROP DODGE!");
+                    SpiderSenseBuff.Instance.TriggerWithWeapon(weapon);
+                    //BuffUtils.Log(SpiderSenseBuffEntry.SpiderSenseID,"DROP DODGE!");
                     dodgeDelay = (int)Mathf.Lerp(25f, 1f, dodgeSkill);
                     for (int num8 = 0; num8 < player.bodyChunks.Length; num8++)
                     {
@@ -209,10 +237,10 @@ namespace HotDogGains.Positive
                 {
                     array[num9] = player.bodyChunks[num9].pos + new Vector2(0f, 13f + dodgeSkill * 3f);
                 }
-                if (OutOfDanger(weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
+                if (OutOfDanger(player, weapon.firstChunk.lastPos, weapon.firstChunk.pos, array, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
                 {
-                    //SpiderSenseBuff.Instance.TriggerSelf(true);
-                    Debug.Log("HOP!");
+                    SpiderSenseBuff.Instance.TriggerWithWeapon(weapon);
+                    //BuffUtils.Log(SpiderSenseBuffEntry.SpiderSenseID,"HOP!");
                     dodgeDelay = (int)Mathf.Lerp(35f, 3f, dodgeSkill);
                     //player.footingCounter = 0;
                     for (int num10 = 0; num10 < player.bodyChunks.Length; num10++)
@@ -231,7 +259,7 @@ namespace HotDogGains.Positive
 
         public SpiderSense(Player player)
         {
-            this.player = player;
+            this.playerRef = new WeakReference<Player>(player);
         }
     }
 

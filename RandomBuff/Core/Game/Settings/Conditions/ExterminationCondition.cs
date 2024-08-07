@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
 {
-    internal class ExterminationCondition : Condition
+    public class ExterminationCondition : Condition
     {
         public static List<AbstractPhysicalObject.AbstractObjectType> weaponSelections;
         static ConditionalWeakTable<Creature, CreatureDmgSourceRecord> dmgSourceMapper = new ConditionalWeakTable<Creature, CreatureDmgSourceRecord>();
@@ -42,11 +42,19 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 AbstractPhysicalObject.AbstractObjectType.Rock,
             };
             //TODO:暂时
-            //foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            //{
+
+
+        }
+
+        public override void HookOn()
+        {
+            base.HookOn();
+            On.Creature.Die += Creature_Die;
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
                 try
                 {
-                    foreach (var type in typeof(Player).Assembly.GetTypes())
+                    foreach (var type in assembly.SafeGetTypes())
                     {
                         var ba = type.BaseType;
                         if (type.IsSubclassOf(typeof(Creature)))
@@ -59,37 +67,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 {
                     BuffUtils.LogException("ExterminationCondition", ex);
                 }
-            //}
-
-            foreach(var hook in creatureViolenceHooks)
-            {
-                hook.Undo();
-            }
-        }
-
-        public override void EnterGame(RainWorldGame game)
-        {
-            base.EnterGame(game);
-
-            //BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
-            On.Creature.Die += Creature_Die;
-            foreach(var hook in creatureViolenceHooks)
-            {
-                hook.Apply();
             }
         }
 
 
-        public override void SessionEnd(SaveState save)
-        {
-            base.SessionEnd(save);
-            On.Creature.Die -= Creature_Die;
-            //BuffEvent.OnCreatureKilled -= BuffEvent_OnCreatureKilled;
-            foreach (var hook in creatureViolenceHooks)
-            {
-                hook.Apply();
-            }
-        }
+
 
         private void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {

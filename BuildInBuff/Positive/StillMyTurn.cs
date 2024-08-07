@@ -41,7 +41,7 @@ namespace TemplateGains
         public static void WeaponWarp(Weapon weapon,Player slug)
         {
             weapon.myTurnWeapon().canWarp = false;
-            if (slug?.firstChunk != null && slug.room != null && slug.Consious && weapon.firstChunk != null && 
+            if (slug?.firstChunk != null && slug.room != null && slug.Consious && weapon?.firstChunk != null && 
                 !(weapon is Spear spr && spr.stuckInChunk?.owner is Creature crit && crit.inShortcut))
             {
                 weapon.firstChunk.pos = slug.firstChunk.pos;
@@ -63,7 +63,7 @@ namespace TemplateGains
         private static bool MyTurn_HitSomething(On.Spear.orig_HitSomething orig, Spear self, SharedPhysics.CollisionResult result, bool eu)
         {
             bool hit = orig.Invoke(self, result, eu);
-            if (hit && self.thrownBy is Player player) 
+            if (hit && self.thrownBy is Player player && !(self is ExplosiveSpear)) 
                 self.myTurnWeapon().CanWarp(player);
 
             return hit;

@@ -34,8 +34,11 @@ using RandomBuff.Render.UI.Component;
 using RandomBuffUtils.FutileExtend;
 using RandomBuff.Render.Quest;
 using System.Drawing;
+using Kittehface.Framework20;
+using RandomBuff.Core.Option;
 using Steamworks;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -58,7 +61,8 @@ namespace RandomBuff
 
         internal static BuffPlugin Instance { get; private set; }
 
-        public static bool AllCardDisplay { get; private set; }
+
+        public static BuffOptionInterface Option { get; private set; }
 
         public const string ModId = "randombuff";
 
@@ -66,11 +70,15 @@ namespace RandomBuff
         {
             LogInstance = this.Logger;
             Instance = this;
+            
+
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
                 On.RainWorld.PostModsInit += RainWorld_PostModsInit;
-           
+                Option = new BuffOptionInterface();
+
+
             }
             catch (Exception e)
             {
@@ -82,6 +90,7 @@ namespace RandomBuff
         {
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
             ExceptionTracker.Singleton?.Update();
+            BuffExceptionTracker.Singleton?.RawUpdate();
             
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();
@@ -135,12 +144,6 @@ namespace RandomBuff
                         LogWarning("Debug Enable");
                     }
 
-                    if (File.Exists(AssetManager.ResolveFilePath("buffallcards.txt")))
-                    {
-                        AllCardDisplay = true;
-                        LogWarning("Displayed all cards");
-
-                    }
 
                     Application.logMessageReceived += Application_logMessageReceived;
 
@@ -152,6 +155,7 @@ namespace RandomBuff
 
                     GachaTemplate.Init();
                     Condition.Init();
+                    InputAgency.Init();
                     TypeSerializer.Init();
                     QuestCondition.Init();
                     CosmeticUnlock.Init();
@@ -165,14 +169,20 @@ namespace RandomBuff
                     BuffUtils.OnEnable();
 
                     //TODO : 测试用
+                    for(int i =0;i < 15; i++)
+                    {
+                        int exp = BuffPlayerData.Level2Exp(i);
+                        int l = BuffPlayerData.Exp2Level(exp);
+                        BuffPlugin.Log($"{i} - {exp} - {l}");
+                    }
                     //DevEnabled = true;
 
-                    CardpediaMenuHooks.Hook();
                     CardpediaMenuHooks.LoadAsset();
                     SoapBubblePool.Hook();
 
                     AnimMachine.Init();
 
+                    MachineConnector.SetRegisteredOI(ModId, Option);
                     StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());
 
                     isLoaded = true;
@@ -185,7 +195,7 @@ namespace RandomBuff
             }
         }
 
-      
+     
 
         private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
         {
@@ -213,7 +223,7 @@ namespace RandomBuff
                     }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
-                    BuffConfigManager.InitTemplateStaticData();
+                    BuffConfigManager.InitTemplateStaticData()  ;
                     BuffRegister.LoadBuffPluginAsset();
 
                     //这个会用到template数据（嗯
@@ -221,23 +231,43 @@ namespace RandomBuff
                     BuffConfigManager.InitQuestData();
 
                     BuffRegister.BuildAllDataStaticWarpper();
-
                     /****************************************/
 
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
-                        TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont, $"Random Buff, Build: 2024_07_28\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}", new Vector2(1000,200), 0.4f)
+
+                        if (devVersion == null && !File.Exists(AssetManager.ResolveFilePath("disableDevMark.txt")))
                         {
-                            Alignment = TMPro.TextAlignmentOptions.BottomLeft,
-                            Pivot = new Vector2(0f, 0f),
-                            y = 5,
-                            x = 5,
-                            alpha = 0.3f
-                        };
-                        Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
-                        devVersion.AddChild(label);
+                            TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
+                                $"Random Buff, Build: 2024_08_06_2\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                new Vector2(1000, 200), 0.4f)
+                            {
+                                Alignment = TMPro.TextAlignmentOptions.BottomLeft,
+                                Pivot = new Vector2(0f, 0f),
+                                y = 5,
+                                x = 5,
+                                alpha = 0.3f
+                            };
+
+                            Futile.AddStage(devVersion = new FStage("BUFF_DEV"));
+                            devVersion.AddChild(label);
+                        }
+
                     };
+                    foreach (var file in Directory.GetFiles(UserData.GetPersistentDataPath(), "sav*"))
+                    {
+                        if (int.TryParse(Path.GetFileName(file).Substring(3), out var slot))
+                        {
+                            if (slot >= 100)
+                            {
+                                if (!File.Exists($"{UserData.GetPersistentDataPath()}/buffMain{slot - 1}"))
+                                    File.Copy(file, $"{UserData.GetPersistentDataPath()}/buffMain{slot - 1}");
+                                File.Delete(file);
+                            }
+                        }
+                    }
+
                     /****************************************/
                     isPostLoaded = true;
                 }
@@ -248,10 +278,10 @@ namespace RandomBuff
             }
         }
 
-
+        
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            if (type == LogType.Exception)
+            if (type == LogType.Exception && BuffOptionInterface.Instance.ShowExceptionLog.Value)
                 ExceptionTracker.TrackExceptionNew(stackTrace,condition);
             
         }

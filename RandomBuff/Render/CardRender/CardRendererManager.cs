@@ -19,7 +19,7 @@ namespace RandomBuff.Render.CardRender
 {
     internal static class CardRendererManager
     {
-        static float maxDestroyTime = 60f;
+        static float maxDestroyTime = 120f;
         static List<BuffCardRendererBase> totalRenderers = new List<BuffCardRendererBase>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
         static List<SingleTextCardRenderer> inactiveSingleTextCardRenderer = new List<SingleTextCardRenderer>();
@@ -66,7 +66,7 @@ namespace RandomBuff.Render.CardRender
             mostInavtiveRenderer.gameObject.SetActive(true);
             mostInavtiveRenderer.Init(mostInavtiveRenderer._id, BuffConfigManager.GetStaticData(buffID));
             inactiveCardRenderers.Remove(mostInavtiveRenderer);
-            BuffPlugin.LogDebug($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
+            //BuffPlugin.LogDebug($"Get used renderer : {mostInavtiveRenderer._id}, {inactiveCardRenderers.Contains(mostInavtiveRenderer)}");
             return mostInavtiveRenderer;
 
             BuffCardRenderer GetNewRenderer(BuffID buffID)
@@ -80,7 +80,7 @@ namespace RandomBuff.Render.CardRender
                     totalRenderers.Add(renderer);
 
                     renderer.Init(id, BuffConfigManager.GetStaticData(buffID));
-                    BuffPlugin.LogDebug($"Get new card renderer of id {id}");
+                    //BuffPlugin.LogDebug($"Get new card renderer of id {id}");
                     return renderer;
                 }
                 catch(Exception e)
@@ -222,6 +222,8 @@ namespace RandomBuff.Render.CardRender
 
         public static Texture TextBack { get; private set; }
 
+        public static string MissingFaceTexture { get; private set; }
+
         public static Color PositiveColor { get; } = Helper.GetRGBColor(27, 178, 196);
         public static Color NegativeColor { get; } = Helper.GetRGBColor(183, 56, 73);
         public static Color DualityColor { get; } = Helper.GetRGBColor(177, 170, 187);
@@ -235,6 +237,8 @@ namespace RandomBuff.Render.CardRender
 
         static string GB2312;//加载完字体后销毁节省内存
         static bool[] corounteFlags = new bool[2] { false, false };
+
+        public static bool PauseLoadFont { get; set; }
 
         /// <summary>
         /// 从文件中加载资源
@@ -339,6 +343,7 @@ namespace RandomBuff.Render.CardRender
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
             TextBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/textback").texture;
+            MissingFaceTexture = Futile.atlasManager.LoadImage("buffassets/cardbacks/missing").name;
 
             BuffPlugin.Log($"tex name : {FPBack.name}, {FPBack.texelSize}");
         }
@@ -424,6 +429,12 @@ namespace RandomBuff.Render.CardRender
             
             while (pointer < GB2312.Length)
             {
+                if(PauseLoadFont)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 fontToLoad.HasCharacter(GB2312[pointer], true, true);
                 //Debug.Log($"{GB2312[pointer]} {fontToLoad.HasCharacter(GB2312[pointer], false, true)}");
                 end = DateTime.Now;

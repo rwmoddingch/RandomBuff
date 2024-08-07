@@ -13,7 +13,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Kittehface.Framework20;
 using RandomBuff.Core.Entry;
 using RandomBuff.Render.CardRender;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff.Core.Buff
 {
@@ -30,9 +30,11 @@ namespace RandomBuff.Core.Buff
         public string FaceName { get; private set; } = null;
         public Color Color { get; private set; } = Color.white;
         public BuffType BuffType { get; private set; } = BuffType.Positive;
+        public bool AsPositive { get; private set; } = false;
+
         public BuffProperty BuffProperty { get; private set; } = BuffProperty.Normal;
         public bool Stackable { get; private set; } = false;
-        public bool NeedUnlocked { get; private set; } = false;
+        public bool Hidden { get; private set; } = false;
 
         public int MaxCycleCount { get; private set; } = -1;
         public bool Countable => MaxCycleCount != -1;
@@ -50,6 +52,13 @@ namespace RandomBuff.Core.Buff
         //帮助方法
         internal Texture GetFaceTexture()
         {
+            var atlas = Futile.atlasManager.GetAtlasWithName(FaceName);
+            //BuffPlugin.LogError($"Get face for {BuffID} {FaceName}");
+            if (!atlas.isSingleImage)
+            {
+                BuffPlugin.LogError($"Get face for {BuffID} {FaceName}, but get nonsingleimage : {atlas.name}");
+                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFaceTexture).texture;
+            }
             return Futile.atlasManager.GetAtlasWithName(FaceName).texture;
         }
 
@@ -157,7 +166,7 @@ namespace RandomBuff.Core.Buff
                 }
                 else
                 {
-                    newData.FaceName = "Futile_White";
+                    newData.FaceName = CardBasicAssets.MissingFaceTexture;
                     BuffPlugin.LogWarning($"Can't find faceName At {jsonFile.Name}");
                 }
 
@@ -184,6 +193,13 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "BuffProperty"))
                     newData.BuffProperty = (BuffProperty)Enum.Parse(typeof(BuffProperty), (string)rawData[loadState]);
 
+                if (rawData.ContainsKey(loadState = "AsPositive"))
+                {
+                    if (rawData[loadState] is bool)
+                        newData.Stackable = (bool)rawData[loadState];
+                    else
+                        newData.AsPositive = bool.Parse(rawData[loadState] as string);
+                }
 
                 if (rawData.ContainsKey(loadState = "Color"))
                 {
@@ -193,9 +209,9 @@ namespace RandomBuff.Core.Buff
                         newData.Color = Custom.hexToColor((string)rawData[loadState]);
                 }
 
-                if (rawData.ContainsKey(loadState = "NeedUnlocked"))
+                if (rawData.ContainsKey(loadState = "Hidden"))
                 {
-                    newData.NeedUnlocked = (bool)rawData[loadState];
+                    newData.Hidden = (bool)rawData[loadState];
                 }
 
                 if (rawData.ContainsKey(loadState = "MultiLayerFace"))
@@ -219,6 +235,8 @@ namespace RandomBuff.Core.Buff
                     foreach (var obj in tagObj)
                     {
                         newData.Tag.Add((string)obj);
+                        BuffPlugin.LogDebug($"Tag:{obj}");
+
                     }
                 }
 

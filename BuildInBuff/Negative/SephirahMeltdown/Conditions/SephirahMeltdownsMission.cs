@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Expedition;
+using HotDogGains.Negative;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -12,6 +13,7 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
 using UnityEngine;
 
@@ -32,7 +34,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 conditions = new List<Condition>()
                 {
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = CreatureTemplate.Type.RedCentipede},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = BuffConfigManager.ContainsId(new BuffID("bur-pursued")) ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
                     new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 20}
@@ -45,7 +47,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {
                             TipherethBuffData.Tiphereth.value,
                             ChesedBuffData.Chesed.value,
-                            "bur-pursued"
+                            BuffConfigManager.ContainsId(new BuffID("bur-pursued")) ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
                         }},
                         {8, new List<string>()
                         {
@@ -114,6 +116,25 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
             }
 
+            else
+            {
+                MusicEvent musicEvent = new MusicEvent
+                {
+                    fadeInTime = 1f,
+                    roomsRange = -1,
+                    cyclesRest = 0,
+                    volume = 0.13f,
+                    prio = 10f,
+                    stopAtDeath = true,
+                    stopAtGate = false,
+                    loop = true,
+                    maxThreatLevel = 10,
+                    songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
+
+                };
+                game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+            }
+
 
             On.Music.MusicPlayer.GameRequestsSong += MusicPlayer_GameRequestsSong;
             base.EnterGame(game);
@@ -132,7 +153,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             if (game.GetStorySession.saveState.cycleNumber == 7)
             {
-                BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("bur-pursued"));
+                if(BuffCore.GetAllBuffIds().Contains(new BuffID("bur-pursued")))
+                    BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("bur-pursued"));
+                else
+                    BuffPoolManager.Instance.RemoveBuffAndData(ArmedKingVultureBuffEntry.ArmedKingVultureID);
+
                 BuffUtils.Log("SephirahMeltdown","Remove bur-pursued at 8 cycles");
             }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
@@ -142,16 +167,31 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 BuffUtils.Log("SephirahMeltdown", "Add Final Test");
                 BuffPoolManager.Instance.GameSetting.conditions.RemoveAll(i => i is DeathCondition);
-                BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(game.session.characterStats));
+                BuffPoolManager.Instance.GameSetting.conditions.Add(
+                    new TreeOfLightCondition().SetTargetCount(game.session.characterStats));
                 AyinBuffData.Ayin.CreateNewBuff();
             }
             game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
             {
-                fadeOutTime = 1,
-                prio = 20,
+                fadeOutTime = 0.5f,
+                prio = 100,
+                songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
+                type = StopMusicEvent.Type.AllSongs
+            });
+            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            {
+                fadeOutTime = 0.5f,
+                prio = 100,
                 songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
                 type = StopMusicEvent.Type.AllSongs
-            });     
+            });
+            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            {
+                fadeOutTime = 0.5f,
+                prio = 100,
+                songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
+                type = StopMusicEvent.Type.AllSongs
+            });
             On.Music.MusicPlayer.GameRequestsSong -= MusicPlayer_GameRequestsSong;
         }
 

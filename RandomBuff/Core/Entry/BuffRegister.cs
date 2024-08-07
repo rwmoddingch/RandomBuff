@@ -19,11 +19,12 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
+using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using RandomBuffUtils;
 using UnityEngine;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -31,7 +32,7 @@ using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace RandomBuff.Core.Entry
 {
-    
+
 
     public enum HookLifeTimeLevel
     {
@@ -259,11 +260,22 @@ namespace RandomBuff.Core.Entry
                     return;
                 }
                 ConditionTypes.Add(id, new ConditionType(id, typeof(TConditionType), GetConditionType(parentId), displayName,isHidden));
+                BuffHookWarpper.RegisterConditionHook<TConditionType>();
             }
             catch (Exception e)
             {
                 BuffPlugin.LogException(e, $"Exception when register condition {id}");
             }
+        }
+
+        /// <summary>
+        /// 注册新的使命
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="mission"></param>
+        public static void RegisterMission(MissionID ID, Mission mission)
+        {
+            MissionRegister.RegisterMission(ID,mission);
         }
     }
 
@@ -308,6 +320,8 @@ namespace RandomBuff.Core.Entry
 
         private static readonly List<Type> allEntry = new();
 
+        public static readonly List<Assembly> allBuffAssemblies = new();
+
         private static bool IsDerivedType(this Type checkType, Type baseType)
         {
             var aType = checkType?.BaseType;
@@ -348,6 +362,7 @@ namespace RandomBuff.Core.Entry
         internal static void InitAllBuffPlugin()
         {
             allEntry.Clear();
+            allBuffAssemblies.Clear();
             foreach (var mod in ModManager.ActiveMods)
             {
              
@@ -362,6 +377,7 @@ namespace RandomBuff.Core.Entry
                 {
 
                     Assembly assembly = Assembly.LoadFile(file.FullName);
+                    allBuffAssemblies.Add(assembly);
 
                     foreach (var type in assembly.GetTypes())
                     {

@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,36 +23,62 @@ namespace RandomBuff.Core.Game
     {
         public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
         {
+            if (BuffPlugin.DevEnabled)
+            {
+                var str = "";
+                foreach(var type in types)
+                    str +=type.ToString() + ", ";
+                BuffPlugin.LogDebug($"Request pick: {str}");
+            }
+            else
+                BuffPlugin.LogDebug($"Request pick");
+
+            if (types.Any(i => i == BuffType.Duality))
+            {
+                types = types.Where(i => i != BuffType.Duality).ToArray();
+                BuffPlugin.LogError("Now buff picker don't use Duality");
+            }
+
+
             IEnumerable<BuffID> alreadyHas;
-            IEnumerable<string> conflict = new List<string>();
+
+            var conflict = new List<string>();
             if (BuffPoolManager.Instance == null)
             {
-                alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.Where(i =>
-                    types.Contains(i.GetStaticData().BuffType) &&
-                    !i.GetStaticData().Stackable);
+                alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.Where(i => 
+                    types.Contains(i.GetStaticData().BuffType) || i.GetStaticData().BuffType == BuffType.Duality);
             }
             else
             {
                 alreadyHas = BuffPoolManager.Instance.GetDataDictionary().Keys.Where(i =>
-                    types.Contains(i.GetStaticData().BuffType) &&
-                    !i.GetStaticData().Stackable);
+                    types.Contains(i.GetStaticData().BuffType) || i.GetStaticData().BuffType == BuffType.Duality);
             }
 
             foreach (var id in alreadyHas)
-                conflict = conflict.Concat(id.GetStaticData().Conflict);
-            
+                conflict.AddRange(id.GetStaticData().Conflict);
+
+            foreach (var id in conflict)
+                BuffPlugin.LogDebug($"Conflict: {id}");
+
+
+            alreadyHas = alreadyHas.Where(i => !i.GetStaticData().Stackable);
 
             var list = new List<BuffStaticData>();
             var copyUnique = new List<BuffID>();
-            foreach(var type in types)
-                copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToList());
+            foreach (var type in types)
+            {
+                copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToArray());
+                copyUnique.AddRange(BuffConfigManager.buffTypeTable[BuffType.Duality].Where(i => i.GetStaticData().AsPositive == (type == BuffType.Positive)));
+            }
+
             copyUnique.RemoveAll(alreadyHas.Contains);
-      
-            copyUnique.RemoveAll(i =>i.GetStaticData().NeedUnlocked && !BuffPlayerData.Instance.IsCollected(i));
+            copyUnique.RemoveAll(i =>i.GetStaticData().Hidden || !BuffPlayerData.Instance.IsCollected(i));
+
+
             copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁
 
-            copyUnique.RemoveAll(i => conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j)));//去除冲突
-
+            copyUnique.RemoveAll(i => conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j)));//去除冲突（类别或名称）
+            copyUnique.RemoveAll(i => i.GetStaticData().Conflict.Contains(name.value));//对应猫
             if (copyUnique.Count < pickCount)
             {
                 return null;

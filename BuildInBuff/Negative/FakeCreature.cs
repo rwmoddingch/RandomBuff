@@ -94,6 +94,18 @@ namespace BuiltinBuffs.Negative
 
         public static FShader Turbulent;
 
+        public static void TryAddFakeCreatureModule(Creature source, Creature target)
+        {
+            if (FakeCreatureHook.modules == null)
+                return;
+            if (FakeCreatureHook.modules.TryGetValue(source, out _))
+            {
+                var module = new FakeCreatureModule(target);
+                target.CollideWithObjects = false;
+                FakeCreatureHook.modules.Add(target, module);
+            }
+        }
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<FakeCreatureBuff, FakeCreatureBuffData, FakeCreatureHook>(FakeCreatureBuffData.FakeCreatureID);
@@ -301,7 +313,9 @@ namespace BuiltinBuffs.Negative
                         break;
                     foreach (var chunk in creature.bodyChunks)
                     {
-                        if (ply.bodyChunks.Any(i => Custom.DistLess(i.pos, chunk.pos, (i.rad + chunk.rad))))
+                        if(chunk == null)
+                            continue;
+                        if (ply.bodyChunks.Any(i =>i != null && Custom.DistLess(i.pos, chunk.pos, (i.rad + chunk.rad))))
                         {
                             SuckIntoShortCut();
                             needBreak = true;

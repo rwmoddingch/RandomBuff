@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Numerics;
 using System.Runtime.Remoting.Messaging;
 using Newtonsoft.Json.Linq;
+using BuiltinBuffs.Negative;
 
 namespace BuiltinBuffs.Duality
 {
@@ -91,9 +92,14 @@ namespace BuiltinBuffs.Duality
             On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
             //On.VultureAI.DoIWantToBiteCreature += VultureAI_DoIWantToBiteCreature;
 
+            On.Player.CanEatMeat += Player_CanEatMeat;
+            On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten; 
+
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
+            //On.Creature.Grab += Creature_Grab;
+            //On.Creature.Grasp.Release += Grasp_Release;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -109,7 +115,49 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
         }
+        public static void LongLifeCycleHookOn()
+        {
+            On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
+        }
         #region 额外特性
+
+        //允许吃肉
+        private static bool Player_CanEatMeat(On.Player.orig_CanEatMeat orig, Player self, Creature crit)
+        {
+            bool result = orig(self, crit);
+            if (self.EatMeatOmnivoreGreenList(crit) && crit.dead)
+            {
+                return !ModManager.MSC || self.pyroJumpCooldown <= 60f;
+            }
+            result = !(crit is IPlayerEdible) && crit.dead &&
+                     (!ModManager.CoopAvailable || !(crit is Player)) &&
+                     (!ModManager.MSC || self.pyroJumpCooldown <= 60f);
+            return result;
+        }
+
+        //修改获取的食物点数
+        private static int SlugcatStats_NourishmentOfObjectEaten(On.SlugcatStats.orig_NourishmentOfObjectEaten orig, SlugcatStats.Name slugcatIndex, IPlayerEdible eatenobject)
+        {
+            SlugcatStats.Name newSlugcatIndex = SlugcatStats.Name.Red;
+            int result = orig(newSlugcatIndex, eatenobject);
+            return result;
+        }
+        
+        //食量增大（需求+2，存储-1）
+        private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
+        {
+            IntVector2 origFoodRequirement = orig(slugcat);
+            int newHibernateRequirement = origFoodRequirement.y + 2;
+            int newTotalFoodRequirement = origFoodRequirement.x + 1;
+            if (newHibernateRequirement > newTotalFoodRequirement)
+            {
+                newHibernateRequirement++;
+                newTotalFoodRequirement = newHibernateRequirement;
+            }
+
+            return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
+        }
+
         //双手位置
         private static void SlugcatHand_Update(On.SlugcatHand.orig_Update orig, SlugcatHand self)
         {
@@ -128,7 +176,7 @@ namespace BuiltinBuffs.Duality
 
             if (VultureCatFeatures.TryGetValue(self, out var vultureCat))
             {
-                result = vultureCat.Grabability(result);
+                result = vultureCat.Grabability(result, obj);
             }
 
             return result;
@@ -143,6 +191,19 @@ namespace BuiltinBuffs.Duality
                     result = -1;
                 }
             return result;
+        }
+
+        //佩戴面具
+        private static bool Creature_Grab(On.Creature.orig_Grab orig, Creature self, PhysicalObject obj, int graspUsed, int chunkGrabbed, Creature.Grasp.Shareability shareability, float dominance, bool overrideEquallyDominant, bool pacifying)
+        {
+            if (self is Player && VultureCatFeatures.TryGetValue(self as Player, out var vultureCat))
+            {
+                if (vultureCat.Mask != null && !vultureCat.HasReleasePickButton)
+                {
+                    return true;
+                }
+            }
+            return orig(self, obj, graspUsed, chunkGrabbed, shareability, dominance, overrideEquallyDominant, pacifying);
         }
         #endregion
         #region 生物关系
@@ -180,6 +241,22 @@ namespace BuiltinBuffs.Duality
             return result;
         }
         #endregion
+        private static void Grasp_Release(On.Creature.Grasp.orig_Release orig, Creature.Grasp self)
+        {
+            orig(self);
+            if (self.grabber is Player && VultureCatFeatures.TryGetValue(self.grabber as Player, out var vultureCat))
+            {
+                var mask = vultureCat.Mask;
+                if (mask != null)
+                {/*
+                if(mask.grabbedBy.Count == 0)
+                    mask.Grabbed(maskGrasp);*/
+                    BuffPlugin.Log("mask.grabbedBy is null: " + (mask.grabbedBy == null));
+                    BuffPlugin.Log("mask.grabbedBy[0]: " + (mask.grabbedBy[0].ToString()));
+                    //BuffPlugin.Log("mask.grabbedBy[0].grabber: " + mask.grabbedBy[0].grabber.ToString());
+                }
+            }
+        }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
@@ -296,11 +373,23 @@ namespace BuiltinBuffs.Duality
             }
         }
 
-        public bool HasMask => VultureShapedMutationBuffEntry.StackLayer >= 2;
+        public bool CanWearMask => VultureShapedMutationBuffEntry.StackLayer >= 2;
 
         public bool IsKing => VultureShapedMutationBuffEntry.StackLayer >= 3;
 
         public bool IsMiros => VultureShapedMutationBuffEntry.StackLayer >= 10;
+
+        #region 面具相关
+        private VultureMask mask;
+        private Creature.Grasp maskGrasp;
+        private float grabChunkCollisionRad;
+        private int wearCount;
+        private bool hasReleasePickButton;
+
+        public VultureMask Mask => mask;
+
+        public bool HasReleasePickButton => hasReleasePickButton;
+        #endregion
 
         #region 行为相关
         //飞行相关属性
@@ -594,6 +683,8 @@ namespace BuiltinBuffs.Duality
             wingFlapAmplitude = 1f;
             foldScaleWhenClimb = 0.5f;
             groundRetractionScale = 0.9f;
+            mask = null; 
+            hasReleasePickButton = false;
             if (player.playerState.isPup)
             {
                 wingLength = 3f;
@@ -661,7 +752,7 @@ namespace BuiltinBuffs.Duality
             if (sLeaser.sprites.Length >= 9)
                 for (int i = 5; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
-
+            //this.MaskUpdate(sLeaser, rCam, timeStacker, camPos);
             this.WingColorForSpecificSlugcat(sLeaser);
             this.darkness = rCam.room.Darkness(Vector2.Lerp(player.mainBodyChunk.lastPos, player.mainBodyChunk.pos, timeStacker));
             this.darkness *= 1f - 0.5f * rCam.room.LightSourceExposure(Vector2.Lerp(player.mainBodyChunk.lastPos, player.mainBodyChunk.pos, timeStacker));
@@ -1046,13 +1137,16 @@ namespace BuiltinBuffs.Duality
             if (!player.Consious) 
                 StopFlight();
 
-            if (player.grasps[0] != null && player.grasps[1] != null)
+            if (player.grasps[0] != null && player.grasps[1] != null && player.grasps[1].grabbed is VultureMask)
             {
                 player.ReleaseGrasp(1);
             }
 
+            //WearMaskUpdate();
+
             if ((player.grasps[0] != null && player.grasps[0].grabbed is VultureMask) ||
-                (player.grasps[1] != null && player.grasps[1].grabbed is VultureMask))
+                (player.grasps[1] != null && player.grasps[1].grabbed is VultureMask) ||
+                this.mask != null)
             {
                 this.State.mask = true;
             }
@@ -1106,7 +1200,10 @@ namespace BuiltinBuffs.Duality
             if (player.wantToJump > 0)
             {
                 if (isFlying)
+                {
                     StopFlight();
+                    preventFlight = 10;
+                }
                 else if (CanSustainFlight(player))
                     InitiateFlight(player);
             }
@@ -1169,9 +1266,14 @@ namespace BuiltinBuffs.Duality
 
         public void NewRoom(Room room)
         {
-            for (int i = 0; i < this.wings.GetLength(0); i++)
-                for (int j = 0; j < this.wings.GetLength(1); j++)
-                    this.wings[i, j].NewRoom(room);
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (this.wings != null)
+            {
+                for (int i = 0; i < this.wings.GetLength(0); i++)
+                    for (int j = 0; j < this.wings.GetLength(1); j++)
+                        this.wings[i, j].NewRoom(room);
+            }
             if (this.kingTusks != null)
             {
                 this.kingTusks.NewRoom(room);
@@ -1259,17 +1361,141 @@ namespace BuiltinBuffs.Duality
 
         public void Jump()
         {
-            for (int i = 0; i < this.wings.GetLength(0); i++)
+            if (this.wings != null)
             {
-                for (int j = 0; j < this.wings.GetLength(1); j++)
+                for (int i = 0; i < this.wings.GetLength(0); i++)
                 {
-                    if (this.wings[i, j].hasAnyGrip)
+                    for (int j = 0; j < this.wings.GetLength(1); j++)
                     {
-                        this.wings[i, j].ReleaseGrip();
+                        if (this.wings[i, j].hasAnyGrip)
+                        {
+                            this.wings[i, j].ReleaseGrip();
+                        }
                     }
                 }
             }
         }
+
+        #region 面具相关
+        public void WearMaskUpdate()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (!this.CanWearMask)
+            {
+                this.ReleaseGraspMask();
+                return;
+            }
+            if (player.input[0].pckp)
+                wearCount++;
+            else
+            {
+                wearCount = 0;
+                hasReleasePickButton = true;
+            }
+
+            if (wearCount == 40 && hasReleasePickButton)
+            {
+                //戴上面具
+                if (this.mask == null && FindMaskInHands(player) != -1)
+                {
+                    int hand = FindMaskInHands(player);
+                    wearCount = 0;
+                    hasReleasePickButton = false;
+                    this.mask = player.grasps[hand].grabbed as VultureMask;
+                    player.ReleaseGrasp(hand);
+                    maskGrasp = new Creature.Grasp(player, mask, player.grasps.Length - 1, 0, Creature.Grasp.Shareability.CanNotShare, 1f, false);
+                    mask.Grabbed(maskGrasp);
+                    grabChunkCollisionRad = maskGrasp.grabbed.collisionRange;
+                    mask.collisionRange = -200f;
+                    new AbstractPhysicalObject.CreatureGripStick(player.abstractCreature, mask.abstractPhysicalObject, 0, mask.TotalMass < player.TotalMass);
+                    player.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, player.mainBodyChunk);
+                    BuffPlugin.Log("Player wear mask on face!");
+                }
+                //取下面具
+                else if (this.mask != null)
+                {
+                    wearCount = 0;
+                    hasReleasePickButton = false;
+                    this.mask = null;
+                    this.ReleaseGraspMask();
+                    player.room.PlaySound(SoundID.Slugcat_Step_A, player.mainBodyChunk);
+                }
+            }
+            if (mask != null)
+            {/*
+                if(mask.grabbedBy.Count == 0)
+                    mask.Grabbed(maskGrasp);*/
+                BuffPlugin.Log("mask.grabbedBy is null: " + (mask.grabbedBy == null)); 
+                BuffPlugin.Log("mask.grabbedBy.Count: " + (mask.grabbedBy.Count));
+                BuffPlugin.Log("maskGrasp.grabber.grasps[player.grasps.Length - 1] = null: " + (maskGrasp.grabber.grasps[player.grasps.Length - 1] = null));
+                //BuffPlugin.Log("mask.grabbedBy[0].grabber: " + mask.grabbedBy[0].grabber.ToString());
+            }
+            /*
+            if (this.mask != null && player.room != null && player.graphicsModule != null)
+            {
+                foreach (var sLeaser in player.room.game.cameras[0].spriteLeasers)
+                {
+                    if (sLeaser.drawableObject == player.graphicsModule)
+                    {
+                        mask.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition() + player.room.game.cameras[0].CamPos(player.room.game.cameras[0].currentCameraPosition));
+                        mask.firstChunk.vel *= 0f;
+                    }
+                }
+            }
+            */
+        }
+
+        public void MaskUpdate(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (!this.CanWearMask)
+            {
+                this.ReleaseGraspMask();
+                return;
+            }
+            if (mask != null)
+            {
+                mask.lastDonned = 1f;
+                mask.donned = 1f;/*
+                mask.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition() + camPos);
+                mask.firstChunk.vel *= 0f;*/
+            }
+        }
+
+        public void ReleaseGraspMask()
+        {
+            try
+            {
+                if (maskGrasp != null)
+                    maskGrasp.grabbed.collisionRange = grabChunkCollisionRad;
+                grabChunkCollisionRad = -1f;
+                maskGrasp?.Release();
+                maskGrasp = null;
+                mask = null;
+                BuffPlugin.Log("Player remove mask on face!");
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+            }
+
+        }
+
+        public int FindMaskInHands(Player player)
+        {
+            int hand = -1;
+            for(int i = 0; i < player.grasps.Length; i++)
+            {
+                if (player.grasps[i] != null && player.grasps[i].grabbed is VultureMask)
+                {
+                    return i;
+                }
+            }
+            return hand;
+        }
+        #endregion
 
         public bool isLaserActive()
         {
@@ -1348,7 +1574,7 @@ namespace BuiltinBuffs.Duality
         }
         
         //只能一次叼一个东西
-        public Player.ObjectGrabability Grabability(Player.ObjectGrabability result)
+        public Player.ObjectGrabability Grabability(Player.ObjectGrabability result, PhysicalObject obj)
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return result;
@@ -1358,8 +1584,11 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.BigOneHand)
                 result = Player.ObjectGrabability.BigOneHand;
             else if (result == Player.ObjectGrabability.TwoHands)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
             else if (result == Player.ObjectGrabability.Drag)
+                result = Player.ObjectGrabability.Drag;
+
+            if (obj == this.mask)
                 result = Player.ObjectGrabability.CantGrab;
 
             return result;

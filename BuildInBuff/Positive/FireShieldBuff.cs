@@ -18,7 +18,7 @@ using RandomBuffUtils.ParticleSystem;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class FireShieldBuff : Buff<FireShieldBuff, FireShieldBuffData>
+    internal class FireShieldBuff : IgnitionPointBaseBuff<FireShieldBuff, FireShieldBuffData>
     {
         public override BuffID ID => FireShieldBuffEntry.FireShield;
 
@@ -35,11 +35,6 @@ namespace BuiltinBuffs.Positive
                 }
             }
         }
-
-        public void FireShieldCheck()
-        {
-            GetTemporaryBuffPool().CreateTemporaryBuff(IgnitionPointBuffEntry.ignitionPointBuffID);
-        }
     }
 
     internal class FireShieldBuffData : BuffData
@@ -51,7 +46,6 @@ namespace BuiltinBuffs.Positive
     {
         public static BuffID FireShield = new BuffID("FireShield", true);
         public static ConditionalWeakTable<Player, FireShield> FireShieldFeatures = new ConditionalWeakTable<Player, FireShield>();
-        private static bool isChecked = false;
 
         public static int StackLayer
         {
@@ -100,9 +94,6 @@ namespace BuiltinBuffs.Positive
 
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
-            if (!isChecked)
-                FireShieldBuff.Instance.FireShieldCheck();
-
             //if (Input.GetKeyDown(KeyCode.M))
             //{
             //    FireShield.GetBuffData().Stack();
@@ -135,7 +126,8 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return owner.mainBodyChunk.submersion <= 0.5;
+                return owner.mainBodyChunk.submersion <= 0.5 ||
+                       FireShieldBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HellIBuffEntry.hellBuffID);
             }
         }
 

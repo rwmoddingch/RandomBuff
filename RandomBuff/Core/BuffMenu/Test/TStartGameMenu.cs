@@ -20,9 +20,9 @@ namespace RandomBuff.Core.BuffMenu.Test
     ////T开头均为测试用
     //internal class TStartGameMenu : Menu.Menu, CheckBox.IOwnCheckBox
     //{
-    //    public static ProcessManager.ProcessID TestStartGameMenu = new("TestStartGameMenu", true);
+    //    public static ProcessManager.ProcessID BuffGameMenu = new("BuffGameMenu", true);
 
-    //    public TStartGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, TestStartGameMenu)
+    //    public TStartGameMenu(ProcessManager manager, ProcessManager.ProcessID ID) : base(manager, BuffGameMenu)
     //    {
     //        callBack = new (OnDataLoaded);
     //        if (manager.rainWorld.options.saveSlot < 100)

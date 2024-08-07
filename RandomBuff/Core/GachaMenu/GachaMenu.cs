@@ -16,19 +16,26 @@ namespace RandomBuff.Core.GachaMenu
 {
     internal class GachaMenu : Menu.Menu
     {
-        public static ProcessManager.ProcessID GachaMenuID = new ("GachaMenu", true);
-
         private List<BuffID> picked = new ();
-        BuffSlotTitle slotTitle;
 
-        public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, GachaMenuID)
+        BuffSlotTitle slotTitle;
+        RainEffect rainEffect;
+
+        public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, BuffEnums.ProcessID.GachaMenuID)
         {
             pages.Add(new Menu.Page(this, null, "GachaMenu", 0));
+
+            rainEffect = new RainEffect(this, pages[0]);
+            pages[0].subObjects.Add(rainEffect);
+
             pages[0].subObjects.Add(exitButton = new SimpleButton(this, pages[0], "Exit", "ExitButton", 
                 new Vector2(ContinueAndExitButtonsXPos - 320f - manager.rainWorld.options.SafeScreenOffset.x, 50f), new Vector2(100f, 30f)));
             this.lastID = lastID;
             this.game = game;
+            pages[0].selectables.Remove(exitButton);
             inGameSlot = new BasicInGameBuffCardSlot();
+            InputAgency.Current.TakeFocus(inGameSlot.BaseInteractionManager);
+
             foreach(var id in BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter))
                 inGameSlot.AppendCard(id);
             container.AddChild(inGameSlot.Container);
@@ -38,18 +45,16 @@ namespace RandomBuff.Core.GachaMenu
             currentPacket = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket;
             if(currentPacket.positive.pickTimes == 0)
                 positive = false;
+
+            AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>
+            {
+                rainEffect.rainFade = Custom.SCurve(t.Get(), 0.8f) * 0.3f;
+            });
+
             NewPicker();
         }
 
-        public override void Singal(MenuObject sender, string message)
-        {
-            base.Singal(sender, message);
-            if(message == "ExitButton" && exitCounter >= 0)
-            {
-                manager.RequestMainProcessSwitch(lastID);
-                ShutDownProcess();
-            }
-        }
+
 
         public void Select(BuffID id)
         {
@@ -73,11 +78,13 @@ namespace RandomBuff.Core.GachaMenu
                     if (currentPacket.negative.pickTimes != 0)
                     {
                         selectCount = 0;
+                        pages[0].selectables.Add(exitButton);
                         needNew = true;
                     }
                     else
                     {
                         exitCounter = 0;
+                        pages[0].selectables.Add(exitButton);
                         return;
                     }
                 }
@@ -90,6 +97,7 @@ namespace RandomBuff.Core.GachaMenu
                     if (currentPacket.negative.pickTimes == 0)
                     {
                         exitCounter = 0;
+                        pages[0].selectables.Add(exitButton);
                         return;
                     }
                     needNew = true;
@@ -110,7 +118,7 @@ namespace RandomBuff.Core.GachaMenu
                     BuffType.Positive);
 
                 var negativeCardsList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
-                    BuffType.Negative, BuffType.Duality);
+                    BuffType.Negative);
 
                 //卡牌库存不足
                 if (positiveCards == null || negativeCardsList == null)
@@ -122,9 +130,11 @@ namespace RandomBuff.Core.GachaMenu
                 }
 
                 var negativeCards = negativeCardsList.Select(i => i.BuffID).ToArray();
+                
 
                 for (int i=0;i< positiveCards.Count;i++)
                     negativeCards[i] = positiveCards[i].BuffProperty == BuffProperty.Special ? negativeCards[i] : null;
+
 
                 pickerSlot = new CardPickerSlot(inGameSlot, Select,
                     positiveCards.Select(i => i.BuffID).ToArray(),
@@ -134,12 +144,13 @@ namespace RandomBuff.Core.GachaMenu
             else
             {
                 var pickList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.negative.showCount,
-                    BuffType.Negative, BuffType.Duality);
+                    BuffType.Negative);
 
                 //卡牌库存不足
                 if (pickList == null)
                 {
                     exitCounter = 0;
+                    pages[0].selectables.Add(exitButton);
                     return;
                 }
 
@@ -149,6 +160,8 @@ namespace RandomBuff.Core.GachaMenu
             }
             pickerSlots.Add(pickerSlot);
             container.AddChild(pickerSlot.Container);
+            if (pickerSlots.Count >= 2)
+                pickerSlot.Container.MoveBehindOtherNode(pickerSlots[pickerSlots.Count-1].Container); 
             inGameSlot.Container.MoveToFront();
         }
 
@@ -157,6 +170,7 @@ namespace RandomBuff.Core.GachaMenu
         public override void ShutDownProcess()
         {
             base.ShutDownProcess();
+            InputAgency.AllRelease();
             if (manager.oldProcess != game)
             {
                 var all = BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter);
@@ -167,6 +181,20 @@ namespace RandomBuff.Core.GachaMenu
                 BuffFile.Instance.SaveFile();
                 manager.oldProcess = game;
             }
+            foreach(var pick in pickerSlots.Where(i => i != null))
+                pick.Destory();
+            inGameSlot.Destory();
+            slotTitle.Destroy();
+        }
+
+        public override void Singal(MenuObject sender, string message)
+        {
+            base.Singal(sender, message);
+            if (message == "ExitButton" && exitCounter >= 0)
+            {
+                manager.RequestMainProcessSwitch(lastID);
+                ShutDownProcess();
+            }
         }
 
         public override void Update()
@@ -176,10 +204,10 @@ namespace RandomBuff.Core.GachaMenu
                 pickerSlots[i]?.Update();
             inGameSlot?.Update();
             slotTitle.Update();
-
+            exitButton.inactive = exitCounter <= 0;
             if (exitCounter != -1)
                 exitCounter++;
-
+            InputAgency.StaticUpdate();
         }
 
 
@@ -193,8 +221,7 @@ namespace RandomBuff.Core.GachaMenu
 
             //一个很笨的淡入
             if (exitCounter < 40)
-                exitButton.roundedRect.borderColor = exitButton.labelColor =
-                    new HSLColor(0, 0, Custom.LerpMap(exitCounter + timeStacker, 0, 40, 0, 1f, 0.75f));
+                exitButton.black = Custom.LerpMap(exitCounter + timeStacker, 0, 40, 1, 0f, 0.75f);
         }
 
 

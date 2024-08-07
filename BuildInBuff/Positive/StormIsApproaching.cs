@@ -97,9 +97,20 @@ namespace BuiltinBuffs.Positive
     {
         public override BuffID ID => StormIsApproachingEntry.StormIsApproaching;
 
-        private bool hasUse = false;
 
-        public override bool Triggerable => !hasUse;
+        public StormIsApproachingBuff()
+        {
+            MyTimer = new DownCountBuffTimer((timer, game) =>
+            {
+                canTrigger = true;
+
+            }, 240, autoReset: false);
+            MyTimer.Paused = true;
+        }
+
+        public override bool Triggerable => canTrigger;
+
+        private bool canTrigger = true;
 
         public override bool Trigger(RainWorldGame game)
         {
@@ -110,11 +121,11 @@ namespace BuiltinBuffs.Positive
                 player = game.Players.FirstOrDefault(i => i.realizedCreature is Player && i.realizedCreature.room != null)?.realizedCreature as Player;
             if (player == null)
                 return false;
-
-            hasUse = true;
+            canTrigger = false;
 
             player.room.AddObject(new JudgmentCut(player.room, player));
-
+            MyTimer.Reset();
+            MyTimer.Paused = false;
             return false;
         }
     }
@@ -283,7 +294,7 @@ namespace BuiltinBuffs.Positive
             dir = new Vector2(player.flipDirection, 0);
             if (player.bodyMode == Player.BodyModeIndex.ZeroG)
                 dir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
-            emitter = new JudgmentGhostPeriodicEmitter(player, room, 8, 1, 20, 0.4f);
+            emitter = new JudgmentGhostPeriodicEmitter(player, room, 8, 1, 20, 0.4f); 
             room.AddObject(emitter);
     
         }
@@ -298,7 +309,8 @@ namespace BuiltinBuffs.Positive
                 room.AddObject(new LightningBolt(origPos - dir*15, player.DangerPos + dir *20, 
                     0, 2, 0.75f, 0.5f, 200f / 360f, true)
                 { intensity = 1f });
-                player.SuperHardSetPosition(new Vector2(100, 100000));
+                player.SuperHardSetPosition(origPos);
+
                 emitter.Destroy();
                 Destroy();
 
@@ -537,8 +549,8 @@ namespace BuiltinBuffs.Positive
             endPos = player.bodyChunks[1].pos;
             room.AddObject(new JudgmentCutStartFlash(room, pos));
             room.AddObject(new JudgmentCutMoveTrail(room, player));
-            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound1, 0, 0.9f, 1);
-            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound2, 0, 0.9f, 1);
+            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound1, 0, 0.1f, 1);
+            room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.StartSound2, 0, 0.1f, 1);
 
         }
         private int delay = 2;
@@ -591,12 +603,12 @@ namespace BuiltinBuffs.Positive
             else if (counter == 8 + delay)
             {
                 BuffPostEffectManager.AddEffect(new SingleColorEffect(1, duringTime, 0.5f, 0.5f,
-                    Custom.hexToColor("070B0C"), Custom.hexToColor("E3F4FF"), 1f));
+                    Custom.hexToColor("070B0C"), Custom.hexToColor("E3F4FF"), 1f){IgnorePaused = true});
                 room.game.paused = true;
 
             }
             else if (counter == 8 + delay + cut)
-                BuffPostEffectManager.AddEffect(new CutEffect(0, duringTime - cut / 40f,0.3f,0.03f));
+                BuffPostEffectManager.AddEffect(new CutEffect(0, duringTime - cut / 40f,0.3f,0.03f) { IgnoreGameSpeed = true, IgnorePaused = true });
             else if (counter == 8 + delay + cut + 10)
             {
                 player.SuperHardSetPosition(pos);
@@ -611,8 +623,8 @@ namespace BuiltinBuffs.Positive
                     (pos - room.game.cameras[0].pos) / Custom.rainWorld.screenSize, 0.1f));
                 BuffPostEffectManager.AddEffect(new HueEffect(2, 0.3f, 0.001f, 0.2f, 1f, 0.2f));
                 room.game.cameras[0].ScreenMovement(pos,Custom.RNV()*40,30);
-                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound1, 0, 0.9f, 1);
-                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 0, 0.9f, 1);
+                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound1, 0, 0.1f, 1);
+                room.game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 0, 0.1f, 1);
 
 
             }

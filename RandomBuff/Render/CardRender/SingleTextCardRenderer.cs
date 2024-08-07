@@ -1,5 +1,5 @@
 ﻿using RandomBuff.Core.Buff;
-using RandomBuff.Render.UI.Component;
+using RandomBuff.Render.UI.ExceptionTracker;
 using RWCustom;
 using System;
 using System.Collections.Generic;

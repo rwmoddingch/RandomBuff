@@ -169,9 +169,9 @@ namespace RandomBuff.Cardpedia.PediaPage
             string title;
             var language = Custom.rainWorld.inGameTranslator.currentLanguage;
 
-            if (card.ID.GetBuffData() != null)
-            {
-                var data = card.ID.GetBuffData();
+            var data = BuffDataManager.Instance.GetOrCreateBuffData(card.ID, true);
+            if (data != null)
+            {                
                 if (data is CountableBuffData)
                 {
                     life = (data as CountableBuffData).MaxCycleCount.ToString() + BuffResourceString.Get("CardSheetPage_Life_Countable");

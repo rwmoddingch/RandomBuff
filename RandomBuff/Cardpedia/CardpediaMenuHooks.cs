@@ -1,17 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using Menu;
 using RWCustom;
-using Menu;
+using UnityEngine;
 
 namespace RandomBuff.Cardpedia
 {
+    internal class IconButton : SimpleButton
+    {
+        public IconButton(Menu.Menu menu, MenuObject owner, string spriteName, string singalText, Vector2 pos, Vector2 size, float sizeFac = 0.5f) : base(menu, owner, "", singalText, pos, size)
+        {
+            Container.AddChild(icon = new FSprite(spriteName)
+            {
+                x = pos.x + size.x * (1 - sizeFac) * 0.5f, 
+                y = pos.y + size.y * (1 - sizeFac) * 0.5f,
+                width = size.x * sizeFac, 
+                height = size.y * sizeFac, 
+                anchorY = 0, 
+                anchorX = 0
+            });
+            this.sizeFac = sizeFac;
+        }
+
+
+        public override void RemoveSprites()
+        {
+            base.RemoveSprites();
+            icon.RemoveFromContainer();
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+            icon.SetPosition(DrawPos(timeStacker) + size* (1 - sizeFac) * 0.5f);
+            icon.color = MyColor(timeStacker);
+        }
+
+        private readonly FSprite icon;
+        private readonly float sizeFac;
+    }
+
+
     public static class CardpediaMenuHooks
     {
-        private static MainMenu menu;
+        public static MainMenu menu;
         public static Shader InvertColor;
         public static Shader SquareBlinking;
         public static Shader UIBlur;
@@ -25,22 +55,7 @@ namespace RandomBuff.Cardpedia
         public static Shader FateRain;
         public static Texture2D RBNoiseTex;
 
-        public static void Hook()
-        {
-            On.Menu.MainMenu.ctor += MainMenu_ctor;
-        }
-
-        private static void MainMenu_ctor(On.Menu.MainMenu.orig_ctor orig, MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
-        {
-            orig(self, manager, showRegionSpecificBkg);
-            float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
-            Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
-            Vector2 size = new Vector2(buttonWidth, 30f);
-            SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
-            menu = self;
-            self.AddMainMenuButton(collectionButton, new Action(CollectionButtonPressed), 0);
-        }
-
+ 
         public static void CollectionButtonPressed()
         {
             if (menu != null)
@@ -84,6 +99,7 @@ namespace RandomBuff.Cardpedia
             //Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Main");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_Cards");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/SlugLoading_UI");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/RandomBuff_Cardpedia");
 
             Futile.atlasManager.LoadImage("buffassets/missionicons/missionicon_general");
             string path = AssetManager.ResolveFilePath("buffassets/assetbundles/shadertest");           

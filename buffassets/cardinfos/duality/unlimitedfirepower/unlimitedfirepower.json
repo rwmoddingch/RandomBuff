@@ -5,7 +5,8 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "ffbe4d",
-    
+    "Tag" : ["ScavengerBomb Variant"],
+    "Conflict":["ScavengerBomb Variant"],
     "Chinese" : {
         "BuffName" : "无限火力",
         "Description" : "炸弹、炸矛、鞭炮草爆炸后不会消耗"
