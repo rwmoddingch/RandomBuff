@@ -156,7 +156,7 @@ namespace RandomBuff.Core.Option
 
             AppendItems(tab, ref yIndex,
                 new OpLabel(Vector2.zero, Vector2.zero, "Version 1.0.0", FLabelAlignment.Left){color = color.Value},
-                new OpLabel(Vector2.zero, Vector2.zero, "By: RWModdingCH", FLabelAlignment.Right) { color = color.Value });
+                new OpLabel(Vector2.zero, Vector2.zero, "by: Team Nowhere", FLabelAlignment.Right) { color = color.Value });
             return tab;
         }
 
