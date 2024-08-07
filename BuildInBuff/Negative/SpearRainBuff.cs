@@ -91,7 +91,6 @@ namespace BuiltinBuffs.Negative
         {
             this.room = room;
             this.roomRain = roomRain;
-            room.world.rainCycle.cycleLength = 40 * 10;
 
             AbstractSpear abSpear = new AbstractSpear(room.world, null, room.GetWorldCoordinate(new Vector2(0, 0)), room.game.GetNewID(), false);
             abSpear.RealizeInRoom();
@@ -118,6 +117,7 @@ namespace BuiltinBuffs.Negative
                 if (linq.Count() > 0)
                 {
                     var sprite = linq.First().sprites[0];
+                    getSpriteSpear.ApplyPalette(linq.First(), room.game.cameras[0], room.game.cameras[0].currentPalette);
                     spearElement = sprite.element.name;
                     spearColor = sprite.color;
                     getSpriteSpear.Destroy();
