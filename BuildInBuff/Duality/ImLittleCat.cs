@@ -28,18 +28,20 @@ namespace TemplateGains
     {
         public override void Destroy()
         {
-            if(BuffCustom.TryGetGame(out var game)&&game!=null)
+            if (BuffCustom.TryGetGame(out var game))
             {
                 foreach (var absPlayer in game.Players)
                 {
-                    Player player = absPlayer.realizedCreature as Player;
-                    if (player!=null &&player.littleCat().changed)
+                    if (absPlayer.realizedCreature != null)
                     {
-                        player.setPupStatus(false);
-                        player.playerState.isPup = false;
-                        player.littleCat().changed = false;
+                        Player player = absPlayer.realizedCreature as Player;
+                        if (player != null && player.littleCat().changed)
+                        {
+                            player.setPupStatus(false);
+                            player.playerState.isPup = false;
+                            player.littleCat().changed = false;
+                        }
                     }
-
                 }
             }
             base.Destroy();
@@ -70,7 +72,7 @@ namespace TemplateGains
             if (!self.playerState.isPup)
             {
                 self.setPupStatus(true);
-                self.littleCat().changed= true;
+                self.littleCat().changed = true;
                 self.playerState.isPup = true;
             }
         }

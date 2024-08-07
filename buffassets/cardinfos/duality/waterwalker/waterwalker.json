@@ -1,0 +1,13 @@
+{
+  "FaceName": "waterwalker",
+  "ID": "waterwalkerID",
+  "BuffType": "Duality",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "#007acc",
+  "Chinese": {
+    "BuffName": "水上行走",
+    "Description": "可以在水上行走,只是行走不是站立"
+  }
+}
