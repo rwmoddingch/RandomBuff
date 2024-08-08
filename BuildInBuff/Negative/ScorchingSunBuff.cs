@@ -205,7 +205,7 @@ namespace BuiltinBuffs.Negative
                 }
                 if (effect == null)
                 {
-                    effect = new ScorchingSunSingleColorEffect(1, -1f, 1f, 1f, Custom.hexToColor("000000"), Custom.hexToColor("FF0000"), 0.1f * num, self.room);
+                    effect = new ScorchingSunSingleColorEffect(1, -1f, 1f, 1f, Custom.hexToColor("000000"), Custom.hexToColor("E3AB4E"), 0.1f * num, self.room);
                     BuffPostEffectManager.AddEffect(effect);
                 }
 

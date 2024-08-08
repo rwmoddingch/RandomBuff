@@ -177,6 +177,9 @@ namespace BuiltinBuffs.Expeditions
 
             foreach (var group in ExpeditionProgression.perkGroups)
             {
+                if (!BuffOptionInterface.Instance.EnableExpeditionModExtend.Value && group.Key != "expedition" &&
+                    group.Key != "moreslugcats")
+                    continue;
                 foreach (var item in group.Value)
                 {
                     if (IsUselessID(item)) continue;
@@ -208,6 +211,9 @@ namespace BuiltinBuffs.Expeditions
             }
             foreach (var group in ExpeditionProgression.burdenGroups)
             {
+                if (!BuffOptionInterface.Instance.EnableExpeditionModExtend.Value && group.Key != "expedition" &&
+                    group.Key != "moreslugcats")
+                    continue;
                 foreach (var item in group.Value)
                 {
                     if (IsUselessID(item)) continue;
