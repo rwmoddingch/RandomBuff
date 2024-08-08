@@ -18,6 +18,7 @@ using RandomBuff.Core.ProgressionUI;
 using RandomBuff.Render.UI.Notification;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
+using RandomBuff.Core.Progression.Record;
 
 namespace RandomBuff.Core.StaticsScreen
 {
@@ -104,9 +105,10 @@ namespace RandomBuff.Core.StaticsScreen
             
             //winPackage
             var winPackage = BuffPoolManager.Instance.winGamePackage;
+            var record = winPackage.buffRecord as InGameTimerRecord;
             BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}");
             var str = "[RECORD]: ";
-            foreach (var item in winPackage.buffRecord.GetValueDictionary())
+            foreach (var item in record.GetValueDictionary())
                 str += $"{{{item.Key},{item.Value}}},";
 
             BuffPlugin.Log(str);
@@ -117,7 +119,7 @@ namespace RandomBuff.Core.StaticsScreen
             recordBoxShowPos = recordBoxHidePos + new Vector2(-40 - recordSize.x, 0);
             recordBox = new OpScrollBox(new Vector2(screenSize.x + 10, screenSize.y - recordSize.y - 100f), recordSize, 100f, false, false, false);
             new UIelementWrapper(wrapper, recordBox);
-            BuffProgressionPage.CreateElementsForRecordPage(recordBox, recordSize, winPackage.buffRecord);
+            BuffProgressionPage.CreateElementsForRecordPage(recordBox, recordSize, record);
 
 
             pages[0].subObjects.Add(scoreCaculator = new BuffGameScoreCaculator(this, pages[0], new Vector2(middleX - width / 2f, 200f), winPackage, width));
@@ -146,7 +148,7 @@ namespace RandomBuff.Core.StaticsScreen
         {
             if (message == "CONTINUE")
             {
-                if(newFinishedQuests.Count == 0)
+                if(newFinishedQuests.Count == 0 && scoreCaculator.state == BuffGameScoreCaculator.ScoreCaculatorState.Finish)
                 {
                     this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu);
                     if (manager.musicPlayer != null)

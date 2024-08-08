@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
@@ -549,7 +550,13 @@ namespace RandomBuff.Core.Game
                 winGamePackage.winWithConditions.Add(condition);
 
             winGamePackage.sessionRecord = Game.GetStorySession.playerSessionRecords[0];
-            winGamePackage.buffRecord = GameSetting.inGameRecord;
+            winGamePackage.buffRecord = new InGameTimerRecord() { totTime = SpeedRunTimer.TimeFormat(SpeedRunTimer.GetCampaignTimeTracker(GameSetting.name).TotalFixedTimeSpan) };
+            winGamePackage.buffRecord.totCard +=  GameSetting.inGameRecord.totCard;
+            winGamePackage.buffRecord.totPositiveCard += GameSetting.inGameRecord.totPositiveCard;
+            winGamePackage.buffRecord.totDualityCard += GameSetting.inGameRecord.totDualityCard;
+            winGamePackage.buffRecord.totNegativeCard += GameSetting.inGameRecord.totNegativeCard;
+            winGamePackage.buffRecord.totTriggerCount += GameSetting.inGameRecord.totTriggerCount;
+
             if (ModManager.CoopAvailable)
             {
                 for (int i = 1; i < Game.GetStorySession.playerSessionRecords.Length; i++)
@@ -609,7 +616,7 @@ namespace RandomBuff.Core.Game
         public List<Condition> winWithConditions = new List<Condition>();
         public PlayerSessionRecord sessionRecord;
         public SaveState saveState;
-        public InGameRecord buffRecord;
+        public InGameTimerRecord buffRecord;
 
         public float expMultiply;
         public string missionId;

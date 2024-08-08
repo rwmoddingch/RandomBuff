@@ -96,4 +96,10 @@ namespace RandomBuff.Core.Progression.Record
             set => _ = value;
         }
     }
+
+    public class InGameTimerRecord : InGameRecord
+    {
+        [JsonProperty]
+        public string totTime;
+    }
 }
