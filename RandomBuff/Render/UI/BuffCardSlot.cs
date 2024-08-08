@@ -238,7 +238,9 @@ namespace RandomBuff.Render.UI
             {
               
                 BuffID id = Params[0] as BuffID;
-                var name = id.GetStaticData().CardInfos[InGameTranslator.LanguageID.English];
+                var name = id.GetStaticData().CardInfos.First().Value;
+                if (id.GetStaticData().CardInfos.TryGetValue(InGameTranslator.LanguageID.English, out var newName))
+                    name = newName;
                 if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out var newName))
                     name = newName;
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnMouseFocus");
@@ -258,8 +260,10 @@ namespace RandomBuff.Render.UI
 
                 if(BuffConfigManager.GetStaticData(id).Triggerable)
                 {
-                    var name = id.GetStaticData().CardInfos[InGameTranslator.LanguageID.English];
-                    if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage,out var newName))
+                    var name = id.GetStaticData().CardInfos.First().Value;
+                    if (id.GetStaticData().CardInfos.TryGetValue(InGameTranslator.LanguageID.English, out var newName))
+                        name = newName;
+                    if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage,out newName))
                         name = newName;
 
                     helpInfo += BuffResourceString.Get("BasicInGameBuffCardSlot_BindKey");
