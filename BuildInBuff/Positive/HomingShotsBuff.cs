@@ -133,7 +133,7 @@ namespace BuiltinBuffs.Positive
                                 if (target != null)
                                 {
                                     float dist = Custom.Dist(weapon.firstChunk.pos, target.firstChunk.pos);
-                                    float distPower = Custom.LerpMap(dist, 10f, 500f + 100f * StackLayer, 0f, 1f);/*
+                                    float distPower = Custom.LerpMap(dist, 10f, 500f + 100f * StackLayer, 1f, 0f);/*
                                     float distPower = 200f / (dist + 10f);
                                     weapon.firstChunk.vel *= Custom.LerpMap(weapon.firstChunk.vel.magnitude, 1f, 10f, 0.99f, 0.9f);
                                     weapon.firstChunk.vel += distPower * Vector2.ClampMagnitude(target.firstChunk.pos - weapon.firstChunk.pos, HomingSpeed) / HomingSpeed * 3f;*/
