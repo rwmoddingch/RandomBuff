@@ -64,7 +64,15 @@ namespace RandomBuff.Render.CardRender
         public bool Fade
         {
             get => _targetAlpha == 0f;
-            set => _targetAlpha = value ? 0f : 1f;
+            set
+            {
+                if(value != Fade)
+                {
+                    _targetAlpha = value ? 0f : 1f;
+                    if (_isTitle)
+                        _renderer.cardHighlightFrontController.DarkGradient = !value;
+                }
+            }
         }
 
         TMP_CharacterInfo[] origCharInfos;

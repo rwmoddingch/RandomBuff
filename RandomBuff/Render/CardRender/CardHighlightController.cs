@@ -34,6 +34,14 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
+        float _darkGradient;
+        float _targetDarkGradient;
+        internal bool DarkGradient
+        {
+            get => _targetDarkGradient == 1f;
+            set => _targetDarkGradient = value ? 1f : 0f;
+        }
+
         [SerializeField] float _targetEdgeHighLightStrength;
         [SerializeField] float _EdgeHighLightStrength;
         [SerializeField] float _EdgeHighLightTimeFactor;
@@ -58,9 +66,9 @@ namespace RandomBuff.Render.CardRender
         public void Init(BuffCardRendererBase buffCardRenderer, Texture texture, bool isFront)
         {
             _renderer = buffCardRenderer;
-            float widthFactor = texture.width / 300f;
+            //float widthFactor = texture.width / 300f;
             //BuffPlugin.Log($"{buffCardRenderer._buffStaticData.BuffID} width factor : {widthFactor}");
-            _MeshRenderer.material.SetFloat("_HighlighWidth", 30f * widthFactor);
+            _MeshRenderer.material.SetFloat("_HighlighWidth", 60f);
             _MeshRenderer.material.SetFloat("_HighlighExpose", 4f);
             _MeshRenderer.material.SetFloat("_EdgeHighLightStrength", 0f);
             _MeshRenderer.material.SetFloat("_EdgeHighLightStrength", _EdgeHighLightStrength);
@@ -124,6 +132,16 @@ namespace RandomBuff.Render.CardRender
                     _saturation = _targetSaturation;
 
                 _MeshRenderer.material.SetFloat("_Saturation", _saturation);
+                _renderer.cardCameraController.CardDirty = true;
+            }
+
+            if(_targetDarkGradient != _darkGradient)
+            {
+                _darkGradient = Mathf.Lerp(_darkGradient, _targetDarkGradient, 0.05f);
+                if (Mathf.Abs(_darkGradient - _targetDarkGradient) < 0.01f)
+                    _darkGradient = _targetDarkGradient;
+
+                _MeshRenderer.material.SetFloat("_DarkGradient", _darkGradient);
                 _renderer.cardCameraController.CardDirty = true;
             }
         }

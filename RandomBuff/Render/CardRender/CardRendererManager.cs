@@ -191,6 +191,7 @@ namespace RandomBuff.Render.CardRender
         /// </summary>
         public static Shader CardBasicShader { get; private set; }
 
+        public static Shader CardBasicTransprent { get; private set; }
         /// <summary>
         /// 卡牌标题的字体
         /// </summary>
@@ -334,9 +335,10 @@ namespace RandomBuff.Render.CardRender
                 BuffPlugin.Log($"Load asset from assetbundle : {asset.name}");
             }
 
-            CardHighlightShader = loadedShaders[1];
-            CardTextShader = loadedShaders[2];
+            CardHighlightShader = loadedShaders[2];
+            CardTextShader = loadedShaders[3];
             CardBasicShader = loadedShaders[0];
+            CardBasicTransprent = loadedShaders[1];
 
             //加载其他资源
             MoonBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/moonback").texture;

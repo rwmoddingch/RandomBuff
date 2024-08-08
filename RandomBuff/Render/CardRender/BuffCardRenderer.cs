@@ -135,7 +135,7 @@ namespace RandomBuff.Render.CardRender
             _meshFilterFront = _cardQuadFront.GetComponent<MeshFilter>();
             if(_cardQuadFront.TryGetComponent<Collider>(out var collider))
                 Destroy(collider);
-            
+
             //cardHighlightFrontController.Init(this, _cardTextureFront);
 
             _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -147,8 +147,8 @@ namespace RandomBuff.Render.CardRender
             _cardQuadBack.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
             cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
             cardHighlightBackController.Init(this, _cardTextureBack, false);
-            if (_cardQuadBack.TryGetComponent<Collider>(out var collider1))
-                Destroy(collider1);
+            if (_cardQuadBack.TryGetComponent<Collider>(out collider))
+                Destroy(collider);
             
 
             Depth = 8.5f;
@@ -198,83 +198,6 @@ namespace RandomBuff.Render.CardRender
             get => !cardTextBackController.Fade;
             set => cardTextBackController.Fade = !value;
         }
-
-        //public void Init(int id, BuffStaticData buffStaticData)
-        //{
-        //    try
-        //    {
-        //        _id = id;
-        //        _buffStaticData = buffStaticData;
-        //        _cardTextureFront = buffStaticData.GetFaceTexture();
-        //        _cardTextureBack = buffStaticData.GetBackTexture();
-
-        //        var info = _buffStaticData.GetCardInfo(Custom.rainWorld.inGameTranslator.currentLanguage);
-
-        //        if (!_notFirstInit)
-        //        {
-        //            cardCameraController = gameObject.AddComponent<CardCameraController>();
-        //            //初始化卡面和卡背
-        //            _cardQuadFront = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        //            _cardQuadFront.transform.parent = transform;
-        //            _cardQuadFront.transform.localScale = new Vector3(3f, 5f, 1f);
-        //            _cardQuadFront.name = $"BuffCardQuadFront_{id}";
-        //            _cardQuadFront.layer = 8;
-        //            _cardQuadFront.transform.localPosition = new Vector3(0, 0, 0);
-        //            _cardQuadFront.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
-        //            cardHighlightFrontController = _cardQuadFront.AddComponent<CardHighlightController>();
-        //            _meshFilterFront = _cardQuadFront.GetComponent<MeshFilter>();
-        //            //cardHighlightFrontController.Init(this, _cardTextureFront);
-
-        //            _cardQuadBack = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        //            _cardQuadBack.transform.parent = transform;
-        //            _cardQuadBack.transform.localScale = new Vector3(3f, 5f, 1f);
-        //            _cardQuadBack.name = $"BuffCardQuadBack_{id}";
-        //            _cardQuadBack.layer = 8;
-        //            _cardQuadBack.transform.localPosition = new Vector3(0, 0, 0);
-        //            _cardQuadBack.GetComponent<MeshRenderer>().material.shader = CardBasicAssets.CardHighlightShader;
-        //            cardHighlightBackController = _cardQuadBack.AddComponent<CardHighlightController>();
-        //            cardHighlightBackController.Init(this, _cardTextureBack);
-
-        //            Depth = 8.5f;
-        //            Rotation = Vector2.zero;
-
-        //            //初始化文本
-        //            cardTextFrontController = _cardQuadFront.AddComponent<CardTextController>();
-
-        //            cardTextBackController = _cardQuadBack.AddComponent<CardTextController>();
-
-        //            //初始化堆叠层数和轮回数显示
-        //            cardStackerTextController = gameObject.AddComponent<CardNumberTextController>();
-        //            cardCycleCounterTextController = gameObject.AddComponent<CardNumberTextController>();
-        //            cardKeyBinderTextController = gameObject.AddComponent<CardKeyBinderTextController>();
-
-        //            //初始化专有相机
-        //            cardCameraController.Init(id);
-
-        //            _notFirstInit = true;
-        //            BuffPlugin.Log($"New card renderer for {buffStaticData.BuffID}");
-        //        }
-        //        else
-        //        {
-        //            cardCameraController.CardDirty = true;
-        //        }
-
-
-        //        _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureFront;
-        //        _cardQuadBack.GetComponent<MeshRenderer>().material.mainTexture = _cardTextureBack;
-
-        //        cardHighlightFrontController.Init(this, _cardTextureFront);
-
-        //        BuffPlugin.Log($"_test : {_cardTextureBack}");
-
-        //        cardHighlightBackController.Init(this, _cardTextureBack);
-        //    }
-        //    catch(Exception e)
-        //    {
-        //        BuffPlugin.LogError($"Exception in buffcard init : {_buffStaticData.BuffID}");
-        //        BuffPlugin.LogException(e);
-        //    }
-        //}
 
         GameObject obj;
         protected override void FirstInit(int id, BuffStaticData buffStaticData)
