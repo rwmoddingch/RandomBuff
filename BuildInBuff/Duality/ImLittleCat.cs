@@ -7,11 +7,45 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff;
 using RandomBuffUtils;
+using BuildInBuff.Positive;
+using System.Runtime.CompilerServices;
 
 namespace TemplateGains
 {
+    public class LittleCatData
+    {
+        public bool changed = false;
+    }
+    public static class LittleCat
+    {
+        private static readonly ConditionalWeakTable<Player, LittleCatData> modules = new ConditionalWeakTable<Player, LittleCatData>();
+        public static LittleCatData littleCat(this Player player)
+        {
+            return modules.GetValue(player, (Player p) => new LittleCatData());
+        }
+    }
     class ImLittleCatBuff : Buff<ImLittleCatBuff, ImLittleCatBuffData>
     {
+        public override void Destroy()
+        {
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                foreach (var absPlayer in game.Players)
+                {
+                    if (absPlayer.realizedCreature != null)
+                    {
+                        Player player = absPlayer.realizedCreature as Player;
+                        if (player != null && player.littleCat().changed)
+                        {
+                            player.setPupStatus(false);
+                            player.playerState.isPup = false;
+                            player.littleCat().changed = false;
+                        }
+                    }
+                }
+            }
+            base.Destroy();
+        }
         public override BuffID ID => ImLittleCatBuffEntry.ImLittleCatID;
     }
     class ImLittleCatBuffData : BuffData
@@ -21,6 +55,7 @@ namespace TemplateGains
     class ImLittleCatBuffEntry : IBuffEntry
     {
         public static BuffID ImLittleCatID = new BuffID("ImLittleCatID", true);
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<ImLittleCatBuff, ImLittleCatBuffData, ImLittleCatBuffEntry>(ImLittleCatID);
@@ -37,6 +72,7 @@ namespace TemplateGains
             if (!self.playerState.isPup)
             {
                 self.setPupStatus(true);
+                self.littleCat().changed = true;
                 self.playerState.isPup = true;
             }
         }
@@ -45,6 +81,7 @@ namespace TemplateGains
         {
             orig.Invoke(self, abstractCreature, world);
             self.setPupStatus(true);
+            self.littleCat().changed = true;
             self.playerState.isPup = true;
         }
     }

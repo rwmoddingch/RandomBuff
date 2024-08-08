@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿#define TESTVERSION
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Security;
 using System.Security.Permissions;
-using System.Security.Policy;
 using BepInEx;
 using RandomBuff.Cardpedia;
 using BepInEx.Logging;
-using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
-using RandomBuff.Core.Game;
-using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Hooks;
@@ -22,27 +17,24 @@ using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuff.Render.CardRender;
 using RandomBuffUtils;
-using RWCustom;
 using UnityEngine;
-using UDebug = UnityEngine.Debug;
-using Random = UnityEngine.Random;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.CosmeticUnlocks;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Render.UI.Component;
-using RandomBuffUtils.FutileExtend;
 using RandomBuff.Render.Quest;
-using System.Drawing;
 using Kittehface.Framework20;
 using RandomBuff.Core.Option;
 using Steamworks;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.ExceptionTracker;
 
+
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 #pragma warning restore CS0618
+
 
 //添加友元方便调试
 [assembly: InternalsVisibleTo("BuiltinBuffs")]
@@ -105,9 +97,6 @@ namespace RandomBuff
             {
                 if (!isLoaded)
                 {
-                    if(File.Exists(AssetManager.ResolveFilePath("randombuff.log")))
-                        File.Delete("randombuff.log");
-                     
                     File.Create(AssetManager.ResolveFilePath("buffcore.log")).Close();
                 }
             }
@@ -138,12 +127,15 @@ namespace RandomBuff
                 {
                     Log($"[Random Buff], version: {saveVersion}, {System.DateTime.Now}");
 
+#if TESTVERSION
+                    
                     if (File.Exists(AssetManager.ResolveFilePath("buff.dev")))
                     {
                         DevEnabled = true;
                         LogWarning("Debug Enable");
                     }
 
+#endif
 
                     Application.logMessageReceived += Application_logMessageReceived;
 
@@ -168,14 +160,6 @@ namespace RandomBuff
 
                     BuffUtils.OnEnable();
 
-                    //TODO : 测试用
-                    for(int i =0;i < 15; i++)
-                    {
-                        int exp = BuffPlayerData.Level2Exp(i);
-                        int l = BuffPlayerData.Exp2Level(exp);
-                        BuffPlugin.Log($"{i} - {exp} - {l}");
-                    }
-                    //DevEnabled = true;
 
                     CardpediaMenuHooks.LoadAsset();
                     SoapBubblePool.Hook();
@@ -231,8 +215,9 @@ namespace RandomBuff
                     BuffConfigManager.InitQuestData();
 
                     BuffRegister.BuildAllDataStaticWarpper();
-                    /****************************************/
 
+
+#if TESTVERSION
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {
                         orig();
@@ -240,7 +225,7 @@ namespace RandomBuff
                         if (devVersion == null && !File.Exists(AssetManager.ResolveFilePath("disableDevMark.txt")))
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
-                                $"Random Buff, Build: 2024_08_06_2\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                $"Random Buff, Build: 2024_08_07\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
                                 new Vector2(1000, 200), 0.4f)
                             {
                                 Alignment = TMPro.TextAlignmentOptions.BottomLeft,
@@ -268,7 +253,7 @@ namespace RandomBuff
                         }
                     }
 
-                    /****************************************/
+#endif
                     isPostLoaded = true;
                 }
             }
