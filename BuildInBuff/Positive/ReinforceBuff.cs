@@ -18,7 +18,7 @@ namespace BuiltinBuffs.Positive
         public override BuffID ID => ReinforceBuffEntry.reinforceBuffID;
         //static int maxGrasp = 10;
 
-        public override bool Triggerable => Active || true;
+        public override bool Triggerable => Active;
         public override bool Active => !TriggeredThisCycle && ReachChieftain && RoomMeetRequirements;
 
         public bool TriggeredThisCycle { get; private set; }
