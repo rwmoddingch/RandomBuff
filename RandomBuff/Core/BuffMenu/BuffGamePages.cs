@@ -356,10 +356,10 @@ namespace RandomBuff.Core.BuffMenu
                 subObjects.Add(hiddenToggles[i]);
             }
 
-            randomButton = new SymbolButton(menu, this, "Sandbox_Randomize", "NEWGAME_DETAIL_RANDOM", new Vector2(430f, 250f));
-            randomButton.size = new Vector2(40f, 40f);
-            randomButton.roundedRect.size = randomButton.size;
-            subObjects.Add(randomButton);
+            //randomButton = new SymbolButton(menu, this, "Sandbox_Randomize", "NEWGAME_DETAIL_RANDOM", new Vector2(430f, 250f));
+            //randomButton.size = new Vector2(40f, 40f);
+            //randomButton.roundedRect.size = randomButton.size;
+            //subObjects.Add(randomButton);
             minusButton = new SymbolButton(menu, this, "minus", "NEWGAME_DETAIL_MINUS", new Vector2(900f, 250f));
             minusButton.size = new Vector2(40f, 40f);
             minusButton.roundedRect.size = minusButton.size;

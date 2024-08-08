@@ -70,6 +70,7 @@ namespace RandomBuffUtils
                         self.source.clip = AssetManager.SafeWWWAudioClip(
                             "file://" + AssetManager.ResolveFilePath(self.trackName.Replace("BUFF_", "")+end),
                             false, true, end == ".ogg" ? AudioType.OGGVORBIS : AudioType.WAV); 
+                        BuffUtils.Log(nameof(BuffScene),$"Load buff music at {self.trackName.Replace("BUFF_", "") + end}");
                     }
                 }
             }
@@ -82,13 +83,6 @@ namespace RandomBuffUtils
             catch
             {
                 BuffUtils.LogError(nameof(BuffScene),$"Null at {self.trackName}");
-                Custom.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
-                {
-                    fadeOutTime = 0.001f,
-                    prio = float.MaxValue,
-                    songName = self.trackName,
-                    type = StopMusicEvent.Type.AllSongs
-                });
             }
 
         }

@@ -364,6 +364,11 @@ namespace BuiltinBuffs.Positive
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            if (slatedForDeletetion)
+            {
+                sLeaser.CleanSpritesAndRemove();
+                return;
+            }
             Vector3 smoothRotation = Vector3.Lerp(lastRotation3D, currentRotation3D, timeStacker);
             Vector2 pos = Vector2.Lerp(firstChunk.lastPos, firstChunk.pos, timeStacker) - camPos;
             sLeaser.sprites[0].SetPosition(pos);
