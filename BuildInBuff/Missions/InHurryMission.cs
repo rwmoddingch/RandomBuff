@@ -124,10 +124,10 @@ namespace BuiltinBuffs.Missions
             {
                 lastMoveTiles = Mathf.RoundToInt(moveTiles);
                 onLabelRefresh?.Invoke(this);
-                if (lastMoveTiles >= targetTileCount)
-                    Finished = true;
-            }
 
+            }
+            if (lastMoveTiles >= targetTileCount)
+                Finished = true;
             module.Update(self);
         }
 

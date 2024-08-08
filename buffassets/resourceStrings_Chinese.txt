@@ -27,6 +27,8 @@ CardSheetPage_Stack_Stackable|可叠加
 CardSheetPage_Stack_Unstackable|不可叠加
 CardSheetPage_Stack_Triggerable|手动
 CardSheetPage_Stack_Untriggerable|自动
+Notification_TooManyMods_Title|启用mod数量警告:
+Notification_TooManyMods_Info|看起来你启用了很多的mod，请注意这有可能会造成更多的异常或游戏崩溃。<LINE>如果出现异常，请留意 报错提示（如有启用）和 以下文件：<LINE>exceptionLog.txt（位于 雨世界根目录）<LINE>buffcore.txt（位于 Rain World\RainWorld_Data\StreamingAssets）
 
 
 //CardInfoDisplay:
@@ -91,11 +93,12 @@ CardpediaCardSheet_Info|（点击下方卡牌以查看详细信息）
 CardpediaCardSheet_None|（无）
 
 //Records
-totCard|获取的所有Buff数量：
-totPositiveCard|获取的正面Buff数量：
-totNegativeCard|获取的负面Buff数量：
-totDualityCard|获取的双向Buff数量：
-totTriggerCount|Buff触发的次数:
+totCard|获取的所有Buff：
+totPositiveCard|获取的正面Buff：
+totNegativeCard|获取的负面Buff：
+totDualityCard|获取的双向Buff：
+totTriggerCount|Buff触发次数:
+totTime|完成用时:
 RunCount|完成的游戏局数:
 InitPickCount|最大初始抽卡数:
 

@@ -74,7 +74,7 @@ namespace RandomBuff.Core.Game
             }
 
             copyUnique.RemoveAll(alreadyHasNoStackable.Contains);
-            copyUnique.RemoveAll(i =>i.GetStaticData().Hidden || !BuffPlayerData.Instance.IsCollected(i));
+            copyUnique.RemoveAll(i =>i.GetStaticData().Hidden && !BuffPlayerData.Instance.IsCollected(i));
 
 
             copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁
@@ -85,6 +85,7 @@ namespace RandomBuff.Core.Game
             copyUnique.RemoveAll(i => i.GetStaticData().Conflict.Any(c => ModManager.ActiveMods.Any(mod => mod.id == c))); //去除mod
             if (copyUnique.Count < pickCount)
             {
+                BuffPlugin.LogError($"No enough card!!!");
                 return null;
             }
 

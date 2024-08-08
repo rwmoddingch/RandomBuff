@@ -47,6 +47,8 @@ Notification_MissionReward_Unique|Unlock unique mission
 Notification_CosmeticReward|Unlock cosmetic
 Notification_CardReward|Unlock card
 Notification_FreePickReward|Unlock free pick count
+Notification_TooManyMods_Title|Mod count warning:
+Notification_TooManyMods_Info|It seems you have enable many mods, be ware this may cause more exception or crash.<LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
 
 //BuffMenu:
 Survival|SURVIVAL
@@ -88,12 +90,13 @@ CardpediaCardSheet_Info|(Click the cards below to view the detail information)
 CardpediaCardSheet_None|(None)
 
 //Records
-totCard|Number of all buffs acquired:
-totPositiveCard|Number of positive buffs acquired:
-totNegativeCard|Number of negative buffs acquired:
-totDualityCard|Number of duality buffs acquired:
-totTriggerCount|Number of buff triggers:
-RunCount|Number of games completed:
+totCard|Acquired buffs :
+totPositiveCard|Acquired positive buffs :
+totNegativeCard|Acquired negative buffs :
+totDualityCard|Acquired duality buffs :
+totTriggerCount|Triggered buffs :
+totTime|Finish time:
+RunCount|Games completed:
 InitPickCount|Initial draw count:
 
 //BasicInGameBuffCardSlot
