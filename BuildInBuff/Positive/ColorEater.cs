@@ -1,5 +1,7 @@
+using BuiltinBuffs.Positive;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -13,16 +15,33 @@ using Random = UnityEngine.Random;
 
 namespace BuildInBuff.Positive
 {
+    class ColorPicker : Spear
+    {
+        public static AbstractPhysicalObject.AbstractObjectType Picker = new AbstractPhysicalObject.AbstractObjectType("ColorPicker",true);
+        public ColorPicker(AbstractPhysicalObject abstractPhysicalObject, World world) : base(abstractPhysicalObject, world)
+        {
+
+        }
+
+    }
+
     class ColorEaterBuff : Buff<ColorEaterBuff, ColorEaterBuffData>
     {
         public override BuffID ID => ColorEaterBuffEntry.ColorEaterID;
       
+        //按下按键可以吸取周围的颜色
         public override bool Trigger(RainWorldGame game)
         {
             if (game.AlivePlayers.Count > 0)
             {
+
                 var player = (game.AlivePlayers[0].realizedCreature as Player);
 
+                var absPicker = new AbstractPhysicalObject(player.room.world, ColorPicker.Picker, null, new WorldCoordinate(player.room.abstractRoom.index, -1, -1, 0), player.room.game.GetNewID());
+
+                //absPicker.RealizeInRoom();
+                //var picker = absPicker.realizedObject;
+                //picker.firstChunk.pos = player.firstChunk.pos;
                 var color = game.cameras[0].PixelColorAtCoordinate(player.bodyChunks[1].pos - new Vector2(0, 10));
                 player.EatPlate().MainColor = Color.Lerp(player.EatPlate().MainColor, color, 0.9f);
                 player.EatPlate().MainColor = Custom.HSL2RGB(Custom.RGB2HSL(player.EatPlate().MainColor).x, 0.4f, 0.5f);
@@ -48,13 +67,38 @@ namespace BuildInBuff.Positive
 
         public static void HookOn()
         {
+            On.AbstractPhysicalObject.Realize += AbstractPhysicalObject_Realize;
+
             On.Player.Update += Player_Update;
             On.Player.ShortCutColor += Player_ShortCutColor;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+            //On.PlayerGraphics.SlugcatColor += PlayerGraphics_SlugcatColor;//行不通的改色方法
+        }
+        private static void AbstractPhysicalObject_Realize(On.AbstractPhysicalObject.orig_Realize orig, AbstractPhysicalObject self)
+        {
+            orig(self);
+            if (self.type == ColorPicker.Picker)
+            {
+                self.realizedObject = new ColorPicker(self,self.world);
+            }
+        }
+
+        private static Color PlayerGraphics_SlugcatColor(On.PlayerGraphics.orig_SlugcatColor orig, SlugcatStats.Name i)
+        {
+            Color color = orig.Invoke(i);
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                if(game.Players.Count>0&& game.Players[0].realizedCreature!=null)
+                {
+                    color=(game.Players[0].realizedCreature as Player).EatPlate().MainColor;
+                }
+            }
+            return color;
         }
 
         private static void ChangeColor(PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser)
         {
+
             for (int i = 0; i < sLeaser.sprites.Length; i++)
             {
                 if (i != 9)
@@ -72,10 +116,10 @@ namespace BuildInBuff.Positive
             }
 
         }
+
         private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig.Invoke(self, sLeaser, rCam, timeStacker, camPos);
-
             ChangeColor(self, sLeaser);
         }
 
@@ -134,21 +178,26 @@ namespace BuildInBuff.Positive
 
         public float InvertLerpColor()
         {
-            float targetH = Custom.RGB2HSL(targetColor).x;
-            float mainH = Custom.RGB2HSL(MainColor).x;
+            //float targetH = Custom.RGB2HSL(targetColor).x;
+            //float mainH = Custom.RGB2HSL(MainColor).x;
 
-            return Mathf.Min(Mathf.Abs(targetH - mainH), Mathf.Abs(targetH - mainH + 1));
+            //return Mathf.Min(Mathf.Abs(targetH - mainH), Mathf.Abs(targetH - mainH + 1));
+
+            var a = MainColor;
+            var b = targetColor;
+            return (Math.Abs(a.r - b.r) + Math.Abs(a.g - b.g) + Math.Abs(a.b - b.b)) / 3f;
 
         }
         public void lerpTo(Color target, float t)
         {
             MainColor = Color.Lerp(MainColor, target, t);
-            MainColor = Custom.HSL2RGB(Custom.RGB2HSL(MainColor).x, 0.4f, 0.5f);
+            //MainColor = Custom.HSL2RGB(Custom.RGB2HSL(MainColor).x, 0.4f, 0.5f);
         }
         public ColorPlateData(Player player)
         {
-            this.targetColor = Custom.HSL2RGB(Random.value, 0.4f, 0.5f);
-            this.MainColor = Custom.HSL2RGB(Random.value, 0.4f, 0.5f);
+            this.targetColor = Random.ColorHSV();
+            //this.MainColor = Custom.HSL2RGB(Random.value, 0.4f, 0.5f);
+            this.MainColor = Random.ColorHSV();
 
             this.player = player;
         }
