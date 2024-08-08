@@ -200,6 +200,7 @@ namespace RandomBuff.Core.Entry
             ConditionID parentId = null,params GachaTemplateID[] banList)
             where TConditionType : Condition, new()
         {
+           
             try
             {
                 if (id != Helper.GetUninit<TConditionType>().ID)
