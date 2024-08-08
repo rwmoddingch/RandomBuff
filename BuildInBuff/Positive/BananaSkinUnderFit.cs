@@ -14,7 +14,7 @@ namespace HotDogGains.Positive
         public static BuffID BananaSkinUnderFitID = new BuffID("BananaSkinUnderFitID", true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<BananaSkinUnderFitBuff,BananaSkinUnderFitBuffData,BananaSkinUnderFitBuffEntry>(BananaSkinUnderFitID);
+            //BuffRegister.RegisterBuff<BananaSkinUnderFitBuff,BananaSkinUnderFitBuffData,BananaSkinUnderFitBuffEntry>(BananaSkinUnderFitID);
         }
             public static void HookOn()
         {

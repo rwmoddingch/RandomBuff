@@ -32,7 +32,7 @@
 	
 	<Name>日天菌
 	<Detail>神明智慧吞噬者
-	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
+	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee, MoneyWorshippers
 
 	<Name>墨阳
 	<Detail>产能不足
