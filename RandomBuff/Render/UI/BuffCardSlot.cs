@@ -241,7 +241,7 @@ namespace RandomBuff.Render.UI
                 var name = id.GetStaticData().CardInfos.First().Value;
                 if (id.GetStaticData().CardInfos.TryGetValue(InGameTranslator.LanguageID.English, out var newName))
                     name = newName;
-                if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out var newName))
+                if (id.GetStaticData().CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out newName))
                     name = newName;
                 helpInfo = BuffResourceString.Get("BasicInGameBuffCardSlot_OnMouseFocus");
                 helpInfo = Regex.Replace(helpInfo, "<BuffID>", name.BuffName);
