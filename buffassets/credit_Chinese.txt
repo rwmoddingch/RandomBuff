@@ -31,16 +31,20 @@
 	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun, PupaLizard, IntenseSituation, FlameThrower, FlamePurification, BombMania
 	
 	<Name>日天菌
-	<Detail>神明智慧吞噬者σ( ᑒ )
+	<Detail>神明智慧吞噬者
 	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
 
 	<Name>墨阳
 	<Detail>产能不足
 	<BuffIDs>FakeCreature
 
+	<Name>空气
+	<Detail>脑浆香香哦 肚子亮亮哦
+	<BuffIDs>CatNeuroID, SisyphusID
+
 	<Name>寂空
 	<Detail>「广告位招租」
-	<BuffIDs>ShortCircuits, TwoSides, TurboPropulsion
+	<BuffIDs>ShortCircuitGates, TwoSides, TurboPropulsion
 
 	<Name>琳
 	<Detail>线稿打在在草稿上（悲）
@@ -151,8 +155,6 @@
 	<Entry>宣传
 		<Name>寂空
 		<Detail>请提交本周期的降水报告和避难所维护日志
-		<Name>Whoking
-		<Detail>wawa 2
 	<Entry>早期宣传
 		<Name>气球
 	<Entry>字体使用

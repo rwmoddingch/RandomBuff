@@ -31,8 +31,12 @@
 	<BuffIDs>BountyHunter, Breathless,ColdGaze, DivisibleSpear, Dozer, DrainLife, EmergencyPlatform, FasterShortCuts, FireShield, FlashShield, GrindingTeeth, HomingShots, LightSpeedSpear, OrbitalRailcannonStrike, OriBash, PermanentShield, RetrospectiveClock, SpearMaster, SporePuff'sCrest, StagnantForcefield, Stronger, SuperJump, Thor'sPower, WallNutBowling, WaterDancer, WaterNoble,ParrotFashion, DustExplosion, IgnitionPoint, PointDischarge, RandomRain, StoneofBlessing, SuperConductor, SurpriseGift, VultureShapedMutation, ByeByeWeapon, ChewSlowly, FoodLover, HighPing, Hydrophobia, Mirror, Photophobia, ScorchingSun, PupaLizard, IntenseSituation, FlameThrower, FlamePurification, BombMania
 	
 	<Name>Sunday
-	<Detail>Devourer of divine wisdom σ( ᑒ )
+	<Detail>Devourer of divine wisdom
 	<BuffIDs>GoldPowerID, HardenedMask, Herbicide, NeedleSpear, NoodleHand, Reinforce, StoneThrower, StormIsApproaching, SuperCapacitance, TailcopterID, ThundThrow, FeatherfallID, InfoOverload, JellyfishShapedMutation, NMR, Ramenpede, SpiderShapedMutation, WalkingMushroom, Alzheimers, Arachnophobia, ChronoLizard, ExplosiveJaw, FlyingAqua, GiveALight, InvisibleKiller, NoPassDay, RockCob, SnailMissileID, SpearRain, BuzzingBee
+
+	<Name>KONGQI
+	<Detail>Yes！Yes！Yes！
+	<BuffIDs>CatNeuroID, SisyphusID
 
 	<Name>Moyang
 	<Detail>under capacity
@@ -40,7 +44,7 @@
 
 	<Name>Seron
 	<Detail>-127.0.0.1-
-	<BuffIDs>ShortCircuit, TwoSides, TurboPropulsion
+	<BuffIDs>ShortCircuitGates, TwoSides, TurboPropulsion
 
 	<Name>Lin
 	<Detail>Outline on the draft (sad wawa)
@@ -147,9 +151,7 @@
 <Stage>SpecialThanks
 	<Entry>Publicize
 		<Name>Serion
-		<Detail>wawa
-		<Name>Whoking
-		<Detail>wawa 2
+		<Detail> -127.0.0.1-
 	<Entry>Early publicize
 		<Name>qiqiu
 	<Entry>Font use

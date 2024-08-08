@@ -13,6 +13,6 @@
   },
   "English": {
     "BuffName": "AggressiveVenting",
-    "Description": "Pre-set to IgnitionPoint; when triggered it immediately clears the player's positive temperature and transfers it all to other nearby creatures, cooldown 30 seconds"
+    "Description": "Based on IgnitionPoint; When triggered, it immediately clears the player's positive temperature and transfers it all to other nearby creatures, cooldown 30 seconds"
   }
 }

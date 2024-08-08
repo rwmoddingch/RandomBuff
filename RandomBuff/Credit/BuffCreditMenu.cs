@@ -1,5 +1,6 @@
 ﻿using Menu;
 using Menu.Remix;
+using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
@@ -28,6 +29,7 @@ namespace RandomBuff.Credit
 
         int currentStageIndex;
         bool quitCredit;
+        bool songSwitched;
 
         public BuffCreditMenu(ProcessManager manager)
             : base(manager, BuffEnums.ProcessID.CreditID)
@@ -61,6 +63,8 @@ namespace RandomBuff.Credit
             {
                 CardRendererManager.RecycleCardRenderer(renderer);
             }
+
+            manager.musicPlayer.MenuRequestsSong("RW_96 - Fragments", 1f, 1f);
         }
 
         public override void Update()
@@ -109,6 +113,12 @@ namespace RandomBuff.Credit
                     stage.RemoveSprites();
                 }
             }
+
+            if (!songSwitched && Time > 180f)
+            {
+                //manager.musicPlayer.MenuRequestsSong("RW_96 - Fragments", 2f, 6f);
+                songSwitched = true;
+            }    
         }
 
 
