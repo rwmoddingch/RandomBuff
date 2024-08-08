@@ -64,7 +64,7 @@ namespace RandomBuff.Credit
                 CardRendererManager.RecycleCardRenderer(renderer);
             }
 
-            manager.musicPlayer.MenuRequestsSong("RW_96 - Fragments", 1f, 1f);
+            manager.musicPlayer.MenuRequestsSong("RW_63 - Wandering Cut", 1f, 1f);
         }
 
         public override void Update()
@@ -114,9 +114,9 @@ namespace RandomBuff.Credit
                 }
             }
 
-            if (!songSwitched && Time > 180f)
+            if (!songSwitched && Time > 152f)
             {
-                //manager.musicPlayer.MenuRequestsSong("RW_96 - Fragments", 2f, 6f);
+                manager.musicPlayer.MenuRequestsSong("RW_77 - Fragile", 2f, 6f);
                 songSwitched = true;
             }    
         }
@@ -242,6 +242,7 @@ namespace RandomBuff.Credit
         {
             quitCredit = true;
             CardBasicAssets.PauseLoadFont = false;
+            manager.musicPlayer.FadeOutAllSongs(3f);
             manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
         }
 

@@ -348,36 +348,6 @@ namespace RandomBuff.Render.UI.Notification
                 linePoses.Add(Vector2.zero);
             }
 
-
-            //if (questUnlockedType == QuestUnlockedType.Mission)
-            //{
-            //    MissionID id = new MissionID(itemName);
-            //    var newInstance = new MissionReward(id, this);
-            //    newInstance.InitSprites();
-            //    rewardInstances.Add(newInstance);
-
-            //    if(rewardInstances.Count > 1)
-            //    {
-            //        splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
-            //        notificationManager.Container.AddChild(splitLines.Last());
-            //        linePoses.Add(Vector2.zero);
-            //    }
-            //}
-            //else if(questUnlockedType == QuestUnlockedType.Cosmetic)
-            //{
-            //    CosmeticUnlockID cosmeticUnlockID = new CosmeticUnlockID(itemName);
-            //    var instance = new CosmeticReward(cosmeticUnlockID, this);
-            //    instance.InitSprites();
-            //    rewardInstances.Add(instance);
-
-            //    if (rewardInstances.Count > 1)
-            //    {
-            //        splitLines.Add(new FSprite("pixel") { scaleX = 2f, scaleY = rewardInstanceHeight });
-            //        notificationManager.Container.AddChild(splitLines.Last());
-            //        linePoses.Add(Vector2.zero);
-            //    }
-            //}
-
             RecaculateInstancePos();
 
             void RecaculateInstancePos()
@@ -571,6 +541,36 @@ namespace RandomBuff.Render.UI.Notification
             {
                 base.Destroy();
             }
+        }
+    }
+
+    internal class InfoBanner : NotificationBanner
+    {
+        FLabel infoLabel;
+        public InfoBanner(NotificationManager notificationManager) : base(notificationManager)
+        {
+        }
+
+        public override void InitSprites()
+        {
+            base.InitSprites();
+            infoLabel = new FLabel(Custom.GetDisplayFont(), "");
+            notificationManager.ownerContainer.AddChild(infoLabel);
+        }
+
+        public void SetInfo(string title, string text)
+        {
+            text = LabelTest.WrapText(text, true, Custom.rainWorld.options.ScreenSize.x - 200f);
+            infoLabel.text = text;
+            titleLabel.text = title;
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+            float smoothContentExpand = Mathf.Lerp(lastContentExpand, contentExpand, timeStacker);
+            infoLabel.SetPosition(screenCenter);
+            infoLabel.alpha = smoothContentExpand;
         }
     }
 }

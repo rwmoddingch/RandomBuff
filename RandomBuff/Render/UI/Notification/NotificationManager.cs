@@ -73,6 +73,10 @@ namespace RandomBuff.Render.UI.Notification
             {
                 banners.Add(new RewardBanner(this));
             }
+            else if(notificationType == NotificationType.Info)
+            {
+                banners.Add(new InfoBanner(this));
+            }
             TakeFocus();
         }
 
@@ -80,6 +84,12 @@ namespace RandomBuff.Render.UI.Notification
         {
             NewNotification(NotificationType.Reward);
             (banners.First() as RewardBanner).AppendReward(questUnlockedType,itemName);
+        }
+
+        public void NewInfoNotification(string title, string info)
+        {
+            NewNotification(NotificationType.Info);
+            (banners.First() as InfoBanner).SetInfo(title, info);
         }
 
         public enum NotificationType

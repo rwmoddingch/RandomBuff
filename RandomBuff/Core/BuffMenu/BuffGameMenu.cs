@@ -25,6 +25,7 @@ using RandomBuff.Render.UI.Component;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.BuffMenu.Manual;
 using RandomBuff.Core.Game.Settings;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -152,6 +153,14 @@ namespace RandomBuff.Core.BuffMenu
                 black.RemoveFromContainer();
                 pages[3].Container.alpha = 1f;
                 blackFadeAnim = null;
+
+                //通知mod数量
+                if(ModManager.ActiveMods.Count(i => i.hasDLL) > 25 && !BuffOptionInterface.Instance.DisableNotifyDialog.Value)
+                {
+                    testNotification.NewInfoNotification(BuffResourceString.Get("Notification_TooManyMods_Title"),BuffResourceString.Get("Notification_TooManyMods_Info"));
+                    BuffOptionInterface.Instance.DisableNotifyDialog.Value = true;
+                    BuffOptionInterface.SaveConfig();
+                }
             });
         }
         TickAnimCmpnt blackFadeAnim;

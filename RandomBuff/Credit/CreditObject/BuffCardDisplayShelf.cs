@@ -50,6 +50,8 @@ namespace RandomBuff.Credit.CreditObject
 
             float x = topLeftPos.x + cardRect.x / 2f;
             float y = topLeftPos.y - cardRect.y / 2f;
+            int rolls = 0;
+            int cardsInRoll = 0;
 
             for(int i = 0; i < buffIDs.Length; i++)
             {
@@ -57,10 +59,33 @@ namespace RandomBuff.Credit.CreditObject
                 added[i] = false;
                 denPosList[i] = new Vector2(x, y);
                 x += cardRect.x;
+                if (rolls == 0)
+                    cardsInRoll++;
                 if(x >= screenSize.x - edgeGap)
                 {
                     x = topLeftPos.x + cardRect.x / 2f;
                     y -= cardRect.y;
+                    rolls++;
+                }
+            }
+
+            if(y - cardRect.y / 2f - 20f < 0f)
+            {
+                float delta = Mathf.Abs(y - cardRect.y - 20f);
+                float shrink = delta / (rolls);
+
+                int mul = 1;
+                int xx = 0;
+
+                for(int i = cardsInRoll;i < buffIDs.Length;i++)
+                {
+                    denPosList[i].y += shrink * mul;
+                    xx++;
+                    if(xx >= cardsInRoll)
+                    {
+                        mul++;
+                        xx = 0;
+                    }
                 }
             }
         }
