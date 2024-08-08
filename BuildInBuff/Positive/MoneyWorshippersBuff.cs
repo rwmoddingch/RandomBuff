@@ -29,6 +29,8 @@ namespace BuiltinBuffs.Positive
             {
                 foreach(var grasp in player.grasps)
                 {
+                    if (grasp == null)
+                        continue;
                     if (grasp.grabbed.abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.DataPearl || grasp.grabbed.abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.PebblesPearl)
                     {
                         result = true;

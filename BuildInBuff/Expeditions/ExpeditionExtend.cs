@@ -159,7 +159,7 @@ namespace BuiltinBuffs.Expeditions
                     re.buffType.DefineMethodOverride("Destroy", typeof(void), Type.EmptyTypes,
                         Mono.Cecil.MethodAttributes.Public, (il) => BuildILDestroy(il, item));
                     //BuffUtils.Log("BuffExtend", $"Build expedition buff {group.Key}:{item}");
-                }
+                }   
             }
         }
 
