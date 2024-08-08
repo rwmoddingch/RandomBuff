@@ -5,7 +5,7 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "FFFFFF",
-    "Conflict": ["Presbyopia"],
+    "Conflict": ["Presbyopia","SBCameraScroll"],
     "Chinese" : {
         "BuffName" : "鼠目寸光",
         "Description" : "玩家的屏幕视野缩小，看见的景象会放大填充满屏幕"

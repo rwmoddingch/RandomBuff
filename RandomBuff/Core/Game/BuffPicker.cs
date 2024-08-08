@@ -23,6 +23,7 @@ namespace RandomBuff.Core.Game
     {
         public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
         {
+#if TESTVERSION
             if (BuffPlugin.DevEnabled)
             {
                 var str = "";
@@ -32,7 +33,7 @@ namespace RandomBuff.Core.Game
             }
             else
                 BuffPlugin.LogDebug($"Request pick");
-
+#endif
             if (types.Any(i => i == BuffType.Duality))
             {
                 types = types.Where(i => i != BuffType.Duality).ToArray();
@@ -57,11 +58,12 @@ namespace RandomBuff.Core.Game
             foreach (var id in alreadyHas)
                 conflict.AddRange(id.GetStaticData().Conflict);
 
+#if TESTVERSION
             foreach (var id in conflict)
                 BuffPlugin.LogDebug($"Conflict: {id}");
 
-
-            alreadyHas = alreadyHas.Where(i => !i.GetStaticData().Stackable);
+#endif
+            var alreadyHasNoStackable = alreadyHas.Where(i => !i.GetStaticData().Stackable);
 
             var list = new List<BuffStaticData>();
             var copyUnique = new List<BuffID>();
@@ -71,14 +73,16 @@ namespace RandomBuff.Core.Game
                 copyUnique.AddRange(BuffConfigManager.buffTypeTable[BuffType.Duality].Where(i => i.GetStaticData().AsPositive == (type == BuffType.Positive)));
             }
 
-            copyUnique.RemoveAll(alreadyHas.Contains);
+            copyUnique.RemoveAll(alreadyHasNoStackable.Contains);
             copyUnique.RemoveAll(i =>i.GetStaticData().Hidden || !BuffPlayerData.Instance.IsCollected(i));
 
 
             copyUnique.RemoveAll(i => BuffConfigManager.IsItemLocked(QuestUnlockedType.Card,i.value));// 去除未解锁
 
-            copyUnique.RemoveAll(i => conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j)));//去除冲突（类别或名称）
+            copyUnique.RemoveAll(i => !alreadyHas.Contains(i) && (conflict.Contains(i.value) || conflict.Any(j => i.GetStaticData().Tag.Contains(j))));//去除冲突（类别或名称）
             copyUnique.RemoveAll(i => i.GetStaticData().Conflict.Contains(name.value));//对应猫
+
+            copyUnique.RemoveAll(i => i.GetStaticData().Conflict.Any(c => ModManager.ActiveMods.Any(mod => mod.id == c))); //去除mod
             if (copyUnique.Count < pickCount)
             {
                 return null;

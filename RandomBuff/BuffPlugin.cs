@@ -1,5 +1,4 @@
-﻿#define TESTVERSION
-
+﻿
 using System;
 using System.IO;
 using System.Linq;
@@ -42,7 +41,7 @@ using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff
 {
-    [BepInPlugin(ModId, "Random Buff", "1.0.0")]
+    [BepInPlugin(ModId, "Random Buff", ModVersion)]
     internal class BuffPlugin : BaseUnityPlugin
     {
         public static BuffFormatVersion saveVersion = new ("a-0.0.6");
@@ -57,6 +56,8 @@ namespace RandomBuff
         public static BuffOptionInterface Option { get; private set; }
 
         public const string ModId = "randombuff";
+
+        public const string ModVersion = "1.0.0";
 
         public void OnEnable()
         {
@@ -225,7 +226,7 @@ namespace RandomBuff
                         if (devVersion == null && !File.Exists(AssetManager.ResolveFilePath("disableDevMark.txt")))
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
-                                $"Random Buff, Build: 2024_08_07\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                $"Random Buff, Build: 2024_08_08\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
                                 new Vector2(1000, 200), 0.4f)
                             {
                                 Alignment = TMPro.TextAlignmentOptions.BottomLeft,
