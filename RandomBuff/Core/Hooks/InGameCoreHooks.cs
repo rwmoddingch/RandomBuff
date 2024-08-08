@@ -139,10 +139,16 @@ namespace RandomBuff.Core.Hooks
                         new Vector2(110f, 30f)));
                 
                 }
-                self.pages[0].subObjects.Add(new SimpleButton(self, self.pages[0], BuffResourceString.Get("SleepMenu_UnStack"),
-                    "BUFF_UNSTACK_PASSAGE",
-                    new Vector2(self.LeftHandButtonsPosXAdd + self.manager.rainWorld.options.SafeScreenOffset.x,
-                        Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)+40), new Vector2(110f, 30f)));
+
+                if (BuffCore.GetAllBuffIds(self.saveState.saveStateNumber).Any())
+                {
+                    self.pages[0].subObjects.Add(new SimpleButton(self, self.pages[0],
+                        BuffResourceString.Get("SleepMenu_UnStack"),
+                        "BUFF_UNSTACK_PASSAGE",
+                        new Vector2(self.LeftHandButtonsPosXAdd + self.manager.rainWorld.options.SafeScreenOffset.x,
+                            Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f) + 40),
+                        new Vector2(110f, 30f)));
+                }
             }
         }
 
@@ -228,7 +234,7 @@ namespace RandomBuff.Core.Hooks
 
         private static void World_SpawnGhost(On.World.orig_SpawnGhost orig, World self)
         {
-            if (Custom.rainWorld.BuffMode() && (Custom.rainWorld.progression.currentSaveState.cycleNumber == 0 || BuffDataManager.Instance.GetGameSetting(self.game.StoryCharacter) != null))
+            if (Custom.rainWorld.BuffMode() && (Custom.rainWorld.progression.currentSaveState.cycleNumber == 0 || BuffDataManager.Instance.GetGameSetting(self.game.StoryCharacter).MissionId != null))
                 return;
             orig(self);
 
