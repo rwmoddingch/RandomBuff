@@ -61,6 +61,10 @@ namespace BuiltinBuffs.Negative
             {
                 amputation.Update();
             }
+            else
+            {
+                AmputationFeatures.Add(self, new Amputation(self));
+            }
         }
 
         //只能一次拿一个东西
