@@ -6,6 +6,9 @@
     "Triggerable" :  false,
     "Stackable" :  false,
     "Color" : "FFFFFF",
+    "Conflict":[
+        "SBCameraScroll"
+    ],
     "Chinese":{
         "BuffName":"纯真的自我",
         "Description":"现在，该是我们退场的时候了。请不要悲伤，就算我们即将消逝在光芒之中，但我们绝不会被世人遗忘。（卡牌效果：随食物点数提高旋转屏幕，无限雨循环时间，全局生物处于催眠状态）"
