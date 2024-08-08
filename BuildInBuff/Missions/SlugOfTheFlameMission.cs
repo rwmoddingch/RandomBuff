@@ -1,13 +1,17 @@
 ﻿using BuiltinBuffs.Duality;
 using BuiltinBuffs.Negative;
+using BuiltinBuffs.Negative.SephirahMeltdown;
 using BuiltinBuffs.Positive;
 using HotDogBuff.Negative;
 using Newtonsoft.Json;
 using RandomBuff;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.SaveData;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +38,8 @@ namespace BuiltinBuffs.Missions
             {
                 conditions = new List<Condition>()
                 {
-                    new ScorchCreatureCondition(){ scorchRequirement =  200}
+                    new ScorchCreatureCondition(){ scorchRequirement =  200 },
+                    new PermanentHoldCondition(){HoldBuff = ScorchingSunBuffEntry.ScorchingSun}
                 },
             };
             startBuffSet.AddRange(new[]
@@ -49,6 +54,7 @@ namespace BuiltinBuffs.Missions
         public void RegisterMission()
         {
             BuffRegister.RegisterCondition<ScorchCreatureCondition>(ScorchCreatureCondition.scorchCrreatureConditionID, "ScorchCreature", true);
+            BuffRegister.RegisterCondition<PermanentHoldCondition>(PermanentHoldCondition.permanentHoldConditionID, "PermanentHold", true);
             MissionRegister.RegisterMission(slugOfTheFlameMissionID, new SlugOfTheFlameMission());
         }
     }
@@ -111,6 +117,72 @@ namespace BuiltinBuffs.Missions
         public override string DisplayName(InGameTranslator translator)
         {
             return string.Format(BuffResourceString.Get("DisplayName_ScorchCreature"), scorchRequirement);
+        }
+    }
+
+    internal class PermanentHoldCondition : Condition
+    {
+        public static ConditionID permanentHoldConditionID = new ConditionID("PermanentlyHold", true);
+        public override ConditionID ID => permanentHoldConditionID;
+
+        [JsonProperty]
+        string id;
+
+        [JsonProperty]
+        string name;
+        public BuffID HoldBuff
+        {
+            get => new BuffID(id);
+            set
+            {
+                id = value.value;
+                
+                if(BuffConfigManager.GetStaticData(value).CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out var info))
+                {
+                    name = info.BuffName;
+                }
+                else
+                    name = BuffConfigManager.GetStaticData(value).CardInfos[InGameTranslator.LanguageID.English].BuffName;
+            }
+        }
+        public override int Exp => 200;
+
+        public override string DisplayName(InGameTranslator translator)
+        {
+            return string.Format(BuffResourceString.Get("DisplayName_PermanentlyHold"), name);
+        }
+
+        public override string DisplayProgress(InGameTranslator translator)
+        {
+            return "";
+        }
+
+        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
+        {
+            return ConditionState.Fail;
+        }
+
+        int counter = 40;
+        public override void InGameUpdate(RainWorldGame game)
+        {
+            base.InGameUpdate(game);
+
+            if (counter > 80)
+                counter = 0;
+            else
+                counter++;
+
+            if (counter == 0)
+            {
+                if (!BuffCore.GetAllBuffIds().Contains(HoldBuff))
+                    BuffCore.CreateNewBuff(HoldBuff);
+
+                if (!Finished)
+                {
+                    Finished = true;
+                    onLabelRefresh?.Invoke(this);
+                }
+            }
         }
     }
 }

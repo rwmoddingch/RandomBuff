@@ -96,16 +96,49 @@ namespace RandomBuff.Core.BuffMenu
 
             if (showAnim != null)
                 showAnim.Destroy();
+            else if(show)
+                initY = -height - 40f;
             showAnim = AnimMachine.GetTickAnimCmpnt(0, 40, autoDestroy: true).BindActions(
-                OnAnimGrafUpdate: (t,f) =>
+                OnAnimUpdate: (t) =>
                 {
                     if (this.show)
+                    {
+                        lastPos = pos;
                         pos.y = Mathf.Lerp(initY, 0f, t.Get());
+                    }   
                     else
-                        pos.y = Mathf.Lerp(initY, -1000f, t.Get());
+                    {
+                        lastPos = pos;
+                        pos.y = Mathf.Lerp(initY, -height - 40f, t.Get());
+                    }
+                },
+                OnAnimGrafUpdate:(t, f) =>
+                {
+                    if(show)
+                    {
+                        gradient.scaleY = 2f * t.Get();
+                    }
+                    else
+                    {
+                        gradient.scaleY = 2f * (1f - t.Get());
+                    }
+                    closeButton.GrafUpdate(f);
+                    nodeWrapper.GrafUpdate(f);
                 },
                 OnAnimFinished: (t) =>
                 {
+                    if (this.show)
+                    {
+                        lastPos = pos;
+                        pos.y = 0f;
+                        gradient.scaleY = 2f;
+                    }
+                    else
+                    {
+                        lastPos = pos;
+                        pos.y = -height - 40;
+                        gradient.scaleY = 0f;
+                    }
                     showAnim = null;
                 }).BindModifier(Helper.EaseInOutCubic);
         }

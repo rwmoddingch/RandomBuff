@@ -11,6 +11,7 @@ using RandomBuff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuffUtils;
 using RWCustom;
@@ -44,6 +45,12 @@ namespace BuiltinBuffs.Missions
             startBuffSet.Add(SuperConductorBuffEntry.superConductorBuffID);
             startBuffSet.Add(Negative.MobileAssaultIBuffEntry.mobileAssaultBuffID);
             startBuffSet.Add(Negative.ChronoLizardIBuffEntry.ChronoLizardBuffID);
+
+            gameSetting.gachaTemplate = new NormalGachaTemplate()
+            {
+                PSelect = 0,
+                PocketPackMultiply = 0,
+            };
         }
 
         public void RegisterMission()
