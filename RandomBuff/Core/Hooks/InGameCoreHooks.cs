@@ -17,6 +17,7 @@ using Mono.Cecil.Cil;
 using Menu;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Game.Settings;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 
 namespace RandomBuff.Core.Hooks
@@ -44,16 +45,27 @@ namespace RandomBuff.Core.Hooks
                 saveState.deathPersistentSaveData.karma = 9;
                 saveState.deathPersistentSaveData.karmaCap = 9;
             }
+
+            BuffCore.OnGameSettingSpecialSetupInternal(saveState, gameSetting);
         }
 
         public static bool IsCurrentFullRoomSettingNeed(GameSetting gameSetting)
         {
-            return gameSetting.MissionId is "DoomExpress" or "EmergnshyTreatment";
+            return gameSetting.MissionId is "DoomExpress" or "EmergnshyTreatment" || BuffCore.IsFullRoomSettingNeedInternal(gameSetting);
         }
 
 
+        public static bool IsSpRoomSettingNeedRemoveAtNormal(string roomName)
+        {
+            return RemoveRoomSettingList.Contains(roomName) ||
+                   BuffCore.IsSpRoomScriptNeedRemoveAtNormalInternal(roomName);
+        }
+
         public static void ClampKarmaForBuffMode(ref int karma,ref int karmaCap)
         {
+            if (BuffCore.OnClampKarmaForBuffModeInternal(ref karma, ref karmaCap))
+                return;
+            
             if (BuffPoolManager.Instance.GameSetting.MissionId is not "TripleAffirmation")
             {
                 karmaCap = Mathf.Min(karmaCap, 4);
@@ -231,7 +243,7 @@ namespace RandomBuff.Core.Hooks
                 if (!IsCurrentFullRoomSettingNeed(BuffPoolManager.Instance?.GameSetting ??
                                              BuffDataManager.Instance.GetGameSetting(game?.StoryCharacter ??
                                                  Custom.rainWorld.progression.PlayingAsSlugcat)) &&
-                    RemoveRoomSettingList.Contains(self.abstractRoom.name))
+                    IsSpRoomSettingNeedRemoveAtNormal(self.abstractRoom.name))
                 {
                     self.roomSettings.roomSpecificScript = false;
                 }

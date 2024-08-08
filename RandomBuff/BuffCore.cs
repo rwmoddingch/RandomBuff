@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.SaveData;
+using RandomBuffUtils;
+
 
 namespace RandomBuff
 {
-    public static class BuffCore
+    public static partial class BuffCore
     {
         /// <summary>
         /// 获取ID对应的Buff
@@ -215,5 +218,122 @@ namespace RandomBuff
             return true;
         }
 
+
+        
+    }
+
+    public static partial class BuffCore
+    {
+        /// <summary>
+        /// 创建BuffData时触发，使用自定义的staticData
+        /// </summary>
+        public static event CustomStaticBuffDataHandler OnCustomStaticDataLoaded;
+
+        /// <summary>
+        /// 调整游戏模式的初始存档状态
+        /// </summary>
+        public static event GameSettingSpecialSetupHandler OnGameSettingSpecialSetup;
+
+        /// <summary>
+        /// 是否启用全RoomScript
+        /// </summary>
+        public static event IsFullSpRoomScriptNeedHandler IsFullSpRoomScriptNeed;
+
+        /// <summary>
+        /// 是否禁用用某房间的RoomScript，返回true则禁用
+        /// 是增量
+        /// </summary>
+        public static event IsSpRoomScriptNeedRemoveAtNormalHandler IsSpRoomScriptNeedRemoveAtNormal;
+
+
+        /// <summary>
+        /// 调整游戏的业力状态
+        /// </summary>
+        public static event ClampKarmaForBuffModeHandler OnClampKarmaForBuffMode;
+    }
+
+
+    public static partial class BuffCore
+    {
+        public delegate void CustomStaticBuffDataHandler(BuffData data, BuffStaticData staticData,
+            Dictionary<string, object> customArgs);
+
+        public delegate void GameSettingSpecialSetupHandler(SaveState saveState, GameSetting gameSetting);
+
+        public delegate bool IsFullSpRoomScriptNeedHandler(GameSetting gameSetting);
+
+        public delegate bool IsSpRoomScriptNeedRemoveAtNormalHandler(string roomName);
+
+        public delegate bool ClampKarmaForBuffModeHandler(ref int karma, ref int karmaCap);
+
+        internal static void OnCustomStaticDataLoadedInternal(BuffData data, BuffStaticData staticData,
+            Dictionary<string, object> customArgs)
+        {
+            OnCustomStaticDataLoaded?.SafeInvoke("OnCustomStaticDataLoaded", data, staticData, customArgs);
+        }
+
+        internal static void OnGameSettingSpecialSetupInternal(SaveState saveState, GameSetting gameSetting)
+        {
+            OnGameSettingSpecialSetup?.SafeInvoke("OnGameSettingSpecialSetup", saveState, gameSetting);
+        }
+
+        internal static bool IsFullRoomSettingNeedInternal(GameSetting gameSetting)
+        {
+            if (IsFullSpRoomScriptNeed == null)
+                return false;
+            foreach (var deg in IsFullSpRoomScriptNeed.GetInvocationList())
+            {
+                try
+                {
+                    var re = (deg as IsFullSpRoomScriptNeedHandler).Invoke(gameSetting);
+                    if(re) return true;
+                }
+                catch (Exception e)
+                {
+                    BuffUtils.LogException($"BuffEvent - IsFullSpRoomScriptNeed", e);
+                }
+            }
+            return false;
+        }
+
+        internal static bool OnClampKarmaForBuffModeInternal(ref int karma, ref int karmaCap)
+        {
+            if (OnClampKarmaForBuffMode == null)
+                return false;
+
+            foreach (var deg in OnClampKarmaForBuffMode.GetInvocationList())
+            {
+                try
+                {
+                    var re = (deg as ClampKarmaForBuffModeHandler).Invoke(ref karma, ref karmaCap);
+                    if (re) return true;
+                }
+                catch (Exception e)
+                {
+                    BuffUtils.LogException($"BuffEvent - OnClampKarmaForBuffMode", e);
+                }
+            }
+            return false;
+        }
+
+        internal static bool IsSpRoomScriptNeedRemoveAtNormalInternal(string roomName)
+        {
+            if (IsSpRoomScriptNeedRemoveAtNormal == null)
+                return false;
+
+            foreach (var deg in IsSpRoomScriptNeedRemoveAtNormal.GetInvocationList())
+            {
+                try
+                {
+                    var re = (deg as IsSpRoomScriptNeedRemoveAtNormalHandler).Invoke(roomName);
+                    if (re) return true;
+                }
+                catch (Exception e)
+                {
+                    BuffUtils.LogException($"BuffEvent - OnClampKarmaForBuffMode", e);
+                }
+            }
+            return false;
+        }
     }
 }

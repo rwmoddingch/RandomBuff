@@ -178,7 +178,7 @@ namespace RandomBuffUtils
         public delegate void KeyDownHandler(string keyDown);
 
 
-        internal static void SafeInvoke(this Delegate del,string eventName, params object[] param)
+        public static void SafeInvoke(this Delegate del,string eventName, params object[] param)
         {
             foreach (var single in del.GetInvocationList())
             {

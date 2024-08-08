@@ -364,6 +364,8 @@ namespace RandomBuff.Core.Buff
                 staticData.MaxCycleCount = countable.MaxCycleCount;
                 BuffPlugin.LogDebug($"{staticData.BuffID},{staticData.MaxCycleCount}");
             }
+
+            BuffCore.OnCustomStaticDataLoadedInternal(data,staticData, customArgs);
         }
 
         /// <summary>

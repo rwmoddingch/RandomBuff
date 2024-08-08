@@ -63,6 +63,8 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
             //原版更新方法
             orig.Invoke(self, eu);
 
+            if (self.room == null || self.inShortcut) return;
+
             //如果玩家意识清醒 且在水下或无重力 那么“允许推进”
             bool canPropel = self.Consious && (self.submerged || self.bodyMode == Player.BodyModeIndex.ZeroG);
             //如果允许推进 且氧气量大于0.5 且按下跳跃键 但还没在推进 那么“可以开始推进”
