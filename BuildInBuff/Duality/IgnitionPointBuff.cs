@@ -48,7 +48,7 @@ namespace BuiltinBuffs.Duality
         {
             foreach(var u in Camera.room.updateList)
             {
-                if (!u.slatedForDeletetion && (u is Creature creature) && TemperatrueModule.TryGetTemperatureModule(creature, out var module) && !barMapper.ContainsKey(creature) && creature.room != null)
+                if (!u.slatedForDeletetion && (u is Creature creature) && TemperatureModule.TryGetTemperatureModule(creature, out var module) && !barMapper.ContainsKey(creature) && creature.room != null)
                 {
                     AddBarForCreature(creature);
                 }
@@ -136,7 +136,7 @@ namespace BuiltinBuffs.Duality
                 this.bindCreature = creature;
                 InitSprites();
 
-                if (TemperatrueModule.TryGetTemperatureModule(bindCreature, out var module))
+                if (TemperatureModule.TryGetTemperatureModule(bindCreature, out var module))
                 {
                     extinguishFactor = module.extinguishPoint / module.ignitingPoint;
                     unfreezeFactor = module.unfreezePoint / module.freezePoint;
@@ -182,7 +182,7 @@ namespace BuiltinBuffs.Duality
                     owner.RemoveBar(bindCreature);
                     return;
                 }
-                if (TemperatrueModule.TryGetTemperatureModule(bindCreature, out var module))
+                if (TemperatureModule.TryGetTemperatureModule(bindCreature, out var module))
                 {
                     lastTempFac = tempFac;
                     if (module.temperature > 0f)
@@ -276,8 +276,8 @@ namespace BuiltinBuffs.Duality
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<IgnitionPointBuff, IgnitionPointBuffData, IgnitionPointBuffEntry>(ignitionPointBuffID);
-            TemperatrueModule.AddProvider(new CreatureProvider());
-            TemperatrueModule.AddProvider(new PlayerProvider());
+            TemperatureModule.AddProvider(new CreatureProvider());
+            TemperatureModule.AddProvider(new PlayerProvider());
         }
 
 
@@ -300,12 +300,12 @@ namespace BuiltinBuffs.Duality
         private static void DeferredDrawUpdate(On.RoomCamera.SpriteLeaser.orig_Update orig, RoomCamera.SpriteLeaser self, float timeStacker, RoomCamera rCam, Vector2 camPos)
         {
             bool freeze = false;
-            TemperatrueModule module = null;
-            if(self.drawableObject is UpdatableAndDeletable updatable && TemperatrueModule.TryGetTemperatureModule(updatable, out module) && module.freeze)
+            TemperatureModule module = null;
+            if(self.drawableObject is UpdatableAndDeletable updatable && TemperatureModule.TryGetTemperatureModule(updatable, out module) && module.freeze)
             {
                 freeze = true;
             }
-            else if(self.drawableObject is GraphicsModule graphics && TemperatrueModule.TryGetTemperatureModule(graphics.owner, out module) && module.freeze)
+            else if(self.drawableObject is GraphicsModule graphics && TemperatureModule.TryGetTemperatureModule(graphics.owner, out module) && module.freeze)
             {
                 freeze = true;
             }
@@ -340,7 +340,7 @@ namespace BuiltinBuffs.Duality
             var result = orig.Invoke(self, obj);
             if (!result)
             {
-                if(TemperatrueModule.TryGetTemperatureModule(obj, out var module))
+                if(TemperatureModule.TryGetTemperatureModule(obj, out var module))
                 {
                     module.Update(obj);
                     if (module.freeze)
@@ -353,7 +353,7 @@ namespace BuiltinBuffs.Duality
         private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
             orig.Invoke(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
-            if(type == Creature.DamageType.Explosion && TemperatrueModule.TryGetTemperatureModule(self, out var module))
+            if(type == Creature.DamageType.Explosion && TemperatureModule.TryGetTemperatureModule(self, out var module))
             {
                 module.AddTemperature(damage * 0.3f);
             }
@@ -458,7 +458,7 @@ namespace BuiltinBuffs.Duality
         {
             if(label != null)
             {
-                if (TemperatrueModule.TryGetTemperatureModule(creature, out var module))
+                if (TemperatureModule.TryGetTemperatureModule(creature, out var module))
                 {
                     label.text = $"temperature : {module.temperature}\nignitedPoint : {module.ignitingPoint}\nextinguishPoint : {module.extinguishPoint}\nlowHeatRate : {module.coolOffRate}\nburn : {module.burn}\n\nfreezePoint : {module.freezePoint}\nunfreezePoint:{module.unfreezePoint}\nwarmUpRate : {module.warmUpRate}\nfreeze : {module.freeze}";
                 }
@@ -488,7 +488,7 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public partial class TemperatrueModule
+    public partial class TemperatureModule
     {
         public static float hypothermiaToTemperatureParam = 100f;
         public float temperature;
@@ -521,12 +521,12 @@ namespace BuiltinBuffs.Duality
     }
 
     //静态部分
-    public partial class TemperatrueModule
+    public partial class TemperatureModule
     {
-        public static ConditionalWeakTable<UpdatableAndDeletable, TemperatrueModule> temperatureModuleMapping = new ConditionalWeakTable<UpdatableAndDeletable, TemperatrueModule>();
+        public static ConditionalWeakTable<UpdatableAndDeletable, TemperatureModule> temperatureModuleMapping = new ConditionalWeakTable<UpdatableAndDeletable, TemperatureModule>();
         public static List<ITemperatureModuleProvider> providers = new List<ITemperatureModuleProvider>();
         
-        public static bool TryGetTemperatureModule(UpdatableAndDeletable target, out TemperatrueModule temperatrueModule)
+        public static bool TryGetTemperatureModule(UpdatableAndDeletable target, out TemperatureModule temperatrueModule)
         {
             if(temperatureModuleMapping.TryGetValue(target, out temperatrueModule))
                 return true;
@@ -552,11 +552,11 @@ namespace BuiltinBuffs.Duality
         public interface ITemperatureModuleProvider
         {
             bool ProvideThisObject(UpdatableAndDeletable target);
-            TemperatrueModule ProvideModule(UpdatableAndDeletable target);
+            TemperatureModule ProvideModule(UpdatableAndDeletable target);
         }
     }
 
-    public class CreatureTemperatureModule : TemperatrueModule
+    public class CreatureTemperatureModule : TemperatureModule
     {
         public BurnFire fire;
         public FreezeIce freezeIce;
@@ -722,9 +722,9 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class CreatureProvider : TemperatrueModule.ITemperatureModuleProvider
+    public class CreatureProvider : TemperatureModule.ITemperatureModuleProvider
     {
-        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        public TemperatureModule ProvideModule(UpdatableAndDeletable target)
         {
             return new CreatureTemperatureModule(target as Creature);
         }
@@ -777,9 +777,9 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class PlayerProvider : TemperatrueModule.ITemperatureModuleProvider
+    public class PlayerProvider : TemperatureModule.ITemperatureModuleProvider
     {
-        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        public TemperatureModule ProvideModule(UpdatableAndDeletable target)
         {
             return new PlayerTemperatureModule(target as Creature);
         }
@@ -910,7 +910,7 @@ namespace BuiltinBuffs.Duality
             this.pos = pos;
             if (updatableAndDeletable is PhysicalObject obj)
                 rad = obj.bodyChunks[0].rad * 3f;
-            if (TemperatrueModule.TryGetTemperatureModule(updatableAndDeletable, out var module))
+            if (TemperatureModule.TryGetTemperatureModule(updatableAndDeletable, out var module))
                 color = module.lastFreezeCol;
             CreateIceSparkle();
             BuffUtils.Log("IgnitionPoint", "Create FreezeIce");
@@ -929,7 +929,7 @@ namespace BuiltinBuffs.Duality
                 CreateIceSparkle();
 
             lastAlpha = alpha;
-            if (TemperatrueModule.TryGetTemperatureModule(binder, out var temperature))
+            if (TemperatureModule.TryGetTemperatureModule(binder, out var temperature))
             {
                 alpha = Mathf.InverseLerp(temperature.unfreezePoint, temperature.freezePoint, -temperature.temperature);
             }
@@ -966,7 +966,7 @@ namespace BuiltinBuffs.Duality
             }
             iceColors = new Color[origColors.Length][];
 
-            if(TemperatrueModule.TryGetTemperatureModule(binder, out var temperature))
+            if(TemperatureModule.TryGetTemperatureModule(binder, out var temperature))
             {
                 float hue = Custom.RGB2HSL(temperature.lastFreezeCol).x;
                 for (int i = 0; i < iceColors.Length; i++)

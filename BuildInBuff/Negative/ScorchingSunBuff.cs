@@ -166,7 +166,7 @@ namespace BuiltinBuffs.Negative
                         {
                             Creature creature = self.abstractRoom.creatures[k].realizedCreature;
                             
-                            if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
+                            if (TemperatureModule.TryGetTemperatureModule(creature, out var heatModule))
                             {
                                 float mul = 1f;
                                 if (!IsBeingExposedToSunlight(self, creature))
@@ -178,7 +178,7 @@ namespace BuiltinBuffs.Negative
                             else
                             {
                                 heatModule = new CreatureTemperatureModule(creature);
-                                TemperatrueModule.temperatureModuleMapping.Add(creature, heatModule);
+                                TemperatureModule.temperatureModuleMapping.Add(creature, heatModule);
                             }
                             //creature.Hypothermia = Mathf.Min(0, creature.Hypothermia - 0.02f * num);//这行会导致拾荒飞天
                         }
@@ -215,7 +215,7 @@ namespace BuiltinBuffs.Negative
                 }
 
                 float heatstroke = 0;
-                if (TemperatrueModule.TryGetTemperatureModule(self, out var heatModule))
+                if (TemperatureModule.TryGetTemperatureModule(self, out var heatModule))
                 {
                     heatstroke = Mathf.Min(1f, heatModule.temperature / heatModule.ignitingPoint);
                 }
@@ -380,7 +380,7 @@ namespace BuiltinBuffs.Negative
         {
             get
             {
-                if (TemperatrueModule.TryGetTemperatureModule(obj, out var heatModule))
+                if (TemperatureModule.TryGetTemperatureModule(obj, out var heatModule))
                     return heatModule.temperature / heatModule.coolOffRate;
                 else 
                     return -1;
@@ -476,7 +476,7 @@ namespace BuiltinBuffs.Negative
                 {
                     FSprite fSprite = fContainer.GetChildAt(0) as FSprite;
                     FLabel fLabel = fContainer.GetChildAt(1) as FLabel;
-                    if (obj is Creature && TemperatrueModule.TryGetTemperatureModule(obj as Creature, out var heatModule))
+                    if (obj is Creature && TemperatureModule.TryGetTemperatureModule(obj as Creature, out var heatModule))
                     {
                         fLabel.text = (heatModule.coolOffRate / heatModule.ignitingPoint).ToString();
                     }

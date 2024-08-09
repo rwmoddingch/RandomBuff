@@ -91,7 +91,7 @@ namespace BuiltinBuffs.Missions
             orig.Invoke(self);
             if(!origDead && self.dead)
             {
-                if (TemperatrueModule.TryGetTemperatureModule(self, out var temperature) && temperature.burn)
+                if (TemperatureModule.TryGetTemperatureModule(self, out var temperature) && temperature.burn)
                 {
                     scorched++;
                     onLabelRefresh?.Invoke(this);

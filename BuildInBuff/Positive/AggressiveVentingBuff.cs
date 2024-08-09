@@ -43,7 +43,7 @@ namespace BuiltinBuffs.Positive
                 if(p.room == null)
                     continue;
 
-                if(TemperatrueModule.TryGetTemperatureModule(p, out var temperature))
+                if(TemperatureModule.TryGetTemperatureModule(p, out var temperature))
                 {
                     if(temperature.temperature > 0f)
                     {
@@ -56,7 +56,7 @@ namespace BuiltinBuffs.Positive
                         {
                             if (Vector2.Distance(p.DangerPos, crit.DangerPos) > rad)
                                 continue;
-                            if (TemperatrueModule.TryGetTemperatureModule(crit, out var module))
+                            if (TemperatureModule.TryGetTemperatureModule(crit, out var module))
                             {
                                 module.AddTemperature(heat);
                             }

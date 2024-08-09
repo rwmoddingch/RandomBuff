@@ -36,8 +36,8 @@ namespace BuiltinBuffs.Duality
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<DustExplosionBuff, DustExplosionBuffData, DustExplosionBuffEntry>(DustExplosion);
-            TemperatrueModule.AddProvider(new SmokeProvider());
-            TemperatrueModule.AddProvider(new CosmeticSpriteProvider());
+            TemperatureModule.AddProvider(new SmokeProvider());
+            TemperatureModule.AddProvider(new CosmeticSpriteProvider());
         }
 
         public static void HookOn()
@@ -45,9 +45,9 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class SmokeProvider : TemperatrueModule.ITemperatureModuleProvider
+    public class SmokeProvider : TemperatureModule.ITemperatureModuleProvider
     {
-        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        public TemperatureModule ProvideModule(UpdatableAndDeletable target)
         {
             return new SmokeHeatModule(target as SmokeSystem);
         }
@@ -59,9 +59,9 @@ namespace BuiltinBuffs.Duality
             return (target is SmokeSystem);
         }
     }
-    public class CosmeticSpriteProvider : TemperatrueModule.ITemperatureModuleProvider
+    public class CosmeticSpriteProvider : TemperatureModule.ITemperatureModuleProvider
     {
-        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        public TemperatureModule ProvideModule(UpdatableAndDeletable target)
         {
             return new CosmeticSpriteHeatModule(target as CosmeticSprite);
         }
@@ -74,7 +74,7 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class SmokeHeatModule : TemperatrueModule
+    public class SmokeHeatModule : TemperatureModule
     {
         //public BurnFire fire;
         //public FreezeIce freezeIce;
@@ -310,7 +310,7 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    public class CosmeticSpriteHeatModule : TemperatrueModule
+    public class CosmeticSpriteHeatModule : TemperatureModule
     {
         //public BurnFire fire;
         //public FreezeIce freezeIce;

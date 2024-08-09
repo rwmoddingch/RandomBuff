@@ -753,7 +753,7 @@ namespace BuiltinBuffs.Positive
                     bodyChunk.vel *= 0f;
                     bodyChunk.HardSetPosition(bodyChunk.pos);
                 }
-                if (TemperatrueModule.TryGetTemperatureModule(creature, out var heatModule))
+                if (TemperatureModule.TryGetTemperatureModule(creature, out var heatModule))
                 {
                     heatModule.temperature = Mathf.Max(0f, heatModule.temperature - 0.025f);
                 }

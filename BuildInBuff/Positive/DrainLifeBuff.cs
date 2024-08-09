@@ -83,9 +83,15 @@ namespace BuiltinBuffs.Positive
 
                     drainLife.LastHealth = (self.State as HealthState).health;
                 }
+                if (!self.abstractCreature.state.alive)
+                {
+                    DrainLifeFeatures.Remove(self);
+                    return;
+                }
+
             }
             else if (!DrainLifeFeatures.TryGetValue(self, out _) &&
-                     self.abstractCreature.state is HealthState)
+                     self.abstractCreature.state is HealthState && self.abstractCreature.state.alive)
             {
                 DrainLifeFeatures.Add(self, new DrainLife(self));
             }

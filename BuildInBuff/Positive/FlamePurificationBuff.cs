@@ -32,7 +32,7 @@ namespace BuiltinBuffs.Positive
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<FlamePurificationBuff, FlamePurificationBuffData, FlamePurificationBuffEntry>(flamePurificationBuffID);
-            TemperatrueModule.AddProvider(new WormGrassProvider());
+            TemperatureModule.AddProvider(new WormGrassProvider());
         }
 
         public static void HookOn()
@@ -43,7 +43,7 @@ namespace BuiltinBuffs.Positive
         private static void DaddyCorruption_DrawSprites(On.DaddyCorruption.orig_DrawSprites orig, DaddyCorruption self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig.Invoke(self, sLeaser, rCam, timeStacker, camPos);
-            if(TemperatrueModule.TryGetTemperatureModule(self, out var module))
+            if(TemperatureModule.TryGetTemperatureModule(self, out var module))
             {
                 var corruptionTempModule = module as DaddyCorruptionTempModule;
                 for(int i = 0;i < sLeaser.sprites.Length;i++)
@@ -55,10 +55,10 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class WormGrassProvider : TemperatrueModule.ITemperatureModuleProvider
+    internal class WormGrassProvider : TemperatureModule.ITemperatureModuleProvider
     {
 
-        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        public TemperatureModule ProvideModule(UpdatableAndDeletable target)
         {
             return new WormGrassTempModule(target as WormGrass);
         }
@@ -72,7 +72,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class WormGrassTempModule : TemperatrueModule
+    internal class WormGrassTempModule : TemperatureModule
     {
         WormGrass.WormGrassPatch[] patchIndexs;
 
@@ -190,9 +190,9 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class DaddyCorruptionProvider : TemperatrueModule.ITemperatureModuleProvider
+    internal class DaddyCorruptionProvider : TemperatureModule.ITemperatureModuleProvider
     {
-        public TemperatrueModule ProvideModule(UpdatableAndDeletable target)
+        public TemperatureModule ProvideModule(UpdatableAndDeletable target)
         {
             return new DaddyCorruptionTempModule();
         }
@@ -206,7 +206,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class DaddyCorruptionTempModule : TemperatrueModule
+    internal class DaddyCorruptionTempModule : TemperatureModule
     {
         public List<int> skipSpriteIndexRange = new List<int>();
         public override void Update(UpdatableAndDeletable updatableAndDeletable)
