@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "CentipedeCracker",
-        "Description" : "Centipede shells will trigger a series of chain explosions of other shells, and this type of explosions won't hurt centipedes."
+        "Description" : "CWhen centipede shell shedding, it will trigger a series of chain explosions which won't hurt centipedes."
     }
 }

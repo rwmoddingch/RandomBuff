@@ -8,10 +8,10 @@
 
   "Chinese": {
     "BuffName": "大口径",
-    "Description": "投掷的炸弹速度更快，范围更大，伤害更高，后坐力也更大..."
+    "Description": "投掷的炸弹速度更快，范围更大，伤害更高，后坐力也更大"
   },
   "English": {
     "BuffName": "High Caliber",
-    "Description": "Higher muzzle velocity,better range,and greater recoil..."
+    "Description": "Higher muzzle velocity,better range,and greater recoil for bombs"
   }
 }

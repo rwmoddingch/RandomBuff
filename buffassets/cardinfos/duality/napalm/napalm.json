@@ -4,14 +4,14 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
-    "Color" : "000000",
+    "Color" : "FF3200",
 
     "Chinese" : {
         "BuffName" : "凝固汽油弹",
-        "Description" : "极大降低炸弹的爆炸伤害，但炸弹爆炸将创造一片持续15秒的火区，前置为燃点。"
+        "Description" : "前置为温度; 极大降低炸弹的爆炸伤害，但炸弹爆炸将创造一片持续15秒的火区。"
     },
     "English": {
         "BuffName" : "Napalm",
-        "Description" : "Greatly reduces the blast damage of the bomb, but the bomb explosion will create a zone of fire that lasts for 15 seconds, fronted as an ignition point."
+        "Description" : "Bind with Temperature; Greatly reduces the blast damage of the bomb, but the bomb explosion will create a zone of fire that lasts for 15 seconds."
     }
 }

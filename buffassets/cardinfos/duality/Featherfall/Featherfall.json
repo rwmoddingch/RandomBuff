@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Feather Fall",
-        "Description":"When in midair, the time speed will be halved"
-    },
+        "Description":"When in midair, time passes at half the rate"
+    }
 }

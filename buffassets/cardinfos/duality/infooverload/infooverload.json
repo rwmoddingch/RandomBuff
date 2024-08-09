@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "InfoOverload",
-        "Description" : "Replace all non-colored pearls with HalcyonPearl"
+        "Description" : "Replace all normal pearls with HalcyonPearl"
     }
 }

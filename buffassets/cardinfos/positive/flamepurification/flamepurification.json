@@ -8,10 +8,10 @@
 
     "Chinese" : {
         "BuffName" : "烈焰净化",
-        "Description" : "前置为燃点；地形上燃烧的火焰将可以清除舌草和香菇墙"
+        "Description" : "前置为温度；地形上燃烧的火焰将可以清除舌草"
     },
     "English" : {
         "BuffName" : "FlamePurification",
-        "Description" : "Pre-set to IgnitionPoint; burning flames on the terrain will be able to clear walls of tongue grass and corrupt"
+        "Description" : "Bind with Temperature; burning flames on the terrain will be able to clear walls of worm grass"
     }
 }

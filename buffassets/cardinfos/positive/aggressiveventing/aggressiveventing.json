@@ -9,10 +9,10 @@
 
   "Chinese": {
     "BuffName": "暴力散热",
-    "Description": "前置为燃点；触发时会立刻清空玩家的正温度，并全部转移到附近其他生物上，冷却时间30秒"
+    "Description": "前置为温度；触发时会立刻清空玩家的正温度，并全部转移到附近其他生物上，冷却时间30秒"
   },
   "English": {
     "BuffName": "AggressiveVenting",
-    "Description": "Based on IgnitionPoint; When triggered, it immediately clears the player's positive temperature and transfers it all to other nearby creatures, cooldown 30 seconds"
+    "Description": "Bind with Temperature; When triggered, it immediately clears the player's positive temperature and transfers it all to other nearby creatures, cooldown 30 seconds"
   }
 }

@@ -8,10 +8,10 @@
 
     "Chinese" : {
         "BuffName" : "喷火器",
-        "Description" : "触发后获得一个仅能同时存在一个的喷火器（长按拾取键使用），重复召唤将会删去上一个"
+        "Description" : "前置为温度; 触发后获得一个仅能同时存在一个的喷火器（长按拾取键使用），重复召唤将会删去上一个"
     },
   "English": {
     "BuffName": "FlameThrower",
-    "Description": "Triggered to gain a flamethrower(hold grab to use) that can only exist one at a time; repeated summoning will delete the previous one"
+    "Description": "Bind with Temperature; triggered to gain a flamethrower(hold grab to use) that can only exist one at a time; repeated summoning will delete the previous one"
   }
 }

@@ -8,11 +8,11 @@
     "Color" : "FF7300",
 
     "Chinese" : {
-        "BuffName" : "燃点",
-        "Description" : "添加新的机制，每个生物有独立的高温条，当达到一定的阈值时会触发燃烧。部分伤害具有高温属性。"
+        "BuffName" : "温度",
+        "Description" : "添加新的温度机制并替代原版的低温机制，每个生物有独立的温度条，当高温达到一定的阈值时会触发燃烧。当低温达到一定阈值时会触发短暂冰冻。部分伤害具有高温属性。"
     },
     "English": {
-        "BuffName" : "IgnitionPoint",
-        "Description" : "Add a new mechanic where each creature has a separate heat bar that triggers burning when a certain threshold is reached. Some damage has a high temperature property."
+        "BuffName" : "Temperature",
+        "Description" : "Add a new temperature mechanic to replace original hypothermia. Each creature has a separate temperature bar. Burning will be triggered when the high temperature reaches a certain threshold.A short freeze will be triggered the low temperature reaches a certain threshold. Some kind of damage has a high temperature property."
     }
 }
