@@ -120,7 +120,9 @@ namespace RandomBuff.Render.UI
     internal class InGameSlotHideAnimator : BuffCardAnimator
     {
         float targetScale;
-        Vector2 targetPosition;
+
+        Vector2 basicTargetPosition;
+        Vector2 TargetPosition => basicTargetPosition;
 
         InGameSlotInteractionManager InGameSlotInteractionManager => buffCard.interactionManager as InGameSlotInteractionManager;
         BuffCardTransformSmoother smoother;
@@ -136,13 +138,15 @@ namespace RandomBuff.Render.UI
             smoother = new BuffCardTransformSmoother(buffCard);
 
             targetScale = BuffCard.normalScale * 0.1f;
-            targetPosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * InGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
+
+            basicTargetPosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * InGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
+
         }
 
         public override void Update()
         {
             smoother.LerpRotation(Vector3.zero, 0.15f);
-            smoother.LerpPos(targetPosition, 0.15f);
+            smoother.LerpPos(TargetPosition, 0.15f);
             smoother.LerpScale(targetScale, 0.15f);
         }
 
@@ -378,7 +382,10 @@ namespace RandomBuff.Render.UI
             if (!CurrentFocused && buffCard.Highlight)
                 buffCard.Highlight = false;
 
-            
+            if (flip && buffCard.CurrentFocused)
+            {
+                buffCard._cardRenderer.cardTextBackController.CommitScroll(InputAgency.Current.GetScroll() * (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default ? 2f : 1f));
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
