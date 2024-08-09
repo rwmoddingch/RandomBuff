@@ -71,7 +71,7 @@ namespace BuiltinBuffs.Positive
     internal class DesolateDiveBuffEntry : IBuffEntry
     {
         public static BuffID desolateDiveBuffID = new BuffID("DesolateDive", true);
-        static float DiveVelThreshold = 12f;
+        static float DiveVelThreshold = 15f;
 
         public static string desolateDiveSpike;
         public static string desolateDiveHalfCircle;
@@ -86,7 +86,7 @@ namespace BuiltinBuffs.Positive
         {
             desolateDiveSpike = Futile.atlasManager.LoadImage(desolateDiveBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "DesolateDiveSpike").elements[0].name;
             desolateDiveHalfCircle = Futile.atlasManager.LoadImage(desolateDiveBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "DesolateDiveHalfCircle").elements[0].name;
-            BuffSounds.LoadSound(desolateDive, desolateDiveBuffID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("hero_quake_spell_impact", 0.15f));
+            BuffSounds.LoadSound(desolateDive, desolateDiveBuffID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("hero_quake_spell_impact"));
         }
 
         public static void HookOn()
@@ -121,26 +121,52 @@ namespace BuiltinBuffs.Positive
             if (firstContact && self.room != null && speed > DiveVelThreshold && direction.y < 0 && self.input[0].y < 0 &&  PlayerUtils.TryGetModulePart<DesolatePlayerModule>(self, DesolateDiveBuff.Instance, out var moudle) && moudle.Allowed)
             {
                 Vector2 pos = Helper.GetContactPos(self.bodyChunks[chunk].pos, Vector2.down, self.room);
-                CreateDiveEffec(pos, self.room);
-                self.room.AddObject(new ShockWave(self.bodyChunks[chunk].pos, 800f, 0.015f, 6));
+                if (self.room.BeingViewed)
+                {
+                    CreateDiveEffec(pos, self.room);
+                    self.room.game.cameras[0].ScreenMovement(pos, Vector2.down * 25f, 0.1f);
+                }
 
+                self.room.AddObject(new ShockWave(self.bodyChunks[chunk].pos, 800f, 0.015f, 6));
+               
                 self.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Death, self.mainBodyChunk);
-                self.room.PlaySound(desolateDive,0f, 0.5f, 1f);
+                self.room.PlaySound(desolateDive,0f, 0.45f, 1f);
                 foreach(var obj in self.room.updateList)
                 {
-                    if(obj is Creature creature && creature != self)
+                    if(obj is PhysicalObject p)
                     {
-                        if ((creature.DangerPos - self.DangerPos).magnitude < desolateRad * 2F)
-                            creature.stun += Mathf.CeilToInt(speed * 2);
+                        Vector2 delta = Vector2.zero;
+                        for(int i = 0;i < p.bodyChunks.Length; i++)
+                        {
+                            delta += (p.bodyChunks[i].pos - self.DangerPos);
+                        }
+                        delta /= p.bodyChunks.Length;
+                        float dist = delta.magnitude;
+
+                        if (dist < desolateRad * 2f)
+                        {
+                            if (p is Creature creature)
+                            {
+                                if (creature is Player)
+                                    continue;
+                                creature.stun += Mathf.CeilToInt(speed * 2);
+                            }
+
+                            Vector2 force = delta.normalized * Custom.LerpMap(dist, 0f, desolateRad, 20f, 0f) + Vector2.up * 8f;
+
+                            foreach (var bodyChunk in p.bodyChunks)
+                                bodyChunk.vel += force;
+                        }
                     }
+                    
                 }
                 moudle.Triggered();
             }
             orig.Invoke(self, chunk, direction, speed, firstContact);
         }
 
-        static float desolateRad = 80f;
-        static float ovalScale = 0.1f;
+        static float desolateRad = 160f;
+        static float ovalScale = 0.05f;
         public static void CreateDiveEffec(Vector2 pos, Room room)
         {
             var emitter1 = new ParticleEmitter(room);
@@ -202,7 +228,7 @@ namespace BuiltinBuffs.Positive
 
             ParticleSystem.ApplyEmitterAndInit(emitter2);
 
-
+            //向上波
             var emitter3 = new ParticleEmitter(room);
             emitter3.lastPos = emitter3.pos = pos;
             //StormIsApproaching.AdditiveDefault
@@ -218,8 +244,8 @@ namespace BuiltinBuffs.Positive
             emitter3.ApplyParticleModule(new SetCustomPos(emitter3, (p) =>
             {
                 float l2 = 0f;
-                float y = (l2) * desolateRad * 6f * Mathf.Lerp(0.95f, 1.05f, p.randomParam1);
-                float x = Mathf.Sin(l2 * Mathf.PI * 8f) * desolateRad * 0.4f + Mathf.Lerp(-0.5f, 0.5f, p.randomParam2) * desolateRad;
+                float y = (l2) * desolateRad * 1.5f * Mathf.Lerp(0.95f, 1.05f, p.randomParam1);
+                float x = Mathf.Sin(l2 * Mathf.PI * 8f) * desolateRad * 0.2f + Mathf.Lerp(-0.25f, 0.25f, p.randomParam2) * desolateRad;
                 return new Vector2(x, y) + p.emitter.pos;
             }));
             emitter3.ApplyParticleModule(new AlphaOverLife(emitter3, (p, l) =>
@@ -229,8 +255,8 @@ namespace BuiltinBuffs.Positive
             emitter3.ApplyParticleModule(new PositionOverLife(emitter3, (p, l) =>
             {
                 float l2 = 1f - Mathf.Pow(1f - l, 3f);
-                float y = (l2) * desolateRad * 6f * Mathf.Lerp(0.95f, 1.05f, p.randomParam1);
-                float x = Mathf.Sin(l2 * Mathf.PI * 8f) * desolateRad * 0.4f + Mathf.Lerp(-0.5f, 0.5f, p.randomParam2) * desolateRad;
+                float y = (l2) * desolateRad * 3f * Mathf.Lerp(0.95f, 1.05f, p.randomParam1);
+                float x = Mathf.Sin(l2 * Mathf.PI * 8f) * desolateRad * 0.2f + Mathf.Lerp(-0.25f, 0.25f, p.randomParam2) * desolateRad;
                 return new Vector2(x, y) + p.emitter.pos;
             }));
 
@@ -243,7 +269,7 @@ namespace BuiltinBuffs.Positive
 
             ParticleSystem.ApplyEmitterAndInit(emitter3);
 
-
+            //石头
             var emitter4 = new ParticleEmitter(room);
             emitter4.pos = emitter4.lastPos = pos;
             emitter4.ApplyParticleSpawn(new BurstSpawnerModule(emitter4, Random.Range(5, 10)));
