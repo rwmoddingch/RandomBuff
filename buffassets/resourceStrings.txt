@@ -77,6 +77,7 @@ InGameSlot_CardDetail|BuffDetail
 CardPickSlot_SlotTitle|Pick <Cards> cards
 InGameSlot_SandBoxTitle|Modify active buffs
 InGameSlot_OpenSandBoxButton|Buff
+HudTips|Press {0} to open hud for browsing condition and buffcard
 
 
 //CardpediaCardSheet

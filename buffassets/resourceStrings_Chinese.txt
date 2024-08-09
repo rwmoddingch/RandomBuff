@@ -80,6 +80,7 @@ InGameSlot_CardDetail|Buff详情
 CardPickSlot_SlotTitle|抽取<Cards>张卡
 InGameSlot_SandBoxTitle|修改启用的buff
 InGameSlot_OpenSandBoxButton|Buff
+HudTips|按下 {0} 打开hud以浏览条件和buff卡牌
 
 
 //CardpediaCardSheet

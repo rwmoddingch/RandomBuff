@@ -585,6 +585,7 @@ namespace RandomBuff.Render.UI
         public CardPickerSlot ActivePicker { get; private set; }
         public BuffConditionHUD ConditionHUD { get; private set; }
         public CardPocket SandboxPocket { get; private set; }
+        public HudTips SlotHudTips { get; private set; }
 
         FContainer buttonContainer;
         public SideSingleSelectButton OpenPocketButton { get; private set; }
@@ -641,6 +642,11 @@ namespace RandomBuff.Render.UI
                     }
                 };
             }
+
+            if(HudTips.TryGetHudTips(Container, out var tip))
+            {
+                SlotHudTips = tip;
+            }
         }
 
         public override void Update()
@@ -653,6 +659,7 @@ namespace RandomBuff.Render.UI
             ConditionHUD.Update();
             SandboxPocket?.Update();
             OpenPocketButton?.Update();
+
             if (ActivePicker != null)
             {
                 ActivePicker.Update();
@@ -674,6 +681,9 @@ namespace RandomBuff.Render.UI
                     BuffPlugin.Log("Dequeue new pick");
                 }
             }
+
+            if (SlotHudTips != null && SlotHudTips.slateForDeletion)
+                SlotHudTips = null;
         }
 
         public override void AppendCard(BuffCard buffCard)
@@ -802,6 +812,7 @@ namespace RandomBuff.Render.UI
             TimerAnimSlot.Destory();
             ConditionHUD.Destroy();
             SandboxPocket?.Destroy();
+            SlotHudTips?.ClearSprites();
             base.Destory();
             InputAgency.AllRelease();
         }
@@ -851,6 +862,11 @@ namespace RandomBuff.Render.UI
             if (!show && SandboxPocket.Show)
                 SandboxPocket.SetShow(false);
 
+        }
+
+        public void HideTips()
+        {
+            SlotHudTips?.Hide();
         }
 
         /// <summary>

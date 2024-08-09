@@ -595,14 +595,16 @@ namespace RandomBuff.Render.UI
                 foreach (var card in managedCards)
                     card.SetAnimatorState(BuffCard.AnimatorState.InGameSlot_Show);
                 if (SubManager != null) SubManager.overrideDisabled = true;
+
                 if (Slot.completeSlot != null)
                 {
                     Slot.completeSlot.ConditionHUD.ChangeMode(BuffCondition.BuffConditionHUD.Mode.Alway);
                     Slot.completeSlot.SetPocketButtonShow(true);
+                    Slot.completeSlot.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
+                    Slot.completeSlot.SetGamePaused(true);
+                    Slot.completeSlot.HideTips();
                 }
-                Slot.completeSlot?.Title?.ChangeTitle(BuffResourceString.Get("InGameSlot_SlotTitle"), true);
-
-                Slot.completeSlot?.SetGamePaused(true);
+                 
                 InputAgency.Current.TakeFocus(this);
 
                 //用于在动画完成时更新鼠标位置
