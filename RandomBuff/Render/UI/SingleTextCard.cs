@@ -76,7 +76,8 @@ namespace RandomBuff.Render.UI
             Container = new FContainer();
 
             _cardRenderer = CardRendererManager.GetSingleTextRenderer(text);
-            Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture));
+            _ftexture = _cardRenderer.CleanGetTexture();
+            Container.AddChild(_ftexture);
             Text = text;
         }
 
@@ -93,6 +94,7 @@ namespace RandomBuff.Render.UI
             CardRendererManager.RecycleCardRenderer(_cardRenderer);
             Container.RemoveAllChildren();
             Container.RemoveFromContainer();
+            _ftexture.RemoveFromContainer();
         }
     }
 }

@@ -29,6 +29,12 @@ namespace RandomBuff.Render.CardRender
 
         protected GameObject _cardQuadBack;
 
+        protected FTexture _texture;
+        public FTexture Texture
+        {
+            get => _texture;
+        }
+
         /// <summary>
         /// 表示卡牌物体的旋转
         /// </summary>
@@ -157,6 +163,7 @@ namespace RandomBuff.Render.CardRender
             //初始化专有相机
             cardCameraController.Init(id);
 
+            _texture = new FTexture(cardCameraController.targetTexture);
             _notFirstInit = true;
         }
 
@@ -177,9 +184,24 @@ namespace RandomBuff.Render.CardRender
             return meshFilter.sharedMesh.vertices.Select(v => meshFilter.gameObject.transform.TransformPoint(v)).ToList();
         }
 
+        public virtual void OnDestroy()
+        {
+            BuffPlugin.LogDebug($"BuffCardRenderer_{_id} release ftexture");
+            _texture.Destroy();
+        }
+
         public virtual string Salt()
         {
             return $"BuffCardRendererBase_{_id}";
+        }
+
+        public FTexture CleanGetTexture()
+        {
+            Texture.SetPosition(Vector2.zero);
+            Texture.scale = 1f;
+            Texture.alpha = 1f;
+            Texture.rotation = 0f;
+            return Texture;
         }
     }
 

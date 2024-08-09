@@ -23,6 +23,7 @@ namespace RandomBuff.Render.UI
         public const float normalScale = 0.5f;
 
         //基础变量
+        bool _texInit = true;
         FTexture _ftexture;
         public FContainer Container { get; private set; }
         public RenderTexture RenderTexture { get => _cardRenderer.cardCameraController.targetTexture; }
@@ -30,37 +31,57 @@ namespace RandomBuff.Render.UI
         public BuffID ID { get; private set; }
         public BuffStaticData StaticData => BuffConfigManager.GetStaticData(ID);
 
-        public FTexture CardTexture
-        {
-            get
-            {
-                return _ftexture;
-            }
-        }
-
+        float _tempRotZ;
         public Vector3 Rotation
         {
-            get => new Vector3(_cardRenderer.Rotation.x, _cardRenderer.Rotation.y, _ftexture.rotation);
+            get => new Vector3(_cardRenderer.Rotation.x, _cardRenderer.Rotation.y, _ftexture != null ? _ftexture.rotation : _tempRotZ);
             set
             {
                 _cardRenderer.Rotation = value;
-                _ftexture.rotation = value.z;
+                if (_ftexture != null)
+                    _ftexture.rotation = value.z;
+                else
+                    _tempRotZ = value.z;
             }
         }
+
+        Vector2 _tempPos;
         public Vector2 Position
         {
-            get => _ftexture.GetPosition();
-            set => _ftexture.SetPosition(value);
+            get => _ftexture != null ? _ftexture.GetPosition() : _tempPos;
+            set
+            {
+                if (_ftexture != null)
+                    _ftexture.SetPosition(value);
+                else
+                    _tempPos = value;
+            }
         }
+
+        float _tempScale = 1f;
         public float Scale
         {
-            get => _ftexture.scale;
-            set => _ftexture.scale = value;
+            get => (_ftexture != null) ? _ftexture.scale : _tempScale;
+            set
+            {
+                if(_ftexture != null)
+                    _ftexture.scale = value;
+                else
+                    _tempScale = value;
+            }
         }
+
+        float _tempAlpha = 1f;
         public float Alpha
         {
-            get => _ftexture.alpha;
-            set => _ftexture.alpha = value;
+            get => _ftexture != null ? _ftexture.alpha : _tempAlpha;
+            set
+            {
+                if (_ftexture != null)
+                    _ftexture.alpha = value;
+                else
+                    _tempAlpha = value;
+            }
         }
 
         //动画机
@@ -265,7 +286,9 @@ namespace RandomBuff.Render.UI
             _cardRenderer = CardRendererManager.GetRenderer(buffID);
             Container = new FContainer();
 
-            Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture, _cardRenderer.Salt()));
+            _ftexture = _cardRenderer.CleanGetTexture();
+            Container.AddChild(_cardRenderer.Texture);
+
             SetAnimatorState(initState);
 
             Scale = normalScale;
@@ -274,6 +297,15 @@ namespace RandomBuff.Render.UI
         //更新方法，在交互管理器中调用
         public void Update()
         {
+            //if(!_texInit && _cardRenderer.cardCameraController.targetTexture != null)
+            //{
+            //    Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture, ""));
+            //    _ftexture.rotation = _tempRotZ;
+            //    _ftexture.scale = _tempScale;
+            //    _ftexture.SetPosition(_tempPos);
+            //    _ftexture.alpha = _tempAlpha;
+            //    _texInit = true;
+            //}
             currentAnimator?.Update();
         }
 
@@ -287,7 +319,7 @@ namespace RandomBuff.Render.UI
             CardRendererManager.RecycleCardRenderer(_cardRenderer);
             Container.RemoveAllChildren();
             Container.RemoveFromContainer();
-            _ftexture.Destroy();
+            _ftexture.RemoveFromContainer();
         }
 
         //改变卡牌的状态
