@@ -726,6 +726,8 @@ namespace RandomBuff.Render.UI
             ConditionHUD.DrawSprites(timeStacker);
             SandboxPocket?.GrafUpdate(timeStacker);
             OpenPocketButton?.GrafUpdate(timeStacker);
+
+#if TESTVERSION
             if (Input.GetKeyDown(KeyCode.C) && File.Exists(path))
             {
                 //BuffPoolManager.Instance.CreateBuff(new BuffID("DeathFreeMedallion"));
@@ -738,6 +740,7 @@ namespace RandomBuff.Render.UI
                     id.CreateNewBuff();
                 }
             }
+#endif
         }
 
         /// <summary>

@@ -18,8 +18,13 @@ namespace RandomBuff
             public static readonly ProcessManager.ProcessID UnstackMenu = new("UnstackMenu", true);
             public static readonly ProcessManager.ProcessID StackMenu = new("StackMenu", true);
             public static readonly ProcessManager.ProcessID GachaMenuID = new("GachaMenu", true);
+        }
 
+        public static class StoryGameInitCondition
+        {
 
+            public static readonly ProcessManager.MenuSetup.StoryGameInitCondition BuffStackLoad =
+                new("BuffStackLoad", true);
         }
     }
 }
