@@ -156,7 +156,7 @@ Duality|双向
 
 
 //BuffCondition_Builtin
-InRangeDisplayName_WormGrassWipeOutCondition|清除房间内的所有舌草
+InRangeDisplayName_WormGrassWipeOutCondition|在一轮回内清除房间内的所有舌草
 
 //BuffCondition_CommunityID; 英文不需要此条目
 Lizards|蜥蜴

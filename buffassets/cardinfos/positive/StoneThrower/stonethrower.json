@@ -1,9 +1,10 @@
 {
     "FaceName": "stonethrower",
     "BuffID" : "StoneThrower",
-    "BuffType" : "Positive",
+    "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
+    "AsPositive": true,
     "Color" : "FFFFFF",
 
     "Chinese" : {
@@ -11,7 +12,7 @@
         "Description" : "石头伤害提高为1，但是矛伤害降低至原来的0.5"
     },
     "English" : {
-        "BuffName" : "StoneThrower",
+        "BuffName" : "Stone Thrower",
         "Description" : "Stone damage is increased to 1, but spear damage is reduced to half"
     }
 }

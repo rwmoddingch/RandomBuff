@@ -11,7 +11,7 @@
         "Description" : "子弹菇获得移动能力"
     },
     "English": {
-        "BuffName" : "WalkingMushroom",
-        "Description" : "Bullet Mushroom gains mobility"
+        "BuffName" : "Walking-shroom",
+        "Description" : "Mushroom gains mobility"
     }
 }

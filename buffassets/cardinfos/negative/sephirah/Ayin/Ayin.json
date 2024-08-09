@@ -11,11 +11,11 @@
     ],
     "Chinese":{
         "BuffName":"纯真的自我",
-        "Description":"现在，该是我们退场的时候了。请不要悲伤，就算我们即将消逝在光芒之中，但我们绝不会被世人遗忘。（卡牌效果：随食物点数提高旋转屏幕，无限雨循环时间，全局生物处于催眠状态）"
+        "Description":"【关闭SBCameraScroll来保证显示效果正常】\n现在，该是我们退场的时候了。请不要悲伤，就算我们即将消逝在光芒之中，但我们绝不会被世人遗忘。（卡牌效果：随食物点数提高旋转屏幕，无限雨循环时间，全局生物处于催眠状态）"
     },
     "Hidden":true,
     "English":{
         "BuffName":" The Knowing I",
-        "Description":"It’s time for us to step down from the stage. Don’t worry, we will not be forgotten, even if we scatter and fade away into the light. (Card Effect: Increase screen rotation based on food points, infinite rain cycle duration, and all global creatures are in a state of hypnosis.)"
+        "Description":"[DISABLE SBCameraScroll to ensure the display works properly]\n It’s time for us to step down from the stage. Don’t worry, we will not be forgotten, even if we scatter and fade away into the light. (Card Effect: Increase screen rotation based on food points, infinite rain cycle duration, and all global creatures are in a state of hypnosis.)"
     }
 }

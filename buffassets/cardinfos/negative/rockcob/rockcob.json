@@ -11,7 +11,7 @@
         "Description" : "激活爆米花只会生成一堆石头"
     },
     "English" : {
-        "BuffName" : "RockCob",
+        "BuffName" : "Rockcorn Plant",
         "Description" : "Activating popcorn only generates a pile of rocks"
     }
 }
