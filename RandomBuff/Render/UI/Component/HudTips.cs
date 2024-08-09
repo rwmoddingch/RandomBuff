@@ -54,8 +54,15 @@ namespace RandomBuff.Render.UI.Component
 
         public void Hide()
         {
+            if (slateForDeletion)
+                return;
             show = false;
             FireUpAnim();
+            if(!BuffOptionInterface.Instance.DisableCardSlotText.Value)
+            {
+                BuffOptionInterface.Instance.DisableCardSlotText.Value = true;
+                BuffOptionInterface.SaveConfig();
+            }
         }
 
         public void FireUpAnim()
@@ -87,8 +94,6 @@ namespace RandomBuff.Render.UI.Component
             if (!BuffOptionInterface.Instance.DisableCardSlotText.Value)
             {
                 hudTips = new HudTips(ownerContainer);
-                BuffOptionInterface.Instance.DisableCardSlotText.Value = true;
-                BuffOptionInterface.SaveConfig();
                 return true;
             }
             else
