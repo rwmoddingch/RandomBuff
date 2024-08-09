@@ -35,6 +35,7 @@ namespace RandomBuff.Core.Option
             CheatAllCosmetics = config.Bind(nameof(CheatAllCosmetics), false);
 
             DisableNotifyDialog = config.Bind(nameof(DisableNotifyDialog), false);
+            DisableCardSlotText = config.Bind(nameof(DisableCardSlotText), false);
             Instance = this;
 
         }
@@ -217,6 +218,9 @@ namespace RandomBuff.Core.Option
         public Configurable<bool> EnableExpeditionExtend {get; private set; }
         public Configurable<bool> EnableExpeditionModExtend { get; private set; }
         public Configurable<bool> DisableNotifyDialog { get; private set; }
+
+        public Configurable<bool> DisableCardSlotText { get; private set; }
+
 
         private OpCheckBox mainExpedition, modExpedition;
 
