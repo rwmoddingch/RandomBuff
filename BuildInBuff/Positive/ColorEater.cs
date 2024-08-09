@@ -410,7 +410,7 @@ namespace BuildInBuff.Positive
         public static BuffID ColorEaterID = new BuffID("ColorEaterID", true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<ColorEaterBuff, ColorEaterBuffData, ColorEaterBuffEntry>(ColorEaterID);
+            //BuffRegister.RegisterBuff<ColorEaterBuff, ColorEaterBuffData, ColorEaterBuffEntry>(ColorEaterID);
         }
 
         public static void HookOn()
