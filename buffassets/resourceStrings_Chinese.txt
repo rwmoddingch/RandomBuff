@@ -255,7 +255,7 @@ BuffManual_CardPedia_1|浏览卡牌
 //BuffManual_Summary
 BuffManual_Summary_Content_0|随机增益是以随机的增益效果搭配为玩法的游戏模式。你可以为自己添加挑战，也可以完成特殊的使命来解锁奖励。
 BuffManual_Gameplay_Content_0|通过启用不同的buff来对游戏玩法产生或大或小的影响。<LINE>大部分的更改都是动态的，不同的buff也有可能组合产生意外的效果。
-BuffManual_Gameplay_Content_1|你可以选择两种不同的模式来游玩Random Buff，分别自由模式和使命模式。
+BuffManual_Gameplay_Content_1|你可以选择两种不同的模式来游玩Random Buff，分别是自由模式和使命模式。
 BuffManual_Gameplay_Content_2|不同游戏模式均存在可以完成的条件。<LINE>每个条件都有自己的需求和进度，完成条件可以获取不同数量的经验值。
 BuffManual_FreeMode_Content_0|最常规的游玩方式。<LINE>如果成功进行结算，只会根据完成的条件、击杀数量和持有卡牌数量结算经验值提升等级。<LINE>可在界面左下角切换子模式。
 BuffManual_FreeMode_Content_1|可以选择0到5个条件进行游戏，每个成功的雨眠会进行一轮抽取，当完成所有条件后雨眠即可进行结算。<LINE>0个条件时不会进行结算。<LINE>根据选择的蛞蝓猫，初始房间与选择的蛞蝓猫在剧情模式的初始房间相同。
@@ -284,7 +284,7 @@ Remix_Title|Random Buff
 Remix_Option|配置
 Remix_CardSlotKey|查看卡牌按键
 Remix_KeyBindKey|卡牌绑键按键
-Remix_ShowExceptionLog|提示报错
+Remix_ShowExceptionLog|报错提示
 Remix_EnableExpeditionExtend|实验性 - DLC探险效果转化卡牌
 Remix_EnableExpeditionModExtend|实验性 - MOD探险效果转化卡牌
 Remix_Cheat|作弊

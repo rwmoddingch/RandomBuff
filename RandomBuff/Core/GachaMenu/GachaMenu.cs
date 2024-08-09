@@ -43,7 +43,7 @@ namespace RandomBuff.Core.GachaMenu
             container.AddChild(slotTitle.Container);
 
             currentPacket = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket;
-            if(currentPacket.positive.pickTimes == 0)
+            if(currentPacket.positive.pickTimes == 0 || currentPacket.positive.selectCount == 0)
                 positive = false;
 
             AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>

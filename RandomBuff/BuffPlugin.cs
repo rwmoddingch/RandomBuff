@@ -223,7 +223,7 @@ namespace RandomBuff
                     {
                         orig();
 
-                        if (devVersion == null && !File.Exists(AssetManager.ResolveFilePath("disableDevMark.txt")))
+                        if (devVersion == null)
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
                                 $"Random Buff, Build: 2024_08_09\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",

@@ -88,7 +88,7 @@ namespace RandomBuff.Cardpedia
             //Futile.atlasManager.LoadImage("buffassets/illustrations/ColorPicker_Pigment");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Chi");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Stack_Chi");
-            //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Chi");
+              //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Trigger_Chi");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Description_Chi");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Confliction_Chi");
             //Futile.atlasManager.LoadImage("buffassets/illustrations/Titles/Type_Eng");
