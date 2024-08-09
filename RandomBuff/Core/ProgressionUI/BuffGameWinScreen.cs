@@ -148,7 +148,7 @@ namespace RandomBuff.Core.StaticsScreen
         {
             if (message == "CONTINUE")
             {
-                if(newFinishedQuests.Count == 0 && scoreCaculator.state == BuffGameScoreCaculator.ScoreCaculatorState.Finish)
+                if(newFinishedQuests.Count == 0 && scoreCaculator != null && scoreCaculator.state == BuffGameScoreCaculator.ScoreCaculatorState.Finish)
                 {
                     this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu);
                     if (manager.musicPlayer != null)

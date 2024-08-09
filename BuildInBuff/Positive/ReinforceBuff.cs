@@ -79,7 +79,7 @@ namespace BuiltinBuffs.Positive
             if (tracker != null)
                 ReachChieftain = ReachChieftain || tracker.GoalFullfilled;
 
-            BuffUtils.Log("ReinforceBuff", $"UpdateReachChieftain : {ReachChieftain}");
+            //BuffUtils.Log("ReinforceBuff", $"UpdateReachChieftain : {ReachChieftain}");
         }
 
         public void UpdateRoomRequirements(World world)
