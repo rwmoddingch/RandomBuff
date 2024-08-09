@@ -67,18 +67,8 @@ namespace RandomBuff.Core.Hooks
                 });
             };
 
-            //IL.Menu.MainMenu.ctor += (il) =>
-            //{
-            //    InsertMainMenuButtonAfter(il, "COLLECTION", self =>
-            //    {
-            //        float buttonWidth = MainMenu.GetButtonWidth(self.CurrLang);
-            //        Vector2 pos = new Vector2(683f - buttonWidth / 2f, 0f);
-            //        Vector2 size = new Vector2(buttonWidth, 30f);
-            //        SimpleButton collectionButton = new SimpleButton(self, self.pages[0], BuffResourceString.Get("MainMenu_Cardpedia"), "CARDPEDIA", pos, size);
-            //        CardpediaMenuHooks.menu = self;
-            //        self.AddMainMenuButton(collectionButton, new Action(CardpediaMenuHooks.CollectionButtonPressed), 0);
-            //    });
-            //};
+            IL.ProcessManager.PostSwitchMainProcess += ProcessManager_PostSwitchMainProcess1;
+
 
             IL.Menu.MainMenu.AddMainMenuButton += (il) =>
             {
@@ -122,7 +112,31 @@ namespace RandomBuff.Core.Hooks
 
         }
 
-   
+        private static void ProcessManager_PostSwitchMainProcess1(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            ILLabel label = c.DefineLabel();
+            try
+            {
+                c.GotoNext(
+                    i => i.MatchLdarg(0),
+                    i => i.MatchLdfld<ProcessManager>("rainWorld"),
+                    i => i.MatchLdfld<RainWorld>("progression"),
+                    i => i.MatchCallvirt<PlayerProgression>("Revert"));
+                c.Emit(OpCodes.Ldarg_1);
+                c.EmitDelegate<Func<ProcessManager.ProcessID,bool>>((id) => id == BuffEnums.ProcessID.StackMenu || id == BuffEnums.ProcessID.UnstackMenu);
+                c.Emit(OpCodes.Brtrue, label);
+                c.GotoNext(MoveType.After, i => i.MatchCallvirt<PlayerProgression>("Revert"));
+                c.MarkLabel(label);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+
 
         #region SaveSlot
 
@@ -303,7 +317,7 @@ namespace RandomBuff.Core.Hooks
         }
 
         private static void ProcessManager_PostSwitchMainProcess(On.ProcessManager.orig_PostSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
-        {
+        {   
             if (ID == BuffEnums.ProcessID.BuffGameMenu)
             {
                 self.currentMainLoop = new BuffGameMenu(self, ID);

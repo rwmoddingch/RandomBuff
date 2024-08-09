@@ -112,7 +112,7 @@ namespace RandomBuff.Core.Game
             GameSetting = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).Clone();
             GameSetting.EnterGame(Game);
           
-            BuffPlugin.Log($"Enter Game,TemplateID: {GameSetting.gachaTemplate.ID}, Difficulty: {GameSetting.Difficulty}, Condition Count: {GameSetting.conditions.Count}{(GameSetting.MissionId is null ? "" : $", Mission: {GameSetting.MissionId}")}");
+            BuffPlugin.Log($"------Enter Game,TemplateID: {GameSetting.gachaTemplate.ID}, Difficulty: {GameSetting.Difficulty}, Condition Count: {GameSetting.conditions.Count}{(GameSetting.MissionId is null ? "" : $", Mission: {GameSetting.MissionId}")}------");
 
 
             foreach(var condition in GameSetting.conditions)
@@ -121,8 +121,6 @@ namespace RandomBuff.Core.Game
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
             {
                 CreateBuff(data.Key);
-                BuffPlugin.LogDebug($"---buff: {data.Key}");
-
             }
 
             BuffDataManager.Instance.CleanMalnourishedData();

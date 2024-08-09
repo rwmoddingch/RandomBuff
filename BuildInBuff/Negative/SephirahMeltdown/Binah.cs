@@ -169,6 +169,14 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                         songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
                         type = StopMusicEvent.Type.AllSongs
                     });
+
+                    game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                    {
+                        fadeOutTime = 1,
+                        prio = 20,
+                        songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
+                        type = StopMusicEvent.Type.AllSongs
+                    });
                 }
             }
 

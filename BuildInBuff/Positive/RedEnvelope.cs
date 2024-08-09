@@ -49,6 +49,8 @@ namespace HotDogGains.Positive
                     }
             
                 }
+
+                game.GetStorySession.saveState.theGlow = true;
                 player.room.PlaySound(SoundID.SANDBOX_Add_Item,player.mainBodyChunk);
                 return true;
             }

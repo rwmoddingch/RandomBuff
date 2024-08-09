@@ -91,6 +91,7 @@ namespace RandomBuff.Core.Hooks
             On.Menu.SleepAndDeathScreen.AddPassageButton += SleepAndDeathScreen_AddPassageButton;
             On.Menu.SleepAndDeathScreen.Singal += SleepAndDeathScreen_Singal;
 
+
             On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
 
             On.Player.ctor += Player_ctor;
@@ -101,6 +102,24 @@ namespace RandomBuff.Core.Hooks
                 {
                     if (Custom.rainWorld.BuffMode())
                         return false;
+                    return orig(self);
+                });
+
+            _ = new Hook(typeof(ProcessManager.MenuSetup).GetProperty("LoadInitCondition").GetGetMethod(),
+                (Func<ProcessManager.MenuSetup, bool> orig, ProcessManager.MenuSetup self) => orig(self) || self.startGameCondition == BuffEnums.StoryGameInitCondition.BuffStackLoad);
+
+            _ = new Hook(typeof(RainWorldGame).GetProperty("InitialBlackSeconds").GetGetMethod(),
+                (Func< RainWorldGame, float> orig, RainWorldGame self) =>
+                {
+                    if (self.manager.menuSetup.startGameCondition == BuffEnums.StoryGameInitCondition.BuffStackLoad)
+                        return 10;
+                    return orig(self);
+                });
+            _ = new Hook(typeof(RainWorldGame).GetProperty("FadeInTime").GetGetMethod(),
+                (Func<RainWorldGame, float> orig, RainWorldGame self) =>
+                {
+                    if (self.manager.menuSetup.startGameCondition == BuffEnums.StoryGameInitCondition.BuffStackLoad)
+                        return 0;
                     return orig(self);
                 });
         }
@@ -127,7 +146,7 @@ namespace RandomBuff.Core.Hooks
         private static void SleepAndDeathScreen_AddPassageButton(On.Menu.SleepAndDeathScreen.orig_AddPassageButton orig, SleepAndDeathScreen self, bool buttonBlack)
         {
             orig(self, buttonBlack);
-            if (self.manager.rainWorld.BuffMode() && BuffDataManager.Instance.GetGameSetting(self.saveState.saveStateNumber).CanStackByPassage)
+            if (self.manager.rainWorld.BuffMode() && self.saveState != null && BuffDataManager.Instance.GetGameSetting(self.saveState.saveStateNumber).CanStackByPassage && !self.saveState.malnourished)
             {
                 if (BuffCore.GetAllBuffIds(self.saveState.saveStateNumber).Any(i => i.GetStaticData().Stackable))
                 {
@@ -165,8 +184,8 @@ namespace RandomBuff.Core.Hooks
                         if (self.proceedWithEndgameID != null)
                         {
                             self.endgameTokens.Passage(self.proceedWithEndgameID);
-                            self.winState.ConsumeEndGame();
-                            self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
+                            //self.winState.ConsumeEndGame();
+                            //self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
                             self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.StackMenu);
                             self.PlaySound(SoundID.MENU_Passage_Button);
                         }
@@ -177,8 +196,8 @@ namespace RandomBuff.Core.Hooks
                         if (self.proceedWithEndgameID != null)
                         {
                             self.endgameTokens.Passage(self.proceedWithEndgameID);
-                            self.winState.ConsumeEndGame();
-                            self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
+                            //self.winState.ConsumeEndGame();
+                            //self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
                             self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.UnstackMenu);
                             self.PlaySound(SoundID.MENU_Passage_Button);
                         }
@@ -344,6 +363,15 @@ namespace RandomBuff.Core.Hooks
         private static void RainWorldGame_Update(On.RainWorldGame.orig_Update orig, RainWorldGame self)
         {
             orig(self);
+            if (self.manager.menuSetup.startGameCondition == BuffEnums.StoryGameInitCondition.BuffStackLoad && self.Players[0].realizedCreature != null)
+            {
+                self.GetStorySession.saveState.deathPersistentSaveData.winState.ConsumeEndGame();
+                self.manager.rainWorld.progression.SaveWorldStateAndProgression(false);
+                self.manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
+                self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
+                return;
+            }
+
             BuffPoolManager.Instance?.Update(self);
         }
 

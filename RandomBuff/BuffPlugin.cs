@@ -126,7 +126,7 @@ namespace RandomBuff
             {
                 if (!isLoaded)
                 {
-                    Log($"[Random Buff], version: {saveVersion}, {System.DateTime.Now}");
+                    Log($"[Random Buff], Version: {ModVersion}, Current save version: {saveVersion}, {System.DateTime.Now}");
 
 #if TESTVERSION
                     
