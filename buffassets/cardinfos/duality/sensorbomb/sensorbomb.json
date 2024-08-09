@@ -5,7 +5,8 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "FF4A52",
-
+    "Tag" : ["BombExplodeModify"],
+    "Conflict":["BombExplodeModify"],
     "Chinese" : {
         "BuffName" : "感应炸弹",
         "Description" : "炸弹投出后不会再因为碰撞爆炸，而是在接近任意生物或速度接近静止时爆炸。"

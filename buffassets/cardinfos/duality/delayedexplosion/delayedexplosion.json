@@ -5,8 +5,8 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "E90000",
-    "Tag" : ["ScavengerBomb Variant"],
-    "Conflict":["ScavengerBomb Variant"],
+    "Tag" : ["BombExplodeModify"],
+    "Conflict":["BombExplodeModify"],
     "Chinese" : {
         "BuffName" : "延时炸弹",
         "Description" : "炸弹撞击到目标后，大约过两秒才会爆炸。"
