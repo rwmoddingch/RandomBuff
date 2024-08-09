@@ -108,20 +108,20 @@ namespace BuiltinBuffs.Duality
     internal class DelayedExplosionModule
     {
         public WeakReference<ScavengerBomb> bombRef;
-        public ScavengerBomb self;
         public bool startBurn;
         float delayBurn = 90;
 
         public DelayedExplosionModule(ScavengerBomb scavengerBomb)
         {
             bombRef = new WeakReference<ScavengerBomb>(scavengerBomb);
-            self = scavengerBomb;
             delayBurn = 90;
             startBurn = false;
         }
 
         public bool HitSomething(SharedPhysics.CollisionResult result, bool eu)
         {
+            if (!bombRef.TryGetTarget(out var self))
+                return false;
             if (result.obj == null)
             {
                 return false;
@@ -149,6 +149,8 @@ namespace BuiltinBuffs.Duality
 
         public void TerrainImpact(int chunk, IntVector2 direction, float speed, bool firstContact)
         {
+            if (!bombRef.TryGetTarget(out var self))
+                return;
             if (firstContact)
             {
                 if (speed * self.bodyChunks[chunk].mass > 7f)
@@ -176,7 +178,12 @@ namespace BuiltinBuffs.Duality
 
         public void Update()
         {
+            if (!bombRef.TryGetTarget(out var self))
+                return;
             if (!startBurn) return;
+            if (self.smoke != null && (self.smoke.room == null || self.smoke.slatedForDeletetion))
+                self.smoke = null;
+            ;
             if (delayBurn > 0)
             {
                 delayBurn--;
