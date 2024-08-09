@@ -88,8 +88,8 @@ namespace RandomBuff.Render.UI.Component
         public void GrafUpdate(float timeStacker)
         {
             slot.GrafUpdate(timeStacker);
-            if (Input.GetKeyDown(KeyCode.P) && showAnim == null)
-                SetShow(!show);
+            //if (Input.GetKeyDown(KeyCode.P) && showAnim == null)
+            //    SetShow(!show);
         }
 
         TickAnimCmpnt showAnim;

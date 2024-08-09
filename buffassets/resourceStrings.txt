@@ -167,6 +167,8 @@ Cicadas|Cicadas
 ProgressionUI_Record|RECORD
 ProgressionUI_Quest|QUEST
 ProgressionUI_Cosmetic|COSMETIC
+ScoreCaculator_ExpMulti|Exp multiplier
+
 
 //QuestCondition
 Quest_Display_MissionQuest|Complete {0} mission

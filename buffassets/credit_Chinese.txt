@@ -151,6 +151,9 @@
 	<Name>异格凯尔嘻
 	<Detail>这是什么抛瓦？
 
+	<Name>雪棉
+	<Detail>参与的老师们都是永远的神——
+
 <Stage>SpecialThanks
 	<Entry>宣传
 		<Name>寂空

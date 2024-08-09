@@ -148,6 +148,9 @@
 	<Name>sp.Kal'tist:)
 	<Detail>What form of the POWER is this？
 
+	<Name>Cotton
+	<Detail>wawa
+
 <Stage>SpecialThanks
 	<Entry>Publicize
 		<Name>Serion

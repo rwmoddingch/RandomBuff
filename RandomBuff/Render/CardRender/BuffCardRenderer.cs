@@ -186,7 +186,6 @@ namespace RandomBuff.Render.CardRender
 
         public virtual void OnDestroy()
         {
-            BuffPlugin.LogDebug($"BuffCardRenderer_{_id} release ftexture");
             _texture.Destroy();
         }
 

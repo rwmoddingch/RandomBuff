@@ -150,9 +150,12 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 if(newFinishedQuests.Count == 0 && scoreCaculator != null && scoreCaculator.state == BuffGameScoreCaculator.ScoreCaculatorState.Finish)
                 {
-                    this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu);
-                    if (manager.musicPlayer != null)
-                        manager.musicPlayer.FadeOutAllSongs(50f);
+                    if(questShow)
+                    {
+                        this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu);
+                        if (manager.musicPlayer != null)
+                            manager.musicPlayer.FadeOutAllSongs(50f);
+                    }
                 }
                 else
                 {

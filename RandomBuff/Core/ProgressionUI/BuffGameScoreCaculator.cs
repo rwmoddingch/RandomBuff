@@ -123,7 +123,7 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 totalScore += condition.Exp;
             }
-            BuffPlayerData.Instance.playerTotExp += Mathf.RoundToInt(totalScore * winPackage.expMultiply);
+            BuffPlayerData.Instance.playerTotExp += Mathf.CeilToInt(totalScore * winPackage.expMultiply);
             
         }
 
@@ -142,7 +142,7 @@ namespace RandomBuff.Core.StaticsScreen
                 if (scoreBoard.state == ScoreBoardState.UpdateScore)
                     state = ScoreCaculatorState.AddKillScore;
             }
-            else if(state == ScoreCaculatorState.AddKillScore || state == ScoreCaculatorState.AddBuffScore || state == ScoreCaculatorState.AddConditionScore)
+            else if(state == ScoreCaculatorState.AddKillScore || state == ScoreCaculatorState.AddBuffScore || state == ScoreCaculatorState.AddConditionScore || state == ScoreCaculatorState.ApplyExpMult)
             {
                 if (activeInstances.Count == 0 || activeInstances.First().state == ScoreInstance.ScoreInstanceState.FadeOut)
                 {
@@ -242,6 +242,23 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 if(indexInCurrentState == winPackage.winWithConditions.Count)
                 {
+                    state = ScoreCaculatorState.ApplyExpMult;
+                    indexInCurrentState = 0;
+                    BuffPlugin.Log("Switch to ApplyExpMult");
+                    return;
+                }
+
+                var condition = winPackage.winWithConditions[indexInCurrentState];
+
+                activeInstances.Insert(0, new BuffConditionScoreInstance(this, condition));
+                foreach(var instance in activeInstances)
+                    instance.UpdateInstancePos();
+                indexInCurrentState++;
+            }
+            else if(state == ScoreCaculatorState.ApplyExpMult)
+            {
+                if (indexInCurrentState >= 1)
+                {
                     if (waitScoreDeletionDelay != null)
                         return;
 
@@ -254,10 +271,9 @@ namespace RandomBuff.Core.StaticsScreen
                     return;
                 }
 
-                var condition = winPackage.winWithConditions[indexInCurrentState];
-
-                activeInstances.Insert(0, new BuffConditionScoreInstance(this, condition));
-                foreach(var instance in activeInstances)
+                BuffPlugin.Log("ApplyExpMult");
+                activeInstances.Insert(0, new ExpMultiScoreInstance(this, winPackage.expMultiply));
+                foreach (var instance in activeInstances)
                     instance.UpdateInstancePos();
                 indexInCurrentState++;
             }
@@ -284,6 +300,7 @@ namespace RandomBuff.Core.StaticsScreen
             AddKillScore,
             AddBuffScore,
             AddConditionScore,
+            ApplyExpMult,
             WaitScoreDeletion,
             ShowLevelProgression,
             AddScoreToLevel,
@@ -348,8 +365,8 @@ namespace RandomBuff.Core.StaticsScreen
                 }
             }
 
-            TickAnimCmpnt alphaAnim;
-            float param;
+            protected TickAnimCmpnt alphaAnim;
+            protected float param;
             public virtual void PrepareUpdate()
             {
                 if (state != ScoreInstanceState.Prepare)
@@ -384,19 +401,6 @@ namespace RandomBuff.Core.StaticsScreen
 
                 lastPos = pos;
                 pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
-
-                //lastAlpha = alpha;
-                //alpha = Mathf.Lerp(alpha, 1f, 0.15f);
-
-                //if (Mathf.Approximately(alpha, 1f))
-                //{
-                //    alpha = 1f;
-                //    lastAlpha = 1f;
-                //    state = ScoreInstanceState.UpdateScore;
-                //    caculator.scoreBoard.score += score;
-                //}
-                //lastPos = pos;
-                //pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
             }
 
             public virtual void UpdateScoreUpdate()
@@ -581,6 +585,75 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 base.ClearSprites();
                 conditionLabel.RemoveFromContainer();
+            }
+        }
+
+        public class ExpMultiScoreInstance : ScoreInstance
+        {
+            FLabel expMul;
+            float multi;
+            public ExpMultiScoreInstance(BuffGameScoreCaculator caculator, float multi) : base(caculator, 0)
+            {
+                this.multi = multi;
+                expMul = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("ScoreCaculator_ExpMulti"))
+                {
+                    anchorX = 0f,
+                    anchorY = 0f,
+                };
+                caculator.Container.AddChild(expMul);
+                scoreLabel.text = $"{multi:F2}";
+            }
+
+            public override void PrepareUpdate()
+            {
+                if (state != ScoreInstanceState.Prepare)
+                    return;
+
+                if (alphaAnim == null && state == ScoreInstanceState.Prepare)
+                {
+                    alphaAnim = AnimMachine.GetTickAnimCmpnt(0, caculator.fastCaculate ? 5 : 60, autoDestroy: true).BindModifier(Helper.EaseInOutCubic)
+                        .BindActions(OnAnimGrafUpdate: (t, f) =>
+                        {
+                            param = t.Get();
+                        }, OnAnimFinished: (t) =>
+                        {
+                            param = 1f;
+                            state = ScoreInstanceState.UpdateScore;
+                            caculator.scoreBoard.score = Mathf.CeilToInt(caculator.scoreBoard.score * multi);
+                            if (caculator.fastCaculate)
+                                caculator.scoreBoard.HardSet();
+                            alphaAnim = null;
+
+                            lastAlpha = param;
+                            alpha = param;
+
+                            lastPos = pos;
+                            pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
+                        });
+                    alphaAnim.SetEnable(true);
+                }
+
+                lastAlpha = param;
+                alpha = param;
+
+                lastPos = pos;
+                pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+                Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
+
+                expMul.alpha = smoothAlpha;
+                expMul.SetPosition(smoothPos);
+            }
+
+            public override void ClearSprites()
+            {
+                base.ClearSprites();
+                expMul.RemoveFromContainer();
             }
         }
 
