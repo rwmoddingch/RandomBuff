@@ -129,7 +129,8 @@ namespace RandomBuff
                     Log($"[Random Buff], Version: {ModVersion}, Current save version: {saveVersion}, {System.DateTime.Now}");
 
 #if TESTVERSION
-                    
+                    Log($"!!!!TEST BUILD!!!!");
+
                     if (File.Exists(AssetManager.ResolveFilePath("buff.dev")))
                     {
                         DevEnabled = true;
@@ -226,7 +227,7 @@ namespace RandomBuff
                         if (devVersion == null)
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
-                                $"Random Buff, Build: 2024_08_09\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                $"Random Buff, Build: 2024_08_09_2\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
                                 new Vector2(1000, 200), 0.4f)
                             {
                                 Alignment = TMPro.TextAlignmentOptions.BottomLeft,

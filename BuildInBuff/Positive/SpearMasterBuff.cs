@@ -6,6 +6,7 @@ using MonoMod.Cil;
 using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -71,7 +72,7 @@ namespace BuiltinBuffs.Positive
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                BuffUtils.LogException(spearMasterBuffID,e);
             }
 
         }
