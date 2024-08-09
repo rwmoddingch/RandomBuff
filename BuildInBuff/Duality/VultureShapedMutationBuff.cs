@@ -1156,7 +1156,7 @@ namespace BuiltinBuffs.Duality
             }
 
             this.hangingInTentacle = false;
-            if (player.room != null)
+            if (player.room != null && this.wings != null)
                 for (int i = 0; i < this.wings.GetLength(0); i++)
                     for (int j = 0; j < this.wings.GetLength(1); j++)
                         this.wings[i, j].Update();
@@ -1320,7 +1320,7 @@ namespace BuiltinBuffs.Duality
                 self.bodyChunks[0].vel.x *= 1.2f;
             //抵消重力
             if (self.input[0].y >= 0)
-                self.bodyChunks[0].vel += 1.85f * Vector2.up;
+                self.bodyChunks[0].vel += 1.85f * Vector2.up * self.room.gravity;
             else
                 self.bodyChunks[0].vel -= 1.05f * Vector2.up;
             //随机速度
@@ -2150,7 +2150,7 @@ namespace BuiltinBuffs.Duality
                             Vector2 down = Vector2.down * idealLength * (UnderneathIsSolid() ? 1f : 0f);
                             tChunks[tChunks.Length - 1].vel = Vector2.Lerp(tChunks[tChunks.Length - 1].vel, connectedChunk.pos + down - tChunks[tChunks.Length - 1].pos, 0.05f);*/
                             framesWithoutReaching = 0;
-                            SwitchMode(Mode.Fly);
+                            //SwitchMode(Mode.Fly);
                         }
                     }
                     if (OtherTentacle.mode == Mode.Fly)
