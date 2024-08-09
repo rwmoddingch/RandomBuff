@@ -40,9 +40,9 @@ namespace RandomBuff.Core.Game
             Instance = this;
 
             if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
-                ProcessManager.MenuSetup.StoryGameInitCondition.New)
+                ProcessManager.MenuSetup.StoryGameInitCondition.New && !BuffPoolManager.Instance.isInitHud)
             {
-                Custom.rainWorld.processManager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
+                BuffPoolManager.Instance.isInitHud = true;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
             }

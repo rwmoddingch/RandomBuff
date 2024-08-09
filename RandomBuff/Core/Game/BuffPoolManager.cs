@@ -98,6 +98,8 @@ namespace RandomBuff.Core.Game
 
         private InGameRecord record;
 
+        public bool isInitHud = false;
+
         private BuffPoolManager(RainWorldGame game)
         {
 

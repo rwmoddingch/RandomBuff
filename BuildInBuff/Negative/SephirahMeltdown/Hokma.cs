@@ -86,8 +86,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             IL.RainWorldGame.Update += RainWorldGame_Update;
             IL.RainWorldGame.GrafUpdate += RainWorldGame_Update;
 
-            new Hook(typeof(RoomCamera).GetProperty(nameof(RoomCamera.roomSafeForPause)).GetGetMethod(),
-            typeof(HokmaHook).GetMethod("RoomCameraRoomSafeForPauseHook", BindingFlags.NonPublic | BindingFlags.Static));
             count = 0;
         }
 
@@ -110,10 +108,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         }
 
 
-        private static bool RoomCameraRoomSafeForPauseHook(Func<RoomCamera, bool> orig, RoomCamera self)
-        {
-            return orig(self) && self.game.pauseMenu == null;
-        }
 
         private static void RainWorldGame_Update(ILContext il)
         {

@@ -19,6 +19,7 @@ using Modding.Expedition;
 using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Option;
+using System.Security.Policy;
 
 namespace BuiltinBuffs.Expeditions
 {
@@ -107,7 +108,8 @@ namespace BuiltinBuffs.Expeditions
             "unl-gun",
             "bur-doomed",
             "unl-glow",
-            "unl-passage"
+            "unl-passage",
+            "unl-karma"
         };
 
         private static readonly Dictionary<string, List<SlugcatStats.Name>> BuiltInPerks =
@@ -334,9 +336,6 @@ namespace BuiltinBuffs.Expeditions
                                 OverrideForAgility(stat);
                         }
                         OverrideForAgility(game.session.characterStats);
-                        break;
-                    case "unl-karma":
-                        game.GetStorySession.saveState.deathPersistentSaveData.reinforcedKarma = true;
                         break;
                     case "bur-pursued":
                         if (ExpeditionGame.burdenTrackers.All( i => !(i is ExpeditionGame.PursuedTracker)))

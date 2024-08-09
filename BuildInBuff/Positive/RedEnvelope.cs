@@ -51,6 +51,9 @@ namespace HotDogGains.Positive
                 }
 
                 game.GetStorySession.saveState.theGlow = true;
+
+                foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
+                    ply.glowing = true;
                 player.room.PlaySound(SoundID.SANDBOX_Add_Item,player.mainBodyChunk);
                 return true;
             }
