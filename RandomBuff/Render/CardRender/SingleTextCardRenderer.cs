@@ -65,6 +65,11 @@ namespace RandomBuff.Render.CardRender
             //base.DuplicateInit(id, buffStaticData);
             textController.Init(this, _cardQuadFront.transform, CardBasicAssets.TitleFont, Color.white, "W", Custom.rainWorld.inGameTranslator.currentLanguage);
         }
+
+        public override string Salt()
+        {
+            return $"SingleTextCardRenderer_{_id}";
+        }
     }
 
     internal class SingleTextController : MonoBehaviour

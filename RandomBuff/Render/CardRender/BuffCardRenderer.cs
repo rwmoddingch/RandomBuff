@@ -176,6 +176,11 @@ namespace RandomBuff.Render.CardRender
         {
             return meshFilter.sharedMesh.vertices.Select(v => meshFilter.gameObject.transform.TransformPoint(v)).ToList();
         }
+
+        public virtual string Salt()
+        {
+            return $"BuffCardRendererBase_{_id}";
+        }
     }
 
     internal class BuffCardRenderer : BuffCardRendererBase
@@ -239,6 +244,11 @@ namespace RandomBuff.Render.CardRender
             cardStackerTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), new Vector3(0f, 0f, 45f));
             cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), Vector3.zero, CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
             cardKeyBinderTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, string.Empty, Vector3.zero, CardNumberTextController.InternalPrimitiveType.Hexagon, 0.618f * -0.3f);
+        }
+
+        public override string Salt()
+        {
+            return $"BuffCardRenderer_{_id}";
         }
     }
 }

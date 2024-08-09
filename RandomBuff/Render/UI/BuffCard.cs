@@ -265,7 +265,7 @@ namespace RandomBuff.Render.UI
             _cardRenderer = CardRendererManager.GetRenderer(buffID);
             Container = new FContainer();
 
-            Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture));
+            Container.AddChild(_ftexture = new FTexture(_cardRenderer.cardCameraController.targetTexture, _cardRenderer.Salt()));
             SetAnimatorState(initState);
 
             Scale = normalScale;
@@ -287,6 +287,7 @@ namespace RandomBuff.Render.UI
             CardRendererManager.RecycleCardRenderer(_cardRenderer);
             Container.RemoveAllChildren();
             Container.RemoveFromContainer();
+            _ftexture.Destroy();
         }
 
         //改变卡牌的状态

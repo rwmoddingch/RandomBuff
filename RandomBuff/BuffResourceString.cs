@@ -35,7 +35,7 @@ namespace RandomBuff
                 if (languageID != InGameTranslator.LanguageID.English)
                     LoadResourceStrings(InGameTranslator.LanguageID.English);
             }
-            BuffPlugin.Log($"Load resource string of : {languageID}");
+            //BuffPlugin.Log($"Load resource string of : {languageID}");
             currentLangMapper.Clear();
             string suffix = languageID == InGameTranslator.LanguageID.English ? "" : $"_{languageID.value}";
 
@@ -64,8 +64,7 @@ namespace RandomBuff
                                 currentLangMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
                                 if (!engLoaded && languageID == InGameTranslator.LanguageID.English)
                                     engMapper.Add(splited[0].Trim(), ReplaceLine(splited[1].Trim()));
-                                BuffPlugin.Log(
-                                    $"Load resource string : {splited[0].Trim()} | {splited[1].Trim()}, {languageID}");
+                                //BuffPlugin.Log($"Load resource string : {splited[0].Trim()} | {splited[1].Trim()}, {languageID}");
 
                             }
                             else
