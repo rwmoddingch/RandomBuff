@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MoreSlugcats;
+using Newtonsoft.Json;
 using RandomBuffUtils;
 
 namespace RandomBuff.Core.Game.Settings.Conditions
@@ -34,7 +35,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 {
                     currentProgress = index;
                     onLabelRefresh?.Invoke(this);
-                    Finished = index == WinState.GourmandPassageTracker.Length;
+                    Finished = index == WinState.GourmandPassageTracker.Length-1;
                 }
             }
 
@@ -49,10 +50,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 return $"({currentProgress}/{WinState.GourmandPassageTracker.Length})";
             }
 
-            return "ERROR";
+            return "";
         }
 
-
+        [JsonProperty]
         private int currentProgress = 0;
         public override string DisplayName(InGameTranslator translator)
         {
