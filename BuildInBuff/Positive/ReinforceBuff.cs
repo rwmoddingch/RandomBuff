@@ -27,6 +27,10 @@ namespace BuiltinBuffs.Positive
 
         public ReinforceBuff()
         {
+            if(BuffCustom.TryGetGame(out var game))
+            {
+                UpdateReachChieftain(game);
+            }
         }
 
         public override bool Trigger(RainWorldGame game)

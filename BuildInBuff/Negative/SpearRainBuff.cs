@@ -69,7 +69,7 @@ namespace BuiltinBuffs.Negative
         }
     }
 
-    public class SpearRainModule : UpdatableAndDeletable
+    public class SpearRainModule : UpdatableAndDeletable, IDrawable
     {
         static float spearsPerTilePerSec = 20;
         public static ConditionalWeakTable<RoomRain, SpearRainModule> rainModules = new ConditionalWeakTable<RoomRain, SpearRainModule>();
@@ -92,10 +92,6 @@ namespace BuiltinBuffs.Negative
             this.room = room;
             this.roomRain = roomRain;
 
-            AbstractSpear abSpear = new AbstractSpear(room.world, null, room.GetWorldCoordinate(new Vector2(0, 0)), room.game.GetNewID(), false);
-            abSpear.RealizeInRoom();
-            getSpriteSpear = abSpear.realizedObject as Spear;
-
             for(int x = 0;x < room.Width; x++)
             {
                 if(!room.GetTile(x, room.Height - 1).Solid)
@@ -117,7 +113,6 @@ namespace BuiltinBuffs.Negative
                 if (linq.Count() > 0)
                 {
                     var sprite = linq.First().sprites[0];
-                    getSpriteSpear.ApplyPalette(linq.First(), room.game.cameras[0], room.game.cameras[0].currentPalette);
                     spearElement = sprite.element.name;
                     spearColor = sprite.color;
                     getSpriteSpear.Destroy();
@@ -195,6 +190,26 @@ namespace BuiltinBuffs.Negative
             emitter.ApplyParticleModule(new SpearHitAndStuck(emitter));
             ParticleSystem.ApplyEmitterAndInit(emitter);
             return emitter;
+        }
+
+        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            sLeaser.sprites = new FSprite[0]; 
+        }
+
+        public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+        }
+
+        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+            AbstractSpear abSpear = new AbstractSpear(room.world, null, room.GetWorldCoordinate(new Vector2(0, 0)), room.game.GetNewID(), false);
+            abSpear.RealizeInRoom();
+            getSpriteSpear = abSpear.realizedObject as Spear;
+        }
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
         }
 
         internal class SpearSpawnModule : SpawnModule
