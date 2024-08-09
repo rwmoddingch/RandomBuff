@@ -8,7 +8,7 @@
     "Color" : "ffe351",
     "Chinese":{
         "BuffName":"尾翼直升机",
-        "Description":"在连续跳跃可以让尾巴转动起来飞行"
+        "Description":"连续跳跃可以让尾巴转动起来飞行"
     },
     "English":{
         "BuffName":"Tailcopter",
