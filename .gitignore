@@ -363,5 +363,5 @@ FodyWeavers.xsd
 
 **/Assembly-CSharp.dll
 **/Assembly-CSharp-firstpass.dll
-**/HOOK-Assembly-CSharp.dll
+**/HOOKS-Assembly-CSharp.dll
 **/PUBLIC-Assembly-CSharp.dll
