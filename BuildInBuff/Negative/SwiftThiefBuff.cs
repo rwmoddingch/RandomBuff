@@ -55,6 +55,7 @@ namespace BuiltinBuffs.Negative
             orig(self, eu);
             try
             {
+                if (!self.Consious) return;
                 bool escaping = false;
                 if (thiefScavs.TryGetValue(self, out var thiefScav) && thiefScav.scaringPlayer.Count > 0)
                 {

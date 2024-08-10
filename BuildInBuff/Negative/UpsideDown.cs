@@ -452,6 +452,7 @@ namespace BuiltinBuffs.Negative
             if (module.TryGetValue(self, out var _module))
             {
                 if (_module.headTailSprite <= 0) { return; }
+                sLeaser.sprites[_module.headTailSprite].color = sLeaser.sprites[3].color;
                 Vector2 vector4 = (vector + vector2 * 3f) / 4f;
 
                 for (int i = 0; i < 4; i++)
