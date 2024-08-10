@@ -315,10 +315,12 @@ namespace BuiltinBuffs.Duality
 
             orig.Invoke(self, timeStacker, rCam, camPos);
 
-            if (module != null && (module is CreatureTemperatureModule cModule) && cModule.freezeIce != null)
+            if (module != null && (module is CreatureTemperatureModule cModule) && cModule.freezeIce != null && self.sprites != null)
             {
                 if(!cModule.freezeIce.melt)
                 {
+                    if (cModule.freezeIce.origColors == null || cModule.freezeIce.iceColors == null)
+                        return;
                     for (int i = 0; i < self.sprites.Length; i++)
                     {
                         FreezeIce.ApplyColor(self.sprites[i], cModule.freezeIce.origColors[i], cModule.freezeIce.iceColors[i], cModule.freezeIce.alpha);
@@ -326,6 +328,8 @@ namespace BuiltinBuffs.Duality
                 }
                 else
                 {
+                    if (cModule.freezeIce.origColors == null || cModule.freezeIce.iceColors == null)
+                        return;
                     for (int i = 0; i < self.sprites.Length; i++)
                     {
                         FreezeIce.ApplyColor(self.sprites[i], cModule.freezeIce.origColors[i], cModule.freezeIce.iceColors[i], 0f);
