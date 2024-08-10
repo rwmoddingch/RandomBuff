@@ -165,7 +165,7 @@ namespace BuiltinBuffs.Positive
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!FlashShieldFeatures.TryGetValue(self, out _))
+            if (!FlashShieldFeatures.TryGetValue(self, out _) && self.room != null)
             {
                 FlashShield flashShield = new FlashShield(self, self.room);
                 self.room.AddObject(flashShield);

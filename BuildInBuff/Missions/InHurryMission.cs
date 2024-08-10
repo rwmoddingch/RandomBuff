@@ -133,8 +133,13 @@ namespace BuiltinBuffs.Missions
                 onLabelRefresh?.Invoke(this);
 
             }
-            if (lastMoveTiles >= targetTileCount)
+
+            if (lastMoveTiles >= targetTileCount && !Finished)
+            {
                 Finished = true;
+                onLabelRefresh?.Invoke(this);
+            }
+
             module.Update(self);
         }
 
