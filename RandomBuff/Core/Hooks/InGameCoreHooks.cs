@@ -94,6 +94,8 @@ namespace RandomBuff.Core.Hooks
 
             On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
 
+            On.SLOracleBehavior.InitCutsceneObjects += SLOracleBehavior_InitCutsceneObjects;
+
             On.Player.ctor += Player_ctor;
             _ = new Hook(
                 typeof(StoryGameSession).GetProperty(nameof(StoryGameSession.RedIsOutOfCycles),
@@ -122,6 +124,14 @@ namespace RandomBuff.Core.Hooks
                         return 0;
                     return orig(self);
                 });
+        }
+
+        private static void SLOracleBehavior_InitCutsceneObjects(On.SLOracleBehavior.orig_InitCutsceneObjects orig, SLOracleBehavior self)
+        {
+            if (Custom.rainWorld.BuffMode() &&
+                self.oracle.room.game.GetStorySession.saveStateNumber != SlugcatStats.Name.Red)
+                return;
+            orig(self);
         }
 
         private static void DreamsState_StaticEndOfCycleProgress(On.DreamsState.orig_StaticEndOfCycleProgress orig, SaveState saveState, string currentRegion, string denPosition, ref int cyclesSinceLastDream, ref int cyclesSinceLastFamilyDream, ref int cyclesSinceLastGuideDream, ref int inGWOrSHCounter, ref DreamsState.DreamID upcomingDream, ref DreamsState.DreamID eventDream, ref bool everSleptInSB, ref bool everSleptInSB_S01, ref bool guideHasShownHimselfToPlayer, ref int guideThread, ref bool guideHasShownMoonThisRound, ref int familyThread)
