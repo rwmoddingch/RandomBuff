@@ -138,6 +138,7 @@ namespace RandomBuff
                     }
 
 #endif
+                    DevEnabled = true;
                     Application.logMessageReceived += Application_logMessageReceived;
 
                     BuffUIAssets.LoadUIAssets();

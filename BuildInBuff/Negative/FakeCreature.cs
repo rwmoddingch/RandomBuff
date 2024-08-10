@@ -311,6 +311,9 @@ namespace BuiltinBuffs.Negative
                 {
                     if (needBreak)
                         break;
+
+                    if(creature.bodyChunks == null)
+                        continue;
                     foreach (var chunk in creature.bodyChunks)
                     {
                         if(chunk == null)

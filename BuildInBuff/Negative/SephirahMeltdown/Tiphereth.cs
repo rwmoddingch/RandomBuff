@@ -105,7 +105,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private static float RainApproachingHook(Func<RainCycle, float> orig, RainCycle self)
         {
             if (RainInst > 0)
-                return Mathf.Clamp01(RainInst * 4);
+                return Mathf.Clamp01(RainInst * (SephirahMeltdownEntry.Hell ? 1 : 0.5f));
             return orig(self);
         }
 
@@ -113,7 +113,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             if(RainInst > 0)
                 return (Mathf.Sin(self.preCycleRainPulse_WaveA) +
-                        Mathf.Sin(self.preCycleRainPulse_WaveB) / 2f + Mathf.Cos(self.preCycleRainPulse_WaveC) * RainAlpha * 2f) * RainInst;
+                        Mathf.Sin(self.preCycleRainPulse_WaveB) / 2f + Mathf.Cos(self.preCycleRainPulse_WaveC) * RainAlpha * 2f) * RainInst * (SephirahMeltdownEntry.Hell ? 1 : 0.5f);
             return orig(self);
         }
 
@@ -143,8 +143,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             {
                 rainTuples =
                     new (int center, int duringTime)[TipherethBuffData.Tiphereth.GetBuffData<TipherethBuffData>().CycleUse + 1];
-                var maxLength = self.cycleLength / (rainTuples.Length + 1);
-                var minLength = self.cycleLength / (rainTuples.Length + 1) / (8 / rainTuples.Length);
+                var maxLength = self.cycleLength / (rainTuples.Length + 1) / 3;
+                var minLength = self.cycleLength / (rainTuples.Length + 1) / (8 / rainTuples.Length) / 3;
                 for (int i = 0; i < rainTuples.Length; i++)
                     rainTuples[i] = ((int)((self.cycleLength + 1f) / rainTuples.Length), Random.Range(minLength, maxLength));
                 isInit = true;
