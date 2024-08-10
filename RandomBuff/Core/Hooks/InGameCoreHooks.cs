@@ -81,7 +81,6 @@ namespace RandomBuff.Core.Hooks
 
 
             On.SaveState.setDenPosition += SaveState_setDenPosition;
-            On.SaveState.ctor += SaveState_setup;
             On.World.SpawnGhost += World_SpawnGhost;
             On.Room.Loaded += Room_Loaded;
 
@@ -124,6 +123,13 @@ namespace RandomBuff.Core.Hooks
                         return 0;
                     return orig(self);
                 });
+            On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+        }
+
+        private static void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
+        {
+            orig(self);
+            On.SaveState.ctor += SaveState_setup;
         }
 
         private static void SLOracleBehavior_InitCutsceneObjects(On.SLOracleBehavior.orig_InitCutsceneObjects orig, SLOracleBehavior self)

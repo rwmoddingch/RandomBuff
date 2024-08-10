@@ -28,7 +28,7 @@ namespace RandomBuff.Core.Option
             
             ShowExceptionLog = config.Bind(nameof(ShowExceptionLog), true);
 
-            EnableExpeditionExtend = config.Bind(nameof(EnableExpeditionExtend), true);
+            EnableExpeditionExtend = config.Bind(nameof(EnableExpeditionExtend), false);
             EnableExpeditionModExtend = config.Bind(nameof(EnableExpeditionModExtend), false);
 
             CheatAllCards = config.Bind(nameof(CheatAllCards), false);
