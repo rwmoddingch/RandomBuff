@@ -139,6 +139,10 @@ namespace RandomBuff.Core.StaticsScreen
                     BuffPlugin.Log($"accomplish quest: {quest.QuestName}:{quest.QuestId}");
 
             }
+            else
+            {
+                newFinishedQuests = new List<BuffQuest>();
+            }
 
             manager.rainWorld.progression.WipeSaveState(winPackage.saveState.saveStateNumber);
 
