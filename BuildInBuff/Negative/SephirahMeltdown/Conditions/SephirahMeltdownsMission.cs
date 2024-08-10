@@ -13,6 +13,7 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Core.Option;
 using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 conditions = new List<Condition>()
                 {
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = BuffConfigManager.ContainsId(new BuffID("bur-pursued")) ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = BuffOptionInterface.Instance.EnableExpeditionExtend.Value ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
                     new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 20}
@@ -47,7 +48,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {
                             TipherethBuffData.Tiphereth.value,
                             ChesedBuffData.Chesed.value,
-                            BuffConfigManager.ContainsId(new BuffID("bur-pursued")) ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
+                            BuffOptionInterface.Instance.EnableExpeditionExtend.Value ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
                         }},
                         {8, new List<string>()
                         {
