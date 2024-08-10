@@ -1283,6 +1283,8 @@ namespace BuiltinBuffs.Duality
         //飞行速度
         private void FlightUpdate(Player self)
         {
+            if (self.room == null) 
+                return;
             wantPos += wingSpeed * new Vector2(self.input[0].x, self.input[0].y);//self.bodyChunks[0].pos + 
             if (self.input[0].x == 0 && !wantPosIsSetX)
             {
