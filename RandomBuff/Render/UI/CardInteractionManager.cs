@@ -695,8 +695,9 @@ namespace RandomBuff.Render.UI
                 }
                 else
                 {
-                    foreach (var id in triggerableBuffIDs)
+                    for(int i = triggerableBuffIDs.Count - 1; i >= 0; i--)
                     {
+                        var id = triggerableBuffIDs[i];
                         if (BuffInput.GetKeyDown(BuffPlayerData.Instance.GetKeyBind(id)))
                         {
                             BuffPlugin.Log($"Trigger card {id} by shorcut key {BuffPlayerData.Instance.GetKeyBind(id)}");
