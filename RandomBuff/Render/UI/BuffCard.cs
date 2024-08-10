@@ -289,9 +289,8 @@ namespace RandomBuff.Render.UI
             _ftexture = _cardRenderer.CleanGetTexture();
             Container.AddChild(_cardRenderer.Texture);
 
+            Reset();
             SetAnimatorState(initState);
-
-            Scale = normalScale;
         }
 
         //更新方法，在交互管理器中调用
@@ -438,6 +437,13 @@ namespace RandomBuff.Render.UI
                 Grey = (!BuffPoolManager.Instance.GetBuff(ID)?.Active) ?? false;
             else
                 Grey = false;
+        }
+
+        public void Reset()
+        {
+            Scale = normalScale;
+            Alpha = 1f;
+            Rotation = Vector3.zero;
         }
 
         public void OnMouseSingleClick()
