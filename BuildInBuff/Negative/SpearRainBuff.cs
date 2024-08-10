@@ -78,6 +78,8 @@ namespace BuiltinBuffs.Negative
 
         string spearElement = "SmallSpear";
         Color spearColor = Color.black;
+
+        bool initColor;
         Spear getSpriteSpear;
 
         List<IntVector2> spawnSpearTiles = new List<IntVector2>();
@@ -203,9 +205,13 @@ namespace BuiltinBuffs.Negative
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
-            AbstractSpear abSpear = new AbstractSpear(room.world, null, room.GetWorldCoordinate(new Vector2(0, 0)), room.game.GetNewID(), false);
-            abSpear.RealizeInRoom();
-            getSpriteSpear = abSpear.realizedObject as Spear;
+            if(!initColor)
+            {
+                AbstractSpear abSpear = new AbstractSpear(room.world, null, room.GetWorldCoordinate(new Vector2(0, 0)), room.game.GetNewID(), false);
+                abSpear.RealizeInRoom();
+                getSpriteSpear = abSpear.realizedObject as Spear;
+                initColor = true;
+            }
         }
 
         public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
