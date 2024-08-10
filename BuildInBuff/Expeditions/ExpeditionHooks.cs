@@ -51,7 +51,7 @@ namespace BuiltinBuffs.Expeditions
                     //    con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
                     //}
                     //FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
-                    BinahBuffData.Binah.CreateNewBuff();
+                    AyinBuffData.Ayin.CreateNewBuff();
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
