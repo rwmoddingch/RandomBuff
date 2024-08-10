@@ -269,31 +269,39 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
 
             //尾巴转转（！）部分参考自TailCopter
             var tailBody = self.bodyChunks[1];
-            var allTail = ((self.graphicsModule) as PlayerGraphics).tail;
-            if (self.slugcatStats.name != new SlugcatStats.Name("TheTraveler"))
+            if ((self.graphicsModule) is PlayerGraphics graphics)
             {
-                if (isPropelling && propulsionLevel > 0)
+                var allTail = graphics.tail;
+                if (self.slugcatStats.name != new SlugcatStats.Name("TheTraveler"))
                 {
-                    var y = Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos);
-                    var x = Custom.PerpendicularVector(y);
-                    //似乎是幅度...?
-                    float size = 20;
-                    var rotatePos = tailBody.pos + y * 30;//中轴的位置
-                    rotatePos += ((float)Math.Sin(tailT * propulsionLevel * 0.01f)) * x * size;
-
-                    for (int i = 2; i < allTail.Length; i++)
+                    if (isPropelling && propulsionLevel > 0)
                     {
-                        float magnification = (i + 1) / allTail.Length;
-                        allTail[i].vel += Custom.DirVec(allTail[i].pos, rotatePos) * Custom.LerpMap(Vector2.Distance(allTail[i].pos, rotatePos), 1, 100, 1, 100 * magnification);
+                        var y = Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos);
+                        var x = Custom.PerpendicularVector(y);
+                        //似乎是幅度...?
+                        float size = 20;
+                        var rotatePos = tailBody.pos + y * 30; //中轴的位置
+                        rotatePos += ((float)Math.Sin(tailT * propulsionLevel * 0.01f)) * x * size;
+
+                        for (int i = 2; i < allTail.Length; i++)
+                        {
+                            float magnification = (i + 1) / allTail.Length;
+                            allTail[i].vel += Custom.DirVec(allTail[i].pos, rotatePos) *
+                                              Custom.LerpMap(Vector2.Distance(allTail[i].pos, rotatePos), 1, 100, 1,
+                                                  100 * magnification);
+                        }
+
+                        //音效暂时弃用
+                        //self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
+                        tailT += 1;
                     }
-                    //音效暂时弃用
-                    //self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
-                    tailT += 1;
+                    else
+                    {
+                        tailT = 0;
+                    }
                 }
-                else
-                { tailT = 0; }
             }
-            
+
         }
         public void OnEnable()
         {

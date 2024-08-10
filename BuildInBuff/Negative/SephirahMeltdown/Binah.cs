@@ -653,6 +653,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public void AIUpdate(TempleGuardAI ai)
         {
+            if (ai.guard.room == null)
+                return;
             if(IsAttacking)
                 ai.guard.telekinesis = Mathf.Min(ai.guard.telekinesis+0.1f,1f);
             if (!IsAttacking)
