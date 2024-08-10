@@ -163,7 +163,7 @@ namespace RandomBuff.Render.CardRender
             //初始化专有相机
             cardCameraController.Init(id);
 
-            _texture = new FTexture(cardCameraController.targetTexture);
+            _texture = new FTexture(cardCameraController.targetTexture, Salt());
             _notFirstInit = true;
         }
 
@@ -191,11 +191,19 @@ namespace RandomBuff.Render.CardRender
 
         public virtual string Salt()
         {
-            return $"BuffCardRendererBase_{_id}";
+            return $"BuffCardRendererBase_{_id}_";
         }
 
         public FTexture CleanGetTexture()
         {
+            if (Texture._element.sourcePixelSize.x != CardBasicAssets.RenderTextureSize.x || Texture._element.sourcePixelSize.y != CardBasicAssets.RenderTextureSize.y || !(Texture._element.atlas.texture is RenderTexture))
+            {
+                _texture.Destroy();
+                cardCameraController.ReinitRenderTarget();
+                _texture = new FTexture(cardCameraController.targetTexture, Salt());
+                FTexture.GarbageCollect();
+            }
+
             Texture.SetPosition(Vector2.zero);
             Texture.scale = 1f;
             Texture.alpha = 1f;

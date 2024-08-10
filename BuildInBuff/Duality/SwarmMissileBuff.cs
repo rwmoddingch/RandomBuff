@@ -52,7 +52,7 @@ namespace BuiltinBuffs.Duality
                 {
                     counter -= 80;
                     for (int i = 0; i < Random.Range(3, 6); i++)
-                        player.room.AddObject(new SwarmMissile(player.room, player.DangerPos, Custom.RNV(), true));
+                        player.room.AddObject(new SwarmMissile(player.room, player.DangerPos, Custom.RNV(), true, player));
                 }
             }
         }
@@ -138,8 +138,9 @@ namespace BuiltinBuffs.Duality
         int randomBiasTargetCounter;
 
         public bool hasTarget;
+        protected Creature killTag;
 
-        public Missile(Room room, Vector2 launchPos, Vector2 launchDir, float launchVel, float maxAngularVel, float wallDetectAngle, int noDetectCounter, float traceDetectRad, float avoidWallDistance)
+        public Missile(Room room, Vector2 launchPos, Vector2 launchDir, float launchVel, float maxAngularVel, float wallDetectAngle, int noDetectCounter, float traceDetectRad, float avoidWallDistance, Creature killTag)
         {
             this.room = room;
             lastPos = pos = launchPos;
@@ -154,6 +155,7 @@ namespace BuiltinBuffs.Duality
 
             preferLeft = Random.value < 0.5f;
             likelyToBias = Mathf.Lerp(0.2f, 0.5f, Random.value);
+            this.killTag = killTag;
         }
 
         public override void Update(bool eu)
@@ -295,7 +297,7 @@ namespace BuiltinBuffs.Duality
 
     public class TestMissile : Missile, IDrawable
     {
-        public TestMissile(Room room, Vector2 launchPos, Vector2 launchDir, float launchVel, float maxAngularVel = 480f, float wallDetectAngle = 35f, int noDetectCounter = 40,float traceDetectRad = 600f, float avoidWallDistance = 150f) : base(room, launchPos, launchDir, launchVel, maxAngularVel, wallDetectAngle, noDetectCounter, traceDetectRad, avoidWallDistance)
+        public TestMissile(Room room, Vector2 launchPos, Vector2 launchDir, float launchVel, float maxAngularVel = 480f, float wallDetectAngle = 35f, int noDetectCounter = 40,float traceDetectRad = 600f, float avoidWallDistance = 150f) : base(room, launchPos, launchDir, launchVel, maxAngularVel, wallDetectAngle, noDetectCounter, traceDetectRad, avoidWallDistance, null)
         {
             ignoreTargets = new CreatureTemplate.Type[1] { CreatureTemplate.Type.Slugcat };
         }
@@ -348,7 +350,7 @@ namespace BuiltinBuffs.Duality
 
         List<Vector2> tailPosList = new List<Vector2>(); 
 
-        public SwarmMissile(Room room, Vector2 launchPos, Vector2 launchDir, bool ignorePlayer = false) : base(room, launchPos, launchDir, 80f, 720f, 35f, 10, 600f, 150f)
+        public SwarmMissile(Room room, Vector2 launchPos, Vector2 launchDir, bool ignorePlayer = false, Creature killTag = null) : base(room, launchPos, launchDir, 80f, 720f, 35f, 10, 600f, 150f, killTag)
         {
             if(ignorePlayer)
                 ignoreTargets = new CreatureTemplate.Type[1] { CreatureTemplate.Type.Slugcat };

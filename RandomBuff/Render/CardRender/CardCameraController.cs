@@ -46,9 +46,11 @@ namespace RandomBuff.Render.CardRender
             CardDirty = false;
         }
 
-        void Start()
+        public void ReinitRenderTarget()
         {
-
+            targetTexture.Release();
+            targetTexture = new RenderTexture(CardBasicAssets.RenderTextureSize.x, CardBasicAssets.RenderTextureSize.y, 0);
+            myCamera.targetTexture = targetTexture;
         }
 
         // Update is called once per frame

@@ -15,6 +15,7 @@ using RWCustom;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using TemplateGains;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -150,16 +151,26 @@ namespace BuiltinBuffs.Positive
 
         public bool InitShoot(Spear self)
         {
-            if (!(self.thrownBy is Player))
+            if (!(self.thrownBy is Player player))
                 return false;
 
             
             if (!(self.stuckInObject is Creature stuckIn))
             {
+                if(StillMyTurnBuff.Instance != null)
+                {
+                    self.myTurnWeapon().CanWarp(player);
+                }
                 return false;
             }
             if (NextTarget(self) == null)
+            {
+                if (StillMyTurnBuff.Instance != null)
+                {
+                    self.myTurnWeapon().CanWarp(player);
+                }
                 return false;
+            }
 
             shootDelay = 2;
             ignoreRad = stuckIn.mainBodyChunk.rad * 2f;
@@ -185,6 +196,11 @@ namespace BuiltinBuffs.Positive
                 trail.Destroy();
                 trail = null;
                 noGmode = false;
+
+                if (StillMyTurnBuff.Instance != null)
+                {
+                    self.myTurnWeapon().CanWarp(self.thrownBy as Player);
+                }
                 return;
             }
 
@@ -284,7 +300,11 @@ namespace BuiltinBuffs.Positive
                 life = 20;
 
             if (life == 0)
+            {
+                if(spear.mode != Weapon.Mode.StuckInWall)
+                    spear.myTurnWeapon().CanWarp(spear.thrownBy as Player);
                 Destroy();
+            }
 
             if(spear.stuckInObject != null)
                 positionsList.Insert(0, spear.stuckInObject.firstChunk.pos);

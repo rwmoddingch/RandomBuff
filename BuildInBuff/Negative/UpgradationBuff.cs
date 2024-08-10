@@ -1,18 +1,10 @@
-﻿
-using RandomBuff;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
-using MoreSlugcats;
+﻿using MoreSlugcats;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using RandomBuff.Core.Game;
-using RandomBuffUtils;
 
 namespace BuiltinBuffs.Negative
 {
@@ -51,6 +43,8 @@ namespace BuiltinBuffs.Negative
                 if (obj is Creature creature && !creature.dead)
                 {
                     if (IgnoreThisType(creature.abstractCreature.creatureTemplate.type))
+                        continue;
+                    if (IgnoreFriendlyLizard(creature, game.Players))
                         continue;
                     if (GetUperAndBetterType(creature.abstractCreature.creatureTemplate.type, false) == creature.abstractCreature.creatureTemplate.type)
                         continue;
@@ -158,6 +152,23 @@ namespace BuiltinBuffs.Negative
             return (StaticWorld.GetCreatureTemplate(type).TopAncestor().type == CreatureTemplate.Type.Leech) ||
                 (type == CreatureTemplate.Type.Overseer) ||
                 (type == CreatureTemplate.Type.Fly);
+        }
+
+        public static bool IgnoreFriendlyLizard(Creature creature, List<AbstractCreature> players)
+        {
+            if(!(creature is Lizard lizard))
+                return false;
+
+            foreach(var player in players)
+            {
+                var rep = lizard.AI.tracker.RepresentationForCreature(player, false);
+                if (rep != null && lizard.AI != null && lizard.AI.LikeOfPlayer(rep) > 0.6f)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static bool SpawnUperCreature(AbstractCreature origCreature)
