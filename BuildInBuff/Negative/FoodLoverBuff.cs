@@ -46,10 +46,11 @@ namespace BuiltinBuffs.Negative
         private static Player.ObjectGrabability Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
         {
             var result = orig.Invoke(self, obj);
-            if (!(obj is IPlayerEdible || 
-                (obj is Creature creature && self.CanEatMeat(creature)) || 
-                (BuffCore.GetAllBuffIds().Contains(DesperateEaterBuffEntry.DesperateEater) && !(obj is Creature) &&
-                 (!ModManager.MSC || self.SlugCatClass != MoreSlugcatsEnums.SlugcatStatsName.Spear) && 
+            if (!(obj is IPlayerEdible ||
+                (obj is Creature creature && self.CanEatMeat(creature)) ||
+                (BuffCore.GetAllBuffIds().Contains(DesperateEaterBuffEntry.DesperateEater) &&
+                 !(obj is IPlayerEdible) && !(obj is Creature) &&
+                 (!ModManager.MSC || self.SlugCatClass != MoreSlugcatsEnums.SlugcatStatsName.Spear) &&
                  self.Malnourished)))
                 result = Player.ObjectGrabability.CantGrab;
             return result;
@@ -58,9 +59,9 @@ namespace BuiltinBuffs.Negative
         private static bool Player_CanIPickThisUp(On.Player.orig_CanIPickThisUp orig, Player self, PhysicalObject obj)
         {
             bool result = orig.Invoke(self, obj);
-            if (obj is IPlayerEdible || 
+            if (obj is IPlayerEdible ||
                 (obj is Creature && self.CanEatMeat(obj as Creature)) ||
-                (DesperateEaterBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(DesperateEaterBuffEntry.DesperateEater) &&
+                (BuffCore.GetAllBuffIds().Contains(DesperateEaterBuffEntry.DesperateEater) &&
                  !(obj is IPlayerEdible) && !(obj is Creature) &&
                  (!ModManager.MSC || self.SlugCatClass != MoreSlugcatsEnums.SlugcatStatsName.Spear) &&
                  self.Malnourished))

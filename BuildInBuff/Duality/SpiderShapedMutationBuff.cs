@@ -33,7 +33,7 @@ namespace BuiltinBuffs.Duality
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.ArachnophobiaIBuffEntry.arachnophobiaID))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(HotDogGains.Positive.SpiderSenseBuffEntry.SpiderSenseID))
-                    num++; 
+                    num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.PhotophobiaBuffEntry.Photophobia))
                     num++;
                 return num;
@@ -84,7 +84,7 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
-            IL.FlareBomb.Update += FlareBomb_UpdateIL; 
+            IL.FlareBomb.Update += FlareBomb_UpdateIL;
             On.SporeCloud.Update += SporeCloud_Update;
             On.SlugcatStats.SlugcatCanMaul += SlugcatStats_SlugcatCanMaul;
             On.Player.CanEatMeat += Player_CanEatMeat;
@@ -188,8 +188,8 @@ namespace BuiltinBuffs.Duality
             {
                 return !ModManager.MSC || self.pyroJumpCooldown <= 60f;
             }
-            result = !(crit is IPlayerEdible) && crit.dead && 
-                     (!ModManager.CoopAvailable || !(crit is Player)) && 
+            result = !(crit is IPlayerEdible) && crit.dead &&
+                     (!ModManager.CoopAvailable || !(crit is Player)) &&
                      (!ModManager.MSC || self.pyroJumpCooldown <= 60f);
             return result;
         }
@@ -244,7 +244,7 @@ namespace BuiltinBuffs.Duality
                           self.grasps[i].grabbed is DropBug ||
                           self.grasps[i].grabbed is VultureGrub ||
                           self.grasps[i].grabbed is Hazer))
-                    return;
+                        return;
                 }
             }
             orig(self, eu);
@@ -417,7 +417,7 @@ namespace BuiltinBuffs.Duality
         public Limb[,] legs;
         public int legsDangleCounter;
         private float legsThickness;
-        public Vector2[,] legsTravelDirs; 
+        public Vector2[,] legsTravelDirs;
         private IntVector2 deadLeg = new IntVector2(-1, -1);
 
         public int LegSprite(int side, int leg, int part)
@@ -544,7 +544,7 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player) || player.graphicsModule == null || sLeaser == null || player.room == null)
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
-            
+
             if (sLeaser.sprites.Length >= 9)
                 for (int i = 4; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
@@ -585,8 +585,8 @@ namespace BuiltinBuffs.Duality
                         InverseKinematic_Reverse(rootPos, legPos, this.legLength * 0.7f, this.legLength * 0.7f, legFlips) :
                         Custom.InverseKinematic(rootPos, legPos, this.legLength * 0.7f, this.legLength * 0.7f, legFlips);*/
                     Vector2 jointPos = Custom.InverseKinematic(rootPos, legPos, this.legLength * 0.7f, this.legLength * 0.7f, legFlips);
-                    jointPos = Vector2.Lerp(jointPos, 
-                                            (rootPos + legPos) * 0.5f - a * flip * Custom.LerpMap(Vector2.Distance(rootPos, legPos), 0f, this.legLength * 1.3f, this.legLength * 0.7f, 0f, 3f), 
+                    jointPos = Vector2.Lerp(jointPos,
+                                            (rootPos + legPos) * 0.5f - a * flip * Custom.LerpMap(Vector2.Distance(rootPos, legPos), 0f, this.legLength * 1.3f, this.legLength * 0.7f, 0f, 3f),
                                             Mathf.Abs(flip));
                     //内侧蛛腿
                     Vector2 innerLeg = Vector2.Lerp(rootPos, jointPos, 0.5f);
@@ -750,7 +750,7 @@ namespace BuiltinBuffs.Duality
                         {
                             modify = Vector2.down;
                             //如果可以抓天花板，就抓天花板
-                            for(int t = 0; t <= Mathf.Floor(legLength / 20f); t++)
+                            for (int t = 0; t <= Mathf.Floor(legLength / 20f); t++)
                             {
                                 if (Custom.DistLess(this.legs[n, m].pos, player.room.MiddleOfTile(player.room.GetTilePosition(vector3 + t * 20f * Mathf.Abs(Mathf.Sin(num)) * Vector2.up)), 0.1f * legLength + 10f) &&
                                     (player.room.GetTile(vector3 + t * 20f * Mathf.Abs(Mathf.Sin(num)) * Vector2.up).Terrain == Room.Tile.TerrainType.Solid ||
@@ -800,8 +800,8 @@ namespace BuiltinBuffs.Duality
                 player.ReleaseGrasp(1);
             }
 
-            if (player.graphicsModule != null && player.Consious && 
-                !player.room.aimap.TileAccessibleToCreature(player.mainBodyChunk.pos, player.Template) && 
+            if (player.graphicsModule != null && player.Consious &&
+                !player.room.aimap.TileAccessibleToCreature(player.mainBodyChunk.pos, player.Template) &&
                 !player.room.aimap.TileAccessibleToCreature(player.bodyChunks[1].pos, player.Template))
             {
                 for (int l = 0; l < this.legs.GetLength(0); l++)
@@ -810,7 +810,7 @@ namespace BuiltinBuffs.Duality
                     {
                         if (this.legs[l, m].reachedSnapPosition &&
                             (!TileAccessibleToPlayer() ||
-                            (Custom.DistLess(wantPos, player.mainBodyChunk.pos, 20f) && 
+                            (Custom.DistLess(wantPos, player.mainBodyChunk.pos, 20f) &&
                             Vector2.Dot(wantPos - player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - player.mainBodyChunk.pos) < 0 &&
                             !Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
                             Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f) &&
@@ -883,19 +883,19 @@ namespace BuiltinBuffs.Duality
                 bool flag = false;
                 for (int i = 0; i < self.bodyChunks.Length; i++)
                 {
-                    if ((self.bodyChunks[i].ContactPoint.x != 0 || 
+                    if ((self.bodyChunks[i].ContactPoint.x != 0 ||
                         self.bodyChunks[i].ContactPoint.y != 0 ||
                         self.bodyMode == Player.BodyModeIndex.WallClimb ||
-                        self.animation == Player.AnimationIndex.HangFromBeam || 
+                        self.animation == Player.AnimationIndex.HangFromBeam ||
                         self.animation == Player.AnimationIndex.ClimbOnBeam ||
                         self.animation == Player.AnimationIndex.AntlerClimb ||
                         self.animation == Player.AnimationIndex.VineGrab ||
                         self.animation == Player.AnimationIndex.ZeroGPoleGrab ||
-                        self.animation == Player.AnimationIndex.HangUnderVerticalBeam) && 
+                        self.animation == Player.AnimationIndex.HangUnderVerticalBeam) &&
                         self.room.aimap.TileAccessibleToCreature(self.bodyChunks[i].pos, self.Template))
                     {
                         flag = true;
-                   }
+                    }
                 }
 
                 if (flag)
@@ -982,7 +982,7 @@ namespace BuiltinBuffs.Duality
 
         private void PlayerMoveByLegs()
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var self) || this.legs == null)
                 return;
 
             travelDir = (wantPos - self.bodyChunks[0].pos).normalized;
