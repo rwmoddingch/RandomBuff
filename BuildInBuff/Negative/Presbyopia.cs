@@ -37,7 +37,7 @@ namespace BuiltinBuffs.Negative
         private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
         {
             orig(self, cam);
-            if(Presbyopia.GetBuff() is PresbyopiaBuff buff && buff.blurPart == null) 
+            if(Presbyopia.GetBuff() is PresbyopiaBuff buff) 
                 self.AddPart(buff.blurPart = new FullScreenBlur(self));
         }
 
