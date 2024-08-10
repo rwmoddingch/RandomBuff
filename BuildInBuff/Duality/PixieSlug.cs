@@ -28,7 +28,7 @@ namespace BuiltinBuffs.Duality
     {
         public static BuffID PixieSlug = new BuffID("PixieSlug", true);
         public static ConditionalWeakTable<Player, Pixies> pixies = new ConditionalWeakTable<Player, Pixies>();
-        public static int rainbowSprite;
+        public static ConditionalWeakTable<Fly, PixieFly> pixieFly = new ConditionalWeakTable<Fly, PixieFly>();
         public static float hue;
 
         public void OnEnable()
@@ -41,12 +41,21 @@ namespace BuiltinBuffs.Duality
         {
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
+            On.Fly.Update += Fly_Update;
             On.FlyGraphics.InitiateSprites += FlyGraphics_InitiateSprites;
             On.FlyGraphics.DrawSprites += FlyGraphics_DrawSprites;
             On.Rock.HitSomething += Rock_HitSomething;
             On.SporeCloud.Update += SporeCloud_Update;
         }
 
+        private static void Fly_Update(On.Fly.orig_Update orig, Fly self, bool eu)
+        {
+            orig(self, eu);
+            if (!pixieFly.TryGetValue(self, out var pFly))
+            {
+                pixieFly.Add(self, new PixieFly());
+            }
+        }
 
         private static void SporeCloud_Update(On.SporeCloud.orig_Update orig, SporeCloud self, bool eu)
         {
@@ -86,13 +95,13 @@ namespace BuiltinBuffs.Duality
         private static void FlyGraphics_DrawSprites(On.FlyGraphics.orig_DrawSprites orig, FlyGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig(self, sLeaser, rCam, timeStacker, camPos);
-            if (rainbowSprite > 0)
+            if (pixieFly.TryGetValue(self.fly, out var pFly) && pFly.rainbowSprite > 0 && sLeaser.sprites.Length > pFly.rainbowSprite)
             {
-                sLeaser.sprites[rainbowSprite].SetPosition(Vector2.Lerp(self.fly.bodyChunks[0].lastPos, self.fly.bodyChunks[0].pos, timeStacker) - camPos);
-                if (!rCam.ReturnFContainer("GrabShaders")._childNodes.Contains(sLeaser.sprites[rainbowSprite]) && self.fly.room != null)
+                sLeaser.sprites[pFly.rainbowSprite].SetPosition(Vector2.Lerp(self.fly.bodyChunks[0].lastPos, self.fly.bodyChunks[0].pos, timeStacker) - camPos);
+                if (!rCam.ReturnFContainer("GrabShaders")._childNodes.Contains(sLeaser.sprites[pFly.rainbowSprite]) && self.fly.room != null)
                 {
-                    sLeaser.sprites[rainbowSprite].RemoveFromContainer();
-                    rCam.ReturnFContainer("GrabShaders").AddChild(sLeaser.sprites[rainbowSprite]);
+                    sLeaser.sprites[pFly.rainbowSprite].RemoveFromContainer();
+                    rCam.ReturnFContainer("GrabShaders").AddChild(sLeaser.sprites[pFly.rainbowSprite]);
                 }
             }
 
@@ -112,15 +121,19 @@ namespace BuiltinBuffs.Duality
         private static void FlyGraphics_InitiateSprites(On.FlyGraphics.orig_InitiateSprites orig, FlyGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             orig(self, sLeaser, rCam);
-            Futile.atlasManager.LoadAtlasFromTexture("rainbow", Resources.Load("Atlases/rainbow") as Texture2D, true);
-            var rainbow = new FSprite("rainbow");
-            rainbow.color = Color.black;
-            rainbow.shader = rCam.game.rainWorld.Shaders["Rainbow"];
-            rainbow.scale = 0.8f;
-            rainbowSprite = sLeaser.sprites.Length;
-            Array.Resize<FSprite>(ref sLeaser.sprites, rainbowSprite + 1);
-            sLeaser.sprites[rainbowSprite] = rainbow;
-            rCam.ReturnFContainer("GrabShaders").AddChild(sLeaser.sprites[rainbowSprite]);
+            if (pixieFly.TryGetValue(self.fly, out var pFly))
+            {
+                Futile.atlasManager.LoadAtlasFromTexture("rainbow", Resources.Load("Atlases/rainbow") as Texture2D, true);
+                var rainbow = new FSprite("rainbow");
+                rainbow.color = Color.black;
+                rainbow.shader = rCam.game.rainWorld.Shaders["Rainbow"];
+                rainbow.scale = 0.8f;
+
+                pFly.rainbowSprite = sLeaser.sprites.Length;
+                Array.Resize<FSprite>(ref sLeaser.sprites, pFly.rainbowSprite + 1);
+                sLeaser.sprites[pFly.rainbowSprite] = rainbow;
+                rCam.ReturnFContainer("GrabShaders").AddChild(sLeaser.sprites[pFly.rainbowSprite]);
+            }            
         }
 
 
@@ -128,6 +141,10 @@ namespace BuiltinBuffs.Duality
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
+            if (!pixies.TryGetValue(self, out var pixie))
+            {
+                pixies.Add(self, new Pixies(self));
+            }
             if (pixies.TryGetValue(self, out var _pixies))
             {
                 _pixies.Update();
@@ -143,6 +160,11 @@ namespace BuiltinBuffs.Duality
             }
         }
 
+    }
+
+    public class PixieFly
+    {
+        public int rainbowSprite = 0;
     }
 
     public class Pixies
