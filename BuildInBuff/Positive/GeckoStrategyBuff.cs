@@ -523,7 +523,8 @@ namespace BuiltinBuffs.Positive
             base.Update(eu);
             bodyChunks[1].pos = firstChunk.pos;
 
-            segments[0].connectedPoint = firstChunk.pos;
+            if(segments.Count > 0)
+                segments[0].connectedPoint = firstChunk.pos;
             for (int i = 0; i < segments.Count; i++)
             {
                 segments[i].vel -= 0.9f * gravity * Vector2.up;
