@@ -890,6 +890,7 @@ namespace RandomBuff.Render.UI
         {
             if(overrideDisabled || finishSelection)
             {
+                Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
                 if (CurrentFocusCard != null)
                     CurrentFocusCard = null;
                 return;
@@ -902,13 +903,17 @@ namespace RandomBuff.Render.UI
                     card.LocalMousePos.y > 0f &&
                     card.LocalMousePos.y < 1f)
                 {
+                    Slot.HelpInfoProvider.UpdateHelpInfo(CardPickerSlot.CardPicker_OnMouseFocus, CurrentFocusCard != card);
                     CurrentFocusCard = card;
                     return;
                 }
             }
 
             if (CurrentFocusCard != null)
+            {
+                Slot.HelpInfoProvider.UpdateHelpInfo(CardPickerSlot.CardPicker_NoCardFocus, false);
                 CurrentFocusCard = null;
+            }
         }
 
         protected override void OnMouseSingleClick()

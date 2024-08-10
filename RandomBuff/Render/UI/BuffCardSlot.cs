@@ -313,6 +313,7 @@ namespace RandomBuff.Render.UI
         public bool AllFinished { get; private set; } = false;
         bool resumeTitle;
 
+
         /// <summary>
         /// 创建一次抽卡卡槽
         /// </summary>
@@ -341,7 +342,10 @@ namespace RandomBuff.Render.UI
                 InGameBuffCardSlot.BaseInteractionManager.SubManager = BaseInteractionManager;
             }
 
-            for(int i = 0;i < majorSelections.Length;i++)
+            HelpInfoProvider = new HelpInfoProvider(this);
+            HelpInfoProvider.UpdateHelpInfo(CardPicker_NoCardFocus, false);
+
+            for (int i = 0;i < majorSelections.Length;i++)
             {
                 var major = new BuffCard(majorSelections[i]);
                 major.Position = new Vector2(2000, -100);
@@ -456,6 +460,30 @@ namespace RandomBuff.Render.UI
             InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
             base.Destory();
         }
+
+        static CardPickerSlot()
+        {
+            HelpInfoProvider.CustomProviders += HelpInfoProvider_CustomProviders;
+        }
+
+        private static bool HelpInfoProvider_CustomProviders(HelpInfoProvider.HelpInfoID ID, out string helpInfo, params object[] Params)
+        {
+            if(ID == CardPicker_NoCardFocus)
+            {
+                helpInfo = BuffResourceString.Get("CardPickerSlot_NoCardFocus");
+                return true;
+            }
+            else if(ID == CardPicker_OnMouseFocus)
+            {
+                helpInfo = BuffResourceString.Get("CardPickerSlot_OnMouseFocus");
+                return true;
+            }
+            helpInfo = string.Empty;
+            return false;
+        }
+
+        internal static HelpInfoProvider.HelpInfoID CardPicker_NoCardFocus = new HelpInfoProvider.HelpInfoID("CardPicker_NoCardFocus", true);
+        internal static HelpInfoProvider.HelpInfoID CardPicker_OnMouseFocus = new HelpInfoProvider.HelpInfoID("CardPicker_OnMouseFocus", true);
     }
 
     /// <summary>
