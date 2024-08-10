@@ -111,7 +111,7 @@ namespace BuiltinBuffs.Negative
         public void Update()
         {
             if (!ownerRef.TryGetTarget(out var player))
-                return; 
+                return;
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);
@@ -129,9 +129,9 @@ namespace BuiltinBuffs.Negative
             else if (result == Player.ObjectGrabability.BigOneHand)
                 result = Player.ObjectGrabability.BigOneHand;
             else if (result == Player.ObjectGrabability.TwoHands)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
             else if (result == Player.ObjectGrabability.Drag)
-                result = Player.ObjectGrabability.CantGrab;
+                result = Player.ObjectGrabability.Drag;
 
             return result;
         }

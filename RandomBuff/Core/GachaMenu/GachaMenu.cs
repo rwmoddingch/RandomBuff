@@ -78,7 +78,6 @@ namespace RandomBuff.Core.GachaMenu
                     if (currentPacket.negative.pickTimes != 0)
                     {
                         selectCount = 0;
-                        pages[0].selectables.Add(exitButton);
                         needNew = true;
                     }
                     else

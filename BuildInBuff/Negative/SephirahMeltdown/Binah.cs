@@ -750,13 +750,13 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         {
             sLeaser.RemoveAllSpritesFromContainer();
             if (newContatiner == null)
-                newContatiner = rCam.ReturnFContainer("Foreground");
+                newContatiner = rCam.ReturnFContainer("Water");
             
             for (int i = 0; i < graphics.FirstHaloSprite; i++)
                 newContatiner.AddChild(sLeaser.sprites[i]);
             
             for (int j = graphics.FirstHaloSprite; j < graphics.TotalSprites; j++)
-                rCam.ReturnFContainer("Water").AddChild(sLeaser.sprites[j]);
+                rCam.ReturnFContainer("Bloom").AddChild(sLeaser.sprites[j]);
             
             if (sLeaser.containers != null)
                 foreach (FContainer node in sLeaser.containers)
