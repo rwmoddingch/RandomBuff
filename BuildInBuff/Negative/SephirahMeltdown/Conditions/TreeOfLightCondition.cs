@@ -131,7 +131,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             if (counter == 5 * 40)
             {
                 AyinPost.Instance.toColor = Color.clear;
-                room.game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                room.game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent()
                 {
                     fadeOutTime = 4f,
                     prio = 100,

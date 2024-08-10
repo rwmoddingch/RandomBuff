@@ -47,9 +47,8 @@ namespace BuiltinBuffs.Negative
         {
             var result = orig.Invoke(self, obj);
             if (!(obj is IPlayerEdible || 
-                (obj is Creature && self.CanEatMeat(obj as Creature)) || 
-                (DesperateEaterBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(DesperateEaterBuffEntry.DesperateEater) && 
-                 !(obj is IPlayerEdible) && !(obj is Creature) &&
+                (obj is Creature creature && self.CanEatMeat(creature)) || 
+                (BuffCore.GetAllBuffIds().Contains(DesperateEaterBuffEntry.DesperateEater) && !(obj is Creature) &&
                  (!ModManager.MSC || self.SlugCatClass != MoreSlugcatsEnums.SlugcatStatsName.Spear) && 
                  self.Malnourished)))
                 result = Player.ObjectGrabability.CantGrab;

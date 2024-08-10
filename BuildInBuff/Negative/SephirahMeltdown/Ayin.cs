@@ -54,7 +54,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
 
                 };
-                game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+                game.rainWorld.processManager.musicPlayer?.GameRequestsSong(musicEvent);
             }
 
             void ReplaceForContainer(FContainer container)
@@ -97,7 +97,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                         songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-2",
 
                     };
-                    game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+                    game.rainWorld.processManager.musicPlayer?.GameRequestsSong(musicEvent);
                 }
                 moveCounter = 0;
                 if (obj == 6)
@@ -230,13 +230,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             Shader.SetGlobalFloat("Buff_screenRotate", 0);
             AyinPost.EndDestroy();
             if(BuffCustom.TryGetGame(out var game))
-                game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
-                {
-                    fadeOutTime = 0.5f,
-                    prio = 100,
-                    songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
-                    type = StopMusicEvent.Type.AllSongs
-                });
+                game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent() { fadeOutTime = 0.5f, prio = 100, songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1", type = StopMusicEvent.Type.AllSongs });
 
         }
 

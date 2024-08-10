@@ -113,7 +113,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                     songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
 
                 };
-                game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+
+                game.rainWorld.processManager.musicPlayer?.GameRequestsSong(musicEvent);
             }
 
             else
@@ -132,7 +133,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                     songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
 
                 };
-                game.rainWorld.processManager.musicPlayer.GameRequestsSong(musicEvent);
+                game.rainWorld.processManager.musicPlayer?.GameRequestsSong(musicEvent);
             }
 
 
@@ -171,21 +172,21 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                     new TreeOfLightCondition().SetTargetCount(game.session.characterStats));
                 AyinBuffData.Ayin.CreateNewBuff();
             }
-            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent()
             {
                 fadeOutTime = 0.5f,
                 prio = 100,
                 songName = $"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1",
                 type = StopMusicEvent.Type.AllSongs
             });
-            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent()
             {
                 fadeOutTime = 0.5f,
                 prio = 100,
                 songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
                 type = StopMusicEvent.Type.AllSongs
             });
-            game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent()
             {
                 fadeOutTime = 0.5f,
                 prio = 100,
