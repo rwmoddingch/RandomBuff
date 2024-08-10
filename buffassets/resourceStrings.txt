@@ -101,11 +101,16 @@ RunCount|Games completed:
 InitPickCount|Initial draw count:
 
 //BasicInGameBuffCardSlot
-BasicInGameBuffCardSlot_OnMouseFocus|Single click to check <BuffID> in detail
-BasicInGameBuffCardSlot_OnCardExclusiveShow|Single click to turn over the card<LINE>Single click blank space to exit detail mode
-BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and click to check it
+BasicInGameBuffCardSlot_OnMouseFocus|[Single click/press throw] to check <BuffID> in detail
+BasicInGameBuffCardSlot_OnCardExclusiveShow|[Single click/press throw] to turn over the card<LINE>[Single click at blank space/press esc] to exit detail mode
+BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and [click/press throw] to check it
 BasicInGameBuffCardSlot_ExitHUD|<LINE>Press <HUD_KEY> to turn off hud
 BasicInGameBuffCardSlot_BindKey|<LINE>Press another key while hold <KEYBINDER_KEY> to bind shortcut key for <BuffID>
+
+//CardPickerSlot
+CardPickerSlot_NoCardFocus|Move mouse over a card and click/press throw to check it
+CardPickerSlot_OnMouseFocus|[Single click/press] throw to flip the card<LINE>[Right click/press grab] to pick the card
+
 
 
 //GachaTemplate
