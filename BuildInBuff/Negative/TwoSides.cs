@@ -26,9 +26,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HotDogGains.Negative;
 
 namespace BuiltinBuffs.Negative //命名空间在BuiltinBuffs的Negative下
+
 {
+    //对于有时长限制卡牌：
+    class TwoSidesBuff : Buff<TwoSidesBuff, TwoSidesBuffData> { public override BuffID ID => TwoSidesIBuffEntry.twoSidesBuffID; }
+    class TwoSidesBuffData : CountableBuffData
+    {
+        public override BuffID ID => TwoSidesIBuffEntry.twoSidesBuffID;
+
+        public override int MaxCycleCount => 3;
+    }
+
+
     internal class TwoSidesIBuffEntry : IBuffEntry
     {
         /*-----------------------------------------------------字段-----------------------------------------------------*/
@@ -97,8 +109,7 @@ namespace BuiltinBuffs.Negative //命名空间在BuiltinBuffs的Negative下
         public void OnEnable()
         {
             //注册BuffID
-            BuffRegister.RegisterBuff<TwoSidesIBuffEntry>(
-                twoSidesBuffID);
+            BuffRegister.RegisterBuff<TwoSidesBuff,TwoSidesBuffData,TwoSidesIBuffEntry>(twoSidesBuffID);
         }
     }
 }
