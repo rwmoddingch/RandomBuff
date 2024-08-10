@@ -68,7 +68,8 @@ namespace RandomBuff.Core.BuffMenu
         {
             SetupSlugNameOrders();
             menuSlot = new BuffGameMenuSlot(this);
-
+            if (ModManager.CoopAvailable)
+                manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[0];
             //延迟加载等待存档载入完毕
             callBack = new BuffFile.BuffFileCompletedCallBack(OnDataLoaded);
 
