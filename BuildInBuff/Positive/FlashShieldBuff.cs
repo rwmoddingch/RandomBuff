@@ -20,6 +20,8 @@ namespace BuiltinBuffs.Positive
 {
     internal class FlashShieldBuff : Buff<FlashShieldBuff, FlashShieldBuffData>
     {
+        public override bool Triggerable => true;
+
         public override BuffID ID => FlashShieldBuffEntry.FlashShield;
 
         public FlashShieldBuff()
@@ -34,6 +36,23 @@ namespace BuiltinBuffs.Positive
                     FlashShieldBuffEntry.FlashShieldFeatures.Add(player, flashShield);
                 }
             }
+        }
+
+        public override bool Trigger(RainWorldGame game)
+        {
+            foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
+                             .Where(i => i != null && i.graphicsModule != null))
+            {
+                if (FlashShieldBuffEntry.FlashShieldFeatures.TryGetValue(player, out var flashShield) &&
+                    BuffInput.GetKeyDown(GetBindKey()))
+                {
+                    if (flashShield.IsActivate)
+                        flashShield.Deactivate();
+                    else if (!flashShield.IsActivate)
+                        flashShield.Activate();
+                }
+            }
+            return false;
         }
     }
 
@@ -216,6 +235,8 @@ namespace BuiltinBuffs.Positive
         float lastPush;
         float getToPush;
 
+        public bool IsActivate { get; set; }
+
         public FlashShield(Player player, Room room)
         {
             this.ownerRef = new WeakReference<Player>(player);
@@ -229,7 +250,19 @@ namespace BuiltinBuffs.Positive
             this.getToPush = 1f;
             this.emitterCount = 30;
             this.level = FlashShieldBuffEntry.StackLayer;
+            this.IsActivate = true;
         }
+
+        public void Activate()
+        {
+            IsActivate = true;
+        }
+
+        public void Deactivate()
+        {
+            IsActivate = false;
+        }
+
         #region 外观
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
@@ -301,6 +334,7 @@ namespace BuiltinBuffs.Positive
             }
         }
         #endregion
+
         public override void Update(bool eu)
         {
             if (!ownerRef.TryGetTarget(out var player) || owner.room == null || this.room == null || owner.room != this.room)
@@ -315,15 +349,20 @@ namespace BuiltinBuffs.Positive
             this.lastPush = this.push;
             this.expand = Custom.LerpAndTick(this.expand, this.getToExpand, 0.05f, 0.0125f);
             this.push = Custom.LerpAndTick(this.push, this.getToPush, 0.02f, 0.025f);
-            bool flag = true;
+            bool flag = true;/*
             if (UnityEngine.Random.value < 0.00625f)
             {
                 this.getToExpand = ((UnityEngine.Random.value < 0.5f) ? 1f : Mathf.Lerp(0.95f, 1.05f, Mathf.Pow(UnityEngine.Random.value, 1.5f)));
-            }
+            }*/
             if (UnityEngine.Random.value < 0.00625f || flag)
             {
                 this.getToPush = 1f;
             }
+
+            if (this.IsActivate)
+                this.getToExpand = 1f;
+            else
+                this.getToExpand = 0f;
 
             if (owner.room != null)
             {

@@ -3,16 +3,16 @@
     "BuffID" : "SensorBomb",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
-    "Triggerable" : false,
+    "Triggerable" : true,
     "Color" : "FF4A52",
     "Tag" : ["BombExplodeModify"],
     "Conflict":["BombExplodeModify"],
     "Chinese" : {
         "BuffName" : "感应炸弹",
-        "Description" : "炸弹投出后不会再因为碰撞爆炸，而是在接近任意生物或速度接近静止时爆炸。"
+        "Description" : "炸弹投出后不会再因为碰撞爆炸，而是在接近任意生物或速度接近静止时爆炸。\n主动触发后，将玩家身边的炸弹转化为本轮回生效的地雷，地雷只会被玩家外的生物触发。"
     },
     "English": {
         "BuffName" : "Sensor Bomb",
-        "Description" : "Instead of exploding from collision after being thrown, bombs explode when they are near any creature or at a speed close to static."
+        "Description" : "Instead of exploding from collision after being thrown, bombs explode when they are near any creature or at a speed close to static.\nWhen triggered, convert nearby bombs into mines that last until cycle end.Mines will only be triggered by other creatures."
     }
 }

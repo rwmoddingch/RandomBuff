@@ -8,10 +8,10 @@
 
     "Chinese" : {
         "BuffName" : "俄罗斯轮盘",
-        "Description" : "任何生物扔出的武器都有小概率立即命中自身。"
+        "Description" : "任何生物扔出的武器都有1/6概率立即命中自身。"
     },
     "English" : {
         "BuffName" : "Russian Roulette",
-        "Description" : "Weapons thrown by any creatures have a small chance to hit the thrower themselves instantly."
+        "Description" : "Weapons thrown by any creatures have a 1/6 chance to hit the thrower themselves instantly."
     }
 }

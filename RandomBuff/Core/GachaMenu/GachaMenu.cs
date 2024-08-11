@@ -65,7 +65,7 @@ namespace RandomBuff.Core.GachaMenu
 
         public void RequestNewPicker()
         {
-            if ((++selectCount) != pickSlots.Count)
+            if ((++selectCount) < pickSlots.Count)
                 NewPicker();
             else
             {
