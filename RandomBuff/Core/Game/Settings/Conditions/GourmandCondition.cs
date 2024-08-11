@@ -35,7 +35,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 {
                     currentProgress = count;
                     onLabelRefresh?.Invoke(this);
-                    if (currentProgress == tracker.progress.Length - 1)
+                    if (currentProgress == tracker.progress.Length)
                         Finished = true;
                 }
             }

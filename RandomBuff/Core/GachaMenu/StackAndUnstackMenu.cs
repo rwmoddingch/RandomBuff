@@ -14,8 +14,10 @@ namespace RandomBuff.Core.GachaMenu
 {
     internal class StackAndUnstackMenu : Menu.Menu
     {
+        public SlugcatStats.Name name;
         public StackAndUnstackMenu(ProcessManager manager,SlugcatStats.Name name, ProcessManager.ProcessID ID) : base(manager, ID)
         {
+            this.name = name;
             this.title = new BuffSlotTitle();
             container.AddChild(title.Container);
             pages.Add(new Menu.Page(this, null, "StackAndUnstackMenu", 0));
@@ -106,7 +108,10 @@ namespace RandomBuff.Core.GachaMenu
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
-           
+            if (manager.upcomingProcess == null && exitCounter <= 0 && RWInput.CheckPauseButton(0))
+            {
+                manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+            }
             pickerSlot?.GrafUpdate(timeStacker);
             inGameSlot?.GrafUpdate(timeStacker);
             title.GrafUpdate(timeStacker);

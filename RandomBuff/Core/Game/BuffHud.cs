@@ -49,8 +49,7 @@ namespace RandomBuff.Core.Game
             }
 
 
-            if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
-                ProcessManager.MenuSetup.StoryGameInitCondition.New && !BuffPoolManager.Instance.isInitHud)
+            if (BuffCustom.TryGetGame(out var game) && game.GetStorySession.saveState.cycleNumber == 0 && !BuffPoolManager.Instance.isInitHud)
             {
                 BuffPoolManager.Instance.isInitHud = true;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
