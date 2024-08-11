@@ -59,9 +59,20 @@ namespace BuiltinBuffs.Positive
             IL.BigSpiderAI.Update += BigSpiderAI_Update;
             On.Player.Update += Player_Update;
             On.Player.Die += Player_Die;
+            On.Player.Destroy += Player_Destroy;
             On.TailSegment.Update += TailSegment_Update;
             On.PlayerGraphics.TailSpeckles.DrawSprites += TailSpeckles_DrawSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+        }
+
+        private static void Player_Destroy(On.Player.orig_Destroy orig, Player self)
+        {
+            orig(self);
+            if (geckoModule.TryGetValue(self, out var module) && module.escapeCount >= 0)
+            {
+                self.playerState.permaDead = true;
+                self.Die();
+            }
         }
 
         private static void Player_Die(On.Player.orig_Die orig, Player self)
