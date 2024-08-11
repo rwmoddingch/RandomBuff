@@ -393,7 +393,7 @@ namespace BuiltinBuffs.Positive
                         {
                             for (int i = 0; i < self.grabbedBy.Count; i++)
                             {
-                                if (self.grabbedBy[i].grabber is Player) continue;
+                                if (self.grabbedBy[i].grabber is Player || self.grabbedBy[i].grabber is Leech) continue;
                                 
                                 int num = self.grabbedBy[i].graspUsed;
                                 var grabber = self.grabbedBy[i].grabber;

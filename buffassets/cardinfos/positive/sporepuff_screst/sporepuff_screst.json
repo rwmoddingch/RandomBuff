@@ -6,6 +6,7 @@
   "Triggerable": false,
   "Stackable": true,
   "Color": "E3AB4E",
+  "Conflict": [ "PixieSlug" ],
 
   "Chinese": {
     "BuffName": "烟雾果纹章",
