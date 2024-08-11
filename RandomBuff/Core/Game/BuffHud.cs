@@ -42,7 +42,7 @@ namespace RandomBuff.Core.Game
             if (BuffPoolManager.Instance.GameSetting.fallbackPick is { } pick)
             {
                 foreach (var pickSlot in pick)
-                    inGameSlot.RequestPickCards((id) => id.CreateNewBuff(), pickSlot.major, pickSlot.additive,pickSlot.selectCount);
+                    inGameSlot.RequestPickCards((id) => BuffPoolManager.Instance.CreateBuff(id, true), pickSlot.major, pickSlot.additive,pickSlot.selectCount);
                 
 
                 BuffPoolManager.Instance.GameSetting.fallbackPick = null;

@@ -920,7 +920,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 toUseRooms.Clear();
                 foreach (var room in useRoom)
                 {
-                    if(room?.connections == null) continue;
+                    if (room?.connections == null) continue;
+                    if (room.shelter || room.gate) continue;
                     foreach (var node in room.connections.Where(i => !allRooms.Contains(i)))
                     {
                         if (game.world.GetAbstractRoom(node) != null && !game.world.GetAbstractRoom(node).shelter && !game.world.GetAbstractRoom(node).gate)

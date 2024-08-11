@@ -26,18 +26,20 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     MoreSlugcatsEnums.EndgameID.Gourmand, false) is
                 WinState.GourFeastTracker tracker)
             {
-                int index = 0;
-                for (;
-                     tracker.currentCycleProgress[index] > 0 && index < tracker.currentCycleProgress.Length;
-                     index++) ;
-
-                if (index != currentProgress)
+               
+                int count = 0;
+                for (int index = 0; index < tracker.progress.Length; index++)
+                    if (tracker.progress[index] > 0 || tracker.currentCycleProgress[index] > 0)
+                        count++;
+                if (currentProgress != count)
                 {
-                    currentProgress = index;
+                    currentProgress = count;
                     onLabelRefresh?.Invoke(this);
-                    Finished = index == WinState.GourmandPassageTracker.Length-1;
+                    if (currentProgress == tracker.progress.Length - 1)
+                        Finished = true;
                 }
             }
+        
 
         }
 
