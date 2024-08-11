@@ -365,3 +365,4 @@ FodyWeavers.xsd
 **/Assembly-CSharp-firstpass.dll
 **/HOOKS-Assembly-CSharp.dll
 **/PUBLIC-Assembly-CSharp.dll
+/BuildInBuff/BuiltinBuffs.csproj

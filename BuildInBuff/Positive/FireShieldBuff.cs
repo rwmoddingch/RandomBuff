@@ -20,6 +20,8 @@ namespace BuiltinBuffs.Positive
 {
     internal class FireShieldBuff : IgnitionPointBaseBuff<FireShieldBuff, FireShieldBuffData>
     {
+        public override bool Triggerable => true;
+
         public override BuffID ID => FireShieldBuffEntry.FireShield;
 
         public FireShieldBuff()
@@ -29,11 +31,28 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
-                    var flashShield = new FireShield(player, player.room);
-                    FireShieldBuffEntry.FireShieldFeatures.Add(player, flashShield);
-                    player.room.AddObject(flashShield);
+                    var fireShield = new FireShield(player, player.room);
+                    FireShieldBuffEntry.FireShieldFeatures.Add(player, fireShield);
+                    player.room.AddObject(fireShield);
                 }
             }
+        }
+
+        public override bool Trigger(RainWorldGame game)
+        {
+            foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
+                             .Where(i => i != null && i.graphicsModule != null))
+            {
+                if (FireShieldBuffEntry.FireShieldFeatures.TryGetValue(player, out var fireShield) &&
+                    BuffInput.GetKeyDown(GetBindKey()))
+                {
+                    if (fireShield.IsActivate)
+                        fireShield.Deactivate();
+                    else if (!fireShield.IsActivate)
+                        fireShield.Activate();
+                }
+            }
+            return false;
         }
     }
 
@@ -72,9 +91,9 @@ namespace BuiltinBuffs.Positive
             orig(self, abstractCreature, world);
             if (!FireShieldFeatures.TryGetValue(self, out _))
             {
-                FireShield flashShield = new FireShield(self, self.room);
-                FireShieldFeatures.Add(self, flashShield);
-                self.room.AddObject(flashShield);
+                FireShield fireShield = new FireShield(self, self.room);
+                FireShieldFeatures.Add(self, fireShield);
+                self.room.AddObject(fireShield);
             }
         }
 
@@ -82,13 +101,13 @@ namespace BuiltinBuffs.Positive
         {
             orig(self, newRoom);
 
-            if (FireShieldFeatures.TryGetValue(self, out var flashShield))
+            if (FireShieldFeatures.TryGetValue(self, out var fireShield))
             {
                 FireShieldFeatures.Remove(self);
-                flashShield.Destroy();
-                flashShield = new FireShield(self, self.room);
-                FireShieldFeatures.Add(self, flashShield);
-                self.room.AddObject(flashShield);
+                fireShield.Destroy();
+                fireShield = new FireShield(self, self.room);
+                FireShieldFeatures.Add(self, fireShield);
+                self.room.AddObject(fireShield);
             }
         }
 
@@ -122,14 +141,19 @@ namespace BuiltinBuffs.Positive
         float angle;
         float angleSpeed;
 
+        private int coolingTime;
+
         public bool IsExisting
         {
             get
             {
-                return owner.mainBodyChunk.submersion <= 0.5 ||
-                       FireShieldBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HellIBuffEntry.hellBuffID);
+                return IsActivate &&
+                       (owner.mainBodyChunk.submersion <= 0.5 ||
+                       FireShieldBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HellIBuffEntry.hellBuffID));
             }
         }
+
+        public bool IsActivate { get; set; }
 
         public FireShield(Player player, Room room)
         {
@@ -142,6 +166,18 @@ namespace BuiltinBuffs.Positive
             this.emitterMaxCount = 3;
             this.angle = 0f;
             this.angleSpeed = 1f;
+            this.IsActivate = true;
+        }
+
+
+        public void Activate()
+        {
+            IsActivate = true;
+        }
+
+        public void Deactivate()
+        {
+            IsActivate = false;
         }
 
         public override void Update(bool eu)
