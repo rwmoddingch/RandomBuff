@@ -392,7 +392,7 @@ namespace RandomBuff.Core.Game.Settings
             fallbackPick = new List<FallbackPickSlot>();
        
        
-            var positive = gachaTemplate.CurrentPacket.negative;
+            var positive = gachaTemplate.CurrentPacket.positive;
             for (int i = 0; i < positive.pickTimes; i++)
             {
 

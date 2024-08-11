@@ -363,12 +363,7 @@ namespace BuiltinBuffs.Positive
 
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            if (slatedForDeletetion)
-            {
-                sLeaser.CleanSpritesAndRemove();
-                return;
-            }
+        {            
             Vector3 smoothRotation = Vector3.Lerp(lastRotation3D, currentRotation3D, timeStacker);
             Vector2 pos = Vector2.Lerp(firstChunk.lastPos, firstChunk.pos, timeStacker) - camPos;
             sLeaser.sprites[0].SetPosition(pos);
@@ -386,6 +381,12 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[2].SetPosition(pos + flamePosDelta / 2f);
             sLeaser.sprites[2].rotation = Custom.VecToDeg(flamePosDelta) + 90f;
             sLeaser.sprites[2].alpha = currentHeat / maxHeat;
+
+
+            if (slatedForDeletetion || room != rCam.room)
+            {
+                sLeaser.CleanSpritesAndRemove();
+            }
         }
 
         Color CaculateTubeCol(float l)
