@@ -10,6 +10,7 @@ using RandomBuff;
 using BuiltinBuffs.Positive;
 using System.ComponentModel;
 using RWCustom;
+using BuiltinBuffs;
 
 namespace TemplateGains
 {
@@ -51,6 +52,7 @@ namespace TemplateGains
 
             if (weapon.grabbedBy.Count > 0)
                 return;
+
             if (slug == null || slug.room == null || !slug.Consious)
                 return;
 
@@ -61,8 +63,11 @@ namespace TemplateGains
             if (myTurnData.WarpCount > 0)
             {
                 weapon.ChangeMode(Weapon.Mode.Free);
-                weapon.SetRandomSpin();
-                weapon.firstChunk.pos = Vector2.Lerp(slug.firstChunk.pos, weapon.firstChunk.pos, Mathf.InverseLerp(0, myTurnData.MaxWarpCount, myTurnData.WarpCount));
+                var targetPos = slug.firstChunk.pos;
+
+                var t = Mathf.InverseLerp(0, myTurnData.MaxWarpCount, myTurnData.WarpCount);
+                weapon.firstChunk.pos = Vector2.Lerp(targetPos,weapon.firstChunk.pos,t);
+                
                 myTurnData.canWarp = true;
                 myTurnData.WarpCount--;
                 return;
@@ -100,7 +105,7 @@ namespace TemplateGains
         public bool canWarp = false;
 
         public int WarpCount = 0;
-        public int MaxWarpCount => 40 - (StillMyTurnBuffEntry.StillMyTurnID.GetBuffData().StackLayer * 10);
+        public int MaxWarpCount => 30 - (StillMyTurnBuffEntry.StillMyTurnID.GetBuffData().StackLayer * 8);
         public void CanWarp(Player player)
         {
             this.player = player;
