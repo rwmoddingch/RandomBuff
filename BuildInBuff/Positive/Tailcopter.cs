@@ -64,7 +64,7 @@ namespace TemplateGains
 
             if (self.input[0].jmp && !self.input[1].jmp && tailBody.contactPoint.y >= 0)//空中按跳提升飞行计数
             {
-                copter.flyCount += 40;
+                copter.flyCount += 20;
                 if (copter.flyCount > copter.flyLimit) copter.flyCount = copter.flyLimit;//如果超过上限就等于上限
 
                 tailBody.vel += Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos) * 0.2f;
@@ -99,7 +99,7 @@ namespace TemplateGains
 
             foreach (var body in self.bodyChunks)
             {
-                float g = self.g;//玩家房间的重力
+                float g = self.room.gravity;//玩家房间的重力
                 g *= copter.flying;//乘上飞行程度的倍率
 
                 tailBody.vel.y += g;
