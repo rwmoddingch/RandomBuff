@@ -12,7 +12,7 @@
     "Description": "每当你对其他生物造成伤害时，根据伤害值回复饱食度。"
   },
   "English": {
-    "BuffName": "DrainLife",
+    "BuffName": "Drain Life",
     "Description": "Whenever you deal damage to other creatures, restore food points based on the damage value."
   }
 }

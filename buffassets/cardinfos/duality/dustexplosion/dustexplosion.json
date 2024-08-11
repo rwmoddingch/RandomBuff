@@ -12,7 +12,7 @@
     "Description": "现在各种烟雾范围内出现火焰或爆炸将会引发粉尘爆炸。"
   },
   "English": {
-    "BuffName": "DustExplosion",
+    "BuffName": "Dust Explosion",
     "Description": "The occurrence of flames or explosions within various smoke ranges now will cause dust explosions."
   }
 }

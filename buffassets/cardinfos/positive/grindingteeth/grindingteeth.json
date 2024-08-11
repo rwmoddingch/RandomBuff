@@ -12,7 +12,7 @@
     "Description": "如果你不能撕咬生物，则允许你撕咬；否则，每层增加撕咬伤害50%。"
   },
   "English": {
-    "BuffName": "GrindingTeeth",
+    "BuffName": "Grinding Teeth",
     "Description": "If you cannot maul creatures, you are allowed to maul; Otherwise, each layer increases the bite damage by 50%."
   }
 }
