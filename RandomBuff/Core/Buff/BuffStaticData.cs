@@ -196,7 +196,7 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "AsPositive"))
                 {
                     if (rawData[loadState] is bool)
-                        newData.Stackable = (bool)rawData[loadState];
+                        newData.AsPositive = (bool)rawData[loadState];
                     else
                         newData.AsPositive = bool.Parse(rawData[loadState] as string);
                 }

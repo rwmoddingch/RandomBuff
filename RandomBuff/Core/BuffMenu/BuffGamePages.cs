@@ -858,7 +858,7 @@ namespace RandomBuff.Core.BuffMenu
                 bindMission = mission;
                 this.animCmpnt = animCmpnt;
 
-                if (BuffPlayerData.Instance.finishedMission.Contains(mission.ID.value))
+                if (mission != null && BuffPlayerData.Instance.finishedMission.Contains(mission.ID.value))
                 {
                     Container.AddChild(finishSymbol = new FSprite("buffassets/illustrations/correctSymbol", true) { alpha = 0f, scale = 0.5f });
                 }

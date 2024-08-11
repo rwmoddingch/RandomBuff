@@ -48,7 +48,7 @@ namespace BuiltinBuffs.Negative
                                 player.realizedCreature.DangerPos), 60, 300, 0.06f, 0.02f, 0.4f) / 20f * 0.6f *
                             Mathf.Clamp01(waitCounter - 80) *
                             Custom.LerpMap(waitCounter, 80, 120, 0.1f, 1f) *
-                            Custom.LerpMap(waitCounter, 300, 500, 1f, 2f))
+                            Custom.LerpMap(waitCounter, 300, 500, 1f, 2f) *0.5f)
                         {
 
                             AbstractCreature acreature = new AbstractCreature(player.world,
@@ -69,6 +69,8 @@ namespace BuiltinBuffs.Negative
                             {
                                 BuffUtils.Log(FakeCreatureBuffData.FakeCreatureID,
                                     $"Wow! Create creature! {shortCut.destNode}, {acreature.creatureTemplate.type}");
+                                player.Room.AddEntity(creature.abstractCreature);
+
                             }
 
                             waitCounter = 0;
@@ -311,6 +313,9 @@ namespace BuiltinBuffs.Negative
                 {
                     if (needBreak)
                         break;
+
+                    if(creature.bodyChunks == null)
+                        continue;
                     foreach (var chunk in creature.bodyChunks)
                     {
                         if(chunk == null)

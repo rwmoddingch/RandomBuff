@@ -93,7 +93,7 @@ namespace BuiltinBuffs.Missions
         [JsonProperty]
         public int targetTileCount;
 
-
+        [JsonProperty]
         private int lastMoveTiles;
 
 
@@ -108,6 +108,11 @@ namespace BuiltinBuffs.Missions
             orig(self, eu);
             if (self.isNPC) return;
 
+            if (lastMoveTiles >= targetTileCount)
+            {
+                Finished = true;
+                return;
+            }
             if (needFaster && self.slugcatStats.runspeedFac <= self.slugcatStats.Original().runspeedFac) return;
 
             if (!modules.TryGetValue(self, out var module))
@@ -130,15 +135,15 @@ namespace BuiltinBuffs.Missions
             if (lastMoveTiles != Mathf.RoundToInt(moveTiles))
             {
                 lastMoveTiles = Mathf.RoundToInt(moveTiles);
+                if (lastMoveTiles >= targetTileCount)
+                {
+                    Finished = true;
+                }
+
                 onLabelRefresh?.Invoke(this);
 
             }
 
-            if (lastMoveTiles >= targetTileCount && !Finished)
-            {
-                Finished = true;
-                onLabelRefresh?.Invoke(this);
-            }
 
             module.Update(self);
         }

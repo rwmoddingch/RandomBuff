@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using RWCustom;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.SaveData;
 using UnityEngine;
@@ -18,8 +19,8 @@ namespace RandomBuff.Core.GachaMenu
     {
         private List<BuffID> picked = new ();
 
-        BuffSlotTitle slotTitle;
-        RainEffect rainEffect;
+        private BuffSlotTitle slotTitle;
+        private RainEffect rainEffect;
 
         public GachaMenu(ProcessManager.ProcessID lastID, RainWorldGame game, ProcessManager manager) : base(manager, BuffEnums.ProcessID.GachaMenuID)
         {
@@ -42,9 +43,7 @@ namespace RandomBuff.Core.GachaMenu
             slotTitle = new BuffSlotTitle();
             container.AddChild(slotTitle.Container);
 
-            currentPacket = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).gachaTemplate.CurrentPacket;
-            if(currentPacket.positive.pickTimes == 0 || currentPacket.positive.selectCount == 0)
-                positive = false;
+            pickSlots = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).fallbackPick;
 
             AnimMachine.GetTickAnimCmpnt(0, 80, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>
             {
@@ -66,97 +65,20 @@ namespace RandomBuff.Core.GachaMenu
 
         public void RequestNewPicker()
         {
-            selectCount++;
-            bool needNew = false;
-            if (positive)
-            {
-                if (selectCount == currentPacket.positive.selectCount)
-                {
-                    currentPacket.positive.pickTimes--;
-                    if (currentPacket.positive.pickTimes == 0)
-                        positive = false;
-                    if (currentPacket.negative.pickTimes != 0)
-                    {
-                        selectCount = 0;
-                        needNew = true;
-                    }
-                    else
-                    {
-                        exitCounter = 0;
-                        pages[0].selectables.Add(exitButton);
-                        return;
-                    }
-                }
-            }
+            if ((++selectCount) < pickSlots.Count)
+                NewPicker();
             else
             {
-                if (selectCount == currentPacket.negative.selectCount)
-                {
-                    currentPacket.negative.pickTimes--;
-                    if (currentPacket.negative.pickTimes == 0)
-                    {
-                        exitCounter = 0;
-                        pages[0].selectables.Add(exitButton);
-                        return;
-                    }
-                    needNew = true;
-                    selectCount = 0;
-                }
+                exitCounter = 0;
+                pages[0].selectables.Add(exitButton);
             }
-
-            if(needNew)
-                NewPicker();
         }
 
         private void NewPicker()
         {
-            CardPickerSlot pickerSlot;
-            if (positive)
-            {
-                var positiveCards = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
-                    BuffType.Positive);
-
-                var negativeCardsList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.positive.showCount,
-                    BuffType.Negative);
-
-                //卡牌库存不足
-                if (positiveCards == null || negativeCardsList == null)
-                {
-                    positive = false;
-                    selectCount = 0;
-                    RequestNewPicker();
-                    return;
-                }
-
-                var negativeCards = negativeCardsList.Select(i => i.BuffID).ToArray();
-                
-
-                for (int i=0;i< positiveCards.Count;i++)
-                    negativeCards[i] = positiveCards[i].BuffProperty == BuffProperty.Special ? negativeCards[i] : null;
-
-
-                pickerSlot = new CardPickerSlot(inGameSlot, Select,
-                    positiveCards.Select(i => i.BuffID).ToArray(),
-                    negativeCards,
-                    currentPacket.positive.selectCount, slotTitle);
-            }
-            else
-            {
-                var pickList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, currentPacket.negative.showCount,
-                    BuffType.Negative);
-
-                //卡牌库存不足
-                if (pickList == null)
-                {
-                    exitCounter = 0;
-                    pages[0].selectables.Add(exitButton);
-                    return;
-                }
-
-                pickerSlot = new CardPickerSlot(inGameSlot, Select,
-                    pickList.Select(i => i.BuffID).ToArray(),
-                    new BuffID[currentPacket.negative.showCount], currentPacket.negative.selectCount, slotTitle, true);
-            }
+            CardPickerSlot pickerSlot = new CardPickerSlot(inGameSlot, Select,
+                pickSlots[selectCount].major,
+                pickSlots[selectCount].additive, pickSlots[selectCount].selectCount, slotTitle, true);
             pickerSlots.Add(pickerSlot);
             container.AddChild(pickerSlot.Container);
             if (pickerSlots.Count >= 2)
@@ -239,7 +161,7 @@ namespace RandomBuff.Core.GachaMenu
 
         private int selectCount;
         private bool positive = true;
-        private GachaTemplate.CachaPacket currentPacket;
+        private List<GameSetting.FallbackPickSlot> pickSlots;
 
     }
 }

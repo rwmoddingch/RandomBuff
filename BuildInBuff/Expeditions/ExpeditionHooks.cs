@@ -51,7 +51,7 @@ namespace BuiltinBuffs.Expeditions
                     //    con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
                     //}
                     //FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
-                    AyinBuffData.Ayin.CreateNewBuff();
+                    BinahBuffData.Binah.CreateNewBuff();
                 }
 
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
@@ -71,7 +71,7 @@ namespace BuiltinBuffs.Expeditions
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-                    BinahBuffData.Binah.CreateNewBuff();
+                    FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
@@ -107,7 +107,24 @@ namespace BuiltinBuffs.Expeditions
 
             _ = new Hook(typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),BindingFlags.Static | BindingFlags.Public).GetGetMethod(),
                 typeof(ExpeditionHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet), BindingFlags.Static | BindingFlags.NonPublic));
+
+            On.Expedition.ExpeditionGame.IsMSCRoomScript += ExpeditionGame_IsMSCRoomScript;
+            On.Expedition.ExpeditionGame.IsUndesirableRoomScript += ExpeditionGame_IsUndesirableRoomScript;
              
+        }
+
+        private static bool ExpeditionGame_IsUndesirableRoomScript(On.Expedition.ExpeditionGame.orig_IsUndesirableRoomScript orig, UpdatableAndDeletable item)
+        {
+            if (Custom.rainWorld.BuffMode())
+                return false;
+            return orig(item);
+        }
+
+        private static bool ExpeditionGame_IsMSCRoomScript(On.Expedition.ExpeditionGame.orig_IsMSCRoomScript orig, UpdatableAndDeletable item)
+        {
+            if (Custom.rainWorld.BuffMode())
+                return false;
+            return orig(item);
         }
 
         private static void RainWorldGame_Update(ILContext il)

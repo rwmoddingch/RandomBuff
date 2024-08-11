@@ -20,7 +20,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public override BuffID ID => Chesed;
 
         public float DeathMulti => Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 1, 5f);
-        public float SpeedMulti => Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 1, 2f);
+        public float SpeedMulti => Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 1, (SephirahMeltdownEntry.Hell ? 2 : 1.5f));
         public float SpeedMulti2 => Custom.LerpMap(CycleUse, 0, MaxCycleCount - 1, 1, 1.5f);
 
 
@@ -138,7 +138,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 damage /= 3;
                 stunBonus /= 3;
             }
-
             orig(self, source, directionAndMomentum, hitChunk, onAppendagePos, type, damage, stunBonus);
         }
 
@@ -149,7 +148,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 if (!(self is Player) && ChesedBuff.Instance.activeEnums.Contains(ChesedEnum.Resistance))
                 {
                     damage /= 3;
-                    stunBonus /= 3;
+
+                    if(SephirahMeltdownEntry.Hell)
+                        stunBonus /= 3;
                 }
                 else if (self is Player && ChesedBuff.Instance.activeEnums.Contains(ChesedEnum.Damage) &&
                          !(source?.owner is Lizard))
@@ -159,8 +160,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
                 }
             }
-
-            orig(self,source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
+        
+            orig(self,source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus + (SephirahMeltdownEntry.Hell ?0: (damage * 30f) / self.Template.baseStunResistance));
         }
 
         private static void BigSpider_MoveTowards(ILContext il)
@@ -172,7 +173,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private static float Lizard_GetFrameSpeed(On.Lizard.orig_GetFrameSpeed orig, Lizard self, float runSpeed)
         {
-            return orig(self, runSpeed) * (ChesedBuff.Instance.activeEnums.Contains(ChesedEnum.Speed) ? 2.5f : 1f);
+            return orig(self, runSpeed) * (ChesedBuff.Instance.activeEnums.Contains(ChesedEnum.Speed) ? (SephirahMeltdownEntry.Hell ? 2.5f : 1.75f) : 1f);
         }
 
         private static bool VultureAI_OnlyHurtDontGrab(On.VultureAI.orig_OnlyHurtDontGrab orig, VultureAI self, PhysicalObject testObj)

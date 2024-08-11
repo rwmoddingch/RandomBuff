@@ -47,11 +47,12 @@ namespace BuiltinBuffs.Positive
             On.Player.GrabUpdate += Player_GrabUpdate;
             On.Player.BiteEdibleObject += Player_BiteEdibleObject;
             On.Player.MaulingUpdate += Player_MaulingUpdate;
+            On.Player.EatMeatUpdate += Player_EatMeatUpdate;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.SlugcatHand.Update += SlugcatHand_Update;
             On.RainWorldGame.Win += RainWorldGame_Win;
         }
-        
+
         private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
         {
             try
@@ -130,6 +131,17 @@ namespace BuiltinBuffs.Positive
         }
 
         private static void Player_MaulingUpdate(On.Player.orig_MaulingUpdate orig, Player self, int graspIndex)
+        {
+            orig(self, graspIndex);
+            if (bigStomach.TryGetValue(self, out var module))
+            {
+                module.regurgitateCounter = 0;
+                module.swallowCounter = 0;
+            }
+        }
+
+
+        private static void Player_EatMeatUpdate(On.Player.orig_EatMeatUpdate orig, Player self, int graspIndex)
         {
             orig(self, graspIndex);
             if (bigStomach.TryGetValue(self, out var module))

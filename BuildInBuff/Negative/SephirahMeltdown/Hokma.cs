@@ -92,7 +92,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private static void Player_checkInput(On.Player.orig_checkInput orig, Player self)
         {
             orig(self);
-            if (self.input[0].mp && !self.input[1].mp && BinahBuff.Instance == null && self.abstractCreature.world.game.Players.Count == 1)
+            if (self.input[0].mp && !self.input[1].mp && BinahBuff.Instance == null && self.abstractCreature.world.game.Players.Count == 1 && SephirahMeltdownEntry.Hell)
             {
                 BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
                     { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });

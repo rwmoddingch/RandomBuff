@@ -254,7 +254,7 @@ namespace RandomBuff.Core.SaveData
         {
             UserData.OnFileMounted -= UserData_OnFileMounted;
             LoadState = BuffFileLoadState.Loading;
-            if (result.IsSuccess())
+            if (result.IsSuccess() && file.filename.StartsWith("buffsave"))
             {
                 buffCoreFile = file;
 
@@ -287,7 +287,7 @@ namespace RandomBuff.Core.SaveData
                     !buffCoreFile.Contains("buff-data")    ||
                     !buffCoreFile.Contains("buff-player"))
                 {
-                    LoadFailedFallBack();
+                    LoadFailedFallBack();   
                     return;
                 }
                 var fileVersion = new BuffFormatVersion(buffCoreFile.Get("buff-version"));

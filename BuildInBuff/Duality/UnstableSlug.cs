@@ -35,7 +35,7 @@ namespace TemplateGains
         {
             foreach (var item in game.Players)
             {
-                if (item != null && item.state.alive && item?.realizedObject is Player player)
+                if (item != null && item.state.alive && item?.realizedObject is Player player && player.room != null)
                 {
                     player.Stun(200);
                     var explotion = new DamageOnlyExplosion(player.room, player, player.mainBodyChunk.pos, 10, 200, 10f, 1.8f, 80, 20, player, 10, 0, 1, game.Players.ToArray());

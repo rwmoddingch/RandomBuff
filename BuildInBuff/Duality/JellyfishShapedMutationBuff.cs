@@ -1433,27 +1433,33 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return;
-            for (int i = 0; i < tentacles.GetLength(0); i++)
+            if (tentacles != null)
             {
-                for (int j = 0; j < tentacles.GetLength(1); j++)
+                for (int i = 0; i < tentacles.GetLength(0); i++)
                 {
-                    for (int k = 0; k < tentacles[i, j].GetLength(0); k++)
+                    for (int j = 0; j < tentacles.GetLength(1); j++)
                     {
-                        tentacles[i, j][k, 0] = self.firstChunk.pos;//pos
-                        tentacles[i, j][k, 1] = tentacles[i, j][k, 0];//lastPos
-                        tentacles[i, j][k, 2] *= 0f;//速度
+                        for (int k = 0; k < tentacles[i, j].GetLength(0); k++)
+                        {
+                            tentacles[i, j][k, 0] = self.firstChunk.pos;//pos
+                            tentacles[i, j][k, 1] = tentacles[i, j][k, 0];//lastPos
+                            tentacles[i, j][k, 2] *= 0f;//速度
+                        }
                     }
                 }
             }
-            for (int i = 0; i < oralArm.GetLength(0); i++)
+            if (oralArm != null)
             {
-                for (int j = 0; j < oralArm.GetLength(1); j++)
+                for (int i = 0; i < oralArm.GetLength(0); i++)
                 {
-                    for (int k = 0; k < oralArm[i, j].GetLength(0); k++)
+                    for (int j = 0; j < oralArm.GetLength(1); j++)
                     {
-                        oralArm[i, j][k].pos = self.firstChunk.pos;//pos
-                        oralArm[i, j][k].lastPos = oralArm[i, j][k].pos;//lastPos
-                        oralArm[i, j][k].vel *= 0f;//速度
+                        for (int k = 0; k < oralArm[i, j].GetLength(0); k++)
+                        {
+                            oralArm[i, j][k].pos = self.firstChunk.pos;//pos
+                            oralArm[i, j][k].lastPos = oralArm[i, j][k].pos;//lastPos
+                            oralArm[i, j][k].vel *= 0f;//速度
+                        }
                     }
                 }
             }

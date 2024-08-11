@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
 using HUD;
+using MonoMod.RuntimeDetour;
 using MoreSlugcats;
 using Newtonsoft.Json;
 using On.Menu.Remix;
@@ -43,6 +45,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             base.CycleEnd();
             CycleUse++;
         }
+
     }
 
     internal class BinahBuff : Buff<BinahBuff,BinahBuffData>, BuffHudPart.IOwnBuffHudPart
@@ -51,6 +54,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public bool needSpawnChain = true;
         private MusicEvent turnOne;
         private MusicEvent turnTwo;
+
 
         public const int MaxTime = 200;
 
@@ -385,7 +389,26 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             On.RegionGate.customKarmaGateRequirements += RegionGate_customKarmaGateRequirements;
             On.RegionGate.Update += RegionGate_Update;
+
+            On.SlugcatStats.SpearSpawnModifier += SlugcatStats_SpearSpawnModifier;
             currentDarkness = 0;
+
+            _ = new Hook(typeof(RoomSettings).GetProperty("RandomItemDensity").GetGetMethod(), typeof(BinahHook).GetMethod("Room_RandomItemDensity" , BindingFlags.Static | BindingFlags.NonPublic));
+        }
+
+        private static float Room_RandomItemDensity(Func<RoomSettings, float> orig, RoomSettings self)
+        {
+            if (SephirahMeltdownEntry.Hell)
+                return orig(self);
+            else return orig(self) * 1.35f;
+        }
+
+        private static float SlugcatStats_SpearSpawnModifier(On.SlugcatStats.orig_SpearSpawnModifier orig, SlugcatStats.Name index, float originalSpearChance)
+        {
+            if (SephirahMeltdownEntry.Hell)
+                return orig(index, originalSpearChance);
+            else
+                return orig(index, originalSpearChance) * 6f;
         }
 
         private static void TempleGuard_Update(On.TempleGuard.orig_Update orig, TempleGuard self, bool eu)
@@ -599,6 +622,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             BinahGlobalManager.requestFairyAttack += BinahGlobalManager_OnRequestFairyAttack;
         }
 
+        private int preAttackCounter = 0;
+
         private void BinahGlobalManager_OnRequestFairyAttack()
         {
             if (!critRef.TryGetTarget(out var guard) || guard.room.PlayersInRoom.Count == 0)
@@ -661,30 +686,40 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             {
                 if (ai.guard.room.PlayersInRoom.Any(i => !i.dead))
                 {
-                    foreach (var type in BinahGlobalManager.MaxCd.Keys)
+                    if (preAttackCounter > 0)
+                        preAttackCounter--;
+                    else
                     {
-                        if (BinahGlobalManager.TryUseAttack(type))
+                        foreach (var type in BinahGlobalManager.MaxCd.Keys)
                         {
-                            AttackType = type;
-                            focusedPlayer = ai.guard.room.PlayersInRoom.First(i => !i.dead);
-                            switch (AttackType)
+                            if (BinahGlobalManager.TryUseAttack(type))
                             {
-                                case BinahAttackType.Key:
-                                    ai.guard.room.AddObject(new BinahKey(ai.guard.room,Vector2.Lerp(ai.guard.bodyChunks[1].pos, ai.guard.bodyChunks[2].pos, 0.5f), 
-                                        focusedPlayer));
-                                    break;
-                                case BinahAttackType.Strike:
-                                    foreach(var player in ai.guard.room.PlayersInRoom)
-                                        ai.guard.room.AddObject(new BinahStrike(ai.guard.room, player.DangerPos));
-                                    AttackType = BinahAttackType.None;
-                                    break;
-                                default:
-                                    break;
+                                AttackType = type;
+                                focusedPlayer = ai.guard.room.PlayersInRoom.First(i => !i.dead);
+                                switch (AttackType)
+                                {
+                                    case BinahAttackType.Key:
+                                        ai.guard.room.AddObject(new BinahKey(ai.guard.room, Vector2.Lerp(ai.guard.bodyChunks[1].pos, ai.guard.bodyChunks[2].pos, 0.5f),
+                                            focusedPlayer));
+                                        break;
+                                    case BinahAttackType.Strike:
+                                        foreach (var player in ai.guard.room.PlayersInRoom)
+                                            ai.guard.room.AddObject(new BinahStrike(ai.guard.room, player.DangerPos));
+                                        AttackType = BinahAttackType.None;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
                             }
-                            break;
-                        }
 
+                        }
                     }
+           
+                }
+                else
+                {
+                    preAttackCounter = SephirahMeltdownEntry.Hell ? 0 : 80;
                 }
             }
             else
@@ -717,7 +752,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
                         if (attackCounter / 80 == 3)
                         {
-                            BinahGlobalManager.requestFairyAttack?.Invoke();
+                            if (SephirahMeltdownEntry.Hell)
+                                BinahGlobalManager.requestFairyAttack();
+                            else
+                                BinahGlobalManager_OnRequestFairyAttack();
                             AttackType = BinahAttackType.None;
                         }
                         else if (attackCounter % 80 == 1)
@@ -788,6 +826,17 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private static readonly List<FSprite> ChainSprites = new List<FSprite>();
 
         public static readonly CreatureTemplate.Type[] SpawnTypes = new[]
+        {
+            CreatureTemplate.Type.RedCentipede,
+            CreatureTemplate.Type.RedLizard,
+            CreatureTemplate.Type.CyanLizard,
+            CreatureTemplate.Type.CyanLizard,
+            CreatureTemplate.Type.BlueLizard,
+            CreatureTemplate.Type.GreenLizard,
+            CreatureTemplate.Type.Centipede
+        };
+
+        public static readonly CreatureTemplate.Type[] OrigSpawnTypes = new[]
         {
             CreatureTemplate.Type.RedCentipede,
             CreatureTemplate.Type.RedLizard,
@@ -871,7 +920,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 toUseRooms.Clear();
                 foreach (var room in useRoom)
                 {
-                    if(room?.connections == null) continue;
+                    if (room?.connections == null) continue;
+                    if (room.shelter || room.gate) continue;
                     foreach (var node in room.connections.Where(i => !allRooms.Contains(i)))
                     {
                         if (game.world.GetAbstractRoom(node) != null && !game.world.GetAbstractRoom(node).shelter && !game.world.GetAbstractRoom(node).gate)
@@ -888,13 +938,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 allRooms.Add(game.AlivePlayers[0].pos.room);
 
             int spawnCount = Mathf.RoundToInt(maxCount = Random.Range(3, 5));
-            bool allowMulti = spawnCount > toUseRooms.Count;
-            for (int i = 0; i < spawnCount; i++)
+            for (int i = 0; i < Mathf.Min(spawnCount, toUseRooms.Count); i++)
             {
                 int r = Random.Range(0, allRooms.Count);
                 ChainRoomIndices.Add(allRooms[r]);
-                if (!allowMulti)
-                    allRooms.RemoveAt(r);
+                allRooms.RemoveAt(r);
             }
             CheckChainCreateOrDelete();
             OnBinahNewChain?.Invoke();
@@ -920,7 +968,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                         for (int i = 0; i < 100; i++)
                         {
                             var tile = room.RandomPos();
-                            if(room.GetTile(tile).Solid)
+                            if(room.GetTile(tile).Solid || !Custom.DistLess(room.MiddleOfTile(tile),player.DangerPos,400))
                                 continue;
                             AbstractCreature abCrit = new AbstractCreature(room.world,
                                 StaticWorld.GetCreatureTemplate(SpawnTypes[Random.Range(0, SpawnTypes.Length)]), null,
@@ -941,7 +989,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             foreach (var index in ChainRoomIndices)
                 if(!ChainType.ContainsKey(index))
-                    ChainType.Add(index,SpawnTypes[Random.Range(0,SpawnTypes.Length)]);
+                    ChainType.Add(index,SephirahMeltdownEntry.Hell ? OrigSpawnTypes[Random.Range(0, OrigSpawnTypes.Length)] : SpawnTypes[Random.Range(0,SpawnTypes.Length)]);
 
         }
         public static readonly List<BinahRoom> DisplayChains = new List<BinahRoom>();
@@ -1008,6 +1056,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             foreach(var item in MaxCd)
                 cd.Add(item.Key,Random.Range(0, MaxCd[item.Key].max)*40);
             localDamage = 0;
+            totCd = 0;
         }
 
         private static int updateCounter;
@@ -1018,6 +1067,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static void GlobalUpdate(RainWorldGame game)
         {
+            if (totCd > 0)
+                totCd--;
+
             foreach (var item in cd)
                 item.Value.value = item.Value - 1;
 
@@ -1046,19 +1098,27 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static bool TryUseAttack(BinahAttackType attackType)
         {
+            if (totCd > 0)
+                return false;
             if (attackType == BinahAttackType.Strike && BinahBuff.Instance.Data.Health > 0.75f)
                 return false;
             if (attackType == BinahAttackType.Key && BinahBuff.Instance.Data.Health < 0.25f)
                 return false;
             var re = cd[attackType].value <= 0;
-            if(re)
+            if (re)
                 cd[attackType].value = int.MaxValue; //等待攻击结束
+               
+            
+
             return re;
         }
 
+
+        private static int totCd;
         public static void EndAttack(BinahAttackType attackType)
         {
             cd[attackType].value = Random.Range(MaxCd[attackType].min, MaxCd[attackType].max) * 40;
+            totCd = SephirahMeltdownEntry.Hell ? 0 : 140;
         }
 
         public static readonly Dictionary<BinahAttackType,(int min,int max)> MaxCd = new Dictionary<BinahAttackType, (int min, int max)>()
@@ -1514,7 +1574,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private int counter = 0;
 
-        public const int ReadyCount = 80;
+        public const int ReadyCount = 120;
 
         public const float Width = 250;
 
@@ -1600,10 +1660,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                             var index=  room.shortcutsIndex.IndexfOf(room.GetTilePosition(dir + center));
                             if (index != -1 && room.shortcuts[index].shortCutType != ShortcutData.Type.DeadEnd)
                             {
-                                var crit = FakeCreatureEntry.templates[
-                                    Random.Range(0, FakeCreatureEntry.templates.Length)];
+                                var crit = SephirahMeltdownEntry.Hell ?
+                                    FakeCreatureEntry.templates[Random.Range(0, FakeCreatureEntry.templates.Length-1)] :
+                                    StaticWorld.GetCreatureTemplate(BinahGlobalManager.SpawnTypes[Random.Range(0, BinahGlobalManager.SpawnTypes.Length)]);
                                 if (crit.type == CreatureTemplate.Type.RedCentipede)
-                                    crit = StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedLizard);
+                                    crit = StaticWorld.GetCreatureTemplate(SephirahMeltdownEntry.Hell ? CreatureTemplate.Type.RedLizard : CreatureTemplate.Type.CyanLizard);
                                 AbstractCreature acreature = new AbstractCreature(room.world,
                                     crit,
                                     null, new WorldCoordinate(room.abstractRoom.index,0,0,index), room.world.game.GetNewID());
@@ -1616,6 +1677,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                                     room.world.game.shortcuts.CreatureEnterFromAbstractRoom(creature,
                                         room.world.GetAbstractRoom(room.shortcuts[index].destinationCoord.room),
                                         room.shortcuts[index].destNode);
+                                    if(!SephirahMeltdownEntry.Hell)
+                                        creature.Stun(80);
                                 }
                                 else
                                 {
@@ -1623,7 +1686,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                                     var creature = acreature.realizedCreature;
                                     foreach (var chunk in creature.bodyChunks)
                                         chunk.HardSetPosition(dir+center);
-                                    creature.Stun(50);
+                                    creature.Stun(SephirahMeltdownEntry.Hell ? 50 : 120);
                                 }
                                 room.AddObject(new BinahShowEffect(room, dir + center, 200, RainWorld.SaturatedGold));
                                 BuffUtils.Log(BinahBuffData.Binah,$"Spawn creature cause by key attack, Type:{acreature.creatureTemplate.type}, pos:{dir+center}, shortCut:{room.shortcuts[index].shortCutType}");

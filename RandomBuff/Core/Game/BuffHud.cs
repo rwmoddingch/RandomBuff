@@ -39,6 +39,16 @@ namespace RandomBuff.Core.Game
 
             Instance = this;
 
+            if (BuffPoolManager.Instance.GameSetting.fallbackPick is { } pick)
+            {
+                foreach (var pickSlot in pick)
+                    inGameSlot.RequestPickCards((id) => BuffPoolManager.Instance.CreateBuff(id, true), pickSlot.major, pickSlot.additive,pickSlot.selectCount);
+                
+
+                BuffPoolManager.Instance.GameSetting.fallbackPick = null;
+            }
+
+
             if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
                 ProcessManager.MenuSetup.StoryGameInitCondition.New && !BuffPoolManager.Instance.isInitHud)
             {

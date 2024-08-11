@@ -16,7 +16,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static readonly BuffID Netzach = new BuffID(nameof(Netzach), true);
         public override BuffID ID => Netzach;
 
-        public float FoodMulti => 1 / Custom.LerpMap(CycleUse, 0, MaxCycleCount-1, 1f, 3f);
+        public float FoodMulti => 1 / Custom.LerpMap(CycleUse, 0, MaxCycleCount-1, 1f, (SephirahMeltdownEntry.Hell ? 3f : 2.2f));
     }
 
     internal class NetzachBuff : Buff<NetzachBuff, NetzachBuffData>

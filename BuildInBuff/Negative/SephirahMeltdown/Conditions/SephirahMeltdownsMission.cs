@@ -56,6 +56,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                             BinahBuffData.Binah.value
                         }},
                     }, 
+                    SPCount = SephirahMeltdownEntry.Hell ? 0 : 1, SPSelect = 2, SPShow = 10,
                     NCount = 0, NSelect = 0, NShow = 0,
                     PCount = 0, PSelect = 0, PShow = 0,
                     PocketPackMultiply = 0,
@@ -163,7 +164,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 BuffUtils.Log("SephirahMeltdown","Remove bur-pursued at 8 cycles");
             }
             CurrentPacket = (game.GetStorySession.saveState.cycleNumber + 1) % 4 == 0 ?
-                new CachaPacket() { negative = (0, 0, 0), positive = (2, 6, 1) } : new CachaPacket();
+                new CachaPacket() { negative = (0, 0, 0), positive = (2, SephirahMeltdownEntry.Hell ? 6 : 10, 1) } : new CachaPacket();
             if (game.GetStorySession.saveState.cycleNumber == 11 &&
                 BuffPoolManager.Instance.GameSetting.conditions.Count(i => !i.Finished) == 1)
             {

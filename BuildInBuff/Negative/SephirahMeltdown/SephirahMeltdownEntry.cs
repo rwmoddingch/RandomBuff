@@ -32,7 +32,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             BuffRegister.RegisterBuff<BinahBuff, BinahBuffData, BinahHook>(BinahBuffData.Binah);
             BuffRegister.RegisterBuff<AyinBuff, AyinBuffData, AyinHook>(AyinBuffData.Ayin);
 
-
+            Hell = File.Exists(AssetManager.ResolveFilePath("ShitVersion.txt"));
         }
 
         public static void LoadAssets()
@@ -94,6 +94,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         public static Shader AyinScreenEffect;
 
         public static Texture2D BinahScreenEffectTexture;
+
+        public static bool Hell { get; private set; }
+
 
     }
 
