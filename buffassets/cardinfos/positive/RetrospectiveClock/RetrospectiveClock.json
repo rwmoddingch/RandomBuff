@@ -11,7 +11,7 @@
         "Description" : "主动触发卡牌，记录玩家触发时的雨循环时间和房间及位置；再次触发卡牌，将恢复雨循环时间至记录点，并将玩家传送至记录的房间及位置(不会重置饱食度和其他卡牌增益效果)；第二次触发后卡牌使用完毕"
     },
     "English" : {
-        "BuffName" : "ThundThrow",
-        "Description" : "One lightning strike to the point of impact after the thrown stone impacts."
+        "BuffName" : "RetrospectiveClock",
+        "Description" : "Trigger the buff records the rain cycle time along with the location of players; triggering this again will restore the record (will not reset food points or other buff effects)"
     }
 }
