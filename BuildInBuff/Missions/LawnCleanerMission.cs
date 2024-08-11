@@ -90,7 +90,6 @@ namespace BuiltinBuffs.Missions
 
         public override void HookOn()
         {
-            base.HookOn();
             On.Room.Loaded += Room_Loaded;
         }
 

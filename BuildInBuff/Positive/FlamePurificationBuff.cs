@@ -182,10 +182,10 @@ namespace BuiltinBuffs.Positive
 
             void CreateFlameForWorm(WormGrass.Worm worm)
             {
-                for(int i = 0;i < 1; i++)
-                {
-                    worm.wormGrass.room.AddObject(new HolyFire.HolyFireSprite(Vector2.Lerp(worm.basePos, worm.pos, 1f)));
-                }
+                //for(int i = 0;i < 1; i++)
+                //{
+                //    worm.wormGrass.room.AddObject(new HolyFire.HolyFireSprite(Vector2.Lerp(worm.basePos, worm.pos, 1f)));
+                //}
             }
         }
     }

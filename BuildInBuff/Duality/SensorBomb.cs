@@ -1,5 +1,7 @@
 ﻿using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Render.UI;
+using RandomBuffUtils;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -10,25 +12,123 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
+    internal class SensorBombBuff : Buff<SensorBombBuff, SensorBombBuffData>
+    {
+        public override BuffID ID => SensorBombEntry.sensorBombBuffID;
+
+        public List<MineData> mineDatas = new List<MineData>();
+
+
+        public override bool Trigger(RainWorldGame game)
+        {
+            foreach(var abplayer in game.Players)
+            {
+                if(abplayer.realizedCreature == null || abplayer.realizedCreature.room == null) 
+                    continue;
+                var player = abplayer.realizedCreature as Player;
+
+                foreach(var obj in player.room.updateList.Where(u => u is ScavengerBomb).Select( u => u as ScavengerBomb).ToArray())
+                {
+                    if (obj.firstChunk.ContactPoint.y != -1)
+                        continue;
+                    if (obj.grabbedBy != null && obj.grabbedBy.Count > 0)
+                        continue;
+                    if (Vector2.Distance(player.DangerPos, obj.firstChunk.pos) > 40)
+                        continue;
+                    if (IsMine(obj.abstractPhysicalObject))
+                        continue;
+                    ConvertToMine(obj);
+                }
+            }
+            return false;
+        }
+
+        public void ConvertToMine(ScavengerBomb bomb)
+        {
+            BuffUtils.Log("SensorBomb", $"Convert bomb {bomb.abstractPhysicalObject.ID.number} into mine");
+            mineDatas.Add(new MineData() { id = bomb.abstractPhysicalObject.ID.number, pos = bomb.firstChunk.pos });
+            bomb.room.AddObject(new SensorMineBehaviour(bomb.room, bomb, mineDatas.Last()));
+        }
+
+        public bool IsMine(AbstractPhysicalObject abstractPhysicalObject)
+        {
+            foreach (var mineData in mineDatas)
+                if (mineData.id == abstractPhysicalObject.ID.number)
+                    return true;
+            return false;
+        }
+
+        public MineData GetMineData(AbstractPhysicalObject abstractPhysicalObject)
+        {
+            foreach (var mineData in mineDatas)
+                if (mineData.id == abstractPhysicalObject.ID.number)
+                    return mineData;
+            return null;
+        }
+
+        public void RemoveMine(AbstractPhysicalObject abstractPhysicalObject)
+        {
+            for(int i = mineDatas.Count - 1; i >= 0; i--)
+            {
+                if (mineDatas[i].id == abstractPhysicalObject.ID.number)
+                    mineDatas.RemoveAt(i);
+            }    
+        }
+    }
+
+    public class MineData
+    {
+        public int id;
+        public Vector2 pos;
+    }
+
+    internal class SensorBombBuffData : BuffData
+    {
+        public override BuffID ID => SensorBombEntry.sensorBombBuffID;
+    }
+
     internal class SensorBombEntry : IBuffEntry
     {
         public static BuffID sensorBombBuffID = new BuffID("SensorBomb", true);
 
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<SensorBombEntry>(sensorBombBuffID);
+            BuffRegister.RegisterBuff<SensorBombBuff,SensorBombBuffData,SensorBombEntry>(sensorBombBuffID);
         }
 
         public static void HookOn()
         {
+            On.PhysicalObject.PlaceInRoom += PhysicalObject_PlaceInRoom;
             On.ScavengerBomb.HitSomething += ScavengerBomb_HitSomething;
             On.ScavengerBomb.Update += ScavengerBomb_Update;
             On.ScavengerBomb.WeaponDeflect += ScavengerBomb_WeaponDeflect;
             On.ScavengerBomb.TerrainImpact += ScavengerBomb_TerrainImpact;
             On.ScavengerBomb.Thrown += ScavengerBomb_Thrown;
             On.Weapon.HitWall += Weapon_HitWall;
+            On.ScavengerBomb.Explode += ScavengerBomb_Explode;
             //On.BodyChunk.CheckHorizontalCollision += BodyChunk_CheckHorizontalCollision;
             //On.BodyChunk.CheckVerticalCollision += BodyChunk_CheckVerticalCollision;
+        }
+
+        private static void PhysicalObject_PlaceInRoom(On.PhysicalObject.orig_PlaceInRoom orig, PhysicalObject self, Room placeRoom)
+        {
+            orig.Invoke(self, placeRoom);
+            if(self is ScavengerBomb bomb)
+            {
+                if (SensorBombBuff.Instance.IsMine(bomb.abstractPhysicalObject))
+                {
+                    self.room.AddObject(new SensorMineBehaviour(self.room, bomb, SensorBombBuff.Instance.GetMineData(bomb.abstractPhysicalObject)));
+                }
+            }
+        }
+
+        private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
+        {
+            orig.Invoke(self, hitChunk);
+            if(self.slatedForDeletetion && SensorBombBuff.Instance.IsMine(self.abstractPhysicalObject))
+            {
+                SensorBombBuff.Instance.RemoveMine(self.abstractPhysicalObject);
+            }
         }
 
         private static void Weapon_HitWall(On.Weapon.orig_HitWall orig, Weapon self)
@@ -228,6 +328,107 @@ namespace BuiltinBuffs.Duality
             mesh2.MoveVertice(0, smoothPos);
             mesh2.MoveVertice(1, dir2 * rad + perpDir2 * rad * 0.8f + smoothPos);
             mesh2.MoveVertice(2, dir2 * rad + perpDir1 * rad * 0.8f + smoothPos);
+        }
+    }
+
+    internal class SensorMineBehaviour : CosmeticSprite
+    {
+        public static int counterPerScan = 40;
+
+        ScavengerBomb bindBomb;
+
+        int lastscanCounter = counterPerScan;
+        int scanCounter = counterPerScan;
+
+        public SensorMineBehaviour(Room room, ScavengerBomb bomb, MineData mineData)
+        {
+            this.room = room;
+            this.bindBomb = bomb;
+            lastPos = pos = mineData.pos;
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+
+            if (slatedForDeletetion)
+                return;
+
+            if (bindBomb.slatedForDeletetion)
+                Destroy();
+
+            if (bindBomb.collisionLayer != 0)
+                bindBomb.ChangeCollisionLayer(0);
+
+            if(bindBomb.grabbedBy != null && bindBomb.grabbedBy.Count > 0)
+            {
+                for (int i = bindBomb.grabbedBy.Count - 1; i >= 0; i--)
+                    bindBomb.grabbedBy[i].Release();
+            }
+
+            bindBomb.firstChunk.lastPos = bindBomb.firstChunk.pos = pos;
+            bindBomb.firstChunk.vel = Vector2.zero;
+            bindBomb.rotationSpeed = 0f;
+            bindBomb.canBeHitByWeapons = false;
+            bindBomb.firstChunk.collideWithObjects = false;
+
+            lastscanCounter = scanCounter;
+            if(scanCounter > 0)
+            {
+                scanCounter--;
+                if(scanCounter == 0)
+                    MineScan();
+            }
+        }
+
+        public void MineScan()
+        {
+            scanCounter = counterPerScan;
+            foreach(var creature in room.updateList.Where(u => u is Creature && !(u is Player)).Select(u => u as Creature))
+            {
+                if (creature.room == null)
+                    continue;
+                if(Vector2.Distance(creature.DangerPos, pos) < 60f)
+                {
+                    MineTriggered();
+                    return;
+                }
+            }
+        }
+
+        public void MineTriggered()
+        {
+            bindBomb.Explode(null);
+        }
+
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            base.InitiateSprites(sLeaser, rCam);
+            sLeaser.sprites = new FSprite[1];
+            sLeaser.sprites[0] = new FSprite("Futile_White") { shader = rCam.game.rainWorld.Shaders["FlatLight"], color = Color.red };
+            AddToContainer(sLeaser, rCam, null);
+        }
+
+        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if(newContatiner == null)
+            {
+                newContatiner = rCam.ReturnFContainer("Bloom");
+            }
+            foreach(var sprite in sLeaser.sprites)
+                newContatiner.AddChild(sprite);
+        }
+
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker) - camPos;
+            float smoothParam = Mathf.Pow(Mathf.Lerp(lastscanCounter / (float)counterPerScan, scanCounter / (float)counterPerScan, timeStacker), 4);
+
+            sLeaser.sprites[0].SetPosition(smoothPos);
+            sLeaser.sprites[0].scale = smoothParam * 5f;
+            sLeaser.sprites[0].alpha = smoothParam;
+
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         }
     }
 }

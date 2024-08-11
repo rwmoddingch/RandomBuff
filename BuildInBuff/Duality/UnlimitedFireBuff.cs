@@ -9,7 +9,7 @@ using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
-
+using System.Runtime.CompilerServices;
 
 namespace BuiltinBuffs.Duality
 {
@@ -29,7 +29,40 @@ namespace BuiltinBuffs.Duality
             IL.ScavengerBomb.Explode += ScavengerBomb_Explode;
             IL.ExplosiveSpear.Explode += ExplosiveSpear_Explode;
             IL.FirecrackerPlant.Explode += FirecrackerPlant_Explode;
-            //On.UpdatableAndDeletable.Destroy += UpdatableAndDeletable_Destroy;
+
+            On.ScavengerBomb.Explode += ScavengerBomb_Explode1;
+            On.ExplosiveSpear.Explode += ExplosiveSpear_Explode1;
+            On.FirecrackerPlant.Explode += FirecrackerPlant_Explode1;
+
+            On.Weapon.Update += Weapon_Update;
+        }
+
+        private static void Weapon_Update(On.Weapon.orig_Update orig, Weapon self, bool eu)
+        {
+            orig.Invoke(self, eu);
+            if (ExplodeCD.cdMapper.TryGetValue(self, out var cd))
+                cd.Update(self);
+        }
+
+        private static void FirecrackerPlant_Explode1(On.FirecrackerPlant.orig_Explode orig, FirecrackerPlant self)
+        {
+            if (ExplodeCD.cdMapper.TryGetValue(self, out var cd) && cd.cd > 0)
+                return;
+            orig.Invoke(self);
+        }
+
+        private static void ExplosiveSpear_Explode1(On.ExplosiveSpear.orig_Explode orig, ExplosiveSpear self)
+        {
+            if (ExplodeCD.cdMapper.TryGetValue(self, out var cd) && cd.cd > 0)
+                return;
+            orig.Invoke(self);
+        }
+
+        private static void ScavengerBomb_Explode1(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
+        {
+            if (ExplodeCD.cdMapper.TryGetValue(self, out var cd) && cd.cd > 0)
+                return;
+            orig.Invoke(self, hitChunk);
         }
 
         private static void FirecrackerPlant_Explode(ILContext il)
@@ -41,6 +74,7 @@ namespace BuiltinBuffs.Duality
                     self.lumpsPopped[i] = false;
                 }
                 self.fuseCounter = 0;
+                ExplodeCD.cdMapper.Add(self, new ExplodeCD());
             });
         }
 
@@ -50,27 +84,17 @@ namespace BuiltinBuffs.Duality
             { 
                 self.exploded = false;
                 self.igniteCounter = 0;
+                ExplodeCD.cdMapper.Add(self, new ExplodeCD());
             });
         }
 
-        //private static void UpdatableAndDeletable_Destroy(On.UpdatableAndDeletable.orig_Destroy orig, UpdatableAndDeletable self)
-        //{
-        //    orig.Invoke(self);
-        //    if (self is ScavengerBomb)
-        //    {
-        //        EmgTxCustom.Log("Bomb destroyed");
-        //        var instr = c1.Next;
-        //        while (instr != null)
-        //        {
-        //            EmgTxCustom.Log(instr);
-        //            instr = instr.Next;
-        //        }
-        //    }
-        //}
-
         private static void ScavengerBomb_Explode(MonoMod.Cil.ILContext il)
         {
-            ApplyILHook<ScavengerBomb>(il, (self) => { self.ignited = false; });
+            ApplyILHook<ScavengerBomb>(il, (self) => 
+            { 
+                self.ignited = false; 
+                ExplodeCD.cdMapper.Add(self, new ExplodeCD()); 
+            });
         }
 
         private static void ApplyILHook<T>(ILContext il,Action<T> func)
@@ -90,6 +114,30 @@ namespace BuiltinBuffs.Duality
             else
             {
                 BuffUtils.Log(UnlimitedFirepowerBuffID, new NullReferenceException("c1 cant find"));
+            }
+        }
+
+        public class ExplodeCD
+        {
+            public static ConditionalWeakTable<Weapon, ExplodeCD> cdMapper = new ConditionalWeakTable<Weapon, ExplodeCD>();
+
+            public int cd;
+
+            public ExplodeCD()
+            {
+                cd = 8;
+            }
+
+            public void Update(Weapon weapon)
+            {
+                if(cd > 0)
+                {
+                    cd--;
+                    if(cd == 0)
+                    {
+                        cdMapper.Remove(weapon);
+                    }
+                }
             }
         }
     }

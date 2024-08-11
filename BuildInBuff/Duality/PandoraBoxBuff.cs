@@ -9,6 +9,7 @@ using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using RandomBuff.Core.Game;
 
 namespace BuiltinBuffs.Duality
 {
@@ -87,6 +88,7 @@ namespace BuiltinBuffs.Duality
                     self.objectInStomach = origObject;
                     orig.Invoke(self);
                 }
+                BuffPoolManager.Instance.TriggerBuff(PandoraBoxBuffID, true);
             }
             else
                 orig.Invoke(self);
@@ -95,6 +97,8 @@ namespace BuiltinBuffs.Duality
         public static bool SkipThisItem(AbstractPhysicalObject.AbstractObjectType type)
         {
             if (type == AbstractPhysicalObject.AbstractObjectType.EggBugEgg)
+                return true;
+            else if (type == AbstractPhysicalObject.AbstractObjectType.Creature)
                 return true;
             return false;
         }
