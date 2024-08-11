@@ -51,7 +51,6 @@ namespace BuiltinBuffs.Positive
         }
 
         public static bool shouldFire = true;
-
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<HomingShotsBuff, HomingShotsBuffData, HomingShotsBuffEntry>(HomingShots);
@@ -85,10 +84,10 @@ namespace BuiltinBuffs.Positive
                             {
                                 for (int k = 0; k < self.room.abstractRoom.creatures.Count; k++)
                                 {
-                                    if (self.room.abstractRoom.creatures[k].realizedCreature != null &&
-                                        !(self.room.abstractRoom.creatures[k].realizedCreature is Player))
+                                    if (self.room.abstractRoom.creatures[k].realizedCreature != null)
                                     {
                                         Creature creature = self.room.abstractRoom.creatures[k].realizedCreature;
+<<<<<<< HEAD
                                         shouldFire = true;
                                         if (creature.dead)
                                             shouldFire = false;
@@ -124,6 +123,9 @@ namespace BuiltinBuffs.Positive
                                             }
                                         }
                                         if (shouldFire)
+=======
+                                        if (ShouldFire(self, creature))
+>>>>>>> a7c97a07e64c999572eecff03bcc7ed5a776349f
                                         {
                                             if (Custom.DistLess(weapon.firstChunk.pos, self.room.abstractRoom.creatures[k].realizedCreature.mainBodyChunk.pos, minDist))
                                             {
