@@ -42,7 +42,7 @@ namespace RandomBuff.Core.Game.Settings
 
         private HashSet<ConditionID> cantAddMoreTmp = new();
 
-        public List<BuffID> fallbackPick = null;
+        public List<List<BuffID>> fallbackPick;
 
         public bool IsValid { get; private set; } = true;
 
@@ -349,11 +349,8 @@ namespace RandomBuff.Core.Game.Settings
                             setting.conditions.Add((Condition)JsonConvert.DeserializeObject(subs[2],
                                 BuffRegister.GetConditionType((ConditionID)cid).Type));
                             break;
-                        case "FALLBACK":
-                            setting.fallbackPick = JsonConvert.DeserializeObject<List<BuffID>>(subs[1]);
-                            foreach (var fallback in setting.fallbackPick)
-                                if(BuffRegister.GetBuffType(fallback) != null)
-                                    BuffDataManager.Instance.GetOrCreateBuffData(name, fallback, true);
+                        case "FALLBACK-NEW":
+                            setting.fallbackPick = JsonConvert.DeserializeObject<List<List<BuffID>>>(subs[1]);
                             BuffPlugin.Log($"Load Fallback List, Count: {setting.fallbackPick.Count}");
                             break;
                         case "MISSION":
@@ -385,14 +382,14 @@ namespace RandomBuff.Core.Game.Settings
         {
             if(!gachaTemplate.CurrentPacket.NeedMenu)
                 return;
-            fallbackPick = new List<BuffID>();
-            var negative = gachaTemplate.CurrentPacket.negative.pickTimes *
-                           gachaTemplate.CurrentPacket.negative.selectCount;
-            if (negative > 0)
+            fallbackPick = new List<List<BuffID>>();
+            var negative = gachaTemplate.CurrentPacket.negative.pickTimes;
+            for(int i = 0;i < negative;i++)
             {
-                fallbackPick.AddRange(
-                    BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative, 
-                         BuffType.Negative).Select(i => i.BuffID));
+                var majorList = new List<BuffID>();
+                var additiveList = new List<BuffID>();
+               // BuffPicker.GetNewBuffsOfType()
+
             }
             var positive = gachaTemplate.CurrentPacket.negative.pickTimes *
                            gachaTemplate.CurrentPacket.negative.selectCount;
@@ -402,13 +399,7 @@ namespace RandomBuff.Core.Game.Settings
                 var pos = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive,
                     BuffType.Positive);
                 var negCount = pos.Count(i => i.BuffProperty == BuffProperty.Special);
-                fallbackPick.AddRange(pos.Select(i => i.BuffID));
-                if (negCount > 0)
-                {
-                    fallbackPick.AddRange(
-                        BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negCount,
-                             BuffType.Negative).Select(i => i.BuffID));
-                }
+
             }
         }
 
@@ -427,7 +418,7 @@ namespace RandomBuff.Core.Game.Settings
             
 
             if (fallbackPick != null)
-                builder.Append($"FALLBACK{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}{SettingSplit}");
+                builder.Append($"FALLBACK-NEW{SubSettingSplit}{JsonConvert.SerializeObject(fallbackPick)}{SettingSplit}");
             if(MissionId != null)
                 builder.Append($"MISSION{SubSettingSplit}{MissionId}{SettingSplit}");
 

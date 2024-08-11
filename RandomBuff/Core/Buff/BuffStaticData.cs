@@ -317,7 +317,7 @@ namespace RandomBuff.Core.Buff
                 newData.AssetPath = dirPath.Remove(0,1);
                 var rdata = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(newData.BuffID));
                 GetCustomStaticBuffData(rdata, newData, rawData);
-                BuffPlugin.LogDebug(newData.ToDebugString());
+                //BuffPlugin.LogDebug(newData.ToDebugString());
                 return true;
 
                 int LoadAsInt(object input)

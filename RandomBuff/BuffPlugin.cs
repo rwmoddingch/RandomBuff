@@ -57,7 +57,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.1";
+        public const string ModVersion = "1.0.2";
 
         public void OnEnable()
         {
@@ -89,7 +89,9 @@ namespace RandomBuff
             FakeFoodPool.UpdateInactiveItems();
         }
 
+#if TESTVERSION
         private FStage devVersion;
+#endif
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
@@ -138,7 +140,7 @@ namespace RandomBuff
                     }
 
 #endif
-                    DevEnabled = true;
+                    //DevEnabled = true;
                     Application.logMessageReceived += Application_logMessageReceived;
 
                     BuffUIAssets.LoadUIAssets();
