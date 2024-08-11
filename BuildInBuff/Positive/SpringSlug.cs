@@ -25,14 +25,9 @@ namespace HotDogGains.Positive
         private static void Player_TerrainImpact(On.Player.orig_TerrainImpact orig, Player self, int chunk, RWCustom.IntVector2 direction, float speed, bool firstContact)
         {
             orig.Invoke(self, chunk, direction, speed, firstContact);
-            if (speed>16)
-            {
-                BuffUtils.Log(SpringSlugID, "SlugSpring");
-                for (int i = 0; i < self.bodyChunks.Length; i++)
-                {
-                    self.bodyChunks[i].vel = -direction.ToVector2() * speed*0.9f;
-                }
-            }
+
+            if (speed>15)self.bounce = 0.9f;
+            else self.bounce = 0.1f;
         }
     }
 }
