@@ -61,6 +61,11 @@ namespace BuiltinBuffs.Duality
                     {
                         if (self.room != null)
                         {
+                            self.CentiState.shells[hitChunk.index] = false;
+                            CentipedeShell centipedeShell = new CentipedeShell(hitChunk.pos, Custom.RNV() * UnityEngine.Random.value * 3f,
+                                                    (self.graphicsModule as CentipedeGraphics).hue, (self.graphicsModule as CentipedeGraphics).saturation, hitChunk.rad * 1.8f * 0.0714285746f * 1.2f,
+                                                    hitChunk.rad * 1.3f * 0.09090909f * 1.2f);
+                            self.room.AddObject(centipedeShell);
                             self.room.AddObject(new RandomBuffUtils.DamageOnlyExplosion(self.room, self, hitChunk.pos, 8, 40f * self.size, 20f * self.size, 5f * self.size, 
                                 100f * self.size, 0, self, 1f, 0f, 0f, CreatureTemplate.Type.Centipede));
                             self.room.AddObject(new ShockWave(hitChunk.pos, 40f * self.size + 20f, 0.5f, 8, true));
