@@ -10,10 +10,10 @@
 
   "Chinese": {
     "BuffName": "火焰护盾",
-    "Description": "你周围生成由旋转火球构成的护盾，生物位于火球附近时，高温条快速增加，直至开始燃烧。同时，寒冷离你远去。不过当你浸没在水中时，护盾会暂时消失。按下你设置的按键以开启和关闭护盾。"
+    "Description": "前置为温度；你周围生成由旋转火球构成的护盾，生物位于火球附近时，高温条快速增加，直至开始燃烧。同时，寒冷离你远去。不过当你浸没在水中时，护盾会暂时消失。按下你设置的按键以开启和关闭护盾。"
   },
   "English": {
-    "BuffName": "FireShield ",
-    "Description": "A shield composed of rotating fireballs is generated around you, and when creatures are located near the fireball, its temperature rapidly increases until it begins to burn. Meanwhile, the cold is far away from you. However, when you are submerged in water, the shield will temporarily disappear. Press the button you set to turn on and off the shield."
+    "BuffName": "Fire Shield ",
+    "Description": "Bind with Temperature; A shield composed of rotating fireballs is generated around you, and when creatures are located near the fireball, its temperature rapidly increases until it begins to burn. Meanwhile, the cold is far away from you. However, when you are submerged in water, the shield will temporarily disappear. Press the button you set to turn on and off the shield."
   }
 }

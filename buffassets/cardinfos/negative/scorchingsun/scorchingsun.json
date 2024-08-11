@@ -8,10 +8,10 @@
 
   "Chinese": {
     "BuffName": "烈日炎炎",
-    "Description": "室外环境变得灼热无比，你在室外会频繁昏倒。"
+    "Description": "前置为温度；室外环境变得灼热无比，你在室外会频繁昏倒。"
   },
   "English": {
-    "BuffName": "ScorchingSun",
-    "Description": "The outdoor environment becomes extremely hot, and you will frequently faint outdoors."
+    "BuffName": "Scorching Sun",
+    "Description": "Bind with Temperature; The outdoor environment becomes extremely hot, and you will frequently faint outdoors."
   }
 }
