@@ -90,6 +90,9 @@ namespace BuiltinBuffs.Positive
                                     {
                                         Creature creature = self.room.abstractRoom.creatures[k].realizedCreature;
                                         shouldFire = true;
+                                        if (creature.dead)
+                                            shouldFire = false;
+
                                         if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(self.abstractCreature) > 0.5f)
                                         {
                                             shouldFire = false;

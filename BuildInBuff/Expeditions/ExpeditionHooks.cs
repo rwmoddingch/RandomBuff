@@ -71,7 +71,7 @@ namespace BuiltinBuffs.Expeditions
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
                 {
-                    BinahBuffData.Binah.CreateNewBuff();
+                    FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
 
                 }
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))

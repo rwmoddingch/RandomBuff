@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
 using HUD;
+using MonoMod.RuntimeDetour;
 using MoreSlugcats;
 using Newtonsoft.Json;
 using On.Menu.Remix;
@@ -387,7 +389,26 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             On.RegionGate.customKarmaGateRequirements += RegionGate_customKarmaGateRequirements;
             On.RegionGate.Update += RegionGate_Update;
+
+            On.SlugcatStats.SpearSpawnModifier += SlugcatStats_SpearSpawnModifier;
             currentDarkness = 0;
+
+            _ = new Hook(typeof(RoomSettings).GetProperty("RandomItemDensity").GetGetMethod(), typeof(BinahHook).GetMethod("Room_RandomItemDensity" , BindingFlags.Static | BindingFlags.NonPublic));
+        }
+
+        private static float Room_RandomItemDensity(Func<RoomSettings, float> orig, RoomSettings self)
+        {
+            if (SephirahMeltdownEntry.Hell)
+                return orig(self);
+            else return orig(self) * 1.35f;
+        }
+
+        private static float SlugcatStats_SpearSpawnModifier(On.SlugcatStats.orig_SpearSpawnModifier orig, SlugcatStats.Name index, float originalSpearChance)
+        {
+            if (SephirahMeltdownEntry.Hell)
+                return orig(index, originalSpearChance);
+            else
+                return orig(index, originalSpearChance) * 6f;
         }
 
         private static void TempleGuard_Update(On.TempleGuard.orig_Update orig, TempleGuard self, bool eu)

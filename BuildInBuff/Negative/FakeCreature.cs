@@ -69,6 +69,8 @@ namespace BuiltinBuffs.Negative
                             {
                                 BuffUtils.Log(FakeCreatureBuffData.FakeCreatureID,
                                     $"Wow! Create creature! {shortCut.destNode}, {acreature.creatureTemplate.type}");
+                                player.Room.AddEntity(creature.abstractCreature);
+
                             }
 
                             waitCounter = 0;

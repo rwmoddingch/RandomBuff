@@ -124,6 +124,7 @@ namespace RandomBuff.Core.Hooks
                     return orig(self);
                 });
             On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+
         }
 
         private static void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
