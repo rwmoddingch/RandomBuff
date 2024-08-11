@@ -46,9 +46,10 @@ namespace BuiltinBuffs.Negative
     internal class ScorchingSunBuffEntry : IBuffEntry
     {
         public static BuffID ScorchingSun = new BuffID("ScorchingSun", true);
+        public static ConditionalWeakTable<Player, ScorchingSunPlayer> ScorchingSunFeatures = new ConditionalWeakTable<Player, ScorchingSunPlayer>();
         private static ScorchingSunSingleColorEffect effect;
 
-        public static ScorchingSunSingleColorEffect Effect 
+        public static ScorchingSunSingleColorEffect Effect
         {
             get
             {
@@ -106,7 +107,7 @@ namespace BuiltinBuffs.Negative
         private static float ThreatTracker_ThreatOfTile(On.ThreatTracker.orig_ThreatOfTile orig, ThreatTracker self, WorldCoordinate coord, bool accountThreatCreatureAccessibility)
         {
             float threat = orig.Invoke(self, coord, accountThreatCreatureAccessibility);
-            if(self.AI.creature.realizedCreature != null && self.AI.creature.realizedCreature.room != null)
+            if (self.AI.creature.realizedCreature != null && self.AI.creature.realizedCreature.room != null)
             {
                 var creature = self.AI.creature.realizedCreature;
                 var room = creature.room;
@@ -119,7 +120,7 @@ namespace BuiltinBuffs.Negative
                     IntVector2 skyTile = new IntVector2(room.Width / 2, room.Height);
                     threat += Mathf.InverseLerp(0f, 20f, Custom.ManhattanDistance(skyTile, coord.Tile));
                 }
-                    
+
             }
 
             return threat;
@@ -127,9 +128,9 @@ namespace BuiltinBuffs.Negative
 
         private static void Room_Update(On.Room.orig_Update orig, Room self)
         {
-            orig(self); 
+            orig(self);
 
-            if(self != null)
+            if (self != null)
             {
                 int num = OutdoorLevel(self);
                 if (num < 0)
@@ -157,7 +158,7 @@ namespace BuiltinBuffs.Negative
                         self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.Bloom, 0.1f * num, false));
                     else if (self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom).amount < 0.15f * num)
                         self.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Bloom).amount = 0.15f * num;
-                    
+
 
                     for (int k = 0; k < self.abstractRoom.creatures.Count; k++)
                     {
@@ -165,14 +166,14 @@ namespace BuiltinBuffs.Negative
                             self.abstractRoom.creatures[k].realizedCreature.room != null)
                         {
                             Creature creature = self.abstractRoom.creatures[k].realizedCreature;
-                            
+
                             if (TemperatureModule.TryGetTemperatureModule(creature, out var heatModule))
                             {
                                 float mul = 1f;
                                 if (!IsBeingExposedToSunlight(self, creature))
                                     mul = 0.95f;
 
-                                float heatAdd = (heatModule.coolOffRate/40f) * Mathf.Lerp(1.1f, 1.5f, Mathf.InverseLerp(num, 1, 3)) * mul;
+                                float heatAdd = (heatModule.coolOffRate / 40f) * Mathf.Lerp(1.1f, 1.5f, Mathf.InverseLerp(num, 1, 3)) * mul;
                                 heatModule.AddTemperature(heatAdd);
                             }
                             else
@@ -191,40 +192,52 @@ namespace BuiltinBuffs.Negative
         {
             orig.Invoke(self, eu);
 
-            if (self.room != null)
+            if (ScorchingSunFeatures.TryGetValue(self, out var scorchingSunPlayer))
             {
-                int num = OutdoorLevel(self.room);
-
-                if (effect != null)
+                if (self.room != null)
                 {
-                    if (self.room != effect.Room)//self.room != null && 
+                    int num = OutdoorLevel(self.room);
+
+                    if (effect != null)
                     {
-                        effect.Reset(0.1f * num, self.room);
-                        BuffPlugin.Log($"Reset ScorchingSunSingleColorEffect, Level:{num}");
+                        if (self.room != effect.Room)//self.room != null && 
+                        {
+                            effect.Reset(0.1f * num, self.room);
+                            BuffPlugin.Log($"Reset ScorchingSunSingleColorEffect, Level:{num}");
+                        }
                     }
-                }
-                if (effect == null)
-                {
-                    effect = new ScorchingSunSingleColorEffect(1, -1f, 1f, 1f, Custom.hexToColor("000000"), Custom.hexToColor("E3AB4E"), 0.1f * num, self.room);
-                    BuffPostEffectManager.AddEffect(effect);
-                }
+                    if (effect == null)
+                    {
+                        effect = new ScorchingSunSingleColorEffect(1, -1f, 1f, 1f, Custom.hexToColor("000000"), Custom.hexToColor("E3AB4E"), 0.1f * num, self.room);
+                        BuffPostEffectManager.AddEffect(effect);
+                    }
 
-                if (!self.Stunned && num > 0)
-                {
-                    self.AerobicIncrease(0.03f * num);
-                }
+                    if (!self.Stunned && num > 0)
+                    {
+                        self.AerobicIncrease(0.03f * num);
+                    }
 
-                float heatstroke = 0;
-                if (TemperatureModule.TryGetTemperatureModule(self, out var heatModule))
-                {
-                    heatstroke = Mathf.Min(1f, heatModule.temperature / heatModule.ignitingPoint);
-                }
+                    float heatstroke = 0;
+                    if (TemperatureModule.TryGetTemperatureModule(self, out var heatModule))
+                    {
+                        heatstroke = Mathf.Clamp01(heatModule.temperature / heatModule.ignitingPoint);
+                    }
 
-                if (!self.Stunned && Random.Range(0, 800 + 1f * num + 10f * heatstroke) > 800f)
-                {
-                    ScorchingSunBuff.Instance.TriggerSelf();
-                    self.Stun(80);
+                    if (!self.Stunned && scorchingSunPlayer.LastStun >= scorchingSunPlayer.CoolingTime &&
+                        Random.Range(0f, 800f + (1f + 0.3f * num) * 5f * heatstroke) > 800f)
+                    {
+                        scorchingSunPlayer.LastStun = 0;
+                        scorchingSunPlayer.CoolingTime = Mathf.RoundToInt(Random.Range(200f, 600f) / (1f + 0.3f * num * heatstroke));
+                        ScorchingSunBuff.Instance.TriggerSelf();
+                        self.Stun(80);
+                    }
+
+                    scorchingSunPlayer.LastStun++;
                 }
+            }
+            else
+            {
+                ScorchingSunFeatures.Add(self, new ScorchingSunPlayer(self));
             }
         }
 
@@ -290,6 +303,21 @@ namespace BuiltinBuffs.Negative
             }
         }
         #endregion
+    }
+
+    internal class ScorchingSunPlayer
+    {
+        WeakReference<Player> ownerRef;
+
+        public int LastStun { get; set; }
+        public int CoolingTime { get; set; }
+
+        public ScorchingSunPlayer(Player c)
+        {
+            ownerRef = new WeakReference<Player>(c);
+            LastStun = 0;
+            CoolingTime = 400;
+        }
     }
 
     internal class ScorchingSunSingleColorEffect : BuffPostEffectLimitTime
