@@ -42,7 +42,7 @@ namespace RandomBuff.Core.Game.Settings
 
         private HashSet<ConditionID> cantAddMoreTmp = new();
 
-        public List<List<BuffID>> fallbackPick;
+        public List<FallbackPickSlot> fallbackPick;
 
         public bool IsValid { get; private set; } = true;
 
@@ -61,6 +61,13 @@ namespace RandomBuff.Core.Game.Settings
             }
         }
 
+        public class FallbackPickSlot
+        {
+            public BuffID[] major;
+            public BuffID[] additive;
+            public int selectCount;
+
+        }
 
         public float Difficulty { get; private set; } = 0.5f;
 
@@ -350,7 +357,7 @@ namespace RandomBuff.Core.Game.Settings
                                 BuffRegister.GetConditionType((ConditionID)cid).Type));
                             break;
                         case "FALLBACK-NEW":
-                            setting.fallbackPick = JsonConvert.DeserializeObject<List<List<BuffID>>>(subs[1]);
+                            setting.fallbackPick = JsonConvert.DeserializeObject<List<FallbackPickSlot>>(subs[1]);
                             BuffPlugin.Log($"Load Fallback List, Count: {setting.fallbackPick.Count}");
                             break;
                         case "MISSION":
@@ -382,25 +389,55 @@ namespace RandomBuff.Core.Game.Settings
         {
             if(!gachaTemplate.CurrentPacket.NeedMenu)
                 return;
-            fallbackPick = new List<List<BuffID>>();
-            var negative = gachaTemplate.CurrentPacket.negative.pickTimes;
-            for(int i = 0;i < negative;i++)
+            fallbackPick = new List<FallbackPickSlot>();
+       
+       
+            var positive = gachaTemplate.CurrentPacket.negative;
+            for (int i = 0; i < positive.pickTimes; i++)
             {
-                var majorList = new List<BuffID>();
-                var additiveList = new List<BuffID>();
-               // BuffPicker.GetNewBuffsOfType()
 
+                var majorList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive.showCount, BuffType.Positive)
+                    .Select(i => i.BuffID).ToArray();
+
+                var additiveList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive.showCount, BuffType.Negative)
+                    .Select(i => i.BuffID).ToArray();
+
+
+                for (int j = 0; j < majorList.Length; j++)
+                    if (majorList[j].GetStaticData().BuffProperty != BuffProperty.Special)
+                        additiveList[j] = null;
+
+                fallbackPick.Add(new FallbackPickSlot()
+                {
+                    additive = additiveList,
+                    major = majorList,
+                    selectCount = positive.selectCount
+                });
             }
-            var positive = gachaTemplate.CurrentPacket.negative.pickTimes *
-                           gachaTemplate.CurrentPacket.negative.selectCount;
 
-            if (positive > 0)
+            var negative = gachaTemplate.CurrentPacket.negative;
+            for (int i = 0; i < negative.pickTimes; i++)
             {
-                var pos = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive,
-                    BuffType.Positive);
-                var negCount = pos.Count(i => i.BuffProperty == BuffProperty.Special);
+                
+                var majorList  = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative.showCount, BuffType.Negative)
+                    .Select(i => i.BuffID).ToArray();
 
+                var additiveList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative.showCount, BuffType.Positive)
+                    .Select(i => i.BuffID).ToArray();
+
+
+                for(int j =0 ;j< majorList.Length; j++)
+                    if (majorList[j].GetStaticData().BuffProperty != BuffProperty.Special)
+                        additiveList[j] = null;
+
+                fallbackPick.Add(new FallbackPickSlot()
+                {
+                    additive = additiveList,
+                    major = majorList,
+                    selectCount = positive.selectCount
+                });
             }
+
         }
 
         public string SaveToString()
