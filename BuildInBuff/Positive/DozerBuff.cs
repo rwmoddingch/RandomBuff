@@ -55,7 +55,7 @@ namespace BuiltinBuffs.Positive
 
             foreach (var physicalObj in self.room.physicalObjects[self.collisionLayer])
             {
-                if (physicalObj == self)
+                if (physicalObj is Player)
                     continue;
 
                 if (Mathf.Abs(self.bodyChunks[0].pos.x - physicalObj.bodyChunks[0].pos.x) < self.collisionRange + physicalObj.collisionRange && 
