@@ -50,8 +50,6 @@ namespace BuiltinBuffs.Positive
             }
         }
 
-        public static bool shouldFire = true;
-
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<HomingShotsBuff, HomingShotsBuffData, HomingShotsBuffEntry>(HomingShots);
@@ -85,42 +83,10 @@ namespace BuiltinBuffs.Positive
                             {
                                 for (int k = 0; k < self.room.abstractRoom.creatures.Count; k++)
                                 {
-                                    if (self.room.abstractRoom.creatures[k].realizedCreature != null &&
-                                        !(self.room.abstractRoom.creatures[k].realizedCreature is Player))
+                                    if (self.room.abstractRoom.creatures[k].realizedCreature != null)
                                     {
                                         Creature creature = self.room.abstractRoom.creatures[k].realizedCreature;
-                                        shouldFire = true;
-                                        if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(self.abstractCreature) > 0.5f)
-                                        {
-                                            shouldFire = false;
-                                        }
-                                        if (creature is Lizard)
-                                        {
-                                            foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Lizard).AI.relationshipTracker.relationships.
-                                                Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == self.abstractCreature))
-                                            {
-                                                if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
-                                                    shouldFire = false;
-                                            }
-                                        }
-                                        if (creature is Scavenger && 
-                                            (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
-                                            LikeOfPlayer(CreatureCommunities.CommunityID.Scavengers, 
-                                                        (creature as Scavenger).abstractCreature.world.game.world.RegionNumber, 
-                                                        self.playerState.playerNumber) > 0.5)
-                                        {
-                                            shouldFire = false;
-                                        }
-                                        if (creature is Cicada)
-                                        {
-                                            foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Cicada).AI.relationshipTracker.relationships.
-                                                Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == self.abstractCreature))
-                                            {
-                                                if ((creature as Cicada).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
-                                                    shouldFire = false;
-                                            }
-                                        }
-                                        if (shouldFire)
+                                        if (ShouldFire(self, creature))
                                         {
                                             if (Custom.DistLess(weapon.firstChunk.pos, self.room.abstractRoom.creatures[k].realizedCreature.mainBodyChunk.pos, minDist))
                                             {
@@ -146,6 +112,45 @@ namespace BuiltinBuffs.Positive
                     }
                 }
             }
+        }
+
+        private static bool ShouldFire(Player player, Creature creature)
+        {
+            if (creature is Player)
+                return false;
+            if (creature.dead)
+                return false;
+            if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(player.abstractCreature) > 0.5f)
+            {
+                return false;
+            }
+            if (creature is Lizard)
+            {
+                foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Lizard).AI.relationshipTracker.relationships.
+                    Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == player.abstractCreature))
+                {
+                    if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                        return false;
+                }
+            }
+            if (creature is Scavenger &&
+                (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
+                LikeOfPlayer(CreatureCommunities.CommunityID.Scavengers,
+                            (creature as Scavenger).abstractCreature.world.game.world.RegionNumber,
+                            player.playerState.playerNumber) > 0.5)
+            {
+                return false;
+            }
+            if (creature is Cicada)
+            {
+                foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Cicada).AI.relationshipTracker.relationships.
+                    Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == player.abstractCreature))
+                {
+                    if ((creature as Cicada).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                        return false;
+                }
+            }
+            return true;
         }
     }
 }
