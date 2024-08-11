@@ -396,6 +396,7 @@ namespace BuiltinBuffs.Duality
         bool jumping;
         Vector2 travelDir;
         public float runCycle;
+        private int standCount;
 
         Vector2 modify = Vector2.down;
 
@@ -462,6 +463,7 @@ namespace BuiltinBuffs.Duality
             this.legsThickness = Mathf.Lerp(0.7f, 1.1f, UnityEngine.Random.value);
 
             this.deathConvulsions = (player.State.alive ? 1f : 0f);
+            this.standCount = 0;
         }
 
         #region 外观
@@ -748,7 +750,9 @@ namespace BuiltinBuffs.Duality
                         float num11 = 1.2f;
                         if (!this.legs[n, m].reachedSnapPosition)
                         {
-                            modify = Vector2.down;
+                            modify = Vector2.zero;
+                            if (player.standing)
+                                modify = Vector2.down;
                             //如果可以抓天花板，就抓天花板
                             for (int t = 0; t <= Mathf.Floor(legLength / 20f); t++)
                             {
@@ -762,6 +766,8 @@ namespace BuiltinBuffs.Duality
                                 }
                             }
                             this.legs[n, m].FindGrip(player.room, vector3, vector3 + 20f * Mathf.Abs(Mathf.Sin(num)) * modify, this.legLength * num11, vector4, -2, -2, false);
+                            if (modify == Vector2.down)
+                                this.legs[n, m].vel += Vector2.down;
                         }
                         else if (!Custom.DistLess(vector3, this.legs[n, m].absoluteHuntPos, this.legLength * num11 * Mathf.Pow(1f - num8, 0.2f)))
                         {
@@ -799,10 +805,21 @@ namespace BuiltinBuffs.Duality
             {
                 player.ReleaseGrasp(1);
             }
+            /*
+            if (player.animation == Player.AnimationIndex.StandUp)
+                this.standCount++;
+            else
+                this.standCount = 0;
+            if (this.standCount > 10)
+            {
+                this.standCount = 0;
+                player.bodyMode = Player.BodyModeIndex.Crawl;
+                player.animation = Player.AnimationIndex.LedgeCrawl;
+            }*/
 
-            if (player.graphicsModule != null && player.Consious &&
-                !player.room.aimap.TileAccessibleToCreature(player.mainBodyChunk.pos, player.Template) &&
-                !player.room.aimap.TileAccessibleToCreature(player.bodyChunks[1].pos, player.Template))
+            if (player.graphicsModule != null && player.Consious && (player.room.aimap == null ||
+                (!player.room.aimap.TileAccessibleToCreature(player.mainBodyChunk.pos, player.Template) && 
+                !player.room.aimap.TileAccessibleToCreature(player.bodyChunks[1].pos, player.Template))))
             {
                 for (int l = 0; l < this.legs.GetLength(0); l++)
                 {
@@ -908,18 +925,22 @@ namespace BuiltinBuffs.Duality
                 }
 
                 Vector2 pos = new Vector2(self.input[0].x, self.input[0].y);
-                self.bodyChunks[0].vel += Custom.DirVec(self.bodyChunks[0].pos, pos) * 1f;
-                self.bodyChunks[1].vel -= Custom.DirVec(self.bodyChunks[0].pos, pos) * 0.5f;
+                if (pos == Vector2.zero) 
+                    pos = Vector2.up;
+                self.bodyChunks[0].vel += pos.normalized * 1f;
+                self.bodyChunks[1].vel -= pos.normalized * 0.5f;
 
                 if (self.graphicsModule != null)
                 {
-                    for (int j = 0; j < 2; j++)
+                    for (int j = 0; j < this.legs.GetLength(0); j++)
                     {
                         for (int k = 0; k < 2; k++)
                         {
                             this.legs[j, k].mode = Limb.Mode.Dangle;
                             this.legFlips[j, k, 0] = ((j == 0) ? -1f : 1f);
-                            this.legs[j, k].vel += Vector3.Slerp(Custom.DirVec(self.mainBodyChunk.pos, wantPos), Custom.PerpendicularVector(self.mainBodyChunk.pos, wantPos) * ((j == 0) ? -1f : 1f), (k == 0) ? 0.1f : 0.5f).ToVector2InPoints() * 3f;
+                            this.legs[j, k].vel += Vector3.Slerp(Custom.DirVec(self.mainBodyChunk.pos, wantPos), 
+                                                                 Custom.PerpendicularVector(self.mainBodyChunk.pos, wantPos) * ((j == 0) ? -1f : 1f), 
+                                                                 (k == 0) ? 0.1f : 0.5f).ToVector2InPoints() * 3f;
                         }
                     }
                 }
@@ -943,12 +964,12 @@ namespace BuiltinBuffs.Duality
                 return;
             float scale = self.simulateHoldJumpButton >= 6 ? 2f : 1f;
             float num = Custom.AimFromOneVectorToAnother(self.bodyChunks[1].pos, self.bodyChunks[0].pos);
-            if (self.superLaunchJump >= 19)
+            /*if (self.superLaunchJump >= 19)
             {
                 for (int i = 0; i < this.legs.GetLength(0); i++)
                     for (int j = 0; j < this.legs.GetLength(1); j++)
                         this.legs[i, j].FindGrip(self.room, self.bodyChunks[0].pos, self.bodyChunks[0].pos + 20f * Mathf.Abs(Mathf.Sin(num)) * Vector2.down, this.legLength * 1.1f, self.bodyChunks[0].pos + 100f * Mathf.Abs(Mathf.Sin(num)) * Vector2.down, -2, -2, false);
-            }
+            }*/
             float d = Custom.LerpMap(jumpDir.y, -1f, 1f, 0.7f, 1.2f, 1.1f);
             this.footingCounter = 0;
             self.mainBodyChunk.vel *= 0.5f;
