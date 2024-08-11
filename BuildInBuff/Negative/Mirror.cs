@@ -27,6 +27,9 @@ namespace TemplateGains
         {
             var self = orig.Invoke(playerNumber);
             self.x *= -1;
+            self.analogueDir.x *= -1;
+            self.downDiagonal *= -1;
+
             return self;
         }
 

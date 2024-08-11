@@ -11,6 +11,7 @@ using RandomBuff;
 using BuiltinBuffs;
 using RandomBuffUtils;
 using BuiltinBuffs.Positive;
+using BuiltinBuffs.Negative;
 
 namespace TemplateGains
 {
@@ -40,48 +41,37 @@ namespace TemplateGains
         {
             orig.Invoke(self, eu);
             
+            //如果断尾了或者在管道里之类的就跳过
             if (!self.GetExPlayerData().HaveTail || self.inShortcut || self.room == null || self.graphicsModule == null) return;
 
-            //if (PlayerUtils.TryGetModulePart<Tail,TailcopterBuffEntry>(self,out var modulePart))
-            //{
-            //    if (!modulePart.HaveTail) return;
-            //}
-
-            if (CatNeuroBuffEntry.CatNeuroID.GetBuffData() != null) return;
-            if (GeckoStrategyBuffEntry.geckoModule.TryGetValue(self, out var module) &&!( module.escapeCount >= 0 && !self.playerState.permaDead))
-            {
-                return;
-            }
+            //如果是神经元猫就相当于断尾就跳过
+            //if (CatNeuroBuffEntry.CatNeuroID.GetBuffData() != null) return;
 
 
 
             var copter = self.copter();
 
-            var tailBody = self.bodyChunks[1];
+            //尾巴链接的身体部分
+            var tailBody = self.bodyChunks[0];
+            //var tailBody = UpsideDownBuffEntry.UpsideDownID.GetBuffData()==null? self.bodyChunks[1]: self.bodyChunks[0];
 
             var allTail = ((self.graphicsModule) as PlayerGraphics).tail;
             var tail = ((self.graphicsModule) as PlayerGraphics).tail[((self.graphicsModule) as PlayerGraphics).tail.Length - 1];
 
-            if (self.input[0].jmp && !self.input[1].jmp && tailBody.contactPoint.y >= 0)//空中按跳提升飞行计数
+            //空中按跳提升飞行计数,并且提供一定吸力
+            if (self.input[0].jmp && !self.input[1].jmp && tailBody.contactPoint.y >= 0)
             {
-                copter.flyCount += 20;
-                if (copter.flyCount > copter.flyLimit) copter.flyCount = copter.flyLimit;//如果超过上限就等于上限
-
+                copter.flyCount = Math.Min(copter.flyCount + 20, copter.flyLimit); 
                 tailBody.vel += Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos) * 0.2f;
             }
-            //else if (self.input[0].jmp && tailBody.contactPoint.y >= 0)//长按按跳提升飞行计数
-            //{
-            //    copter.flyCount += 1;
-            //    if (copter.flyCount > copter.flyLimit) copter.flyCount = copter.flyLimit;//如果超过上限就等于上限
+            //没在飞就让计数归位
+            else if (copter.flyCount > 0) copter.flyCount--;
 
-            //    tailBody.vel += Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos) * 0.01f;
-            //}
+            //让玩家按下的时候更快停止尾巴转动
+            if (self.input[0].y<0&&self.room.gravity>0)copter.flyCount--;
 
-            else if (copter.flyCount > 0) copter.flyCount--;//没在飞就让计数归位
-            if (self.input[0].y<0&&self.room.gravity>0)copter.flyCount--;//让玩家按下的时候更快停止尾巴转动
-
-            copter.flying = Custom.LerpMap(copter.flyCount, 0, copter.flyLimit / 2f, 0, 1f);
             //飞行计数提升时改变飞行程度
+            copter.flying = Custom.LerpMap(copter.flyCount, 0, copter.flyLimit / 2f, 0, 1f);
 
 
             //抵消房间的重力
@@ -131,7 +121,7 @@ namespace TemplateGains
             {
                 self.bodyChunks[0].vel += self.input[0].analogueDir * copter.flying * 1f;
                 self.bodyChunks[1].vel -= self.input[0].analogueDir * copter.flying * 0.2f;
-            }//提供更强e移动力
+            }//提供更强移动力
 
 
         }
