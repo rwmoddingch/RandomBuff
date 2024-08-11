@@ -143,7 +143,7 @@ namespace BuiltinBuffs.Positive
             ownerRef = new WeakReference<Player>(owner);
             this.room = owner.room;
             this.count = 10;
-            this.sporeLife = 0.8f + this.Level * 0.05f;
+            this.sporeLife = 0.7f + this.Level * 0.05f;
             this.Color = new Color(227f / 255f, 171f / 255f, 78f / 255f);
         }
 
