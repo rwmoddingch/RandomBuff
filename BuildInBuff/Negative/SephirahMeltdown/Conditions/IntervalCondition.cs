@@ -24,6 +24,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             currentCycle = game.GetStorySession.saveState.cycleNumber;
         }
 
