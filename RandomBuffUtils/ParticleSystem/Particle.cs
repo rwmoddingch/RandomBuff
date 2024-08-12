@@ -51,15 +51,16 @@ namespace RandomBuffUtils.ParticleSystem
             }
         }
 
-        public Vector2 scaleXY;
-        public Vector2 setScaleXY;
-        public Vector2 lastScaleXY;
+        public Vector2 scaleXY = Vector2.one;
+        public Vector2 setScaleXY = Vector2.one;
+        public Vector2 lastScaleXY = Vector2.one;
 
         public Color setColor;
         public Color color;
         public Color lastColor;
 
         public float alpha = 1f;
+        public float setAlpha = 1f;
 
         public float rotation;
         public float lastRotation;
@@ -223,6 +224,12 @@ namespace RandomBuffUtils.ParticleSystem
         {
             this.vel = vel;
             this.setVel = vel;
+        }
+
+        public virtual void HardSetAlpha(float alpha)
+        {
+            this.alpha = alpha;
+            this.setAlpha = alpha;
         }
 
         public T GetUniqueData<T>(IOwnParticleUniqueData owner) where T : ParticleUniqueData

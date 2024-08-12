@@ -86,6 +86,9 @@ namespace RandomBuff.Core.Progression
 
             grown = MeshManager.LoadMesh("grown", AssetManager.ResolveFilePath("buffassets//assetbundles//futileExtend//grown.obj"));
             Futile.atlasManager.LoadImage("buffassets/illustrations/crownTex");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/AlphaCircle20");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/FlatLight200");
+
             QuestRendererManager.AddProvider(new CosmeticQuestRendererProvider());
         }
 

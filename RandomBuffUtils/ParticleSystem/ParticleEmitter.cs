@@ -16,7 +16,8 @@ namespace RandomBuffUtils.ParticleSystem
         public Action<Particle> OnParticleDieEvent;
         public Action<Particle> OnParticleInitEvent;
 
-        public Action<ParticleEmitter> OnEmitterDie; 
+        public Action<ParticleEmitter> OnEmitterDie;
+        public Action<ParticleEmitter> OnEmitterActuallyDie;
 
         public List<Particle> Particles { get; } = new List<Particle>();
 
@@ -61,6 +62,7 @@ namespace RandomBuffUtils.ParticleSystem
 
         void ActualDie()
         {
+            OnEmitterActuallyDie?.Invoke(this);
             room = null;
             //BuffUtils.Log("ParticleEmitter", "ActualDie");
             Particles.Clear();
@@ -68,13 +70,19 @@ namespace RandomBuffUtils.ParticleSystem
             system.managedEmitter.Remove(this);
         }
 
-        public virtual void Die()
+        public virtual void Die(bool forceDie = false)
         {
             //BuffUtils.Log("ParticleEmitter", "Die");
             slateForDeletion = true;
             OnEmitterDie?.Invoke(this);
             foreach (var module in EmitterModules)
                 module.OnDie();
+            if(forceDie)
+            {
+                for (int i = Particles.Count - 1; i >= 0; i--)
+                    Particles[i].Die();
+                ActualDie();
+            }
         }
 
         #region Draw&Update

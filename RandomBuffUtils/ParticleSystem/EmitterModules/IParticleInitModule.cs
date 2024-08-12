@@ -32,6 +32,21 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
+    public class SetCustomVelocity : EmitterModule, IParticleInitModule
+    {
+        Func<Particle, Vector2> velFunc;
+
+        public SetCustomVelocity(ParticleEmitter emitter, Func<Particle, Vector2> func) : base(emitter)
+        {
+            velFunc = func;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.SetVel(velFunc.Invoke(particle));
+        }
+    }
+
     public class SetSphericalVelocity : EmitterModule, IParticleInitModule
     {
         float a;

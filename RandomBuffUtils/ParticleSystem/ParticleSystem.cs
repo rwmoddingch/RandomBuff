@@ -79,6 +79,14 @@ namespace RandomBuffUtils.ParticleSystem
 
             for (int i = managedEmitter.Count - 1; i >= 0; i--)
                 managedEmitter[i].Update(eu);
+
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            for (int i = managedEmitter.Count - 1; i >= 0; i--)
+                managedEmitter[i].Die(true);
         }
 
 
