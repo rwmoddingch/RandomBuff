@@ -273,7 +273,7 @@ BuffManual_MissionMode_Content_1|一共有两种使命可以在上方选择：<L
 BuffManual_MissionMode_Content_2|每个使命都有不同的指定条件，可以在条件栏查看，只有完成条件的要求才能完成使命。
 BuffManual_MissionMode_Content_3|每个使命都有不同的初始卡组，可以在卡组栏查看。
 BuffManual_MissionMode_Content_4|该模式的详情可以通过右下角的按钮查看
-BuffManual_BuffAndCard_Content_0|Mod中的buff一共分为正面、中性、负面三大类。<LINE>不同buff产生的效果大相径庭，卡牌可以用于展示它们的信息。<LINE>每个buff都会有一个代表它的卡牌，卡牌可以展示buff的封面、名字以及详细信息。<LINE>除此之外，卡牌还具有展示其他额外信息的功能。
+BuffManual_BuffAndCard_Content_0|Mod中的buff一共分为正面、中性、负面三大类。<LINE>不同buff产生的效果大相径庭，卡牌可以用于展示它们的信息。<LINE>每个buff都会有一个代表它的卡牌，卡牌可以展示buff的封面、名字以及详细信息。<LINE>此外，卡牌还能展示其他信息如buff剩余生效循环、堆叠层数。
 BuffManual_BuffAndCard_Content_1|当卡牌上出现圆形标记时，这表明该buff是有时效性的。<LINE>图形中的数字表明了该buff还可以生效多少个雨循环。
 BuffManual_BuffAndCard_Content_2|当卡牌上出现菱形标记时，这表明该buff是可堆叠的。<LINE>图形中的数字表明了该buff当前的堆叠层数<LINE>堆叠层数具体的效果取决于不同buff的实现方式。
 BuffManual_BuffAndCard_Content_3|当卡牌上出现六边形标记时，这表明该buff是可主动触发的。<LINE>若图形中为>>标记，则说明你没有给他绑定任何触发快捷键。<LINE>快捷键可以通过按下配置菜单指定的按键来绑定。绑定后即可使用快捷键来触发buff效果。<LINE>此外你也可以右键卡牌来触发buff的效果。
