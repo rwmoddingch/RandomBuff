@@ -1,6 +1,6 @@
 {
-    "FaceName": "littleboynuke",
-    "BuffID" : "LittleBoyNuke",
+    "FaceName": "bigpebblenuke",
+    "BuffID" : "BigPebbleNuke",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : false,
@@ -9,11 +9,11 @@
     "Tag" : ["ScavengerBomb Variant"],
     "Conflict":["ScavengerBomb Variant"],
     "Chinese" : {
-        "BuffName" : "小男孩",
+        "BuffName" : "五石核弹",
         "Description" : "拾荒炸弹将拥有超高的威力和更大的范围，并留下持续一段时间的辐射区。"
     },
     "English": {
-        "BuffName" : "LittleBoyNuke",
+        "BuffName" : "BigPebbleNuke",
         "Description" : "Scavenger Bombs will have super high power and greater range, and leave a radiated area that lasts for a while."
     }
 }
