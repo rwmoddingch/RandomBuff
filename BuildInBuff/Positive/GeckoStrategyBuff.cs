@@ -68,7 +68,7 @@ namespace BuiltinBuffs.Positive
         private static void Player_Destroy(On.Player.orig_Destroy orig, Player self)
         {
             orig(self);
-            if (geckoModule.TryGetValue(self, out var module) && module.escapeCount >= 0)
+            if (geckoModule.TryGetValue(self, out var module) && module.tailCut && module.escapeCount >= 0)
             {
                 self.playerState.permaDead = true;
                 self.Die();
@@ -77,7 +77,7 @@ namespace BuiltinBuffs.Positive
 
         private static void Player_Die(On.Player.orig_Die orig, Player self)
         {
-            if (geckoModule.TryGetValue(self, out var module) && module.escapeCount >= 0 && !self.playerState.permaDead)
+            if (geckoModule.TryGetValue(self, out var module) && module.tailCut && module.escapeCount >= 0 && !self.playerState.permaDead)
             {
                 return;
             }
