@@ -10,6 +10,7 @@ using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using RandomBuff.Core.Game;
+using MoreSlugcats;
 
 namespace BuiltinBuffs.Duality
 {
@@ -43,6 +44,14 @@ namespace BuiltinBuffs.Duality
                 BuffUtils.Log(PandoraBoxBuffID, "Player_Regurgitate yes");
                 AbstractPhysicalObject origObject = self.objectInStomach;
                 bool replaceSuccessfully = false;
+
+                if(self.room.updateList.Count(u => u is PhysicalObject physical && (physical.abstractPhysicalObject.type == MoreSlugcatsEnums.AbstractObjectType.HRGuard)) > 0)
+                {
+                    self.objectInStomach = new AbstractPhysicalObject(self.room.world, MoreSlugcatsEnums.AbstractObjectType.SingularityBomb, null, self.coord, self.room.game.GetNewID());
+                    replaceSuccessfully = true;
+                    orig.Invoke(self);
+                }
+
                 for (int i = 0; i < 5 && !replaceSuccessfully; i++)
                 {
                     WorldCoordinate coordinate = self.coord;
@@ -100,6 +109,14 @@ namespace BuiltinBuffs.Duality
                 return true;
             else if (type == AbstractPhysicalObject.AbstractObjectType.Creature)
                 return true;
+            else if (type == MoreSlugcatsEnums.AbstractObjectType.HRGuard)
+            {
+                if(Random.value < 0.001f)
+                {
+                    return false;
+                }
+                return true;
+            }
             return false;
         }
     }
