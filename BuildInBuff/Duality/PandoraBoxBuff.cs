@@ -10,6 +10,7 @@ using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using RandomBuff.Core.Game;
+using MoreSlugcats;
 
 namespace BuiltinBuffs.Duality
 {
@@ -99,6 +100,8 @@ namespace BuiltinBuffs.Duality
             if (type == AbstractPhysicalObject.AbstractObjectType.EggBugEgg)
                 return true;
             else if (type == AbstractPhysicalObject.AbstractObjectType.Creature)
+                return true;
+            else if (type == MoreSlugcatsEnums.AbstractObjectType.HRGuard)
                 return true;
             return false;
         }
