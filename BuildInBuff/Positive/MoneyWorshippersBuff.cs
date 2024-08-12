@@ -31,7 +31,7 @@ namespace BuiltinBuffs.Positive
                 {
                     if (grasp == null)
                         continue;
-                    if (grasp.grabbed.abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.DataPearl || grasp.grabbed.abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.PebblesPearl)
+                    if (grasp.grabbed.abstractPhysicalObject is DataPearl.AbstractDataPearl)
                     {
                         result = true;
                         break;

@@ -59,6 +59,8 @@ namespace RandomBuff.Core.StaticsScreen
 
         private bool showCredit = false;
 
+        public SlugcatStats.Name name;
+
         public BuffGameWinScreen(ProcessManager manager) : base(manager, BuffEnums.ProcessID.BuffGameWinScreen)
         {
             pages = new List<Page>();
@@ -86,6 +88,8 @@ namespace RandomBuff.Core.StaticsScreen
 
             float middleX = 400f;
             float width = 460f;
+
+            name = BuffPoolManager.Instance.Game.StoryCharacter;
 
             title = new CardTitle(container, BuffCard.normalScale * 0.6f, new Vector2(middleX, 668f), 0.1f, spanAdjust: -50f);
 

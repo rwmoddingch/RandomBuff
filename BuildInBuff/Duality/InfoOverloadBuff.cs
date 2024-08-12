@@ -23,7 +23,7 @@ namespace BuiltinBuffs.Duality
             BuffRegister.RegisterBuff<InfoOverloadIBuffEntry>(InfoOverloadBuffID);
         }
 
-        public static void HookOn()
+        public static void LongLifeCycleHookOn()
         {
             On.DataPearl.AbstractDataPearl.ctor += AbstractDataPearl_ctor;
         }

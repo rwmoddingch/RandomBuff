@@ -368,6 +368,11 @@ namespace RandomBuff.Core.Hooks
                     foreach (var buff in BuffCore.GetAllBuffIds(menu.name))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
+                else if (self.oldProcess is BuffGameWinScreen win)
+                {
+                    foreach (var buff in BuffCore.GetAllBuffIds(win.name))
+                        BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
+                }
                 BuffDataManager.Instance.CleanMalnourishedData();
             }
 
