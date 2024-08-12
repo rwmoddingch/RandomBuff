@@ -25,12 +25,9 @@ using TemplateGains;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class BounceSpearBuffData : CountableBuffData
+    internal class BounceSpearBuffData : BuffData
     {
- 
-
         public override BuffID ID => BounceSpearBuffHooks.bounceSpearID;
-        public override int MaxCycleCount => 3;
     }
     internal class BounceSpearBuff : Buff<BounceSpearBuff, BounceSpearBuffData>
     {
