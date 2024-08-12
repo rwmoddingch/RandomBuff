@@ -224,7 +224,7 @@ namespace BuiltinBuffs.Negative
                     }
 
                     if (!self.Stunned && scorchingSunPlayer.LastStun >= scorchingSunPlayer.CoolingTime &&
-                        Random.Range(0f, 800f + (1f + 0.3f * num) * 5f * heatstroke) > 800f)
+                        Random.Range(0f, 800f + (1f + 0.3f * num) * 10f * (heatstroke - 0.5f)) > 800f)
                     {
                         scorchingSunPlayer.LastStun = 0;
                         scorchingSunPlayer.CoolingTime = Mathf.RoundToInt(Random.Range(200f, 600f) / (1f + 0.3f * num * heatstroke));
