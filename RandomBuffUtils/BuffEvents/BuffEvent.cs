@@ -139,12 +139,12 @@ namespace RandomBuffUtils
             orig(self, game);
             var finished = self.endgameTrackers.Where(i => i.GoalFullfilled && !i.GoalAlreadyFullfilled).Select(i => i.ID);
             var unFinished = self.endgameTrackers.Where(i => !i.GoalFullfilled && i.GoalAlreadyFullfilled).Select(i => i.ID);
-            
-            if (finished.Any() || unFinished.Any())
+            var all = self.endgameTrackers.Where(i => i.GoalFullfilled && !i.GoalAlreadyFullfilled).Select(i => i.ID);
+            if (finished.Any() || unFinished.Any() || all.Any())
             {
                 foreach(var id in finished)
                     BuffUtils.Log("BuffEvent",$"finished {id}");
-                onAchievementCompleted.SafeInvoke("onAchievementCompleted", finished.ToList(), unFinished.ToList());
+                onAchievementCompleted.SafeInvoke("onAchievementCompleted", finished.ToList(), unFinished.ToList(),all.ToList());
             }
         }
     }
@@ -167,7 +167,7 @@ namespace RandomBuffUtils
         public delegate void NewRoomHandler(string roomName);
 
         private static AchievementCompleteHandler onAchievementCompleted;
-        public delegate void AchievementCompleteHandler(List<WinState.EndgameID> newFinished, List<WinState.EndgameID> newUnfinished);
+        public delegate void AchievementCompleteHandler(List<WinState.EndgameID> newFinished, List<WinState.EndgameID> newUnfinished, List<WinState.EndgameID> allFinished);
 
         public delegate void ReachNewRoomHandler(AbstractRoom room);
 
