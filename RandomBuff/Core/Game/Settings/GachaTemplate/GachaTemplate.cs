@@ -146,7 +146,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             public (int selectCount, int showCount, int pickTimes) positive;
             public (int selectCount, int showCount, int pickTimes) negative;
 
-            public bool NeedMenu => positive.pickTimes + negative.pickTimes != 0;
+            public bool NeedMenu => positive.pickTimes*positive.selectCount + negative.pickTimes * negative.selectCount != 0;
         }
 
 

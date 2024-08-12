@@ -393,49 +393,59 @@ namespace RandomBuff.Core.Game.Settings
        
        
             var positive = gachaTemplate.CurrentPacket.positive;
-            for (int i = 0; i < positive.pickTimes; i++)
+            if (positive.selectCount > 0)
             {
-
-                var majorList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive.showCount, BuffType.Positive)
-                    .Select(i => i.BuffID).ToArray();
-
-                var additiveList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, positive.showCount, BuffType.Negative)
-                    .Select(i => i.BuffID).ToArray();
-
-
-                for (int j = 0; j < majorList.Length; j++)
-                    if (majorList[j].GetStaticData().BuffProperty != BuffProperty.Special)
-                        additiveList[j] = null;
-
-                fallbackPick.Add(new FallbackPickSlot()
+                for (int i = 0; i < positive.pickTimes; i++)
                 {
-                    additive = additiveList,
-                    major = majorList,
-                    selectCount = positive.selectCount
-                });
+
+                    var majorList = BuffPicker
+                        .GetNewBuffsOfType(game.StoryCharacter, positive.showCount, BuffType.Positive)
+                        .Select(i => i.BuffID).ToArray();
+
+                    var additiveList = BuffPicker
+                        .GetNewBuffsOfType(game.StoryCharacter, positive.showCount, BuffType.Negative)
+                        .Select(i => i.BuffID).ToArray();
+
+
+                    for (int j = 0; j < majorList.Length; j++)
+                        if (majorList[j].GetStaticData().BuffProperty != BuffProperty.Special)
+                            additiveList[j] = null;
+
+                    fallbackPick.Add(new FallbackPickSlot()
+                    {
+                        additive = additiveList,
+                        major = majorList,
+                        selectCount = positive.selectCount
+                    });
+                }
             }
 
             var negative = gachaTemplate.CurrentPacket.negative;
-            for (int i = 0; i < negative.pickTimes; i++)
+            if (negative.selectCount > 0)
             {
-                
-                var majorList  = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative.showCount, BuffType.Negative)
-                    .Select(i => i.BuffID).ToArray();
-
-                var additiveList = BuffPicker.GetNewBuffsOfType(game.StoryCharacter, negative.showCount, BuffType.Positive)
-                    .Select(i => i.BuffID).ToArray();
-
-
-                for(int j =0 ;j< majorList.Length; j++)
-                    if (majorList[j].GetStaticData().BuffProperty != BuffProperty.Special)
-                        additiveList[j] = null;
-
-                fallbackPick.Add(new FallbackPickSlot()
+                for (int i = 0; i < negative.pickTimes; i++)
                 {
-                    additive = additiveList,
-                    major = majorList,
-                    selectCount = positive.selectCount
-                });
+
+                    var majorList = BuffPicker
+                        .GetNewBuffsOfType(game.StoryCharacter, negative.showCount, BuffType.Negative)
+                        .Select(i => i.BuffID).ToArray();
+
+                    var additiveList = BuffPicker
+                        .GetNewBuffsOfType(game.StoryCharacter, negative.showCount, BuffType.Positive)
+                        .Select(i => i.BuffID).ToArray();
+
+
+                    for (int j = 0; j < majorList.Length; j++)
+                        if (majorList[j].GetStaticData().BuffProperty != BuffProperty.Special)
+                            additiveList[j] = null;
+
+                    fallbackPick.Add(new FallbackPickSlot()
+                    {
+                        additive = additiveList,
+                        major = majorList,
+                        selectCount = negative.selectCount
+                    });
+                }
             }
 
         }
