@@ -24,7 +24,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             if (game.GetStorySession.saveState.deathPersistentSaveData.winState.GetTracker(
                     MoreSlugcatsEnums.EndgameID.Gourmand, false) is
-                WinState.GourFeastTracker tracker)
+                WinState.GourFeastTracker tracker && tracker.progress != null && tracker.currentCycleProgress != null)
             {
                
                 int count = 0;
