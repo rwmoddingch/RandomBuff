@@ -3,7 +3,7 @@
     "BuffID" : "FlamePurification",
     "BuffType" : "Positive",
     "BuffProperty" : "Normal",
-    "Triggerable" : true,
+    "Triggerable" : false,
     "Color" : "FF2D0E",
 
     "Chinese" : {
@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "FlamePurification",
-        "Description" : "Bind with Temperature; burning flames on the terrain will be able to clear walls of worm grass"
+        "Description" : "Bind with Temperature; burning flames on the terrain will be able to clear worm grass"
     }
 }
