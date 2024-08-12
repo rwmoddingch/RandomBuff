@@ -244,6 +244,14 @@ namespace RandomBuff.Core.Game
                 part.owner = this;
                 part.InitSprites(hud);
 
+                if (id2hudParts.TryGetValue(id, out var oldPart))
+                {
+                    id2hudParts.Remove(id);
+                    hudParts.Remove(oldPart);
+                    oldPart.ClearSprites();
+                    BuffPlugin.Log($"Same ID HudPart at: {id}");
+                }
+
                 id2hudParts.Add(id, part);
                 hudParts.Add(part);
             }
