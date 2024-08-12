@@ -57,7 +57,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.2";
+        public const string ModVersion = "1.0.3";
 
         public void OnEnable()
         {
@@ -140,7 +140,7 @@ namespace RandomBuff
                     }
 
 #endif
-                    DevEnabled = true;
+                    //DevEnabled = true;
                     Application.logMessageReceived += Application_logMessageReceived;
 
                     BuffUIAssets.LoadUIAssets();

@@ -22,10 +22,15 @@ namespace BuiltinBuffs.Positive
 
         public static void HookOn()
         {
-            IL.Player.GrabUpdate += Player_GrabUpdate_CraftIL;
+            On.Player.GraspsCanBeCrafted += Player_GraspsCanBeCrafted;
             On.Player.SpitUpCraftedObject += Player_SpitUpCraftedObject;
             On.SlugcatStats.SpearSpawnModifier += SlugcatStats_SpearSpawnModifier;
             On.Player.Grabability += Player_Grabability;
+        }
+
+        private static bool Player_GraspsCanBeCrafted(On.Player.orig_GraspsCanBeCrafted orig, Player self)
+        {
+            return CanBeCrafted(self) != 0 || orig(self);
         }
 
         private static Player.ObjectGrabability Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
@@ -40,42 +45,7 @@ namespace BuiltinBuffs.Positive
             
         }
 
-        private static void Player_GrabUpdate_CraftIL(ILContext il)
-        {
-            try
-            {
-                ILCursor c = new ILCursor(il);
-                c.GotoNext(MoveType.After, i => i.MatchLdarg(0),
-                    i => i.MatchCall<Player>("PickupPressed"),
-                    i => i.MatchLdarg(0),
-                    i => i.MatchCall<Player>("get_input"),
-                    i => i.MatchLdcI4(0),
-                    i => i.MatchLdelema<Player.InputPackage>(),
-                    i => i.MatchLdfld<Player.InputPackage>("pckp"),
-                    i => i.OpCode == OpCodes.Brfalse);
-
-                ILLabel l = c.DefineLabel();
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate<Func<Player, bool>>((player) =>
-                {
-                    var re = player.craftingObject = player.craftingObject || CanBeCrafted(player) != 0;
-                    return re;
-                });
-                c.Emit(OpCodes.Brfalse, l);
-
-                c.Emit(OpCodes.Ldc_I4_1);
-                c.Emit(OpCodes.Stloc_1);
-                c.Emit(OpCodes.Ldc_I4_M1);
-                c.Emit(OpCodes.Stloc_S, (byte)6);
-
-                c.MarkLabel(l);
-            }
-            catch (Exception e)
-            {
-                BuffUtils.LogException(spearMasterBuffID,e);
-            }
-
-        }
+      
         private static void Player_SpitUpCraftedObject(On.Player.orig_SpitUpCraftedObject orig, Player self)
         {
             if (CanBeCrafted(self) != 0)
