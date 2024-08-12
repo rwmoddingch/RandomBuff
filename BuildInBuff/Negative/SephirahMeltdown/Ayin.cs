@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using BuiltinBuffs.Positive;
+using MonoMod.RuntimeDetour;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuffUtils;
@@ -251,10 +253,20 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             On.RainWorldGame.Update += RainWorldGame_Update;
             On.FFacetRenderLayer.ctor += FFacetRenderLayer_ctor;
+
+            _ = new Hook(typeof(FSprite).GetProperty(nameof(FSprite.shader)).GetSetMethod(),
+                typeof(AyinHook).GetMethod("FSprite_ShaderSet", BindingFlags.NonPublic | BindingFlags.Static));
             Shader.SetGlobalFloat("Buff_screenRotate", 0);
 
 
             counter = 0;
+        }
+
+        private static void FSprite_ShaderSet(Action<FSprite, FShader> orig, FSprite self, FShader shader)
+        {
+            if (ReplacedShaders.Contains(shader.name))
+                shader = Custom.rainWorld.Shaders[$"SephirahMeltdownEntry.{shader.name}Rotation"];
+            orig(self, shader);
         }
 
         public static readonly HashSet<string> ReplacedShaders = new HashSet<string>()

@@ -13,14 +13,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override void EnterGame(RainWorldGame game)
         {
             base.EnterGame(game);
+            Finished = game.GetStorySession.saveState.deathPersistentSaveData.winState.endgameTrackers.Where(i => i.GoalFullfilled).Select(i => i.ID)
+                .Contains(achievementID);
             BuffEvent.OnAchievementCompleted += BuffEvent_OnAchievementCompleted;
         }
 
-        private void BuffEvent_OnAchievementCompleted(List<WinState.EndgameID> newFinished, List<WinState.EndgameID> newUnfinished)
+        private void BuffEvent_OnAchievementCompleted(List<WinState.EndgameID> newFinished, List<WinState.EndgameID> newUnfinished, List<WinState.EndgameID> allFinished)
         {
-            if (newFinished.Contains(achievementID))
-                Finished = true;
-
+            Finished = allFinished.Contains(achievementID);
         }
 
         public override ConditionID ID => ConditionID.Achievement;

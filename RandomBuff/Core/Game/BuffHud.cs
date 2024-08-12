@@ -49,8 +49,7 @@ namespace RandomBuff.Core.Game
             }
 
 
-            if (Custom.rainWorld.processManager.menuSetup.startGameCondition ==
-                ProcessManager.MenuSetup.StoryGameInitCondition.New && !BuffPoolManager.Instance.isInitHud)
+            if (BuffCustom.TryGetGame(out var game) && game.GetStorySession.saveState.cycleNumber == 0 && !BuffPoolManager.Instance.isInitHud)
             {
                 BuffPoolManager.Instance.isInitHud = true;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
@@ -244,6 +243,14 @@ namespace RandomBuff.Core.Game
                 var part = owner.CreateHUDPart();
                 part.owner = this;
                 part.InitSprites(hud);
+
+                if (id2hudParts.TryGetValue(id, out var oldPart))
+                {
+                    id2hudParts.Remove(id);
+                    hudParts.Remove(oldPart);
+                    oldPart.ClearSprites();
+                    BuffPlugin.Log($"Same ID HudPart at: {id}");
+                }
 
                 id2hudParts.Add(id, part);
                 hudParts.Add(part);

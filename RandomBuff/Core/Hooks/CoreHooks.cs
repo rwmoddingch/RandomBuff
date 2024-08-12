@@ -363,6 +363,11 @@ namespace RandomBuff.Core.Hooks
                     foreach (var buff in BuffCore.GetAllBuffIds(game3.StoryCharacter))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
+                else if (self.oldProcess is StackAndUnstackMenu menu)
+                {
+                    foreach (var buff in BuffCore.GetAllBuffIds(menu.name))
+                        BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
+                }
                 BuffDataManager.Instance.CleanMalnourishedData();
             }
 

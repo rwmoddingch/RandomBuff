@@ -20,7 +20,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static BuiltinBuffs.Duality.LittleBoyNukeBuffEntry;
+using static BuiltinBuffs.Duality.BigPebbleNukeBuffEntry;
 using static BuiltinBuffs.Positive.StagnantForcefieldPlayerModule;
 using static RandomBuffUtils.FutileExtend.FMesh;
 using Random = UnityEngine.Random;

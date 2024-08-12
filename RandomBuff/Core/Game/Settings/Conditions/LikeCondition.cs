@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MoreSlugcats;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -48,6 +49,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             conditions ??= new List<Condition>();
             var choices = CreatureCommunities.CommunityID.values.entries.Select((i) => new CreatureCommunities.CommunityID(i)).Where((i) =>!exclusiveIDs.Contains(i)).Where((i) => conditions.OfType<LikeCondition>().All(j => j.communityID != i)).ToList();
+            if (name == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+                choices.Remove(CreatureCommunities.CommunityID.Scavengers);
 
             if (choices.Count == 0)
                 return ConditionState.Fail;

@@ -123,6 +123,13 @@ namespace RandomBuff.Core.Hooks
                         return 0;
                     return orig(self);
                 });
+            _ = new Hook(typeof(SaveState).GetProperty("SlowFadeIn").GetGetMethod(),
+                (Func<SaveState, float> orig, SaveState self) =>
+                {
+                    if (Custom.rainWorld.BuffMode())
+                        return self.malnourished ? 4 : 0.8f;
+                    return orig(self);
+                });
             On.RainWorld.PostModsInit += RainWorld_PostModsInit;
 
         }

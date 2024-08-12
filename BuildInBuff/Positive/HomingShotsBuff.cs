@@ -122,6 +122,9 @@ namespace BuiltinBuffs.Positive
                 return false;
             if (creature.dead)
                 return false;
+            if (creature.Template.smallCreature || creature.Template.type == CreatureTemplate.Type.Leech ||
+                creature.Template.type == CreatureTemplate.Type.SeaLeech)
+                return false;
             if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(player.abstractCreature) > 0.5f)
             {
                 return false;

@@ -4,7 +4,7 @@
     "BuffType": "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" :  false,
-    "Stackable" :  false,
+    "Stackable" :  true,
     "Color" : "dbdbdb",
     "Chinese":{
         "BuffName":"还是我的回合",

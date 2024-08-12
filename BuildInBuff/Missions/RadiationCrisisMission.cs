@@ -37,7 +37,7 @@ namespace BuiltinBuffs.Missions
                 }
             };
 
-            startBuffSet.Add(LittleBoyNukeBuffEntry.littelBoyNukeID);
+            startBuffSet.Add(BigPebbleNukeBuffEntry.BigPebbleNukeID);
             startBuffSet.Add(BombManiaBuffEntry.bombManiaBuffID);
             startBuffSet.Add(MultiplierBuffEntry.multiplierBuffID);
         }

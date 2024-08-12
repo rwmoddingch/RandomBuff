@@ -150,6 +150,8 @@ namespace BuiltinBuffs.Positive
                                 if (creature is Player)
                                     continue;
                                 creature.stun += Mathf.CeilToInt(speed * 2);
+                                creature.SetKillTag(self.abstractCreature);
+                                creature.Violence(null, null, creature.mainBodyChunk, null, Creature.DamageType.Blunt, 1f, 0f);
                             }
 
                             Vector2 force = delta.normalized * Custom.LerpMap(dist, 0f, desolateRad, 20f, 0f) + Vector2.up * 8f;

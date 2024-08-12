@@ -18,19 +18,19 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
-    internal class LittleBoyNukeBuffEntry : IBuffEntry
+    internal class BigPebbleNukeBuffEntry : IBuffEntry
     {
         public static Color RadiatCol = Color.green * 0.7f + Color.blue * 0.3f;
-        public static BuffID littelBoyNukeID = new BuffID("LittleBoyNuke", true);
-        public static SoundID nukeSound = new SoundID("LittleBoyNuke", true);
+        public static BuffID BigPebbleNukeID = new BuffID("BigPebbleNuke", true);
+        public static SoundID nukeSound = new SoundID("BigPebbleNuke", true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<LittleBoyNukeBuffEntry>(littelBoyNukeID);
+            BuffRegister.RegisterBuff<BigPebbleNukeBuffEntry>(BigPebbleNukeID);
         }
 
         public static void LoadAssets()
         {
-            BuffSounds.LoadSound(nukeSound, littelBoyNukeID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("littleboynuke1A", 0.25f));
+            BuffSounds.LoadSound(nukeSound, BigPebbleNukeID.GetStaticData().AssetPath, new BuffSoundGroupData(), new BuffSoundData("bigpebblenuke1A", 0.25f));
         }
 
         public static void HookOn()

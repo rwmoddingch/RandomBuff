@@ -12,6 +12,16 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Duality
 {
+    internal class NampalmBuff : IgnitionPointBaseBuff<NampalmBuff, NapalmBuffData>
+    {
+        public override BuffID ID => NapalmBuffEntry.napalmBuffID;
+    }
+
+    internal class NapalmBuffData : BuffData
+    {
+        public override BuffID ID => NapalmBuffEntry.napalmBuffID;
+    }
+
     internal class NapalmBuffEntry : IBuffEntry
     {
         public static BuffID napalmBuffID = new BuffID("Napalm", true);

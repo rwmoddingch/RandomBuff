@@ -137,6 +137,7 @@ namespace RandomBuff.Core.StaticsScreen
                 showCredit = newFinishedQuests.Any(i => i.QuestId == "builtin.quest.Crown");
                 foreach (var quest in newFinishedQuests)
                     BuffPlugin.Log($"accomplish quest: {quest.QuestName}:{quest.QuestId}");
+                
 
             }
             else

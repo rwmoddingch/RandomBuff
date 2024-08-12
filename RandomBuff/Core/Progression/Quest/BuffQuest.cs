@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
@@ -87,7 +88,25 @@ namespace RandomBuff.Core.Progression.Quest
                     BuffPlayerData.Instance.UpdateQuestConditionState(QuestId, i);
                 }
 
-            return BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId) == QuestConditions.Count;
+            if (BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId) == QuestConditions.Count)
+            {
+                RefreshUnlockItems();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 刷新解锁物品状态
+        /// </summary>
+        public void RefreshUnlockItems()
+        {
+            if (unlockItem.TryGetValue(QuestUnlockedType.Card, out var cards))
+            {
+                foreach(var card in cards)
+                    BuffPlayerData.Instance.AddCollect(new BuffID(card));
+            }
         }
 
         /// <summary>
