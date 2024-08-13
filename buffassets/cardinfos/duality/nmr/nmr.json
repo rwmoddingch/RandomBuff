@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "NMR",
-        "Description" : "Players who hold or swallow metal items are subject to a slight levitation effect"
+        "Description" : "When slugcat holds or swallows a metal object, it will levitate slightly."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Swift Thief",
-        "Description" : "Scavengers that's not fully loaded will steal players' items and flee swiftly. As for valuable items like pearls, scavengers will even dispose some carried items to steal them. "
+        "Description" : "Scavengers will steal items out of slugcat's hands."
     }
 }

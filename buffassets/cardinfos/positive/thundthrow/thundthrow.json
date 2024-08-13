@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "ThundThrow",
-        "Description" : "One lightning strike to the point of impact after the thrown stone impacts."
+        "Description" : "Rocks thrown by slugcat summon a lightning strike when they land."
     }
 }

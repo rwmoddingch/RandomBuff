@@ -11,7 +11,7 @@
         "Description" : "大面条虫死亡后，可以通过投掷尸体的方式将其当作矛来使用"
     },
     "English" : {
-        "BuffName" : "NeedleflySpear",
-        "Description" : "When the Adult Needlefly dies, you can throw its corpse as a spear."
+        "BuffName" : "NoodleflySpear",
+        "Description" : "Adult noodlefly corpses act as spears."
     }
 }

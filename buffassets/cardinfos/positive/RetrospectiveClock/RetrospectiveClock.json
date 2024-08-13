@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "RetrospectiveClock",
-        "Description" : "First time triggering the card, the player's room, pos and rain cycle time will be recorded once. When triggering the card again, the player's pos, room and rain cycle time will be reset to the recorded ones (food points and buff effect of other cards won't be reset). The reset function can only be used once per cycle."
+        "Description" : "When triggered, stores slugcat's current position and cycle time. When triggered again, teleports slugcat to it's stored position and sets the rain timer to its stored value."
     }
 }

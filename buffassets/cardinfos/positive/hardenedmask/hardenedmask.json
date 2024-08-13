@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "HardenedMask",
-        "Description" : "When holding a mask, you can deflect spears flying in your direction."
+        "Description" : "Gives vulture masks the ability to deflect spears thrown at slugcat."
     }
 }

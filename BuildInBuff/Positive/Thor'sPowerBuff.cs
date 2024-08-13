@@ -21,10 +21,16 @@ namespace BuiltinBuffs.Positive
 
         public override BuffID ID => Thor_sPowerBuffEntry.Thor_sPowerBuffID;
 
-        public override bool Triggerable => true;
+        public override bool Triggerable => !triggered;
+
+        public override bool Active => !triggered;
+        bool triggered;
 
         public override bool Trigger(RainWorldGame game)
         {
+            if (triggered)
+                return false;
+
             if(game.FirstAlivePlayer.realizedCreature != null && game.FirstAlivePlayer.realizedCreature.room != null)
             {
                 var room = game.FirstAlivePlayer.realizedCreature.room;
@@ -77,7 +83,8 @@ namespace BuiltinBuffs.Positive
                     spear.Destroy();
                 }
 
-                return true;
+                triggered = true;
+                return false;
             }
 
             return false;

@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Cluster Bomb",
-        "Description" : "High-damage explosions fire a barrage of lower-damage cluster bombs"
+        "Description" : "Explosives split off into several lower power explosives when blown up."
     }
 }

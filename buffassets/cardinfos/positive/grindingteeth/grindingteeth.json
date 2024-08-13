@@ -13,6 +13,6 @@
   },
   "English": {
     "BuffName": "Grinding Teeth",
-    "Description": "If you cannot maul creatures, you are allowed to maul; Otherwise, each layer increases the bite damage by 50%."
+    "Description": "Gives slugcat the ability to maul a creature, similarly to artificer. If slugcat can already maul, increases the damage by 50% per stack."
   }
 }

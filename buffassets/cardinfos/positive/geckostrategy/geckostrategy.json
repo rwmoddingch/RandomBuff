@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Tail Escape",
-        "Description" : "When caught by other creatures, the player has one chance per cycle to escape by cutting off its tail. However, this won't work when Neuron Slug or Tailcopter buff is acquired. "
+        "Description" : "When grabbed, slugcat can separate it's tail to escape the creature that grabbed it. Requires a tail to use."
     }
 }

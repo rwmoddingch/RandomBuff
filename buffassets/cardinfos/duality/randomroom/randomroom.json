@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "RandomRoom",
-        "Description" : "Obfuscate all room connections except gates and shelters."
+        "Description" : "Randomized room connections except for gates and dens."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Orbital Railcannon Strike",
-        "Description" : "When this buff is activated by the player and there is an empty slot in their hand, it grants the player a beacon usable only during this turn. Upon deployment, if there is no obstruction above, it activates the orbital railcannon strike upon landing. The railcannon automatically locks onto and attacks the largest nearby target. Cooldown: 240 seconds."
+        "Description" : "When triggered , if slugcat has an open hand grants slugcat a special beacon. When thrown, if there is no ceiling above it, calls down an orbital strike which targets nearby creatures. 4 minute cooldown."
     }
 }

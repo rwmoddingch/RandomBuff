@@ -14,6 +14,6 @@
   },
   "English": {
     "BuffName": "Permanent Shield",
-    "Description": "Generate a shield that can deflect projectiles. After each successful deflection, the shield will temporarily disappear and recover after a period of time."
+    "Description": "Creates a shield around slugcat which deflects spears thrown at it, short cooldown on deflect."
   }
 }

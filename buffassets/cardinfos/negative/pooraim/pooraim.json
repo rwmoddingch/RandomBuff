@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "PoorAim",
-        "Description" : "A random bias (within a limitation) will be added to the throwing direction of weapons."
+        "Description" : "Slightly changes the throwing angle of your spears and rocks."
     }
 }

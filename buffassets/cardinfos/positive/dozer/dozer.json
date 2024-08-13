@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Dozer",
-        "Description" : "When moving at high speeds, the player will push away entities in the way with great force."
+        "Description" : "When moving at high speeds, slugcat will push creatures in it's path with significant force."
     }
 }

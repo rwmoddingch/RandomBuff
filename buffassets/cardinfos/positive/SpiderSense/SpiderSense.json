@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Spider Sense",
-        "Description":"Players will dodge flying spears automatically if possible"
+        "Description":"Slugcat will attempt to automatically dodge an incoming spear."
     }
 }

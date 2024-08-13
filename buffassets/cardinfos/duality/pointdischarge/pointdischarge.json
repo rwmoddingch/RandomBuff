@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "PointDischarge",
-        "Description" : "Larger centipedes have a chance to flash blue-white when chasing the player, and after a few seconds will stun all players who are close to the centipede holding a normal spear/electric spear, but the normal spear will be converted to an electric spear, and the uncharged electric spear will be fully charged"
+        "Description" : "Large centipedes occasionally flash blue and white when following a slugcat, after a short delay it will release an electric shock which converts spears into electric spears and charges electric spears if needed."
     }
 }

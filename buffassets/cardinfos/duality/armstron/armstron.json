@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Armstron",
-        "Description" : "Once entering the room where the iterator moon is located, the global game gravity changes to 1/6"
+        "Description" : "Once slugcat enters moon's room, set the global gravity to 1/6th of normal gravity."
     }
 }

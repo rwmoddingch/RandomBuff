@@ -17,6 +17,6 @@
     },
     "English" : {
         "BuffName" : "No Pass Day",
-        "Description" : "All gates will not be opened in this rain cycle"
+        "Description" : "All gates are locked for one cycle."
     }
 }

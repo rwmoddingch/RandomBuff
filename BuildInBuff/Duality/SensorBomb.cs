@@ -1,14 +1,18 @@
-﻿using RandomBuff.Core.Buff;
+﻿using BuiltinBuffs.Positive;
+using RandomBuff;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Render.UI;
 using RandomBuffUtils;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Duality
 {
@@ -91,9 +95,16 @@ namespace BuiltinBuffs.Duality
     {
         public static BuffID sensorBombBuffID = new BuffID("SensorBomb", true);
 
+        public static string circleGradient80;
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<SensorBombBuff,SensorBombBuffData,SensorBombEntry>(sensorBombBuffID);
+        }
+
+        public static void LoadAssets()
+        {
+            circleGradient80 = Futile.atlasManager.LoadImage(sensorBombBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "circleGradient80").elements[0].name;
         }
 
         public static void HookOn()
@@ -334,17 +345,22 @@ namespace BuiltinBuffs.Duality
     internal class SensorMineBehaviour : CosmeticSprite
     {
         public static int counterPerScan = 40;
+        public static int counterPerRealScan = 20;
 
         ScavengerBomb bindBomb;
 
-        int lastscanCounter = counterPerScan;
-        int scanCounter = counterPerScan;
+        int lastscanCounter;
+        int scanEffectCounter;
+        int realScanCounter;
 
         public SensorMineBehaviour(Room room, ScavengerBomb bomb, MineData mineData)
         {
             this.room = room;
             this.bindBomb = bomb;
             lastPos = pos = mineData.pos;
+
+            scanEffectCounter = lastscanCounter = Random.Range(0, counterPerScan);
+            realScanCounter = Random.Range(0, counterPerRealScan);
         }
 
         public override void Update(bool eu)
@@ -357,13 +373,25 @@ namespace BuiltinBuffs.Duality
             if (bindBomb.slatedForDeletetion)
                 Destroy();
 
+            if(bindBomb.mode != Weapon.Mode.Frozen)
+                bindBomb.mode = Weapon.Mode.Frozen;
+
             if (bindBomb.collisionLayer != 0)
                 bindBomb.ChangeCollisionLayer(0);
 
             if(bindBomb.grabbedBy != null && bindBomb.grabbedBy.Count > 0)
             {
                 for (int i = bindBomb.grabbedBy.Count - 1; i >= 0; i--)
-                    bindBomb.grabbedBy[i].Release();
+                {
+                    if (bindBomb.grabbedBy[i].grabber is Player)
+                    {
+                        bindBomb.mode = Weapon.Mode.Carried;
+                        SensorBombBuff.Instance.RemoveMine(bindBomb.abstractPhysicalObject);
+                        Destroy();
+                    }
+                    else
+                        bindBomb.grabbedBy[i].Release();
+                }    
             }
 
             bindBomb.firstChunk.lastPos = bindBomb.firstChunk.pos = pos;
@@ -372,18 +400,25 @@ namespace BuiltinBuffs.Duality
             bindBomb.canBeHitByWeapons = false;
             bindBomb.firstChunk.collideWithObjects = false;
 
-            lastscanCounter = scanCounter;
-            if(scanCounter > 0)
+            lastscanCounter = scanEffectCounter;
+            if(scanEffectCounter > 0)
             {
-                scanCounter--;
-                if(scanCounter == 0)
+                scanEffectCounter--;
+                if (scanEffectCounter == 0)
+                    scanEffectCounter = counterPerScan;
+            }
+
+            if(realScanCounter > 0)
+            {
+                realScanCounter--;
+                if (realScanCounter == 0)
                     MineScan();
             }
         }
 
         public void MineScan()
         {
-            scanCounter = counterPerScan;
+            realScanCounter = counterPerRealScan;
             foreach(var creature in room.updateList.Where(u => u is Creature && !(u is Player)).Select(u => u as Creature))
             {
                 if (creature.room == null)
@@ -405,7 +440,7 @@ namespace BuiltinBuffs.Duality
         {
             base.InitiateSprites(sLeaser, rCam);
             sLeaser.sprites = new FSprite[1];
-            sLeaser.sprites[0] = new FSprite("Futile_White") { shader = rCam.game.rainWorld.Shaders["FlatLight"], color = Color.red };
+            sLeaser.sprites[0] = new FSprite(SensorBombEntry.circleGradient80) { shader = rCam.game.rainWorld.Shaders["Hologram"], color = Color.red };
             AddToContainer(sLeaser, rCam, null);
         }
 
@@ -413,7 +448,7 @@ namespace BuiltinBuffs.Duality
         {
             if(newContatiner == null)
             {
-                newContatiner = rCam.ReturnFContainer("Bloom");
+                newContatiner = rCam.ReturnFContainer("Foreground");
             }
             foreach(var sprite in sLeaser.sprites)
                 newContatiner.AddChild(sprite);
@@ -422,10 +457,10 @@ namespace BuiltinBuffs.Duality
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker) - camPos;
-            float smoothParam = Mathf.Pow(Mathf.Lerp(lastscanCounter / (float)counterPerScan, scanCounter / (float)counterPerScan, timeStacker), 4);
+            float smoothParam = Mathf.Pow(Mathf.Lerp(lastscanCounter / (float)counterPerScan, scanEffectCounter / (float)counterPerScan, timeStacker), 4);
 
             sLeaser.sprites[0].SetPosition(smoothPos);
-            sLeaser.sprites[0].scale = smoothParam * 5f;
+            sLeaser.sprites[0].scale = smoothParam * 2f;
             sLeaser.sprites[0].alpha = smoothParam;
 
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);

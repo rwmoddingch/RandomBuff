@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "SpearMaster",
-        "Description" : "You can craft two normal spears into a higher level spear (Electric Spear Explosive Spear randomly) and more spears will be spawned each cycle"
+        "Description" : "Allows slugcat to craft two spears into an explosive or electric spear, causes more spears to spawn each cycle."
     }
 }

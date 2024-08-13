@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Still My Turn",
-        "Description":"Spears and rocks will get back to players' hands instantly after hitting creatures"
+        "Description":"If a spear or rock hits a creature, instantly teleport it back to slugcat's hands."
     }
 }

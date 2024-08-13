@@ -13,6 +13,6 @@
     },
     "English": {
         "BuffName" : "Delayed Explosion",
-        "Description" : "Bombs' explosion will delay for around 2s after colliding with targets."
+        "Description" : "Bombs have a 2 second delay on their explosions."
     }
 }

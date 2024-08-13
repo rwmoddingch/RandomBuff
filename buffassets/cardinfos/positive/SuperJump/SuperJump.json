@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Super Jump",
-        "Description":"Increases the jumping power depending on the stack amount"
+        "Description":"Increases slugcat jump height."
     }
 }

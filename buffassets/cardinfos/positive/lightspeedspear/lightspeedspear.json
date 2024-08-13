@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "LightSpeedSpear",
-        "Description" : "Bug spears will instantly fly to their destinations, and there is a small chance that the spears will appear in the room."
+        "Description" : "Allows bug spears to spawn which instantly hit anything they are thrown at."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Emergency Platform",
-        "Description" : "After activation, a small platform will be created below the player for them to stand on. It lasts for 10 seconds and has a one minute cooldown."
+        "Description" : "On use, a small platform will be created below slugcat for 10 seconds. 1 minute cooldown"
     }
 }

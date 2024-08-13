@@ -157,10 +157,13 @@
 		<Detail> -127.0.0.1-
 	<Entry>Early publicize
 		<Name>qiqiu
+	<Entry>English localization assistance
+		<Name>Sumy
+		<Detail> meow
 	<Entry>Font use
 		<Name>峰广明锐体
 		<Name>NotoSans Hans
 	<Entry><NextPage>
-	<Entry>Else
-		<Name> wawa4
-		<Detail> no wawa
+	<Entry>buff ideas
+		<Name> Thanks for everyone who provide buff ideas!
+	

@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "StoneofBlessing",
-        "Description" : "Creatures in the room the player is in have +100% hp (except the player). Creatures that leave the room have their hp value reset"
+        "Description" : "Doubles the health of creatures other than slugcat in the room."
     }
 }

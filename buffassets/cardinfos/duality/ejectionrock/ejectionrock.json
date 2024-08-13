@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "EjectionRock",
-        "Description" : "Rocks will randomly fly in the other direction when it hits a wall, not stopping until it hits a creature. And it deals a lot of knockback to hit targets (including the player)"
+        "Description" : "Rocks will bounce back and forth off walls indefinitely until they hit a creature, causing significant knockback to the creature hit.(including yourself)"
     }
 }

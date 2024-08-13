@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Money Worshippers",
-        "Description" : "Scavangers won't attack player who hold pearl"
+        "Description" : "Holding a pearl pacifies any nearby scavengers."
     }
 }

@@ -14,6 +14,6 @@
   },
   "English": {
     "BuffName": "Fire Shield ",
-    "Description": "Bind with Temperature; A shield composed of rotating fireballs is generated around you, and when creatures are located near the fireball, its temperature rapidly increases until it begins to burn. Meanwhile, the cold is far away from you. However, when you are submerged in water, the shield will temporarily disappear. Press the button you set to turn on and off the shield."
+    "Description": "Bind with Temperature; A circle of rotating fireballs is appears around slugcat. When a creature touches them, they begin to burn. Fireballs disappear temporarily in water and can be turned on or off at will.Trigger to turn on and off the sheild"
   }
 }

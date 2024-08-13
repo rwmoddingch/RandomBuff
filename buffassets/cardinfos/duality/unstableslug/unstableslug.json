@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Unstable Slug",
-        "Description":"Players' bodies will violently explode fitfully, which can stun players and deal massive damage to other creatures"
+        "Description":"Slugcat will randomly explode which stuns it and everything around it, a timer can be seen at the top right before explosions."
     }	
 }

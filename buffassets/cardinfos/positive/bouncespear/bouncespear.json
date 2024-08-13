@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "BounceSpear",
-        "Description" : "Make normal spears and electric spears bounceable, hitting one target and shooting at the nearest creature"
+        "Description" : "Causes normal and electric spears to riccochet off creatures at other nearby creatures."
     }
 }

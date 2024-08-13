@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "SwarmMissile",
-        "Description" : "Spore plant activation will no longer spawn bees, but instead spawn a large number of swarm missiles with a lock-on feature. The missiles will deal a small amount of explosive damage. When the player swallows the spore plant, it will spawn missiles at a constant frequency."
+        "Description" : "Beehives will no longer spawn bees, instead spawning heat-seeking swarm missles, when swallowed by slugcat, slugcat will constantly fire these missles."
     }
 }

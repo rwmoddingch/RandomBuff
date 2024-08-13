@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Dequantize",
-        "Description":"There's a 25% chance of losing one food pip when eating up food"
+        "Description":"25% chance for slugcat to lose a food pip rather than gain one when eating."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "DeathFreeMedallion",
-        "Description" : "Counteracts one death and teleports the player to safety"
+        "Description" : "Revives slugcat and teleports it to a safe location once."
     }
 }

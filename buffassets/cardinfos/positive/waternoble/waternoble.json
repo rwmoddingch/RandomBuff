@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Aquatic Noble",
-        "Description":"When under water, your weapon damage will be multiplied by the stack amount"
+        "Description":"When underwater, your throw damage is multiplied by the current stack count of this buff."
     }
 }

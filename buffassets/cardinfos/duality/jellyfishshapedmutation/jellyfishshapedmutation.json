@@ -21,6 +21,6 @@
   },
   "English": {
     "BuffName": "Jellyfish-Shaped Mutation",
-    "Description": "You grow jellyfish tentacles, and you can set a button to stun a creature when it grabs you, or long press the pick button to move your tentacles through the directional keys and actively stun the creature caught by your tentacles, but now you can only hold a thing in your mouth. Each time you release an electric shock, your food points decreases by 1 grid. When your food points is 0, the electric shock cannot be triggered. But when you are hit by a strong enough current, you can obtain food points. You begin to develop resistance to electric shock, no longer suffocating in water, but swimming speed decreases by 50%, and if you do not come into contact with water for more than 2 cycles, you will dry up and die. Leeches and giant jellyfish no longer have hostility towards you."
+    "Description": "Turns slugcat into a jellyfish hybrid. Slugcat will grow tentacles which can distribute an electric shock when this buff is triggered, however this shock will drain 1 food pip. Slugcat is immune to electricity and can gain food from being electrocuted. If slugcat does not touch water for 2 cycles, it will die. Certain aquatic creatures become friendly to slugcat but slugcat's swim speed is decreased by 50%."
   }
 }

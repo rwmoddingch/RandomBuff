@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Mirror",
-        "Description":"Reverse the left and right directions of controlling"
+        "Description":"Left moves you right, right moves you left."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "ShortCircuitGate",
-        "Description" : "The next gate passed no longer requires karma level"
+        "Description" : "The next gate passed no longer requires karma to open."
     }
 }

@@ -13,6 +13,6 @@
   },
   "English": {
     "BuffName": "AggressiveVenting",
-    "Description": "Bind with Temperature; When triggered, it immediately clears the player's positive temperature and transfers it all to other nearby creatures, cooldown 30 seconds"
+    "Description": "Bind with Temperature; When triggered, it immediately clears the player's positive temperature and transfers it all to other nearby creatures, 30 second cooldown"
   }
 }

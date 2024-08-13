@@ -17,6 +17,6 @@
     },
     "English": {
         "BuffName" : "Dream Traveller",
-        "Description" : "After hibernation, players will wake up in a random shelter in current region. "
+        "Description" : "When slugcat sleeps in a den, it will wake up in a random den in the same region. "
     }
 }

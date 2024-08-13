@@ -13,6 +13,6 @@
     },
     "English":{
         "BuffName":"Bouncy Slug",
-        "Description":"When landing on the floor, players will bounce up with halved velocity"
+        "Description":"When slugcat lands, it bounces off the ground with half of its velocity."
     }
 }

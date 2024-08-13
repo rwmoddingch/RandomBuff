@@ -11,6 +11,6 @@
     },
     "English" : {
         "BuffName" : "DudBomb",
-        "Description" : "Scavenger grenades have a chance that they cannot explode"
+        "Description" : "Grenades have a chance to not explode when landing."
     }
 }

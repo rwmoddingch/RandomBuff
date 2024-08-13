@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "SuperConductor",
-        "Description" : "Shock damage will occur with a falloff chain, which will end when the runoff reaches 0 or when there are no targets"
+        "Description" : "Electricity will chain between creatures until it runs out of charge."
     }
 }
