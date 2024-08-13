@@ -15,16 +15,21 @@ namespace BuiltinBuffs.Duality
     {
         public override BuffID ID => RandomRoomBuffEntry.randomRoomBuffID;
 
-
+        int randomizeDelay;
         bool randomized;
         List<AbstractRoomRepresent> activeRoomRepresents = new List<AbstractRoomRepresent>();
 
         public override void Update(RainWorldGame game)
         {
-            if (!randomized)
+            if (randomizeDelay > 0)
+                randomizeDelay--;
+            else
             {
-                RandomizeRoomConnections(game.world);
-                randomized = true;
+                if (!randomized)
+                {
+                    RandomizeRoomConnections(game.world);
+                    randomized = true;
+                }
             }
         }
 
@@ -57,7 +62,9 @@ namespace BuiltinBuffs.Duality
         public void ChangeRegion()
         {
             activeRoomRepresents.Clear();
+            randomizeDelay = 40;
             randomized = false;
+            BuffUtils.Log("RandomRoom", "ChangeRegion");
         }
 
         void RandomizeRoomConnections(World world)
@@ -231,15 +238,16 @@ namespace BuiltinBuffs.Duality
         public static BuffID randomRoomBuffID = new BuffID("RandomRoom", true);
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<RandomRoomBuff, RandomRoomBuffData, RandomRainIBuffEntry>(randomRoomBuffID);
+            BuffRegister.RegisterBuff<RandomRoomBuff, RandomRoomBuffData, RandomRoomBuffEntry>(randomRoomBuffID);
         }
 
         public static void HookOn()
         {
-            On.WorldLoader.CreatingWorld += WorldLoader_CreatingWorld;
+            //On.WorldLoader.CreatingWorld += WorldLoader_CreatingWorld;
+            On.OverWorld.WorldLoaded += OverWorld_WorldLoaded;
         }
 
-        private static void WorldLoader_CreatingWorld(On.WorldLoader.orig_CreatingWorld orig, WorldLoader self)
+        private static void OverWorld_WorldLoaded(On.OverWorld.orig_WorldLoaded orig, OverWorld self)
         {
             orig.Invoke(self);
             RandomRoomBuff.Instance.ChangeRegion();
