@@ -110,7 +110,16 @@ namespace BuiltinBuffs.Expeditions
 
             On.Expedition.ExpeditionGame.IsMSCRoomScript += ExpeditionGame_IsMSCRoomScript;
             On.Expedition.ExpeditionGame.IsUndesirableRoomScript += ExpeditionGame_IsUndesirableRoomScript;
+
+            On.Expedition.Eggspedition.Update += Eggspedition_Update;
              
+        }
+
+        private static void Eggspedition_Update(On.Expedition.Eggspedition.orig_Update orig, Eggspedition self)
+        {
+            if (Custom.rainWorld.BuffMode())
+                return;
+            orig(self);
         }
 
         private static bool ExpeditionGame_IsUndesirableRoomScript(On.Expedition.ExpeditionGame.orig_IsUndesirableRoomScript orig, UpdatableAndDeletable item)
