@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Net.Configuration;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using TemplateGains;
 
 namespace HotDogGains.Negative
 {
@@ -35,20 +36,19 @@ namespace HotDogGains.Negative
         public static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-            if(modules.TryGetValue(self, out HandAcheModule module))
-            {
-                module.NeedRelax();
-            }
-            else modules.Add(self, new HandAcheModule(self));
-            
+            HandAcheModule.handAcheData(self).AcheUpdate();
             
 
         }
-        public static ConditionalWeakTable<Player, HandAcheModule> modules = new ConditionalWeakTable<Player, HandAcheModule>(); 
+        
     }
+
 
     internal class HandAcheModule
     {
+        public static ConditionalWeakTable<Player, HandAcheModule> modules = new ConditionalWeakTable<Player, HandAcheModule>();
+        public static HandAcheModule handAcheData(Player player) => modules.GetValue(player, (Player p) => new HandAcheModule(p));
+
         public int[] hands = new int[2] { 0,0};//用于记录拿东西的疲惫值
         public int climb = 0;//用于记录攀爬的疲惫值
         public Player self;//作用的玩家
@@ -78,7 +78,7 @@ namespace HotDogGains.Negative
         }
 
 
-        public void NeedRelax()
+        public void AcheUpdate()
         {
             twoHandsTired();
             climbTired();
