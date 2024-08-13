@@ -34,6 +34,9 @@ namespace BuiltinBuffs.Positive
                     var fireShield = new FireShield(player, player.room);
                     FireShieldBuffEntry.FireShieldFeatures.Add(player, fireShield);
                     player.room.AddObject(fireShield);
+
+                    FireShieldState fireShieldState = new FireShieldState(player);
+                    FireShieldBuffEntry.FireShieldStateFeatures.Add(player, fireShieldState);
                 }
             }
         }
@@ -43,7 +46,7 @@ namespace BuiltinBuffs.Positive
             foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
             {
-                if (FireShieldBuffEntry.FireShieldFeatures.TryGetValue(player, out var fireShield) &&
+                if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var fireShield) &&
                     BuffInput.GetKeyDown(GetBindKey()))
                 {
                     if (fireShield.IsActivate)
@@ -65,6 +68,7 @@ namespace BuiltinBuffs.Positive
     {
         public static BuffID FireShield = new BuffID("FireShield", true);
         public static ConditionalWeakTable<Player, FireShield> FireShieldFeatures = new ConditionalWeakTable<Player, FireShield>();
+        public static ConditionalWeakTable<Player, FireShieldState> FireShieldStateFeatures = new ConditionalWeakTable<Player, FireShieldState>();
 
         public static int StackLayer
         {
@@ -94,6 +98,11 @@ namespace BuiltinBuffs.Positive
                 FireShield fireShield = new FireShield(self, self.room);
                 FireShieldFeatures.Add(self, fireShield);
                 self.room.AddObject(fireShield);
+            }
+            if (!FireShieldStateFeatures.TryGetValue(self, out _))
+            {
+                FireShieldState flashShieldState = new FireShieldState(self);
+                FireShieldStateFeatures.Add(self, flashShieldState);
             }
         }
 
@@ -147,13 +156,18 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return IsActivate &&
+                if (!ownerRef.TryGetTarget(out var player))
+                    return false;
+                bool isActivate = true;
+                if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var flashShieldState))
+                {
+                    isActivate = flashShieldState.IsActivate;
+                }
+                return isActivate &&
                        (owner.mainBodyChunk.submersion <= 0.5 ||
                        FireShieldBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.HellIBuffEntry.hellBuffID));
             }
         }
-
-        public bool IsActivate { get; set; }
 
         public FireShield(Player player, Room room)
         {
@@ -166,18 +180,6 @@ namespace BuiltinBuffs.Positive
             this.emitterMaxCount = 3;
             this.angle = 0f;
             this.angleSpeed = 1f;
-            this.IsActivate = true;
-        }
-
-
-        public void Activate()
-        {
-            IsActivate = true;
-        }
-
-        public void Deactivate()
-        {
-            IsActivate = false;
         }
 
         public override void Update(bool eu)
@@ -264,6 +266,29 @@ namespace BuiltinBuffs.Positive
             });
 
             return emitter;
+        }
+    }
+
+    internal class FireShieldState
+    {
+        WeakReference<Player> ownerRef;
+
+        public bool IsActivate { get; set; }
+
+        public FireShieldState(Player c)
+        {
+            this.ownerRef = new WeakReference<Player>(c);
+            this.IsActivate = true;
+        }
+
+        public void Activate()
+        {
+            IsActivate = true;
+        }
+
+        public void Deactivate()
+        {
+            IsActivate = false;
         }
     }
 

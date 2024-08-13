@@ -34,6 +34,9 @@ namespace BuiltinBuffs.Positive
                     var flashShield = new FlashShield(player, player.room);
                     player.room.AddObject(flashShield);
                     FlashShieldBuffEntry.FlashShieldFeatures.Add(player, flashShield);
+
+                    FlashShieldState flashShieldState = new FlashShieldState(player);
+                    FlashShieldBuffEntry.FlashShieldStateFeatures.Add(player, flashShieldState);
                 }
             }
         }
@@ -43,7 +46,7 @@ namespace BuiltinBuffs.Positive
             foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
             {
-                if (FlashShieldBuffEntry.FlashShieldFeatures.TryGetValue(player, out var flashShield) &&
+                if (FlashShieldBuffEntry.FlashShieldStateFeatures.TryGetValue(player, out var flashShield) &&
                     BuffInput.GetKeyDown(GetBindKey()))
                 {
                     if (flashShield.IsActivate)
@@ -66,6 +69,7 @@ namespace BuiltinBuffs.Positive
         public static BuffID FlashShield = new BuffID("FlashShield", true);
 
         public static ConditionalWeakTable<Player, FlashShield> FlashShieldFeatures = new ConditionalWeakTable<Player, FlashShield>();
+        public static ConditionalWeakTable<Player, FlashShieldState> FlashShieldStateFeatures = new ConditionalWeakTable<Player, FlashShieldState>();
         public static ConditionalWeakTable<AbstractCreature, Illuminated> IlluminatedFeatures = new ConditionalWeakTable<AbstractCreature, Illuminated>();
 
 
@@ -190,6 +194,11 @@ namespace BuiltinBuffs.Positive
                 self.room.AddObject(flashShield);
                 FlashShieldFeatures.Add(self, flashShield);
             }
+            if (!FlashShieldStateFeatures.TryGetValue(self, out _))
+            {
+                FlashShieldState flashShieldState = new FlashShieldState(self);
+                FlashShieldStateFeatures.Add(self, flashShieldState);
+            }
         }
 
         private static void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
@@ -235,8 +244,6 @@ namespace BuiltinBuffs.Positive
         float lastPush;
         float getToPush;
 
-        public bool IsActivate { get; set; }
-
         public FlashShield(Player player, Room room)
         {
             this.ownerRef = new WeakReference<Player>(player);
@@ -250,17 +257,6 @@ namespace BuiltinBuffs.Positive
             this.getToPush = 1f;
             this.emitterCount = 30;
             this.level = FlashShieldBuffEntry.StackLayer;
-            this.IsActivate = true;
-        }
-
-        public void Activate()
-        {
-            IsActivate = true;
-        }
-
-        public void Deactivate()
-        {
-            IsActivate = false;
         }
 
         #region 外观
@@ -358,11 +354,14 @@ namespace BuiltinBuffs.Positive
             {
                 this.getToPush = 1f;
             }
+            if(FlashShieldBuffEntry.FlashShieldStateFeatures.TryGetValue(player, out var flashShieldState))
+            {
 
-            if (this.IsActivate)
-                this.getToExpand = 1f;
-            else
-                this.getToExpand = 0f;
+                if (flashShieldState.IsActivate)
+                    this.getToExpand = 1f;
+                else
+                    this.getToExpand = 0f;
+            }
 
             if (owner.room != null)
             {
@@ -543,6 +542,29 @@ namespace BuiltinBuffs.Positive
         private float Radius(float ring, float timeStacker)
         {
             return (5f + 2f * ring + Mathf.Lerp(this.lastPush, this.push, timeStacker) - 0.5f * this.averageVoice) * Mathf.Lerp(this.lastExpand, this.expand, timeStacker) * 20f;
+        }
+    }
+
+    internal class FlashShieldState
+    {
+        WeakReference<Player> ownerRef;
+
+        public bool IsActivate { get; set; }
+
+        public FlashShieldState(Player c)
+        {
+            this.ownerRef = new WeakReference<Player>(c);
+            this.IsActivate = true;
+        }
+
+        public void Activate()
+        {
+            IsActivate = true;
+        }
+
+        public void Deactivate()
+        {
+            IsActivate = false;
         }
     }
 
