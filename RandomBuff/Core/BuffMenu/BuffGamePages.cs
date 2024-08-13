@@ -38,8 +38,11 @@ namespace RandomBuff.Core.BuffMenu
 
     public class SlugcatIllustrationPage : SlugcatSelectMenu.SlugcatPage
     {
-        public SlugcatIllustrationPage(Menu.Menu menu, MenuObject menuObject, int pageIndex, SlugcatStats.Name name) : base(menu, menuObject, pageIndex, name)
+        int illustractionStartIndex;
+
+        public SlugcatIllustrationPage(Menu.Menu menu, MenuObject menuObject, int pageIndex, int illustractionStartIndex, SlugcatStats.Name name) : base(menu, menuObject, pageIndex, name)
         {
+            this.illustractionStartIndex = illustractionStartIndex;
             var origMenu = menu;
             var selectMenu = Helper.GetUninit<SlugcatSelectMenu>();
             selectMenu.saveGameData = new();
@@ -56,7 +59,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public new float Scroll(float timeStacker)
         {
-            float scroll = (SlugcatPageIndex - (menu as BuffGameMenu).currentPageIndex) - Mathf.Lerp((menu as BuffGameMenu).lastScroll, (menu as BuffGameMenu).scroll, timeStacker);
+            float scroll = (index - illustractionStartIndex - (menu as BuffGameMenu).currentSlugPageIndex) - Mathf.Lerp((menu as BuffGameMenu).lastScroll, (menu as BuffGameMenu).scroll, timeStacker);
             if (scroll < MinOffset)
             {
                 scroll += (menu as BuffGameMenu).slugcatPages.Count;
@@ -70,7 +73,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public new float NextScroll(float timeStacker)
         {
-            float scroll = (SlugcatPageIndex - (menu as BuffGameMenu).currentPageIndex) - Mathf.Lerp((menu as BuffGameMenu).scroll, (menu as BuffGameMenu).NextScroll, timeStacker);
+            float scroll = (index - illustractionStartIndex - (menu as BuffGameMenu).currentSlugPageIndex) - Mathf.Lerp((menu as BuffGameMenu).scroll, (menu as BuffGameMenu).NextScroll, timeStacker);
             if (scroll < MinOffset)
             {
                 scroll += (menu as BuffGameMenu).slugcatPages.Count;
@@ -241,7 +244,7 @@ namespace RandomBuff.Core.BuffMenu
         }
     }
 
-    internal class BuffNewGameDetailPage : PositionedMenuObject
+    internal class BuffNewGameDetailPage : Page
     {
         BuffGameMenu gameMenu;
         FNodeWrapper nodeWrapper;
@@ -260,6 +263,7 @@ namespace RandomBuff.Core.BuffMenu
         SymbolButton randomButton;
         SymbolButton minusButton;
         SymbolButton plusButton;
+        SimpleImageButton extraInfoButton;
 
         SimpleButton jollyToggleConfigMenu;
 
@@ -291,11 +295,11 @@ namespace RandomBuff.Core.BuffMenu
         int activeConditionCount;
         bool canAddAnyCondition;
 
-        public BuffNewGameDetailPage(BuffGameMenu menu, MenuObject owner, Vector2 pos) : base(menu, owner, pos)
+        public BuffNewGameDetailPage(BuffGameMenu menu, MenuObject owner,int index) : base(menu, owner, "BuffNewGameDetailPage", index)
         {
             gameMenu = menu as BuffGameMenu;
             myContainer = new FContainer();
-            owner.Container.AddChild(myContainer);
+            menu.container.AddChild(myContainer);
             lastPos = pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
 
             Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
@@ -321,12 +325,12 @@ namespace RandomBuff.Core.BuffMenu
             var gameSetting = BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName);
 
             Vector2 testPos = new Vector2(683f, 85f) + new Vector2(SlugcatSelectMenu.GetRestartTextOffset(gameMenu.CurrLang), 80f);
-            subObjects.Add(backButton = new SimpleButton(gameMenu, this, gameMenu.Translate("BACK"), "NEWGAME_DETAIL_BACK", new Vector2(200f, 698f), new Vector2(110f, 30f)));
             subObjects.Add(startGameButton = new HoldButton(gameMenu, this, BuffResourceString.Get("BuffGameMenu_NewGame"), "NEWGAME_DETAIL_NEWGAME", new Vector2(683f, 85f), 40f));
+            subObjects.Add(backButton = new SimpleButton(gameMenu, this, gameMenu.Translate("BACK"), "NEWGAME_DETAIL_BACK", new Vector2(200f, gameMenu.manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
             subObjects.Add(settingButton = new SimpleButton(gameMenu, this, (BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
                 "NEWGAME_DETAIL_SELECT_MODE", new Vector2(683f - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
                 new Vector2(120, 40)));
-            subObjects.Add(new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 40f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
+            subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 40f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
             settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
 
             subObjects.Add(nodeWrapper = new FNodeWrapper(gameMenu, this));
@@ -385,11 +389,14 @@ namespace RandomBuff.Core.BuffMenu
         public void SetShow(bool show)
         {
             Show = show;
+
             gameMenu.SetButtonsActive(!show);
             currentGameSetting = BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName);
             if (show)
             {
                 InitConditions();
+                menu.currentPage = index;
+                menu.ResetSelection();
                 settingButton.menuLabel.text = BuffResourceString.Get(currentGameSetting.TemplateName);
             }
             else
@@ -511,6 +518,8 @@ namespace RandomBuff.Core.BuffMenu
             }
             plusButton.buttonBehav.greyedOut = !canAddAnyCondition || activeConditionCount == 5;
             minusButton.buttonBehav.greyedOut = activeConditionCount == 0;
+
+            UpdateSelectables();
         }
 
         void InitConditions()
@@ -592,13 +601,97 @@ namespace RandomBuff.Core.BuffMenu
         void QuitToSelectSlug()
         {
             gameMenu.SetButtonsActive(true);
-
             ClearCurrentConditions();
+            menu.currentPage = 0;
+            menu.ResetSelection();
         }
 
         public void EscLogic()
         {
             SetShow(false);
+        }
+
+        void UpdateSelectables()
+        {
+            Helper.ClearSelectables(minusButton);
+            Helper.ClearSelectables(plusButton);
+            Helper.ClearSelectables(backButton);
+            for (int i = 0;i < conditionButtons.Length; i++)
+            {
+                Helper.ClearSelectables(conditionButtons[i]);
+                Helper.ClearSelectables(hiddenToggles[i]);
+            }
+            if(jollyToggleConfigMenu != null)
+            {
+                Helper.ClearSelectables(jollyToggleConfigMenu);
+            }
+            
+            MenuObject topSelectable = backButton;
+            for(int i = 0; i < activeConditionCount; i++)
+            {
+                conditionButtons[i].nextSelectable[1] = topSelectable;
+                topSelectable.nextSelectable[3] = conditionButtons[i];
+
+                conditionButtons[i].nextSelectable[2] = hiddenToggles[i];
+                hiddenToggles[i].nextSelectable[0] = conditionButtons[i];
+
+                topSelectable = conditionButtons[i];
+            }
+            for (int i = 0; i < conditionButtons.Length; i++)
+            {
+                Helper.LinkEmptyToSelf(conditionButtons[i]);
+                Helper.LinkEmptyToSelf(hiddenToggles[i]);
+            }
+
+            if (minusButton.buttonBehav.greyedOut)
+            {
+                topSelectable.nextSelectable[3] = plusButton;
+                plusButton.nextSelectable[1] = topSelectable;
+                plusButton.nextSelectable[3] = startGameButton;
+                if (menu.selectedObject == minusButton)
+                    menu.selectedObject = plusButton;
+            }
+            else if (plusButton.buttonBehav.greyedOut)
+            {
+                topSelectable.nextSelectable[3] = minusButton;
+                minusButton.nextSelectable[1] = topSelectable;
+                minusButton.nextSelectable[3] = startGameButton;
+                if (menu.selectedObject == plusButton)
+                    menu.selectedObject = minusButton;
+            }
+            else
+            {
+                topSelectable.nextSelectable[3] = minusButton;
+                minusButton.nextSelectable[2] = plusButton;
+                plusButton.nextSelectable[0] = minusButton;
+                minusButton.nextSelectable[1] = topSelectable;
+                plusButton.nextSelectable[1] = topSelectable;
+
+                minusButton.nextSelectable[3] = startGameButton;
+                plusButton.nextSelectable[3] = startGameButton;
+            }
+            Helper.LinkEmptyToSelf(minusButton);
+            Helper.LinkEmptyToSelf(plusButton);
+
+
+            startGameButton.nextSelectable[0] = settingButton;
+            startGameButton.nextSelectable[1] = minusButton;
+            startGameButton.nextSelectable[2] = extraInfoButton;
+            Helper.LinkEmptyToSelf(startGameButton);
+
+            settingButton.nextSelectable[1] = backButton;
+            settingButton.nextSelectable[2] = startGameButton;
+            Helper.LinkEmptyToSelf(settingButton);
+
+            backButton.nextSelectable[2] = jollyToggleConfigMenu;
+            Helper.LinkEmptyToSelf(backButton);
+
+            if(jollyToggleConfigMenu != null)
+            {
+                jollyToggleConfigMenu.nextSelectable[0] = backButton;
+                jollyToggleConfigMenu.nextSelectable[3] = backButton.nextSelectable[3];
+                Helper.LinkEmptyToSelf(jollyToggleConfigMenu);
+            }
         }
 
         class ConditionInstance
@@ -621,7 +714,7 @@ namespace RandomBuff.Core.BuffMenu
         }
     }
 
-    internal class BuffNewGameMissionPage : PositionedMenuObject
+    internal class BuffNewGameMissionPage : Page
     {
         BuffGameMenu gameMenu;
         GameSetting currentGameSetting;
@@ -645,15 +738,13 @@ namespace RandomBuff.Core.BuffMenu
         Vector2 flagHangPos;
         Vector2 flagHidePos;
 
-        public BuffNewGameMissionPage(BuffGameMenu menu, MenuObject owner, Vector2 pos) : base(menu, owner, pos)
+        public BuffNewGameMissionPage(BuffGameMenu menu, MenuObject owner, int index) : base(menu, owner, "BuffNewGameMissionPage", index)
         {
             this.menu = menu;
             gameMenu = menu;
 
             flagControlIndex = gameMenu.flagNeedUpdate.Count;
             gameMenu.flagNeedUpdate.Add(false);
-
-          
 
             signalToValue = new Dictionary<string, string>();
             InitMenuElements();
@@ -662,7 +753,7 @@ namespace RandomBuff.Core.BuffMenu
             missionSheetBox = new MissionSheetBox(menu, this, Vector2.zero);
             subObjects.Add(missionSheetBox);
 
-
+            UpdateSelectables();
             SetShow(false);
         }
 
@@ -688,6 +779,125 @@ namespace RandomBuff.Core.BuffMenu
             subObjects.Add(backButton);
 
             subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 1040f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
+
+        }
+        public void UpdateSelectables()
+        {
+            List<MissionButton> activeButtons = new List<MissionButton>();
+            List<MissionInfoBox.CardTitleButton> activeCardButtons = new List<MissionInfoBox.CardTitleButton>();
+
+            for (int i = 0;i < missionSheetBox.generalMissions.Count; i++)
+            {
+                Helper.ClearSelectables(missionSheetBox.generalMissions[i]);
+                if (missionSheetBox.generalMissions[i].active)
+                    activeButtons.Add(missionSheetBox.generalMissions[i]);
+                else
+                    Helper.LinkEmptyToSelf(missionSheetBox.generalMissions[i]);
+            }
+
+            for(int i = 0;i < missionInfoBox.buffButtons.Count; i++)
+            {
+                Helper.ClearSelectables(missionInfoBox.buffButtons[i]);
+                if (!missionInfoBox.buffButtons[i].active)
+                    Helper.LinkEmptyToSelf(missionInfoBox.buffButtons[i]);
+                else
+                    activeCardButtons.Add(missionInfoBox.buffButtons[i]);
+            }
+
+            Helper.ClearSelectables(missionSheetBox.leftFlipButton);
+            Helper.ClearSelectables(missionSheetBox.rightFlipButton);
+            Helper.ClearSelectables(missionSheetBox.exclusiveMission);
+            Helper.ClearSelectables(missionInfoBox.startButton);
+            Helper.ClearSelectables(backButton);
+
+            MenuObject bottomSelectable = null;
+            if (missionInfoBox.buffButtons[0].active)
+                bottomSelectable = missionInfoBox.buffButtons[0];
+            else if (!missionInfoBox.startButton.buttonBehav.greyedOut)
+            {
+                bottomSelectable = missionInfoBox.startButton;
+            }
+            else
+                bottomSelectable = extraInfoButton;
+
+            MenuObject leftSelectable = null;
+            if (missionSheetBox.exclusiveMission.active)
+            {
+                leftSelectable = missionSheetBox.exclusiveMission;
+                leftSelectable.nextSelectable[1] = backButton;
+                leftSelectable.nextSelectable[3] = bottomSelectable;
+            }
+            else
+                Helper.LinkEmptyToSelf(missionSheetBox.exclusiveMission);
+
+            if (missionSheetBox.currentPage != 0)
+            {
+                leftSelectable.nextSelectable[2] = missionSheetBox.leftFlipButton;
+                missionSheetBox.leftFlipButton.nextSelectable[0] = leftSelectable;
+                missionSheetBox.leftFlipButton.nextSelectable[3] = bottomSelectable;
+
+                leftSelectable = missionSheetBox.leftFlipButton;
+            }
+            else
+            {
+                if (menu.selectedObject == missionSheetBox.leftFlipButton)
+                    menu.selectedObject = activeButtons.First();
+            }
+
+            MenuObject rightSelectable = null;
+            if ((missionSheetBox.currentPage < missionSheetBox.totalPages - 1))
+            {
+                rightSelectable = missionSheetBox.rightFlipButton;
+                activeButtons.Last().nextSelectable[2] = rightSelectable;
+                rightSelectable.nextSelectable[0] = activeButtons.Last();
+            }    
+            else
+            {
+                rightSelectable = activeButtons.Last();
+                if (menu.selectedObject == missionSheetBox.rightFlipButton)
+                    menu.selectedObject = activeButtons.Last();
+            }
+            rightSelectable.nextSelectable[3] = bottomSelectable;
+
+
+
+            for (int i = 0;i < activeButtons.Count; i++)
+            {
+                if(leftSelectable != null)
+                {
+                    leftSelectable.nextSelectable[2] = activeButtons[i];
+                    activeButtons[i].nextSelectable[0] = leftSelectable;
+                    leftSelectable.nextSelectable[3] = bottomSelectable;
+                    Helper.LinkEmptyToSelf(leftSelectable);
+                }
+                activeButtons[i].nextSelectable[3] = bottomSelectable;
+                activeButtons[i].nextSelectable[1] = backButton;
+                bottomSelectable.nextSelectable[1] = activeButtons[i];
+
+                leftSelectable = activeButtons[i];
+                Helper.LinkEmptyToSelf(activeButtons[i]);
+            }
+
+            if(bottomSelectable is MissionInfoBox.CardTitleButton)
+            {
+                for(int i = 1;i < activeCardButtons.Count;i++)
+                {
+                    bottomSelectable.nextSelectable[3] = activeCardButtons[i];
+                    activeCardButtons[i].nextSelectable[1] = bottomSelectable;
+
+                    bottomSelectable = activeCardButtons[i];
+                }
+                bottomSelectable.nextSelectable[3] = missionInfoBox.startButton;
+                missionInfoBox.startButton.nextSelectable[1] = bottomSelectable;
+            }
+
+            backButton.nextSelectable[3] = rightSelectable;
+            Helper.LinkEmptyToSelf(backButton);
+
+            missionInfoBox.startButton.nextSelectable[2] = extraInfoButton;
+            Helper.LinkEmptyToSelf(missionInfoBox.startButton);
+
+            Helper.LinkEmptyToSelf(extraInfoButton);
         }
 
         public void SetShow(bool show)
@@ -701,12 +911,16 @@ namespace RandomBuff.Core.BuffMenu
                 //backButton.pos.y = 698f;
                 pickedMission = null;
                 currentGameSetting = BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName);
+                menu.currentPage = index;
+                menu.ResetSelection();
             }
             else
             {
                 showAnim.SetTickAndStart(-1);
                 //blackSprite.alpha = 0f;
                 //backButton.pos.y = 1400f;
+                menu.currentPage = 0;
+                menu.ResetSelection();
 
             }
             missionInfoBox.SetShow(show);
@@ -763,12 +977,14 @@ namespace RandomBuff.Core.BuffMenu
                 if (missionSheetBox.currentPage > 0)
                     missionSheetBox.currentPage--;
                 missionSheetBox.FlipPage(false);
+                UpdateSelectables();
             }
             else if (message == "MISSIONFLIP_RIGHT")
             {
                 if (missionSheetBox.currentPage < missionSheetBox.totalPages - 1)
                     missionSheetBox.currentPage++;
                 missionSheetBox.FlipPage(true);
+                UpdateSelectables();
             }
             else if (message == "MISSION_START")
             {
@@ -841,12 +1057,14 @@ namespace RandomBuff.Core.BuffMenu
                 Singal(null,"NEWGAME_MISSION_BACK");
         }
 
+
+
         public class MissionButton : SimpleButton
         {
             public Mission bindMission;
             public bool active;
             AnimateComponentBase animCmpnt;
-            TickAnimCmpnt selfShow = AnimMachine.GetTickAnimCmpnt(0, 20, autoStart: false).AutoPause().BindModifier(Helper.EaseInOutCubic);
+            TickAnimCmpnt selfShow;
 
             Vector2 showPos;
             Vector2 hidePos;
@@ -862,6 +1080,11 @@ namespace RandomBuff.Core.BuffMenu
                 {
                     Container.AddChild(finishSymbol = new FSprite("buffassets/illustrations/correctSymbol", true) { alpha = 0f, scale = 0.5f });
                 }
+                selfShow = AnimMachine.GetTickAnimCmpnt(0, 20, autoStart: false).AutoPause().BindModifier(Helper.EaseInOutCubic).BindActions(OnAnimFinished: (t) =>
+                {
+                    if (active)
+                        pos.y = active ? 450f : 1400f;
+                });
 
                 SetPos(pos);
             }
@@ -876,9 +1099,11 @@ namespace RandomBuff.Core.BuffMenu
             {
                 selfShow.SetTickAndStart(show ? 1 : -1);
                 active = show;
+                if(show)
+                    pos.y = show ? 450f : 1400f;
+
                 if (animCmpnt != null)
                     return;
-                pos.y = show ? 450f : 1400f;
             }
 
 
@@ -1563,7 +1788,7 @@ namespace RandomBuff.Core.BuffMenu
         }
     }
 
-    internal class ModeSelectPage : PositionedMenuObject
+    internal class ModeSelectPage : Page
     {
         //BuffGameMenu gameMenu;
 
@@ -1579,9 +1804,11 @@ namespace RandomBuff.Core.BuffMenu
         public float lastAlpha;
         public float y;
 
-        public ModeSelectPage(BuffGameMenu menu, MenuObject owner, Vector2 pos) : base(menu, owner, Vector2.zero)
+        public ModeSelectPage(BuffGameMenu menu, MenuObject owner, Vector2 pos, int index) : base(menu, owner, "ModeSelectPage", index)
         {
+            BuffPlugin.Log($"ModeSelectPage : {index}");
             this.menu = menu;
+            this.lastPos = this.pos = pos;
             //gameMenu = menu;
             darkSprite = new FSprite("pixel")
             {
@@ -1615,9 +1842,15 @@ namespace RandomBuff.Core.BuffMenu
         {
             Show = show;
             if (show)
-                menu.selectedObject = defaultmodeButton;
+            {
+                menu.currentPage = index;
+                BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
+            }
             else
+            {
+                menu.currentPage = 0;
                 (menu as BuffGameMenu).ResetSelectables();
+            }
         }
 
         
@@ -1634,6 +1867,7 @@ namespace RandomBuff.Core.BuffMenu
                     fadeInCounter += 0.05f;
                 }
                 y = Mathf.Sin(0.5f * Mathf.PI * fadeInCounter);
+                BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
             }
 
             if (!Show)

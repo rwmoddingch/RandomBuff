@@ -49,8 +49,8 @@ namespace RandomBuff.Core.BuffMenu
         public BuffExtraInfoPage extraInfoPage;
 
         internal BuffGameMenuSlot menuSlot;
-        internal SlugcatStats.Name CurrentName => slugNameOrders[currentPageIndex];
-        internal int currentPageIndex = 0;
+        internal SlugcatStats.Name CurrentName => slugNameOrders[currentSlugPageIndex];
+        internal int currentSlugPageIndex = 0;
 
         float scrolledPageIndex;
         int targetScrolledPageIndex;
@@ -99,25 +99,32 @@ namespace RandomBuff.Core.BuffMenu
 
             flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1200f, 500f));
             menuSlot.SetupBuffs(slugNameOrders);
-            testNotification = new NotificationManager(this, container, 4);
-            
-            pages = new List<Page>()
-            {
 
-                new(this, null, "WawaButtonPage", 0),
-                new(this, null, "GameDetailPage", 1),
-                new (this, null, "WawaSlugcatPage", 2),
-                new BuffProgressionPage(this, null, 3),
-                testNotification,
+            int pageIndex = 0;
+
+            
+            pages = new List<Page>
+            {
+                new(this, null, "WawaButtonPage", pageIndex++),
+                new(this, null, "GameDetailPage", pageIndex++),
+                new(this, null, "WawaSlugcatPage", pageIndex++),
             };
-           
+
+            int pageStartIndex = pageIndex;
             for (int i = 0; i < slugNameOrders.Count; i++)
             {
-                slugcatPages.Add(new SlugcatIllustrationPage(this, null, i + 1, slugNameOrders[i]));
+                slugcatPages.Add(new SlugcatIllustrationPage(this, null, pageIndex++, pageStartIndex, slugNameOrders[i]));
                 pages.Add(slugcatPages[i]);
             }
 
             InitButtonPage(pages[0]);
+            pages.Add((modeSelectPage = new ModeSelectPage(this, null, Vector2.zero, pageIndex++)));
+            pages.Add(newGameDetailPage = new BuffNewGameDetailPage(this, null, pageIndex++));
+            pages.Add(missionPage = new BuffNewGameMissionPage(this, null, pageIndex++));
+            pages.Add(progressionPage = new BuffProgressionPage(this, null, pageIndex++));
+            pages.Add((testNotification = new NotificationManager(this, container, pageIndex++)));
+
+            
             container.AddChild(menuSlot.Container);
             InitGameDetailPage(pages[0]);
             continueDetailPage.SetShow(false);
@@ -163,6 +170,7 @@ namespace RandomBuff.Core.BuffMenu
                     BuffOptionInterface.SaveConfig();
                 }
             });
+            UpdateSelectables();
         }
         TickAnimCmpnt blackFadeAnim;
         //
@@ -173,15 +181,13 @@ namespace RandomBuff.Core.BuffMenu
         //--------------测试-----------------
         BuffNewGameMissionPage missionPage;
         ModeSelectPage modeSelectPage;
+        BuffProgressionPage progressionPage;
 
         void InitGameDetailPage(Page page)
         {
             page.subObjects.Add(continueDetailPage = new BuffContinueGameDetialPage(this, page, Vector2.zero));
-            page.subObjects.Add(newGameDetailPage = new BuffNewGameDetailPage(this, page, Vector2.zero));
             //--------------测试-----------------
-            page.subObjects.Add(modeSelectPage = new ModeSelectPage(this, page, Vector2.zero));
-            page.subObjects.Add(missionPage = new BuffNewGameMissionPage(this, page, Vector2.zero));
-            pages[3].Container.MoveToFront();
+            //pages[3].Container.MoveToFront();
 
         }
 
@@ -228,32 +234,31 @@ namespace RandomBuff.Core.BuffMenu
 
             //page.subObjects.Add(restartCheckbox = new CheckBox(this, page, this, new Vector2(this.startButton.pos.x + 200f + restartTextOffset, Mathf.Max(30f, manager.rainWorld.options.SafeScreenOffset.y)), restartTextWidth, base.Translate("Restart game"), "RESTART", false));
             //restartCheckbox.label.pos.x += (restartTextWidth - restartCheckbox.label.label.textRect.width - 5f);
-            SetSelectables();
         }
 
-        void SetSelectables()
+        public void UpdateSelectables()
         {
             startButton.nextSelectable[0] = prevButton;
             startButton.nextSelectable[1] = backButton;
             startButton.nextSelectable[2] = nextButton;
-            
+
             prevButton.nextSelectable[1] = backButton;
             prevButton.nextSelectable[2] = startButton;
-            
+
             nextButton.nextSelectable[0] = startButton;
             nextButton.nextSelectable[1] = manualButton;
-            
+
             manualButton.nextSelectable[0] = backButton;
             manualButton.nextSelectable[1] = progressionMenu;
             manualButton.nextSelectable[3] = nextButton;
-            
+
             progressionMenu.nextSelectable[0] = backButton;
             progressionMenu.nextSelectable[1] = jollyToggleConfigMenu;
             progressionMenu.nextSelectable[3] = manualButton;
-            
+
             backButton.nextSelectable[2] = jollyToggleConfigMenu ?? progressionMenu;
             backButton.nextSelectable[3] = prevButton;
-            
+
             if (jollyToggleConfigMenu != null)
             {
                 jollyToggleConfigMenu.nextSelectable[0] = backButton;
@@ -295,7 +300,6 @@ namespace RandomBuff.Core.BuffMenu
             list.Remove(new SlugcatStats.Name("nightowl"));
             if(!list.Contains(MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel))
                 list.Add(MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel);
-
         }
 
         private bool IsInactive => manager.rainWorld.progression.IsThereASavedGame(CurrentName) && !restartCurrent;
@@ -325,7 +329,7 @@ namespace RandomBuff.Core.BuffMenu
             {
                 testLabel.label.text = BuffResourceString.Get("BuffGameMenu_NewGame");
             }
-            menuSlot.UpdatePage(currentPageIndex);
+            menuSlot.UpdatePage(currentSlugPageIndex);
             continueDetailPage.ChangeSlugcat(CurrentName);
             newGameDetailPage.SetShow(false);
         }
@@ -381,7 +385,7 @@ namespace RandomBuff.Core.BuffMenu
                 modeSelectPage.SetShow(false);
                 PlaySound(SoundID.MENU_Next_Slugcat);
                 if (ModManager.CoopAvailable)
-                    manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[(currentPageIndex - 1 + slugNameOrders.Count) % slugNameOrders.Count];
+                    manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[(currentSlugPageIndex - 1 + slugNameOrders.Count) % slugNameOrders.Count];
                 //UpdateSlugcat();
             }
             else if (message == "NEXT")
@@ -392,7 +396,7 @@ namespace RandomBuff.Core.BuffMenu
 
                 PlaySound(SoundID.MENU_Next_Slugcat);
                 if (ModManager.CoopAvailable)
-                    manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[(currentPageIndex+1) % slugNameOrders.Count];
+                    manager.rainWorld.options.jollyPlayerOptionsArray[0].playerClass = slugNameOrders[(currentSlugPageIndex+1) % slugNameOrders.Count];
                 //UpdateSlugcat();
             }
             else if (message == "START")
@@ -491,7 +495,7 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if(message == "PROGRESSIONMENU_SHOW")
             {
-                (pages[3] as BuffProgressionPage).ShowProgressionPage();
+                progressionPage.ShowProgressionPage();
             }
             else if(message == "EXTRAINFOPAGE_SHOW")
             {
@@ -548,11 +552,11 @@ namespace RandomBuff.Core.BuffMenu
 
                 if (intScrolledPageIndex != lastIntScrolledPageIndex)
                 {
-                    currentPageIndex = intScrolledPageIndex;
-                    while (currentPageIndex < 0)
-                        currentPageIndex += slugcatPages.Count;
-                    while (currentPageIndex > slugcatPages.Count - 1)
-                        currentPageIndex -= slugcatPages.Count;
+                    currentSlugPageIndex = intScrolledPageIndex;
+                    while (currentSlugPageIndex < 0)
+                        currentSlugPageIndex += slugcatPages.Count;
+                    while (currentSlugPageIndex > slugcatPages.Count - 1)
+                        currentSlugPageIndex -= slugcatPages.Count;
                     lastScroll = scroll;
                     UpdateSlugcatAndPage();
                 }
@@ -662,10 +666,10 @@ namespace RandomBuff.Core.BuffMenu
         {
             //BuffPlugin.Log($"{currentPage == 3}, {modeSelectPage.Show}, {missionPage.Show}, {newGameDetailPage.Show}");
             string info = "";
-            if(currentPage == 3)//progressionPage
+            if(currentPage == progressionPage.index)//progressionPage
             {
                 info = "exit progression";
-                (pages[3] as BuffProgressionPage).EscLogic();
+                progressionPage.EscLogic();
             }
             else if (modeSelectPage.Show)
             {
@@ -694,7 +698,9 @@ namespace RandomBuff.Core.BuffMenu
 
         public void ResetSelectables()
         {
+            UpdateSelectables();
             selectedObject = startButton;
+            pages[currentPage].lastSelectedObject = startButton;
         }
 
         public override void ShutDownProcess()

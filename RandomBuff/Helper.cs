@@ -385,6 +385,14 @@ namespace RandomBuff
             }
         }
 
+        public static void ClearSelectables(MenuObject menuObject)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                menuObject.nextSelectable[i] = null;
+            }
+        }
+
         public static IEnumerable<BuffType> EnumBuffTypes()
         {
             yield return BuffType.Positive;

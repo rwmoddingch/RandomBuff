@@ -227,12 +227,14 @@ namespace RandomBuff.Core.BuffMenu
         void RecoverFocus()
         {
             menu.currentPage = menulastFocusPage;
+            menu.ResetSelection();
         }
 
         void TakeFocus()
         {
             menulastFocusPage = menu.currentPage;
             menu.currentPage = index;
+            menu.ResetSelection();
         }
 
         public BuffExtraInfoPage AppendInfoEntry(string info, Color color, string element = "")
