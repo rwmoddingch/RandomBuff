@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 
@@ -27,6 +28,16 @@ namespace BuiltinBuffs.Negative
             base.Destroy();
             ShortSightedEntry.localCenter = new Vector2(0.5f, 0.5f);
             ShortSightedEntry.scale = 1;
+            if (BuffCustom.TryGetGame(out var game))
+            {
+                var camera = game.cameras[0];
+                for (int i = 0; i < 11; i++)
+                {
+                    camera.SpriteLayers[i].SetPosition(0, 0);
+                    camera.SpriteLayers[i].scale = 1;
+
+                }
+            }
         }
     }
 
