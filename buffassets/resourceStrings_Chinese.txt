@@ -301,7 +301,7 @@ Remix_KeyBindKey_Desc|点开允许绑定按键的卡牌后，按住此键后可�
 Remix_ShowExceptionLog_Desc|在当雨世界出现异常 (exceptionLog.txt) 时，在右上角出现感叹号（！），点开可详细查看log内容
 Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取对应卡牌一次以解锁
 Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁
-=|需要重启以应用，将探险以及多猫扩展的增益和负担转化为卡牌
+Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫扩展的增益和负担转化为卡牌
 Remix_EnableExpeditionModExtend_Desc|需要重启以应用，将其他mod的增益和负担转化为卡牌，可能存在兼容性问题
 
 //SleepMenu
