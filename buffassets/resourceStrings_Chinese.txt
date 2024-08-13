@@ -27,14 +27,12 @@ CardSheetPage_Stack_Stackable|可叠加
 CardSheetPage_Stack_Unstackable|不可叠加
 CardSheetPage_Stack_Triggerable|手动
 CardSheetPage_Stack_Untriggerable|自动
-Notification_TooManyMods_Title|启用mod数量警告:
-Notification_TooManyMods_Info|看起来你启用了很多的mod，请注意这有可能会造成更多的异常或游戏崩溃。<LINE>如果出现异常，请留意 报错提示（如有启用）和 以下文件：<LINE>exceptionLog.txt（位于 雨世界根目录）<LINE>buffcore.txt（位于 Rain World\RainWorld_Data\StreamingAssets）
 
 
 //CardInfoDisplay:
 CardInfoDisplay_Missing|???
-CardInfoDisplay_MissingDescription|选择一个buff来查看介绍
-CardInfoDisplay_MissingConflict|选择一个buff来查看冲突
+CardInfoDisplay_MissingDescription|选择一个buff卡片来查看介绍
+CardInfoDisplay_MissingConflict|选择一个buff卡片来查看冲突
 
 CardInfoDisplay_TypeTitle|类型:
 CardInfoDisplay_TriggerTitle|触发:
@@ -51,6 +49,8 @@ Notification_MissionReward_Unique|解锁专属使命
 Notification_CosmeticReward|解锁装饰品
 Notification_CardReward|解锁卡牌
 Notification_FreePickReward|解锁自由抽卡数
+Notification_TooManyMods_Title|启用mod数量警告:
+Notification_TooManyMods_Info|看起来你启用了很多的mod，请注意这有可能会造成更多的异常或游戏崩溃。<LINE>如果出现异常，请留意 报错提示（如有启用）和 以下文件：<LINE>exceptionLog.txt（位于 雨世界根目录）<LINE>buffcore.txt（位于 Rain World\RainWorld_Data\StreamingAssets）
 //挨我服了我说不明白人话谁改改这个
 
 //BuffMenu:
@@ -76,7 +76,7 @@ Mode_Desc_Mission|选择一个使命以开始一局新游戏。<LINE>你的游�
 
 //BuffCardSlot
 InGameSlot_SlotTitle|Buff卡槽
-InGameSlot_CardDetail|Buff详情
+InGameSlot_CardDetail|Buff卡详情
 CardPickSlot_SlotTitle|抽取<Cards>张卡
 InGameSlot_SandBoxTitle|修改启用的buff
 InGameSlot_OpenSandBoxButton|Buff
@@ -89,15 +89,15 @@ Cycles|循环
 Stackable|可叠加
 Unstackable|不可叠加
 CardpediaCardSheet_Manually|主动点击触发
-CardpediaCardSheet_Automatically|主自动触发
+CardpediaCardSheet_Automatically|自动触发
 CardpediaCardSheet_Info|（点击下方卡牌以查看详细信息）
 CardpediaCardSheet_None|（无）
 
 //Records
-totCard|获取的所有Buff：
-totPositiveCard|获取的正面Buff：
-totNegativeCard|获取的负面Buff：
-totDualityCard|获取的双向Buff：
+totCard|获取的所有Buff卡片：
+totPositiveCard|获取的正面Buff卡片：
+totNegativeCard|获取的负面Buff卡片：
+totDualityCard|获取的双向Buff卡片：
 totTriggerCount|Buff触发次数:
 totTime|完成用时:
 RunCount|完成的游戏局数:
@@ -124,8 +124,8 @@ GachaTemplate_Desc_SurvivalOfFittest|每隔五轮回随机获取鹫形突变, �
 GachaTemplate_Detail_Base|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>初始抽卡倍率:{1}<ENTRY>{2}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>无初始抽卡<ENTRY>{1}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Normal|<GachaPositive>正面或中性抽卡数:{0}<ENTRY><GachaNonPositive>负面或中性抽卡数:{1}
-GachaTemplate_Detail_Base_Yes|
-GachaTemplate_Detail_Base_No|不
+GachaTemplate_Detail_Base_Yes|是
+GachaTemplate_Detail_Base_No|否
 
 //BuffCondition
 DisplayName_Achievement|获取{0}通行证
@@ -274,8 +274,8 @@ BuffManual_MissionMode_Content_2|每个使命都有不同的指定条件，可�
 BuffManual_MissionMode_Content_3|每个使命都有不同的初始卡组，可以在卡组栏查看。
 BuffManual_MissionMode_Content_4|该模式的详情可以通过右下角的按钮查看
 BuffManual_BuffAndCard_Content_0|Mod中的buff一共分为正面、中性、负面三大类。<LINE>不同buff产生的效果大相径庭，卡牌可以用于展示它们的信息。<LINE>每个buff都会有一个代表它的卡牌，卡牌可以展示buff的封面、名字以及详细信息。<LINE>此外，卡牌还能展示其他信息如buff剩余生效循环、堆叠层数。
-BuffManual_BuffAndCard_Content_1|当卡牌上出现圆形标记时，这表明该buff是有时效性的。<LINE>图形中的数字表明了该buff还可以生效多少个雨循环。
-BuffManual_BuffAndCard_Content_2|当卡牌上出现菱形标记时，这表明该buff是可堆叠的。<LINE>图形中的数字表明了该buff当前的堆叠层数<LINE>堆叠层数具体的效果取决于不同buff的实现方式。
+BuffManual_BuffAndCard_Content_1|当卡牌上出现圆形标记〇时，这表明该buff是有时效性的。<LINE>图形中的数字表明了该buff还可以生效多少个雨循环。
+BuffManual_BuffAndCard_Content_2|当卡牌上出现菱形标记◇时，这表明该buff是可堆叠的。<LINE>图形中的数字表明了该buff当前的堆叠层数<LINE>堆叠层数具体的效果取决于不同buff的实现方式。
 BuffManual_BuffAndCard_Content_3|当卡牌上出现六边形标记时，这表明该buff是可主动触发的。<LINE>若图形中为>>标记，则说明你没有给他绑定任何触发快捷键。<LINE>快捷键可以通过按下配置菜单指定的按键来绑定。绑定后即可使用快捷键来触发buff效果。<LINE>此外你也可以右键卡牌来触发buff的效果。
 BuffManual_Progression_Content_0|Random Buff拥有一套独立的进度系统，包含等级、记录、收集品和装饰品<LINE>其中等级在三个页面中均可见，左侧展示当前等级和经验，右侧展示下一级需要的经验。
 BuffManual_Progression_Content_1|记录页面会展示一些特殊的进度，可以用来统计一些游玩random buff时触发的事件次数。
@@ -298,7 +298,7 @@ Remix_CheatAllCosmetics|解锁全部装饰品
 Remix_Credit|致谢
 Remix_CardSlotKey_Desc|按下此键可以在局内查看所持有的卡牌
 Remix_KeyBindKey_Desc|点开允许绑定按键的卡牌后，按住此键后可再按另一个键，为该卡牌的功能绑定后者按键
-Remix_ShowExceptionLog_Desc|在当雨世界出现异常 (exceptionLog.txt) 时，在右上角出现感叹号，点开可详细查看log内容
+Remix_ShowExceptionLog_Desc|在当雨世界出现异常 (exceptionLog.txt) 时，在右上角出现感叹号（！），点开可详细查看log内容
 Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取对应卡牌一次以解锁
 Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁
 Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫扩展的增益和负担转化为卡牌
