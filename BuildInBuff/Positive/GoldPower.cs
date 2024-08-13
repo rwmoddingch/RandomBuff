@@ -1,5 +1,7 @@
 using System;
+using BuiltinBuffs.Positive;
 using MonoMod;
+using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using UnityEngine;
@@ -40,11 +42,28 @@ namespace TemplateGains
         public static int GoldPower(Player self)
         {
             int power = 0;
-            for (int i = 0; i < 2; i++)
+            //检测手上的珍珠数量
+            for (int i = 0; i < self.grasps.Length; i++)
             {
                 if (self.grasps[i] != null && self.grasps[i].grabbed != null && self.grasps[i].grabbed is DataPearl) power++;
             }
+            //检测肚子里的珍珠数量
             if (self.objectInStomach != null && self.objectInStomach is DataPearl.AbstractDataPearl) power++;
+
+            //检测超级胃内的珍珠数量
+            if(SuperStomachBuffEntry.SuperStomach.GetBuffData()!=null)
+            {
+                if (SuperStomachBuffEntry.bigStomach.TryGetValue(self, out var stomach))
+                {
+                    for (int i = 0; i < stomach.objectsInStomach.Count; i++)
+                    {
+                        if (stomach.objectsInStomach[i].type == AbstractPhysicalObject.AbstractObjectType.DataPearl) power++;
+                    }
+
+                }
+            }
+
+
             return power;
         }
 
