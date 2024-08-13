@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "DivineBeing",
-        "Description" : "Creatures in a circle around the player remain prostrate and stationary, recovering when the player leaves."
+        "Description" : "Creatures around slugcat become immobile until slugcat leaves the area."
     }
 }

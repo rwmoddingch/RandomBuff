@@ -10,8 +10,8 @@
         "BuffName" : "矛矛雨",
         "Description" : "下雨时会同时下触地消失的矛，矛可以对生物造成少量伤害"
     },
-    "English" : {
-        "BuffName" : "SpearRain",
-        "Description" : "It will rain spears, spear cause small amout of damage to creature"
+    "English": {
+        "BuffName": "SpearRain",
+        "Description": "It will rain spears, spears do a small amount of damage to anything they hit."
     }
 }

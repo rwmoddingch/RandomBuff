@@ -13,6 +13,6 @@
     },
     "English": {
         "BuffName" : "Temperature",
-        "Description" : "Add a new temperature mechanic to replace original hypothermia. Each creature has a separate temperature bar. Burning will be triggered when the high temperature reaches a certain threshold.A short freeze will be triggered the low temperature reaches a certain threshold. Some kind of damage has a high temperature property."
+        "Description" : "Overhauls the temperature mechanic entirely, at a high temperature creatures will burn and at a low temperature they will freeze temporarily. Certain types of damage or buffs can increase or decrease temperature."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Russian Roulette",
-        "Description" : "Weapons thrown by any creatures have a 1/6 chance to hit the thrower themselves instantly."
+        "Description" : "Thrown weapons have a chance of hitting the thrower instead."
     }
 }

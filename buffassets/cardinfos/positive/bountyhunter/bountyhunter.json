@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "BountyHunter",
-        "Description" : "Mark a random creature in the area every once in a while.When you kill the marked creature you get a random buff that lasts until the end of current cycle."
+        "Description" : "Mark a random creature in the area, once killed the creature grants a random buff for the rest of the cycle."
     }
 }

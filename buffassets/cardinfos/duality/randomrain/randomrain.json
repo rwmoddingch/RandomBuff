@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "RandomRain",
-        "Description" : "Cycles fluctuate even more, with the lowest rains timed at one-half of the original, and the highest rains timed at twice as high"
+        "Description" : "Significantly increases rain timer variance, cycles can last twice as long as the maximum or half as long as the minimum."
     }
 }

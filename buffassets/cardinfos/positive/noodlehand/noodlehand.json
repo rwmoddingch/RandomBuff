@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "NoodleHand",
-        "Description" : "Can pick up objects twice as far as usual"
+        "Description" : "Doubles slugcat grab range"
     }
 }

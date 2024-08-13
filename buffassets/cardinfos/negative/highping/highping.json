@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "HighPing",
-        "Description" : "The screen is not synchronized with the actual progress of the game, showing the screen 0.2 seconds before the actual process"
+        "Description" : "Gameplay is visually delayed by 0.2 seconds."
     }
 }

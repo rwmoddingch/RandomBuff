@@ -13,6 +13,6 @@
     },
     "English" : {
         "BuffName" : "EatMore",
-        "Description" : "+N sleep foodpoint requirement (or both if already at foodpoint max value)"
+        "Description" : "Increases the amount of food required to sleep."
     }
 }

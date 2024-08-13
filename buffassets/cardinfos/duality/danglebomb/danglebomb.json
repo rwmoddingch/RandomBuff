@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "DangleBomb",
-        "Description" : "Turns all dangle fruits into timer bombs that count down and explode after throwing. Eating them also causes them to explode"
+        "Description" : "Turns all blue fruit into timed bombs which explode when thrown or consumed."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "PandoraBox",
-        "Description" : "Whatever the player swallows and spits out becomes a new randomized item"
+        "Description" : "When slugcat swallows and spits up an item, it is randomly turned into another item similar to gourmand's item generation."
     }
 }

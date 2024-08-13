@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Super Stomach",
-        "Description":"Players can store more items in their stomachs. First in, last out."
+        "Description":"Slugcat can store more items in their stomach, retrieving items goes from most recent to least recent."
     }
 }

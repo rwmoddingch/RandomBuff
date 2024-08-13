@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Ropecket Launch",
-        "Description":"Mimic poles will throw grabbed objects upwards"
+        "Description":"Pole plants will launch things upwards rather than pulling them down."
     }
 }

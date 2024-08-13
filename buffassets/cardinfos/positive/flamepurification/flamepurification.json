@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "FlamePurification",
-        "Description" : "Bind with Temperature; burning flames on the terrain will be able to clear worm grass"
+        "Description" : "Bind with Temperature; fire on the ground will destroy wormgrass."
     }
 }

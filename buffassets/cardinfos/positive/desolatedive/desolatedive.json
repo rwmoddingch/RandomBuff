@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "DesolateDive",
-        "Description" : "Holding down while player smashes into the ground from a high place, it causes a tremor in the room and a stun effect on a certain range of creatures near the point of impact"
+        "Description" : "If the player is holding down as they hit the ground from high up, cause a tremor which knocks back and stuns nearby creatures."
     }
 }

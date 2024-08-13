@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "StagnantForcefield",
-        "Description" : "For a period of time after triggering the card, all objects approaching a certain distance from the player are limited to a certain maximum speed. There is a certain cooldown time."
+        "Description" : "When triggered, creates a forcefield around slugcat which slows down everything."
     }
 }

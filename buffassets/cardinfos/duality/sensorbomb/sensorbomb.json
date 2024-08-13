@@ -9,10 +9,10 @@
     "Conflict":["BombExplodeModify"],
     "Chinese" : {
         "BuffName" : "感应炸弹",
-        "Description" : "炸弹投出后不会再因为碰撞爆炸，而是在接近任意生物或速度接近静止时爆炸。\n主动触发后，将玩家身边的炸弹转化为本轮回生效的地雷，地雷只会被玩家外的生物触发。"
+        "Description" : "炸弹投出后不会再因为碰撞爆炸，而是在接近任意生物或速度接近静止时爆炸。\n主动触发后，将玩家身边的炸弹转化为本轮回生效的地雷，地雷只会被玩家外的生物触发。抓起地雷来拆除使其变为普通炸弹。"
     },
     "English": {
         "BuffName" : "Sensor Bomb",
-        "Description" : "Instead of exploding from collision after being thrown, bombs explode when they are near any creature or at a speed close to static.\nWhen triggered, convert nearby bombs into mines that last until cycle end.Mines will only be triggered by other creatures."
+        "Description" : "Bombs no longer explode when colliding with a target, instead exploding when near a creature or when not moving. Trigger the buff to turn all bombs nearby into landmines which can only be activated by other creatures. Grab the landmine to defuse and convert into normal bomb"
     }
 }

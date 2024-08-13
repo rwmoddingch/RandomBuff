@@ -17,6 +17,6 @@
     },
     "English" : {
         "BuffName" : "Super Battery",
-        "Description" : "Players won't get hurt from centipede shocking and can store electric energy from it. The stored electric energy can be saved to next cycle. When caught by other non-player creatures (except centipedes), players will release all energy to deal electric damage to the grabbers other non-player creatures in range"
+        "Description" : "Slugcats are immune to centipede shocks, instead slugcat will store the electricity. If grabbed which charged up, slugcat will release a powerful electric shock with all energy charged which stuns and damages enemies within range."
     }
 }

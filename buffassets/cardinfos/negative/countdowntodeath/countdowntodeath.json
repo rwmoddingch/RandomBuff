@@ -10,8 +10,8 @@
         "BuffName" : "死亡倒计时",
         "Description" : "下一个循环若未在两百秒内进行雨眠，玩家将会爆炸"
     },
-    "English" : {
-        "BuffName" : "Countdown to Death",
-        "Description" : "If the next cycle player does not sleep within 200 seconds, the player will explode"
-    }
+  "English": {
+    "BuffName": "Countdown to Death",
+    "Description": "If slugcat does not sleep within 200 seconds in the next cycle, slugcat will explode instantly."
+  }
 }

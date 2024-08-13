@@ -12,6 +12,6 @@
     },
     "English": {
     "BuffName": "Sisyphus",
-    "Description": "After putting down the rock, players will be teleported to where they picked it up (won't work across different regions)"
+    "Description": "When slugcat drops a rock, teleports it to where the rock was picked up as long as its in the same region."
   }
 }

@@ -13,6 +13,6 @@
     },
     "English" : {
         "BuffName" : "Upside Down",
-        "Description" : "Swap the positions of players' heads and tails. The heads dragged behind will somehow nerf players' mobilities."
+        "Description" : "Swap the position of slugcat's head and tail, limiting its movement significantly."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Neurodegeneration",
-        "Description":"When entering a new room, your controlling will freeze for 2s"
+        "Description":"Freeze slugcat in place for 2 seconds at the start of every room."
     }
 }

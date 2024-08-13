@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Short-Sighted",
-        "Description" : "The player's screen field of view is reduced, and the scene seen will be enlarged to fill the screen"
+        "Description" : "Decrease the field of view."
     }
 }

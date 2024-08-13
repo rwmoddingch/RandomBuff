@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Snail Missile",
-        "Description":"Snails will fly towards players and pop if close enough"
+        "Description":"Pop snails will fly towards the player and pop when in range."
     }
 }

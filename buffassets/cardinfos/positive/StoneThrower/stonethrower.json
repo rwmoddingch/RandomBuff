@@ -13,6 +13,6 @@
     },
     "English" : {
         "BuffName" : "Stone Thrower",
-        "Description" : "Stone damage is increased to 1, but spear damage is reduced to half"
+        "Description" : "Stones deal 1 damage (equal to a survivor spear) but spear damage is halved."
     }
 }

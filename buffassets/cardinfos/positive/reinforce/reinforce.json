@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Reinforce",
-        "Description" : "When your are Chieftain, allow you to avoid direct friendly-fire from scavangers, and can be triggered to send in a ScavengerReinforcement Squad. The squad can only be sent once a raincycle."
+        "Description" : "When slugcat is a chieftan, gives it immunity from scav projectiles. Once per cycle, slugcat can summon a scavenger hitsquad to assist in combat."
     }
 }

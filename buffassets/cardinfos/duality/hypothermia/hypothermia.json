@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Hypothermia",
-        "Description" : "All non-aquatic creature left in water for too long will lose temperature until they freeze to death (except self-heating ones)"
+        "Description" : "Makes water cold for all creatures, leading to death if a creature is left in the water too long without heat."
     }
 }

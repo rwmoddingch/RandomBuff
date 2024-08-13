@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Desperate Eater",
-        "Description" : "When starving, players can eat most inedible items (except for large corpses) like edible items."
+        "Description" : "When starving, slugcat can consume normally non edible items like rocks."
     }
 }

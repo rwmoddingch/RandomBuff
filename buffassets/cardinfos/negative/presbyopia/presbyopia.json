@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Presbyopia",
-        "Description" : "The image becomes blurry within a certain range of the player, and becomes clearer as it gets farther away from the player."
+        "Description" : "The area around slugcat becomes blurry, decreasing in blur with distance."
     }
 }

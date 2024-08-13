@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "GiveALight",
-        "Description" : "Red lizards and caramel Lizards spitting out spit will explode once in contact with other entities."
+        "Description" : "Red and caramel lizard spit explodes on contact."
     }
 }

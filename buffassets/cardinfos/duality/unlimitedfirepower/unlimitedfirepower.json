@@ -13,6 +13,6 @@
     },
     "English": {
         "BuffName" : "UnlimitedFirepower",
-        "Description" : "Bombs, explosive spears, and firecrackers explode without depleting themselves"
+        "Description" : "Explosives do not destroy themselves on use, creating infinite use explosives."
     }
 }

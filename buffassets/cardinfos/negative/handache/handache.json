@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Handache",
-        "Description":"Players will release their hands when holding items for up to 5s"
+        "Description":"Slugcat will randomly stop using its hands for up to 5 seconds."
     }
 }
