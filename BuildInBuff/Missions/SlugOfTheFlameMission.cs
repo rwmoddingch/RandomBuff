@@ -180,7 +180,7 @@ namespace BuiltinBuffs.Missions
                 if (!Finished)
                 {
                     Finished = true;
-                    onLabelRefresh?.Invoke(this);
+                    //onLabelRefresh?.Invoke(this);
                 }
             }
         }

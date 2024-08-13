@@ -439,8 +439,9 @@ namespace BuiltinBuffs.Duality
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             base.InitiateSprites(sLeaser, rCam);
-            sLeaser.sprites = new FSprite[1];
+            sLeaser.sprites = new FSprite[2];
             sLeaser.sprites[0] = new FSprite(SensorBombEntry.circleGradient80) { shader = rCam.game.rainWorld.Shaders["Hologram"], color = Color.red };
+            sLeaser.sprites[1] = new FSprite("Futile_White") { shader = rCam.game.rainWorld.Shaders["LightSource"], color = Color.red };
             AddToContainer(sLeaser, rCam, null);
         }
 
@@ -462,6 +463,10 @@ namespace BuiltinBuffs.Duality
             sLeaser.sprites[0].SetPosition(smoothPos);
             sLeaser.sprites[0].scale = smoothParam * 2f;
             sLeaser.sprites[0].alpha = smoothParam;
+
+            sLeaser.sprites[1].SetPosition(smoothPos);
+            sLeaser.sprites[1].scale = smoothParam * 16f;
+            sLeaser.sprites[1].alpha = smoothParam;
 
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         }

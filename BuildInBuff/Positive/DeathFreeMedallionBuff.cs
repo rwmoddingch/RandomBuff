@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BuiltinBuffs.Duality;
 using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Buff;
@@ -366,6 +367,10 @@ namespace BuiltinBuffs.Positive
                     bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.owner = bindAbPlayer.realizedCreature as Player;
                 }
                 playerRespawned = true;
+                bindAbPlayer.realizedCreature.slatedForDeletetion = false;
+
+                if (TemperatureModule.TryGetTemperatureModule(bindAbPlayer.realizedCreature, out var module))
+                    module.temperature = 0f;
             }
         }
 

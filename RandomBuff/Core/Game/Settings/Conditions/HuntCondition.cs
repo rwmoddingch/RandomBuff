@@ -42,7 +42,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 currentKillCount++;
                 if (currentKillCount >= killCount && !Finished)
                     Finished = true;
-                onLabelRefresh?.Invoke(this);
+                else
+                    onLabelRefresh?.Invoke(this);
             }
         }
 

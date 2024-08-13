@@ -291,7 +291,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                     SetText(setText);
 
                 RefreshColor(complete);
-                //BuffPlugin.Log($"RefreshColor to false in Refresh, setComplete {setComplete}");
+                BuffPlugin.Log($"{condition.ID} RefreshColor to false in Refresh, setComplete {setComplete}");
             }
 
             public void Complete(Condition condition)
@@ -300,7 +300,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                     return;
                 BuffPlugin.Log("Complete");
                 RefreshColor(true);
-                //BuffPlugin.Log($"RefreshColor to true in Complete, setComplete {setComplete}");
+                BuffPlugin.Log($"{bindCondition.ID} RefreshColor to true in Complete, setComplete {setComplete}");
             }
 
             public void Uncomplete(Condition condition)
@@ -309,7 +309,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                     return;
                 BuffPlugin.Log("UnComplete");
                 RefreshColor(false);
-                //BuffPlugin.Log($"RefreshColor to false in UnComplete, setComplete {setComplete}");
+                BuffPlugin.Log($"{bindCondition.ID} RefreshColor to false in UnComplete, setComplete {setComplete}");
             }
 
             void Flash()
@@ -333,7 +333,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                     {
                         stayDisplayTimer = MaxStayDisplayTimer;//重置显示时间
                         InternalRefreshColor(complete);
-                        //BuffPlugin.Log($"InternalRefreshColor to {complete} in RefreshColor, setComplete {setComplete}");
+                        BuffPlugin.Log($"{bindCondition.ID} InternalRefreshColor to {complete} in RefreshColor, setComplete {setComplete}");
                     }
                     else//动画未完成稍后刷新颜色
                         needColorRefresh = true;

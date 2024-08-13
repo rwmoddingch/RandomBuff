@@ -85,7 +85,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                         kills++;
                         if (kills >= killRequirement)
                             Finished = true;
-                        onLabelRefresh?.Invoke(this);
+                        //onLabelRefresh?.Invoke(this);
                     }
                 }
             }
