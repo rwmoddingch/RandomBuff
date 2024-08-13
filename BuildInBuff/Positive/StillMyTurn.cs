@@ -15,7 +15,10 @@ using BuiltinBuffs;
 namespace TemplateGains
 {
     //我的回合
-    class StillMyTurnBuff : Buff<StillMyTurnBuff, StillMyTurnBuffData> { public override BuffID ID => StillMyTurnBuffEntry.StillMyTurnID; }
+    class StillMyTurnBuff : Buff<StillMyTurnBuff, StillMyTurnBuffData>
+    {
+        public override BuffID ID => StillMyTurnBuffEntry.StillMyTurnID;
+    }
     class StillMyTurnBuffData : BuffData
     {
         public override bool CanStackMore()=> StackLayer < 4;
@@ -105,7 +108,7 @@ namespace TemplateGains
         public bool canWarp = false;
 
         public int WarpCount = 0;
-        public int MaxWarpCount => 30 - (StillMyTurnBuffEntry.StillMyTurnID.GetBuffData().StackLayer * 8);
+        public int MaxWarpCount => 30 - ((StillMyTurnBuffEntry.StillMyTurnID.GetBuffData()?.StackLayer?? 0) * 8);
         public void CanWarp(Player player)
         {
             this.player = player;
