@@ -221,7 +221,6 @@ BuffManual_Progression|Progression
 
 //BuffManual_SubpageTitle
 BuffManual_Introduction_0|Introduction
-BuffManual_Introduction_0|Introduction
 BuffManual_Gameplay_0|Buff Gameplay
 BuffManual_Gameplay_1|Game Mode
 BuffManual_Gameplay_2|Conditions
