@@ -93,7 +93,7 @@ namespace BuiltinBuffs.Duality
                     module.butterVel = currentVel;
                 }
 
-                if (self.canJump > 0 || self.wantToJump <= 0)
+                if (self.canJump > 0)
                 {                                                            
                     if(currentVel.x * module.butterVel.x >= 0)
                     {
