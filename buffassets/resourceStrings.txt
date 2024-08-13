@@ -1,5 +1,5 @@
 //MainMenu
-MainMenu_Buff|BUFF
+MainMenu_Buff|BUFF mode
 MainMenu_Cardpedia|CARDPEDIA
 
 
@@ -18,6 +18,7 @@ BuffMissionPage_Buffs|MISSION BUFFS
 
 //BuffContinueGamePage
 BuffContinueGamePage_Restart|Restart
+
 //CardSheetPage:
 CardSheetPage_Life_Countable|Cycles
 CardSheetPage_Life_Uncountable|Everlasting
@@ -29,8 +30,8 @@ CardSheetPage_Stack_Untriggerable|Automatically
 
 //CardInfoDisplay:
 CardInfoDisplay_Missing|???
-CardInfoDisplay_MissingDescription|Select a buff to view description
-CardInfoDisplay_MissingConflict|Select a buff to view conflict
+CardInfoDisplay_MissingDescription|Select a buff card to view description
+CardInfoDisplay_MissingConflict|Select a buff card to view conflict
 
 CardInfoDisplay_TypeTitle|Type:
 CardInfoDisplay_TriggerTitle|Trigger:
@@ -51,10 +52,10 @@ Notification_TooManyMods_Title|Mod amount warning:
 Notification_TooManyMods_Info|It seems you have enabled too many mods, be aware that this may cause more exception or crash.<LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
 
 //BuffMenu:
-Survival|SURVIVAL
-Normal|NORMAL
-Quick|QUICK
-Sandbox|SANDBOX
+Survival|SURVIVAL MODE
+Normal|NORMAL MODE
+Quick|QUICK MODE
+Sandbox|SANDBOX MODE
 ProgressionMenu_Show|PROGRESSION
 
 
@@ -72,8 +73,8 @@ Mode_Desc_Free|You can customize the game's difficulty,<LINE>mode and goals free
 Mode_Desc_Mission|Choose a mission to start a new game.<LINE>Your goals and initial cards are decided by which mission you chose,<LINE>and you can't change the game's difficulty and mode.
 
 //BuffCardSlot
-InGameSlot_SlotTitle|BuffSlot
-InGameSlot_CardDetail|BuffDetail
+InGameSlot_SlotTitle|BuffCardSlot
+InGameSlot_CardDetail|BuffCardDetail
 CardPickSlot_SlotTitle|Pick <Cards> cards
 InGameSlot_SandBoxTitle|Modify active buffs
 InGameSlot_OpenSandBoxButton|Buff
@@ -91,11 +92,11 @@ CardpediaCardSheet_Info|(Click the cards below to view the detail information)
 CardpediaCardSheet_None|(None)
 
 //Records
-totCard|Acquired buffs :
-totPositiveCard|Acquired positive buffs :
-totNegativeCard|Acquired negative buffs :
-totDualityCard|Acquired duality buffs :
-totTriggerCount|Triggered buffs :
+totCard|Acquired buff cards :
+totPositiveCard|Acquired positive buff cards :
+totNegativeCard|Acquired negative buff cards :
+totDualityCard|Acquired duality buff cards :
+totTriggerCount|Triggered buff cards :
 totTime|Finish time:
 RunCount|Games completed:
 InitPickCount|Initial draw count:
@@ -106,7 +107,6 @@ BasicInGameBuffCardSlot_OnCardExclusiveShow|[Single click/press throw] to turn o
 BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and [click/press throw] to check it
 BasicInGameBuffCardSlot_ExitHUD|<LINE>Press <HUD_KEY> to turn off hud
 BasicInGameBuffCardSlot_BindKey|<LINE>Press another key while holding <KEYBINDER_KEY> to bind the shortcut key for <BuffID>
-
 //CardPickerSlot
 CardPickerSlot_NoCardFocus|Move mouse over a card and click/press throw to check it
 CardPickerSlot_OnMouseFocus|[Single click/press throw] to flip the card<LINE>[Right click/press grab] to pick the card
@@ -161,11 +161,6 @@ Duality|duality
 
 //BuffCondition_Builtin
 InRangeDisplayName_WormGrassWipeOutCondition|Wipe out all wormgrass in room in one cycle
-
-//BuffCondition_CommunityID
-Lizards|Lizards
-Scavengers|Scavengers
-Cicadas|Cicadas
 
 
 //ProgressionUI
@@ -226,6 +221,7 @@ BuffManual_Progression|Progression
 
 //BuffManual_SubpageTitle
 BuffManual_Introduction_0|Introduction
+BuffManual_Introduction_0|Introduction
 BuffManual_Gameplay_0|Buff Gameplay
 BuffManual_Gameplay_1|Game Mode
 BuffManual_Gameplay_2|Conditions
@@ -240,7 +236,7 @@ BuffManual_FreeMode_5|Mode Detail
 BuffManual_MissionMode_0|Mission Mode
 BuffManual_MissionMode_1|Select Mission
 BuffManual_MissionMode_2|Mission Condition
-BuffManual_MissionMode_3|Preset Buffs
+BuffManual_MissionMode_3|Preset Buff Cards
 BuffManual_MissionMode_4|Mode Detail
 BuffManual_BuffAndCard_0|Buff & BuffCards
 BuffManual_BuffAndCard_1|Cycles Remain
@@ -264,14 +260,14 @@ BuffManual_FreeMode_Content_2|Conditions are selected in the same way as Normal 
 BuffManual_FreeMode_Content_3|Conditions are selected in the same way as Normal Mode. However, you can choose a certain number of initial buffs when you start the game, and every time you go through a rain cycle after that, an additional negative buff will be added.<LINE>The initial room will be selected in the same way as in Quick Mode.
 BuffManual_FreeMode_Content_4|Conditions are selected in the same way as Normal Mode, but no experience will be gained. <LINE> No card draws will take place during the game, and will be replaced by a sandbox card pack with buffs that can be freely enabled and disabled. <LINE> The initial room will be selected in the same way as in Normal Mode, and there is no settlement.
 BuffManual_FreeMode_Content_5|Details of this mode can be viewed via the button in the lower right corner
-BuffManual_MissionMode_Content_0|A mode with fixed conditions and initial buffs depending on the mission. There are two types of mission: generic missions and exclusive missions. <LINE>Exclusive missions can only be completed by specific slugcats, while general missions can be completed by any slugcat. <LINE>Completing missions not only allows you to level up as in Free Mode, but also unlocks special collectibles!
+BuffManual_MissionMode_Content_0|A mode with fixed conditions and initial buffs depending on the mission. There are two types of mission: generic missions and exclusive missions. <LINE>Exclusive missions can only be completed by specific slugcats, while general missions can be completed by any slugcat. <LINE>Completing missions not only allows you to level up as in Free Mode, Generally,can also unlock special collectibles.
 BuffManual_MissionMode_Content_1|There are two types of missions to choose from above:<LINE> Exclusive mission: can only be completed by the currently selected slugcat<LINE> General mission: can be completed by any slugcats.
 BuffManual_MissionMode_Content_2|Each mission has different specified conditions, which can be viewed in the conditions section, and the mission can only be completed if you fulfill the requirements of the conditions.
 BuffManual_MissionMode_Content_3|Each mission has a different initial buff set, which can be viewed in Mission Buffs section.
 BuffManual_MissionMode_Content_4|Details of this mode can be viewed via the button in the lower right corner
 BuffManual_BuffAndCard_Content_0|The buffs in the Mod are sorted into three main categories: positive, neutral, and negative. <LINE>The effects of different buffs vary greatly, and cards can be used to display information about them. <LINE>Each buff has a card that represents it, and the card can display the cover, name, and description of the buff. <LINE>The cards can also display other additional information like remaining life cycles and stacking level.
-BuffManual_BuffAndCard_Content_1|When a circular mark appears on the card, it indicates that the buff is time-sensitive. The number in the <LINE> graphic indicates how many more rain cycles the buff can take effect.
-BuffManual_BuffAndCard_Content_2|When a diamond-shaped mark appears on the card, it indicates that the buff is stackable. <LINE>The number in the graphic indicates the current stacking level of the buff <LINE>The exact effect of the stacking level depends on how the different buffs are implemented.
+BuffManual_BuffAndCard_Content_1|When a round mark(〇) appears on the card, it indicates that the buff is time-sensitive. The number in the <LINE> graphic indicates how many more rain cycles the buff can take effect.
+BuffManual_BuffAndCard_Content_2|When a diamond-shaped mark(◇) appears on the card, it indicates that the buff is stackable. <LINE>The number in the graphic indicates the current stacking level of the buff <LINE>The exact effect of the stacking level depends on how the different buffs are implemented.
 BuffManual_BuffAndCard_Content_3|When a hexagonal mark appears on the card, this indicates that the buff is actively triggerable. <LINE> If the graphic is marked with a >> mark, this indicates that you have not bound any trigger shortcuts to it. <LINE>Shortcuts can be bound by pressing the key specified in the configuration menu. Once bound, you can use the shortcut to trigger the buff. <LINE>Additionally, you can right-click on a card to trigger a buff.
 BuffManual_Progression_Content_0|Random Buff has a separate progress system for levels, records, quests, and cosmetics <LINE> where levels are visible on all three pages, with the current level and experience displayed on the left, and the experience needed for the next level displayed on the right.
 BuffManual_Progression_Content_1|The record page displays some special progress that can be used to count the number of events triggered when playing some random buff.
@@ -295,14 +291,13 @@ Remix_Cheat|Cheats
 Remix_CheatAllCards|Unlock All Cards
 Remix_CheatAllCosmetics|Unlock All Cosmetics
 Remix_Credit|Credit
-Remix_EnableExpeditionExtend_Desc|NEED RESTART TO APPLY, Converts Expedition and More Slugcat Expansion perks and burdens into cards.
-Remix_EnableExpeditionModExtend_Desc|NEED RESTART TO APPLY, Converts perks and burdens from other mods into cards. This may cause compatibility issues.
-
 Remix_CardSlotKey_Desc|Press this key to view the cards you hold in-game.
 Remix_KeyBindKey_Desc|After selecting a card that allows key binding, hold this key and press another key to bind the latter key to the card's trigger function.
-Remix_ShowExceptionLog_Desc|When an exception occurs (exceptionLog.txt), an exclamation mark will appear in the top-right corner. Click it to view the log details.
+Remix_ShowExceptionLog_Desc|When an exception occurs (exceptionLog.txt), an exclamation mark(!) will appear in the top-right corner. Click it to view the log details.
 Remix_CheatAllCards_Desc|Allows free card drawing in sandbox mode. Cards usually need to be obtained once to unlock.
 Remix_CheatAllCosmetics_Desc|Usually requires completing specific missions to unlock.
+Remix_EnableExpeditionExtend_Desc|NEED RESTART TO APPLY, Converts Expedition and More Slugcat Expansion perks and burdens into cards.
+Remix_EnableExpeditionModExtend_Desc|NEED RESTART TO APPLY, Converts perks and burdens from other mods into cards. This may cause compatibility issues.
 
 //SleepMenu
 SleepMenu_Stack|Stack Card
