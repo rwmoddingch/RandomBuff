@@ -121,6 +121,7 @@ namespace RandomBuff.Core.BuffMenu
             pages.Add((modeSelectPage = new ModeSelectPage(this, null, Vector2.zero, pageIndex++)));
             pages.Add(newGameDetailPage = new BuffNewGameDetailPage(this, null, pageIndex++));
             pages.Add(missionPage = new BuffNewGameMissionPage(this, null, pageIndex++));
+            pages.Add(buffCardViewPage = new BuffCardViewPage(this, null, pageIndex++));
             pages.Add(progressionPage = new BuffProgressionPage(this, null, pageIndex++));
             pages.Add((testNotification = new NotificationManager(this, container, pageIndex++)));
 
@@ -176,12 +177,13 @@ namespace RandomBuff.Core.BuffMenu
         //
 
 
-        BuffContinueGameDetialPage continueDetailPage;
-        BuffNewGameDetailPage newGameDetailPage;
+        public BuffContinueGameDetialPage continueDetailPage;
+        public BuffNewGameDetailPage newGameDetailPage;
         //--------------测试-----------------
-        BuffNewGameMissionPage missionPage;
-        ModeSelectPage modeSelectPage;
-        BuffProgressionPage progressionPage;
+        public BuffNewGameMissionPage missionPage;
+        public ModeSelectPage modeSelectPage;
+        public BuffProgressionPage progressionPage;
+        public BuffCardViewPage buffCardViewPage;
 
         void InitGameDetailPage(Page page)
         {
@@ -670,6 +672,14 @@ namespace RandomBuff.Core.BuffMenu
             {
                 info = "exit progression";
                 progressionPage.EscLogic();
+            }
+            else if(currentPage == buffCardViewPage.index)
+            {
+                buffCardViewPage.EscLogic();
+            }
+            else if(currentPage == extraInfoPage.index)
+            {
+                extraInfoPage.EscLogic();
             }
             else if (modeSelectPage.Show)
             {

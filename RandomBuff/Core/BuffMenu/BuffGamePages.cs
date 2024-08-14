@@ -809,6 +809,7 @@ namespace RandomBuff.Core.BuffMenu
             Helper.ClearSelectables(missionSheetBox.exclusiveMission);
             Helper.ClearSelectables(missionInfoBox.startButton);
             Helper.ClearSelectables(backButton);
+            Helper.ClearSelectables(extraInfoButton);
 
             MenuObject bottomSelectable = null;
             if (missionInfoBox.buffButtons[0].active)
@@ -858,6 +859,7 @@ namespace RandomBuff.Core.BuffMenu
                     menu.selectedObject = activeButtons.Last();
             }
             rightSelectable.nextSelectable[3] = bottomSelectable;
+            rightSelectable.nextSelectable[2] = backButton;
 
 
 
@@ -888,6 +890,7 @@ namespace RandomBuff.Core.BuffMenu
                     bottomSelectable = activeCardButtons[i];
                 }
                 bottomSelectable.nextSelectable[3] = missionInfoBox.startButton;
+                bottomSelectable.nextSelectable[0] = missionInfoBox.startButton;
                 missionInfoBox.startButton.nextSelectable[1] = bottomSelectable;
             }
 
@@ -897,6 +900,11 @@ namespace RandomBuff.Core.BuffMenu
             missionInfoBox.startButton.nextSelectable[2] = extraInfoButton;
             Helper.LinkEmptyToSelf(missionInfoBox.startButton);
 
+            if(!missionInfoBox.startButton.inactive)
+            {
+                extraInfoButton.nextSelectable[0] = missionInfoBox.startButton;
+                missionInfoBox.startButton.nextSelectable[3] = extraInfoButton;
+            }
             Helper.LinkEmptyToSelf(extraInfoButton);
         }
 
@@ -926,6 +934,9 @@ namespace RandomBuff.Core.BuffMenu
             missionInfoBox.SetShow(show);
             missionSheetBox.SetShow(show);
             gameMenu.SetButtonsActive(!show);
+
+            if (show)
+                UpdateSelectables();
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -934,7 +945,6 @@ namespace RandomBuff.Core.BuffMenu
             if (message == "NEWGAME_MISSION_BACK")
             {
                 SetShow(false);
-                missionInfoBox.interactionManager?.Destroy();
                 menu.PlaySound(SoundID.MENU_Switch_Page_Out);
             }
             else if (message.StartsWith("MISSIONPICK_"))
@@ -959,6 +969,7 @@ namespace RandomBuff.Core.BuffMenu
                         }
                         missionInfoBox.UpdateMissionInfo(mission.TextCol ,Custom.rainWorld.inGameTranslator.Translate(mission.MissionName), mission.BindSlug == null? "NOBINDSLUG" : mission.BindSlug.value,info, mission.startBuffSet.ToArray());
                         pickedMission = mission;
+                        UpdateSelectables();
                         break;
                     }
                 }
@@ -966,12 +977,12 @@ namespace RandomBuff.Core.BuffMenu
             else if (message.StartsWith("MISSIONBUFF_"))
             {
                 var buffID = Regex.Split(message, "_")[1];
-                missionInfoBox.UpdateCardDisplay(true, buffID);
+                (menu as BuffGameMenu).buffCardViewPage.UpdateCardDisplay(true, buffID);
             }
-            else if (message == "MISSION_QUITDISPLAY")
-            {
-                missionInfoBox.UpdateCardDisplay(false, null);
-            }
+            //else if (message == "MISSION_QUITDISPLAY")
+            //{
+            //    missionInfoBox.UpdateCardDisplay(false, null);
+            //}
             else if (message == "MISSIONFLIP_LEFT")
             {
                 if (missionSheetBox.currentPage > 0)
@@ -1051,10 +1062,7 @@ namespace RandomBuff.Core.BuffMenu
 
         public void EscLogic()
         {
-            if (MissionInfoBox.hasCardOnDisplay)
-                missionInfoBox.UpdateCardDisplay(false, null);
-            else
-                Singal(null,"NEWGAME_MISSION_BACK");
+            Singal(null, "NEWGAME_MISSION_BACK");
         }
 
 
@@ -1455,9 +1463,9 @@ namespace RandomBuff.Core.BuffMenu
             public FSprite slugIcon;
             public List<FLabel> conditionList;
             public List<CardTitleButton> buffButtons;
-            public SimpleButton quitDisplayButton;
+            //public SimpleButton quitDisplayButton;
             public HoldButton startButton;
-            public TestBasicInteractionManager interactionManager;
+            //public TestBasicInteractionManager interactionManager;
 
             public float rotateProgress;
 
@@ -1481,7 +1489,7 @@ namespace RandomBuff.Core.BuffMenu
                 missionPage = owner as BuffNewGameMissionPage;
                 conditionList = new List<FLabel>();
                 buffButtons = new List<CardTitleButton>();
-                interactionManager = new TestBasicInteractionManager(null);
+                //interactionManager = new TestBasicInteractionManager(null);
                 //holdBox = new EmptyRoundRect(menu, owner, string.Empty, new Vector2(228f, 1400f), new Vector2(920f, 380f), 20f);
                 //subObjects.Add(holdBox);
                 for (int i = 0; i < 5; i++)
@@ -1516,7 +1524,7 @@ namespace RandomBuff.Core.BuffMenu
                 Container.AddChild(conditionTitle);
                 Container.AddChild(buffTitle);
 
-                startButton = new HoldButton(menu, this, BuffResourceString.Get("BuffMissionPage_Start"),"MISSION_START", new Vector2(688f, 160f), 120f);
+                startButton = new HoldButton(menu, this, BuffResourceString.Get("BuffMissionPage_Start"),"MISSION_START", new Vector2(688f, 160f), 80f);
                 subObjects.Add(startButton);
 
                 darkSprite = new FSprite("pixel");
@@ -1526,10 +1534,10 @@ namespace RandomBuff.Core.BuffMenu
                 darkSprite.SetPosition(Custom.rainWorld.screenSize / 2f);
                 menu.cursorContainer.AddChild(darkSprite);
 
-                quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "MISSION_QUITDISPLAY", new Vector2(638f, 1400f), new Vector2(110f, 30f));
-                subObjects.Add(quitDisplayButton);
-                quitDisplayButton.Container.RemoveFromContainer();
-                menu.cursorContainer.AddChild(quitDisplayButton.Container);
+                //quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "MISSION_QUITDISPLAY", new Vector2(638f, 1400f), new Vector2(110f, 30f));
+                //subObjects.Add(quitDisplayButton);
+                //quitDisplayButton.Container.RemoveFromContainer();
+                //menu.cursorContainer.AddChild(quitDisplayButton.Container);
             }
 
             public void SetShow(bool show)
@@ -1544,7 +1552,7 @@ namespace RandomBuff.Core.BuffMenu
                     {
                         buffButtons[j].SetShow(false);
                     }
-                    quitDisplayButton.pos.y = 1800f;
+                    //quitDisplayButton.pos.y = 1800f;
                     //startButton.pos.y = 1400f;
                 }
                 else
@@ -1593,36 +1601,13 @@ namespace RandomBuff.Core.BuffMenu
 
             public void UpdateCardDisplay(bool display, string newID)
             {
-                hasCardOnDisplay = display;
-                if (display)
-                {
-                    quitDisplayButton.pos.y = 100f;
-                    darkSprite.alpha = 0.5f;                   
-                    var displayCard = new BuffCard(new BuffID(newID));
-                    displayCard.Rotation = new Vector3(0f, 0f, 0f);
-                    displayCard.Position = new Vector2(693f, 393f);
-                    displayCard.Scale = 0.6f;
-
-                    interactionManager.ManageCard(displayCard);
-                    Container.AddChild(displayCard.Container);
-                    
-                }
-                else
-                {
-                    quitDisplayButton.pos.y = -1500f;
-                    darkSprite.alpha = 0f;
-
-                    interactionManager.DestroyManagedCard();
-                    
-                }
-
                 
             }
 
             public override void Update()
             {
                 base.Update();
-                interactionManager?.Update();
+                //interactionManager?.Update();
                 startButton.buttonBehav.greyedOut = hasCardOnDisplay || BuffNewGameMissionPage.pickedMission == null;
 
                 float anim = (owner as BuffNewGameMissionPage).showAnim.Get();
@@ -1633,7 +1618,7 @@ namespace RandomBuff.Core.BuffMenu
             public override void GrafUpdate(float timeStacker)
             {
                 base.GrafUpdate(timeStacker);
-                interactionManager?.GrafUpdate(timeStacker);
+                //interactionManager?.GrafUpdate(timeStacker);
 
                 float anim = (owner as BuffNewGameMissionPage).showAnim.Get();
                 conditionTitle.alpha = anim;
@@ -1788,6 +1773,101 @@ namespace RandomBuff.Core.BuffMenu
         }
     }
 
+    internal class BuffCardViewPage : Page
+    {
+        SimpleButton quitDisplayButton; 
+        TestBasicInteractionManager interactionManager; 
+        FSprite darkSprite;
+
+        bool hasCardOnDisplay;
+        int lastPage;
+
+        public BuffCardViewPage(Menu.Menu menu, MenuObject owner, int index) : base(menu, owner, "BuffCardViewPage", index)
+        {
+            darkSprite = new FSprite("pixel");
+            darkSprite.alpha = 0f;
+            darkSprite.scale = 1400f;
+            darkSprite.color = Color.black;
+            darkSprite.SetPosition(Custom.rainWorld.screenSize / 2f);
+            Container.AddChild(darkSprite);
+
+            quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "BuffCardViewPage_QUITDISPLAY", new Vector2(638f, 1400f), new Vector2(110f, 30f));
+            subObjects.Add(quitDisplayButton);
+            interactionManager = new TestBasicInteractionManager(null);
+        }
+
+        public void UpdateCardDisplay(bool display, string newID)
+        {
+            hasCardOnDisplay = display;
+            if (display)
+            {
+                quitDisplayButton.pos.y = 100f;
+                darkSprite.alpha = 0.5f;
+                var displayCard = new BuffCard(new BuffID(newID));
+                displayCard.Rotation = new Vector3(0f, 0f, 0f);
+                displayCard.Position = new Vector2(693f, 393f);
+                displayCard.Scale = 0.6f;
+
+                interactionManager.ManageCard(displayCard);
+                Container.AddChild(displayCard.Container);
+                TakeFocus();
+            }
+            else
+            {
+                quitDisplayButton.pos.y = -1500f;
+                darkSprite.alpha = 0f;
+
+                interactionManager.DestroyManagedCard();
+                RecoverFocus();
+            }
+        }
+
+        public override void Singal(MenuObject sender, string message)
+        {
+            base.Singal(sender, message);
+            if(message == "BuffCardViewPage_QUITDISPLAY")
+            {
+                UpdateCardDisplay(false, string.Empty);
+            }
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            interactionManager?.Update();
+        }
+
+        public override void GrafUpdate(float timeStacker)
+        {
+            base.GrafUpdate(timeStacker);
+            interactionManager?.GrafUpdate(timeStacker);
+        }
+
+        void TakeFocus()
+        {
+            if(menu.currentPage != index)
+            {
+                lastPage = menu.currentPage;
+                menu.currentPage = index;
+                menu.ResetSelection();
+            }
+        }
+
+        void RecoverFocus()
+        {
+            if(menu.currentPage == index)
+            {
+                menu.currentPage = lastPage;
+                menu.ResetSelection();
+            }
+        }
+
+        public void EscLogic()
+        {
+            UpdateCardDisplay(false, string.Empty);
+        }
+    }
+
     internal class ModeSelectPage : Page
     {
         //BuffGameMenu gameMenu;
@@ -1844,7 +1924,7 @@ namespace RandomBuff.Core.BuffMenu
             if (show)
             {
                 menu.currentPage = index;
-                BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
+                //BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
             }
             else
             {
@@ -1867,7 +1947,7 @@ namespace RandomBuff.Core.BuffMenu
                     fadeInCounter += 0.05f;
                 }
                 y = Mathf.Sin(0.5f * Mathf.PI * fadeInCounter);
-                BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
+                //BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
             }
 
             if (!Show)

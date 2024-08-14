@@ -211,6 +211,7 @@ Mission_Display_InHurry|着急忙慌
 Mission_Display_SurvivalOfFittest|适者生存
 Mission_Display_SlugOfTheFlame|烈焰之蝓
 Mission_Display_KingOfIsles|空岛之王
+Mission_Display_TunnelBattle|管道战
 
 //Credit
 CreditTitle_Intro|Random Buff

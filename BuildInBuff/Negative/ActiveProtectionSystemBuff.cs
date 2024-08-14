@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative
 
             for(int i =0;i < 2; i++)
             {
-                self.vulture.room.AddObject(new ProtectionMissile(self.vulture.room, self.vulture.DangerPos, Custom.RNV(), self.vulture));
+                self.vulture.room.AddObject(new ProtectionMissile(self.vulture.room, self.vulture.DangerPos, Custom.DegToVec(Custom.VecToDeg(self.shootDir) + i == 0 ? -60f : 60f), self.vulture));
             }
         }
     }
@@ -54,7 +54,7 @@ namespace BuiltinBuffs.Negative
         {
             for (int i = 0; i < tailPosCount; i++)
                 tailPosList.Add(pos);
-            life = 200;
+            life = 40;
         }
 
         public override void Update(bool eu)
@@ -161,50 +161,48 @@ namespace BuiltinBuffs.Negative
             if (totalWeaponCount > 0)
             {
                 spitDir /= totalWeaponCount;
-                var emitter = new ParticleEmitter(room);
-                emitter.pos = emitter.lastPos = pos;
-
-                emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 2, false));
-                emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, Random.Range(40, 60)));
-
-                emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
-                emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
-
-                emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
-                emitter.ApplyParticleModule(new SetRandomPos(emitter, 0f));
-                emitter.ApplyParticleModule(new SetCustomVelocity(emitter, (p) =>
-                {
-                    float deg = Custom.VecToDeg(spitDir);
-                    deg += 70f * (2f * p.randomParam1 - 1f);
-                    return Custom.DegToVec(deg) * Mathf.Lerp(30f, 40f, p.randomParam2);
-                }));
-                emitter.ApplyParticleModule(new SetRandomScale(emitter, 0.3f, 0.5f));
-                emitter.ApplyParticleModule(new SetConstColor(emitter, Color.white));
-                emitter.ApplyParticleModule(new ConstantAcc(emitter, Vector2.down * 8f));
-                emitter.ApplyParticleModule(new SimpleParticlePhysic(emitter, true, false));
-
-                emitter.ApplyParticleModule(new ScaleOverLife(emitter, (particle, lifeParam) =>
-                {
-                    return particle.setScaleXY * (1f - lifeParam);
-                }));
-
-                emitter.ApplyParticleModule(new DefaultDrawer(emitter, new int[1] { 0 }));
-                emitter.ApplyParticleModule(new TrailDrawer(emitter, 1, 10)
-                {
-                    alpha = (p, i, a) => 1f - i / (float)a,
-                    gradient = (p, i, a) => Color.Lerp(Color.white, Color.yellow, i / (float)a),
-                    width = (p, i, a) => (1f - i / (float)a) * p.setScaleXY.x,
-                }); ;
-
-                ParticleSystem.ApplyEmitterAndInit(emitter);
-                
-                
             }
+            else
+                spitDir = (pos - lastPos).normalized;
 
+            var emitter = new ParticleEmitter(room);
+            emitter.pos = emitter.lastPos = pos;
 
+            emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 2, false));
+            emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, Random.Range(40, 60)));
 
-            
+            emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
+
+            emitter.ApplyParticleModule(new SetRandomLife(emitter, 5, 10));
+            emitter.ApplyParticleModule(new SetRandomPos(emitter, 0f));
+            emitter.ApplyParticleModule(new SetCustomVelocity(emitter, (p) =>
+            {
+                float deg = Custom.VecToDeg(spitDir);
+                deg += 70f * (2f * p.randomParam1 - 1f);
+                return Custom.DegToVec(deg) * Mathf.Lerp(30f, 40f, p.randomParam2);
+            }));
+            emitter.ApplyParticleModule(new SetRandomScale(emitter, 0.3f, 0.5f));
+            emitter.ApplyParticleModule(new SetConstColor(emitter, Color.white));
+            emitter.ApplyParticleModule(new ConstantAcc(emitter, Vector2.down * 8f));
+            emitter.ApplyParticleModule(new SimpleParticlePhysic(emitter, true, false));
+
+            emitter.ApplyParticleModule(new ScaleOverLife(emitter, (particle, lifeParam) =>
+            {
+                return particle.setScaleXY * (1f - lifeParam);
+            }));
+
+            emitter.ApplyParticleModule(new DefaultDrawer(emitter, new int[1] { 0 }));
+            emitter.ApplyParticleModule(new TrailDrawer(emitter, 1, 10)
+            {
+                alpha = (p, i, a) => 1f - i / (float)a,
+                gradient = (p, i, a) => Color.Lerp(Color.white, Color.yellow, i / (float)a),
+                width = (p, i, a) => (1f - i / (float)a) * p.setScaleXY.x,
+            }); ;
+
+            ParticleSystem.ApplyEmitterAndInit(emitter);
+
             this.room.AddObject(new SootMark(this.room, vector, 80f, true));
             //this.room.AddObject(new Explosion(this.room, null, vector, 7, 250f, 6.2f, 0.1f, 280f, 0.25f, killTag, 0.7f, 160f, 1f));
             this.room.AddObject(new Explosion.ExplosionLight(vector, 280f, 1f, 7, Color.white));

@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static BuiltinBuffs.Positive.FlameThrower;
 using RWCustom;
+using RandomBuff;
+using RandomBuff.Core.Game;
 
 namespace BuiltinBuffs.Positive
 {
@@ -20,16 +22,28 @@ namespace BuiltinBuffs.Positive
         public override BuffID ID => AggressiveVentingBuffEntry.aggresiveVentingBuffID;
 
         bool canTrigger = true;
+        bool autoTriggered;
         public override bool Triggerable => canTrigger;
         public override bool Active => canTrigger;
 
         public AggressiveVentingBuff() : base()
         {
-            MyTimer = new DownCountBuffTimer((timer, game) => canTrigger = true, 10, autoReset: false, useDefaultStrategy: false);
+            MyTimer = new DownCountBuffTimer(CallBack, 30, autoReset: false, useDefaultStrategy: false);
             MyTimer.ApplyStrategy(new SpanTimerDisplayStrategy(
                 new SpanTimerDisplayStrategy.BuffTimeSpan(1, 4),
                 new SpanTimerDisplayStrategy.BuffTimeSpan(10, 13),
-                new SpanTimerDisplayStrategy.BuffTimeSpan(27, 30)));
+                new SpanTimerDisplayStrategy.BuffTimeSpan(27, 30),
+                new SpanTimerDisplayStrategy.BuffTimeSpan(42, 45)));
+        }
+
+        public void CallBack(BuffTimer timer, RainWorldGame game)
+        {
+            canTrigger = true;
+            if(autoTriggered)
+            {
+                (MyTimer as DownCountBuffTimer).ResetLimit(0, 30);
+                autoTriggered = false;
+            }
         }
 
         public override bool Trigger(RainWorldGame game)
@@ -66,9 +80,36 @@ namespace BuiltinBuffs.Positive
             }
 
             canTrigger = false;
+            if (autoTriggered)
+                (MyTimer as DownCountBuffTimer).ResetLimit(0, 45);
             MyTimer.Reset();
 
             return false;
+        }
+
+        public override void Update(RainWorldGame game)
+        {
+            base.Update(game);
+
+            foreach (var player in game.Players)
+            {
+                if (player.realizedCreature == null)
+                    continue;
+                var p = player.realizedCreature as Player;
+
+                if (p.room == null)
+                    continue;
+
+                if (TemperatureModule.TryGetTemperatureModule(p, out var temperature))
+                {
+                    if (temperature.temperature > temperature.extinguishPoint)
+                    {
+                        autoTriggered = true;
+                        BuffPoolManager.Instance.TriggerBuff(ID, true);
+                        return;
+                    }
+                }
+            }
         }
 
         public void CreateAggressiveVentingParticle(Room room, Vector2 pos, float rad)

@@ -162,6 +162,14 @@ namespace RandomBuff.Core.Buff
             else
                 frames = highLimitFrame + step;
         }
+
+        public void ResetLimit(int low, int high)
+        {
+            if (high < low)
+                return;
+            lowLimitFrame = low * 40;
+            highLimitFrame = high * 40;
+        }
     }
 
     /// <summary>
