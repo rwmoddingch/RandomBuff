@@ -7,6 +7,7 @@ using BuiltinBuffs.Duality;
 using BuiltinBuffs.Negative;
 using HotDogGains.Negative;
 using RandomBuff;
+using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -38,12 +39,13 @@ namespace BuiltinBuffs.Missions
             startBuffSet.Add(VultureShapedMutationBuffEntry.VultureShapedMutation);
             startBuffSet.Add(ArmedKingVultureBuffEntry.ArmedKingVultureID);
             startBuffSet.Add(NoPassDayBuffEntry.noPassDayBuffID);
+            startBuffSet.Add(RocketBoostTusksEntry.RocketBoostTusks);
 
         }
 
         public void RegisterMission()
         {
-            
+            BuffRegister.RegisterMission(KingOfIsles,new KingOfIslesMission());
         }
     }
 }

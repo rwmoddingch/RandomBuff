@@ -1,0 +1,17 @@
+{
+    "FaceName": "RocketBoostTusks",
+    "BuffID" : "RocketBoostTusks",
+    "BuffType" : "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "ff4200",
+
+    "Chinese" : {
+        "BuffName" : "火箭助推角矛",
+        "Description" : "角矛发射后会追踪一点时间后快速射出，并且获得更快的发射速度和更远的攻击范围，攻击到目标或墙的情况会发生一次无伤害的爆炸"
+    },
+    "English" : {
+        "BuffName" : "Rocket Boost Tusks",
+        "Description" : "After king vulture's tusk being launched, it tracks the target for a short time before speeding up rapidly, resulting in increased firing speed and extended attack range. Upon hitting a target or wall, it causes a non-damaging explosion."
+    }
+}
