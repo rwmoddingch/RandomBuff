@@ -125,6 +125,7 @@ GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>Experience multiplier: {0}<EN
 GachaTemplate_Detail_Normal|<GachaPositive>Positive or duality card draws: {0}<ENTRY><GachaNonPositive>Negative or duality card draws: {1}
 GachaTemplate_Detail_Base_Yes|Can
 GachaTemplate_Detail_Base_No|Can't
+GachaTemplate_Detail_Base_Boost|<Color=D2174D>Additional Spawns
 
 //BuffCondition
 DisplayName_Achievement|Earn {0} passage

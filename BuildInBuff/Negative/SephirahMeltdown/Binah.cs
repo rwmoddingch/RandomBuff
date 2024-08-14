@@ -98,7 +98,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
 
             };
-            game.rainWorld.processManager.musicPlayer.GameRequestsSong(turnOne);
+            game.rainWorld.processManager.musicPlayer?.GameRequestsSong(turnOne);
         }
 
 
@@ -128,7 +128,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion",
 
                 };
-                game.rainWorld.processManager.musicPlayer.GameRequestsSong(turnTwo);
+                game.rainWorld.processManager.musicPlayer?.GameRequestsSong(turnTwo);
 
             }
 
@@ -162,11 +162,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     //TODO:存在BUG
                     game.GetStorySession.saveState.deathPersistentSaveData.songsPlayRecords.RemoveAll(i =>
                         i.songName == $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong");
-                    game.rainWorld.processManager.musicPlayer.GameRequestsSong(turnOne);
+                    game.rainWorld.processManager.musicPlayer?.GameRequestsSong(turnOne);
                 }
                 else
                 {
-                    game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                    game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent()
                     {
                         fadeOutTime = 1,
                         prio = 20,
@@ -174,7 +174,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                         type = StopMusicEvent.Type.AllSongs
                     });
 
-                    game.rainWorld.processManager.musicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                    game.rainWorld.processManager.musicPlayer?.GameRequestsSongStop(new StopMusicEvent()
                     {
                         fadeOutTime = 1,
                         prio = 20,

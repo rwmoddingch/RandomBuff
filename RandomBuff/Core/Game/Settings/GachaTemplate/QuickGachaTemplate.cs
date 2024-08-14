@@ -27,6 +27,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public override void EnterGame(RainWorldGame game)
         {
+            base.EnterGame(game);
             if (newGame)
             {
                 newGame = false;

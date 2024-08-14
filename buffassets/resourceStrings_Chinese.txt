@@ -124,8 +124,9 @@ GachaTemplate_Desc_SurvivalOfFittest|每隔五轮回随机获取鹫形突变, �
 GachaTemplate_Detail_Base|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>初始抽卡倍率:{1}<ENTRY>{2}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Base_NoFreePick|<Color=FFC300>经验倍率:{0}<ENTRY><Color=FFE180>无初始抽卡<ENTRY>{1}可以使用通行证进行堆叠或删除卡
 GachaTemplate_Detail_Normal|<GachaPositive>正面或中性抽卡数:{0}<ENTRY><GachaNonPositive>负面或中性抽卡数:{1}
-GachaTemplate_Detail_Base_Yes|是
-GachaTemplate_Detail_Base_No|否
+GachaTemplate_Detail_Base_Yes|
+GachaTemplate_Detail_Base_No|不
+GachaTemplate_Detail_Base_Boost|<Color=D2174D>额外生成:
 
 //BuffCondition
 DisplayName_Achievement|获取{0}通行证

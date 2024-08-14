@@ -38,6 +38,25 @@ namespace BuiltinBuffs.Missions
 
                 },
                 gachaTemplate = new NormalGachaTemplate(true)
+                {
+                    boostCreatureInfos = new List<GachaTemplate.BoostCreatureInfo>()
+                    {
+                        new GachaTemplate.BoostCreatureInfo()
+                        {
+                            baseCrit = CreatureTemplate.Type.RedCentipede,
+                            boostCrit = CreatureTemplate.Type.RedCentipede,
+                            boostCount = 1,
+                            boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add
+                        },
+                        new GachaTemplate.BoostCreatureInfo()
+                        {
+                            baseCrit = CreatureTemplate.Type.CyanLizard,
+                            boostCrit = CreatureTemplate.Type.RedLizard,
+                            boostCount = 1,
+                            boostType = GachaTemplate.BoostCreatureInfo.BoostType.Replace
+                        },
+                    }
+                }
             };
             startBuffSet.Add(UpgradationIBuffEntry.UpgradationBuffID);
             startBuffSet.Add(MobileAssaultIBuffEntry.mobileAssaultBuffID);
