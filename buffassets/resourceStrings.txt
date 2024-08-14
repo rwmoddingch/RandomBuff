@@ -203,6 +203,7 @@ Mission_Display_InHurry|HURRIED AND FLUSTERED
 Mission_Display_SurvivalOfFittest|SURVIVAL OF THE FITTEST
 Mission_Display_SlugOfTheFlame|SLUG OF THE FLAME
 Mission_Display_KingOfIsles|KING OF THE ISLES
+Mission_Display_TunnelBattle|TUNNEL BATTLE
 
 //Credit
 CreditTitle_Intro|Random Buff
