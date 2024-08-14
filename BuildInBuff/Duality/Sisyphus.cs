@@ -36,28 +36,39 @@ namespace HotDogGains.Duality
         private static void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
         {
             orig.Invoke(self, obj, graspUsed);
-            if (obj != null&&obj is Rock rock)
+
+            if (!self.inShortcut)
             {
-                RandomBuffUtils.BuffUtils.Log(SisyphusID, "SaveRoom and pos");
-                var rockData = rock.SisyphusData();
-                rockData.saveRoom = rock.room;
-                rockData.savePos = rock.firstChunk.pos;
-                rockData.saveRegion = rock.room.world.regionState.regionName;
+                if (obj != null && obj is Rock rock)
+                {
+                    RandomBuffUtils.BuffUtils.Log(SisyphusID, "SaveRoom and pos");
+                    var rockData = rock.SisyphusData();
+                    rockData.saveRoom = rock.room.abstractRoom;
+                    rockData.savePos = rock.firstChunk.pos;
+                    rockData.saveWorldCoordinate = self.room.GetWorldCoordinate(rock.firstChunk.pos);
+                    rockData.saveRegion = rock.room.world.regionState.regionName;
+                }
             }
+            
         }
 
         private static void Player_ReleaseObject(On.Player.orig_ReleaseObject orig, Player self, int grasp, bool eu)
         {
             Rock rock = self.grasps[grasp].grabbed as Rock;
             orig.Invoke(self, grasp, eu);
+            //加上管道判断防止意外卡死
+            if (self.inShortcut) return;
+
             if (rock?.SisyphusData().saveRoom != null &&
                 rock.SisyphusData().saveRegion == self.room.world.regionState.regionName)
             {
 
                 RandomBuffUtils.BuffUtils.Log(SisyphusID, "Warp rock and player");
+
                 var data = rock.SisyphusData();
-                Warp(self, data.saveRoom, data.savePos);
-                Warp(rock, data.saveRoom, data.savePos);
+
+                Warp(self, data.saveRoom, data.savePos,data.saveWorldCoordinate);
+                Warp(rock, data.saveRoom, data.savePos,data.saveWorldCoordinate);
                 SisyphusBuff.Instance.TriggerSelf(true);
 
 
@@ -80,13 +91,15 @@ namespace HotDogGains.Duality
 
         }
 
-        public static void Warp(PhysicalObject obj,Room newRoom,Vector2 newPos)
+        public static void Warp(PhysicalObject obj,AbstractRoom newRoom,Vector2 newPos,WorldCoordinate worldCoordinate)
         {
-            if (obj.room!=newRoom)
+            if (obj.room.abstractRoom!=newRoom)
             {
-                obj.abstractPhysicalObject.Move(newRoom.GetWorldCoordinate(newPos));
-                obj.PlaceInRoom(newRoom);
-                obj.abstractPhysicalObject.pos = newRoom.GetWorldCoordinate(newPos);
+                newRoom.RealizeRoom(newRoom.world, newRoom.world.game);
+
+                obj.abstractPhysicalObject.Move(worldCoordinate);
+                obj.PlaceInRoom(newRoom.realizedRoom);
+                obj.abstractPhysicalObject.pos = newRoom.realizedRoom.GetWorldCoordinate(newPos);
             }
             else
             {
@@ -109,8 +122,10 @@ namespace HotDogGains.Duality
         Rock rock;
 
         public string saveRegion;
-        public Room saveRoom;
+        public AbstractRoom saveRoom;
         public Vector2 savePos;
+        public WorldCoordinate saveWorldCoordinate;
+
 
         public ExRock(Rock rock)
         {
