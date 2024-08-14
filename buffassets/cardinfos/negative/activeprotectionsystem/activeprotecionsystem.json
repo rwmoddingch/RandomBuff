@@ -1,0 +1,17 @@
+{
+    "FaceName": "ActiveProtectionSystem",
+    "ID": "ActiveProtectionSystem",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#ffffff",
+    "Chinese":{
+        "BuffName":"主动防御系统",
+        "Description":"魔王秃鹫发射角矛时会发射可以击落飞行物的防御导弹"
+    },
+    "English":{
+        "BuffName":"Active Protection System",
+        "Description":"When shooting tusk, king vultures will release missile which deflecet projectiles."
+    }
+}
