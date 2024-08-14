@@ -19,6 +19,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static ConditionID Cycle;
         public static ConditionID Card;
         public static ConditionID Hunt;
+        public static ConditionID HuntAll;
         public static ConditionID Achievement;
         public static ConditionID Like;
         public static ConditionID Gourmand;
@@ -28,8 +29,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static ConditionID MeetSS_SL;
         public static ConditionID Extermination;
         public static ConditionID FixedCycle;
+        public static ConditionID WithInCycle;
 
         public static ConditionID Death;
+        public static ConditionID ContinuousSurvival;
+
 
 
         static ConditionID()
@@ -47,6 +51,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             //SaveSL = new ConditionID("SaveSL", true);
             FixedCycle = new(nameof(FixedCycle), true);
             Death = new(nameof(Death), true);
+            WithInCycle = new(nameof(WithInCycle), true);
+            ContinuousSurvival = new(nameof(ContinuousSurvival),true);
+            HuntAll = new(nameof(HuntAll), true);
         }
 
         public ConditionID(string value, bool register = false) : base(value, register)
@@ -178,11 +185,15 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Score Condition");
 
             BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
+            BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt All Condition");
+
             BuffRegister.RegisterCondition<ExterminationCondition>(ConditionID.Extermination, "Extermination Condition");
             BuffRegister.RegisterCondition<ScoreCondition>(ConditionID.Score, "Score Condition");
             BuffRegister.RegisterCondition<DeathCondition>(ConditionID.Death, "Death");
-            BuffRegister.RegisterCondition<FixedCycleCondition>(ConditionID.FixedCycle, "Fix Cycles", true);
+            BuffRegister.RegisterCondition<ContinuousSurvivalCondition>(ConditionID.ContinuousSurvival, "Continuous Survival");
 
+            BuffRegister.RegisterCondition<FixedCycleCondition>(ConditionID.FixedCycle, "Fix Cycles", true);
+            BuffRegister.RegisterCondition<WithInCycleCondition>(ConditionID.WithInCycle, "WithIn Cycle", true);
         }
 
         public enum ConditionState

@@ -56,6 +56,7 @@ namespace BuiltinBuffs.Negative
 
                                 if (newCreature != null)
                                 {
+                                    newCreature.saveCreature = false;
                                     abstractCreaturesToAdd.Add(newCreature);
                                     cretToRoom.Add(newCreature, abRoom);
                                     totalCreatureInRegin++;
