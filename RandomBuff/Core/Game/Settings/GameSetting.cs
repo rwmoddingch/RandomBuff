@@ -209,6 +209,7 @@ namespace RandomBuff.Core.Game.Settings
         public void LoadTemplate(string name)
         {
             TemplateName = "Normal";
+            MissionId = null;
             if (!BuffConfigManager.ContainsTemplateName(name))
             {
                 BuffPlugin.LogFatal($"Unknown template: {name}, use default");

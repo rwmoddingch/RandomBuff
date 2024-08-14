@@ -127,19 +127,19 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         private static void PauseMenu_ctor(On.Menu.PauseMenu.orig_ctor orig, Menu.PauseMenu self, ProcessManager manager, RainWorldGame game)
         {
-            if (BinahBuff.Instance == null || BinahBuff.Instance.Data.Health >= 0.25F)
-            {
-                BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
-                    { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });
-                game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 1, 0.1f, 1);
-                foreach (var player in game.AlivePlayers)
-                {
-                    if (player.realizedCreature is Player crit)
-                        crit.Stun(200 + count * 80);
-                }
 
-                count++;
+
+            BuffPostEffectManager.AddEffect(new CutEffect(0, 0.8f, 0.02f, 0.5f, 11, true)
+            { inst = 0.3f, IgnoreGameSpeed = true, IgnorePaused = true });
+            game.cameras[0].virtualMicrophone.PlaySound(StormIsApproachingEntry.EndSound2, 1, 0.1f, 1);
+            foreach (var player in game.AlivePlayers)
+            {
+                if (player.realizedCreature is Player crit)
+                    crit.Stun(200 + count * 80);
             }
+
+            count++;
+
 
             orig(self, manager, game);
         }

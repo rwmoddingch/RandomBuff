@@ -210,7 +210,6 @@ namespace RandomBuff.Core.SaveData
         internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, GameSetting setting, bool malnourished)
         {
             var name = manager.Game.StoryCharacter;
-
             if (!malnourished)
             {
                 if (!allDatas.ContainsKey(name)) allDatas.Add(name, new());
@@ -225,7 +224,7 @@ namespace RandomBuff.Core.SaveData
                 malnourishedData = (name, tempDatas, setting);
                 BuffPlugin.Log($"SAVE MALNOURISHED DATA, Name:{name}");
             }
-            foreach (var data in allDatas[name].ToArray())
+            foreach (var data in tempDatas.ToArray())
             {
                 try
                 {

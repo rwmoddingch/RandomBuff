@@ -1,4 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Expedition;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -90,12 +93,25 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         /// <summary>
         /// 每轮回进入游戏时触发
         /// </summary>
-        public virtual void EnterGame(RainWorldGame game) {}
+        public virtual void EnterGame(RainWorldGame game)
+        {
+            On.WorldLoader.GeneratePopulation += WorldLoader_GeneratePopulation;
+            if (game.GetStorySession.saveState.cycleNumber == 0)
+                BoostCreatureSpawn(game, game.world);
+
+
+        }
+
+
 
         /// <summary>
         /// 在任何删除时候触发
         /// </summary>
-        public virtual void OnDestroy(){}
+        public virtual void OnDestroy()
+        {
+            On.WorldLoader.GeneratePopulation -= WorldLoader_GeneratePopulation;
+
+        }
 
         /// <summary>
         /// 当数据读取完成触发
@@ -112,14 +128,43 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         {
             get
             {
-                if(PocketPackMultiply == 0)
-                    return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "<ENTRY>", ExpMultiply,
-                        BuffResourceString.Get(CanStackByPassage ? "GachaTemplate_Detail_Base_Yes" : "GachaTemplate_Detail_Base_No"));
-                return string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base") + "<ENTRY>", ExpMultiply,
-                    PocketPackMultiply,
-                    BuffResourceString.Get(CanStackByPassage
-                        ? "GachaTemplate_Detail_Base_Yes"
-                        : "GachaTemplate_Detail_Base_No"));
+                if (ChallengeTools.creatureNames == null)
+                    ChallengeTools.CreatureName(ref ChallengeTools.creatureNames);
+                var str = string.Empty;
+                if (PocketPackMultiply == 0)
+                {
+                    str = string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base_NoFreePick") + "<ENTRY>",
+                        ExpMultiply,
+                        BuffResourceString.Get(CanStackByPassage
+                            ? "GachaTemplate_Detail_Base_Yes"
+                            : "GachaTemplate_Detail_Base_No"));
+                }
+                else
+                {
+                    str = string.Format(BuffResourceString.Get("GachaTemplate_Detail_Base") + "<ENTRY>", ExpMultiply,
+                        PocketPackMultiply,
+                        BuffResourceString.Get(CanStackByPassage
+                            ? "GachaTemplate_Detail_Base_Yes"
+                            : "GachaTemplate_Detail_Base_No"));
+                }
+              
+                if (boostCreatureInfos is { Count: > 0 })
+                {
+                    var names = " ";
+                    HashSet<string> already = new();
+                    for (int i = 0; i < boostCreatureInfos.Count; i++)
+                    {
+                        if(already.Contains(ChallengeTools.creatureNames[boostCreatureInfos[i].boostCrit.index]))
+                            continue;
+                        already.Add(ChallengeTools.creatureNames[boostCreatureInfos[i].boostCrit.index]);
+                        names += (i == 0 ? "" : ", ") +
+                                 ChallengeTools.creatureNames[boostCreatureInfos[i].boostCrit.index];
+                    }
+
+                    str += "<ENTRY>" + BuffResourceString.Get("GachaTemplate_Detail_Base_Boost") + names + "<ENTRY>";
+                }
+
+                return str;
             }
         }
 
@@ -141,6 +186,13 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         [JsonProperty]
         public bool CanStackByPassage = true;
 
+
+        /// <summary>
+        /// 补充生物生成
+        /// </summary>
+        [JsonProperty]
+        public List<BoostCreatureInfo> boostCreatureInfos = new();
+
         public class CachaPacket
         {
             public (int selectCount, int showCount, int pickTimes) positive;
@@ -150,6 +202,104 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
         }
 
 
+        /// <summary>
+        /// 生物生成扩展
+        /// </summary>
+        public class BoostCreatureInfo
+        {
+            public enum BoostType
+            {
+                Replace,
+                Add,
+            }
+
+            public BoostType boostType;
+            public int boostCount;
+
+            public CreatureTemplate.Type boostCrit;
+            public CreatureTemplate.Type baseCrit;
+
+        }
+
+
+        private void WorldLoader_GeneratePopulation(On.WorldLoader.orig_GeneratePopulation orig, WorldLoader self, bool fresh)
+        {
+            orig(self, fresh);
+            BoostCreatureSpawn(self.game, self.world);
+        }
+
+        private void BoostCreatureSpawn(RainWorldGame self, World world)
+        {
+            boostCreatureInfos ??= new List<BoostCreatureInfo>();
+            BuffPlugin.Log($"Try Boost creatures, info count:{boostCreatureInfos.Count}");
+
+            foreach (var info in boostCreatureInfos)
+            {
+                BuffPlugin.LogDebug($"{info.baseCrit}, {info.boostCrit}, {info.boostType}, {info.boostCount}");
+                switch (info.boostType)
+                {
+                    case BoostCreatureInfo.BoostType.Add:
+                        foreach (var room in world.abstractRooms.Append(world.offScreenDen))
+                        {
+                            foreach (var crit in room.entities.OfType<AbstractCreature>().ToList())
+                            {
+                                if (crit.creatureTemplate.type == info.baseCrit)
+                                {
+                                    BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}");
+                                    for (int i = 0; i < info.boostCount; i++)
+                                        room.AddEntity(new AbstractCreature(room.world,
+                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
+                                            self.GetNewID(-1)));
+                                }
+                            }
+
+                            foreach (var crit in room.entitiesInDens.OfType<AbstractCreature>().ToList())
+                            {
+                                if (crit.creatureTemplate.type == info.baseCrit)
+                                {
+                                    BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}");
+
+                                    for (int i = 0; i < info.boostCount; i++)
+                                        room.MoveEntityToDen(new AbstractCreature(room.world,
+                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
+                                            self.GetNewID(-1)));
+                                }
+                            }
+                        }
+
+                        break;
+                    case BoostCreatureInfo.BoostType.Replace:
+                        foreach (var room in world.abstractRooms.Append(world.offScreenDen))
+                        {
+                            foreach (var crit in room.entities.OfType<AbstractCreature>().ToList())
+                            {
+                                if (crit.creatureTemplate.type == info.baseCrit)
+                                {
+                                    BuffPlugin.LogDebug(
+                                        $"Replace {crit.creatureTemplate.type} to {info.boostCrit}, at room: {room.name}");
+                                    room.RemoveEntity(crit);
+                                    room.AddEntity(new AbstractCreature(room.world,
+                                        StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos, crit.ID));
+                                }
+                            }
+
+                            foreach (var crit in room.entitiesInDens.OfType<AbstractCreature>().ToList())
+                            {
+                                if (crit.creatureTemplate.type == info.baseCrit)
+                                {
+                                    BuffPlugin.LogDebug(
+                                        $"Replace {crit.creatureTemplate.type} to {info.boostCrit}, at room: {room.name}");
+                                    room.RemoveEntity(crit);
+                                    room.MoveEntityToDen(new AbstractCreature(room.world,
+                                        StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos, crit.ID));
+                                }
+                            }
+                        }
+
+                        break;
+                }
+            }
+        }
     }
 
     public abstract partial class GachaTemplate

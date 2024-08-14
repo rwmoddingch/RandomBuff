@@ -185,7 +185,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Score Condition");
 
             BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
-            BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt All Condition");
+            BuffRegister.RegisterCondition<HuntAllCondition>(ConditionID.HuntAll, "Hunt All Condition");
 
             BuffRegister.RegisterCondition<ExterminationCondition>(ConditionID.Extermination, "Extermination Condition");
             BuffRegister.RegisterCondition<ScoreCondition>(ConditionID.Score, "Score Condition");
