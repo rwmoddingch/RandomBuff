@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -20,6 +21,23 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             return ConditionState.Ok_NoMore;
         }
 
+        public override void HookOn()
+        {
+            base.HookOn();
+            BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+
+        }
+        private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
+        {
+            if (!creature.Template.smallCreature && creature.Template.type != CreatureTemplate.Type.Spider)
+            {
+                currentCount++;
+                if (currentCount >= huntCount && !Finished)
+                    Finished = true;
+                else
+                    onLabelRefresh?.Invoke(this);
+            }
+        }
 
         [JsonProperty] 
         public int huntCount;

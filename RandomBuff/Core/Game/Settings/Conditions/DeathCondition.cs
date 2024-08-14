@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using Newtonsoft.Json;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -47,7 +48,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public override string DisplayProgress(InGameTranslator translator)
         {
-            return $"({currentDeathCount}/{deathCount})";
+            if(BuffCustom.TryGetGame(out _))
+                return $"({currentDeathCount}/{deathCount})";
+            return "";
         }
 
         public override string DisplayName(InGameTranslator translator)

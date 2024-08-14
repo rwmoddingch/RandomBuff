@@ -102,7 +102,6 @@ namespace BuiltinBuffs.Expeditions
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
             On.WinState.CycleCompleted += WinState_CycleCompleted;
-
             IL.RainWorldGame.Update += RainWorldGame_Update;
 
             _ = new Hook(typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),BindingFlags.Static | BindingFlags.Public).GetGetMethod(),

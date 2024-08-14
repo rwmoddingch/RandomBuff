@@ -151,6 +151,9 @@ DisplayName_Distance|Move at least {0} meters
 DisplayName_Distance_Faster|Move at least {0} meters while the card grants a speed boost
 DisplayName_ScorchCreature|Using heat to burn {0} creatures
 DisplayName_PermanentlyHold|Permanently hold {0}
+DisplayName_HuntAll|Kill {0} creatures
+DisplayName_ContinuousSurvival|Survive for {0} consecutive cycles
+DisplayName_WithInCycle|Completed the mission within {0} cycles 
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -198,6 +201,7 @@ Mission_Display_TripleAffirmation|TRIPLE AFFIRMATION
 Mission_Display_InHurry|HURRIED AND FLUSTERED
 Mission_Display_SurvivalOfFittest|SURVIVAL OF THE FITTEST
 Mission_Display_SlugOfTheFlame|SLUG OF THE FLAME
+Mission_Display_KingOfIsles|KING OF THE ISLES
 
 //Credit
 CreditTitle_Intro|Random Buff
