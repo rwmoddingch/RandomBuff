@@ -1,4 +1,5 @@
-﻿using RandomBuff.Core.Game;
+﻿using Menu.Remix.MixedUI;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -17,7 +18,7 @@ namespace RandomBuff.Render.UI.BuffCondition
     internal class BuffConditionHUD
     {
         public FContainer Container { get; } = new();
-        internal List<ConditionInstance> instances = new();
+        internal List<ConditionInstance2> instances = new();
         internal MissionDisplay missionDisplay;
         FlagBanner flagBanner;
 
@@ -38,7 +39,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             foreach (var condition in gameSetting.conditions)
             {
                 condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh);
-                instances.Add(new ConditionInstance(this, condition, instances.Count + indexIncreasement));
+                instances.Add(new ConditionInstance2(this, condition, instances.Count + indexIncreasement));
             }
             flagBanner = new FlagBanner(this);
             UpdateFlagMode();
@@ -133,7 +134,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                     missionDisplay?.SetShow();
                     foreach (var instance in instances)
                     {
-                        instance.SetShow();
+                        instance.SetShow(true);
                     }
                 }
 
@@ -218,6 +219,323 @@ namespace RandomBuff.Render.UI.BuffCondition
                 cardTitle.Destroy();
             }
         }
+
+        internal class ConditionInstance2
+        {
+            public static int MaxShowAnimTimer = 40;
+            public static int MaxStayDisplayTimer = 120;
+            public static int MaxFlashTimer = 20;
+            public static Color normalColor = Color.white * 0.6f + Color.black * 0.4f;
+            public static Color completeColor = Color.green * 0.8f + Color.blue * 0.2f;
+            public static Color uncompleteColor = Color.red * 0.8f + Color.yellow * 0.2f;
+            public static Color highLightColor = Color.white;
+
+            BuffConditionHUD conditionHUD;
+            Condition bindCondition;
+            int index;
+
+            FSprite flatLight;
+            FSprite rect;
+            FLabel textLabel;
+
+            Vector2 hoverPos;
+            Vector2 hidePos;
+            Vector2 pos;
+            Vector2 lastPos;
+            int flashCounter;
+            int lastFlashCounter;
+
+            Color initCol;
+            Color targetCol;
+            Color currentCol;
+            Color lastCol;
+
+            int stayDisplayCounter;
+
+            float showFactor;
+            float lastShowFactor;
+
+            public bool ShowAnimFinished => showAnimCmpnt.finished;
+            public bool afterAnimFinishedShowState;
+            TickAnimCmpnt showAnimCmpnt;
+            TickAnimCmpnt flashColorAnimCmpnt;
+
+            public bool complete;
+
+            List<Action> TextChangeRequestQueue = new List<Action>();
+            List<Action> CompleteStateChangeRequestQueue = new List<Action>();
+
+            public ConditionInstance2(BuffConditionHUD conditionHUD, Condition bindCondition, int index)
+            {
+                this.conditionHUD = conditionHUD;
+                this.bindCondition = bindCondition;
+                this.index = index;
+
+                hoverPos = conditionHUD.TopLeft + new Vector2(20, -30 * index);
+                hidePos = hoverPos + Vector2.right * 100f;
+
+                InitSprites();
+
+                RequestTextChange(bindCondition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
+                             bindCondition.DisplayProgress(Custom.rainWorld.inGameTranslator), true);
+                RequestCompleteChange(bindCondition.Finished, true);
+                
+                showAnimCmpnt = AnimMachine.GetTickAnimCmpnt(0, MaxShowAnimTimer, tick:-1, autoStart: false, autoDestroy: false)
+                    .BindModifier(Helper.LerpEase)
+                    .BindActions(OnAnimStart: Anim_OnStart, OnAnimGrafUpdate: Anim_UpdatePosAndShowFactor, OnAnimFinished: Anim_OnFinish, OnAnimUpdate: Anim_OnUpdate);
+                showAnimCmpnt.finished = true;
+
+                SetShow(true);
+            }
+
+            public void Refresh(Condition condition)
+            {
+                if (bindCondition != condition)
+                    return;
+                RequestTextChange(condition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
+                             condition.DisplayProgress(Custom.rainWorld.inGameTranslator));
+            }
+
+            public void Uncomplete(Condition condition)
+            {
+                if (bindCondition != condition)
+                    return;
+                RequestCompleteChange(false);
+            }
+
+            public void Complete(Condition condition)
+            {
+                if (bindCondition != condition)
+                    return;
+                RequestCompleteChange(true);
+            }
+
+            public void RequestCompleteChange(bool complete, bool forceRefresh = false)
+            {
+                if (forceRefresh || ShowAnimFinished && afterAnimFinishedShowState)
+                    _InternalRefreshComplete(complete, forceRefresh);
+                else
+                {
+                    SetShow(true);
+                    CompleteStateChangeRequestQueue.Add(() => _InternalRefreshComplete(complete));
+                }
+            }
+
+            void _InternalRefreshComplete(bool complete, bool forceRefresh = false)
+            {
+                if(forceRefresh)
+                {
+                    currentCol = lastCol = targetCol = complete ? completeColor : normalColor;
+                }
+                else
+                {
+                    if(complete && !this.complete)
+                    {
+                        currentCol = lastCol = highLightColor;
+                        targetCol = completeColor;
+                    }
+                    else if(!complete && this.complete)
+                    {
+                        currentCol = lastCol = uncompleteColor;
+                        targetCol = normalColor;
+                    }
+                    _InternalFireUpColorChangeAnim();
+                    SetShow(true);
+                }
+
+                this.complete = complete;
+            }
+
+            void _InternalFireUpColorChangeAnim()
+            {
+                initCol = currentCol;
+                if(flashColorAnimCmpnt != null)
+                {
+                    flashColorAnimCmpnt.Destroy();
+                    flashColorAnimCmpnt = null;
+                }
+                flashColorAnimCmpnt = AnimMachine.GetTickAnimCmpnt(0, 20, autoDestroy: true).BindModifier(Helper.LerpEase)
+                    .BindActions(OnAnimGrafUpdate: (t, l) =>
+                    {
+                        currentCol = Color.Lerp(initCol, targetCol, t.Get());
+                    },OnAnimFinished:(t) =>
+                    {
+                        flashColorAnimCmpnt = null;
+                        currentCol = targetCol;
+                    });
+            }
+
+            public void RequestTextChange(string newText, bool forceRefresh = false)
+            {
+                if(forceRefresh || ShowAnimFinished && afterAnimFinishedShowState)
+                    _InternalRefreshText(newText, forceRefresh);
+                else
+                {
+                    SetShow(true);
+                    TextChangeRequestQueue.Add(() => _InternalRefreshText(newText));
+                }
+            }
+
+            void _InternalRefreshText(string text, bool forceRefresh = false)
+            {
+                textLabel.text = text;
+                flatLight.scaleX = (LabelTest.GetWidth(text, true) + 20) / 200f;
+                flatLight.scaleY = 1f;
+                if (!forceRefresh)
+                {
+                    Flash();
+                    SetShow(true);
+                }
+            }
+
+            public void SetShow(bool show)
+            {
+                //BuffPlugin.Log($"{bindCondition.ID} setshow : {show} - {showAnimFinished} - {afterAnimFinishedShowState}");
+                if (ShowAnimFinished)
+                {
+                    if (show == afterAnimFinishedShowState)
+                    {
+                        if(show)
+                            stayDisplayCounter = MaxStayDisplayTimer;
+                    }
+                    else
+                        showAnimCmpnt.SetTickAndStart(show ? 1 : -1);
+                }
+                else
+                    showAnimCmpnt.tick = show ? 1 : -1;
+            }
+
+            public void Anim_UpdatePosAndShowFactor(TickAnimCmpnt t, float timeStacker)
+            {
+                pos = Vector2.Lerp(hidePos, hoverPos, t.Get());
+                showFactor = t.Get();
+                
+            }
+
+            public void Anim_OnStart(TickAnimCmpnt t)
+            {
+                //showAnimFinished = false;
+            }
+
+            public void Anim_OnUpdate(TickAnimCmpnt t)
+            {
+                //BuffPlugin.Log($"{bindCondition.ID},  {t.lowBound}-{t.current}-{t.highBound}, {t.finished}");
+            }
+
+
+            public void Anim_OnFinish(TickAnimCmpnt t)
+            {
+                BuffPlugin.Log($"{bindCondition.ID} Anim_OnFinish");
+                //showAnimFinished = true;
+                afterAnimFinishedShowState = t.current == t.highBound;
+                if (afterAnimFinishedShowState)
+                {
+                    stayDisplayCounter = MaxStayDisplayTimer;
+
+                    if (TextChangeRequestQueue.Count > 0)
+                    {
+                        TextChangeRequestQueue.Last().Invoke();
+                        TextChangeRequestQueue.Clear();
+                    }
+
+                    if (CompleteStateChangeRequestQueue.Count > 0)
+                    {
+                        CompleteStateChangeRequestQueue.Last().Invoke();
+                        CompleteStateChangeRequestQueue.Clear();
+                    }
+
+                    Flash();
+                }
+            }
+
+            void Flash()
+            {
+                flashCounter = MaxFlashTimer;
+            }
+
+            public void InitSprites()
+            {
+                flatLight = new FSprite(BuffUIAssets.Gradient30, true)
+                {
+                    color = Color.white,
+                    alpha = 0f,
+                    anchorX = 0f,
+                    anchorY = 1f,
+                    shader = Custom.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"]
+                };
+                textLabel = new FLabel(Custom.GetDisplayFont(), "")
+                {
+                    anchorX = 0,
+                    anchorY = 1f,
+                    alignment = FLabelAlignment.Left
+                };
+                rect = new FSprite("pixel", true)
+                {
+                    color = Color.white,
+                    alpha = 0f,
+                    anchorX = 0f,
+                    anchorY = 1f,
+                    scaleX = 6f,
+                    scaleY = 16f,
+                    shader = Custom.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"]
+                };
+                conditionHUD.Container.AddChild(flatLight);
+                conditionHUD.Container.AddChild(textLabel);
+                conditionHUD.Container.AddChild(rect);
+            }
+
+            public void Update()
+            {
+                lastPos = pos;
+                lastShowFactor = showFactor;
+                lastFlashCounter = flashCounter;
+                lastCol = currentCol;
+
+                if(afterAnimFinishedShowState && stayDisplayCounter > 0)
+                {
+                    stayDisplayCounter--;
+                    if (conditionHUD.currentMode == Mode.Alway)
+                        stayDisplayCounter = MaxStayDisplayTimer;
+
+                    if(stayDisplayCounter == 0)
+                    {
+                        SetShow(false);
+                    }
+                }
+
+                if (flashCounter > 0)
+                    flashCounter--;
+            }
+
+            public void DrawSprites(float timeStacker)
+            {
+                Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
+                Color smoothColor = Color.Lerp(lastCol, currentCol, timeStacker);
+
+                textLabel.SetPosition(smoothPos);
+                flatLight.SetPosition(smoothPos + new Vector2(-20f, 0f));
+                rect.SetPosition(smoothPos + new Vector2(-12f, 1f - 8f));
+
+                textLabel.color = smoothColor;
+                flatLight.color = smoothColor;
+                rect.color = smoothColor;
+
+                float smoothAlpha = Mathf.Lerp(lastShowFactor, showFactor, timeStacker);
+                textLabel.alpha = smoothAlpha;
+                
+                float smoothFlash = Helper.LerpEase(Mathf.Lerp(lastFlashCounter / (float)MaxFlashTimer, flashCounter / (float)MaxFlashTimer, timeStacker));
+
+                flatLight.alpha = smoothFlash * 0.6f;
+                rect.alpha = smoothAlpha * 0.6f + smoothAlpha * 0.4f;
+            }
+            public void Destroy()
+            {
+                textLabel.RemoveFromContainer();
+                flatLight.RemoveFromContainer();
+                rect.RemoveFromContainer();
+            }
+        }
+
 
         internal class ConditionInstance
         {
@@ -499,6 +817,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             public void Destroy()
             {
                 textLabel.RemoveFromContainer();
+                flatLight.RemoveFromContainer();
             }
         }
 
@@ -555,7 +874,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                 bool lateFlagMode = hud.flagMode;
                 foreach(var conditionInstanec in hud.instances)
                 {
-                    lateFlagMode &= !conditionInstanec.show;
+                    lateFlagMode &= !conditionInstanec.afterAnimFinishedShowState;
                 }
 
                 renderer.Show = lateFlagMode;

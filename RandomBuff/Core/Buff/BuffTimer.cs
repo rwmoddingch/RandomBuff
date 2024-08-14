@@ -87,7 +87,7 @@ namespace RandomBuff.Core.Buff
                 if(timeSpan <= 15)
                 {
                     ApplyStrategy(new SpanTimerDisplayStrategy(
-                        new SpanTimerDisplayStrategy.BuffTimeSpan(lowLimit, lowLimit + 3),
+                        new SpanTimerDisplayStrategy.BuffTimeSpan(lowLimit + 1, lowLimit + 3),
                         new SpanTimerDisplayStrategy.BuffTimeSpan(highLimit - 3, highLimit)
                         ));
                 }
@@ -96,7 +96,7 @@ namespace RandomBuff.Core.Buff
                     int midSec = lowLimit + timeSpan / 2;
 
                     ApplyStrategy(new SpanTimerDisplayStrategy(
-                        new SpanTimerDisplayStrategy.BuffTimeSpan(lowLimit, lowLimit + 3),
+                        new SpanTimerDisplayStrategy.BuffTimeSpan(lowLimit + 1, lowLimit + 3),
                         new SpanTimerDisplayStrategy.BuffTimeSpan(highLimit - 3, highLimit),
                         new SpanTimerDisplayStrategy.BuffTimeSpan(midSec - 1, midSec + 2)
                         ));
@@ -104,12 +104,20 @@ namespace RandomBuff.Core.Buff
                 else
                 {
                     List<SpanTimerDisplayStrategy.BuffTimeSpan> lst = new();
-                    for (int i = lowLimit;i < highLimit; i += 10)
+
+                    int start = lowLimit + 1;
+                    int spanStep = 10;
+
+                    while(start + 3 < highLimit)
                     {
-                        lst.Add(new SpanTimerDisplayStrategy.BuffTimeSpan(i - 1, i + 2));
+                        lst.Add(new SpanTimerDisplayStrategy.BuffTimeSpan(start, start + 3));
+                        spanStep += 5;
+                        start += spanStep;
                     }
-                    lst.Add(new SpanTimerDisplayStrategy.BuffTimeSpan(lowLimit, lowLimit + 3));
-                    lst.Add(new SpanTimerDisplayStrategy.BuffTimeSpan(highLimit - 3, highLimit));
+                    if(start < highLimit - 3)
+                    {
+                        lst.Add(new SpanTimerDisplayStrategy.BuffTimeSpan(highLimit - 3, highLimit));
+                    }
 
                     ApplyStrategy(new SpanTimerDisplayStrategy(lst.ToArray()));
                 }
