@@ -357,6 +357,11 @@ namespace BuiltinBuffs.Positive
                     bindAbPlayer.realizedCreature.dead = false;
                 if ((bindAbPlayer.realizedCreature as Player).playerState.dead)
                     (bindAbPlayer.realizedCreature as Player).playerState.alive = true;
+                if ((bindAbPlayer.realizedCreature as Player).aerobicLevel > 0f)
+                    (bindAbPlayer.realizedCreature as Player).aerobicLevel = 0f;
+                if ((bindAbPlayer.realizedCreature as Player).playerState.permanentDamageTracking > 0f)
+                    (bindAbPlayer.realizedCreature as Player).playerState.permanentDamageTracking = 0f;
+
                 if (bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.textPrompt.gameOverMode)
                 {
                     bindAbPlayer.Room.realizedRoom.game.cameras[0].hud.textPrompt.gameOverMode = false;

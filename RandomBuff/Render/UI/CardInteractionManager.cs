@@ -557,7 +557,14 @@ namespace RandomBuff.Render.UI
             if (card?.StaticData.Triggerable ?? false)
             {
                 card.onMouseRightClick?.Invoke();
-                BuffPoolManager.Instance.TriggerBuff(card.ID);
+                if (BuffPoolManager.Instance.TriggerBuff(card.ID))
+                {
+                    if (exclusiveShowCard == card)
+                        exclusiveShowCard = null;
+                    if (CurrentFocusCard == card)
+                        CurrentFocusCard = null;
+                    SetState(State.Show);
+                }
             }
         }
 
