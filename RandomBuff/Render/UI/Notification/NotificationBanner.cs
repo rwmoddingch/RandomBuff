@@ -112,6 +112,10 @@ namespace RandomBuff.Render.UI.Notification
         protected virtual void OnOkButtonClick()
         {
             SwitchState(State.CollapseContent);
+            foreach(var button in buttons)
+            {
+                button.inactive = true;
+            }
         }
 
         public virtual void InStateUpdate()

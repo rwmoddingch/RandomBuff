@@ -311,7 +311,10 @@ namespace RandomBuff
 
         public T AutoPause()
         {
-            return BindActions(OnAnimFinished: (self) => self.SetEnable(false));
+            return BindActions(OnAnimFinished: (self) =>
+            {
+                self.SetEnable(false);
+            });
         }
 
         public TickAnimCmpnt GetTickAnimCmpntAfterFinish(int lowBound, int highBound, int? initial = null, int tick = 1, bool autoDestroy = false)
@@ -384,12 +387,13 @@ namespace RandomBuff
         public override void Update()
         {
             base.Update();
+
+            last = current;
             if (!enable)
                 return;
             if (current == initial)
                 OnAnimStart?.Invoke(this);
 
-            last = current;
             if((tick > 0 && current <= highBound) || (tick < 0 && current >= lowBound))
             {
                 current += tick;
@@ -421,6 +425,7 @@ namespace RandomBuff
 
         public void Reset(int value)
         {
+            base.Reset();
             current = last = value;
         }
 
