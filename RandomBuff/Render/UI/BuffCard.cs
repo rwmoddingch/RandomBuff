@@ -327,6 +327,8 @@ namespace RandomBuff.Render.UI
             if (newState == currentAniamtorState && currentAnimator != null)
                 return;
 
+            //BuffPlugin.Log($"{ID} switch to {newState}");
+
             lastAnimatorState = currentAniamtorState;
             currentAnimator?.Destroy();
             currentAniamtorState = newState;

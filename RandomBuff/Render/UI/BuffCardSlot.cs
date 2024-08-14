@@ -82,26 +82,38 @@ namespace RandomBuff.Render.UI
         /// </summary>
         /// <param name="buffID"></param>
         /// <param name="destroyAfterRemove">移除后是否直接销毁卡牌</param>
-        public virtual void RemoveCard(BuffID buffID, bool destroyAfterRemove = false)
+        public virtual bool RemoveCard(BuffID buffID, bool destroyAfterRemove = false)
         {
             var cardToRemove = GetCard(buffID);
 
             if(cardToRemove != null)
+            {
+                BuffPlugin.Log($"Buff {buffID} removed destroy : {destroyAfterRemove}");
                 RemoveCard(cardToRemove, destroyAfterRemove);
+                return true;
+            }
             else
-                BuffPlugin.LogWarning($"Buff {buffID} not exist in buffcardslot");
+            {
+                BuffPlugin.LogWarning($"Buff {buffID} not exist in buffcardslot {destroyAfterRemove}");
+                Helper.TraceStack();
+                return false;
+            }
         }
 
-        public virtual void RemoveCard(BuffID buffID)
+        public virtual bool RemoveCard(BuffID buffID)
         {
             var cardToRemove = GetCard(buffID);
             if(cardToRemove != null)
             {
+                BuffPlugin.Log($"Buff {buffID} removed");
                 RemoveCard(cardToRemove);
+                return true;
             }
             else
             {
                 BuffPlugin.LogWarning($"Buff {buffID} not exist in buffcardslot");
+                Helper.TraceStack();
+                return false;
             }
         }
 

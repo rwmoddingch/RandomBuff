@@ -557,10 +557,7 @@ namespace RandomBuff.Render.UI
             if (card?.StaticData.Triggerable ?? false)
             {
                 card.onMouseRightClick?.Invoke();
-                if (BuffPoolManager.Instance.TriggerBuff(card.ID))
-                {
-                    Slot.RemoveCard(card.ID);
-                }
+                BuffPoolManager.Instance.TriggerBuff(card.ID);
             }
         }
 

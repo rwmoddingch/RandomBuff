@@ -379,7 +379,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             void _InternalRefreshText(string text, bool forceRefresh = false)
             {
                 textLabel.text = text;
-                flatLight.scaleX = (LabelTest.GetWidth(text, true) + 20) / 200f;
+                flatLight.scaleX = (LabelTest.GetWidth(text, true) * 1.5f + 20) / 200f;
                 flatLight.scaleY = 1f;
                 if (!forceRefresh)
                 {
