@@ -330,8 +330,8 @@ namespace RandomBuff.Render.UI
                 return;
 
             BuffPlugin.Log($"{ID}-{interactionManager} switch to {newState}");
-            if (newState == AnimatorState.Test_None)
-                Helper.TraceStack();
+            //if (newState == AnimatorState.Test_None)
+            //    Helper.TraceStack();
 
             lastAnimatorState = currentAniamtorState;
             currentAnimator?.Destroy();

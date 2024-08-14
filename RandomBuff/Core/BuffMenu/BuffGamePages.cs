@@ -1924,7 +1924,7 @@ namespace RandomBuff.Core.BuffMenu
             if (show)
             {
                 menu.currentPage = index;
-                BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
+                //BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
             }
             else
             {
@@ -1947,7 +1947,7 @@ namespace RandomBuff.Core.BuffMenu
                     fadeInCounter += 0.05f;
                 }
                 y = Mathf.Sin(0.5f * Mathf.PI * fadeInCounter);
-                BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
+                //BuffPlugin.Log($"{menu.selectedObject}, {defaultmodeButton.Selected}");
             }
 
             if (!Show)

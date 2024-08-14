@@ -56,7 +56,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override string DisplayProgress(InGameTranslator translator)
         {
             if (BuffCustom.TryGetGame(out _))
-                return $"({(Finished?cycle:currentCycle)}/{cycle}";
+                return $"({(Finished?cycle:currentCycle)}/{cycle})";
             return "";
         }
 
