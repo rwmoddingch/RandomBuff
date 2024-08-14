@@ -9,10 +9,10 @@
 
   "Chinese": {
     "BuffName": "水中舞者",
-    "Description": "你的游泳速度和憋气时间增加30%。"
+    "Description": "你的游泳速度和憋气时间增加100%。"
   },
   "English": {
     "BuffName": "Water Dancer",
-    "Description": "Increases your swim speed and air capacity by 30%."
+    "Description": "Increases your swim speed and air capacity by 100%."
   }
 }
