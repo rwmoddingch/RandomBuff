@@ -105,7 +105,7 @@ InitPickCount|最大初始抽卡数:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|[单击左键/按下投掷]以查看 <BuffID> 的详情
-BasicInGameBuffCardSlot_OnCardExclusiveShow|[单击左键/按下投掷]以翻转卡牌<LINE>在空白处[左键单击/按下投掷]以退出详情浏览<LINE>[滚动滚轮/按住上或下]以在介绍过长时浏览
+BasicInGameBuffCardSlot_OnCardExclusiveShow|[单击左键/按下投掷]以翻转卡牌<LINE>[在空白处左键单击/按下Esc]以退出详情浏览<LINE>[滚动滚轮/按住上或下]以在介绍过长时浏览
 BasicInGameBuffCardSlot_NoCardFocus|将鼠标移至一个卡牌上并[单击左键/按下投掷]来查看卡牌
 BasicInGameBuffCardSlot_ExitHUD|<LINE>按下 <HUD_KEY> 来关闭 hud
 BasicInGameBuffCardSlot_BindKey|<LINE>[单击右键/按下抓取]以触发buff<LINE>按住 <KEYBINDER_KEY> 并同时按另一个按键来给 <BuffID> 绑定快捷键
@@ -314,3 +314,13 @@ SleepMenu_Stack|叠加卡牌
 SleepMenu_UnStack|删除卡牌
 SleepMenu_Stack_Title|选择一张卡叠加
 SleepMenu_UnStack_Title|选择一张卡删除
+
+
+//CardPocket
+CardPocket_StackButton|增加叠加
+CardPocket_UnstackButton|减少叠加
+CardPocket_HelpInfo_None|buff类型按钮上[左键点击/按下投掷]来切换浏览的buff类型<LINE>在 X 按钮上[左键点击/按下投掷]来关闭卡包<LINE>在卡包中[滚动鼠标/按住上下]来浏览buff
+CardPocket_HelpInfo_Hover|在buff卡牌上[左键点击/按下投掷]以查看 {0} 的详情<LINE>在buff卡牌上[右键点击/按下抓取]来切换 {0} 的选择情况
+CardPocket_HelpInfo_Hover_Stackable|<LINE>在详情页面中调整 {0} 的堆叠层数
+CardPocket_HelpInfo_Exclusive|在buff卡牌上[左键点击/按下投掷]以翻转卡牌<LINE>[左键点击空白处/按下Esc]以退出详情浏览<LINE>在buff卡牌上[右键点击/按下抓取]来切换 {0} 的选择情况
+CardPocket_HelpInfo_Exclusive_Stackable|在下方的按钮上[左键点击/按下投掷]来调整 {0} 的堆叠层数<LINE>堆叠层数等于0会取消该buff的选择<LINE>重新选择该buff会将堆叠层数设为1

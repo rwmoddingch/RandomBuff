@@ -661,20 +661,7 @@ namespace RandomBuff.Render.UI
             {
                 Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
 
-                var ids = BuffCore.GetAllBuffIds();
-                List<BuffRep> reps = new List<BuffRep>();
-
-                foreach(var id in ids)
-                {
-                    var rep = new BuffRep(id);
-                    if (rep.stackable)
-                    {
-                        rep.stackCount = BuffCore.GetBuffData(id).StackLayer;
-                    }
-                }
-
-
-                SandboxPocket = new CardPocket(reps, BuffResourceString.Get("InGameSlot_SandBoxTitle"), CardPocketCallBack, BuffCard.normalScale * 0.5f, new Vector2(400f, screenSize.y - 200), new Vector2(screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f))
+                SandboxPocket = new CardPocket(BuffCore.GetAllBuffIds(), BuffResourceString.Get("InGameSlot_SandBoxTitle"), CardPocketCallBack, BuffCard.normalScale * 0.5f, new Vector2(400f, screenSize.y - 200), new Vector2(screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f))
                 {
                     toggleShowCallBack = (show) =>
                     {
@@ -690,17 +677,7 @@ namespace RandomBuff.Render.UI
                     {
                         if (!SandboxPocket.Show)
                         {
-                            var ids = BuffCore.GetAllBuffIds();
-                            List<BuffRep> reps = new List<BuffRep>();
-                            foreach (var id in ids)
-                            {
-                                var rep = new BuffRep(id);
-                                if (rep.stackable)
-                                {
-                                    rep.stackCount = BuffCore.GetBuffData(id).StackLayer;
-                                }
-                            }
-                            SandboxPocket.SetSelectedBuffIDs(reps);
+                            SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
                             SandboxPocket.SetShow(true);
                             OpenPocketButton.SetSelected(false);
                         }

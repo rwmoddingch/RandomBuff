@@ -380,6 +380,9 @@ namespace RandomBuff.Render.UI
             {
                 exclusiveShowCard._cardRenderer.cardTextBackController.CommitScroll(InputAgency.Current.GetScroll() * (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default ? 2f : 1f));
             }
+
+            if (Slot.completeSlot?.SandboxPocket?.Show ?? false)
+                Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
         }
 
         protected override void UpdateFocusCard()
@@ -400,7 +403,8 @@ namespace RandomBuff.Render.UI
                         card.LocalMousePos.y > 0f &&
                         card.LocalMousePos.y < 1f)
                     {
-                        Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnMouseFocus, CurrentFocusCard != card, card.ID);
+                        if(!(Slot.completeSlot?.SandboxPocket?.Show ?? false))
+                            Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnMouseFocus, CurrentFocusCard != card, card.ID);
                         CurrentFocusCard = card;
                         return;
                     }
@@ -408,7 +412,8 @@ namespace RandomBuff.Render.UI
 
                 if (CurrentFocusCard != null)
                 {
-                    Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_NoCardFocus);
+                    if (!(Slot.completeSlot?.SandboxPocket?.Show ?? false))
+                        Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_NoCardFocus);
                     CurrentFocusCard = null;
                 }
 
@@ -422,7 +427,8 @@ namespace RandomBuff.Render.UI
                     exclusiveShowCard.LocalMousePos.y < 1f)
                 {
                     CurrentFocusCard = exclusiveShowCard;
-                    Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnCardExclusiveShow, false, CurrentFocusCard.ID);
+                    if (!(Slot.completeSlot?.SandboxPocket?.Show ?? false))
+                        Slot.HelpInfoProvider.UpdateHelpInfo(BasicInGameBuffCardSlot.InGame_OnCardExclusiveShow, false, CurrentFocusCard.ID);
                     return;
                 }
 

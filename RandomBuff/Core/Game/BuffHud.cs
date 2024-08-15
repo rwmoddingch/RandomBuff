@@ -72,7 +72,7 @@ namespace RandomBuff.Core.Game
 
             if (BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply) != 0)
             {
-                pocket = new CardPocket(new List<BuffRep>(), FormateFreePickTitle(0), (
+                pocket = new CardPocket(new List<BuffID>(), FormateFreePickTitle(0), (
                         (all, _, _) =>
                         {
                             if (all == null)

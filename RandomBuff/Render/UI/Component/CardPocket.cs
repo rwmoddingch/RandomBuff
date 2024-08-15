@@ -13,6 +13,7 @@ using RandomBuff.Core.Progression.Quest;
 using UnityEngine;
 using static RandomBuff.Render.UI.Component.CardPocketSlot;
 using Menu;
+using RandomBuff.Core.Game;
 
 namespace RandomBuff.Render.UI.Component
 {
@@ -55,7 +56,7 @@ namespace RandomBuff.Render.UI.Component
             }
         }
 
-        public CardPocket(List<BuffRep> initBuffID, string title, CardPocketCallBack updateSelectedBuffsCallBack, float cardScale, Vector2 size, Vector2 hoverPos, Vector2 anchor,int maxSelectCount = -1)
+        public CardPocket(List<BuffID> initBuffID, string title, CardPocketCallBack updateSelectedBuffsCallBack, float cardScale, Vector2 size, Vector2 hoverPos, Vector2 anchor,int maxSelectCount = -1)
         {
             this.title = title;
             this.updateSelectedBuffsCallBack = updateSelectedBuffsCallBack;
@@ -171,6 +172,18 @@ namespace RandomBuff.Render.UI.Component
             }
         }
 
+        public void SetSelectedBuffIDs(List<BuffID> buffIDs)
+        {
+            currentSelectedBuffs.Clear();
+            lastSelectedBuffs.Clear();
+            foreach (var id in buffIDs)
+            {
+                var rep = slot.TryGetRep(id);
+                currentSelectedBuffs.Add(rep);
+                lastSelectedBuffs.Add(rep);
+            }
+        }
+
         public void Destroy()
         {
             container.RemoveFromContainer();
@@ -246,6 +259,7 @@ namespace RandomBuff.Render.UI.Component
         {
             this.pocket = pocket;
             BaseInteractionManager = new CardPocketInteratctionManager(this);
+            HelpInfoProvider = new HelpInfoProvider(this);
 
             #region 预计算参数
 
@@ -349,6 +363,11 @@ namespace RandomBuff.Render.UI.Component
                 },
                 enableInput = false
             };
+        }
+
+        static CardPocketSlot()
+        {
+            HelpInfoProvider.CustomProviders += HelpInfoProvider_CustomProviders;
         }
 
         void SetBuffTypeButtonClick(string key)
@@ -675,6 +694,50 @@ namespace RandomBuff.Render.UI.Component
             return false;
         }
 
+        private static bool HelpInfoProvider_CustomProviders(HelpInfoProvider.HelpInfoID ID, out string helpInfo, params object[] Params)
+        {
+            helpInfo = "";
+            if (ID == CardPocket_None)
+            {
+                helpInfo = BuffResourceString.Get("CardPocket_HelpInfo_None");
+                return true;
+            }
+            else if(ID == CardPocket_Hover)
+            {
+                var buffID = Params[0] as BuffID;
+                var staticData = buffID.GetStaticData(); 
+                var name = staticData.CardInfos.First().Value;
+
+                if (staticData.CardInfos.TryGetValue(InGameTranslator.LanguageID.English, out var newName))
+                    name = newName;
+                if (staticData.CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out newName))
+                    name = newName;
+
+                helpInfo = string.Format(BuffResourceString.Get("CardPocket_HelpInfo_Hover"), name.BuffName);
+                if (staticData.Stackable)
+                    helpInfo += string.Format(BuffResourceString.Get("CardPocket_HelpInfo_Hover_Stackable"), name.BuffName);
+                return true;
+            }
+            else if(ID == CardPocket_Exclusive)
+            {
+                var buffID = Params[0] as BuffID;
+                var staticData = buffID.GetStaticData();
+                var name = staticData.CardInfos.First().Value;
+
+                if (staticData.CardInfos.TryGetValue(InGameTranslator.LanguageID.English, out var newName))
+                    name = newName;
+                if (staticData.CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out newName))
+                    name = newName;
+
+                helpInfo = string.Format(BuffResourceString.Get("CardPocket_HelpInfo_Exclusive"), name.BuffName);
+                if (staticData.Stackable)
+                    helpInfo += string.Format(BuffResourceString.Get("CardPocket_HelpInfo_Exclusive_Stackable"), name.BuffName);
+                return true;
+            }
+            return false;
+        }
+
+
         public class BuffRep
         {
             public BuffID buffID;
@@ -688,6 +751,10 @@ namespace RandomBuff.Render.UI.Component
                 stackable = buffID.GetStaticData().Stackable;
             }
         }
+
+        public static HelpInfoProvider.HelpInfoID CardPocket_None = new HelpInfoProvider.HelpInfoID("CardPocket_None", true);
+        public static HelpInfoProvider.HelpInfoID CardPocket_Hover = new HelpInfoProvider.HelpInfoID("CardPocket_Hover", true);
+        public static HelpInfoProvider.HelpInfoID CardPocket_Exclusive = new HelpInfoProvider.HelpInfoID("CardPocket_Exclusive", true);
     }
 
     internal class CardPocketInteratctionManager : ClickSignalInteractionManager<CardPocketSlot>
@@ -724,6 +791,7 @@ namespace RandomBuff.Render.UI.Component
                         card.LocalMousePos.y > 0f &&
                         card.LocalMousePos.y < 1f)
                     {
+                        Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_Hover, CurrentFocusCard != card, card.ID);
                         CurrentFocusCard = card;
                         return;
                     }
@@ -733,7 +801,7 @@ namespace RandomBuff.Render.UI.Component
                 {
                     CurrentFocusCard = null;
                 }
-
+                Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_None);
             }
             else if (currentState == State.Exclusive)
             {
@@ -752,6 +820,7 @@ namespace RandomBuff.Render.UI.Component
             }
             else if (currentState == State.Hide)
             {
+                Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
                 if (CurrentFocusCard != null)
                     CurrentFocusCard = null;
             }
@@ -825,6 +894,7 @@ namespace RandomBuff.Render.UI.Component
             }
             else if(newState == State.Exclusive)
             {
+                Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_Exclusive, false, exclusiveShowCard.ID);
                 exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.CardPocketSlot_Exclusive);
                 Slot.SetScrollEnable(false);
                 if(exclusiveShowCard.StaticData.Stackable)

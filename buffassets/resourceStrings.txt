@@ -103,7 +103,7 @@ InitPickCount|Initial draw count:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|[Single click/press throw] to check <BuffID> in detail
-BasicInGameBuffCardSlot_OnCardExclusiveShow|[Single click/press throw] to turn over the card<LINE>[Single click/press throw] at blank space to exit detail mode<LINE>[Scroll/Hold up or down] to browse discription if it's too long
+BasicInGameBuffCardSlot_OnCardExclusiveShow|[Single click/press throw] to turn over the card<LINE>[Single click at blank space/press Esc] to exit detail mode<LINE>[Scroll/Hold up or down] to browse discription if it's too long
 BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and [click/press throw] to check it
 BasicInGameBuffCardSlot_ExitHUD|<LINE>Press <HUD_KEY> to turn off hud
 BasicInGameBuffCardSlot_BindKey|<LINE>Press another key while holding <KEYBINDER_KEY> to bind the shortcut key for <BuffID>
@@ -309,3 +309,12 @@ SleepMenu_Stack|Stack Card
 SleepMenu_UnStack|Remove Card
 SleepMenu_Stack_Title|Pick 1 card to stack
 SleepMenu_UnStack_Title|Pick 1 card to remove
+
+//CardPocket
+CardPocket_StackButton|Stack
+CardPocket_UnstackButton|Unstack
+CardPocket_HelpInfo_None|[Single click/press throw] on buff type button to switch browsing buff type<LINE>[Single click/press throw] on X button to close card pocket<LINE>[Scroll/hold up or down] in card pocket to browse buffcards.
+CardPocket_HelpInfo_Hover|[Single click/press throw] on buffcard to check buff details of {0}<LINE>[Right click/press grab] on buffcard to toggle selection of {0}
+CardPocket_HelpInfo_Hover_Stackable|<LINE>Toggle stack count of {0} while browsing detail of {0}
+CardPocket_HelpInfo_Exclusive|[Single click/press throw] on buffcard to flip it<LINE>[Single click at blank space/press Esc] to exit detail mode<LINE>[Right click/press grab] on buffcard to toggle selection of {0}
+CardPocket_HelpInfo_Exclusive_Stackable|[Single click/press throw] on buttons below to toggle stack count of {0}<LINE>When stack count equals 0 will disable selection of the buff<LINE>Re-select the buff will set stack count to 1
