@@ -17,8 +17,8 @@
         "Description":"晕倒时后会变成蝙蝠,叠加后获得一定的蝙蝠控制力"
         
     },
-    "English" : {
-        "BuffName" : "Dream Of A Bat",
-        "Description" : "When stuned, you turn into a bat"
-    }
+  "English": {
+    "BuffName": "Dream Of A Bat",
+    "Description": "When you are stunned, you turn into a bat."
+  }
 }
