@@ -65,7 +65,8 @@ namespace BuiltinBuffs.Expeditions
 
         private static readonly Dictionary<string, Type> HookTypes = new Dictionary<string, Type>()
         {
-            { "unl-explosionimmunity", typeof(ExplosionImmunityHook)}
+            { "unl-explosionimmunity", typeof(ExplosionImmunityHook)} ,
+            { "unl-agility", typeof(AgilityHook) }
         };
 
         private static bool OnlyEnglish(string str)
@@ -394,7 +395,7 @@ namespace BuiltinBuffs.Expeditions
 
             if (id == "unl-karma" && BuffCustom.TryGetGame(out var game1))
             {
-                if (game1.GetStorySession.saveState.deathPersistentSaveData.reinforcedKarma)
+                if (!game1.GetStorySession.saveState.deathPersistentSaveData.reinforcedKarma)
                 {
                     game1.GetStorySession.saveState.deathPersistentSaveData.reinforcedKarma = true;
                     game1.cameras[0].hud.karmaMeter.reinforceAnimation = 0;

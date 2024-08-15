@@ -257,12 +257,16 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                             {
                                 if (crit.creatureTemplate.type == info.baseCrit)
                                 {
-                                    BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}");
+                                    BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}, at den");
 
                                     for (int i = 0; i < info.boostCount; i++)
-                                        room.MoveEntityToDen(new AbstractCreature(room.world,
+                                    {
+                                        var abCrit = new AbstractCreature(room.world,
                                             StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
-                                            self.GetNewID(-1)));
+                                            self.GetNewID(-1));
+                                        room.AddEntity(abCrit);
+                                        room.MoveEntityToDen(abCrit);
+                                    }
                                 }
                             }
                         }
@@ -289,9 +293,11 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                                 {
                                     BuffPlugin.LogDebug(
                                         $"Replace {crit.creatureTemplate.type} to {info.boostCrit}, at room: {room.name}");
+                                    var abCrit = new AbstractCreature(room.world,
+                                        StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos, crit.ID);
                                     room.RemoveEntity(crit);
-                                    room.MoveEntityToDen(new AbstractCreature(room.world,
-                                        StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos, crit.ID));
+                                    room.AddEntity(abCrit);
+                                    room.MoveEntityToDen(abCrit);
                                 }
                             }
                         }

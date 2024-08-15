@@ -63,11 +63,11 @@ namespace RandomBuff.Core.Game
                 BuffPlugin.LogDebug($"Conflict: {id}");
 
 #endif
-            var alreadyHasNoStackable = alreadyHas.Where(i => !i.GetStaticData().Stackable || (i.GetBuffData()?.CanStackMore() ?? true));
+            var alreadyHasNoStackable = alreadyHas.Where(i => !i.GetStaticData().Stackable || !(i.GetBuffData()?.CanStackMore() ?? false));
 
             foreach (var id in alreadyHasNoStackable)
             {
-                BuffPlugin.Log(id);
+                BuffPlugin.Log($"BuffPicker: Already contains {id}");
             }
             var list = new List<BuffStaticData>();
             var copyUnique = new List<BuffID>();

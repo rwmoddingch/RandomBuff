@@ -75,7 +75,13 @@ namespace BuiltinBuffs.Expeditions
     {
         public static void HookOn()
         {
-
+            _ = new Hook(typeof(Player).GetProperty("isRivulet").GetGetMethod(),typeof(AgilityHook).GetMethod("Player_isRivulet",BindingFlags.NonPublic | BindingFlags.Static));
         }
+
+        private static bool Player_isRivulet(Func<Player, bool> orig, Player self)
+        {
+            return orig(self) || new BuffID("unl-agility").GetBuffData().StackLayer >= 2;
+        }
+
     }
 }

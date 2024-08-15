@@ -178,9 +178,20 @@ namespace BuiltinBuffs.Negative
             On.DaddyLongLegs.Collide += DaddyLongLegs_Collide;
             On.Lizard.AttemptBite += Lizard_AttemptBite;
             On.Lizard.Bite += Lizard_Bite;
-
+            On.Creature.Die += Creature_Die;
             On.Lizard.Violence += Lizard_Violence;
             On.Creature.Violence += Creature_Violence;
+        }
+
+        private static void Creature_Die(On.Creature.orig_Die orig, Creature self)
+        {
+            if (modules.TryGetValue(self, out var module))
+            {
+                self.killTag = null;
+                module.SuckIntoShortCut();
+                return;
+            }
+            orig(self);
         }
 
         private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
