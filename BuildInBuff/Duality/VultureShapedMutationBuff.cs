@@ -379,6 +379,38 @@ namespace BuiltinBuffs.Duality
 
         public bool IsMiros => VultureShapedMutationBuffEntry.StackLayer >= 10;
 
+        private float MassFac
+        {
+            get
+            {
+                if (!ownerRef.TryGetTarget(out var player))
+                    return 1f;
+
+                float graspMass = 0f;
+                if (player.grasps != null)
+                {
+                    for (int i = 0; i < player.grasps.Length; i++)
+                    {
+                        if (player.grasps[i] != null)
+                            graspMass += player.grasps[i].grabbed.TotalMass;
+                    }
+                }
+
+                float result = (player.TotalMass + graspMass) / player.slugcatStats.runspeedFac;
+                return result;
+            }
+        }
+
+        private bool MassFacCondition
+        {
+            get
+            {
+                if (!ownerRef.TryGetTarget(out var player))
+                    return false;
+                return MassFac >= 1f + 0.1f * VultureShapedMutationBuffEntry.StackLayer || player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Gourmand;
+            }
+        }
+
         #region 面具相关
         private VultureMask mask;
         private Creature.Grasp maskGrasp;
@@ -1213,11 +1245,10 @@ namespace BuiltinBuffs.Duality
             //如果正在飞行
             if (isFlying)
             {
-                float massFac = player.TotalMass / player.slugcatStats.runspeedFac;
-                player.AerobicIncrease(0.04f * Mathf.Pow(massFac, 2f));
+                player.AerobicIncrease(0.04f * Mathf.Pow(MassFac, 2f));
                 if (this.wings != null)
                 {
-                    if (massFac >= 1f + 0.1f * VultureShapedMutationBuffEntry.StackLayer || player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Gourmand)
+                    if (MassFacCondition)
                     {
                         if (player.aerobicLevel >= 0.5f)
                             this.wingFlapAmplitude = Mathf.Clamp(this.wingFlapAmplitude - 0.05f, 1f - player.aerobicLevel, 1f);
@@ -1305,14 +1336,16 @@ namespace BuiltinBuffs.Duality
         {
             if (player.room == null) 
                 return;
-            float massFac = player.TotalMass / player.slugcatStats.runspeedFac;
             float massSpeedFac = 1f;
-            if (player.aerobicLevel >= 0.5f && 
-                (massFac >= 1f + 0.1f * VultureShapedMutationBuffEntry.StackLayer || player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Gourmand))
+            if (player.aerobicLevel >= 0.5f && MassFacCondition)
             {
-                massFac = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 1f, 0f);
+                massSpeedFac = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 1f, 0f);
                 wingSpeed = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 10f, 0f);
                 wantPos += Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 0f, 4f) * Vector2.down;
+            }
+            else
+            {
+                wingSpeed = 10f;
             }
 
             wantPos += wingSpeed * new Vector2(player.input[0].x, player.input[0].y);//player.bodyChunks[0].pos + 

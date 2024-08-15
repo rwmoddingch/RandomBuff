@@ -12,10 +12,10 @@
 
   "Chinese": {
     "BuffName": "鹫形突变",
-    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。同时，你的食量增大，并倾向于食肉。按跳跃键以在空中开启飞行和结束飞行。当你持有面具时，秃鹫类生物对你不再有敌意。"
+    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。同时，你的食量增大，并倾向于食肉。按跳跃键以在空中开启飞行和结束飞行。当你持有面具时，秃鹫类生物对你不再有敌意。另外，请记住，一只太胖的鸟是飞不起来的。"
   },
   "English": {
     "BuffName": "Vulture-Shaped Mutation",
-    "Description": "Slugcat turns into a vulture hybrid, acquiring wings which can be used to freely fly. However, slugcat will require more food and can eat meat. If slugcat has a vulture mask, other vultures become passive towards it."
+    "Description": "Slugcat turns into a vulture hybrid, acquiring wings which can be used to freely fly. However, slugcat will require more food and can eat meat. If slugcat has a vulture mask, other vultures become passive towards it. Also, please remember that a bird that is too fat cannot fly."
   }
 }
