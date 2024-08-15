@@ -212,9 +212,12 @@ namespace BuiltinBuffs.Negative
                         BuffPostEffectManager.AddEffect(effect);
                     }
 
-                    if (!self.Stunned && num > 0)
+                    if (!self.Stunned)
                     {
-                        self.AerobicIncrease(0.03f * num);
+                        if (num > 0)
+                            self.AerobicIncrease(0.03f * num);
+                        if (scorchingSunPlayer.LastStun >= scorchingSunPlayer.CoolingTime)
+                            self.AerobicIncrease(0.03f * num);
                     }
 
                     float heatstroke = 0;
@@ -224,10 +227,10 @@ namespace BuiltinBuffs.Negative
                     }
 
                     if (!self.Stunned && scorchingSunPlayer.LastStun >= scorchingSunPlayer.CoolingTime &&
-                        Random.Range(0f, 800f + (1f + 0.3f * num) * 10f * (heatstroke - 0.5f)) > 800f)
+                        Random.Range(0f, 3000f + (1f + 0.3f * num) * 5f * heatstroke) > 3000f)
                     {
                         scorchingSunPlayer.LastStun = 0;
-                        scorchingSunPlayer.CoolingTime = Mathf.RoundToInt(Random.Range(200f, 600f) / (1f + 0.3f * num * heatstroke));
+                        scorchingSunPlayer.CoolingTime = Mathf.RoundToInt(Random.Range(400f, 1200f) / (1f + 0.3f * num * heatstroke));
                         ScorchingSunBuff.Instance.TriggerSelf();
                         self.Stun(80);
                     }
