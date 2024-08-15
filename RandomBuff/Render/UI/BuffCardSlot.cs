@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using RandomBuff.Core.Option;
 using UnityEngine;
+using static RandomBuff.Render.UI.Component.CardPocketSlot;
 
 namespace RandomBuff.Render.UI
 {
@@ -659,7 +660,21 @@ namespace RandomBuff.Render.UI
             if(BuffPoolManager.Instance.GameSetting.gachaTemplate.ID == GachaTemplateID.SandBox)
             {
                 Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
-                SandboxPocket = new CardPocket(BuffCore.GetAllBuffIds(), BuffResourceString.Get("InGameSlot_SandBoxTitle"), CardPocketCallBack, BuffCard.normalScale * 0.5f, new Vector2(400f, screenSize.y - 200), new Vector2(screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f))
+
+                var ids = BuffCore.GetAllBuffIds();
+                List<BuffRep> reps = new List<BuffRep>();
+
+                foreach(var id in ids)
+                {
+                    var rep = new BuffRep(id);
+                    if (rep.stackable)
+                    {
+                        rep.stackCount = BuffCore.GetBuffData(id).StackLayer;
+                    }
+                }
+
+
+                SandboxPocket = new CardPocket(reps, BuffResourceString.Get("InGameSlot_SandBoxTitle"), CardPocketCallBack, BuffCard.normalScale * 0.5f, new Vector2(400f, screenSize.y - 200), new Vector2(screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f))
                 {
                     toggleShowCallBack = (show) =>
                     {
@@ -675,7 +690,17 @@ namespace RandomBuff.Render.UI
                     {
                         if (!SandboxPocket.Show)
                         {
-                            SandboxPocket.SetSelectedBuffIDs(BuffCore.GetAllBuffIds());
+                            var ids = BuffCore.GetAllBuffIds();
+                            List<BuffRep> reps = new List<BuffRep>();
+                            foreach (var id in ids)
+                            {
+                                var rep = new BuffRep(id);
+                                if (rep.stackable)
+                                {
+                                    rep.stackCount = BuffCore.GetBuffData(id).StackLayer;
+                                }
+                            }
+                            SandboxPocket.SetSelectedBuffIDs(reps);
                             SandboxPocket.SetShow(true);
                             OpenPocketButton.SetSelected(false);
                         }
@@ -860,19 +885,27 @@ namespace RandomBuff.Render.UI
             InputAgency.AllRelease();
         }
 
-        public void CardPocketCallBack(List<BuffID> all, List<BuffID> removed, List<BuffID> added)
+        public void CardPocketCallBack(List<BuffRep> all, List<BuffRep> removed, List<BuffRep> added)
         {
 
             foreach (var buff in added)
             {
                 BuffPlugin.LogDebug($"add : {buff}");
-                buff.CreateNewBuff();
+                buff.buffID.CreateNewBuff();
             }
 
             foreach (var buff in removed)
             {
                 BuffPlugin.LogDebug($"remove : {buff}");
-                buff.UnstackBuff();
+                BuffPoolManager.Instance.RemoveBuffAndData(buff.buffID);
+            }
+
+            foreach(var buff in all)
+            {
+                if (buff.stackable)
+                {
+                    BuffPoolManager.Instance.GetBuffData(buff.buffID).StackLayer = buff.stackCount;
+                }
             }
         }
 
