@@ -181,12 +181,8 @@ namespace RandomBuff.Core.Buff
                 }
 
                 if (rawData.ContainsKey(loadState = "MaxStackLayers"))
-                {
-                    if (rawData[loadState] is int)
-                        newData.MaxStackLayers = (int)rawData[loadState];
-                    else
-                        newData.MaxStackLayers = int.Parse(rawData[loadState] as string);
-                }
+                
+                    LoadAsInt(rawData[loadState]);
 
                 if (rawData.ContainsKey(loadState = "Stackable"))
                 {
@@ -331,24 +327,18 @@ namespace RandomBuff.Core.Buff
 
                 int LoadAsInt(object input)
                 {
-                    if (input is int)
-                        return (int)input;
-                    else if (input is long)
-                        return  (int)(long)input;
-                    else if (input is short)
-                        return (int)(short)input;
+                    if (input is string str)
+                        return int.Parse(str);
                     else
-                        return int.Parse(input as string);
+                        return Convert.ToInt32(input);
                 }
 
                 float LoadAsFloat(object input)
                 {
-                    if(input is float)
-                        return (float)input;
-                    else if(input is double)
-                        return (float)(double)input;
+                    if (input is string str)
+                        return float.Parse(str);
                     else
-                        return float.Parse(input as string); 
+                        return Convert.ToSingle(input);
                 }
             }
             catch (Exception e)

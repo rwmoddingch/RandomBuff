@@ -231,6 +231,8 @@ namespace RandomBuff.Core.Entry
                     if (!type.BanConditionIds.Contains(id))
                         type.BanConditionIds.Add(id);
                 }
+                BuffHookWarpper.RegisterConditionHook<TConditionType>();
+
             }
             catch (Exception e)
             {
