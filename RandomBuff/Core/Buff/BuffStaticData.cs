@@ -46,6 +46,8 @@ namespace RandomBuff.Core.Buff
         public HashSet<string> Conflict { get; private set; } = new();
         public HashSet<string> Tag { get; private set; } = new();
 
+        public int MaxStackLayers { get; private set; } = int.MaxValue;
+
         public Dictionary<string, object> ExtProperty { get; private set; } = new ();
 
 
@@ -178,6 +180,13 @@ namespace RandomBuff.Core.Buff
                         newData.Triggerable = bool.Parse(rawData[loadState] as string);
                 }
 
+                if (rawData.ContainsKey(loadState = "MaxStackLayers"))
+                {
+                    if (rawData[loadState] is int)
+                        newData.MaxStackLayers = (int)rawData[loadState];
+                    else
+                        newData.MaxStackLayers = int.Parse(rawData[loadState] as string);
+                }
 
                 if (rawData.ContainsKey(loadState = "Stackable"))
                 {

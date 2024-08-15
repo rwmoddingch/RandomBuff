@@ -29,7 +29,7 @@ using UnityEngine.Rendering;
 
 namespace BuiltinBuffs.Expeditions
 {
-    internal static class ExpeditionHooks
+    internal static class ExpeditionCoreHooks
     {
         #region DEBUG
 
@@ -91,12 +91,12 @@ namespace BuiltinBuffs.Expeditions
         public static void OnModsInit()
         {
             _ = new Hook(typeof(RainWorld).GetProperty(nameof(RainWorld.ExpeditionMode)).GetGetMethod(),
-                typeof(ExpeditionHooks).GetMethod(nameof(RainWorldExpeditionModeGet), BindingFlags.NonPublic | BindingFlags.Static));
+                typeof(ExpeditionCoreHooks).GetMethod(nameof(RainWorldExpeditionModeGet), BindingFlags.NonPublic | BindingFlags.Static));
             _ = new Hook(typeof(ExpeditionGame).GetProperty(nameof(ExpeditionGame.activeUnlocks)).GetGetMethod(),
-                typeof(ExpeditionHooks).GetMethod(nameof(ExpeditionGameActiveUnlocksGet),BindingFlags.NonPublic | BindingFlags.Static));
+                typeof(ExpeditionCoreHooks).GetMethod(nameof(ExpeditionGameActiveUnlocksGet),BindingFlags.NonPublic | BindingFlags.Static));
 
             _ = new Hook(typeof(BuffPoolManager).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance,null,new Type[] { typeof(RainWorldGame) },Array.Empty<ParameterModifier>()),
-                typeof(ExpeditionHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
+                typeof(ExpeditionCoreHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
 
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
@@ -105,7 +105,7 @@ namespace BuiltinBuffs.Expeditions
             IL.RainWorldGame.Update += RainWorldGame_Update;
 
             _ = new Hook(typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),BindingFlags.Static | BindingFlags.Public).GetGetMethod(),
-                typeof(ExpeditionHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet), BindingFlags.Static | BindingFlags.NonPublic));
+                typeof(ExpeditionCoreHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet), BindingFlags.Static | BindingFlags.NonPublic));
 
             On.Expedition.ExpeditionGame.IsMSCRoomScript += ExpeditionGame_IsMSCRoomScript;
             On.Expedition.ExpeditionGame.IsUndesirableRoomScript += ExpeditionGame_IsUndesirableRoomScript;

@@ -13,6 +13,6 @@
     },
     "English" : {
         "BuffName" : "Ori Bash",
-        "Description" : "Get close to a creature, hold down the right mouse button (or bind key) to select a direction, and then release it. This will launch the player in the corresponding direction and the creature in the opposite direction. Once stack layers is greater than or equal to 2, you may use bash on the item."
+        "Description" : "When close to creature, use your bound key to bash the creature and send it flying."
     }
 }

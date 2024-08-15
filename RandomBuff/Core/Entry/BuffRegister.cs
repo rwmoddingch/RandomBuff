@@ -120,7 +120,7 @@ namespace RandomBuff.Core.Entry
             return (null, null);
         }
 
-        internal static void InternalRegisterBuff(BuffID id,Type buffType,Type dataType)
+        internal static void InternalRegisterBuff(BuffID id,Type buffType,Type dataType,Type hookType = null)
         {
             try
             {
@@ -129,6 +129,10 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogError($"{id} has already registered!");
                     return;
                 }
+
+                if (hookType != null)
+                    BuffHookWarpper.RegisterHook(id, hookType);
+
                 if (id != Helper.GetUninit<IBuff>(buffType).ID || id != Helper.GetUninit<BuffData>(dataType).ID)
                 {
                     BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
@@ -277,6 +281,24 @@ namespace RandomBuff.Core.Entry
         public static void RegisterMission(MissionID ID, Mission mission)
         {
             MissionRegister.RegisterMission(ID,mission);
+        }
+
+        /// <summary>
+        /// 一般不会使用，手动添加staticData
+        /// </summary>
+        /// <param name="data"></param>
+        public static void RegisterStaticData([NotNull] BuffStaticData data)
+        {
+            var staticDatas =
+                (Dictionary<BuffID, BuffStaticData>)typeof(BuffConfigManager).GetField("staticDatas", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+            if (!staticDatas.ContainsKey(data.BuffID))
+            {
+                BuffUtils.Log("BuffExtend", $"Register Buff:{data.BuffID} static data by Code ");
+                staticDatas.Add(data.BuffID, data);
+                BuffConfigManager.buffTypeTable[data.BuffType].Add(data.BuffID);
+            }
+            else
+                BuffUtils.Log("BuffExtend", $"already contains BuffID {data.BuffID}");
         }
     }
 

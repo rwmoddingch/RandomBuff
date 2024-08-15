@@ -116,7 +116,10 @@ namespace RandomBuff.Core.Buff
         /// <summary>
         /// 是否可以继续增加
         /// </summary>
-        public virtual bool CanStackMore() => true;
+        public virtual bool CanStackMore()
+        {
+            return StackLayer < ID.GetStaticData().MaxStackLayers;
+        }
 
 
         /// <summary>

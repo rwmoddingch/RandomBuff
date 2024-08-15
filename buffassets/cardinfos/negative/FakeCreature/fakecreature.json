@@ -18,6 +18,6 @@
     
     "English" : {
         "BuffName" : "Paranoia",
-        "Description" : "Phantom creatures (Probability of being a real creatures: 1/40) can be seen from time to time. Phantom creatures cannot actually harm the player, but the player cannot distinguish between them and real creatures. They disappear immediately after death."
+        "Description" : "Phantom creatures（1/40 probability of being a real creature) have a chance of spawning, phantoms are indistinguishable from real creatures but can not interact with Slugcat, on death they will dissapear."
     }
 }
