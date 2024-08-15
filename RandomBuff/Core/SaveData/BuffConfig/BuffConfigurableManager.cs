@@ -91,6 +91,9 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             BuffPlugin.Log($"Pushing configurables: {buffConfigurables.Count}");
             foreach (var config in buffConfigurables)
             {
+                string pushingString = config.PushString();
+
+                BuffPlugin.Log($"Pushing : {config.id.value}-{config.key}-{pushingString}");
                 BuffConfigManager.Instance.allConfigs[config.id.value][config.key] = config.PushString();
             }
         }

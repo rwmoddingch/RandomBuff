@@ -1,4 +1,5 @@
-﻿using RWCustom;
+﻿using RandomBuff.Core.SaveData.BuffConfig;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace RandomBuff.Cardpedia.Elements.Config
 {
     internal class OpCardpediaConfigSlider : OpCardpediaChainBox
     {
+        BuffConfigurable bindConfigurable;
+
         FLabel leftValueLabel;
         FLabel rightValueLabel;
         FLabel currentValueLabel;
@@ -36,10 +39,11 @@ namespace RandomBuff.Cardpedia.Elements.Config
 
         AnimBehaviour currentLabelBehaviour;
 
-        public OpCardpediaConfigSlider(string title, Vector2 pos, float width, float leftValue, float rightValue, IScrollBoxHandler scrollBoxHandler = null) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false, scrollBoxHandler)
+        public OpCardpediaConfigSlider(BuffConfigurable bindConfigurable, string title, Vector2 pos, float width, float leftValue, float rightValue, IScrollBoxHandler scrollBoxHandler = null) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false, scrollBoxHandler)
         {
             this.left = leftValue;
             this.right = rightValue;
+            this.bindConfigurable = bindConfigurable;
             
             dragRectEventInstance = mouseEvent.AddEvent(
                 () =>
@@ -69,7 +73,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
                         drag = Mathf.Clamp01(startDraggingDrag + delta);
                         startDraggingDrag = drag;
                         currentValueLabel.text = string.Format("{0:N2}", Mathf.Lerp(left, right, drag));
-                        
+                        bindConfigurable.BoxedValue = Mathf.Lerp(left, right, drag);
                     }
                 );
             currentLabelBehaviour = new AnimBehaviour(CardpediaStatics.pediaUILightGrey, CardpediaStatics.pediaUILightGrey, Color.white);

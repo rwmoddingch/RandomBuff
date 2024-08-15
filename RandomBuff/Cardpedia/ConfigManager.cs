@@ -93,21 +93,22 @@ namespace RandomBuff.Cardpedia.Elements
 
         public void OnCardPick(BuffCard card)
         {
+            BuffConfigurableManager.PushAllConfigs();
             wrapper._tab.RemoveItems(scrollBox.items.ToArray());
             scrollBox.items.Clear();
             activeConfigs.Clear();
 
             Vector2 pos = new Vector2(CardpediaStatics.tinyGap, scrollBox.contentSize - CardpediaStatics.tinyGap);
             Vector2 fullRectScale = new Vector2(CardpediaStatics.narrowBlurSpriteScale.x - CardpediaStatics.tinyGap * 2, 200f);
-            foreach(var configurable in BuffConfigurableManager.GetAllConfigurableForID(card.ID))
+            foreach(BuffConfigurable configurable in BuffConfigurableManager.GetAllConfigurableForID(card.ID))
             {
                 if(configurable.acceptable is BuffConfigurableAcceptableRange range)
                 {
-                    activeConfigs.Add(new OpCardpediaConfigSlider(configurable.name, pos, fullRectScale.x, (float)range.minValue, (float)range.maxValue, this));
+                    activeConfigs.Add(new OpCardpediaConfigSlider(configurable, configurable.name, pos, fullRectScale.x, (float)range.minValue, (float)range.maxValue, this));
                 }
                 else if(configurable.acceptable is BuffConfigurableAcceptableList lst)
                 {
-                    activeConfigs.Add(new OpCardpediaDropBox(configurable.name, pos, fullRectScale.x, lst.values.Select((x) => x.ToString()).ToArray(), this));
+                    activeConfigs.Add(new OpCardpediaDropBox(configurable, configurable.name, pos, fullRectScale.x, lst.values.Select((x) => x.ToString()).ToArray(), this));
                 }
             }
 

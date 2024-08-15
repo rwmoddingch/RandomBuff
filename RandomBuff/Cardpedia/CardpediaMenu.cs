@@ -503,6 +503,7 @@ namespace RandomBuff.Cardpedia
         public void OnExit()
         {
             manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
+            BuffFile.Instance.SaveFile();
             PlaySound(SoundID.MENU_Switch_Page_Out);
         }
 

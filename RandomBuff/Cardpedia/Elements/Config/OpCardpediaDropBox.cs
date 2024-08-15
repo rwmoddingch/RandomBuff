@@ -1,4 +1,5 @@
-﻿using RWCustom;
+﻿using RandomBuff.Core.SaveData.BuffConfig;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace RandomBuff.Cardpedia.Elements.Config
         public FSprite defaultRectBackground;
         public FLabel defaultRectLabel;
 
+        BuffConfigurable bindConfigurable;
+
         DropButton[] dropButtons;
         MouseEvent.MouseEventInstance defaultRectEventInstance;
 
@@ -30,8 +33,9 @@ namespace RandomBuff.Cardpedia.Elements.Config
         public Vector2 DropButtonStartPos => new Vector2(rectSize.x - dropButtonWidth, -CardpediaStatics.tinyGap * 2f - CardpediaStatics.chainBox_cosmeticRectHeight);
         public float additionalHeight => (CardpediaStatics.tinyGap + CardpediaStatics.dropBox_dropButtonHeight) * dropButtons.Length;
 
-        public OpCardpediaDropBox(string title, Vector2 pos, float width, string[] list, IScrollBoxHandler scrollBoxHandler = null) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false, scrollBoxHandler)
+        public OpCardpediaDropBox(BuffConfigurable bindConfigurable, string title, Vector2 pos, float width, string[] list, IScrollBoxHandler scrollBoxHandler = null) : base(title, pos, new Vector2(width, CardpediaStatics.dropBox_dropButtonHeight + CardpediaStatics.chainBox_cosmeticRectHeight + CardpediaStatics.tinyGap * 3), false, scrollBoxHandler)
         {
+            this.bindConfigurable = bindConfigurable;
             dropButtonWidth = width;
             
             defaultRectEventInstance = mouseEvent.AddEvent(
@@ -52,7 +56,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
 
             animBehaviour = new AnimBehaviour(CardpediaStatics.pediaUIDarkGrey, CardpediaStatics.pediaUILightGrey, Color.white);
 
-            SetElement(list.First());
+            SetElement(bindConfigurable.StringValue);
         }
 
         public override void InitSprites()
@@ -115,6 +119,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
         {
             defaultRectLabel.text = element;
             animBehaviour.Flash();
+            bindConfigurable.Set(element);
         }
 
         public void Drop()

@@ -34,6 +34,10 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 }
             }
         }
+        public string StringValue
+        {
+            get => serializer.Serialize(BoxedValue);
+        }
         public bool valueDirty;
 
         public BuffConfigurable(BuffID id,string key, Type type, object defaultValue)

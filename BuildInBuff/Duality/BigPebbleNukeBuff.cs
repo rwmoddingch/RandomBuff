@@ -44,6 +44,16 @@ namespace BuiltinBuffs.Duality
         {
             self.explodeColor = RadiatCol;
             orig.Invoke(self, hitChunk);
+
+            foreach(var field in self.room.updateList.Where(u => u is RadiationField).Select(u => u as RadiationField))
+            {
+                if(Vector2.Distance(field.pos, self.firstChunk.pos) < field.rad)
+                {
+                    field.StackField();
+                    return;
+                }
+            }
+
             self.room.AddObject(new RadiationField(self, self.room, self.firstChunk.pos, self.thrownBy, 300f, 40 * 10, 1f));
             if (self.room.game.cameras[0].room == self.room)
                 BuffPostEffectManager.AddEffect(new BurstRadialBlurEffect(0, 0.17f, 0.05f, 0.075f, (self.firstChunk.pos - self.room.game.cameras[0].pos) / Custom.rainWorld.screenSize));
@@ -113,12 +123,12 @@ namespace BuiltinBuffs.Duality
 
         public class RadiationField : UpdatableAndDeletable
         {
-            float rad;
+            public float rad;
             int setLife;
             int life;
             float dmgPerFrame;
 
-            Vector2 pos;
+            public Vector2 pos;
             AbstractCreature killTag;
 
             LightSource lightSource;
@@ -200,6 +210,25 @@ namespace BuiltinBuffs.Duality
                 base.Destroy();
                 lightSource.Destroy();
                 emitter.Die();
+            }
+
+            public void StackField()
+            {
+                rad += 45000f / rad;
+                life = setLife;
+
+                if(emitter != null)
+                {
+                    foreach(var module in emitter.EmitterModules)
+                    {
+                        if(module is SetEmitterLife setEmitterLife)
+                        {
+                            setEmitterLife.life = setEmitterLife.setLife;
+                        }
+                    }
+                    emitter.SpawnModule.maxParitcleCount = Mathf.CeilToInt(rad * 260f / 300f);
+                    (emitter.SpawnModule as BurstSpawnerModule).emitted = false;
+                }
             }
 
             void CreateRadiatParticle()

@@ -1,10 +1,12 @@
 ﻿using BuiltinBuffs.Positive;
+using Noise;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Render.UI;
 using RandomBuffUtils;
 using RWCustom;
+using Smoke;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -136,7 +138,7 @@ namespace BuiltinBuffs.Duality
         private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
         {
             orig.Invoke(self, hitChunk);
-            if(self.slatedForDeletetion && SensorBombBuff.Instance.IsMine(self.abstractPhysicalObject))
+            if (self.slatedForDeletetion && SensorBombBuff.Instance.IsMine(self.abstractPhysicalObject))
             {
                 SensorBombBuff.Instance.RemoveMine(self.abstractPhysicalObject);
             }
@@ -361,6 +363,7 @@ namespace BuiltinBuffs.Duality
 
             scanEffectCounter = lastscanCounter = Random.Range(0, counterPerScan);
             realScanCounter = Random.Range(0, counterPerRealScan);
+            bomb.thrownBy = bomb.room.game.FirstRealizedPlayer;
         }
 
         public override void Update(bool eu)
@@ -423,7 +426,8 @@ namespace BuiltinBuffs.Duality
             {
                 if (creature.room == null)
                     continue;
-                if(Vector2.Distance(creature.DangerPos, pos) < 60f)
+                float dist = Vector2.Distance(creature.DangerPos, pos);
+                if (dist < 40f || dist + Vector2.Distance(creature.mainBodyChunk.lastPos, pos) < 80f)
                 {
                     MineTriggered();
                     return;

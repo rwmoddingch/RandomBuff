@@ -18,6 +18,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public static List<AbstractPhysicalObject.AbstractObjectType> weaponSelections;
         static ConditionalWeakTable<Creature, CreatureDmgSourceRecord> dmgSourceMapper = new ConditionalWeakTable<Creature, CreatureDmgSourceRecord>();
         static List<Hook> creatureViolenceHooks = new List<Hook>();
+        static bool explosionFromScavengerBomb;
 
         public override ConditionID ID => ConditionID.Extermination;
 
@@ -49,7 +50,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override void HookOn()
         {
             base.HookOn();
+            BuffUtils.Log("ExterminationCondition", $"Hooks on");
             On.Creature.Die += Creature_Die;
+            On.Explosion.Update += Explosion_Update;
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
@@ -70,8 +73,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
-
-
+        private void Explosion_Update(On.Explosion.orig_Update orig, Explosion self, bool eu)
+        {
+            if (self.sourceObject != null && self.sourceObject is ScavengerBomb)
+                explosionFromScavengerBomb = true;
+            orig.Invoke(self, eu);
+            if (explosionFromScavengerBomb)
+                explosionFromScavengerBomb = false;
+        }
 
         private void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
@@ -85,7 +94,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                         kills++;
                         if (kills >= killRequirement)
                             Finished = true;
-                        //onLabelRefresh?.Invoke(this);
+                        onLabelRefresh?.Invoke(this);
                     }
                 }
             }
@@ -108,6 +117,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     {
                         dmgSourceMapper.Add(self, new CreatureDmgSourceRecord() { sourceObjType = source.owner.abstractPhysicalObject.type });
                     }
+                }
+                else if (explosionFromScavengerBomb)
+                {
+                    if (dmgSourceMapper.TryGetValue(self, out var record))
+                        record.sourceObjType = AbstractPhysicalObject.AbstractObjectType.ScavengerBomb;
+                    else
+                        dmgSourceMapper.Add(self, new CreatureDmgSourceRecord() { sourceObjType = AbstractPhysicalObject.AbstractObjectType.ScavengerBomb });
                 }
                 orig.Invoke(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
             }

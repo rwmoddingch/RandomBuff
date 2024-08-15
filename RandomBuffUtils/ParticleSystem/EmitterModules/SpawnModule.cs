@@ -52,7 +52,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public sealed class BurstSpawnerModule : SpawnModule
     {
-        bool emitted;
+        public bool emitted;
         public BurstSpawnerModule(ParticleEmitter emitter, int count) : base(emitter, count)
         {
         }

@@ -30,8 +30,8 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
 
     public sealed class SetEmitterLife : EmitterModule
     {
-        int setLife;
-        int life;
+        public int setLife;
+        public int life;
         bool loop;
         bool killOnFinish;
 

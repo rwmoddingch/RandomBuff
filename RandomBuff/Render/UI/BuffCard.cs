@@ -329,7 +329,7 @@ namespace RandomBuff.Render.UI
             if (newState == currentAniamtorState && currentAnimator != null)
                 return;
 
-            BuffPlugin.Log($"{ID}-{interactionManager} switch to {newState}");
+            //BuffPlugin.Log($"{ID}-{interactionManager} switch to {newState}");
             //if (newState == AnimatorState.Test_None)
             //    Helper.TraceStack();
 
