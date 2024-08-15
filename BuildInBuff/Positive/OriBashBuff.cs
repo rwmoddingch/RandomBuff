@@ -321,6 +321,7 @@ namespace BuiltinBuffs.Positive
                 if (isBash)
                 {
                     isBash = false;
+                    OriBashBuffEntry.UpdateSpeed = 1000;
                     outroTimer = 10;
                 }
 

@@ -21,7 +21,7 @@ namespace RandomBuff.Core.Game
     /// </summary>
     static class BuffPicker
     {
-        public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount ,params BuffType[] types)
+        public static List<BuffStaticData> GetNewBuffsOfType(SlugcatStats.Name name,int pickCount, params BuffType[] types)
         {
 #if TESTVERSION
             if (BuffPlugin.DevEnabled)
@@ -63,8 +63,12 @@ namespace RandomBuff.Core.Game
                 BuffPlugin.LogDebug($"Conflict: {id}");
 
 #endif
-            var alreadyHasNoStackable = alreadyHas.Where(i => !i.GetStaticData().Stackable);
+            var alreadyHasNoStackable = alreadyHas.Where(i => !i.GetStaticData().Stackable || (i.GetBuffData()?.CanStackMore() ?? true));
 
+            foreach (var id in alreadyHasNoStackable)
+            {
+                BuffPlugin.Log(id);
+            }
             var list = new List<BuffStaticData>();
             var copyUnique = new List<BuffID>();
             foreach (var type in types)

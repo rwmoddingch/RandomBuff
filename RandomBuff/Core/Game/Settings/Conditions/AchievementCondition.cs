@@ -31,8 +31,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             List<Condition> conditions = null)
         {
             conditions ??= new List<Condition>();
-            var re = WinState.EndgameID.values.entries.Select(i => new WinState.EndgameID(i)).Where(i =>
-                conditions.OfType<AchievementCondition>().All(j => j.achievementID != i) && !string.IsNullOrWhiteSpace(WinState.PassageDisplayName(i))).ToList();
+            var re = WinState.EndgameID.values.entries.Select(i => new WinState.EndgameID(i)).
+                Where(endGame =>
+                    conditions.OfType<AchievementCondition>().All(j => j.achievementID != endGame) &&
+                           !string.IsNullOrWhiteSpace(WinState.PassageDisplayName(endGame))).ToList();
             re.Remove(MoreSlugcatsEnums.EndgameID.Mother);
             re.Remove(MoreSlugcatsEnums.EndgameID.Gourmand);
 
