@@ -4,6 +4,7 @@
   "BuffType": "Negative",
   "BuffProperty": "Normal",
   "Triggerable": false,
+  "Stackable": true,
   "Color": "FFE4FF",
 
   "Chinese": {

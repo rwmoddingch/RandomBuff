@@ -1,17 +1,18 @@
- {
+{
   "FaceName": "Photophobia",
   "BuffID": "Photophobia",
   "BuffType": "Negative",
   "BuffProperty": "Normal",
   "Triggerable": false,
+  "Stackable": true,
   "Color": "FFE4FF",
 
   "Chinese": {
     "BuffName": "恐光症",
-    "Description": "被闪光果照射会导致你直接死亡。"
+    "Description": "被闪光果照射会导致你直接死亡。从第二层开始，每一层将使你被一道光照射时速度下降10%（最多下降50%）。"
   },
   "English": {
     "BuffName": "Photophobia",
-    "Description": "Makes flashbangs deadly to slugcat."
+    "Description": "Makes flashbangs deadly to slugcat. Starting from the second stack, each stack will reduce your speed by 10% (up to 50%) when illuminated by a beam of light."
   }
 }

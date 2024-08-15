@@ -78,6 +78,10 @@ namespace BuiltinBuffs.Positive
             {
                 waterdancer.lastAirInLungs = self.airInLungs;
             }
+            else
+            {
+                WaterDancerFeatures.Add(self, new WaterDancer(self));
+            }
 
             orig(self, eu);
 
@@ -106,6 +110,7 @@ namespace BuiltinBuffs.Positive
         public WaterDancer(Player player)
         {
             ownerRef = new WeakReference<Player>(player);
+            lastAirInLungs = player.airInLungs;
         }
     }
 }

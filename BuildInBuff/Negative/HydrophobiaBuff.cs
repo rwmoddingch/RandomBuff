@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Mono.Cecil.Cil;
 using BuiltinBuffs.Duality;
+using BuiltinBuffs.Positive;
+using RandomBuff;
 
 namespace BuiltinBuffs.Negative
 {
@@ -41,6 +43,14 @@ namespace BuiltinBuffs.Negative
         public static BuffID Hydrophobia = new BuffID("Hydrophobia", true);
 
         public static ConditionalWeakTable<Player, Hydrophobia> HydrophobiaFeatures = new ConditionalWeakTable<Player, Hydrophobia>();
+
+        public static int StackLayer
+        {
+            get
+            {
+                return Hydrophobia.GetBuffData().StackLayer;
+            }
+        }
 
         public void OnEnable()
         {
@@ -73,7 +83,8 @@ namespace BuiltinBuffs.Negative
             {
                 hydrophobia.airInLungs = self.airInLungs;
                 hydrophobia.subAirInLungs = hydrophobia.lastAirInLungs - hydrophobia.airInLungs;
-                self.airInLungs -= hydrophobia.subAirInLungs;
+                //self.airInLungs -= hydrophobia.subAirInLungs;
+                self.airInLungs = hydrophobia.lastAirInLungs - hydrophobia.subAirInLungs * Mathf.Pow(2f, StackLayer);
             }
         }
     }
