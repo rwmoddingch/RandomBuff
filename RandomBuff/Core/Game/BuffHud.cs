@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using HUD;
 using JetBrains.Annotations;
 using RandomBuff.Core.Buff;
@@ -15,6 +16,7 @@ using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using static RandomBuff.Render.UI.Component.CardPocket;
+using static RandomBuff.Render.UI.Component.CardPocketSlot;
 
 namespace RandomBuff.Core.Game
 {
@@ -70,25 +72,32 @@ namespace RandomBuff.Core.Game
 
             if (BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply) != 0)
             {
-                pocket = new CardPocket(new List<BuffID>(), FormateFreePickTitle(0), (
+                pocket = new CardPocket(new List<BuffRep>(), FormateFreePickTitle(0), (
                         (all, _, _) =>
                         {
                             if (all == null)
                                 return;
-                            foreach (var card in all)
-                                card.CreateNewBuff();
+                            foreach (var rep in all)
+                            {
+                                rep.buffID.CreateNewBuff(false);
+                                if(rep.stackable)
+                                {
+                                    for(int i = 1; i < rep.stackCount; i++)
+                                        BuffPoolManager.Instance.GetBuffData(rep.buffID).Stack();
+                                }
+                            }
                             pocket?.Destroy();
                             pocket = null;
                         }),
                     BuffCard.normalScale * 0.5f, new Vector2(400f, Custom.rainWorld.screenSize.y - 200),
                     new Vector2(Custom.rainWorld.screenSize.x - 400 - 100, 100f), new Vector2(0f, 0f),
                     BuffConfigManager.GetFreePickCount(setting.PocketPackMultiply))
-                { 
-                    onSelectedBuffChange = (lst) =>
-                    {
-                        pocket.Title = FormateFreePickTitle(lst.Count);
-                    }
-                };
+                    { 
+                        onSelectedBuffChange = (lst) =>
+                        {
+                            pocket.Title = FormateFreePickTitle(CardPocket.GetRealSelectionCount(lst));
+                        }
+                    };
                 hud.fContainers[1].AddChild(pocket.Container);
                 pocket.SetShow(true);
 

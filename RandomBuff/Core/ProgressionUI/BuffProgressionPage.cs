@@ -187,6 +187,7 @@ namespace RandomBuff.Core.ProgressionUI
             foreach(var pair in nameForCosmetics)
                 contentSize += CaculateBlockHeight(pair.Value.Count);
             contentSize += bigGap;
+            contentSize += buttonSize.y;
             contentSize = Mathf.Max(contentSize, size.y);
 
             opScrollBox.contentSize = contentSize;
@@ -395,6 +396,7 @@ namespace RandomBuff.Core.ProgressionUI
         {
             lastMenuPageIndex = menu.currentPage;
             menu.currentPage = index;
+            menu.ResetSelection();
             Show = true; 
             recordTitle.RequestSwitchTitle(pageNames[setPage], true);
         }
@@ -403,6 +405,7 @@ namespace RandomBuff.Core.ProgressionUI
         {
             menu.currentPage = lastMenuPageIndex;
             Show = false;
+            menu.ResetSelection();
             recordTitle.RequestSwitchTitle("");
         }
 
