@@ -37,14 +37,14 @@ namespace BuiltinBuffs.Positive
 
                     FireShieldState fireShieldState = new FireShieldState(player);
                     FireShieldBuffEntry.FireShieldStateFeatures.Add(player, fireShieldState);
+                    FireShieldBuffEntry.PlayerList.Add(player);
                 }
             }
         }
 
         public override bool Trigger(RainWorldGame game)
         {
-            foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
-                             .Where(i => i != null && i.graphicsModule != null))
+            foreach (var player in FireShieldBuffEntry.PlayerList)
             {
                 if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var fireShield) &&
                     BuffInput.GetKeyDown(GetBindKey()))
@@ -69,6 +69,7 @@ namespace BuiltinBuffs.Positive
         public static BuffID FireShield = new BuffID("FireShield", true);
         public static ConditionalWeakTable<Player, FireShield> FireShieldFeatures = new ConditionalWeakTable<Player, FireShield>();
         public static ConditionalWeakTable<Player, FireShieldState> FireShieldStateFeatures = new ConditionalWeakTable<Player, FireShieldState>();
+        public static List<Player> PlayerList = new List<Player>();
 
         public static int StackLayer
         {
@@ -103,6 +104,7 @@ namespace BuiltinBuffs.Positive
             {
                 FireShieldState flashShieldState = new FireShieldState(self);
                 FireShieldStateFeatures.Add(self, flashShieldState);
+                PlayerList.Add(self);
             }
         }
 
