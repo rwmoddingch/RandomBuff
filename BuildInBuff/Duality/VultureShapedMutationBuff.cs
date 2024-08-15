@@ -379,6 +379,38 @@ namespace BuiltinBuffs.Duality
 
         public bool IsMiros => VultureShapedMutationBuffEntry.StackLayer >= 10;
 
+        private float MassFac
+        {
+            get
+            {
+                if (!ownerRef.TryGetTarget(out var player))
+                    return 1f;
+
+                float graspMass = 0f;
+                if (player.grasps != null)
+                {
+                    for (int i = 0; i < player.grasps.Length; i++)
+                    {
+                        if (player.grasps[i] != null)
+                            graspMass += player.grasps[i].grabbed.TotalMass;
+                    }
+                }
+
+                float result = (player.TotalMass + graspMass) / player.slugcatStats.runspeedFac;
+                return result;
+            }
+        }
+
+        private bool MassFacCondition
+        {
+            get
+            {
+                if (!ownerRef.TryGetTarget(out var player))
+                    return false;
+                return MassFac >= 1f + 0.1f * VultureShapedMutationBuffEntry.StackLayer || player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Gourmand;
+            }
+        }
+
         #region 面具相关
         private VultureMask mask;
         private Creature.Grasp maskGrasp;
@@ -1213,7 +1245,23 @@ namespace BuiltinBuffs.Duality
             //如果正在飞行
             if (isFlying)
             {
-                player.AerobicIncrease(0.01f);
+                player.AerobicIncrease(0.04f * Mathf.Pow(MassFac, 2f));
+                if (this.wings != null)
+                {
+                    if (MassFacCondition)
+                    {
+                        if (player.aerobicLevel >= 0.5f)
+                            this.wingFlapAmplitude = Mathf.Clamp(this.wingFlapAmplitude - 0.05f, 1f - player.aerobicLevel, 1f);
+                        if (player.aerobicLevel >= 0.95f)
+                            player.gourmandExhausted = true;
+                    }
+                    if (player.gourmandExhausted)
+                    {
+                        for (int i = 0; i < this.wings.GetLength(0); i++)
+                            for (int j = 0; j < this.wings.GetLength(1); j++)
+                                this.wings[i, j].SwitchMode(VultureCatTentacle.Mode.Climb);
+                    }
+                }
 
                 player.gravity = 0f;
                 player.airFriction = flightAirFriction;
@@ -1284,54 +1332,68 @@ namespace BuiltinBuffs.Duality
         }
 
         //飞行速度
-        private void FlightUpdate(Player self)
+        private void FlightUpdate(Player player)
         {
-            if (self.room == null) 
+            if (player.room == null) 
                 return;
-            wantPos += wingSpeed * new Vector2(self.input[0].x, self.input[0].y);//self.bodyChunks[0].pos + 
-            if (self.input[0].x == 0 && !wantPosIsSetX)
+            float massSpeedFac = 1f;
+            if (player.aerobicLevel >= 0.5f && MassFacCondition)
             {
-                self.bodyChunks[0].vel.x *= 0.8f;
-                self.bodyChunks[1].vel.x *= 0.8f;
-                if(Mathf.Abs(self.bodyChunks[0].vel.x) < 1f)
+                massSpeedFac = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 1f, 0f);
+                wingSpeed = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 10f, 0f);
+                wantPos += Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 0f, 4f) * Vector2.down;
+            }
+            else
+            {
+                wingSpeed = 10f;
+            }
+
+            wantPos += wingSpeed * new Vector2(player.input[0].x, player.input[0].y);//player.bodyChunks[0].pos + 
+            if (player.input[0].x == 0 && !wantPosIsSetX)
+            {
+                player.bodyChunks[0].vel.x *= 0.8f;
+                player.bodyChunks[1].vel.x *= 0.8f;
+                if(Mathf.Abs(player.bodyChunks[0].vel.x) < 1f)
                 {
                     wantPosIsSetX = true;
-                    wantPos.x = self.bodyChunks[0].pos.x;
+                    wantPos.x = player.bodyChunks[0].pos.x;
                 }
             }
-            if (self.input[0].y == 0 && !wantPosIsSetY)
+            if (player.input[0].y == 0 && !wantPosIsSetY)
             {
-                self.bodyChunks[0].vel.y *= 0.8f;
-                self.bodyChunks[1].vel.y *= 0.8f;
-                if (Mathf.Abs(self.bodyChunks[0].vel.y) < 1f)
+                player.bodyChunks[0].vel.y *= 0.8f;
+                player.bodyChunks[1].vel.y *= 0.8f;
+                if (Mathf.Abs(player.bodyChunks[0].vel.y) < 1f)
                 {
                     wantPosIsSetY = true;
-                    wantPos.y = self.bodyChunks[0].pos.y;
+                    wantPos.y = player.bodyChunks[0].pos.y;
                 }
             }
-            if (self.input[0].x != 0 || Mathf.Abs(wantPos.x - self.bodyChunks[0].pos.x) > 100f)
+            if (player.input[0].x != 0 || Mathf.Abs(wantPos.x - player.bodyChunks[0].pos.x) > 100f)
             {
                 wantPosIsSetX = false;
             }
-            if (self.input[0].y != 0 || Mathf.Abs(wantPos.y - self.bodyChunks[0].pos.y) > 100f)
+            if (player.input[0].y != 0 || Mathf.Abs(wantPos.y - player.bodyChunks[0].pos.y) > 100f)
             {
                 wantPosIsSetY = false;
             }
 
-            self.bodyChunks[0].vel *= Custom.LerpMap(self.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
-            self.bodyChunks[0].vel += Vector2.ClampMagnitude(wantPos - self.bodyChunks[0].pos, 100f) / 100f * 3f;
+            player.bodyChunks[0].vel *= Custom.LerpMap(player.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
+            player.bodyChunks[0].vel += Vector2.ClampMagnitude(wantPos - player.bodyChunks[0].pos, 100f) / 100f * 3f;
             //俯身加速
-            if (self.input[0].x != 0 && self.input[0].y < 0)
-                self.bodyChunks[0].vel.x *= 1.2f;
+            if (player.input[0].x != 0 && player.input[0].y < 0)
+                player.bodyChunks[0].vel.x *= 1.2f;
             //抵消重力
-            if (self.input[0].y >= 0)
-                self.bodyChunks[0].vel += 1.85f * Vector2.up * self.room.gravity;
+            if (player.input[0].y >= 0)
+            {
+                player.bodyChunks[0].vel += 1.85f * Vector2.up * player.room.gravity * massSpeedFac;
+            }
             else
-                self.bodyChunks[0].vel -= 1.05f * Vector2.up;
+                player.bodyChunks[0].vel -= 1.05f * Vector2.up * massSpeedFac;
             //随机速度
-            self.bodyChunks[0].vel += Custom.RNV() * Random.value * 0.5f;
+            player.bodyChunks[0].vel += Custom.RNV() * Random.value * 0.5f;
 
-            self.bodyChunks[1].vel *= 0.8f;
+            player.bodyChunks[1].vel *= 0.8f;
 
 
             if (this.wingFlap < 0.5f)
@@ -1340,7 +1402,7 @@ namespace BuiltinBuffs.Duality
                 this.wingFlap += 0.02f;
             if (this.wingFlap > 1f)
                 this.wingFlap -= 1f;
-            if (self.input[0].y < 0)
+            if (player.input[0].y < 0)
                 this.wingFlap = 0f;
 
             if (this.CheckTentacleModeOr(VultureCatTentacle.Mode.Fly))
