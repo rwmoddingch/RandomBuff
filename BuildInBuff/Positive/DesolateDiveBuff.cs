@@ -131,8 +131,9 @@ namespace BuiltinBuffs.Positive
                
                 self.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Death, self.mainBodyChunk);
                 self.room.PlaySound(desolateDive,0f, 0.45f, 1f);
-                foreach(var obj in self.room.updateList)
+                for(int j = self.room.updateList.Count-1 ; j>=0;j--)
                 {
+                    var obj = self.room.updateList[j];
                     if(obj is PhysicalObject p)
                     {
                         Vector2 delta = Vector2.zero;

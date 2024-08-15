@@ -48,6 +48,13 @@ namespace BuiltinBuffs.Missions
                             boostCrit = CreatureTemplate.Type.KingVulture,
                             boostCount = 1,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add
+                        },
+                        new GachaTemplate.BoostCreatureInfo()
+                        {
+                            baseCrit = CreatureTemplate.Type.KingVulture,
+                            boostCrit = CreatureTemplate.Type.KingVulture,
+                            boostCount = 2,
+                            boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add
                         }
                     }
                 }

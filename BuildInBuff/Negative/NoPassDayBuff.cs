@@ -4,8 +4,10 @@ using RandomBuffUtils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using MonoMod.RuntimeDetour;
 
 namespace BuiltinBuffs.Negative
 {
@@ -15,12 +17,12 @@ namespace BuiltinBuffs.Negative
 
         public NoPassDayBuff()
         {
-            RandomBuffUtils.BuffEvent.OnGateLoaded += BuffEvent_OnGateLoaded;
+            BuffEvent.OnGateLoaded += BuffEvent_OnGateLoaded;
         }
 
         public override void Destroy()
         {
-            RandomBuffUtils.BuffEvent.OnGateLoaded -= BuffEvent_OnGateLoaded;
+            BuffEvent.OnGateLoaded -= BuffEvent_OnGateLoaded;
         }
 
         private void BuffEvent_OnGateLoaded(RandomBuffUtils.BuffEvents.BuffRegionGateEvent.RegionGateInstance gateInstance)
@@ -43,6 +45,21 @@ namespace BuiltinBuffs.Negative
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<NoPassDayBuff, NoPassDayBuffData, NoPassDayBuffEntry>(noPassDayBuffID);
+        }
+
+        public static void HookOn()
+        {
+
+            _ = new Hook(typeof(WaterGate).GetProperty("EnergyEnoughToOpen").GetGetMethod(),
+                typeof(NoPassDayBuffEntry).GetMethod("Gate_EnergyEnoughToOpen", BindingFlags.Static | BindingFlags.NonPublic));
+
+            _ = new Hook(typeof(ElectricGate).GetProperty("EnergyEnoughToOpen").GetGetMethod(),
+                typeof(NoPassDayBuffEntry).GetMethod("Gate_EnergyEnoughToOpen", BindingFlags.Static | BindingFlags.NonPublic));
+        }
+
+        private static bool Gate_EnergyEnoughToOpen(Func<RegionGate, bool> orig, RegionGate self)
+        {
+            return false;
         }
     }
 }
