@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "CyanZap",
-        "Description" : "Cyan lizards can instantly complete the jump charge and reaches their destination instantly."
+        "Description" : "Cyan lizards have no jump charge-up and reach their destination instantly."
     }
 }
