@@ -141,11 +141,17 @@ namespace BuiltinBuffs.Negative
             if (!ownerRef.TryGetTarget(out var player) || player.graphicsModule == null || sLeaser == null)
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
-
+            int grasp = 0;
+            if (player.grasps[1] != null)
+            {
+                grasp = 1;
+            }
             if (sLeaser.sprites.Length >= 9)
                 for (int i = 5; i <= 8; i++)
-                    if (i == 6 || i == 8)
+                {
+                    if (i == 6 - grasp || i == 8 - grasp)
                         sLeaser.sprites[i].isVisible = false;
+                }
         }
     }
 }
