@@ -42,8 +42,6 @@ namespace RandomBuff.Core.Entry
         {
             var type = typeof(TCondition);
             var origMethod = type.GetMethod("HookOn", BindingFlags.Public | BindingFlags.Instance);
-            if (origMethod?.DeclaringType != type)
-                return;
             RegisterConditionHook_Impl<TCondition>(type, origMethod);
         }
 
@@ -83,7 +81,7 @@ namespace RandomBuff.Core.Entry
                 {
                     action.Invoke();
                     HasEnabled[buffID][level] = true;
-                    BuffPlugin.LogDebug($"Enable Buff {buffID}:{level}");
+                    BuffPlugin.Log($"HookWarpper Enable Buff - {buffID}:{level}");
                 }
                 catch (Exception ex)
                 {
@@ -107,7 +105,7 @@ namespace RandomBuff.Core.Entry
                 {
                     action.Invoke();
                     HasEnabled[buffID][level] = false;
-                    BuffPlugin.LogDebug($"Disable Buff {buffID}:{level}");
+                    BuffPlugin.Log($"HookWarpper Disable Buff - {buffID}:{level}");
                 }
                 catch (Exception ex)
                 {
@@ -119,8 +117,16 @@ namespace RandomBuff.Core.Entry
 
         public static void DisableCondition(Condition condition)
         {
-            if (RegistedRemoveCondition.TryGetValue(condition.GetType(), out var method))
+            if (RegistedRemoveCondition.TryGetValue(condition.ID, out var method))
+            {
+                BuffPlugin.Log($"HookWarpper Disable Condition - {condition.ID}");
                 method.Invoke(condition);
+            }
+            else
+            {
+                BuffPlugin.LogError($"HookWarpper No Find Condition - {condition.ID}");
+
+            }
         }
 
     }
@@ -130,10 +136,13 @@ namespace RandomBuff.Core.Entry
 
         private static void RegisterConditionHook_Impl<TCondition>(Type type, MethodInfo origMethod) where TCondition : Condition
         {
+            if (hookAssembly == null)
+                hookAssembly = typeof(On.Player).Assembly;
             DynamicMethodDefinition method = new(origMethod);
             method.Definition.Body.Instructions.Clear();
             ILProcessor ilProcessor = method.GetILProcessor();
             List<(Instruction target, Instruction from)> labelList = new();
+            BuffPlugin.Log($"RegisterConditon - {Helper.GetUninit<Condition>(type).ID}");
 
 
             _ = new ILHook(origMethod, (il) =>
@@ -142,10 +151,12 @@ namespace RandomBuff.Core.Entry
                 foreach (var str in il.Instrs)
                 {
 
-                    if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add") &&
-                        TryGetRemoveMethod(origMethod, m, out var removeMethod))
+                    if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add"))
                     {
-                        ilProcessor.Emit(OpCodes.Call, removeMethod);
+                        if (TryGetRemoveMethod(origMethod, m, out var removeMethod))
+                            ilProcessor.Emit(OpCodes.Call, removeMethod);
+                        else
+                            BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
                     }
                     else if (str.MatchNewobj<Hook>() && str.MatchNewobj(out var ctor))
                     {
@@ -182,11 +193,13 @@ namespace RandomBuff.Core.Entry
                     c.Emit(OpCodes.Call, typeof(List<Hook>).GetMethod(nameof(List<Hook>.Add)));
                 }
 
-                RegistedRemoveCondition.Add(type, (condition => method.Generate().CreateDelegate<Action<TCondition>>().Invoke(condition as TCondition)));
 ;
 
 
             });
+            var deg = method.Generate().CreateDelegate<Action<TCondition>>();
+            RegistedRemoveCondition.Add(Helper.GetUninit<Condition>(type).ID, (condition => deg.Invoke(condition as TCondition)));
+
         }
 
 
@@ -205,10 +218,12 @@ namespace RandomBuff.Core.Entry
             foreach (var str in il.Instrs)
             {
             
-                if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add") &&
-                    TryGetRemoveMethod(origMethod,m,out var removeMethod))
+                if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add"))
                 {
-                    ilProcessor.Emit(OpCodes.Call, removeMethod);
+                    if(TryGetRemoveMethod(origMethod, m, out var removeMethod))
+                        ilProcessor.Emit(OpCodes.Call, removeMethod);
+                    else
+                        BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
                 }
                 else if (str.MatchNewobj<Hook>() && str.MatchNewobj(out var ctor))
                 {
@@ -341,7 +356,7 @@ namespace RandomBuff.Core.Entry
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, bool>> HasEnabled = new();
 
 
-        private static readonly Dictionary<Type,Action<Condition>> RegistedRemoveCondition = new();
+        private static readonly Dictionary<ConditionID,Action<Condition>> RegistedRemoveCondition = new();
 
     }
 }

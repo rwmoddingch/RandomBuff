@@ -50,6 +50,11 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             base.HookOn();
             On.Creature.Die += Creature_Die;
+        }
+
+        public override void EnterGame(RainWorldGame game)
+        {
+            base.EnterGame(game);
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
@@ -69,8 +74,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 }
             }
         }
-
-
 
 
         private void Creature_Die(On.Creature.orig_Die orig, Creature self)
@@ -113,11 +116,18 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                UnityEngine.Debug.LogException(ex);
             }
         }
 
 
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            foreach (var hook in creatureViolenceHooks)
+                hook.Dispose();
+            creatureViolenceHooks.Clear();
+        }
 
 
         public override string DisplayName(InGameTranslator translator)
