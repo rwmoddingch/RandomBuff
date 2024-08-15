@@ -8,6 +8,7 @@ using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using RandomBuff;
 using System.Runtime.CompilerServices;
+using BuildInBuff.Positive;
 
 namespace TemplateGains
 {
@@ -38,7 +39,25 @@ namespace TemplateGains
                 if (item != null && item.state.alive && item?.realizedObject is Player player && player.room != null &&!player.inShortcut)
                 {
                     player.Stun(200);
-                    var explotion = new DamageOnlyExplosion(player.room, player, player.mainBodyChunk.pos, 10, 200, 10f, 1.8f, 80, 20, player, 10, 0, 1, game.Players.ToArray());
+                    
+                    List<AbstractCreature> passDamege = new List<AbstractCreature>();
+
+                    foreach (var absCreature in player.room.updateList)
+                    {
+                        if (absCreature is Fly fly)
+                        {
+                            if (ButteFly.modules.TryGetValue(fly, out var butteFly))
+                            {
+                                passDamege.Add(fly.abstractCreature);
+                                BuffUtils.Log(UnstableSlugBuffEntry.UnstableSlugID, "get buttefly");
+
+                            }
+                        }
+
+                    }
+                    passDamege.AddRange(game.Players.ToArray());
+
+                    var explotion = new DamageOnlyExplosion(player.room, player, player.mainBodyChunk.pos, 10, 200, 10f, 1.8f, 80, 20, player, 10, 0, 1, passDamege.ToArray());
                     player.room.AddObject(explotion);
 
                     var vector = player.mainBodyChunk.pos;
@@ -49,6 +68,7 @@ namespace TemplateGains
                     player.room.AddObject(new ShockWave(vector, 150, 0.485f, 80, true));
                     player.room.AddObject(new ShockWave(vector, 200f, 0.185f, 40, false));
                     player.room.PlaySound(SoundID.Bomb_Explode, player.mainBodyChunk.pos);
+
                 }
             }
             
