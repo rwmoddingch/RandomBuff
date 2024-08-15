@@ -18,6 +18,6 @@
     },
     "English" : {
         "BuffName" : "Upgradation",
-        "Description" : "Randomly upgrade or duplicated a creature in the current room."
+        "Description" : "Randomly upgrade or duplicates a creature in the current room."
     }
 }

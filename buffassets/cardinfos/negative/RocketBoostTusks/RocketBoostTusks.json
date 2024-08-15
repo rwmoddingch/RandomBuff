@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Rocket Boost Tusks",
-        "Description" : "After king vulture's tusk being launched, it tracks the target for a short time before speeding up rapidly, resulting in increased firing speed and extended attack range. Upon hitting a target or wall, it causes a non-damaging explosion."
+        "Description" : "Gives King vulture tusks a slight homing effect, over time they will speed up and on hit will release a small stunning explosion."
     }
 }

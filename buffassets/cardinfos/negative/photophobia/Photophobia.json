@@ -1,4 +1,4 @@
-{
+ {
   "FaceName": "Photophobia",
   "BuffID": "Photophobia",
   "BuffType": "Negative",
@@ -12,6 +12,6 @@
   },
   "English": {
     "BuffName": "Photophobia",
-    "Description": "Being exposed to the flare bomb can lead to your direct death."
+    "Description": "Makes flashbangs deadly to slugcat."
   }
 }
