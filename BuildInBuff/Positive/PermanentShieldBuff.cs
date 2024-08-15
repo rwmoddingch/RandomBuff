@@ -219,7 +219,7 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[this.firstSprite + k].alpha = 3f / this.Radius(stackIndex, timeStacker);
             }
             //有粒子就先不要贴图了
-            sLeaser.sprites[this.firstSprite + 0].isVisible = false;
+            //sLeaser.sprites[this.firstSprite + 0].isVisible = false;
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         } 
 
@@ -262,8 +262,8 @@ namespace BuiltinBuffs.Positive
 
             if (IsExisting && owner.room != null)
             {
-                if (this.emitter == null)
-                    CreateEmitter();
+                //if (this.emitter == null)
+                //    CreateEmitter();
 
                 List<PhysicalObject>[] physicalObjects = owner.room.physicalObjects;
                 for (int i = 0; i < physicalObjects.Length; i++)
