@@ -131,7 +131,7 @@ namespace RandomBuff.Core.Buff
 
         public virtual bool Active => true;
 
-        public virtual bool Triggerable => false;
+        public virtual bool Triggerable => true;
 
         public virtual bool Trigger(RainWorldGame game) => false;
 

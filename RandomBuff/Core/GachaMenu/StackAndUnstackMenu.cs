@@ -33,7 +33,7 @@ namespace RandomBuff.Core.GachaMenu
 
             if (ID == BuffEnums.ProcessID.StackMenu)
             {
-                var stackableArray = allIds.Where(i => i.GetStaticData().Stackable).ToArray();
+                var stackableArray = allIds.Where(i => i.GetStaticData().Stackable && i.GetBuffData().CanStackMore()).ToArray();
                 pickerSlot = new CardPickerSlot(inGameSlot, id =>
                     {
                         exitCounter = 0;
