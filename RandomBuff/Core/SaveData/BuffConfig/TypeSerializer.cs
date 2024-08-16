@@ -57,6 +57,10 @@ namespace RandomBuff.Core.SaveData.BuffConfig
                 {
                     re = new ExtEnumSerializer(type);
                 }
+                else if (type.IsEnum)
+                {
+                    re = new EnumTypeSerializer(type);
+                }
                 else
                 {
                     re = new DefaultTypeSerializer(type);
@@ -82,7 +86,25 @@ namespace RandomBuff.Core.SaveData.BuffConfig
             return JsonUtility.FromJson<TUnityType>(value);
         }
     }
+    public class EnumTypeSerializer : TypeSerializer
+    {
+        public EnumTypeSerializer(Type type)
+        {
+            this.type = type;
+        }
 
+        public readonly Type type;
+
+        public override string Serialize(object value)
+        {
+            return value.ToString();
+        }
+
+        public override object Deserialize(string value)
+        {
+            return Enum.Parse(type, value);
+        }
+    }
     public class DefaultTypeSerializer : TypeSerializer
     {
         public DefaultTypeSerializer(Type type)

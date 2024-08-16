@@ -30,7 +30,10 @@ namespace RandomBuff.Core.SaveData.BuffConfig
 
             if(!(enumType.IsEnum) && !(enumType.IsSubclassOf(typeof(ExtEnumBase))))
                 throw new ArgumentException("CustomBuffConfigEnumAttribute param type mismatch!");
-            this.defaultValue = Activator.CreateInstance(enumType, defaultValue, false);
+            if (enumType.IsEnum)
+                this.defaultValue = Enum.Parse(enumType, defaultValue);
+            else
+                this.defaultValue = Activator.CreateInstance(enumType, defaultValue, false);
             valueType = enumType;
         }
     }

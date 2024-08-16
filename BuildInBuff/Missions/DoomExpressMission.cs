@@ -59,6 +59,14 @@ namespace BuiltinBuffs.Missions
             On.RainWorldGame.ForceSaveNewDenLocation += RainWorldGame_ForceSaveNewDenLocation;
         }
 
+
+        public override void EnterGame(RainWorldGame game)
+        {
+            base.EnterGame(game);
+            if (game.GetStorySession.saveState.miscWorldSaveData.moonHeartRestored)
+                Finished = true;
+        }
+
         private void RainWorldGame_ForceSaveNewDenLocation(On.RainWorldGame.orig_ForceSaveNewDenLocation orig, RainWorldGame game, string roomName, bool saveWorldStates)
         {
             orig(game,roomName, saveWorldStates);

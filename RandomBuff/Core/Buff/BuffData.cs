@@ -8,6 +8,7 @@ using System.Threading.Tasks;
  using RandomBuff.Core.Entry;
  using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
+using UnityEngine;
 
 namespace RandomBuff.Core.Buff
 {
@@ -182,6 +183,40 @@ namespace RandomBuff.Core.Buff
         {
             base.CycleEnd();
             CycleUse++;
+        }
+    }
+
+    /// <summary>
+    /// 自带按键绑定的BuffData
+    /// </summary>
+    public abstract class KeyBindBuffData : BuffData
+    {
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player1 { get; }
+
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player2 { get; }
+
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player3 { get; }
+
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player4 { get; }
+
+        public KeyCode this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return Player1;
+                    case 1: return Player2;
+                    case 2: return Player3;
+                    case 3: return Player4;
+                    default:
+                        return KeyCode.None;
+                }
+            }
         }
     }
 

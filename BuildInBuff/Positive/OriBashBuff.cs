@@ -10,6 +10,7 @@ using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
@@ -53,10 +54,11 @@ namespace BuiltinBuffs.Positive
         }
 
     }
-
-    internal class OriBashBuffData : BuffData
+        
+    internal class OriBashBuffData : KeyBindBuffData
     {
         public override BuffID ID => OriBashBuffEntry.OriBash;
+
     }
 
     internal class OriBashBuffEntry : IBuffEntry
