@@ -283,8 +283,10 @@ namespace BuiltinBuffs.Negative
 
         internal class SpearHitAndStuck : EmitterModule, IParticleUpdateModule, IOwnParticleUniqueData, SharedPhysics.IProjectileTracer, IParticleDieModules
         {
-            public SpearHitAndStuck(ParticleEmitter emitter) : base(emitter)
+            float noDetectRate;
+            public SpearHitAndStuck(ParticleEmitter emitter, float noDetectRate = 0.5f) : base(emitter)
             {
+                this.noDetectRate = noDetectRate;
             }
 
             public void ApplyDie(Particle particle)
@@ -295,12 +297,10 @@ namespace BuiltinBuffs.Negative
                 data.ClearData();
             }
 
-            public void ApplyUpdate(Particle particle)
+            public virtual void ApplyUpdate(Particle particle)
             {
-                if (particle.randomParam3 < 0.5f)
-                    return;
-
-                    
+                if (particle.randomParam3 < noDetectRate)
+                    return; 
 
                 var data = particle.GetUniqueData<HitData>(this);
                 if (data == null)
@@ -312,7 +312,7 @@ namespace BuiltinBuffs.Negative
                 {
                     SharedPhysics.CollisionResult result = SharedPhysics.TraceProjectileAgainstBodyChunks(this, particle.emitter.room, particle.pos, ref pos, 10f, 1, null, true);
 
-                    if (result.obj != null && result.chunk != null)
+                    if (result.obj != null && (result.chunk != null || result.onAppendagePos != null))
                     {
                         data.LogIntoCreature(result, particle);
                         data.MoveWithStuckObj(particle);
@@ -321,17 +321,18 @@ namespace BuiltinBuffs.Negative
                 }
             }
 
-            public Particle.ParticleUniqueData GetUniqueData(Particle particle)
+
+            public virtual Particle.ParticleUniqueData GetUniqueData(Particle particle)
             {
                 return new HitData(particle);
             }
 
-            public bool HitThisChunk(BodyChunk chunk)
+            public virtual bool HitThisChunk(BodyChunk chunk)
             {
                 return true;
             }
 
-            public bool HitThisObject(PhysicalObject obj)
+            public virtual bool HitThisObject(PhysicalObject obj)
             {
                 return obj is Creature;
             }
@@ -339,8 +340,13 @@ namespace BuiltinBuffs.Negative
             internal class HitData : Particle.ParticleUniqueData
             {
                 PhysicalObject stuckInObject;
+                PhysicalObject.Appendage.Pos stuckInAppendage;
+
                 int stuckInChunkIndex;
                 float stuckRotation;
+
+                float deltaRad;
+                float deltaRotation;
 
                 public bool StuckInCreature => stuckInObject != null;
                 public BodyChunk StuckInChunk => stuckInObject.bodyChunks[stuckInChunkIndex];
@@ -354,19 +360,35 @@ namespace BuiltinBuffs.Negative
                     if (result.obj == null || !(result.obj is Creature creature))
                         return;
 
-                    if (result.chunk == null)
+                    if (result.chunk == null && result.onAppendagePos == null)
                         return;
-
-                    stuckInObject = result.obj;
-                    stuckInChunkIndex = result.chunk.index;
-                    stuckRotation = Custom.Angle(p.vel, result.chunk.Rotation);
-
-                    if(creature is Player player)
+                    if(result.onAppendagePos == null)
                     {
-                        if (p.randomParam1 < 0.1f)
+                        stuckInObject = result.obj;
+                        stuckInChunkIndex = result.chunk.index;
+                        stuckRotation = Custom.Angle(p.vel, result.chunk.Rotation);
+                        deltaRotation = Custom.VecToDeg(p.pos - result.chunk.pos) - Custom.VecToDeg(result.chunk.Rotation);
+                        deltaRad = Mathf.Clamp(Vector2.Distance(p.pos, result.chunk.pos), 0f, result.chunk.rad * 0.9f);
+                    }
+                    else
+                    {
+                        stuckInObject = result.obj;
+                        stuckInChunkIndex = 0;
+                        this.stuckInAppendage = result.onAppendagePos;
+                        this.stuckRotation = Custom.VecToDeg(p.vel) - Custom.VecToDeg(stuckInAppendage.appendage.OnAppendageDirection(this.stuckInAppendage));
+                    }
+
+                    ViolenceBehaviour(creature, p, StuckInChunk, stuckInAppendage);
+                }
+
+                public virtual void ViolenceBehaviour(Creature creature, Particle particle, BodyChunk bodyChunk, PhysicalObject.Appendage.Pos appendagePos)
+                {
+                    if (creature is Player player)
+                    {
+                        if (particle.randomParam1 < 0.1f)
                         {
-                            if(p.randomParam2 < 0.01f)
-                                player.Violence(null, null, StuckInChunk, null, Creature.DamageType.Stab, 1f, 20f);
+                            if (particle.randomParam2 < 0.01f)
+                                player.Violence(null, null, bodyChunk, appendagePos, Creature.DamageType.Stab, 1f, 20f);
                             if (ModManager.MSC)
                             {
                                 player.playerState.permanentDamageTracking += (double)(0.01f / player.Template.baseDamageResistance);
@@ -379,9 +401,10 @@ namespace BuiltinBuffs.Negative
                     }
                     else
                     {
-                        creature.Violence(null, p.vel * 0.1f, StuckInChunk, null, Creature.DamageType.Stab, 0.1f, 0f);
+                        creature.Violence(null, particle.vel * 0.1f, bodyChunk, appendagePos, Creature.DamageType.Stab, 0.1f, 0f);
                     }
                 }
+
 
                 public void MoveWithStuckObj(Particle p)
                 {
@@ -390,9 +413,18 @@ namespace BuiltinBuffs.Negative
                         p.Die();
                         return;
                     }
-                    p.rotation = Custom.VecToDeg(StuckInChunk.Rotation) + stuckRotation;
-                    p.pos = StuckInChunk.pos;
+
                     p.vel = Vector2.zero;
+                    if (stuckInAppendage == null)
+                    {
+                        p.rotation = Custom.VecToDeg(StuckInChunk.Rotation) + stuckRotation;
+                        p.pos = StuckInChunk.pos + Custom.DegToVec(Custom.VecToDeg(StuckInChunk.Rotation) + deltaRotation) * deltaRad;                
+                    }
+                    else
+                    {
+                        p.rotation = Custom.VecToDeg(Custom.DegToVec(this.stuckRotation + Custom.VecToDeg(this.stuckInAppendage.appendage.OnAppendageDirection(this.stuckInAppendage))));
+                        p.pos = stuckInAppendage.appendage.OnAppendagePosition(this.stuckInAppendage);
+                    }
                 }
 
                 public void ClearData()

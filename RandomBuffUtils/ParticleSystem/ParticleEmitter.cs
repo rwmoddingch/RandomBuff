@@ -187,7 +187,6 @@ namespace RandomBuffUtils.ParticleSystem
             OnParticleInitEvent?.Invoke(result);
             if (system.IsOnStage)
                 result.InitSpritesAndAddToContainer();
-            
         }
     }
 }

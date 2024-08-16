@@ -138,6 +138,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
+        public static bool TryGetRecord(Creature creature, out CreatureDmgSourceRecord result)
+        {
+            if(dmgSourceMapper.TryGetValue(creature,out result))
+                return true;
+            return false;
+        }
+
 
         public override void OnDestroy()
         {
