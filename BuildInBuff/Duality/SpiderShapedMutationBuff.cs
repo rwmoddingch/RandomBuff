@@ -404,7 +404,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return this.footingCounter > 20 || this.outOfWaterFooting > 0;
+                return this.footingCounter > 5 || this.outOfWaterFooting > 0;
             }
         }
         #endregion
@@ -800,7 +800,6 @@ namespace BuiltinBuffs.Duality
                 return;
             if (player.room == null)
                 return;
-
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);
@@ -848,7 +847,7 @@ namespace BuiltinBuffs.Duality
             }
             if (player.Consious)
             {
-                if (player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template) || player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template)) //
+                if (true) //player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template) || player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template)
                 {
                     this.footingCounter++;
                 }
@@ -900,7 +899,7 @@ namespace BuiltinBuffs.Duality
                 bool flag = false;
                 for (int i = 0; i < self.bodyChunks.Length; i++)
                 {
-                    if ((self.bodyChunks[i].ContactPoint.x != 0 ||
+                    if (self.bodyChunks[i].ContactPoint.x != 0 ||
                         self.bodyChunks[i].ContactPoint.y != 0 ||
                         self.bodyMode == Player.BodyModeIndex.WallClimb ||
                         self.animation == Player.AnimationIndex.HangFromBeam ||
@@ -908,8 +907,7 @@ namespace BuiltinBuffs.Duality
                         self.animation == Player.AnimationIndex.AntlerClimb ||
                         self.animation == Player.AnimationIndex.VineGrab ||
                         self.animation == Player.AnimationIndex.ZeroGPoleGrab ||
-                        self.animation == Player.AnimationIndex.HangUnderVerticalBeam) &&
-                        self.room.aimap.TileAccessibleToCreature(self.bodyChunks[i].pos, self.Template))
+                        self.animation == Player.AnimationIndex.HangUnderVerticalBeam)
                     {
                         flag = true;
                     }
