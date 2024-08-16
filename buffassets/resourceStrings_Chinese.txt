@@ -213,7 +213,7 @@ Mission_Display_SurvivalOfFittest|适者生存
 Mission_Display_SlugOfTheFlame|烈焰之蝓
 Mission_Display_KingOfIsles|空岛之王
 Mission_Display_TunnelBattle|管道战
-Mission_Display_RegularCleaning|日常清理
+Mission_Display_RegularCleanup|日常清理
 
 //Credit
 CreditTitle_Intro|Random Buff

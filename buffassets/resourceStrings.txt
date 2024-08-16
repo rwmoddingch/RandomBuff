@@ -205,7 +205,7 @@ Mission_Display_SurvivalOfFittest|SURVIVAL OF THE FITTEST
 Mission_Display_SlugOfTheFlame|SLUG OF THE FLAME
 Mission_Display_KingOfIsles|KING OF THE ISLES
 Mission_Display_TunnelBattle|TUNNEL BATTLE
-Mission_Display_RegularCleaning|REGULAR CLEANING
+Mission_Display_RegularCleanup|REGULAR CLEANUP
 
 //Credit
 CreditTitle_Intro|Random Buff

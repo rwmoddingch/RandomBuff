@@ -1,11 +1,11 @@
 {
     "Name":"Regular Cleaning",
     "Color":"FF3065",
-    "ID":"builtin.quest.RegularCleaning",
+    "ID":"builtin.quest.RegularCleanup",
     "Conditions":[
         {
             "Type":"MissionCondition",
-            "MissionID":"RegularCleaning"
+            "MissionID":"RegularCleanup"
         }
     ],
     "UnlockItem":

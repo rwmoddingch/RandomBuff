@@ -15,18 +15,18 @@ using UnityEngine;
 
 namespace BuiltinBuffs.Missions
 {
-    internal class RegularCleaningMission : Mission, IMissionEntry
+    internal class RegularCleanupMission : Mission, IMissionEntry
     {
-        public static MissionID regularCleaningMissionID = new MissionID("RegularCleaning", true);
-        public override MissionID ID => regularCleaningMissionID;
+        public static MissionID regularCleanupMissionID = new MissionID("RegularCleanup", true);
+        public override MissionID ID => regularCleanupMissionID;
 
         public override SlugcatStats.Name BindSlug => null;
 
         public override Color TextCol => SpearBurster.scanlineCol;
 
-        public override string MissionName => BuffResourceString.Get("Mission_Display_RegularCleaning");
+        public override string MissionName => BuffResourceString.Get("Mission_Display_RegularCleanup");
 
-        public RegularCleaningMission()
+        public RegularCleanupMission()
         {
             gameSetting = new GameSetting(BindSlug)
             {
@@ -38,7 +38,7 @@ namespace BuiltinBuffs.Missions
                 },
                 gachaTemplate = new NormalGachaTemplate()
                 {
-                    ForceStartPos = "SS_S03",
+                    ForceStartPos = "SS_AI",
                     boostCreatureInfos = new List<GachaTemplate.BoostCreatureInfo>()
                     {
                         new GachaTemplate.BoostCreatureInfo()
@@ -59,7 +59,7 @@ namespace BuiltinBuffs.Missions
 
         public void RegisterMission()
         {
-            MissionRegister.RegisterMission(regularCleaningMissionID, new RegularCleaningMission());
+            MissionRegister.RegisterMission(regularCleanupMissionID, new RegularCleanupMission());
         }
     }
 }
