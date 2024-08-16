@@ -433,6 +433,11 @@ namespace BuiltinBuffs.Expeditions
                     case "unl-explosionimmunity":
                         ExplosionImmunityHook.IgnoreStun = false;
                         break;
+                    case "unl-glow":
+                        game.GetStorySession.saveState.theGlow = true;
+                        foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
+                            ply.glowing = true;
+                        break;
                 }
 
                 void OverrideForAgility(SlugcatStats stat)

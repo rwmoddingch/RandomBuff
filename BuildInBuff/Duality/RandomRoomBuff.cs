@@ -50,7 +50,7 @@ namespace BuiltinBuffs.Duality
             }
             catch (Exception e)
             {
-                BuffPlugin.LogException(e);
+                BuffPlugin.LogError(e);
             }
             finally
             {

@@ -17,6 +17,7 @@ using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
@@ -45,6 +46,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             base.CycleEnd();
             CycleUse++;
         }
+
+
+        [CustomBuffConfigInfo("Unnerfed Sephirah Meltdowns", "The original version of Sephirah Meltdowns (higher difficulty and with many design flaws)")]
+        [CustomBuffConfigTwoValue(false, true)]
+        public bool UnNerfedVersion { get; }
 
     }
 
