@@ -4,14 +4,14 @@
     "BuffType": "Negative",
     "BuffProperty" : "Normal",
     "Triggerable" :  false,
-    "Stackable" :  false,
+    "Stackable" :  true,
     "Color" : "FFE7B0",
     "Chinese":{
         "BuffName":"神经退行",
-        "Description":"进入房间时,不可操作2秒"
+        "Description":"进入房间时,晕眩一段时间"
     },
     "English":{
         "BuffName":"Neurodegeneration",
-        "Description":"Freeze slugcat in place for 2 seconds at the start of every room."
+        "Description":"Freeze slugcat in place for seconds at the start of every room."
     }
 }
