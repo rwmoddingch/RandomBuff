@@ -59,6 +59,7 @@ namespace BuiltinBuffs.Duality
             return (target is SmokeSystem);
         }
     }
+
     public class CosmeticSpriteProvider : TemperatureModule.ITemperatureModuleProvider
     {
         public TemperatureModule ProvideModule(UpdatableAndDeletable target)
