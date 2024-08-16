@@ -17,7 +17,7 @@ namespace BuildInBuff.Duality
     class DreamtOfABatBuffData : BuffData
     {
         public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID;
-        public override bool CanStackMore() => StackLayer < 2;
+        public override bool CanStackMore() => StackLayer < 4;
     }
     class DreamtOfABatBuffEntry : IBuffEntry
     {
@@ -94,7 +94,8 @@ namespace BuildInBuff.Duality
                 }
 
                 //稍微添加一点阈值防止莫名其妙的发动卡牌
-                if (self.stun > 12) self.room.AddObject(new BatBody(self.abstractCreature));
+                var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
+                if (self.stun >activeLimite ) self.room.AddObject(new BatBody(self.abstractCreature));
             }
 
 
