@@ -58,20 +58,58 @@ namespace BuiltinBuffs.Negative
         public static void HookOn()
         {
             On.RoomCamera.DrawUpdate += RoomCamera_DrawUpdate;
-
+            On.RoomCamera.ChangeRoom += RoomCamera_ChangeRoom;
+            On.RoomCamera.Update += RoomCamera_Update;
+            lockCounter = 0;
         }
+
+        private static void RoomCamera_Update(On.RoomCamera.orig_Update orig, RoomCamera self)
+        {
+            orig(self);
+            if (lockCounter > 0)
+                lockCounter--;
+        }
+
+        private static int lockCounter = 0;
+
+        private static void RoomCamera_ChangeRoom(On.RoomCamera.orig_ChangeRoom orig, RoomCamera self, Room newRoom, int cameraPosition)
+        {
+            orig(self, newRoom, cameraPosition);
+            lockCounter = 5;
+        }
+
         public static Vector2 localCenter = new Vector2(0.5f,0.5f);
         public static float scale = 1;
 
         private static void RoomCamera_DrawUpdate(On.RoomCamera.orig_DrawUpdate orig, RoomCamera self, float timeStacker, float timeSpeed)
         {
             orig(self, timeStacker, timeSpeed);
+            var toLocalCenter = new Vector2(0.5F, 0.5f);
+            if (self.followAbstractCreature is AbstractCreature crit)
+            {
+                if (crit.realizedCreature?.room != null && !crit.realizedCreature.inShortcut)
+                    toLocalCenter = (self.followAbstractCreature.realizedCreature.DangerPos - self.pos) /
+                                    Custom.rainWorld.screenSize;
+                else if (self.shortcutGraphics.shortcutHandler.transportVessels.FirstOrDefault(i =>
+                             i.creature == crit.realizedCreature) is ShortcutHandler.ShortCutVessel vessels)
+                {
+                    toLocalCenter = (self.room.MiddleOfTile(vessels.pos) - self.pos) /
+                                    Custom.rainWorld.screenSize;
+                }
+                else if (self.shortcutGraphics.shortcutHandler.betweenRoomsWaitingLobby.FirstOrDefault(i =>
+                             i.creature == crit.realizedCreature) is ShortcutHandler.ShortCutVessel vessels1)
+                {
+                    toLocalCenter = (self.room.MiddleOfTile(vessels1.pos) - self.pos) /
+                                    Custom.rainWorld.screenSize;
+                }
 
-            var toLocalCenter = (self.followAbstractCreature?.realizedCreature?.DangerPos - self.pos) / Custom.rainWorld.screenSize ??
-                                new Vector2(0.5F, 0.5f);
+            }
             scale = Mathf.Lerp(scale, ShortSightedBuff.Instance.Data.ZoomFactor, 0.1f * Time.deltaTime * 40);
 
-            localCenter = Vector2.Lerp(localCenter, toLocalCenter, 0.1f * Time.deltaTime * 40);
+            if (lockCounter > 0)
+                localCenter = toLocalCenter;
+            else
+                localCenter = Vector2.Lerp(localCenter, toLocalCenter, 0.1f * Time.deltaTime * 40);
 
             for (int i = 0; i < 11; i++)
             {
