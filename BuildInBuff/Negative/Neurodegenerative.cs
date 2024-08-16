@@ -20,18 +20,14 @@ namespace HotDogBuff
         public static ConditionalWeakTable<Player, MyLastRoom> module = new ConditionalWeakTable<Player, MyLastRoom>();
         public static void HookOn()
         {
-            On.Player.ctor += Player_ctor;
             On.Player.UpdateMSC += Player_UpdateMSC;
         }
 
         private static void Player_UpdateMSC(On.Player.orig_UpdateMSC orig, Player self)
         {
             orig.Invoke(self);
-            if (!module.TryGetValue(self, out var myLastRoom))
-            {
-                module.Add(self, new MyLastRoom());
-                return;
-            }
+
+            var myLastRoom =module.GetValue(self, (p) => new MyLastRoom(p.room));
             if (myLastRoom.lastRoom != self.room)
             {
                 myLastRoom.cd = myLastRoom.cdMax;
@@ -43,22 +39,18 @@ namespace HotDogBuff
                 self.input[0].jmp = false;
                 self.input[0].pckp = false;
                 self.input[0].thrw = false;
+                self.input[0].analogueDir = Vector2.zero;
                 myLastRoom.cd--;
             }
             myLastRoom.lastRoom = self.room;
         }
 
-        private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
-        {
-            orig.Invoke(self, abstractCreature, world);
-            module.Add(self, new MyLastRoom());
-        }
     }    
     internal class MyLastRoom
     {
         public Room lastRoom;
-        public int cdMax = 100;
+        public int cdMax = 20*NeurodegenerativeBuff.Instance.Data.StackLayer;
         public int cd = 0;
-        public MyLastRoom() { }
+        public MyLastRoom(Room room) { lastRoom = room; }
     }
 }

@@ -19,6 +19,7 @@ using System.Diagnostics.Eventing.Reader;
 using MoreSlugcats;
 using Expedition;
 using IL;
+using BuiltinBuffs.Duality;
 
 namespace BuiltinBuffs.Positive
 {
@@ -35,7 +36,39 @@ namespace BuiltinBuffs.Positive
                 {
                     var sporePuff_sCrest = new SporePuff_sCrest(player);
                     SporePuff_sCrestBuffEntry.SporePuff_sCrestFeatures.Add(player, sporePuff_sCrest);
+
+                    SporePuff_sCrestState sporePuff_sCrestState = new SporePuff_sCrestState(player);
+                    SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.Add(player, sporePuff_sCrestState);
+                    SporePuff_sCrestBuffEntry.PlayerList.Add(player);
                 }
+            }
+        }
+
+        public override bool Trigger(RainWorldGame game)
+        {
+            foreach (var player in SporePuff_sCrestBuffEntry.PlayerList)
+            {
+                if (SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.TryGetValue(player, out var sporePuff_sCrest) &&
+                    BuffInput.GetKeyDown(GetBindKey()))
+                {
+                    if (sporePuff_sCrest.IsActivate)
+                        sporePuff_sCrest.Deactivate();
+                    else if (!sporePuff_sCrest.IsActivate)
+                        sporePuff_sCrest.Activate();
+                }
+            }
+            return false;
+        }
+
+        public static bool DefaultState
+        {
+            get
+            {
+                if (BuffCore.GetAllBuffIds().Contains(BuiltinBuffs.Duality.SpiderShapedMutationBuffEntry.SpiderShapedMutation))
+                    return false;
+                if (BuffCore.GetAllBuffIds().Contains(BuiltinBuffs.Duality.PixieSlugBuffEntry.PixieSlug))
+                    return false;
+                return true;
             }
         }
     }
@@ -50,6 +83,8 @@ namespace BuiltinBuffs.Positive
         public static BuffID SporePuff_sCrest = new BuffID("SporePuff_sCrest", true);
 
         public static ConditionalWeakTable<Player, SporePuff_sCrest> SporePuff_sCrestFeatures = new ConditionalWeakTable<Player, SporePuff_sCrest>();
+        public static ConditionalWeakTable<Player, SporePuff_sCrestState> SporePuff_sCrestStateFeatures = new ConditionalWeakTable<Player, SporePuff_sCrestState>();
+        public static List<Player> PlayerList = new List<Player>();
 
         public static int StackLayer
         {
@@ -80,6 +115,12 @@ namespace BuiltinBuffs.Positive
                 SporePuff_sCrest sporePuff_sCrest = new SporePuff_sCrest(self);
                 SporePuff_sCrestFeatures.Add(self, sporePuff_sCrest);
             }
+            if (!SporePuff_sCrestStateFeatures.TryGetValue(self, out _))
+            {
+                SporePuff_sCrestState sporePuff_sCrestState = new SporePuff_sCrestState(self);
+                SporePuff_sCrestStateFeatures.Add(self, sporePuff_sCrestState);
+                PlayerList.Add(self);
+            }
         }
         private static void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
         {
@@ -106,6 +147,10 @@ namespace BuiltinBuffs.Positive
             if (SporePuff_sCrestFeatures.TryGetValue(self, out var sporePuff_sCrest))
             {
                 sporePuff_sCrest.Update(eu);
+            }
+            if (SporePuff_sCrestStateFeatures.TryGetValue(self, out var sporePuff_sCrestState))
+            {
+                sporePuff_sCrestState.Update();
             }
         }
         #endregion
@@ -152,6 +197,13 @@ namespace BuiltinBuffs.Positive
             base.Update(eu);
             if (!ownerRef.TryGetTarget(out var player) || player.room == null || player.dead)
                 return;
+            if (!SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.TryGetValue(player, out var sporePuff_sCrestState) ||
+                !sporePuff_sCrestState.IsActivate)
+            {
+                count = 10;
+                return;
+            }
+
             if (count > 0)
                 count--;
             else
@@ -183,6 +235,40 @@ namespace BuiltinBuffs.Positive
         public float Radius(int level)
         {
             return (3f + 1f * level) * 10f;
+        }
+    }
+
+    internal class SporePuff_sCrestState
+    {
+        WeakReference<Player> ownerRef;
+        private bool setDefaultState;
+
+        public bool IsActivate { get; set; }
+
+        public SporePuff_sCrestState(Player c)
+        {
+            this.ownerRef = new WeakReference<Player>(c);
+            this.IsActivate = false;
+            this.setDefaultState = false;
+        }
+
+        public void Update()
+        {
+            if (!ownerRef.TryGetTarget(out var player) || this.setDefaultState)
+                return;
+            this.setDefaultState = true;
+            this.IsActivate = SporePuff_sCrestBuff.DefaultState;
+            BuffPlugin.Log("SporePuff_sCrestBuff.DefaultState: " + this.IsActivate);
+        }
+
+        public void Activate()
+        {
+            IsActivate = true;
+        }
+
+        public void Deactivate()
+        {
+            IsActivate = false;
         }
     }
 }

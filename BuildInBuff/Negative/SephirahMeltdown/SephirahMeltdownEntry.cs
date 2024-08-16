@@ -12,6 +12,7 @@ using RandomBuff.Core.Game;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
@@ -32,7 +33,6 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             BuffRegister.RegisterBuff<BinahBuff, BinahBuffData, BinahHook>(BinahBuffData.Binah);
             BuffRegister.RegisterBuff<AyinBuff, AyinBuffData, AyinHook>(AyinBuffData.Ayin);
 
-            Hell = File.Exists(AssetManager.ResolveFilePath("ShitVersion.txt"));
         }
 
         public static void LoadAssets()
@@ -95,9 +95,17 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static Texture2D BinahScreenEffectTexture;
 
-        public static bool Hell { get; private set; }
-
-
+        public static bool Hell
+        {
+            get
+            {
+                var result = BuffConfigurableManager.TryGetConfigurable(BinahBuffData.Binah, "UnNerfedVersion", false, typeof(bool), false);
+                if(result.configurable != null)
+                    return (bool)result.configurable.BoxedValue;
+                BuffUtils.LogWarning("SephirahMeltdown", "Can't find UnNerfedVersion property");
+                return false;
+            }
+        }
     }
 
     internal abstract class SephirahMeltdownBuffData : CountableBuffData

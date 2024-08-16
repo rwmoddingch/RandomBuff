@@ -103,6 +103,9 @@ namespace BuiltinBuffs.Negative
                                     Custom.rainWorld.screenSize;
                 }
 
+                Player player;
+                
+
             }
             scale = Mathf.Lerp(scale, ShortSightedBuff.Instance.Data.ZoomFactor, 0.1f * Time.deltaTime * 40);
 

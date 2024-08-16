@@ -34,7 +34,7 @@ namespace BuiltinBuffs.Positive
                              .Where(i => i != null && i.graphicsModule != null))
                 {
                     var bash = new Bash(player);
-                    bash.InitiateSprites(game.cameras[0].spriteLeasers.
+                    bash.InitiateSprites(player.graphicsModule as PlayerGraphics, game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                     OriBashBuffEntry.BashFeatures.Add(player,bash);
                 }
@@ -109,8 +109,7 @@ namespace BuiltinBuffs.Positive
             orig(self, sLeaser, rCam);
             if (BashFeatures.TryGetValue(self.player, out var bash))
             {
-                bash.InitiateSprites(sLeaser, rCam);
-                self.AddToContainer(sLeaser, rCam, null);
+                bash.InitiateSprites(self,sLeaser, rCam);
             }
         }
 
@@ -176,7 +175,7 @@ namespace BuiltinBuffs.Positive
             ownerRef = new WeakReference<Player>(player);
         }
 
-        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        public void InitiateSprites(PlayerGraphics self,RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             startSprite = sLeaser.sprites.Length;
             Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 2);
@@ -189,7 +188,7 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[startSprite + 1].shader = rCam.room.game.rainWorld.Shaders["GravityDisruptor"];
             sLeaser.sprites[startSprite + 1].scale = 15;
             sLeaser.sprites[startSprite + 1].alpha = 0f;
-
+            self.AddToContainer(sLeaser,rCam,null);
             
            
         }
@@ -304,6 +303,8 @@ namespace BuiltinBuffs.Positive
             else
             {
                 sLeaser.sprites[startSprite + 1].alpha = 0;
+                sLeaser.sprites[startSprite].scaleX = 0;
+                sLeaser.sprites[startSprite + 1].scale = 0;
             }
 
             
@@ -319,7 +320,7 @@ namespace BuiltinBuffs.Positive
             if (!ownerRef.TryGetTarget(out var self))
                 return;
             if (!self.Consious || self.grabbedBy.Any())
-            {
+            {   
                 if (isBash)
                 {
                     isBash = false;
@@ -331,14 +332,12 @@ namespace BuiltinBuffs.Positive
             }
             if (outroTimer > 0)
             {
-                self.mushroomEffect = 0.1f;
                 outroTimer--;
             }
 
             if (isBash)
             {
                 bashTimer++;
-                self.mushroomEffect = 0.1f;
                 if (bashTimer == 4)
                 {
                     isBash = false;

@@ -255,7 +255,7 @@ namespace BuiltinBuffs.Positive
                              FreezeFeatures.TryGetValue(creature.abstractCreature, out var freeze))
                         {
                             freeze.Update();
-                            newFlag = freeze.ShouldSkipUpdate();
+                            newFlag = freeze.ShouldSkipUpdate() && !freeze.ShouldAllowUpdate();
                             if (newFlag && creature is Deer)
                             {
                                 bool eu = true;
@@ -670,6 +670,7 @@ namespace BuiltinBuffs.Positive
         WeakReference<AbstractCreature> ownerRef; 
         private int freezeCount;
         private int cycleCount;
+        private int allowUpdateCount;
         private bool isRecorded;
         private Dictionary<FSprite, Color> oldColor;
         private Dictionary<FSprite, Color> newColor;
@@ -745,6 +746,11 @@ namespace BuiltinBuffs.Positive
             //没有石化则逐渐解除冻结
             else if (freezeCount > 0)
                 freezeCount--;
+
+            if (IsPetrified && creature.grabbedBy != null && creature.grabbedBy.Count > 0)
+                allowUpdateCount = 10;
+            else if (allowUpdateCount > 0)
+                allowUpdateCount--;
 
             if (IsPetrified)
             {
@@ -884,6 +890,17 @@ namespace BuiltinBuffs.Positive
             {
                 return true;
             }
+
+            return false;
+        }
+
+        public bool ShouldAllowUpdate()
+        {
+            if (!ownerRef.TryGetTarget(out var creature))
+                return false;
+
+            if(allowUpdateCount > 0)
+                return true;
 
             return false;
         }
