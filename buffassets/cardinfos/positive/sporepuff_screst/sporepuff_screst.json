@@ -13,6 +13,6 @@
   },
   "English": {
     "BuffName": "Spore Puff's Crest",
-    "Description": "Causes a permanent cloud of spore dust around slugcat. Trigger to enable or disable. When you have Pixie Slug or Spider-Shaped Mutation, this card defaults to the disabled state, otherwise it is in the enabled state."
+    "Description": "Causes a permanent cloud of spore dust around slugcat. Trigger to enable or disable. Pixieslug and Spider shaped mutation automatically disable this card."
   }
 }
