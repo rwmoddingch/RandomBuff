@@ -425,6 +425,8 @@ namespace RandomBuff.Render.UI.Component
             if (enableScroll && pocket.Show && mouseInside)
             {
                 float scroll = InputAgency.Current.GetScroll();
+                if (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default)
+                    scroll *= 2.5f;
                 if (scroll < 0)
                     scrollVel = Mathf.Lerp(scrollVel, 30f, 0.25f);
                 else if (scroll > 0)

@@ -118,6 +118,9 @@ namespace RandomBuff.Core.BuffMenu
             }
 
             InitButtonPage(pages[0]);
+            container.AddChild(menuSlot.Container);
+            InitGameDetailPage(pages[0]);
+
             pages.Add((modeSelectPage = new ModeSelectPage(this, null, Vector2.zero, pageIndex++)));
             pages.Add(newGameDetailPage = new BuffNewGameDetailPage(this, null, pageIndex++));
             pages.Add(missionPage = new BuffNewGameMissionPage(this, null, pageIndex++));
@@ -125,9 +128,7 @@ namespace RandomBuff.Core.BuffMenu
             pages.Add(progressionPage = new BuffProgressionPage(this, null, pageIndex++));
             pages.Add((testNotification = new NotificationManager(this, container, pageIndex++)));
 
-            
-            container.AddChild(menuSlot.Container);
-            InitGameDetailPage(pages[0]);
+
             continueDetailPage.SetShow(false);
             newGameDetailPage.SetShow(false);
 

@@ -337,6 +337,8 @@ namespace RandomBuff.Render.UI
             currentAnimator?.Destroy();
             currentAniamtorState = newState;
 
+            ResetComponents();
+
             if (newState == AnimatorState.Test_None)
             {
                 currentAnimator = new ClearStateAnimator(this, Position, Rotation, Scale);
@@ -405,6 +407,13 @@ namespace RandomBuff.Render.UI
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
             }
+        }
+
+        public void ResetComponents()
+        {
+            DisplayAllGraphTexts = false;
+            DisplayDescription = false;
+            DisplayTitle = false;
         }
 
         public void UpdateGraphText(bool dirty = false, bool useKeyBindData = true)

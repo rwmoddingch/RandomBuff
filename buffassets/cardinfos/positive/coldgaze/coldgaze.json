@@ -6,6 +6,7 @@
   "Triggerable": false,
   "Stackable": true,
   "Color": "E3AB4E",
+  "MaxStackLayers": 3,
 
   "Chinese": {
     "BuffName": "冰冷凝视",

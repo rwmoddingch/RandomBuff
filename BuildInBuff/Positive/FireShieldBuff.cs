@@ -102,8 +102,8 @@ namespace BuiltinBuffs.Positive
             }
             if (!FireShieldStateFeatures.TryGetValue(self, out _))
             {
-                FireShieldState flashShieldState = new FireShieldState(self);
-                FireShieldStateFeatures.Add(self, flashShieldState);
+                FireShieldState fireShieldState = new FireShieldState(self);
+                FireShieldStateFeatures.Add(self, fireShieldState);
                 PlayerList.Add(self);
             }
         }
@@ -161,9 +161,9 @@ namespace BuiltinBuffs.Positive
                 if (!ownerRef.TryGetTarget(out var player))
                     return false;
                 bool isActivate = true;
-                if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var flashShieldState))
+                if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var fireShieldState))
                 {
-                    isActivate = flashShieldState.IsActivate;
+                    isActivate = fireShieldState.IsActivate;
                 }
                 return isActivate &&
                        (owner.mainBodyChunk.submersion <= 0.5 ||

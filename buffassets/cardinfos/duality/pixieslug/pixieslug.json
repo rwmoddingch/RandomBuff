@@ -5,7 +5,6 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "FFE7B0",
-    "Conflict": [ "SporePuff_sCrest" ],
     
     "Chinese" : {
         "BuffName" : "蛞蝓仙子",

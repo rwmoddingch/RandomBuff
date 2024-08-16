@@ -118,6 +118,10 @@ namespace RandomBuff.Cardpedia.Elements
                 {
                     activeConfigs.Add(new OpCardpediaKeyBinder(configurable, configurable.name, pos, fullRectScale.x, this));
                 }
+                else if(configurable.acceptable is BuffConfigurableAcceptableTwoValue two)
+                {
+                    activeConfigs.Add(new OpCardpediaTwoValue(configurable, configurable.name, pos, fullRectScale.x, this));
+                }
             }
 
             for(int i = 1; i < activeConfigs.Count; i++)
@@ -127,8 +131,9 @@ namespace RandomBuff.Cardpedia.Elements
             if(activeConfigs.Count > 0)
             {
                 scrollBox.AddItems(activeConfigs.ToArray());
+                ResetScrollBoxSize();
             }
-            ResetScrollBoxSize();
+
         }
 
         public void ResetScrollBoxSize()
