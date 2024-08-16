@@ -94,8 +94,12 @@ namespace RandomBuff.Cardpedia.Elements
         public void OnCardPick(BuffCard card)
         {
             BuffConfigurableManager.PushAllConfigs();
+
             wrapper._tab.RemoveItems(scrollBox.items.ToArray());
             scrollBox.items.Clear();
+
+            foreach (var item in activeConfigs)
+                item.Unload();
             activeConfigs.Clear();
 
             Vector2 pos = new Vector2(CardpediaStatics.tinyGap, scrollBox.contentSize - CardpediaStatics.tinyGap);
@@ -110,6 +114,10 @@ namespace RandomBuff.Cardpedia.Elements
                 {
                     activeConfigs.Add(new OpCardpediaDropBox(configurable, configurable.name, pos, fullRectScale.x, lst.values.Select((x) => x.ToString()).ToArray(), this));
                 }
+                else if(configurable.acceptable is BuffConfigurableAcceptableKeyCode key)
+                {
+                    activeConfigs.Add(new OpCardpediaKeyBinder(configurable, configurable.name, pos, fullRectScale.x, this));
+                }
             }
 
             for(int i = 1; i < activeConfigs.Count; i++)
@@ -120,6 +128,7 @@ namespace RandomBuff.Cardpedia.Elements
             {
                 scrollBox.AddItems(activeConfigs.ToArray());
             }
+            ResetScrollBoxSize();
         }
 
         public void ResetScrollBoxSize()
@@ -127,6 +136,7 @@ namespace RandomBuff.Cardpedia.Elements
             float newContentSize = Mathf.Max(-activeConfigs.Last().TargetChainedOffset.y + activeConfigs.Last().setRectSize.y + CardpediaStatics.tinyGap * 2, CardpediaStatics.narrowBlurSpriteScale.y);
 
             float currentScroll = scrollBox.scrollOffset;
+            newContentSize = Mathf.Max(newContentSize, scrollBox.size.y);
             scrollBox.contentSize = newContentSize;
             scrollBox.targetScrollOffset = currentScroll;
             scrollBox.scrollOffset = scrollBox.targetScrollOffset;

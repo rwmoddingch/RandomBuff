@@ -44,6 +44,8 @@ namespace RandomBuff.Cardpedia.Elements.Config
             this.left = leftValue;
             this.right = rightValue;
             this.bindConfigurable = bindConfigurable;
+
+            drag = Mathf.InverseLerp(left, right, (float)bindConfigurable.BoxedValue);
             
             dragRectEventInstance = mouseEvent.AddEvent(
                 () =>
