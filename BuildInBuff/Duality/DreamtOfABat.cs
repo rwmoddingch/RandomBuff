@@ -43,7 +43,7 @@ namespace BuildInBuff.Duality
             orig.Invoke(self, sLeaser, rCam, palette);
 
             //让蝙蝠身体的颜色和玩家的颜色一样
-            if (ButteFly.modules.TryGetValue(self.fly.abstractCreature, out var butteFly))
+            if (self.fly.IsButterFly(out var butteFly))
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -120,7 +120,7 @@ namespace BuildInBuff.Duality
             //召唤改色蝙蝠
             var room = player.room;
             var absFly = new AbstractCreature(room.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly), null, room.GetWorldCoordinate(player.DangerPos), room.world.game.GetNewID());
-            ButteFly.modules.Add(absFly, new ButteFly(absPlayer.realizedCreature.ShortCutColor()));
+            absFly.TurnButteFLy(absPlayer.realizedCreature.ShortCutColor());
             room.abstractRoom.AddEntity(absFly);
             absFly.RealizeInRoom();
 
@@ -239,6 +239,16 @@ namespace BuildInBuff.Duality
 
     }
 
+    public static class EXFly
+    {
+        public static bool IsButterFly(this Fly fly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out var butteFly);
+        public static bool IsButterFly(this Fly fly,out ButteFly butteFly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out butteFly);
+
+        public static void TurnButteFLy(this AbstractCreature fly,Color color)
+        {
+            ButteFly.modules.Add(fly, new ButteFly(color));
+        }
+    }
     public class ButteFly
     {
         public static ConditionalWeakTable<AbstractCreature, ButteFly> modules = new ConditionalWeakTable<AbstractCreature, ButteFly>();
