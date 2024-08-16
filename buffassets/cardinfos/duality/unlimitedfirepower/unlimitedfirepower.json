@@ -12,7 +12,7 @@
         "Description" : "炸弹、炸矛、鞭炮草爆炸后不会消耗"
     },
     "English": {
-        "BuffName" : "UnlimitedFirepower",
-        "Description" : "Explosives do not destroy themselves on use, creating infinite use explosives."
+        "BuffName" : "Unlimited Firepower!",
+        "Description" : "Explosives become infinitely reusable."
     }
 }

@@ -12,7 +12,7 @@
         "Description" : "炸弹撞击到目标后，大约过两秒才会爆炸。"
     },
     "English": {
-        "BuffName" : "Delayed Explosion",
-        "Description" : "Bombs have a 2 second delay on their explosions."
+        "BuffName" : "Timed Fuse",
+        "Description" : "Bombs have a 2-second delay on their explosions."
     }
 }

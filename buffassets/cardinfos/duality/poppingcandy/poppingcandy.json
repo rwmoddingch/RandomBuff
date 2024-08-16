@@ -11,7 +11,7 @@
         "Description" : "食用神经元以后玩家会小范围震颤跳动1秒"
     },
     "English": {
-        "BuffName" : "PoppingCandy",
-        "Description" : "Eating a neuron fly gives slugcat a short seizure."
+        "BuffName" : "Seizure Warning",
+        "Description" : "Eating a neuronfly gives your slugcat a short seizure."
     }
 }

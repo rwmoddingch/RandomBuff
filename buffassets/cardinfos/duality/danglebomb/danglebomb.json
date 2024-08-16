@@ -11,7 +11,7 @@
         "Description" : "使所有蓝果变成定时炸弹，投出后倒记时并爆炸，食用也会导致爆炸"
     },
     "English": {
-        "BuffName" : "DangleBomb",
-        "Description" : "Turns all blue fruit into timed bombs which explode when thrown or consumed."
+        "BuffName" : "Danglebomb",
+        "Description" : "All blue fruit become timed bombs that explode when thrown or consumed."
     }
 }

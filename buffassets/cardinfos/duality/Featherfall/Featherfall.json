@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Feather Fall",
-        "Description":"Slows down time by 50% when slugcat is in the air."
+        "Description":"Time slows by 50% when your slugcat is in the air."
     }
 }

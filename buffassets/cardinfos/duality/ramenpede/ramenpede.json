@@ -11,7 +11,7 @@
         "Description" : "蜈蚣(除小蜈蚣)变为两倍长"
     },
     "English": {
-        "BuffName" : "Ramenpede",
-        "Description" : "Double the length of centipedes"
+        "BuffName" : "Ramentipede",
+        "Description" : "Centipedes become twice as long."
     }
 }

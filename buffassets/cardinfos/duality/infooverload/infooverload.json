@@ -11,7 +11,7 @@
         "Description" : "将所有非彩色珍珠替换为赞美诗"
     },
     "English": {
-        "BuffName" : "InfoOverload",
-        "Description" : "Replace all normal pearls with HalcyonPearl"
+        "BuffName" : "Information Overload",
+        "Description" : "All neutral pearls become Halcyon pearls."
     }
 }

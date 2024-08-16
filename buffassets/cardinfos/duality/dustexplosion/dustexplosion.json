@@ -12,7 +12,7 @@
     "Description": "现在各种烟雾范围内出现火焰或爆炸将会引发粉尘爆炸。"
   },
   "English": {
-    "BuffName": "Dust Explosion",
-    "Description": "Dust and smoke become explosive, ignited with fire or other explosives."
+    "BuffName": "Gas Leak",
+    "Description": "Dust and smoke explode when ignited with fire or other explosives."
   }
 }

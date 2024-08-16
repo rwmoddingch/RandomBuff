@@ -11,7 +11,7 @@
         "Description" : "混淆除了业力门和避难所以外所有的房间连接。"
     },
     "English": {
-        "BuffName" : "RandomRoom",
-        "Description" : "Randomized room connections except for gates and dens."
+        "BuffName" : "Random Rooms",
+        "Description" : "Connections between rooms get shuffled (excluding shelters and karma gates)."
     }
 }

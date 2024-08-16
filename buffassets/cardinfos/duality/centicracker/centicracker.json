@@ -11,7 +11,7 @@
         "Description" : "蜈蚣甲受击掉落时会引发其余甲壳的连锁爆炸与脱落，这种爆炸不会伤害到蜈蚣。"
     },
   "English": {
-    "BuffName": "CentipedeCracker",
-    "Description": "When a centipede loses a piece of its shell, it will cause a series of chain explosions which do not harm the centipede."
+    "BuffName": "Centi-Cracker",
+    "Description": "When a centipede loses a piece of its shell, it starts a chain of explosions (which don't hurt the centipede)."
   }
 }

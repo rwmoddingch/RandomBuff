@@ -11,7 +11,7 @@
         "Description" : "玩家所在房间内生物血量+100%（玩家除外）离开房间的生物血量重置"
     },
     "English": {
-        "BuffName" : "StoneofBlessing",
-        "Description" : "Doubles the health of creatures other than slugcat in the room."
+        "BuffName" : "Stone Of Blessing",
+        "Description" : "All creatures in the on-screen room (aside from your slugcat) have double health."
     }
 }

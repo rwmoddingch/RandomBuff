@@ -16,7 +16,7 @@
         "Description" : "扯线蜂的持续时间延长10倍"
     },
     "English": {
-        "BuffName" : "Bee is everywhere",
-        "Description" : "Bees will last 10x as long before disappearing."
+        "BuffName" : "BEES EVERYWHERE!",
+        "Description" : "Bees' attacks last ten times longer."
     }
 }

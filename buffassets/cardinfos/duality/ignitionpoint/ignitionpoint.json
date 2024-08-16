@@ -12,7 +12,7 @@
         "Description" : "添加新的温度机制并替代原版的低温机制，每个生物有独立的温度条，当高温达到一定的阈值时会触发燃烧。当低温达到一定阈值时会触发短暂冰冻。部分伤害具有高温属性。"
     },
     "English": {
-        "BuffName" : "Temperature",
-        "Description" : "Overhauls the temperature mechanic entirely, at a high temperature creatures will burn and at a low temperature they will freeze temporarily. Certain types of damage or buffs can increase or decrease temperature."
+        "BuffName" : "Temperature Overhaul",
+        "Description" : "All creatures can now be cooled or heated by various means. Too hot and they'll burn, too cold and they'll freeze!"
     }
 }

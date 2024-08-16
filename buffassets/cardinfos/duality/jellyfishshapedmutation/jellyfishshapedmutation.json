@@ -21,6 +21,6 @@
   },
   "English": {
     "BuffName": "Jellyfish-Shaped Mutation",
-    "Description": "Turns slugcat into a jellyfish hybrid. Slugcat will grow tentacles which can distribute an electric shock when this buff is triggered, however this shock will drain 1 food pip. Slugcat is immune to electricity and can gain food from being electrocuted. If slugcat does not touch water for 2 cycles, it will die. Certain aquatic creatures become friendly to slugcat but slugcat's swim speed is decreased by 50%."
+    "Description": "Your slugcat becomes a jellyfish hybrid! It can hold pickup to shock other creatures (1 food pip cost), and getting shocked by something else fills its belly! However, it swims slower, can only hold one item, and will die after two cycles of not touching water!"
   }
 }

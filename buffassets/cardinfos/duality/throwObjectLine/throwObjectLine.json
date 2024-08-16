@@ -11,7 +11,7 @@
         "Description":"让拟态草把抓到的物体抛起来"
     },
     "English":{
-        "BuffName":"Ropecket Launch",
-        "Description":"Pole plants will launch things upwards rather than pulling them down."
+        "BuffName":"Slingshot",
+        "Description":"Pole plants launch their prey upwards instead of pulling it down."
     }
 }

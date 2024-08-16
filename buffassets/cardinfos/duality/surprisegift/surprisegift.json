@@ -11,7 +11,7 @@
         "Description" : "拾荒者可能会携带礼盒，可以通过交换或击杀来获取，用矛戳后会变成各种物资或…扯线蜂窝"
     },
     "English": {
-        "BuffName" : "SurpriseGift",
-        "Description" : "Scavengers have a chance of carrying a present which can be obtained via trading or murder, when hit with a spear these boxes will produce random items... or a red lizard."
+        "BuffName" : "Surprise Gift!",
+        "Description" : "Some scavengers carry boxes. When opened with a spear, they drop a surprise gift!"
     }
 }

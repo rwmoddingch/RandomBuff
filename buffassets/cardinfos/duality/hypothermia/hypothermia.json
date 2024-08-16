@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Hypothermia",
-        "Description" : "Makes water cold for all creatures, leading to death if a creature is left in the water too long without heat."
+        "Description" : "All water bodies become freezing cold, slowly killing land creatures that swim too long without warming up."
     }
 }

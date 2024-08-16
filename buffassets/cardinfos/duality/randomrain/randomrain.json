@@ -11,7 +11,7 @@
         "Description" : "雨循环波动更大了，最低雨计时为原来的二分之一，最高的雨计时为原来的两倍"
     },
     "English": {
-        "BuffName" : "RandomRain",
-        "Description" : "Significantly increases rain timer variance, cycles can last twice as long as the maximum or half as long as the minimum."
+        "BuffName" : "Random Rain",
+        "Description" : "The rain timer becomes more random. The minimum time is halved, and the maximum time is doubled."
     }
 }
