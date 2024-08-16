@@ -181,8 +181,7 @@ namespace RandomBuff.Core.Buff
                 }
 
                 if (rawData.ContainsKey(loadState = "MaxStackLayers"))
-                
-                    LoadAsInt(rawData[loadState]);
+                    newData.MaxStackLayers = LoadAsInt(rawData[loadState]);
 
                 if (rawData.ContainsKey(loadState = "Stackable"))
                 {

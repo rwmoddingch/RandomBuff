@@ -87,11 +87,11 @@ namespace RandomBuffUtils
         private static void ProcessManager_Update(On.ProcessManager.orig_Update orig, ProcessManager self, float deltaTime)
         {
             orig(self,deltaTime);
-            foreach(var listener in Listeners)
+            foreach(var listener in Listeners.ToArray())
                 listener.Value.ListenInput();
         }
 
-        static readonly Dictionary<BuffEvent.KeyDownHandler,BuffInputListener> Listeners = new Dictionary<BuffEvent.KeyDownHandler,BuffInputListener>();
+        static readonly Dictionary<BuffEvent.KeyDownHandler,BuffInputListener> Listeners = new ();
     }
 
 
