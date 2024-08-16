@@ -47,11 +47,10 @@ namespace TemplateGains
                     {
                         if (absCreature is Fly fly)
                         {
-                            if (ButteFly.modules.TryGetValue(fly.abstractCreature, out var butteFly))
+                            if (fly.IsButterFly())
                             {
                                 passDamege.Add(fly.abstractCreature);
                                 BuffUtils.Log(UnstableSlugBuffEntry.UnstableSlugID, "get buttefly");
-
                             }
                         }
 
