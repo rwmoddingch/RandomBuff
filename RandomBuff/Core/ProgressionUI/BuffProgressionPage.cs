@@ -60,9 +60,9 @@ namespace RandomBuff.Core.ProgressionUI
         int _showCounter = -1;
         int _targetShowCounter;
 
-        float smoothPage = 0.001f;
+        float smoothPage = 1f;
         int setPage;
-        float lastSmoothPage;
+        float lastSmoothPage = 1f;
 
         bool Show
         {
