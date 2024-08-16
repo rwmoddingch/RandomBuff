@@ -53,9 +53,8 @@ namespace RandomBuff.Render.UI
         bool finished;
         public ClearStateAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
-            buffCard.Highlight = false;
-            if (!buffCard.DisplayTitle)
-                buffCard.DisplayTitle = true;
+            buffCard.DisplayTitle = true;
+            buffCard.DisplayDescription = true;
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -77,7 +76,8 @@ namespace RandomBuff.Render.UI
         Vector3 basicRotation = Vector3.zero;
         public MousePreviewAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
-            buffCard.Highlight = true;
+            buffCard.DisplayTitle = true;
+            buffCard.DisplayDescription = true;
 
             buffCard.onMouseSingleClick += OnSingleClickFlip;
         }

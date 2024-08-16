@@ -258,6 +258,7 @@ namespace BuiltinBuffs.Positive
         {
             coin.RemoveFromContainer();
             flash.RemoveFromContainer();
+            arrow.RemoveFromContainer();
             base.ClearSprites();
         }
 

@@ -65,7 +65,6 @@ namespace RandomBuff.Render.UI.Component
             this.hoverPos = hoverPos;
             this.anchor = anchor;
 
-            SetSelectedBuffIDs(initBuffID);
 
             container = new FContainer();
             bottomContainer_1 = new FContainer();
@@ -78,6 +77,7 @@ namespace RandomBuff.Render.UI.Component
             container.AddChild(slot.Container);
             container.AddChild(symbolContainer);
             //symbolContainer.MoveToFront();
+            SetSelectedBuffIDs(initBuffID);
 
             slot.SetShow(false);
             container.alpha = 0f;

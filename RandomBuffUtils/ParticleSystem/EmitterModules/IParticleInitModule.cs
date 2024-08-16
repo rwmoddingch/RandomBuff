@@ -1,10 +1,12 @@
 ﻿using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Color = UnityEngine.Color;
 using Random = UnityEngine.Random;
 
 namespace RandomBuffUtils.ParticleSystem.EmitterModules
@@ -160,6 +162,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public void ApplyInit(Particle particle)
         {
             particle.HardSetColor(color);
+        }
+    }
+
+    public class SetCustomColor : EmitterModule, IParticleInitModule
+    {
+        Func<Particle, Color> func;
+        public SetCustomColor(ParticleEmitter emitter, Func<Particle, Color> func) : base(emitter)
+        {
+            this.func = func;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.HardSetColor(func.Invoke(particle));
         }
     }
 
