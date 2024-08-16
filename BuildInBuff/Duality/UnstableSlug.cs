@@ -8,7 +8,8 @@ using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using RandomBuff;
 using System.Runtime.CompilerServices;
-using BuildInBuff.Positive;
+using BuildInBuff.Duality;
+
 
 namespace TemplateGains
 {
@@ -46,11 +47,10 @@ namespace TemplateGains
                     {
                         if (absCreature is Fly fly)
                         {
-                            if (ButteFly.modules.TryGetValue(fly, out var butteFly))
+                            if (fly.IsButterFly())
                             {
                                 passDamege.Add(fly.abstractCreature);
                                 BuffUtils.Log(UnstableSlugBuffEntry.UnstableSlugID, "get buttefly");
-
                             }
                         }
 

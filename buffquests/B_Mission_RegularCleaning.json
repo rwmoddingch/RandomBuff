@@ -1,0 +1,18 @@
+{
+    "Name":"Regular Cleaning",
+    "Color":"FF3065",
+    "ID":"builtin.quest.RegularCleaning",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"RegularCleaning"
+        }
+    ],
+    "UnlockItem":
+    {
+        "Card":
+        [
+            "SpearBurster"
+        ]
+    }
+}

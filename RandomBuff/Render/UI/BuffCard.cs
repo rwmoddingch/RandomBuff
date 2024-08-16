@@ -166,7 +166,7 @@ namespace RandomBuff.Render.UI
             }
             set
             {
-                if(StaticData.Stackable)
+                if(StaticData.Stackable || !value)
                     _cardRenderer.cardStackerTextController.Show = value;
             }
         }
@@ -211,7 +211,7 @@ namespace RandomBuff.Render.UI
             }
             set
             {
-                if (StaticData.Countable)
+                if (StaticData.Countable || !value)
                     _cardRenderer.cardCycleCounterTextController.Show = value;
             }
         }
@@ -241,7 +241,7 @@ namespace RandomBuff.Render.UI
             }
             set
             {
-                if (StaticData.Triggerable)
+                if (StaticData.Triggerable || !value)
                     _cardRenderer.cardKeyBinderTextController.Show = value;
             }
         }

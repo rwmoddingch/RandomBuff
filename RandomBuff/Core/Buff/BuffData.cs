@@ -31,7 +31,7 @@ namespace RandomBuff.Core.Buff
         {
             if(bindConfigurables.TryGetValue(propertyName, out var value))
             {
-                BuffPlugin.Log($"Get property {propertyName} configurable : {value.valueType}-{value.BoxedValue}");
+                //BuffPlugin.Log($"Get property {propertyName} configurable : {value.valueType}-{value.BoxedValue}");
                 return value.BoxedValue;
             }
             else
@@ -184,6 +184,7 @@ namespace RandomBuff.Core.Buff
             base.CycleEnd();
             CycleUse++;
         }
+
     }
 
     /// <summary>

@@ -124,7 +124,7 @@ namespace BuiltinBuffs.Negative
                     speed = 5;
                     if (focusCreature != null)
                         self.shootDir = Vector3.Slerp(self.shootDir,
-                            Custom.DirVec(TuskPos(self), focusCreature.DangerPos), 0.15f);
+                            Custom.DirVec(TuskPos(self), focusCreature.DangerPos), 1f);
                 }
                 else
                     speed = (shootCounter - 20) * 20;

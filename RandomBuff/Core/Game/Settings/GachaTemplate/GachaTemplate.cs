@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.Conditions;
+using UnityEngine;
 
 namespace RandomBuff.Core.Game.Settings.GachaTemplate
 {
@@ -214,7 +215,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             }
 
             public BoostType boostType;
-            public int boostCount;
+            public float boostCount;
 
             public CreatureTemplate.Type boostCrit;
             public CreatureTemplate.Type baseCrit;
@@ -246,10 +247,17 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                                 if (crit.creatureTemplate.type == info.baseCrit)
                                 {
                                     BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}");
-                                    for (int i = 0; i < info.boostCount; i++)
+                                    for (int i = 0; i < Mathf.FloorToInt(info.boostCount); i++)
                                         room.AddEntity(new AbstractCreature(room.world,
                                             StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
                                             self.GetNewID(-1)));
+
+                                    if (Random.value < info.boostCount - Mathf.FloorToInt(info.boostCount))
+                                    {
+                                        room.AddEntity(new AbstractCreature(room.world,
+                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
+                                            self.GetNewID(-1)));
+                                    }
                                 }
                             }
 
@@ -259,7 +267,16 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                                 {
                                     BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}, at den");
 
-                                    for (int i = 0; i < info.boostCount; i++)
+                                    for (int i = 0; i < Mathf.FloorToInt(info.boostCount); i++)
+                                    {
+                                        var abCrit = new AbstractCreature(room.world,
+                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
+                                            self.GetNewID(-1));
+                                        room.AddEntity(abCrit);
+                                        room.MoveEntityToDen(abCrit);
+                                    }
+
+                                    if (Random.value < info.boostCount - Mathf.FloorToInt(info.boostCount))
                                     {
                                         var abCrit = new AbstractCreature(room.world,
                                             StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
