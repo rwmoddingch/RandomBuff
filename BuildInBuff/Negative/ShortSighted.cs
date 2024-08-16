@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
@@ -17,6 +18,10 @@ namespace BuiltinBuffs.Negative
     {
         public override BuffID ID => ShortSightedEntry.ShortSighted;
         public override int MaxCycleCount => 3;
+
+        [CustomBuffConfigRange(2f,1.5f,2.5f)]
+        [CustomBuffConfigInfo("Zoom Factor", "Screen zoom factor")]
+        public float ZoomFactor { get; }
     }
 
     internal class ShortSightedBuff : Buff<ShortSightedBuff, ShortSightedBuffData>
@@ -39,6 +44,7 @@ namespace BuiltinBuffs.Negative
                 }
             }
         }
+
     }
 
     internal class ShortSightedEntry : IBuffEntry
@@ -63,7 +69,7 @@ namespace BuiltinBuffs.Negative
 
             var toLocalCenter = (self.followAbstractCreature?.realizedCreature?.DangerPos - self.pos) / Custom.rainWorld.screenSize ??
                                 new Vector2(0.5F, 0.5f);
-            scale = Mathf.Lerp(scale, 2, 0.1f * Time.deltaTime * 40);
+            scale = Mathf.Lerp(scale, ShortSightedBuff.Instance.Data.ZoomFactor, 0.1f * Time.deltaTime * 40);
 
             localCenter = Vector2.Lerp(localCenter, toLocalCenter, 0.1f * Time.deltaTime * 40);
 

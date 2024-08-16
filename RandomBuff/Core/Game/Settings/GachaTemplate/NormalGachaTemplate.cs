@@ -18,6 +18,7 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public NormalGachaTemplate(bool noPick)
         {
+
             TemplateDescription = "GachaTemplate_Desc_Normal";
 
             if (noPick)
@@ -26,8 +27,8 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             }
         }
 
-        public override string TemplateDetail => base.TemplateDetail + string.Format(BuffResourceString.Get("GachaTemplate_Detail_Normal"),
-            PSelect * PCount, NSelect * NCount);
+        public override string TemplateDetail => base.TemplateDetail + (nCount * nSelect + pSelect * pSelect != 0 ? string.Format(BuffResourceString.Get("GachaTemplate_Detail_Normal"),
+            PSelect * PCount, NSelect * NCount) : string.Empty);
 
         public override void NewGame()
         {
@@ -43,35 +44,94 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
 
         public override bool NeedRandomStart => RandomStart;
 
-        [JsonProperty]
-        public int PSelect = 1;
-        [JsonProperty]
-        public int PShow = 3;
-        [JsonProperty]
-        public int PCount = 1;
+
+        private void ChangeDesc()
+        {
+            if (nCount * nSelect + pSelect * pSelect == 0)
+            {
+                if (TemplateDescription == "GachaTemplate_Desc_Normal")
+                    TemplateDescription = "GachaTemplate_Desc_Normal_NoPick";
+            }
+            else if (TemplateDescription == "GachaTemplate_Desc_Normal_NoPick")
+                TemplateDescription = "GachaTemplate_Desc_Normal";
+        }
 
         [JsonProperty]
-        public int NSelect = 1;
-        [JsonProperty]
-        public int NShow = 3;
-        [JsonProperty]
-        public int NCount = 1;
+        public int PSelect
+        {
+            get => pSelect;
+            set
+            {
+                pSelect = value;
+                ChangeDesc();
+            }
+        }
+
 
         [JsonProperty]
-        public int SPSelect = 0;
-        [JsonProperty]
-        public int SPShow = 0;
-        [JsonProperty]
-        public int SPCount = 0;
+        public int PCount
+        {
+            get => pCount;
+            set
+            {
+                pCount = value;
+                ChangeDesc();
+            }
+        }
+
 
         [JsonProperty]
-        public int SNSelect = 0;
-        [JsonProperty]
-        public int SNShow = 0;
-        [JsonProperty]
-        public int SNCount = 0;
+        public int PShow { get; set; } = 3;
 
         [JsonProperty]
-        public bool RandomStart = false;
+        public int NSelect
+        {
+            get => nSelect;
+            set
+            {
+                nSelect = value;
+                ChangeDesc();
+            }
+        }
+
+        [JsonProperty]
+        public int NCount
+        {
+            get => nCount;
+            set
+            {
+                nCount = value;
+                ChangeDesc();
+
+            }
+        }
+
+        [JsonProperty]
+        public int NShow { get; set; } = 3;
+
+        [JsonProperty]
+        public int SPSelect { get; set; } = 0;
+        [JsonProperty]
+        public int SPShow { get; set; } = 0;
+        [JsonProperty]
+        public int SPCount { get; set; } = 0;
+
+        [JsonProperty]
+        public int SNSelect { get; set; } = 0;
+        [JsonProperty]
+        public int SNShow { get; set; } = 0;
+        [JsonProperty]
+        public int SNCount { get; set; } = 0;
+
+
+        private int pSelect = 1;
+        private int pCount = 1;
+
+
+        private int nSelect = 1;
+        private int nCount = 1;
+
+        [JsonProperty]
+        public bool RandomStart { get; set; } = false;
     }
 }

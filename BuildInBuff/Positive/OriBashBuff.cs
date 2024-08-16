@@ -213,18 +213,18 @@ namespace BuiltinBuffs.Positive
         }
 
 
-        public bool GetInput()
+        public bool GetInput(Player player)
         {
+            if (OriBashBuff.Instance.Data[player.playerState.playerNumber] != KeyCode.None)
+                return Input.GetKey(OriBashBuff.Instance.Data[player.playerState.playerNumber]);
             if(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash) == KeyCode.None.ToString())
                 return Input.GetMouseButton(1);
-            else
-                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash));
+            return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash));
         }
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, UnityEngine.Vector2 camPos)
         {
-            Player self;
-            if (!ownerRef.TryGetTarget(out self))
+            if (!ownerRef.TryGetTarget(out var self))
                 return;
 
             if (isBash)
@@ -240,7 +240,7 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[startSprite + 1].color = Color.white;
                 sLeaser.sprites[startSprite + 1].alpha = 1;
                 
-                if (!GetInput() || bashTarget == null || !self.Consious)
+                if (!GetInput(self) || bashTarget == null || !self.Consious)
                 {
                     isBash = false;
                     OriBashBuffEntry.UpdateSpeed = 1000;
@@ -346,7 +346,7 @@ namespace BuiltinBuffs.Positive
                 }
             }
 
-            if (GetInput() && !isPressUse)
+            if (GetInput(self) && !isPressUse)
             { 
                 dir = self.input[0].analogueDir;
                 bashTimer = 0;
@@ -417,7 +417,7 @@ namespace BuiltinBuffs.Positive
                 }
 
             }
-            else if (!GetInput())
+            else if (!GetInput(self))
             {
                 isPressUse = false;
             }

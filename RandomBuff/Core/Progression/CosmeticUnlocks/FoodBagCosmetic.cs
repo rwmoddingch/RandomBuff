@@ -37,7 +37,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
         {
-            return new FoodBagGraphicsModule();
+            if(module.Name == MoreSlugcatsEnums.SlugcatStatsName.Gourmand)
+                return new FoodBagGraphicsModule();
+            return null;
         }
     }
 

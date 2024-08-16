@@ -21,7 +21,7 @@ namespace BuiltinBuffs.Missions
 
         public override MissionID ID => ArtOfExplosion;
         public override SlugcatStats.Name BindSlug => MoreSlugcatsEnums.SlugcatStatsName.Artificer;
-        public override Color TextCol => new Color(0.66667f, 0.9451f, 0.33725f);
+        public override Color TextCol => new Color(0.43922f, 0.13725f, 0.23529f);
         public override string MissionName => BuffResourceString.Get("Mission_Display_ArtOfExplosion");
 
         public ArtOfExplosionMission()

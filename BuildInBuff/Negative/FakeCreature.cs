@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuff;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -19,6 +20,10 @@ namespace BuiltinBuffs.Negative
     {
         public static BuffID FakeCreatureID = new BuffID("FakeCreature", true);
         public override BuffID ID => FakeCreatureID;
+
+        [CustomBuffConfigInfo("Distortion Effect", "Screen distortion effect when phantom creatures disappear")]
+        [CustomBuffConfigTwoValue(true, false)]
+        public bool ScreenDistortionEffect { get; }
     }
 
     internal class FakeCreatureBuff : Buff<FakeCreatureBuff, FakeCreatureBuffData>
@@ -396,7 +401,8 @@ namespace BuiltinBuffs.Negative
                 if (createEffect)
                 {
                     creature.room.PlaySound(SoundID.SB_A14, 0f, 0.76f, 1f);
-                    BuffPostEffectManager.AddEffect(new DisplacementEffect(0, 3, 0.3f, 1f, 1, 0.04f));
+                    if(FakeCreatureBuff.Instance.Data.ScreenDistortionEffect)
+                        BuffPostEffectManager.AddEffect(new DisplacementEffect(0, 3, 0.3f, 1f, 1, 0.04f));
                 }
             }
 

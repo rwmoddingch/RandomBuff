@@ -114,6 +114,7 @@ CardPickerSlot_OnMouseFocus|[Single click/press throw] to flip the card<LINE>[Ri
 
 
 //GachaTemplate
+GachaTemplate_Desc_Normal_NoPick|Standard card draw mode; No card draws.
 GachaTemplate_Desc_Normal|Standard card draw mode; cards can be drawn at the end of each cycle.
 GachaTemplate_Desc_Quick|No card draws; a random card will be picked every 30 seconds, alternating between positive and negative or duality.
 GachaTemplate_Desc_Sandbox|No card draws; cards can be freely added or removed, with no rewards given.

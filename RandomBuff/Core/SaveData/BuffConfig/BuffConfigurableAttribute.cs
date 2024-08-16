@@ -74,7 +74,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
         {
             var typeDefault = valueType = defaultValue.GetType();
             var typeMin = minValue.GetType();
-            var typeMax = maxValue.GetType();   
+            var typeMax = maxValue.GetType();
 
             if(typeMax != typeDefault || typeMin != typeDefault || typeMin != typeMax)
                 throw new ArgumentException("CustomBuffConfigRangeAttribute param type mismatch!");

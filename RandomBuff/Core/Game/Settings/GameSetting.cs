@@ -227,8 +227,10 @@ namespace RandomBuff.Core.Game.Settings
             {
                 try
                 {
-                    var field = gachaTemplate.GetType().GetField(pair.Key, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    if (gachaTemplate.GetType().GetField(pair.Key, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) is {} field)
                         field.SetValue(gachaTemplate, Convert.ChangeType(pair.Value,field.FieldType));
+                    else if (gachaTemplate.GetType().GetProperty(pair.Key, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) is { } property)
+                        property.SetValue(gachaTemplate, Convert.ChangeType(pair.Value, property.PropertyType));
                 }
                 catch (Exception e)
                 {

@@ -161,9 +161,9 @@ namespace RandomBuff.Core.StaticsScreen
                 {
                     if(questShow)
                     {
-                        this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu);
+                        this.manager.RequestMainProcessSwitch(showCredit ? BuffEnums.ProcessID.CreditID : ProcessManager.ProcessID.MainMenu, showCredit ? 3f : 0.45f);
                         if (manager.musicPlayer != null)
-                            manager.musicPlayer.FadeOutAllSongs(50f);
+                            manager.musicPlayer.FadeOutAllSongs(showCredit ? 2.5f : 50f);
                     }
                 }
                 else

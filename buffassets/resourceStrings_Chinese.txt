@@ -115,6 +115,7 @@ CardPickerSlot_NoCardFocus|鼠标移至一个卡牌上并[单击左键/按下投
 CardPickerSlot_OnMouseFocus|[单击左键/按下投掷]以翻转卡牌<LINE>[右键/按下拾取]以选择该卡牌
 
 //GachaTemplate
+GachaTemplate_Desc_Normal_NoPick|普通抽卡牌模式，无抽卡
 GachaTemplate_Desc_Normal|普通抽卡牌模式，轮回末可以进行抽卡
 GachaTemplate_Desc_Quick|无抽卡，每30秒随机添加一张卡牌，正面、负面中性交替
 GachaTemplate_Desc_Sandbox|无抽卡，可自由添加或删除卡牌，不会获得奖励
