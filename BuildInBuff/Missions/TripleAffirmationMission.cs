@@ -258,7 +258,7 @@ namespace BuiltinBuffs.Missions
         {
             if (self.roomSettings.DangerType == RoomRain.DangerType.AerieBlizzard ||
                 self.roomSettings.DangerType == MoreSlugcatsEnums.RoomRainDangerType.Blizzard)
-                self.roomSettings.DangerType = self.water ? RoomRain.DangerType.Flood : RoomRain.DangerType.None;
+                self.roomSettings.DangerType = self.water ? RoomRain.DangerType.Flood : RoomRain.DangerType.Flood;
 
             self.roomSettings.effects.RemoveAll(i => i.type == RoomSettings.RoomEffect.Type.HeatWave
                                                      || i.type == RoomSettings.RoomEffect.Type.FireFlies
