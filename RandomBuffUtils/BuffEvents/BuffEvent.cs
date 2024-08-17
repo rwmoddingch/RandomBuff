@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuffUtils.BuffEvents;
+using RandomBuffUtils.SimplyOracle;
 using static RandomBuffUtils.BuffEvents.BuffRegionGateEvent;
+using static RandomBuffUtils.SimplyOracle.OracleHooks;
 
 namespace RandomBuffUtils
 {
@@ -155,6 +157,17 @@ namespace RandomBuffUtils
         {
             add => BuffExtraDialogBoxEvent.OnExtraDialogsCreated += value;
             remove => BuffExtraDialogBoxEvent.OnExtraDialogsCreated -= value;
+        }
+
+        public static event OracleSeePlayerHandler OnSeePlayer
+        {
+            add => OracleHooks.OnSeePlayer += value;
+            remove => OracleHooks.OnSeePlayer -= value;
+        }
+        public static event OracleConversationHandler OnLoadConversation
+        {
+            add => OracleHooks.OnLoadConversation += value;
+            remove => OracleHooks.OnLoadConversation -= value;
         }
     }
 

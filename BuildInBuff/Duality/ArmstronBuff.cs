@@ -41,27 +41,29 @@ namespace BuiltinBuffs.Duality
             //BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
         }
 
-        private static void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
-        {
-            BuffUtils.Log(ArmstronBuffID,"killed creature");
-        }
 
         private static void AntiGravity_Update(On.AntiGravity.orig_Update orig, AntiGravity self, bool eu)
         {
             orig.Invoke(self, eu);
-            if (!self.active)
-                return;
-            self.room.gravity /= 6f;
+            if (BuffPoolManager.Instance.GameSetting.MissionId != "DoomExpress")
+            {
+                if (!self.active)
+                    return;
+                self.room.gravity /= 6f;
+            }
         }
 
         private static void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom)
         {
             orig.Invoke(self, game, world, abstractRoom);
-            if (game?.session is StoryGameSession storyGameSession)
+            if (BuffPoolManager.Instance.GameSetting.MissionId != "DoomExpress")
             {
-                if (storyGameSession.saveState.miscWorldSaveData.EverMetMoon)
+                if (game?.session is StoryGameSession storyGameSession)
                 {
-                    self.gravity /= 6f;
+                    if (storyGameSession.saveState.miscWorldSaveData.EverMetMoon)
+                    {
+                        self.gravity /= 6f;
+                    }
                 }
             }
         }

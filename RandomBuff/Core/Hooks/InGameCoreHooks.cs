@@ -31,7 +31,6 @@ namespace RandomBuff.Core.Hooks
             {
                 saveState.miscWorldSaveData.moonHeartRestored = false;
                 saveState.miscWorldSaveData.pebblesEnergyTaken = false;
-                BuffPlugin.LogDebug("Init DoomExpress saveState");
 
             }
             else if (gameSetting.MissionId == "EmergnshyTreatment")

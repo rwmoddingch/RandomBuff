@@ -562,7 +562,7 @@ namespace RandomBuff.Core.Entry
                             bindConfigurable.name = property.Name;
                             bindConfigurable.description = "";
                         }
-                        BuffPlugin.Log($"New configurable name : {bindConfigurable.name}, description : {bindConfigurable.description}");
+                        BuffPlugin.LogDebug($"New configurable name : {bindConfigurable.name}, description : {bindConfigurable.description}");
                     }
                 }
             }

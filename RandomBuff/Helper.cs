@@ -121,7 +121,7 @@ namespace RandomBuff
                 }
                 if (!hasComparable)
                 {
-                    BuffPlugin.Log($"{type} not supported because missing IComparable");
+                    BuffPlugin.LogWarning($"{type} not supported because missing IComparable");
                     return false;
                 }
 
@@ -134,7 +134,7 @@ namespace RandomBuff
 
                 foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
                 {
-                    BuffPlugin.Log(method.Name);
+                    //BuffPlugin.Log(method.Name);
                     if (method.Name.Contains("op_Addition")) {
                         matched++;
                         addition = method.CreateFastDelegate();
@@ -174,12 +174,12 @@ namespace RandomBuff
                     subtractionDelegates.Add(type, CreateSystemTypeOperator(OpCodes.Sub));
                     multipyDelegates.Add(type, CreateSystemTypeOperator(OpCodes.Mul));
                     divisionDelegates.Add(type, CreateSystemTypeOperator(OpCodes.Div));
-                    BuffPlugin.Log($"{type} is system type, create dynamicMethod");
+                    BuffPlugin.LogDebug($"{type} is system type, create dynamicMethod");
                     return true;
                 }
                 else
                 {
-                    BuffPlugin.Log($"{type} not supported because missing operator, only detected : {supportOperators}");
+                    BuffPlugin.LogWarning($"{type} not supported because missing operator, only detected : {supportOperators}");
                     return false;
                 }
 

@@ -10,6 +10,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuffUtils.FutileExtend;
+using RandomBuffUtils.SimplyOracle;
 using UnityEngine;
 
 #pragma warning disable CS0618
@@ -46,6 +47,8 @@ namespace RandomBuffUtils
             BuffSounds.OnEnable();
             MeshManager.OnModsInit();
             BuffScene.OnModsInit();
+            OracleHooks.OnModsInit();
+            InGameTranslatorExtend.OnModsInit();
 
             UniformLighting.OnModsInit();
             everInit = true;

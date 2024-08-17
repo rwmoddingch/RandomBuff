@@ -59,7 +59,7 @@ namespace RandomBuff.Core.Buff
                             result.configurable.name = propertyName;
                             result.configurable.description = "";
                         }
-                        BuffPlugin.Log($"New configurable name : {result.configurable.name}, description : {result.configurable.description}");
+                        BuffPlugin.LogDebug($"New configurable name : {result.configurable.name}, description : {result.configurable.description}");
 
                         var acceptable = BuffConfigurableManager.GetProperAcceptable(configAttribute);
                         result.configurable.acceptable = acceptable;

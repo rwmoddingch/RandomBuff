@@ -11,6 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MoreSlugcats;
+using RandomBuff.Core.Entry;
+using RandomBuffUtils;
+using RandomBuffUtils.SimplyOracle;
+using RWCustom;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
@@ -36,11 +41,18 @@ namespace BuiltinBuffs.Missions
                     new WithInCycleCondition() { SetCycle = 5 },
                     new PermanentHoldCondition() { HoldBuff = NoPassDayBuffEntry.noPassDayBuffID },
                 },
-                gachaTemplate = new NormalGachaTemplate()
+                gachaTemplate = new RegularCleanUpTemplate()
                 {
                     ForceStartPos = "SS_AI",
                     boostCreatureInfos = new List<GachaTemplate.BoostCreatureInfo>()
                     {
+                        new GachaTemplate.BoostCreatureInfo()
+                        {
+                            baseCrit = MoreSlugcatsEnums.CreatureTemplateType.Inspector,
+                            boostCrit = CreatureTemplate.Type.DaddyLongLegs,
+                            boostCount = 1,
+                            boostType = GachaTemplate.BoostCreatureInfo.BoostType.Replace
+                        },
                         new GachaTemplate.BoostCreatureInfo()
                         {
                             baseCrit = CreatureTemplate.Type.DaddyLongLegs,
@@ -48,6 +60,7 @@ namespace BuiltinBuffs.Missions
                             boostCount = 2,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add
                         }
+              
                     },
                     PocketPackMultiply = 0,
                 }
@@ -59,7 +72,74 @@ namespace BuiltinBuffs.Missions
 
         public void RegisterMission()
         {
-            MissionRegister.RegisterMission(regularCleanupMissionID, new RegularCleanupMission());
+            BuffRegister.RegisterGachaTemplate<RegularCleanUpTemplate>(RegularCleanUpTemplate.RegularCleanUp);
+            BuffRegister.RegisterMission(regularCleanupMissionID, new RegularCleanupMission());
+            InGameTranslatorExtend.AddLoadFolder("buffassets/text/RegularCleanup");
         }
+
+    }
+
+    internal class RegularCleanUpTemplate : NormalGachaTemplate
+    {
+
+        public static readonly GachaTemplateID RegularCleanUp = new GachaTemplateID(nameof(RegularCleanUp), true);
+
+        public override GachaTemplateID ID => RegularCleanUp;
+
+
+        public override void EnterGame(RainWorldGame game)
+        {
+            base.EnterGame(game);
+            BuffEvent.OnSeePlayer += OracleHooks_OnSeePlayer;
+            BuffEvent.OnLoadConversation += OracleHooks_OnLoadConversation;
+        }
+
+        private void OracleHooks_OnLoadConversation(OracleBehavior behavior, Conversation conversation)
+        {
+            if (behavior.oracle.ID == Oracle.OracleID.SS)
+            {
+                if (behavior.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 0)
+                {
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "gravity", "1"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "locked"));
+                    conversation.events.Add(new Conversation.WaitEvent(conversation, 200));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "work", "0"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "behavior", "Talk"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "turnOff"));
+                    conversation.events.Add(new Conversation.WaitEvent(conversation, 70));
+
+                    var igt = Custom.rainWorld.inGameTranslator;
+                    conversation.events.Add(new Conversation.TextEvent(conversation, 59,
+                        igt.Translate("Well you creature that doesn't know what to call, it's time for a regular cleanup."), 50));
+
+                    conversation.events.Add(new Conversation.TextEvent(conversation, 0,
+                        igt.Translate("I've already provided you with cleaning tools everywhere."), 20));
+
+                    conversation.events.Add(new Conversation.TextEvent(conversation, 0,
+                        igt.Translate("You have to finish the task within the time limit. Now stop interrupting my jobs and go finish yours."), 50));
+
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "unlocked"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "work", "1"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "behavior", "Idle"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "gravity", "0"));
+
+                }
+                behavior.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
+            }
+        }
+
+        private bool OracleHooks_OnSeePlayer(OracleBehavior behavior)
+        {
+            return behavior.oracle.ID == Oracle.OracleID.SS;
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            BuffEvent.OnSeePlayer -= OracleHooks_OnSeePlayer;
+            BuffEvent.OnLoadConversation -= OracleHooks_OnLoadConversation;
+
+        }
+
     }
 }

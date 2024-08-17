@@ -26,7 +26,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
     {
         public CustomBuffConfigEnumAttribute(Type enumType, string defaultValue)
         {
-            BuffPlugin.Log($"CustomBuffConfigEnumAttribute : {enumType}, {defaultValue}");
+            //BuffPlugin.Log($"CustomBuffConfigEnumAttribute : {enumType}, {defaultValue}");
 
             if(!(enumType.IsEnum) && !(enumType.IsSubclassOf(typeof(ExtEnumBase))))
                 throw new ArgumentException("CustomBuffConfigEnumAttribute param type mismatch!");

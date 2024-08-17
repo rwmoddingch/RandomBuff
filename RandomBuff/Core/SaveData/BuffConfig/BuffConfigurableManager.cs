@@ -104,7 +104,7 @@ namespace RandomBuff.Core.SaveData.BuffConfig
     {
         public static BuffConfigurableAcceptableBase GetProperAcceptable(CustomBuffConfigAttribute attribute)
         {
-            BuffPlugin.Log($"BuffConfigurableManager GetProperAcceptable of {attribute}");
+            BuffPlugin.LogDebug($"BuffConfigurableManager GetProperAcceptable of {attribute}");
             if(attribute is CustomBuffConfigEnumAttribute enumConfig)
             {
                 if (enumConfig.valueType == typeof(KeyCode))

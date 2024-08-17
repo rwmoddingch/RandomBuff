@@ -39,7 +39,7 @@ namespace BuiltinBuffs.Missions
                 },
                 gachaTemplate = new NormalGachaTemplate()
                 {
-                    ForceStartPos = "SI_S05",
+                    ForceStartPos = "SI_S04",
                     boostCreatureInfos = new List<GachaTemplate.BoostCreatureInfo>()
                     {
                         new GachaTemplate.BoostCreatureInfo()
