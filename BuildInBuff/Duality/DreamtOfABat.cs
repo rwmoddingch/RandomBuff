@@ -33,6 +33,8 @@ namespace BuildInBuff.Duality
             //防止消失时被判死亡
             On.Player.Die += Player_Die;
 
+            
+
             //改变玩家蝙蝠的颜色
             On.FlyGraphics.ApplyPalette += ButteFly_ApplyPalette;
 
