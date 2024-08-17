@@ -8,6 +8,7 @@ using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -33,24 +34,63 @@ namespace BuiltinBuffs.Positive
         {
             BuffRegister.RegisterBuff<FlamePurificationBuff, FlamePurificationBuffData, FlamePurificationBuffEntry>(flamePurificationBuffID);
             TemperatureModule.AddProvider(new WormGrassProvider());
+            TemperatureModule.AddProvider(new DaddyCorruptionProvider());
+
         }
 
         public static void HookOn()
         {
             On.DaddyCorruption.DrawSprites += DaddyCorruption_DrawSprites;
+            On.DaddyCorruption.Bulb.DrawSprites += Bulb_DrawSprites;
+            On.DaddyCorruption.Bulb.Update += Bulb_Update;
+            On.DaddyCorruption.Bulb.HeardNoise += Bulb_HeardNoise;
+            On.DaddyCorruption.Bulb.FeltSomething += Bulb_FeltSomething;
         }
 
         private static void DaddyCorruption_DrawSprites(On.DaddyCorruption.orig_DrawSprites orig, DaddyCorruption self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            orig.Invoke(self, sLeaser, rCam, timeStacker, camPos);
-            if(TemperatureModule.TryGetTemperatureModule(self, out var module))
+            orig(self,sLeaser,rCam,timeStacker,camPos);
+
+            if (TemperatureModule.TryGetTemperatureModule<DaddyCorruptionTempModule>(self, out var module))
             {
-                var corruptionTempModule = module as DaddyCorruptionTempModule;
-                for(int i = 0;i < sLeaser.sprites.Length;i++)
-                {
-                    if (corruptionTempModule.skipSpriteIndexRange.Contains(i))
-                        sLeaser.sprites[i].isVisible = false;
-                }
+                foreach(var tile in module.cleanTile)
+                    if (tile.Value.Value < 1)
+                        tile.Value.Value = Mathf.Clamp01(tile.Value.Value + 1.5f * Time.deltaTime);
+                    
+            }
+        }
+
+        private static void Bulb_FeltSomething(On.DaddyCorruption.Bulb.orig_FeltSomething orig, DaddyCorruption.Bulb self, float intensity, Vector2 feltAtPos)
+        {
+            if (TemperatureModule.TryGetTemperatureModule<DaddyCorruptionTempModule>(self.owner, out var module) && module.cleanTile.ContainsKey(self.tile))
+                return;
+            orig(self, intensity, feltAtPos);
+        }
+
+        private static void Bulb_HeardNoise(On.DaddyCorruption.Bulb.orig_HeardNoise orig, DaddyCorruption.Bulb self, Vector2 noisePos)
+        {
+            if (TemperatureModule.TryGetTemperatureModule<DaddyCorruptionTempModule>(self.owner, out var module) && module.cleanTile.ContainsKey(self.tile))
+                return;
+            orig(self, noisePos);
+        }
+
+        private static void Bulb_Update(On.DaddyCorruption.Bulb.orig_Update orig, DaddyCorruption.Bulb self)
+        {
+            if (TemperatureModule.TryGetTemperatureModule<DaddyCorruptionTempModule>(self.owner, out var module) && module.cleanTile.ContainsKey(self.tile))
+            {
+                self.eatChunk = null;
+                return;
+            }
+            orig(self);
+        }
+
+        private static void Bulb_DrawSprites(On.DaddyCorruption.Bulb.orig_DrawSprites orig, DaddyCorruption.Bulb self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            if (TemperatureModule.TryGetTemperatureModule<DaddyCorruptionTempModule>(self.owner, out var module) && module.cleanTile.ContainsKey(self.tile))
+            {
+                for (int i = 0; i < self.totalSprites; i++)
+                    sLeaser.sprites[self.firstSprite + i].alpha = 1 - module.cleanTile[self.tile].Value;
             }
         }
     }
@@ -208,32 +248,48 @@ namespace BuiltinBuffs.Positive
 
     internal class DaddyCorruptionTempModule : TemperatureModule
     {
-        public List<int> skipSpriteIndexRange = new List<int>();
+        //public List<int> skipSpriteIndexRange = new List<int>();
+
+        public Dictionary<IntVector2,StrongBox<float>> cleanTile = new Dictionary<IntVector2, StrongBox<float>>();
         public override void Update(UpdatableAndDeletable updatableAndDeletable)
         {
             DaddyCorruption corruption = updatableAndDeletable as DaddyCorruption;
-            var lst = corruption.room.updateList.Where((u) => u is IHeatingCreature).Select((u) => u as IHeatingCreature).ToList();
+            var lst = corruption.room.updateList.OfType<IHeatingCreature>().ToList();
 
             for (int h = lst.Count - 1; h >= 0; h--)
             {
                 var heatSource = lst[h];
 
-                for (int i = corruption.tiles.Count - 1; i >= 0; i--)
+                foreach (var bu in corruption.bulbs)
                 {
-                    var tile = corruption.tiles[i];
-                    if (heatSource.GetHeat(corruption, corruption.room.MiddleOfTile(tile)) > 0f)
+                    if (bu == null) continue;
+                    foreach (var s in bu)
                     {
-                        var bulbLst = corruption.bulbs[tile.x - corruption.bottomLeft.x, tile.y - corruption.bottomLeft.y];
-                        foreach(var bulb in bulbLst)
+                        if (heatSource.GetHeat(corruption, corruption.room.MiddleOfTile(s.tile)) > 0f)
                         {
-                            for(int index = bulb.firstSprite; index < bulb.firstSprite + bulb.totalSprites; index++)
-                            {
-                                skipSpriteIndexRange.Add(index);
-                            }
+                            if (!cleanTile.ContainsKey(s.tile))
+                                cleanTile[s.tile] = new StrongBox<float>(0);
                         }
-                        bulbLst.Clear();
                     }
                 }
+
+
+                //for (int i = corruption.tiles.Count - 1; i >= 0; i--)
+                //{
+                //    var tile = corruption.tiles[i];
+                //    if (heatSource.GetHeat(corruption, corruption.room.MiddleOfTile(tile)) > 0f)
+                //    {
+                //        var bulbLst = corruption.bulbs[tile.x - corruption.bottomLeft.x, tile.y - corruption.bottomLeft.y];
+                //        foreach(var bulb in bulbLst)
+                //        {
+                //            for(int index = bulb.firstSprite; index < bulb.firstSprite + bulb.totalSprites; index++)
+                //            {
+                //                skipSpriteIndexRange.Add(index);
+                //            }
+                //        }
+                //        bulbLst.Clear();
+                //    }
+                //}
             }
         }
     }

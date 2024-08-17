@@ -12,7 +12,7 @@ namespace RandomBuffUtils.SimplyOracle
 
     public class CustomSpecialEvent : SpecialEvent
     {
-        public CustomSpecialEvent(Conversation owner, int initialWait, string eventName,params string[] arg) : base(owner,
+        public CustomSpecialEvent(Conversation owner, int initialWait, string eventName,params object[] arg) : base(owner,
             initialWait, eventName)
         {
             this.args = arg;
@@ -24,7 +24,7 @@ namespace RandomBuffUtils.SimplyOracle
             OracleHooks.OnEventTriggerInternal(owner.interfaceOwner, this);
         }
 
-        public string[] args;
+        public object[] args;
     }
 
     public static class OracleHooks
@@ -66,7 +66,7 @@ namespace RandomBuffUtils.SimplyOracle
                     switch (eventData.eventName)
                     {
                         case "gravity":
-                            ss.oracle.gravity = int.Parse(eventData.args[0]);
+                            ss.oracle.gravity = Convert.ToInt32(eventData.args[0]);
                             break;
                         case "locked":
                             ss.LockShortcuts();
@@ -75,36 +75,24 @@ namespace RandomBuffUtils.SimplyOracle
                             ss.UnlockShortcuts();
                             break;
                         case "work":
-                            ss.getToWorking = int.Parse(eventData.args[0]);
+                            ss.getToWorking = Convert.ToInt32(eventData.args[0]);
                             break;
                         case "behavior":
-                            if (ExtEnumBase.TryParse(typeof(SSOracleBehavior.MovementBehavior), eventData.args[0], true,
-                                    out var re))
-                                ss.movementBehavior = (SSOracleBehavior.MovementBehavior)re;
-                            else
-                                BuffUtils.LogError("BuffOracleExtend",
-                                    $"Unknown movement behavior:{eventData.args[0]}");
+                            ss.movementBehavior = (SSOracleBehavior.MovementBehavior)eventData.args[0];
                             break;
                         case "sound":
-                            if (ExtEnumBase.TryParse(typeof(SoundID), eventData.args[0], true, out var soundId))
-                            {
-                                if (eventData.args.Length == 3)
-                                    ss.oracle.room.PlaySound((SoundID)soundId, ss.oracle.firstChunk, false,
-                                        float.Parse(eventData.args[1]), float.Parse(eventData.args[2]));
-                                else
-                                    ss.oracle.room.PlaySound((SoundID)soundId, ss.oracle.firstChunk);
-
-                            }
+                            if (eventData.args.Length == 3)
+                                ss.oracle.room.PlaySound((SoundID)eventData.args[0], ss.oracle.firstChunk, false,
+                                    Convert.ToSingle(eventData.args[1]), Convert.ToSingle(eventData.args[2]));
                             else
-                                BuffUtils.LogError("BuffOracleExtend", $"Unknown sound Id:{eventData.args[0]}");
-
+                                ss.oracle.room.PlaySound((SoundID)eventData.args[0], ss.oracle.firstChunk);
                             break;
                         case "turnOff":
-                            ss.TurnOffSSMusic(eventData.args.Length == 0 || bool.Parse(eventData.args[0]));
+                            ss.TurnOffSSMusic(eventData.args.Length == 0 || (bool)(eventData.args[0]));
                             break;
                         case "move":
-                            ss.SetNewDestination(new Vector2(float.Parse(eventData.args[0]),
-                                float.Parse(eventData.args[1])));
+                            ss.SetNewDestination(new Vector2(Convert.ToSingle(eventData.args[0]),
+                                Convert.ToSingle(eventData.args[1])));
                             break;
                     }
                 }

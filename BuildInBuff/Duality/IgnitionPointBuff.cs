@@ -529,7 +529,15 @@ namespace BuiltinBuffs.Duality
     {
         public static ConditionalWeakTable<UpdatableAndDeletable, TemperatureModule> temperatureModuleMapping = new ConditionalWeakTable<UpdatableAndDeletable, TemperatureModule>();
         public static List<ITemperatureModuleProvider> providers = new List<ITemperatureModuleProvider>();
-        
+
+        public static bool TryGetTemperatureModule<TTemperatureModule>(UpdatableAndDeletable target,
+            out TTemperatureModule temperatrueModule) where   TTemperatureModule : TemperatureModule
+        {
+            var re = TryGetTemperatureModule(target, out var module);
+            temperatrueModule = module as TTemperatureModule;
+            return re;
+        }
+
         public static bool TryGetTemperatureModule(UpdatableAndDeletable target, out TemperatureModule temperatrueModule)
         {
             if(temperatureModuleMapping.TryGetValue(target, out temperatrueModule))

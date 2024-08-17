@@ -100,12 +100,12 @@ namespace BuiltinBuffs.Missions
             {
                 if (behavior.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 0)
                 {
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "gravity", "1"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "gravity", 1));
                     conversation.events.Add(new CustomSpecialEvent(conversation, 0, "locked"));
-                    conversation.events.Add(new Conversation.WaitEvent(conversation, 200));
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "work", "0"));
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "behavior", "Talk"));
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "turnOff"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "turnOff", false));
+                    conversation.events.Add(new Conversation.WaitEvent(conversation, 100));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "work", 0));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "behavior", SSOracleBehavior.MovementBehavior.Talk));
                     conversation.events.Add(new Conversation.WaitEvent(conversation, 70));
 
                     var igt = Custom.rainWorld.inGameTranslator;
@@ -119,9 +119,9 @@ namespace BuiltinBuffs.Missions
                         igt.Translate("You have to finish the task within the time limit. Now stop interrupting my jobs and go finish yours."), 50));
 
                     conversation.events.Add(new CustomSpecialEvent(conversation, 0, "unlocked"));
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "work", "1"));
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "behavior", "Idle"));
-                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "gravity", "0"));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "work", 1));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "behavior", SSOracleBehavior.MovementBehavior.Idle));
+                    conversation.events.Add(new CustomSpecialEvent(conversation, 0, "gravity", 0));
 
                 }
                 behavior.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
