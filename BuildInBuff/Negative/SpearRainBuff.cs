@@ -314,9 +314,14 @@ namespace BuiltinBuffs.Negative
 
                     if (result.obj != null && (result.chunk != null || result.onAppendagePos != null))
                     {
-                        data.LogIntoCreature(result, particle);
-                        data.MoveWithStuckObj(particle);
-                        particle.emitter.room.PlaySound(SoundID.Spear_Stick_In_Creature, particle.pos, 1f, Random.value * 0.2f + 1f);
+                        if (result.obj is Creature)
+                        {
+                            data.LogIntoCreature(result, particle);
+                            data.MoveWithStuckObj(particle);
+                            particle.emitter.room.PlaySound(SoundID.Spear_Stick_In_Creature, particle.pos, 1f, Random.value * 0.2f + 1f);
+                        }
+                        else
+                            data.HitObjectBehaviour(result, particle);
                     }
                 }
             }
@@ -379,6 +384,11 @@ namespace BuiltinBuffs.Negative
                     }
 
                     ViolenceBehaviour(creature, p, StuckInChunk, stuckInAppendage);
+                }
+
+                public virtual void HitObjectBehaviour(SharedPhysics.CollisionResult result, Particle p)
+                {
+
                 }
 
                 public virtual void ViolenceBehaviour(Creature creature, Particle particle, BodyChunk bodyChunk, PhysicalObject.Appendage.Pos appendagePos)

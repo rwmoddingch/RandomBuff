@@ -27,6 +27,7 @@ namespace BuiltinBuffs.Duality
         private static void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
             orig.Invoke(self);
+            int total = 0;
             if (!self.abstractRoom.shelter && !self.abstractRoom.gate && self.game != null && (!self.game.IsArenaSession || self.game.GetArenaGameSession.GameTypeSetup.levelItems) && (!ModManager.MMF || self.roomSettings.RandomItemDensity > 0f))
             {
                 for (int num16 = (int)((float)self.TileWidth * (float)self.TileHeight * (0.07f + 0.07f * Mathf.Pow(self.roomSettings.RandomItemDensity, 2f) / 5f)); num16 >= 0; num16--)
@@ -80,11 +81,14 @@ namespace BuiltinBuffs.Duality
                                 actuallySpawn = false;
                             }
                         }
+                        if (total > 25)
+                            return;
                         if (actuallySpawn)
                         {
                             EntityID newID3 = self.game.GetNewID(-self.abstractRoom.index);
                             AbstractPhysicalObject abstractBomb = new AbstractPhysicalObject(self.world, AbstractPhysicalObject.AbstractObjectType.ScavengerBomb, null, new WorldCoordinate(self.abstractRoom.index, intVector.x, intVector.y, -1), newID3);
                             self.abstractRoom.AddEntity(abstractBomb);
+                            total++;
                         }
                     }
                 }

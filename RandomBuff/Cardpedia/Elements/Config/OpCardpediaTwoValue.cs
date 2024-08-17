@@ -37,6 +37,7 @@ namespace RandomBuff.Cardpedia.Elements.Config
                 null
             );
             InitSprites();
+            label.text = bindConfigurable.StringValue;
         }
 
         public override void Update()
