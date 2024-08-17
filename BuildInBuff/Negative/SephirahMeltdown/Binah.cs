@@ -57,7 +57,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
     internal class BinahBuff : Buff<BinahBuff,BinahBuffData>, BuffHudPart.IOwnBuffHudPart
     {
         public override BuffID ID => BinahBuffData.Binah;
-        public bool needSpawnChain = true;
+        public bool needSpawnChain;
         private MusicEvent turnOne;
         private MusicEvent turnTwo;
 
@@ -73,13 +73,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             }), MaxTime);
 
             BinahGlobalManager.Init();
-            if (BuffCustom.TryGetGame(out var game))
-            {
-                foreach (var room in game.world.activeRooms)
-                    room.AddObject(new BinahRoom(room, room.IsNeedBinahChain()));
-            }
+ 
 
-            foreach (var self in (BuffCustom.TryGetGame(out game) ? game.Players : new List<AbstractCreature>())
+            needSpawnChain = true;
+            foreach (var self in (BuffCustom.TryGetGame(out var game) ? game.Players : new List<AbstractCreature>())
                 .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
             {
                 self.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", Fac);
@@ -104,18 +101,47 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
 
             };
-            game.rainWorld.processManager.musicPlayer?.GameRequestsSong(turnOne);
-        }
+            if(BuffCustom.TryGetGame(out var game1))
+                game1.rainWorld.processManager.musicPlayer?.GameRequestsSong(turnOne);
+        }   
 
 
         private const float Fac = 0.85f;
+        private bool isInit = false;
 
         public override void Update(RainWorldGame game)
         {
             base.Update(game);
             BinahGlobalManager.GlobalUpdate(game);
             if (needSpawnChain)
+            {
                 needSpawnChain = !BinahGlobalManager.SpawnNewChain(game);
+                if (!needSpawnChain && !isInit)
+                {
+                    isInit = true;
+                    foreach (var room in game.world.activeRooms)
+                        room.AddObject(new BinahRoom(room, room.IsNeedBinahChain()));
+                    turnOne = new MusicEvent
+                    {
+                        fadeInTime = 1f,
+                        roomsRange = -1,
+                        cyclesRest = 0,
+                        prio = 9.9f,
+                        volume = 0.13f,
+                        stopAtDeath = false,
+                        stopAtGate = false,
+                        loop = true,
+                        oneSongPerCycle = false,
+                        maxThreatLevel = 10,
+                        songName = $"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong",
+
+                    };
+                    game.rainWorld.processManager.musicPlayer?.GameRequestsSong(turnOne);
+                }
+            }
+
+            if (!isInit)
+                return;
 
             if (Data.Health < 0.75f && turnTwo == null)
             {
@@ -897,7 +923,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static readonly Dictionary<int, CreatureTemplate.Type> ChainType = new Dictionary<int, CreatureTemplate.Type>();
 
-        private const int SearchDepth = 3;
+        private const int InitSearchDepth = 3;
 
         private static int maxCount = 1;
 
@@ -916,11 +942,13 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             localDamage = 0;
             if (game.AlivePlayers.Count == 0 || game.AlivePlayers[0].Room?.connections == null) return false;
             ChainRoomIndices.Clear();
-            BuffPostEffectManager.AddEffect(new ShockEffect(0,1.3f,0.5f,0.7f,0,10,0.2f,Custom.RNV()*1.3F));
 
             List<int> allRooms = new List<int>();
             List<AbstractRoom> toUseRooms = new List<AbstractRoom> { game.AlivePlayers[0].Room };
-            for (int currentDepth = 0; currentDepth < SearchDepth; currentDepth++)
+            int searchDepth = InitSearchDepth;
+            int spawnCount = Mathf.RoundToInt(maxCount = Random.Range(3, 5));
+
+            for (int currentDepth = 0; currentDepth < searchDepth; currentDepth++)
             {
                 var useRoom = toUseRooms.ToList();
                 toUseRooms.Clear();
@@ -937,22 +965,31 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                         }
                     }
                 }
+
+                if (currentDepth == searchDepth - 1 && searchDepth <= 5 && allRooms.Count < spawnCount)
+                    searchDepth++;
+                
             }
 
             allRooms.Remove(game.AlivePlayers[0].pos.room);
-            if (allRooms.Count == 0)
-                allRooms.Add(game.AlivePlayers[0].pos.room);
 
-            int spawnCount = Mathf.RoundToInt(maxCount = Random.Range(3, 5));
+            if (toUseRooms.Count == 0)
+                return false;
+
+            BuffPostEffectManager.AddEffect(new ShockEffect(0, 1.3f, 0.5f, 0.7f, 0, 10, 0.2f, Custom.RNV() * 1.3F));
+
+
             for (int i = 0; i < Mathf.Min(spawnCount, toUseRooms.Count); i++)
             {
                 int r = Random.Range(0, allRooms.Count);
                 ChainRoomIndices.Add(allRooms[r]);
+                BuffUtils.Log(BinahBuffData.Binah, $"new chains, room:{game.world.GetAbstractRoom(allRooms[r]).name}");
                 allRooms.RemoveAt(r);
             }
             CheckChainCreateOrDelete();
             OnBinahNewChain?.Invoke();
-            BuffUtils.Log(BinahBuffData.Binah, $"new chains count:{maxCount}");
+            BuffPostEffectManager.AddEffect(new ShockEffect(0, 1.3f, 0.5f, 0.7f, 0, 10, 0.2f, Custom.RNV() * 1.3F));
+            BuffUtils.Log(BinahBuffData.Binah, $"new chains, count:{Mathf.Min(spawnCount, toUseRooms.Count)}");
             return true;
         }
 
@@ -994,8 +1031,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             ChainType.Clear();
 
             foreach (var index in ChainRoomIndices)
-                if(!ChainType.ContainsKey(index))
-                    ChainType.Add(index,SephirahMeltdownEntry.Hell ? OrigSpawnTypes[Random.Range(0, OrigSpawnTypes.Length)] : SpawnTypes[Random.Range(0,SpawnTypes.Length)]);
+                ChainType[index]=SephirahMeltdownEntry.Hell ? OrigSpawnTypes[Random.Range(0, OrigSpawnTypes.Length)] : SpawnTypes[Random.Range(0,SpawnTypes.Length)];
 
         }
         public static readonly List<BinahRoom> DisplayChains = new List<BinahRoom>();

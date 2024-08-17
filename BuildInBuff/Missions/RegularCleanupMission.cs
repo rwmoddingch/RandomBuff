@@ -57,8 +57,9 @@ namespace BuiltinBuffs.Missions
                         {
                             baseCrit = CreatureTemplate.Type.DaddyLongLegs,
                             boostCrit = CreatureTemplate.Type.DaddyLongLegs,
-                            boostCount = 2,
-                            boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add
+                            boostCount = 1,
+                            boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add,
+                            roomName = new []{"SS_I03","SS_A01"}
                         }
               
                     },
@@ -89,6 +90,13 @@ namespace BuiltinBuffs.Missions
 
         public override void EnterGame(RainWorldGame game)
         {
+            foreach (var room in game.world.abstractRooms)
+            {
+                if (room.roomAttractions[CreatureTemplate.Type.DaddyLongLegs.index] == AbstractRoom.CreatureRoomAttraction.Avoid ||
+                    room.roomAttractions[CreatureTemplate.Type.DaddyLongLegs.index] == AbstractRoom.CreatureRoomAttraction.Forbidden)
+                    room.roomAttractions[CreatureTemplate.Type.DaddyLongLegs.index] = AbstractRoom.CreatureRoomAttraction.Neutral;
+            }
+
             base.EnterGame(game);
             BuffEvent.OnSeePlayer += OracleHooks_OnSeePlayer;
             BuffEvent.OnLoadConversation += OracleHooks_OnLoadConversation;
