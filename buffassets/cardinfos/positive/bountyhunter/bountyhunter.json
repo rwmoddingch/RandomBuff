@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "BountyHunter",
-        "Description" : "Mark a random creature in the area, once killed the creature grants a random buff for the rest of the cycle."
+        "Description" : "Marks a random creature in the current region with an arrow. When the creature is killed, gain a random positive buffcard for the rest of the cycle."
     }
 }
