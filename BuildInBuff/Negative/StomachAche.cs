@@ -18,7 +18,7 @@ namespace HotDogGains.Negative
     {
         public override BuffID ID => StomachAcheBuffEntry.StomachAcheID;
 
-        public override int MaxCycleCount => 3;
+        public override int MaxCycleCount => 5;
 
         //[JsonProperty]
         //public int cycleLeft;
