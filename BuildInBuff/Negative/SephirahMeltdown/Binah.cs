@@ -48,7 +48,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         }
 
 
-        [CustomBuffConfigInfo("Unnerfed Sephirah Meltdowns", "The original version of Sephirah Meltdowns (higher difficulty and with many design flaws)")]
+        [CustomBuffConfigInfo("Unnerf Meltdown", "The original version of Sephirah Meltdowns (higher difficulty and with many design flaws)")]
         [CustomBuffConfigTwoValue(false, true)]
         public bool UnNerfedVersion { get; }
 
