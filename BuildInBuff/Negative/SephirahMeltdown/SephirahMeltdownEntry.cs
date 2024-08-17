@@ -95,13 +95,17 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
         public static Texture2D BinahScreenEffectTexture;
 
+        private static BuffConfigurable hellCfg;
+
         public static bool Hell
         {
             get
             {
-                var result = BuffConfigurableManager.TryGetConfigurable(BinahBuffData.Binah, "UnNerfedVersion", false, typeof(bool), false);
-                if(result.configurable != null)
-                    return (bool)result.configurable.BoxedValue;
+                if (hellCfg != null)
+                    return (bool)hellCfg.BoxedValue;
+                (hellCfg, _) = BuffConfigurableManager.TryGetConfigurable(BinahBuffData.Binah, "UnNerfedVersion", false, typeof(bool), false);
+                if (hellCfg != null)
+                    return (bool)hellCfg.BoxedValue;
                 BuffUtils.LogWarning("SephirahMeltdown", "Can't find UnNerfedVersion property");
                 return false;
             }

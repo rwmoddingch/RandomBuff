@@ -30,7 +30,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         public Condition SetTargetCount(SlugcatStats state)
         {
-            targetCount = (state.name == MoreSlugcatsEnums.SlugcatStatsName.Saint ? 3 : 5) * state.foodToHibernate;
+            targetCount =  (state.name == MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel ? 30 : 5 * state.foodToHibernate);
             return this;
         }
 

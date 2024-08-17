@@ -270,7 +270,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         }
 
         public static readonly HashSet<string> ReplacedShaders = new HashSet<string>()
-            { "FlatLightBehindTerrain", "LevelSnowShader", "LightSource" ,"LevelColor"};
+            { "FlatLightBehindTerrain", "LevelSnowShader", "LightSource" ,"LevelColor","DeepWater","WaterLight","WaterFall","WaterFallInverted","UnderWaterLight"};
 
         private static void FFacetRenderLayer_ctor(On.FFacetRenderLayer.orig_ctor orig, FFacetRenderLayer self, FStage stage, FFacetType facetType, FAtlas atlas, FShader shader)
         {

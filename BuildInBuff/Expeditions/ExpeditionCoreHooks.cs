@@ -45,7 +45,7 @@ namespace BuiltinBuffs.Expeditions
                     self.Win(false);
                     foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
                     {
-                        if (con is AbyssCondition)
+                        if (con is TreeOfLightCondition)
                             continue;
 
                         con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });

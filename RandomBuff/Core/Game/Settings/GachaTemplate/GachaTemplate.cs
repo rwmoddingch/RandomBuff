@@ -217,6 +217,10 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             public BoostType boostType;
             public float boostCount;
 
+
+            public string[] roomName;
+            public WorldCoordinate[] pos;
+
             public CreatureTemplate.Type boostCrit;
             public CreatureTemplate.Type baseCrit;
 
@@ -234,6 +238,9 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
             boostCreatureInfos ??= new List<BoostCreatureInfo>();
             BuffPlugin.Log($"Try Boost creatures, info count:{boostCreatureInfos.Count}");
 
+
+            int GetRandomCount(float boostCount) => (Random.value < boostCount - Mathf.FloorToInt(boostCount) ? 1 : 0) + Mathf.FloorToInt(boostCount);
+
             foreach (var info in boostCreatureInfos)
             {
                 BuffPlugin.LogDebug($"{info.baseCrit}, {info.boostCrit}, {info.boostType}, {info.boostCount}");
@@ -247,17 +254,10 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                                 if (crit.creatureTemplate.type == info.baseCrit)
                                 {
                                     BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}");
-                                    for (int i = 0; i < Mathf.FloorToInt(info.boostCount); i++)
+                                    for (int i = 0; i < GetRandomCount(info.boostCount); i++)
                                         room.AddEntity(new AbstractCreature(room.world,
                                             StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
                                             self.GetNewID(-1)));
-
-                                    if (Random.value < info.boostCount - Mathf.FloorToInt(info.boostCount))
-                                    {
-                                        room.AddEntity(new AbstractCreature(room.world,
-                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
-                                            self.GetNewID(-1)));
-                                    }
                                 }
                             }
 
@@ -266,23 +266,44 @@ namespace RandomBuff.Core.Game.Settings.GachaTemplate
                                 if (crit.creatureTemplate.type == info.baseCrit)
                                 {
                                     BuffPlugin.LogDebug($"Add {info.boostCrit}, at room: {room.name}, at den");
-
-                                    for (int i = 0; i < Mathf.FloorToInt(info.boostCount); i++)
+                                    for (int i = 0; i < GetRandomCount(info.boostCount); i++)
                                     {
                                         var abCrit = new AbstractCreature(room.world,
                                             StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
                                             self.GetNewID(-1));
+                                        abCrit.remainInDenCounter = 50;
                                         room.AddEntity(abCrit);
-                                        room.MoveEntityToDen(abCrit);
+                                        abCrit.OpportunityToEnterDen(abCrit.pos);
                                     }
 
-                                    if (Random.value < info.boostCount - Mathf.FloorToInt(info.boostCount))
+                                }
+                            }
+
+
+                            if (info.roomName != null && info.roomName.Contains(room.name))
+                            {
+                                var pos = info.pos == null ? QuickConnectivity.DefineNodeOfLocalCoordinate(new WorldCoordinate(room.index,0,0,-1),world,StaticWorld.GetCreatureTemplate(info.boostCrit))
+                                    : info.pos[info.roomName.IndexOf(room.name)];
+                                pos.room = room.index;
+                                if (!pos.NodeDefined)
+                                {
+                                    BuffPlugin.LogDebug($"Add {info.boostCrit} with pos, at room: {room.name}");
+                                    for (int i = 0; i < GetRandomCount(info.boostCount); i++)
+                                        room.AddEntity(new AbstractCreature(room.world,
+                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, pos,
+                                            self.GetNewID(-1)));
+                                }
+                                else
+                                {
+                                    BuffPlugin.LogDebug($"Add {info.boostCrit} with pos, at room: {room.name}, at den");
+                                    for (int i = 0; i < GetRandomCount(info.boostCount); i++)
                                     {
                                         var abCrit = new AbstractCreature(room.world,
-                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, crit.pos,
+                                            StaticWorld.GetCreatureTemplate(info.boostCrit), null, pos,
                                             self.GetNewID(-1));
                                         room.AddEntity(abCrit);
-                                        room.MoveEntityToDen(abCrit);
+                                        abCrit.remainInDenCounter = 50;
+                                        abCrit.OpportunityToEnterDen(abCrit.pos);
                                     }
                                 }
                             }
