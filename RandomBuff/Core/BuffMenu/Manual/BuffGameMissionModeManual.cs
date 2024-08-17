@@ -37,6 +37,11 @@ namespace RandomBuff.Core.BuffMenu.Manual
                 anchorY -= 25f;
                 AddText(BuffResourceString.Get("BuffManual_MissionMode_Content_3"), false, ref anchorY);
             }
+            else if(pageNumber == 4)
+            {
+                anchorY -= 25f;
+                AddText(BuffResourceString.Get("BuffManual_MissionMode_Content_4"), false, ref anchorY);
+            }
         }
     }
 }

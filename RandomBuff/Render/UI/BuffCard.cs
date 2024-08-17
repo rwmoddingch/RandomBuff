@@ -24,7 +24,7 @@ namespace RandomBuff.Render.UI
 
         //基础变量
         bool _texInit = true;
-        FTexture _ftexture;
+        FSprite _ftexture;
         public FContainer Container { get; private set; }
         public RenderTexture RenderTexture { get => _cardRenderer.cardCameraController.targetTexture; }
 

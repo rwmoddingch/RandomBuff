@@ -29,8 +29,8 @@ namespace RandomBuff.Render.CardRender
 
         protected GameObject _cardQuadBack;
 
-        protected FTexture _texture;
-        public FTexture Texture
+        protected FSprite _texture;
+        public FSprite Texture
         {
             get => _texture;
         }
@@ -98,6 +98,8 @@ namespace RandomBuff.Render.CardRender
         internal float inactiveTimer;
         protected bool _notFirstInit;
 
+        FAtlas renderAtlas;
+
         public virtual void Init(int id, BuffStaticData buffStaticData)
         {
             try
@@ -163,8 +165,12 @@ namespace RandomBuff.Render.CardRender
             //初始化专有相机
             cardCameraController.Init(id);
 
-            _texture = new FTexture(cardCameraController.targetTexture, Salt());
+            //_texture = new FTexture(cardCameraController.targetTexture, Salt());
             _notFirstInit = true;
+
+            renderAtlas = new FAtlas(Salt(), cardCameraController.targetTexture, FAtlasManager._nextAtlasIndex++, false);
+            Futile.atlasManager.AddAtlas(renderAtlas);
+            _texture = new FSprite(renderAtlas.elements[0]);
         }
 
         protected virtual void DuplicateInit(int id, BuffStaticData buffStaticData)
@@ -186,7 +192,16 @@ namespace RandomBuff.Render.CardRender
 
         public virtual void OnDestroy()
         {
-            _texture.Destroy();
+            _texture.RemoveFromContainer();
+            Futile.atlasManager._atlases.Remove(renderAtlas);
+
+            int count = renderAtlas.elements.Count;
+            for (int i = 0; i < count; i++)
+            {
+                FAtlasElement fAtlasElement = renderAtlas.elements[i];
+                Futile.atlasManager._allElementsByName.Remove(fAtlasElement.name);
+            }
+
         }
 
         public virtual string Salt()
@@ -194,21 +209,9 @@ namespace RandomBuff.Render.CardRender
             return $"BuffCardRendererBase_{_id}_";
         }
 
-        public FTexture CleanGetTexture()
+        public FSprite CleanGetTexture()
         {
-            if (Texture._element.sourcePixelSize.x != CardBasicAssets.RenderTextureSize.x || Texture._element.sourcePixelSize.y != CardBasicAssets.RenderTextureSize.y || !(Texture._element.atlas.texture is RenderTexture))
-            {
-                _texture.Destroy();
-                cardCameraController.ReinitRenderTarget();
-                _texture = new FTexture(cardCameraController.targetTexture, Salt());
-                FTexture.GarbageCollect();
-            }
-
-            Texture.SetPosition(Vector2.zero);
-            Texture.scale = 1f;
-            Texture.alpha = 1f;
-            Texture.rotation = 0f;
-            return Texture;
+            return _texture;
         }
     }
 
