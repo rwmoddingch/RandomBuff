@@ -34,10 +34,10 @@ namespace BuiltinBuffs.Missions
                     new WithInCycleCondition() { SetCycle = 11 },
                     new CycleCondition() { SetCycle = 10 },
                     new DeathCondition() { deathCount = 5 },
-                    new HuntAllCondition() { huntCount = 40 },
+                    new ScoreCondition() { targetScore = 600},
                     new PermanentHoldCondition() { HoldBuff = NoPassDayBuffEntry.noPassDayBuffID },
                 },
-                gachaTemplate = new NormalGachaTemplate()
+                gachaTemplate = new KingOfIslesTemplate()
                 {
                     ForceStartPos = "SI_S04",
                     boostCreatureInfos = new List<GachaTemplate.BoostCreatureInfo>()
@@ -56,7 +56,8 @@ namespace BuiltinBuffs.Missions
                             boostCount = 1.5f,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add
                         }
-                    }
+                    },
+                    PocketPackMultiply = 0
                 }
             };
             startBuffSet.Add(VultureShapedMutationBuffEntry.VultureShapedMutation);
@@ -68,13 +69,31 @@ namespace BuiltinBuffs.Missions
 
         public void RegisterMission()
         {
+            BuffRegister.RegisterGachaTemplate<KingOfIslesTemplate>(KingOfIslesTemplate.KingOfIsles);
             BuffRegister.RegisterMission(KingOfIsles,new KingOfIslesMission());
         }
 
 
         internal class KingOfIslesTemplate : NormalGachaTemplate
         {
+            public override GachaTemplateID ID => KingOfIsles;
+            public static readonly GachaTemplateID KingOfIsles = new GachaTemplateID(nameof(KingOfIsles), true);
+            public override void EnterGame(RainWorldGame game)
+            {
+                foreach (var room in game.world.abstractRooms)
+                {
+                    if ((room.roomAttractions[CreatureTemplate.Type.KingVulture.index] == AbstractRoom.CreatureRoomAttraction.Avoid ||
+                        room.roomAttractions[CreatureTemplate.Type.KingVulture.index] == AbstractRoom.CreatureRoomAttraction.Forbidden) &&
+                        room.AnySkyAccess)
+                        room.roomAttractions[CreatureTemplate.Type.KingVulture.index] = AbstractRoom.CreatureRoomAttraction.Neutral;
 
+                    if ((room.roomAttractions[CreatureTemplate.Type.Vulture.index] == AbstractRoom.CreatureRoomAttraction.Avoid ||
+                         room.roomAttractions[CreatureTemplate.Type.Vulture.index] == AbstractRoom.CreatureRoomAttraction.Forbidden) &&
+                        room.AnySkyAccess)
+                        room.roomAttractions[CreatureTemplate.Type.Vulture.index] = AbstractRoom.CreatureRoomAttraction.Neutral;
+                }
+                base.EnterGame(game);
+            }
         }
     }
 }

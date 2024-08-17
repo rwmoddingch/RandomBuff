@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BuiltinBuffs.Duality;
 using BuiltinBuffs.Positive;
+using MoreSlugcats;
 using Newtonsoft.Json;
 using RandomBuff;
 using RandomBuff.Core.Entry;
@@ -35,8 +36,9 @@ namespace BuiltinBuffs.Missions
             {
                 conditions = new List<Condition>()
                 {
-                    new DistanceCondition(){targetTileCount = 1500, needFaster = true},
-                    new DeathCondition(){deathCount = 5}
+                    new DistanceCondition(){targetTileCount = 2500, needFaster = true},
+                    new DeathCondition(){deathCount = 5},
+                    new AchievementCondition() {achievementID = MoreSlugcatsEnums.EndgameID.Nomad}
                 }
             };
             startBuffSet.Add(ShockingSpeedBuffEntry.shockingSpeedBuffID);
@@ -57,8 +59,21 @@ namespace BuiltinBuffs.Missions
         {
             BuffRegister.RegisterCondition<DistanceCondition>(DistanceCondition.Distance, "Distance");
             BuffRegister.RegisterMission(InHurry, new InHurryMission());
+            BuffCore.OnGameSettingSpecialSetup += BuffCore_OnGameSettingSpecialSetup;
+        }
+
+        private void BuffCore_OnGameSettingSpecialSetup(SaveState saveState, GameSetting gameSetting)
+        {
+            if (gameSetting.MissionId == InHurry.value)
+            {
+                var tracker = (saveState.deathPersistentSaveData.winState.GetTracker(WinState.EndgameID.Survivor, true) as
+                    WinState.IntegerTracker);
+                tracker.progress = tracker.max;
+                tracker.consumed = true;
+            }
         }
     }
+
 
     public class DistanceCondition : Condition
     {
