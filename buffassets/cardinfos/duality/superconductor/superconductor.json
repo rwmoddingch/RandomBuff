@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Superconductor",
-        "Description" : "All electric shocks chain between creatures. Limited bounces."
+        "Description" : "All electric shocks bounce to nearby creatures. Limited bounce count."
     }
 }

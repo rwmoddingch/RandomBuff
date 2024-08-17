@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Napalm",
-        "Description" : "Requires Temperature. Bombs deal less damage, but leave a ring of fire in the blast zone for 15 seconds."
+        "Description" : "Precondition: Temperature. Bombs deal less damage, but leave a ring of fire in the blast zone for 15 seconds."
     }
 }

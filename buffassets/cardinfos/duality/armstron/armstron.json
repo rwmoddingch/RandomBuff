@@ -11,7 +11,7 @@
         "Description" : "进入迭代器moon所在的房间后，全局游戏重力变为1/6"
     },
     "English": {
-        "BuffName" : "Armstrong",
+        "BuffName" : "Armstron",
         "Description" : "After your slugcat enters Moon's room, (global) gravity becomes six times weaker."
     }
 }

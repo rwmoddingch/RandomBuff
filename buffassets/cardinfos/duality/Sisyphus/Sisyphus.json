@@ -12,6 +12,6 @@
     },
     "English": {
     "BuffName": "Sisyphus",
-    "Description": "When your slugcat drops a rock, it's teleported to where the rock was picked up (as long as it's in the same region)."
+    "Description": "After dropping a rock, your slugcat teleports to where it picked it up (as long as it's in the same region)."
   }
 }
