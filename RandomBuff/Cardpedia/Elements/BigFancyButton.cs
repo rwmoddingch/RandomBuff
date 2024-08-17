@@ -130,6 +130,7 @@ namespace RandomBuff.Cardpedia.Elements
             {
                 (menu as CardpediaMenu).BrowsingCards = true;
                 (menu as CardpediaMenu).currentType = currentType == "Negative"? Core.Buff.BuffType.Negative : (currentType == "Positive"? Core.Buff.BuffType.Positive : Core.Buff.BuffType.Duality);
+                (menu as CardpediaMenu).configManager.OnCardPick(null);
             }
         }        
     }
