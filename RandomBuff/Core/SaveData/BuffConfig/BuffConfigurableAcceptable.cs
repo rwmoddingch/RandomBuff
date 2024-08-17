@@ -121,7 +121,8 @@ namespace RandomBuff.Core.SaveData.BuffConfig
 
         public override object Clamp(object value)
         {
-            if (value != valueA && value != valueB)
+            //BuffPlugin.Log($"{value} - A:{valueA} B:{valueB}, {!value.Equals(valueA)}-{!value.Equals(valueB)}");
+            if (!value.Equals(valueA) && !value.Equals(valueB))
                 return valueA;
             return value;
         }
