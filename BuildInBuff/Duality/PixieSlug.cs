@@ -305,7 +305,7 @@ namespace BuiltinBuffs.Duality
                     flapDeg -= 10f;
                 }
 
-                if (self.wantToJump > 0 && flapCoolDown == 0)
+                if (self.wantToJump > 0 && flapCoolDown == 0 && self.input[0].y >= 0)
                 {
                     if (self.bodyMode != Player.BodyModeIndex.CorridorClimb && self.bodyMode != Player.BodyModeIndex.Swimming && self.bodyMode != Player.BodyModeIndex.ClimbingOnBeam)
                     {
