@@ -13,6 +13,7 @@ using UnityEngine;
 using MoreSlugcats;
 using RWCustom;
 using System.Runtime.InteropServices;
+using System.Xml.Schema;
 
 namespace BuiltinBuffs.Positive
 {
@@ -437,13 +438,31 @@ namespace BuiltinBuffs.Positive
                 {
                     (abstractPhysicalObject as AbstractSpear).stuckInWallCycles = 0;
                 }
+
+                var realizedObj = self.grasps[grasp].grabbed;
+                if (self.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Artificer && self.FoodInStomach >= 1)
+                {                  
+                    if (abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.Rock)
+                    {
+                        var bomb = new AbstractPhysicalObject(self.room.world, AbstractPhysicalObject.AbstractObjectType.ScavengerBomb, null, new WorldCoordinate(self.room.abstractRoom.index, -1, -1, 0), self.room.game.GetNewID());
+                        abstractPhysicalObject = bomb;
+                        self.SubtractFood(1);
+                    }
+
+                    if (abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.FlareBomb)
+                    {
+                        var lantern = new AbstractPhysicalObject(self.room.world, AbstractPhysicalObject.AbstractObjectType.Lantern, null, new WorldCoordinate(self.room.abstractRoom.index, -1, -1, 0), self.room.game.GetNewID());
+                        abstractPhysicalObject = lantern;
+                        self.SubtractFood(1);
+                    }
+                }
                 module.objectsInStomach.Add(abstractPhysicalObject);
                 if (ModManager.MMF && self.room.game.session is StoryGameSession)
                 {
                     (self.room.game.session as StoryGameSession).RemovePersistentTracker(abstractPhysicalObject);
                 }
                 self.ReleaseGrasp(grasp);
-                abstractPhysicalObject.realizedObject.RemoveFromRoom();
+                realizedObj.RemoveFromRoom();
                 abstractPhysicalObject.Abstractize(self.abstractCreature.pos);
                 abstractPhysicalObject.Room.RemoveEntity(abstractPhysicalObject);
             }

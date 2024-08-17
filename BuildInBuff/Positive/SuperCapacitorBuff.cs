@@ -116,7 +116,7 @@ namespace BuiltinBuffs.Positive
                                 }
                         }
                     }
-                }               
+                }
             }
             catch (Exception ex)
             {
@@ -174,7 +174,7 @@ namespace BuiltinBuffs.Positive
                     }
                     else
                         module.Encharge((buffData as SuperCapacitanceBuffData).energyRecord_1, capacity);
-                }                
+                }
             }
 
             if (batteryModule.TryGetValue(self, out var battery))
@@ -182,7 +182,7 @@ namespace BuiltinBuffs.Positive
                 if (self.room != null && battery.energyIndicator != null && (battery.energyIndicator.room == null || battery.energyIndicator.room != self.room || battery.energyIndicator.slatedForDeletetion))
                 {
                     battery.energyIndicator.Destroy();
-                    battery.energyIndicator.slatedForDeletetion = false;                    
+                    battery.energyIndicator.slatedForDeletetion = false;
                     self.room.AddObject(battery.energyIndicator);
                 }
 
@@ -191,7 +191,7 @@ namespace BuiltinBuffs.Positive
                     if (battery.energy > 0)
                     {
                         bool flag = false;
-                        for (int i = self.grabbedBy.Count - 1 ; i >= 0; i--)
+                        for (int i = self.grabbedBy.Count - 1; i >= 0; i--)
                         {
                             if (self.grabbedBy.Count == 0 || self.grabbedBy[0].grabber is Centipede || self.grabbedBy[0].grabber is Player)
                             {
@@ -203,7 +203,7 @@ namespace BuiltinBuffs.Positive
                             {
                                 //self.grabbedBy[0].grabber.Violence(self.firstChunk, null, self.grabbedBy[0].grabber.firstChunk, null, Creature.DamageType.Electric, 0.5f * battery.energy, 1f);
                                 self.room.AddObject(new CreatureSpasmer(self.grabbedBy[i].grabber, false, (int)(2f * battery.energy)));
-                            }                      
+                            }
                         }
 
                         if (!flag)
@@ -229,7 +229,13 @@ namespace BuiltinBuffs.Positive
                 if (source == null || source.owner != player)
                 {
                     battery.Encharge(damage, BatteryModule.Capacity(player.slugcatStats.name, player.isSlugpup));
-                }               
+                }
+
+                if (PlayerUtils.TryGetModulePart<ShockingSpeedBuff.ShockingSpeedModule>(player, ShockingSpeedBuff.Instance, out var part))
+                {
+                    part.GetShocked(player);
+                }
+
                 return;
             }
             orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
@@ -409,7 +415,7 @@ namespace BuiltinBuffs.Positive
                 room = null;
                 Destroy();
                 return;
-            }            
+            }
 
             if (SuperCapacitanceBuffEntry.batteryModule.TryGetValue(bindPlayer, out var battery))
             {

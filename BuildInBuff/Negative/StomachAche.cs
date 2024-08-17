@@ -18,7 +18,7 @@ namespace HotDogGains.Negative
     {
         public override BuffID ID => StomachAcheBuffEntry.StomachAcheID;
 
-        public override int MaxCycleCount => 3;
+        public override int MaxCycleCount => 5;
 
         //[JsonProperty]
         //public int cycleLeft;
@@ -48,7 +48,7 @@ namespace HotDogGains.Negative
                 {
                     c.EmitDelegate<Action<Player>>((self) =>
                     {
-                        self.Stun(80);
+                        self.Stun(20*StomachAcheID.GetBuffData().StackLayer);
                     });
                     c.Emit(OpCodes.Ldarg_0);
                 }
@@ -62,7 +62,7 @@ namespace HotDogGains.Negative
         private static void Player_ObjectEaten(On.Player.orig_ObjectEaten orig, Player self, IPlayerEdible edible)
         {
             StomachAcheBuff.Instance.TriggerSelf(true);
-            self.Stun(80);
+            self.Stun(80*StomachAcheID.GetBuffData().StackLayer);
             orig.Invoke(self, edible);
         }
 

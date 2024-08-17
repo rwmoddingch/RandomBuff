@@ -4,15 +4,16 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Triggerable" : true,
+    "AsPositive":true,
     "Color" : "FF3065",
     "Tag" : ["BombExplodeModify"],
     "Conflict":["BombExplodeModify"],
     "Chinese" : {
         "BuffName" : "矛爆雷",
-        "Description" : "炸弹的爆炸不会造成爆炸伤害，而是往周围撒布伤害为0.5的矛破片"
+        "Description" : "玩家扔出的炸弹的爆炸不会造成爆炸伤害，而是往周围撒布伤害为0.5的矛破片"
     },
     "English": {
         "BuffName" : "Spear Burster",
-        "Description" : "Bombs no longer cause explosion damage, instead speard spear sharp into space which cause 0.5 damage each."
+        "Description" : "Bombs that player thrown no longer cause explosion damage, instead speard spear sharp into space which cause 0.5 damage each."
     }
 }

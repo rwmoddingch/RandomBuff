@@ -56,7 +56,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                             BinahBuffData.Binah.value
                         }},
                     }, 
-                    SPCount = SephirahMeltdownEntry.Hell ? 0 : 1, SPSelect = 2, SPShow = 10,
+                    SPCount = 1, SPSelect = 2, SPShow = 10,
                     NCount = 0, NSelect = 0, NShow = 0,
                     PCount = 0, PSelect = 0, PShow = 0,
                     PocketPackMultiply = 0,
@@ -93,6 +93,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             TemplateDescription = "GachaTemplate_Desc_SephirahMeltdowns";
             PocketPackMultiply = 0;
             ExpMultiply *= 1.5f;
+        }
+
+        public override void NewGame()
+        {
+            CurrentPacket = SephirahMeltdownEntry.Hell ? new CachaPacket() : new CachaPacket() { positive = (SPSelect, SPShow, SPCount), negative = (SNSelect, SNShow, SNCount) };
         }
 
         public override void EnterGame(RainWorldGame game)
