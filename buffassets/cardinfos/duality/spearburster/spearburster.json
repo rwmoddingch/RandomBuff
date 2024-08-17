@@ -14,6 +14,6 @@
     },
     "English": {
         "BuffName" : "Spear Burster",
-        "Description" : "Bombs that player thrown no longer cause explosion damage, instead speard spear sharp into space which cause 0.5 damage each."
+        "Description" : "Your slugcat's bombs no longer deal damage, rather exploding into several spears which do 0.5 damage each."
     }
 }
