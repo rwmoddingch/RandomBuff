@@ -36,6 +36,8 @@ namespace BuiltinBuffs.Expeditions
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
             orig(self, dt);
+            //if(ExpeditionGame.egg == null)
+            //    ExpeditionGame.egg = new Eggspedition(self);
             if (Input.GetKey(KeyCode.Y) && BuffPlugin.DevEnabled)
             {
                 if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
@@ -111,7 +113,15 @@ namespace BuiltinBuffs.Expeditions
             On.Expedition.ExpeditionGame.IsUndesirableRoomScript += ExpeditionGame_IsUndesirableRoomScript;
 
             On.Expedition.Eggspedition.Update += Eggspedition_Update;
+            On.RoomCamera.SpriteLeaser.rbUpdate += SpriteLeaser_rbUpdate;
              
+        }
+
+        private static void SpriteLeaser_rbUpdate(On.RoomCamera.SpriteLeaser.orig_rbUpdate orig, RoomCamera.SpriteLeaser self, float timeStacker)
+        {
+            if (Custom.rainWorld.BuffMode())
+                return;
+            orig(self,timeStacker);
         }
 
         private static void Eggspedition_Update(On.Expedition.Eggspedition.orig_Update orig, Eggspedition self)

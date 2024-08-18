@@ -104,11 +104,13 @@ namespace BuiltinBuffs.Positive
             {
                 canTrigger = true;
 
-            }, 240, autoReset: false);
+            }, 30, autoReset: false);
             MyTimer.Paused = true;
         }
 
         public override bool Triggerable => canTrigger;
+
+        public override bool Active => canTrigger;
 
         private bool canTrigger = true;
 
@@ -126,13 +128,18 @@ namespace BuiltinBuffs.Positive
             player.room.AddObject(new JudgmentCut(player.room, player));
             MyTimer.Reset();
             MyTimer.Paused = false;
-            return false;
+            return true;
         }
     }
-    internal class StormIsApproachingBuffData : CountableBuffData
+    internal class StormIsApproachingBuffData : BuffData
     {
         public override BuffID ID => StormIsApproachingEntry.StormIsApproaching;
-        public override int MaxCycleCount => 3;
+
+        public override void Stack()
+        {
+            base.Stack();
+            StackLayer += 3;
+        }
     }
 
     internal class JudgmentCutPartBase : CosmeticSprite
@@ -634,6 +641,7 @@ namespace BuiltinBuffs.Positive
                 foreach (var crit in room.abstractRoom.creatures.Where(i => i.creatureTemplate.dangerousToPlayer > 0 && !(i.realizedCreature is Player))
                              .Select(i => i.realizedCreature))
                 {
+                    crit.SetKillTag(player.abstractCreature);
                     crit.Die();
                     var vel = Custom.RNV() * Random.Range(20, 35);
                     foreach (var chunk in crit.bodyChunks)

@@ -1363,8 +1363,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             if (dieCounter < 0)
             {
-                foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
+                for (int j = room.abstractRoom.creatures.Count - 1; j >= 0; j--)
                 {
+                    var crit = room.abstractRoom.creatures[j].realizedCreature;
                     if (crit == null || crit.dead || critSet.Contains(crit))
                         continue;
                     if (crit.bodyChunks.Any(i => Custom.DistLess(i.pos, pos, 50)))
@@ -1470,8 +1471,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 {
                     var center = pos + Custom.DegToVec(360 / 8f * i + 90) * (BinahKey.Width - BinahKey.Width / 25 * 3 + offset);
                     var rad = BinahKey.Width / 25 * 3;
-                    foreach (var crit in room.abstractRoom.creatures.Select(c => c.realizedCreature))
+                    for (int j = room.abstractRoom.creatures.Count -1 ; j >= 0 ;j--)
                     {
+                        var crit = room.abstractRoom.creatures[j].realizedCreature;
                         if (crit == null || crit.dead || crit.inShortcut)
                             continue;
                         if (crit.bodyChunks.Any(c => Custom.DistLess(c.pos, center, rad)))
@@ -1685,9 +1687,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 //伤害判断
                 var center = pos + dir * (Width - Width / 25 * 3);
                 var rad = Width / 25 * 3;
-                foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
+                for (int j = room.abstractRoom.creatures.Count - 1; j >= 0; j--)
                 {
-                    if(crit == null || crit.dead)
+                    var crit = room.abstractRoom.creatures[j].realizedCreature;
+                    if (crit == null || crit.dead)
                         continue;
                     if(crit.bodyChunks.Any(i => Custom.DistLess(i.pos, center, rad)))
                         crit.Stun(150);
@@ -2192,9 +2195,10 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             if (Math.Abs(counter - (WaitCounter + OutCounter * 0.5f)) < 2)
             {
-                foreach (var crit in room.abstractRoom.creatures.Select(i => i.realizedCreature))
+                for (int j = room.abstractRoom.creatures.Count - 1; j >= 0; j--)
                 {
-                    if(crit== null || crit.dead || crit.inShortcut) continue;
+                    var crit = room.abstractRoom.creatures[j].realizedCreature;
+                    if (crit== null || crit.dead || crit.inShortcut) continue;
 
                     if (crit.bodyChunks.Any(i => Custom.DistLess(i.pos, pos + new Vector2(0, 50), 80)))
                     {
