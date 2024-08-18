@@ -54,6 +54,14 @@ namespace BuiltinBuffs.Positive
             }
         }
 
+        public static float Level
+        {
+            get
+            {
+                return 1f + (StackLayer - 1f) * 0.5f;
+            }
+        }
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<WaterDancerBuff, WaterDancerBuffData, WaterDancerBuffEntry>(WaterDancer);
@@ -89,10 +97,10 @@ namespace BuiltinBuffs.Positive
             {
                 waterdancer.airInLungs = self.airInLungs;
                 waterdancer.subAirInLungs = waterdancer.lastAirInLungs - waterdancer.airInLungs;
-                self.airInLungs = waterdancer.lastAirInLungs - 1f / (1f + 1f * StackLayer) * waterdancer.subAirInLungs;
+                self.airInLungs = waterdancer.lastAirInLungs - 1f / (1f + 1f * Level) * waterdancer.subAirInLungs;
                 if (self.animation == Player.AnimationIndex.SurfaceSwim || self.animation == Player.AnimationIndex.DeepSwim)
                 {
-                    Vector2 addPos = Vector2.Lerp(self.bodyChunks[0].pos - self.bodyChunks[0].lastPos, self.bodyChunks[1].pos - self.bodyChunks[1].lastPos, 0.5f) * (1f * StackLayer);
+                    Vector2 addPos = Vector2.Lerp(self.bodyChunks[0].pos - self.bodyChunks[0].lastPos, self.bodyChunks[1].pos - self.bodyChunks[1].lastPos, 0.5f) * (1f * Level);
                     self.bodyChunks[0].pos += addPos;
                     self.bodyChunks[1].pos += addPos;
                 }
