@@ -9,10 +9,10 @@
 
   "Chinese": {
     "BuffName": "恐水症",
-    "Description": "潜水时，你的闭气时间减半。"
+    "Description": "首次获取此卡牌时，你的闭气时间减半。从第二层开始，每层使你的闭气时间减少25%；另外，从你进入水中，一直到你离开水面后30秒内，每层将使你的速度降低10%。"
   },
   "English": {
     "BuffName": "Hydrophobia",
-    "Description": "Cuts slugcat air capacity in half."
+    "Description": "When you first acquire this card, your air capacity is halved. Starting from the second stack, each stack reduces your air capacity by 25%; In addition, from when you enter the water until 30 seconds after you leave the surface, each stack will reduce your speed by 10%."
   }
 }
