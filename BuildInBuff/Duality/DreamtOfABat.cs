@@ -1,5 +1,7 @@
 using BuiltinBuffs.Positive;
 using HotDogGains.Duality;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -33,11 +35,36 @@ namespace BuildInBuff.Duality
             //防止消失时被判死亡
             On.Player.Die += Player_Die;
 
-            
 
             //改变玩家蝙蝠的颜色
             On.FlyGraphics.ApplyPalette += ButteFly_ApplyPalette;
 
+            //防止溶光消灭玩家的蝙蝠
+            IL.MeltLights.Update += MeltLights_Update;
+        }
+
+        private static void MeltLights_Update(MonoMod.Cil.ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.After,
+                (i) => i.MatchLdarg(0),
+                (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
+                (i) => i.MatchLdfld<Room>("physicalObjects"),
+                (i) => i.MatchLdcI4(0),
+                (i) => i.MatchLdelemRef(),
+                (i) => i.MatchLdloc(1),
+                (i) => i.Match(OpCodes.Callvirt)
+                ))
+            {
+                c.EmitDelegate<Func<PhysicalObject,PhysicalObject>>((obj) =>
+                {
+                    if(obj is Fly fly&&fly.IsButterFly())
+                    {
+                        return null;//如果是梦蝶就传个空值
+                    }
+                    return obj;
+                });
+            }
         }
 
         private static void ButteFly_ApplyPalette(On.FlyGraphics.orig_ApplyPalette orig, FlyGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -78,13 +105,12 @@ namespace BuildInBuff.Duality
             orig.Invoke(self, st);
 
             if (self.dead) return;
-            //if (self.playerState.permanentDamageTracking>0) return;
-
 
             if (self.room != null && self.room.updateList != null)
             {
                 //fp房间内不发动卡牌防止卡死
                 if (self.room.abstractRoom.name.Length>2&&self.room.abstractRoom.name.Substring(self.room.abstractRoom.name.Length-2) == "AI") return;
+                if (self.room.abstractRoom.name == "SB_E05SAINT") return;
 
 
                 //已经
@@ -98,6 +124,7 @@ namespace BuildInBuff.Duality
 
                 //稍微添加一点阈值防止莫名其妙的发动卡牌
                 var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
+                //虚弱状态更难发动变蝙蝠
                 activeLimite*= self.exhausted ? 2 : 1;
                 if (st>activeLimite ) self.room.AddObject(new BatBody(self.abstractCreature));
             }
@@ -126,6 +153,7 @@ namespace BuildInBuff.Duality
             var absFly = new AbstractCreature(room.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly), null, room.GetWorldCoordinate(player.DangerPos), room.world.game.GetNewID());
 
             absFly.TurnButteFLy(absPlayer.realizedCreature.ShortCutColor());
+
             room.abstractRoom.AddEntity(absFly);
             absFly.RealizeInRoom();
 
