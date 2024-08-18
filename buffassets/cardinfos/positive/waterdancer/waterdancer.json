@@ -9,10 +9,10 @@
 
   "Chinese": {
     "BuffName": "水中舞者",
-    "Description": "你的游泳速度和憋气时间增加100%。"
+    "Description": "首次获取此卡牌时，你的游泳速度和憋气时间增加100%。从第二层开始，每层使你的游泳速度和憋气时间增加50%。"
   },
   "English": {
     "BuffName": "Water Dancer",
-    "Description": "Increases your swim speed and air capacity by 100%."
+    "Description": "When you first acquire this card, your swim speed and air capacity increase by 100%. Starting from the second stack, each stack increases your swim speed and air capacity by 50%."
   }
 }

@@ -60,9 +60,10 @@ namespace BuiltinBuffs.Negative
         }
     }
 
-    class HighPingBuffData : BuffData
+    class HighPingBuffData : CountableBuffData
     {
         public override BuffID ID => HighPingIBuffEntry.highPingID;
+        public override int MaxCycleCount => 3;
     }
 
     class HighPingBuff : Buff<HighPingBuff,HighPingBuffData>

@@ -3,11 +3,10 @@
     "BuffID" : "SpearBurster",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
-    "Triggerable" : true,
     "AsPositive":true,
     "Color" : "FF3065",
-    "Tag" : ["BombExplodeModify"],
-    "Conflict":["BombExplodeModify"],
+    "Tag" : ["BombExplodeModify","ScavengerBombVariant"],
+    "Conflict":["BombExplodeModify","ScavengerBombVariant"],
     "Chinese" : {
         "BuffName" : "矛爆雷",
         "Description" : "玩家扔出的炸弹的爆炸不会造成爆炸伤害，而是往周围撒布伤害为0.5的矛破片"

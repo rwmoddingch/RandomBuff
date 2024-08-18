@@ -13,6 +13,7 @@ using Mono.Cecil.Cil;
 using BuiltinBuffs.Duality;
 using BuiltinBuffs.Positive;
 using RandomBuff;
+using RWCustom;
 
 namespace BuiltinBuffs.Negative
 {
@@ -81,10 +82,7 @@ namespace BuiltinBuffs.Negative
 
             if (HydrophobiaFeatures.TryGetValue(self, out hydrophobia))
             {
-                hydrophobia.airInLungs = self.airInLungs;
-                hydrophobia.subAirInLungs = hydrophobia.lastAirInLungs - hydrophobia.airInLungs;
-                //self.airInLungs -= hydrophobia.subAirInLungs;
-                self.airInLungs = hydrophobia.lastAirInLungs - hydrophobia.subAirInLungs * Mathf.Pow(2f, StackLayer);
+                hydrophobia.Update();
             }
         }
     }
@@ -96,10 +94,38 @@ namespace BuiltinBuffs.Negative
         public float airInLungs;
         public float lastAirInLungs;
         public float subAirInLungs;
+        private int fearCount;
 
         public Hydrophobia(Player player)
         {
             ownerRef = new WeakReference<Player>(player);
+        }
+
+        public void Update()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+
+            this.airInLungs = player.airInLungs;
+            this.subAirInLungs = this.lastAirInLungs - this.airInLungs;
+            //player.airInLungs -= this.subAirInLungs;
+            player.airInLungs = this.lastAirInLungs - this.subAirInLungs * (1f + (HydrophobiaBuffEntry.StackLayer - 1f) * 0.5f);
+
+            if (player.animation == Player.AnimationIndex.SurfaceSwim || player.animation == Player.AnimationIndex.DeepSwim)
+            {
+                fearCount = 1200;
+            }
+            if (fearCount > 0)
+            {
+                fearCount--;
+                Vector2 addPos = Vector2.Lerp(player.bodyChunks[0].pos - player.bodyChunks[0].lastPos, player.bodyChunks[1].pos - player.bodyChunks[1].lastPos, 0.5f) *
+                             Mathf.Max(1f - Mathf.Pow(0.9f, HydrophobiaBuffEntry.StackLayer - 1), 0.5f);
+                //效果即将结束时给一个缓冲
+                if (fearCount < 120)
+                    addPos *= (float)fearCount / 120f;
+                player.bodyChunks[0].pos -= addPos;
+                player.bodyChunks[1].pos -= addPos;
+            }
         }
     }
 }

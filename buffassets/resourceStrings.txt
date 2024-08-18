@@ -1,5 +1,5 @@
 //MainMenu
-MainMenu_Buff|BUFF mode
+MainMenu_Buff|BUFF
 MainMenu_Cardpedia|CARDPEDIA
 
 

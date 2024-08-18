@@ -138,6 +138,10 @@ namespace BuildInBuff.Duality
             //光效
             AddEffect(room);
 
+            if ((ModManager.MSC || ModManager.CoopAvailable) && player.slugOnBack != null && player.slugOnBack.slugcat != null)
+            {
+                player.slugOnBack.DropSlug();
+            }
             //让房间自动删除玩家
             player.slatedForDeletetion = true;
 

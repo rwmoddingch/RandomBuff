@@ -436,7 +436,8 @@ namespace BuiltinBuffs.Expeditions
                     case "unl-glow":
                         game.GetStorySession.saveState.theGlow = true;
                         foreach (var ply in game.Players.Select(i => i.realizedCreature as Player))
-                            ply.glowing = true;
+                            if(ply != null)
+                                ply.glowing = true;
                         break;
                 }
 
