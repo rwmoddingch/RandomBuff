@@ -16,10 +16,11 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Negative
 {
-    internal class FakeCreatureBuffData : BuffData
+    internal class FakeCreatureBuffData : CountableBuffData
     {
         public static BuffID FakeCreatureID = new BuffID("FakeCreature", true);
         public override BuffID ID => FakeCreatureID;
+        public override int MaxCycleCount => 10;
 
         [CustomBuffConfigInfo("Distortion Effect", "Screen distortion effect when phantom creatures disappear")]
         [CustomBuffConfigTwoValue(true, false)]
