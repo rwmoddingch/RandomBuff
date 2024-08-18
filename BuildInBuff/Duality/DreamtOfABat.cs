@@ -77,13 +77,14 @@ namespace BuildInBuff.Duality
         {
             orig.Invoke(self, st);
 
-            if (self.dead||self.playerState.permanentDamageTracking>0) return;
+            if (self.dead) return;
+            //if (self.playerState.permanentDamageTracking>0) return;
 
 
             if (self.room != null && self.room.updateList != null)
             {
                 //fp房间内不发动卡牌防止卡死
-                if (self.room.abstractRoom.name == "SS_AI") return;
+                if (self.room.abstractRoom.name.Length>2&&self.room.abstractRoom.name.Substring(self.room.abstractRoom.name.Length-2) == "AI") return;
 
 
                 //已经
@@ -97,7 +98,8 @@ namespace BuildInBuff.Duality
 
                 //稍微添加一点阈值防止莫名其妙的发动卡牌
                 var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
-                if (self.stun >activeLimite ) self.room.AddObject(new BatBody(self.abstractCreature));
+                activeLimite*= self.exhausted ? 2 : 1;
+                if (st>activeLimite ) self.room.AddObject(new BatBody(self.abstractCreature));
             }
 
 
@@ -122,6 +124,7 @@ namespace BuildInBuff.Duality
             //召唤改色蝙蝠
             var room = player.room;
             var absFly = new AbstractCreature(room.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly), null, room.GetWorldCoordinate(player.DangerPos), room.world.game.GetNewID());
+
             absFly.TurnButteFLy(absPlayer.realizedCreature.ShortCutColor());
             room.abstractRoom.AddEntity(absFly);
             absFly.RealizeInRoom();
@@ -142,6 +145,11 @@ namespace BuildInBuff.Duality
             {
                 player.slugOnBack.DropSlug();
             }
+            if (player.spearOnBack != null && player.spearOnBack.spear != null)
+            {
+                player.spearOnBack.DropSpear();
+            }
+
             //让房间自动删除玩家
             player.slatedForDeletetion = true;
 
@@ -230,6 +238,7 @@ namespace BuildInBuff.Duality
                 else
                 {
                     player.stun--;
+                    player.AerobicIncrease(0.1f);
                     //让玩家到蝙蝠位置
                     for (int i = 0; i < player.bodyChunks.Length; i++)
                     {
