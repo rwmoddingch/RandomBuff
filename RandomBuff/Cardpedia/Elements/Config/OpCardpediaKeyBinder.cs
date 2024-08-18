@@ -84,13 +84,12 @@ namespace RandomBuff.Cardpedia.Elements.Config
         public void ExitBindMode()
         {
             bindMode = false;
-
+            label.text = current;
         }
 
         public void SetBindKey(string keyCode)
         {
             current = keyCode;
-            label.text = keyCode.ToString();
             bindConfigurable.Set(keyCode);
         }
         private void BuffInput_OnAnyKeyDown(string keyDown)
@@ -99,7 +98,11 @@ namespace RandomBuff.Cardpedia.Elements.Config
                 return;
             if (keyDown == BuffOptionInterface.Instance.KeyBindKey.Value || keyDown == BuffOptionInterface.Instance.CardSlotKey.Value)
                 return;
-            SetBindKey(keyDown);
+            if(key != KeyCode.Escape)
+            {
+                SetBindKey(keyDown);
+            }
+
             ExitBindMode();
         }
 

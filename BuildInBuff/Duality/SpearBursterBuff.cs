@@ -28,14 +28,6 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
-            On.Creature.Die += Creature_Die;
-        }
-
-        private static void Creature_Die(On.Creature.orig_Die orig, Creature self)
-        {
-            orig.Invoke(self);
-            BuffUtils.Log("SpearBurster", $"{self} killed by {self.killTag}");
-
         }
 
         private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)

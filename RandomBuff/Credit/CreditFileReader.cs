@@ -44,6 +44,8 @@ namespace RandomBuff.Credit
                         data = new PlayTestStageData() { stageType = CreditStageType.PlayTest };
                     else if (creditStageType == CreditStageType.SpecialThanks)
                         data = new SpecialThanksStageData() { stageType = CreditStageType.SpecialThanks };
+                    else if (creditStageType == CreditStageType.Ideas)
+                        data = new IdeasStageData() { stageType = CreditStageType.Ideas };
 
                     creditStagesAndData.Add(new KeyValuePair<CreditStageType, CreditStageData>(creditStageType, data));
                 }
@@ -72,6 +74,10 @@ namespace RandomBuff.Credit
                         BuffPlugin.Log($"new name at specialthanks : {result}");
                         (data as SpecialThanksStageData).entryNames.Last().Add(result);
                         (data as SpecialThanksStageData).entryDetails.Last().Add(string.Empty);
+                    }
+                    else if(type == CreditStageType.Ideas)
+                    {
+                        (data as IdeasStageData).names.Last().Add(result);
                     }
                 }
                 else if(MatchAndReplaceMark(trimedLine, "<Detail>", out result))
@@ -113,11 +119,19 @@ namespace RandomBuff.Credit
                 }
                 else if(MatchAndReplaceMark(trimedLine, "<Entry>", out result))
                 {
-                    var data = creditStagesAndData.Last().Value as SpecialThanksStageData;
-
-                    data.entries.Add(result);
-                    data.entryNames.Add(new List<string>());
-                    data.entryDetails.Add(new List<string>());
+                    var type = creditStagesAndData.Last().Key;
+                    var data = creditStagesAndData.Last().Value;
+                    if (type == CreditStageType.SpecialThanks)
+                    {
+                        (data as SpecialThanksStageData).entries.Add(result);
+                        (data as SpecialThanksStageData).entryNames.Add(new List<string>());
+                        (data as SpecialThanksStageData).entryDetails.Add(new List<string>());
+                    }
+                    else if(type == CreditStageType.Ideas)
+                    {
+                        (data as IdeasStageData).entries.Add(result);
+                        (data as IdeasStageData).names.Add(new List<string>());
+                    }
                 }
             }
             creditStagesAndData.Add(new KeyValuePair<CreditStageType, CreditStageData>(CreditStageType.ThankYou, new CreditStageData() { stageType = CreditStageType.ThankYou }));
@@ -168,6 +182,12 @@ namespace RandomBuff.Credit
             public List<List<string>> entryNames = new List<List<string>>();
             public List<List<string>> entryDetails = new List<List<string>>();
         }
+
+        public sealed class IdeasStageData : CreditStageData
+        {
+            public List<string> entries = new List<string>();
+            public List<List<string>> names = new List<List<string>>();
+        }
     }
 
     public class CreditStageType : ExtEnum<CreditStageType>
@@ -178,6 +198,7 @@ namespace RandomBuff.Credit
         public static readonly CreditStageType Intro = new CreditStageType("Intro", true);
         public static readonly CreditStageType SpecialThanks = new CreditStageType("SpecialThanks", true);
         public static readonly CreditStageType ThankYou = new CreditStageType("ThankYou", true);
+        public static readonly CreditStageType Ideas = new CreditStageType("Ideas", true);
 
         public CreditStageType(string value, bool register = false) : base(value, register)
         {
