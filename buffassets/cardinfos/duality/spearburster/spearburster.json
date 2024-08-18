@@ -14,6 +14,6 @@
     },
     "English": {
         "BuffName" : "Spear Burster",
-        "Description" : "Your slugcat's bombs no longer deal damage, rather exploding into several spears which do 0.5 damage each."
+        "Description" : "Your slugcat's bombs no longer explode on detonation, rather shooting out 3 volleys of low damage spears."
     }
 }
