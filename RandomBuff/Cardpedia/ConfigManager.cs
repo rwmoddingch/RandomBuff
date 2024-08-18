@@ -102,6 +102,12 @@ namespace RandomBuff.Cardpedia.Elements
                 item.Unload();
             activeConfigs.Clear();
 
+            if(card == null)
+            {
+                ResetScrollBoxSize();
+                return;
+            }
+
             Vector2 pos = new Vector2(CardpediaStatics.tinyGap, scrollBox.contentSize - CardpediaStatics.tinyGap);
             Vector2 fullRectScale = new Vector2(CardpediaStatics.narrowBlurSpriteScale.x - CardpediaStatics.tinyGap * 2, 200f);
             foreach(BuffConfigurable configurable in BuffConfigurableManager.GetAllConfigurableForID(card.ID))
@@ -138,7 +144,11 @@ namespace RandomBuff.Cardpedia.Elements
 
         public void ResetScrollBoxSize()
         {
-            float newContentSize = Mathf.Max(-activeConfigs.Last().TargetChainedOffset.y + activeConfigs.Last().setRectSize.y + CardpediaStatics.tinyGap * 2, CardpediaStatics.narrowBlurSpriteScale.y);
+            float newContentSize;
+            if (activeConfigs.Count == 0)
+                newContentSize = 0f;
+            else
+                newContentSize = Mathf.Max(-activeConfigs.Last().TargetChainedOffset.y + activeConfigs.Last().setRectSize.y + CardpediaStatics.tinyGap * 2, CardpediaStatics.narrowBlurSpriteScale.y);
 
             float currentScroll = scrollBox.scrollOffset;
             newContentSize = Mathf.Max(newContentSize, scrollBox.size.y);
@@ -148,10 +158,13 @@ namespace RandomBuff.Cardpedia.Elements
 
             //BuffPlugin.Log($"config box new content size : {newContentSize}");
 
-            activeConfigs.First().SetPos(new Vector2(CardpediaStatics.tinyGap, newContentSize - CardpediaStatics.tinyGap));
-            foreach(var config in activeConfigs)
+            if (activeConfigs.Count > 0)
             {
-                config.defaultPos = new Vector2(CardpediaStatics.tinyGap, newContentSize - CardpediaStatics.tinyGap);
+                activeConfigs.First().SetPos(new Vector2(CardpediaStatics.tinyGap, newContentSize - CardpediaStatics.tinyGap));
+                foreach (var config in activeConfigs)
+                {
+                    config.defaultPos = new Vector2(CardpediaStatics.tinyGap, newContentSize - CardpediaStatics.tinyGap);
+                }
             }
         }
     }

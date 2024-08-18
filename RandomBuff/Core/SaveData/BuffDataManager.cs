@@ -438,24 +438,6 @@ namespace RandomBuff.Core.SaveData
             var split = Regex.Split(file, SettingSplit)
                 .Where(i => !string.IsNullOrEmpty(i)).ToArray();
 
-            // TODO: 正式版删除
-            if (formatVersion < new BuffFormatVersion("a-0.0.5"))
-            {
-                BuffPlugin.LogWarning($"Update FormatVersion from {formatVersion} to {BuffPlugin.saveVersion}");
-                if (split.Length == 0)
-                {
-                    BuffPlugin.LogWarning($"Empty data !");
-                    return false;
-
-                }
-                InitStringBuffData(split[0],formatVersion);
-                if (split.Length <= 1)
-                    BuffPlugin.LogWarning($"Missing Setting data !");
-                else
-                    InitStringSetting(split[1], formatVersion);
-                return true;
-            }
-
         
 
             foreach (var data in split)

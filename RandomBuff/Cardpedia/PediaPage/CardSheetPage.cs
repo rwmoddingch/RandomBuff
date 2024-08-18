@@ -86,6 +86,8 @@ namespace RandomBuff.Cardpedia.PediaPage
             displayingCard = new BuffCard(new BuffID(tex));
             sheetPageContainer.AddChild(displayingCard.Container);
             displayingCard.Position = CardpediaStatics.displayCardTexturePos;
+            displayingCard.ResetComponents();
+            displayingCard.DisplayTitle = true;
             //BuffPlugin.Log($"tex name : {tex.name}, {tex == null}, {tex.texelSize}");
             displayingCard.Scale = 0.8f;
             displayingCard.Alpha = alpha;
