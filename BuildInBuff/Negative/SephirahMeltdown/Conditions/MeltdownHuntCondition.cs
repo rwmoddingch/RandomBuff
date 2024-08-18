@@ -41,7 +41,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
-            if (creature.Template.type == type || creature.Template.TopAncestor().type == type)
+            if (creature.Template.type == type)
             {
                 currentKill++;
                 if (currentKill == killCount)

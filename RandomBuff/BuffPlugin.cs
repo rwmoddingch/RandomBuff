@@ -57,7 +57,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.5";
+        public const string ModVersion = "1.0.6";
 
         public void OnEnable()
         {
@@ -347,27 +347,4 @@ namespace RandomBuff
         }
     }
 
-    /// <summary>
-    /// 用来简化应用钩子的过程（懒得自己写了）
-    /// 继承这个类并且编写一个名为 HooksOn 的公共静态方法即可
-    /// </summary>
-    internal class HooksApplier
-    {
-        internal static void ApplyHooks()
-        {
-            var applierType = typeof(HooksApplier);
-            var types = applierType.Assembly.GetTypes().Where(a => a.BaseType == applierType && a != applierType);
-            foreach (var t in types)
-            {
-                try
-                {
-                    t.GetMethod("HooksOn", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
-                }
-            }
-        }
-    }
 }

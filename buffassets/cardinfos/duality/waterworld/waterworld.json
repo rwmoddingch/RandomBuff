@@ -1,0 +1,18 @@
+{
+  "FaceName": "waterworld",
+  "BuffID": "WaterWorld",
+  "BuffType": "Duality",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "6ABFE5",
+
+  "Chinese": {
+    "BuffName": "水世界",
+    "Description": "除避难所和业力门外，所有房间的下半部分都被水淹没。"
+  },
+  "English": {
+    "BuffName": "Water World",
+    "Description": "Except for shelters and karma gates, the lower half of all rooms were submerged in water."
+  }
+}

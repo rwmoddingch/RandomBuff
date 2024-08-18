@@ -125,6 +125,7 @@ namespace BuiltinBuffs.Duality
             On.Player.Update += Player_Update;
             On.Player.NewRoom += Player_NewRoom;
             On.Player.Die += Player_Die;
+            On.Player.ObjectEaten += Player_ObjectEaten;
 
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
@@ -475,6 +476,14 @@ namespace BuiltinBuffs.Duality
                 }
             }
             orig(self);
+        }
+
+        private static void Player_ObjectEaten(On.Player.orig_ObjectEaten orig, Player self, IPlayerEdible edible)
+        {
+            if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
+                jellyfishCat.ObjectEaten(edible);
+
+            orig(self, edible);
         }
         #region 外观
         private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -1736,10 +1745,24 @@ namespace BuiltinBuffs.Duality
             this.TryToAttack = false;
         }
 
+        public void ObjectEaten(IPlayerEdible edible)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (edible is SwollenWaterNut && !this.hasContactWater)
+            {
+                this.hasContactWater = true;
+                this.dehydrationCycle = 0;
+                BuffUtils.Log("JellyfishShapedMutation", "JellyfishCat has contact with water by WaterNut!");
+            }
+
+        }
+
         public void DehydrationUpdate()
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
+            
             if (player.Submersion > 0.1f && !this.hasContactWater)
             {
                 this.hasContactWater = true;
@@ -2214,7 +2237,7 @@ namespace BuiltinBuffs.Duality
                 player.room.AddObject(myLight);
                 myLight.colorFromEnvironment = false;
                 myLight.flat = true;
-                myLight.noGameplayImpact = true;
+                myLight.noGameplayImpact = false;//true;
                 myLight.stayAlive = true;
                 myLight.requireUpKeep = true;
             }

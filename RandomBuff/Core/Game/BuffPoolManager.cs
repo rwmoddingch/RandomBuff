@@ -250,12 +250,14 @@ namespace RandomBuff.Core.Game
             if (game.GamePaused)
                 return;
 
-            if(!lastbuttonPressed && Input.GetKey(KeyCode.P) && BuffPlugin.DevEnabled)
+            if(!lastbuttonPressed && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A) && BuffPlugin.DevEnabled)
             {
                 game.Win(false);
             }
-            lastbuttonPressed = Input.GetKey(KeyCode.P);
-            
+
+            lastbuttonPressed = Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A);
+
+
 
             foreach (var buff in buffList)
             {
@@ -371,7 +373,7 @@ namespace RandomBuff.Core.Game
 
             BuffFile.Instance.SaveFile();
 
-            if (GameSetting.Win || (Input.GetKey(KeyCode.P) && BuffPlugin.DevEnabled))
+            if (GameSetting.Win || (Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A) && BuffPlugin.DevEnabled))
             {
                 CreateWinGamePackage();
                 

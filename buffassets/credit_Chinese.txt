@@ -166,6 +166,8 @@
 	<Entry>英语本地化协助
 		<Name>Sumy
 		<Detail> meow
+		<Name>MaddestOfLads
+		<Detail> 
 	<Entry><NextPage>
 	<Entry>buff设计灵感
 		<Name> 非常感谢各位积极提供灵感

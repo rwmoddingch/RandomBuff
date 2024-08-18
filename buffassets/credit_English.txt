@@ -160,6 +160,8 @@
 	<Entry>English localization assistance
 		<Name>Sumy
 		<Detail> meow
+		<Name>MaddestOfLads
+		<Detail> 
 	<Entry>Font use
 		<Name>峰广明锐体
 		<Name>NotoSans Hans

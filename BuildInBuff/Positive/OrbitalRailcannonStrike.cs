@@ -479,7 +479,7 @@ namespace BuiltinBuffs.Positive
             var deg = Custom.VecToDeg(-dir);
         
             room.AddObject(new Explosion.ExplosionLight(pos, 450, 1, 20, Color.white));
-            room.AddObject(new Explosion(room, sourceObject, pos, 40,300, 6.2f, 5f, 400f, 0.25f, sourceObject.thrownBy, 
+            room.AddObject(new Explosion(room, sourceObject, pos, 40,400, 6.2f, 70F, 400f, 0.25f, sourceObject.thrownBy, 
                 1.4f, 160f, 1f));
             room.AddObject(new ShockWave(pos, 450, 0.5f, 8, true));
 

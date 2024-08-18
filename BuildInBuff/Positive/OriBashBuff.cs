@@ -342,6 +342,7 @@ namespace BuiltinBuffs.Positive
                 {
                     isBash = false;
                     OriBashBuffEntry.UpdateSpeed = 1000;
+                    bashTarget = null;
                 }
             }
 
