@@ -33,7 +33,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             {
                 currentCount++;
                 if (currentCount >= huntCount && !Finished)
+                {
+                    onLabelRefresh?.Invoke(this);
                     Finished = true;
+                }
                 else
                     onLabelRefresh?.Invoke(this);
             }
