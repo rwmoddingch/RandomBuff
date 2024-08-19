@@ -29,7 +29,11 @@ namespace BuildInBuff.Negative
 
             //让蝙蝠不会被矛和石头致死
             IL.Weapon.HitSomethingWithoutStopping += Weapon_HitSomethingWithoutStopping;
+
+            //防止矛大师吃到蝙蝠
+            IL.Spear.HitSomethingWithoutStopping += Spear_HitSomethingWithoutStopping;
         }
+
 
         public static void DeflectionWeapon(PhysicalObject weapon, PhysicalObject fly)
         {
@@ -103,7 +107,7 @@ namespace BuildInBuff.Negative
                 {
                     if (creature is Fly)
                     {
-                        DeflectionWeapon(weapon,creature);
+                        DeflectionWeapon(weapon, creature);
                         return null;
                     }
                     return weapon;
@@ -127,5 +131,21 @@ namespace BuildInBuff.Negative
             }
         }
 
+        private static void Spear_HitSomethingWithoutStopping(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.Before,
+                (i) => i.MatchIsinst("Fly"),
+                (i) => i.Match(OpCodes.Brfalse)
+                ))
+            {
+                c.EmitDelegate<Func<PhysicalObject, PhysicalObject>>((creature) =>
+                {
+                    if (creature is Fly)return null;
+                    return creature;
+                });
+            }
+
+        }
     }
 }
