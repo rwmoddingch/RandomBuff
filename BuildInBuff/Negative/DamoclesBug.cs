@@ -78,12 +78,13 @@ namespace BuiltinBuffs.Negative
         {
             if (!ownerRef.TryGetTarget(out var player) || player.room == null)
                 return;
-            if (UnityEngine.Random.value * 40 * 30 * 10 > 1)
+            if (UnityEngine.Random.value * 40 * 30 * 10 > 1)//Input.GetKeyDown(KeyCode.C)
             {
                 Vector2 corner = Custom.RectCollision(player.DangerPos, player.DangerPos + 100000f * Vector2.up, player.room.RoomRect).GetCorner(FloatRect.CornerLabel.D);
                 IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(player.room, player.DangerPos, corner);
                 if (intVector != null)
                 {
+                    DamoclesBugBuff.Instance.TriggerSelf(true);
                     corner = Custom.RectCollision(corner, player.DangerPos, player.room.TileRect(intVector.Value)).GetCorner(FloatRect.CornerLabel.D);
                     AbstractCreature absDropBug = new AbstractCreature(player.abstractCreature.world,
                                                                     StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.DropBug), null,
@@ -95,10 +96,11 @@ namespace BuiltinBuffs.Negative
                     {
                         body.HardSetPosition(corner);
                     }
-                    dropBug.AI.behavior = DropBugAI.Behavior.SitInCeiling;
-                    for(int i = 0; i < 100; i++)
+                    for(int i = 0; i < 80; i++)
                     {
+                        dropBug.AI.behavior = DropBugAI.Behavior.SitInCeiling;
                         dropBug.AI.ceilingModule.SitUpdate();
+                        dropBug.graphicsModule.Update();
                         dropBug.AI.ceilingModule.dropDelay = 0f;
                     }
                 }
