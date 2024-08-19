@@ -493,9 +493,10 @@ namespace BuiltinBuffs.Duality
             isFlying = true;
             wantPos = self.bodyChunks[0].pos;
 
-            for (int i = 0; i < this.wings.GetLength(0); i++)
-                for (int j = 0; j < this.wings.GetLength(1); j++)
-                    this.wings[i, j].SwitchMode(VultureCatTentacle.Mode.Fly);
+            if (this.wings != null)
+                for (int i = 0; i < this.wings.GetLength(0); i++)
+                    for (int j = 0; j < this.wings.GetLength(1); j++)
+                        this.wings[i, j].SwitchMode(VultureCatTentacle.Mode.Fly);
         }
 
         public bool CanSustainFlight(Player self)
@@ -1334,7 +1335,7 @@ namespace BuiltinBuffs.Duality
         //飞行速度
         private void FlightUpdate(Player player)
         {
-            if (player.room == null) 
+            if (player.room == null)
                 return;
             float massSpeedFac = 1f;
             if (player.aerobicLevel >= 0.5f && MassFacCondition)
@@ -1353,7 +1354,7 @@ namespace BuiltinBuffs.Duality
             {
                 player.bodyChunks[0].vel.x *= 0.8f;
                 player.bodyChunks[1].vel.x *= 0.8f;
-                if(Mathf.Abs(player.bodyChunks[0].vel.x) < 1f)
+                if (Mathf.Abs(player.bodyChunks[0].vel.x) < 1f)
                 {
                     wantPosIsSetX = true;
                     wantPos.x = player.bodyChunks[0].pos.x;
@@ -1418,9 +1419,10 @@ namespace BuiltinBuffs.Duality
                 this.wingFlapAmplitude = Mathf.Clamp(this.wingFlapAmplitude + 0.0125f, 0f, 0.5f);
             }
             float num2 = 0f;
-            for (int i = 0; i < this.wings.GetLength(0); i++)
-                for (int j = 0; j < this.wings.GetLength(1); j++)
-                    num2 += this.wings[i, j].Support() * (this.IsMiros ? 0.75f : 0.5f);
+            if (this.wings != null)
+                for (int i = 0; i < this.wings.GetLength(0); i++)
+                    for (int j = 0; j < this.wings.GetLength(1); j++)
+                        num2 += this.wings[i, j].Support() * (this.IsMiros ? 0.75f : 0.5f);
             num2 = Mathf.Pow(num2, 0.5f);
             num2 = Mathf.Max(num2, 0.1f);
             this.hoverStill = false;
