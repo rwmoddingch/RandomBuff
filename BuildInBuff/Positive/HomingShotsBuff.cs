@@ -94,6 +94,7 @@ namespace BuiltinBuffs.Positive
                                             {
                                                 target = self.room.abstractRoom.creatures[k].realizedCreature;
                                                 minDist = Custom.Dist(weapon.firstChunk.pos, self.room.abstractRoom.creatures[k].realizedCreature.mainBodyChunk.pos);
+                                                minDist = minDist / self.room.abstractRoom.creatures[k].realizedCreature.TotalMass;//会考虑生物体型来索敌
                                             }
                                         }
                                     }
