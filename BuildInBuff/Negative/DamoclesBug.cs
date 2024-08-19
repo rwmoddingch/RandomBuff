@@ -78,7 +78,7 @@ namespace BuiltinBuffs.Negative
         {
             if (!ownerRef.TryGetTarget(out var player) || player.room == null)
                 return;
-            if (UnityEngine.Random.value * 40 * 30 * 10 < 1 || Input.GetKeyDown(KeyCode.C))// || Input.GetKeyDown(KeyCode.C)
+            if (UnityEngine.Random.value * 40 * 30 * 10 < 1)// || Input.GetKeyDown(KeyCode.C)
             {
                 Vector2 corner = Custom.RectCollision(player.DangerPos, player.DangerPos + 100000f * Vector2.up, player.room.RoomRect).GetCorner(FloatRect.CornerLabel.D);
                 IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(player.room, player.DangerPos, corner);
