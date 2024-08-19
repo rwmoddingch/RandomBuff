@@ -12,11 +12,11 @@ namespace RandomBuff.Render.UI
 {
     internal class SingleTextCard
     {
-        FTexture _ftexture;
+        FSprite _ftexture;
         public FContainer Container { get; private set; }
         public RenderTexture RenderTexture { get => _cardRenderer.cardCameraController.targetTexture; }
 
-        public FTexture CardTexture
+        public FSprite CardTexture
         {
             get
             {

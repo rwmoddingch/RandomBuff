@@ -1,0 +1,23 @@
+{
+    "FaceName": "IronFly",
+    "ID": "IronFlyID",
+    "BuffType": "Negative",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#1b202a",
+
+    "MultiLayerFace":true,
+    "FaceLayer":6,
+    "MaxFaceDepth":0.8,
+    "FaceBackgroundColor": "939197",
+    
+    "Chinese":{
+        "BuffName":"钢铁蝙蝠",
+        "Description":"蝙蝠的身体变的像钢铁一样坚固"
+    },
+    "English" : {
+        "BuffName" : "Iron Bat",
+        "Description" : "The bat's body can become as tough as steel, capable of even deflecting certain weapons"
+    }
+}

@@ -216,6 +216,22 @@ namespace RandomBuff.Credit
                 }
                 inStageEnterTime += 8f;
             }
+            else if(creditStageType == CreditStageType.Ideas)
+            {
+                var data = stageData as CreditFileReader.IdeasStageData;
+                for(int i = 0;i < data.names.Count; i++)
+                {
+                    inStageEnterTime += 1f;
+                    stage.AddObjectToStage(new ScrollNameLabel(this, stage, inStageEnterTime, 8f, data.entries[i], true));
+                    inStageEnterTime += 0.5f;
+                    foreach(var name in data.names[i])
+                    {
+                        stage.AddObjectToStage(new ScrollNameLabel(this, stage, inStageEnterTime, 8f, name, false));
+                        inStageEnterTime += 0.5f;
+                    }
+                }
+                inStageEnterTime += 8f;
+            }
             else if(creditStageType == CreditStageType.Intro)
             {
                 stage.AddObjectToStage(new FlagHolder(this, stage, 0f, 10f));

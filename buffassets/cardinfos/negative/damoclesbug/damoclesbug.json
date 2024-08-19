@@ -1,0 +1,17 @@
+{
+  "FaceName": "DamoclesBug",
+  "BuffID": "DamoclesBug",
+  "BuffType": "Negative",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Color": "AB2323",
+
+  "Chinese": {
+    "BuffName": "达摩克里斯之虫",
+    "Description": "当你头顶有障碍物时，每一帧都有极小概率生成一只潜伏中的落网虫。"
+  },
+  "English": {
+    "BuffName": "The Bug of Damocles",
+    "Description": "When there is an obstacle above your head, there is a very low probability of generating a lurking Dropwig in each frame."
+  }
+}

@@ -54,6 +54,11 @@ namespace RandomBuff.Core.Buff
         //帮助方法
         internal Texture GetFaceTexture()
         {
+            if (!Futile.atlasManager.DoesContainAtlas(FaceName))
+            {
+                BuffPlugin.LogWarning($"Can;t Get face for {BuffID} {FaceName}");
+                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFaceTexture).texture;
+            }
             var atlas = Futile.atlasManager.GetAtlasWithName(FaceName);
             //BuffPlugin.LogError($"Get face for {BuffID} {FaceName}");
             if (!atlas.isSingleImage)

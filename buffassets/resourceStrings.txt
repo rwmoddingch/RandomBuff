@@ -52,10 +52,10 @@ Notification_TooManyMods_Title|Mod amount warning:
 Notification_TooManyMods_Info|It seems you have enabled too many mods, be aware that this may cause more exception or crash.<LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
 
 //BuffMenu:
-Survival|SURVIVAL MODE
-Normal|NORMAL MODE
-Quick|QUICK MODE
-Sandbox|SANDBOX MODE
+Survival|SURVIVAL
+Normal|NORMAL
+Quick|QUICK
+Sandbox|SANDBOX
 ProgressionMenu_Show|PROGRESSION
 
 

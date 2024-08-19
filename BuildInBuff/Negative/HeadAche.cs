@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.CompilerServices;
+using BuiltinBuffs.Negative;
 using MonoMod;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuffUtils;
 using TemplateGains;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -65,8 +67,11 @@ namespace HotDogGains.Negative
         public void AcheUpdate()
         {
             stunCount--;
-            if (stunCount < 10 * 40) player.AerobicIncrease(2f);
-            if (stunCount < 3 * 40) player.slowMovementStun=3;
+            if (stunCount == 5f*40f) BuffPostEffectManager.AddEffect(new DisplacementEffect(0, 5, 1, 5f, 3, 0.04f)); ;
+
+            //if (stunCount < 10 * 40) player.AerobicIncrease(0.2f);
+            if (stunCount < 5 * 40) player.Blink(20);
+            if (stunCount < 3 * 40) player.slowMovementStun=1;
             if (stunCount <= 0) AcheStun();
         }
 

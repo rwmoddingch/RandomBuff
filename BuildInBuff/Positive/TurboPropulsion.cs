@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
 using System.Drawing;
+using HotDogGains.Positive;
 
 namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
 {
@@ -63,7 +64,33 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
             //原版更新方法
             orig.Invoke(self, eu);
 
-            if (self.room == null || self.inShortcut) return;
+            //没尾巴就直接删粒子再Return跳过之后的步骤
+            if (!self.GetExPlayerData().HaveTail || self.inShortcut || self.room == null || self.graphicsModule == null)
+            {
+                if (emitter != null)
+                {
+                    emitter.Die();
+                }
+                return;
+            }
+
+            if (CatNeuroBuffEntry.CatNeuroID.GetBuffData() != null)
+            {
+                if (emitter != null)
+                {
+                    emitter.Die();
+                }
+                return;
+            }
+
+            if (GeckoStrategyBuffEntry.geckoModule.TryGetValue(self, out var module) && !(module.escapeCount >= 0 && !self.playerState.permaDead))
+            {
+                if (emitter != null)
+                {
+                    emitter.Die();
+                }
+                return;
+            }
 
             //如果玩家意识清醒 且在水下或无重力 那么“允许推进”
             bool canPropel = self.Consious && (self.submerged || self.bodyMode == Player.BodyModeIndex.ZeroG);
@@ -269,39 +296,31 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
 
             //尾巴转转（！）部分参考自TailCopter
             var tailBody = self.bodyChunks[1];
-            if ((self.graphicsModule) is PlayerGraphics graphics)
+            var allTail = ((self.graphicsModule) as PlayerGraphics).tail;
+            if (self.slugcatStats.name != new SlugcatStats.Name("TheTraveler"))
             {
-                var allTail = graphics.tail;
-                if (self.slugcatStats.name != new SlugcatStats.Name("TheTraveler"))
+                if (isPropelling && propulsionLevel > 0)
                 {
-                    if (isPropelling && propulsionLevel > 0)
-                    {
-                        var y = Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos);
-                        var x = Custom.PerpendicularVector(y);
-                        //似乎是幅度...?
-                        float size = 20;
-                        var rotatePos = tailBody.pos + y * 30; //中轴的位置
-                        rotatePos += ((float)Math.Sin(tailT * propulsionLevel * 0.01f)) * x * size;
+                    var y = Custom.DirVec(self.bodyChunks[0].pos, self.bodyChunks[1].pos);
+                    var x = Custom.PerpendicularVector(y);
+                    //似乎是幅度...?
+                    float size = 20;
+                    var rotatePos = tailBody.pos + y * 30;//中轴的位置
+                    rotatePos += ((float)Math.Sin(tailT * propulsionLevel * 0.01f)) * x * size;
 
-                        for (int i = 2; i < allTail.Length; i++)
-                        {
-                            float magnification = (i + 1) / allTail.Length;
-                            allTail[i].vel += Custom.DirVec(allTail[i].pos, rotatePos) *
-                                              Custom.LerpMap(Vector2.Distance(allTail[i].pos, rotatePos), 1, 100, 1,
-                                                  100 * magnification);
-                        }
-
-                        //音效暂时弃用
-                        //self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
-                        tailT += 1;
-                    }
-                    else
+                    for (int i = 2; i < allTail.Length; i++)
                     {
-                        tailT = 0;
+                        float magnification = (i + 1) / allTail.Length;
+                        allTail[i].vel += Custom.DirVec(allTail[i].pos, rotatePos) * Custom.LerpMap(Vector2.Distance(allTail[i].pos, rotatePos), 1, 100, 1, 100 * magnification);
                     }
+                    //音效暂时弃用
+                    //self.room.PlaySound(SoundID.Bat_Idle_Flying_Sounds, self.bodyChunks[1]);
+                    tailT += 1;
                 }
+                else
+                { tailT = 0; }
             }
-
+            
         }
         public void OnEnable()
         {

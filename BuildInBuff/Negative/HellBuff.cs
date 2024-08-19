@@ -23,11 +23,14 @@ namespace BuiltinBuffs.Negative
             On.AbstractCreature.Update += AbstractCreature_Update;
         }
 
+
         private static void RoomCamera_DrawUpdate(On.RoomCamera.orig_DrawUpdate orig, RoomCamera self, float timeStacker, float timeSpeed)
         {
             orig(self,timeStacker, timeSpeed);
-            Shader.DisableKeyword("SNOW_ON");
-            Shader.EnableKeyword("HR");
+            if(Shader.IsKeywordEnabled("SNOW_ON"))
+                Shader.DisableKeyword("SNOW_ON");
+            if (!Shader.IsKeywordEnabled("HR"))
+                Shader.EnableKeyword("HR");
 
         }
 
@@ -72,7 +75,7 @@ namespace BuiltinBuffs.Negative
             {
                 game.cameras[0].ChangeBothPalettes(31, 75, 0.75f);
                 game.cameras[0].ApplyEffectColorsToAllPaletteTextures(15, 13);
-                if(game.cameras[0]?.room.waterObject != null)
+                if(game.cameras[0]?.room.waterObject != null && !game.cameras[0].room.abstractRoom.shelter)
                     game.cameras[0].room.waterObject.WaterIsLethal = true;
                 Shader.EnableKeyword("HR");
                 isInit = true;

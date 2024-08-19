@@ -24,6 +24,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using static MonoMod.InlineRT.MonoModRule;
 using JollyCoop;
+using RandomBuff.Core.SaveData;
 
 namespace BuiltinBuffs.Duality
 {
@@ -72,6 +73,7 @@ namespace BuiltinBuffs.Duality
             }
         }
 
+        /*
         public override bool Trigger(RainWorldGame game)
         {
             foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
@@ -80,10 +82,11 @@ namespace BuiltinBuffs.Duality
                 if (JellyfishShapedMutationBuffEntry.JellyfishCatFeatures.TryGetValue(player, out var jellyfishCat))
                 {
                     jellyfishCat.TryToAttack = true;
+                    jellyfishCat.PressTime = 100;
                 }
             }
             return false;
-        }
+        }*/
     }
 
     internal class JellyfishShapedMutationBuffData : BuffData
@@ -108,6 +111,8 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
+            IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+
             On.SaveState.SessionEnded += SaveState_SessionEnded;
             On.ShelterDoor.DoorClosed += ShelterDoor_DoorClosed;
             On.RainWorldGame.Win += RainWorldGame_Win;
@@ -125,6 +130,7 @@ namespace BuiltinBuffs.Duality
             On.Player.Update += Player_Update;
             On.Player.NewRoom += Player_NewRoom;
             On.Player.Die += Player_Die;
+            On.Player.ObjectEaten += Player_ObjectEaten;
 
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
@@ -429,7 +435,7 @@ namespace BuiltinBuffs.Duality
                     self.bodyChunks[1].pos -= addPos;
                 }
 
-                if (self.grabbedBy.Count > 0 && jellyfishCat.TryToAttack)
+                if (self.grabbedBy.Count > 0)
                 {
                     for (int i = 0; i < self.grabbedBy.Count; i++)
                     {
@@ -438,15 +444,6 @@ namespace BuiltinBuffs.Duality
                         {
                             if (jellyfishCat.TryElectricAttack(grabber))
                             {
-                                for (int j = 0; j < grabber.grasps.Length; j++)
-                                {
-                                    if (grabber.grasps[j] != null &&
-                                        grabber.grasps[j].grabbed != null &&
-                                        grabber.grasps[j].grabbed == self)
-                                    {
-                                        grabber.ReleaseGrasp(j);
-                                    }
-                                }
                                 jellyfishCat.ElectricAttack(grabber);
                                 break;
                             }
@@ -476,6 +473,37 @@ namespace BuiltinBuffs.Duality
             }
             orig(self);
         }
+
+        private static void Player_ObjectEaten(On.Player.orig_ObjectEaten orig, Player self, IPlayerEdible edible)
+        {
+            if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
+                jellyfishCat.ObjectEaten(edible);
+
+            orig(self, edible);
+        }
+
+        #region 时缓
+        private static void RainWorldGame_RawUpdate(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
+                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
+            {
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Action<RainWorldGame>>(game =>
+                {
+                    if (UpdateSpeed < game.framesPerSecond)
+                        game.framesPerSecond = UpdateSpeed;
+                });
+            }
+            else
+                BuffUtils.LogError(JellyfishShapedMutation, "IL HOOK FAILED");
+        }
+
+        public static int UpdateSpeed = 1000;
+
+        public static int OldUpdateSpeed = 1000;
+        #endregion
         #region 外观
         private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
@@ -606,29 +634,13 @@ namespace BuiltinBuffs.Duality
         private int electricCounter;
         private int electricChargingTime;
 
-        private int pressPckpTime;
+        public bool ImmuneShock { get; set; }
 
-        public bool ImmuneShock
-        {
+        public bool TryToAttack 
+        { 
             get
             {
-                return immuneShock;
-            }
-            set
-            {
-                immuneShock = value;
-            }
-        }
-
-        public bool TryToAttack
-        {
-            get
-            {
-                return this.tryToAttack;
-            }
-            set
-            {
-                this.tryToAttack = value;
+                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation));
             }
         }
 
@@ -670,7 +682,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return pressPckpTime >= 10;
+                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation));
             }
         }
         #endregion
@@ -1733,13 +1745,26 @@ namespace BuiltinBuffs.Duality
             }
             LightUpdate();
             MoveTentacleToAttack();
-            this.TryToAttack = false;
+        }
+
+        public void ObjectEaten(IPlayerEdible edible)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (edible is SwollenWaterNut && !this.hasContactWater)
+            {
+                this.hasContactWater = true;
+                this.dehydrationCycle = 0;
+                BuffUtils.Log("JellyfishShapedMutation", "JellyfishCat has contact with water by WaterNut!");
+            }
+
         }
 
         public void DehydrationUpdate()
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
+            
             if (player.Submersion > 0.1f && !this.hasContactWater)
             {
                 this.hasContactWater = true;
@@ -1800,7 +1825,7 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var self) || creature is BigEel || creature is Player)
                 return false;
 
-            if (this.Electric && self.FoodInStomach >= 1)
+            if (this.TryToAttack && this.Electric && self.FoodInStomach >= 1)
             {
                 return true;
             }
@@ -1810,16 +1835,45 @@ namespace BuiltinBuffs.Duality
 
         public void ElectricAttack(Creature creature)
         {
-            if (!ownerRef.TryGetTarget(out var self) || creature is BigEel || creature is Player)
+            if (!ownerRef.TryGetTarget(out var player) || creature is BigEel || creature is Player)
                 return;
-            self.SubtractFood(1);
-            creature.Violence(self.firstChunk,
-                             new Vector2?(Custom.DirVec(self.firstChunk.pos, creature.firstChunk.pos) * 5f),
-                             creature.firstChunk, null, Creature.DamageType.Electric, 0.05f + 0.05f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel,
-                             (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));//(creature is Player) ? 140f : (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));
-            self.room.AddObject(new CreatureSpasmer(creature, false, creature.stun));
-            self.room.AddObject(new Explosion.ExplosionLight(self.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
-            self.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, self.firstChunk.pos);
+
+            for (int j = 0; j < creature.grasps.Length; j++)
+            {
+                if (creature.grasps[j] != null &&
+                    creature.grasps[j].grabbed != null &&
+                    creature.grasps[j].grabbed == player)
+                {
+                    creature.ReleaseGrasp(j);
+                }
+            }
+
+            player.SubtractFood(1);
+            float damage = 0.05f + 0.05f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel;
+            float stun = 320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f);
+            if (player.Submersion > 0.5f)
+                player.room.AddObject(new SimpleRangeDamage(player.room, Creature.DamageType.Electric, player.firstChunk.pos, 80f, damage, stun, player, 0.5f));
+            else
+                creature.Violence(player.firstChunk,
+                                new Vector2?(Custom.DirVec(player.firstChunk.pos, creature.firstChunk.pos) * 5f),
+                                creature.firstChunk, null, Creature.DamageType.Electric, damage, stun);//(creature is Player) ? 140f : (320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f)));
+            player.room.AddObject(new CreatureSpasmer(creature, false, creature.stun));
+            player.room.AddObject(new Explosion.ExplosionLight(creature.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
+            player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, creature.firstChunk.pos);
+            this.electricCounter = this.electricChargingTime;
+        }
+
+        public void ElectricAttackInWater()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+
+            player.SubtractFood(1);
+            float rad = 80f + 40f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel;
+            float damage = 1f + 0.5f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel;
+            player.room.AddObject(new UnderwaterShock(player.room, player, player.mainBodyChunk.pos, 14, rad, damage, player, new Color(0.7f, 0.7f, 1f)));
+            player.room.AddObject(new Explosion.ExplosionLight(player.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
+            player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, player.firstChunk.pos);
             this.electricCounter = this.electricChargingTime;
         }
 
@@ -1828,20 +1882,41 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player))
                 return;
 
-            if (player.input[0].pckp)
-                pressPckpTime++;
+            //时缓
+            if (WantToMoveTentacle && JellyfishShapedMutationBuffEntry.UpdateSpeed != 10 && player.room.game.framesPerSecond != 10)
+            {
+                JellyfishShapedMutationBuffEntry.OldUpdateSpeed = player.room.game.framesPerSecond;
+                JellyfishShapedMutationBuffEntry.UpdateSpeed = 10;
+            }
             else
-                pressPckpTime = 0;
-            /*身体几乎不再移动
+            {
+                JellyfishShapedMutationBuffEntry.UpdateSpeed = JellyfishShapedMutationBuffEntry.OldUpdateSpeed;
+            }
+
+            //身体几乎不再移动
             if (WantToMoveTentacle)
             {
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
-                    player.bodyChunks[i].vel *= 0.2f;
+                    //player.bodyChunks[i].pos = player.bodyChunks[i].lastPos;
+                    player.bodyChunks[i].vel *= 0.05f;
                 }
-            }*/
+                if (player.bodyMode == Player.BodyModeIndex.Stand)
+                    player.bodyMode = Player.BodyModeIndex.Default;
+                else if (player.bodyMode == Player.BodyModeIndex.Swimming)
+                    player.bodyMode = Player.BodyModeIndex.Default;
+            }
+
+            //水下直接以自身为中心放电
+            if (player.Submersion > 0.5f && this.TryToAttack && this.Electric && player.FoodInStomach >= 1)
+                ElectricAttackInWater();
 
             anyTentaclePulled = false;
+            TentaclesUpdate(player);
+        }
+
+        public void TentaclesUpdate(Player player)
+        {
             for (int i = 0; i < tentacles.GetLength(0); i++)
             {
                 for (int j = 0; j < tentacles.GetLength(1); j++)
@@ -1918,7 +1993,7 @@ namespace BuiltinBuffs.Duality
                     }
                     if (latchOnToBodyChunks[i, j] != null && latchOnToBodyChunks[i, j].owner is Creature && (latchOnToBodyChunks[i, j].owner as Creature).enteringShortCut.HasValue)
                     {
-                        BuffUtils.Log("JellyfishShapedMutation",$"JellyCat released door traveling object {latchOnToBodyChunks[i, j].owner}");
+                        BuffUtils.Log("JellyfishShapedMutation", $"JellyCat released door traveling object {latchOnToBodyChunks[i, j].owner}");
                         latchOnToBodyChunks[i, j] = null;
                     }
                     if (latchOnToBodyChunks[i, j] != null)
@@ -1931,7 +2006,7 @@ namespace BuiltinBuffs.Duality
                         if (!player.dead && WantToMoveTentacle &&//player.room.PointSubmerged(tentacles[i, j][tentacles[i, j].GetLength(0) - 1, 0]) && 
                             !flag3 && !player.Stunned && !consumedCreatures.Contains(latchOnToBodyChunks[i, j].owner as Creature))
                         {
-                            if (this.TryToAttack && this.TryElectricAttack(latchOnToBodyChunks[i, j].owner as Creature))
+                            if (this.TryElectricAttack(latchOnToBodyChunks[i, j].owner as Creature))
                             {
                                 ElectricAttack(latchOnToBodyChunks[i, j].owner as Creature);
                             }
@@ -2015,7 +2090,7 @@ namespace BuiltinBuffs.Duality
                             {
                                 if (Custom.DistLess(player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12].pos,
                                     tentacleTipPos,
-                                    player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12].rad * 1.15f))
+                                    player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12].rad * 1.15f + 5f))
                                 {
                                     latchOnToBodyChunks[i, j] = player.room.abstractRoom.creatures[num11].realizedCreature.bodyChunks[num12];
                                     //player.roomPlaySound((!(player.roomabstractplayer.roomcreatures[num11].realizedCreature is Player)) ? SoundID.Jelly_Fish_Tentacle_Latch_On_NPC : SoundID.Jelly_Fish_Tentacle_Latch_On_Player, tentacleTipPos);
@@ -2214,7 +2289,7 @@ namespace BuiltinBuffs.Duality
                 player.room.AddObject(myLight);
                 myLight.colorFromEnvironment = false;
                 myLight.flat = true;
-                myLight.noGameplayImpact = true;
+                myLight.noGameplayImpact = false;//true;
                 myLight.stayAlive = true;
                 myLight.requireUpKeep = true;
             }

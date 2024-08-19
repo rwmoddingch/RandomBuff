@@ -131,6 +131,23 @@ namespace RandomBuff.Core.Hooks
                 });
             On.RainWorld.PostModsInit += RainWorld_PostModsInit;
 
+            On.ScavengerBomb.Update += ScavengerBomb_Update;
+            On.ScavengerBomb.Explode += ScavengerBomb_Explode;
+
+        }
+
+        private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
+        {
+            if (self.smoke?.slatedForDeletetion ?? false)
+                self.smoke = null;
+            orig(self,hitChunk);
+        }
+
+        private static void ScavengerBomb_Update(On.ScavengerBomb.orig_Update orig, ScavengerBomb self, bool eu)
+        {
+            orig(self, eu);
+            if (self.smoke?.slatedForDeletetion ?? false)
+                self.smoke = null;
         }
 
         private static void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)

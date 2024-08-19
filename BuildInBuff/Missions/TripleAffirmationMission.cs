@@ -258,7 +258,9 @@ namespace BuiltinBuffs.Missions
         {
             if (self.roomSettings.DangerType == RoomRain.DangerType.AerieBlizzard ||
                 self.roomSettings.DangerType == MoreSlugcatsEnums.RoomRainDangerType.Blizzard)
-                self.roomSettings.DangerType = self.water ? RoomRain.DangerType.Flood : RoomRain.DangerType.Flood;
+                self.roomSettings.DangerType = RoomRain.DangerType.Flood;
+            if (self.world.rainCycle.CycleProgression >= 0.99f)
+                self.water = true;
 
             self.roomSettings.effects.RemoveAll(i => i.type == RoomSettings.RoomEffect.Type.HeatWave
                                                      || i.type == RoomSettings.RoomEffect.Type.FireFlies
@@ -277,45 +279,58 @@ namespace BuiltinBuffs.Missions
                     false));
             self.roomSettings.placedObjects.RemoveAll(i => i.type == PlacedObject.Type.FairyParticleSettings);
 
-            var setting = new PlacedObject(PlacedObject.Type.FairyParticleSettings, null) { active = true };
-            setting.data = new PlacedObject.FairyParticleData(setting)
-            {
-                colorHmax = 0.14f,
-                colorSmax = 1,
-                colorLmax = 0.52f,
-                colorHmin = 0.19f,
-                colorSmin = 1f,
-                colorLmin = 0.43f,
-                dirLerpType = FairyParticle.LerpMethod.SIN_IO,
-                dirDevMax = 19,
-                dirDevMin = 0,
-                dirMax = 23,
-                dirMin = 0,
-                scaleMax = 2,
-                scaleMin = 1,
-                glowStrength = 100,
-                glowRad = 8,
-                speedLerpType = FairyParticle.LerpMethod.SIN_IO,
-                numKeyframes = 9,
-                alphaTrans = 0.27f,
-                spriteType = PlacedObject.FairyParticleData.SpriteType.Leaf,
-                absPulse = true,
-                pulseRate = 0,
-                pulseMax = 37,
-                pulseMin = 7,
-                interpTrans = 0.7f,
-                interpDurMax = 180,
-                interpDurMin = 60,
-                interpDistMax = 100,
-                interpDistMin = 40,
-            };
-            self.roomSettings.placedObjects.Add(setting);
-            self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.HeatWave, 0.3f,
+            //var setting = new PlacedObject(PlacedObject.Type.FairyParticleSettings, null);
+            //setting.data = new PlacedObject.FairyParticleData(setting)
+            //{
+            //    colorHmax = 0.14f,
+            //    colorSmax = 1,
+            //    colorLmax = 0.52f,
+            //    colorHmin = 0.19f,
+            //    colorSmin = 1f,
+            //    colorLmin = 0.43f,
+            //    dirLerpType = FairyParticle.LerpMethod.SIN_IO,
+            //    dirDevMax = 19,
+            //    dirDevMin = 0,
+            //    dirMax = 23,
+            //    dirMin = 0,
+            //    scaleMax = 2,
+            //    scaleMin = 1,
+            //    glowStrength = 100,
+            //    glowRad = 8,
+            //    speedLerpType = FairyParticle.LerpMethod.SIN_IO,
+            //    numKeyframes = 9,
+            //    alphaTrans = 0.27f,
+            //    spriteType = PlacedObject.FairyParticleData.SpriteType.Leaf,
+            //    absPulse = true,
+            //    pulseRate = 0,
+            //    pulseMax = 37,
+            //    pulseMin = 7,
+            //    interpTrans = 0.7f,
+            //    interpDurMax = 180,
+            //    interpDurMin = 60,
+            //    interpDistMax = 100,
+            //    interpDistMin = 40,
+                
+            //};
+            //self.roomSettings.placedObjects.Add(setting);
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.HeatWave))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.HeatWave, 0.3f,
                 false));
-            self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.FairyParticles, 0.13f,
+            //if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.FairyParticles))
+            //    self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.FairyParticles, 0.13f,
+            //false));
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.FireFlies))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.FireFlies, 1f,
                 false));
-            self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.FireFlies, 1f,
-                false));
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.LethalWater))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.LethalWater, 1f,
+                    false));
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.LightBurn))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.LightBurn, 0.4f,
+                    false));
+            if (self.roomSettings.effects.All(i => i.type != RoomSettings.RoomEffect.Type.WaterViscosity))
+                self.roomSettings.effects.Add(new RoomSettings.RoomEffect(RoomSettings.RoomEffect.Type.WaterViscosity, 0.2f,
+                    false));
             orig(self);
             if (self.abstractRoom.name == "SB_E05SAINT")
                 self.AddObject(new MissionEnding(self));

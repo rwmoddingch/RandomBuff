@@ -17,10 +17,10 @@
 
   "Chinese": {
     "BuffName": "鲊形突变",
-    "Description": "你长出水母的触须，可以设置按键，在被生物抓住时电击生物，也可以长按拾取键以通过方向键移动你的触须，并主动电击你的触须抓住的生物，但你现在只能用嘴叼着一件东西。你的每次电击减少1格饱食度，饱食度为0时无法触发，但你被足够强的电流击中时可以获取饱食度。你开始对电击产生抵抗力，在水中不会再窒息，但游泳速度降低50%，并且超过2循环未接触水将干枯而死。水蛭和巨型水母不再对你有敌意。"
+    "Description": "你长出水母的触须，可以设置按键，长按此按键，在水中以自身为中心放电，在陆地上则可以被生物抓住时电击生物，或通过方向键移动你的触须，并主动电击你的触须抓住的生物，但你现在只能用嘴叼着一件东西。你的每次电击减少1格饱食度，饱食度为0时无法触发，但你被足够强的电流击中时可以获取饱食度。你开始对电击产生抵抗力，在水中不会再窒息，但游泳速度降低50%，并且超过2循环未接触水将干枯而死。水蛭和巨型水母不再对你有敌意。"
   },
   "English": {
     "BuffName": "Jellyfish-Shaped Mutation",
-    "Description": "Turns slugcat into a jellyfish hybrid. Slugcat will grow tentacles which can distribute an electric shock when this buff is triggered, however this shock will drain 1 food pip. Slugcat is immune to electricity and can gain food from being electrocuted. If slugcat does not touch water for 2 cycles, it will die. Certain aquatic creatures become friendly to slugcat but slugcat's swim speed is decreased by 50%."
+    "Description": "Turns slugcat into a jellyfish hybrid. Slugcat will grow tentacles, and long press the button you have set to discharge electricity centered around yourself in the water. On land, you can electrocute a creature when you are caught by it, or move your tentacles with the directional keys and actively electrocute the creature caught by your tentacles., however this shock will drain 1 food pip. Slugcat is immune to electricity and can gain food from being electrocuted. If slugcat does not touch water for 2 cycles, it will die. Certain aquatic creatures become friendly to slugcat but slugcat's swim speed is decreased by 50%."
   }
 }
