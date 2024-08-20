@@ -52,23 +52,15 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             base.HookOn();
             On.Creature.Die += Creature_Die;
             On.Explosion.Update += Explosion_Update;
-        }
-
-        public override void EnterGame(RainWorldGame game)
-        {
-            base.EnterGame(game);
-            
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
                     foreach (var type in assembly.SafeGetTypes())
                     {
-                        var ba = type.BaseType;
                         if (type.IsSubclassOf(typeof(Creature)))
-                        {
-                            creatureViolenceHooks.Add(new Hook(type.GetMethod("Violence", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic), Creature_Violence));
-                        }
+                            _ =new Hook(type.GetMethod("Violence", System.Reflection.BindingFlags.Instance |
+                                                                   System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic), Creature_Violence);
                     }
                 }
                 catch (Exception ex)
@@ -77,6 +69,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                 }
             }
         }
+
+
 
         private void Explosion_Update(On.Explosion.orig_Update orig, Explosion self, bool eu)
         {
@@ -146,13 +140,6 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         }
 
 
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-            foreach (var hook in creatureViolenceHooks)
-                hook.Dispose();
-            creatureViolenceHooks.Clear();
-        }
 
 
         public override string DisplayName(InGameTranslator translator)

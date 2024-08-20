@@ -155,7 +155,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         }
 
 
-        private List<Hook> runtimeHooks = new();
+        private List<IDetour> runtimeHooks = new();
 
         //绑定状态更新
         internal void BindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
