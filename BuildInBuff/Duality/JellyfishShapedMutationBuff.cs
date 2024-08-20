@@ -112,6 +112,7 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+            IL.Player.GrabUpdate += GrabUpdateIL;
 
             On.SaveState.SessionEnded += SaveState_SessionEnded;
             On.ShelterDoor.DoorClosed += ShelterDoor_DoorClosed;
@@ -141,6 +142,37 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
         }
         #region 额外特性
+        //水下吃东西
+        private static void GrabUpdateIL(ILContext il)
+        {
+            try
+            {
+                ILCursor c = new ILCursor(il);
+                if (c.TryGotoNext(MoveType.After,
+                    (i) => i.MatchCallvirt<BodyChunk>("get_submersion"),
+                    (i) => i.Match(OpCodes.Ldc_R4),
+                    (i) => i.Match(OpCodes.Blt_S),
+                    (i) => i.Match(OpCodes.Ldarg_0),
+                    (i) => i.MatchCall<Player>("get_isRivulet")))
+                {
+                    BuffPlugin.Log("JellyfishCat Match IL!");
+                    c.Emit(OpCodes.Ldarg_0);
+                    c.EmitDelegate<Func<bool, Player, bool>>((isRivulet, self) =>
+                    {
+                        if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
+                        {
+                            return true;
+                        }
+                        return isRivulet;
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+            }
+        }
+
         //脱水致死
         private static void SaveState_SessionEnded(On.SaveState.orig_SessionEnded orig, SaveState self, RainWorldGame game, bool survived, bool newMalnourished)
         {
@@ -442,7 +474,7 @@ namespace BuiltinBuffs.Duality
                         Creature grabber = self.grabbedBy[i].grabber;
                         if (grabber != null && grabber.grasps != null)
                         {
-                            if (jellyfishCat.TryElectricAttack(grabber))
+                            if (!self.dead && jellyfishCat.TryElectricAttack(grabber))
                             {
                                 jellyfishCat.ElectricAttack(grabber);
                                 break;
