@@ -140,7 +140,7 @@ namespace BuiltinBuffs.Negative
                     float dot = Vector2.Dot(creature.DangerPos - startPos, (endPos - startPos).normalized);
                     if (dot < 0f || dot > length)
                         continue;
-                    if(PointToSegDist(creature.DangerPos, startPos, endPos) < Mathf.Lerp(20f, 50f, power))
+                    if(PointToSegDist(creature.DangerPos, startPos, endPos) < Mathf.Lerp(20f, 50f, power) && owner.AI.friendTracker.friend != creature)
                     {
                         creature.stun = 80;
                     }
