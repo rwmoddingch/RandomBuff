@@ -155,7 +155,6 @@ namespace BuiltinBuffs.Duality
                     (i) => i.Match(OpCodes.Ldarg_0),
                     (i) => i.MatchCall<Player>("get_isRivulet")))
                 {
-                    BuffPlugin.Log("JellyfishCat Match IL!");
                     c.Emit(OpCodes.Ldarg_0);
                     c.EmitDelegate<Func<bool, Player, bool>>((isRivulet, self) =>
                     {
