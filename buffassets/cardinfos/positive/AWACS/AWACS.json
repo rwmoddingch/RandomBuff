@@ -1,0 +1,18 @@
+{
+  "FaceName": "AWACS",
+  "BuffID": "AWACSID",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": true,
+  "Stackable": false,
+  "Color": "FFCC00",
+
+  "Chinese": {
+    "BuffName": "蝓警机",
+    "Description": "显示一个HUD，提示当前房间内所有生物的位置。HUD可以手动关闭或开启。"
+  },
+  "English": {
+    "BuffName": "AWACS",
+    "Description": "Displays a HUD that surrounds the slugcat, showing the relative orientation of creatures in the current room to the slugcat.The HUD can be turned off manually."
+  }
+}
