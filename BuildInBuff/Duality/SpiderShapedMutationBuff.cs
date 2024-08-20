@@ -830,7 +830,7 @@ namespace BuiltinBuffs.Duality
                             Vector2.Dot(wantPos - player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - player.mainBodyChunk.pos) < 0 &&
                             !Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
                             Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength + 15f) &&
-                            player.room.gravity > 0.3f)))
+                            (player.room.gravity > 0.3f && player.Submersion < 0.5f))))
                         {
                             Vector2 a = Custom.DirVec(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) * (Vector2.Distance(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos) - this.legLength);
                             player.mainBodyChunk.pos += a * 0.8f;
@@ -1093,7 +1093,7 @@ namespace BuiltinBuffs.Duality
                 }
             }
             if (num >= 2 ||
-                (num >= 1 && player.room.gravity <= 0.3f))
+                (num >= 1 && (player.room.gravity <= 0.3f || player.Submersion >= 0.5f)))
                 return true;
             return false;
         }
