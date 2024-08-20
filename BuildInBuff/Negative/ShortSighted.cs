@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.SaveData.BuffConfig;
@@ -57,7 +59,9 @@ namespace BuiltinBuffs.Negative
 
         public static void HookOn()
         {
-            On.RoomCamera.DrawUpdate += RoomCamera_DrawUpdate;
+            _ = new Hook(typeof(RoomCamera).GetMethod("DrawUpdate"),
+                typeof(ShortSightedEntry).GetMethod("RoomCamera_DrawUpdate", BindingFlags.Static | BindingFlags.NonPublic));
+            //On.RoomCamera.DrawUpdate += RoomCamera_DrawUpdate;
             On.RoomCamera.ChangeRoom += RoomCamera_ChangeRoom;
             On.RoomCamera.Update += RoomCamera_Update;
             lockCounter = 0;

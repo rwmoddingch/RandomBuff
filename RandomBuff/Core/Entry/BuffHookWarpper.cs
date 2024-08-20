@@ -9,6 +9,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
 using System.Reflection;
+using BepInEx;
 using Mono.Cecil;
 using On.Menu;
 using RandomBuff.Core.Game.Settings.Conditions;
@@ -164,7 +165,7 @@ namespace RandomBuff.Core.Entry
                         else
                             BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
                     }
-                    else if (str.MatchNewobj(out var ctor) && ctor.ReturnType.Is(typeof(IDetour)))
+                    else if (str.MatchNewobj(out var ctor) && ctor.DeclaringType.HasInterface<IDetour>())
                     {
                         if (ctor.Parameters.Count != 0)
                         {
@@ -227,7 +228,7 @@ namespace RandomBuff.Core.Entry
 
 
                 ILCursor c = new ILCursor(il);
-                while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj(out var newObj) && newObj.ReturnType.Is(typeof(IDetour))))
+                while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj(out var newObj) && newObj.DeclaringType.HasInterface<IDetour>()))
                 {
                     c.Emit(OpCodes.Dup);
                     c.Emit(OpCodes.Ldarg_0);
@@ -245,6 +246,15 @@ namespace RandomBuff.Core.Entry
 
         }
 
+
+        private static bool HasInterface<T>(this TypeReference type)
+        {
+            if (type.Is(typeof(Hook)) || type.Is(typeof(ILHook)))
+                return true;
+            if (type.SafeResolve() is { } def)
+                return def.Interfaces.Any(i => i.InterfaceType == type.Module.ImportReference(typeof(T)));
+            return false;
+        }
 
         private static void RegisterHook_Impl(BuffID id, Type type, ILContext il, MethodBase origMethod, HookLifeTimeLevel level)
         {
@@ -273,7 +283,7 @@ namespace RandomBuff.Core.Entry
                     else
                         BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
                 }
-                else if (str.MatchNewobj(out var ctor) && ctor.ReturnType.Is(typeof(IDetour)))
+                else if (str.MatchNewobj(out var ctor) && ctor.DeclaringType.HasInterface<IDetour>())
                 {
                     if (ctor.Parameters.Count != 0)
                     {
@@ -329,14 +339,18 @@ namespace RandomBuff.Core.Entry
 
             foreach (var exception in il.Body.ExceptionHandlers)
             {
-                ilProcessor.Body.ExceptionHandlers.Add(new ExceptionHandler(exception.HandlerType)
+                var re = new ExceptionHandler(exception.HandlerType)
                 {
                     TryStart = labelDictionary[exception.TryStart],
                     TryEnd = labelDictionary[exception.TryEnd],
                     HandlerStart = labelDictionary[exception.HandlerStart],
                     HandlerEnd = labelDictionary[exception.HandlerEnd],
-                    CatchType = exception.CatchType,
-                });
+                    CatchType = exception.CatchType
+                };
+                method.Module.ImportReference(exception.CatchType);
+                if (exception.FilterStart != null)
+                    re.FilterStart = labelDictionary[exception.FilterStart];
+                ilProcessor.Body.ExceptionHandlers.Add(re);
             }
             foreach (var pair in labelList)
                 pair.from.Operand = labelDictionary[pair.target];
@@ -351,8 +365,9 @@ namespace RandomBuff.Core.Entry
 
             ILCursor c = new ILCursor(il);
             while (c.TryGotoNext(MoveType.After,
-                       i => i.MatchNewobj(out var newObj) && newObj.ReturnType.Is(typeof(IDetour))))
+                       i => i.MatchNewobj(out var newObj) && newObj.DeclaringType.HasInterface<IDetour>()))
             {
+                BuffPlugin.Log("Sdsd");
                 c.Emit(OpCodes.Dup);
                 c.EmitDelegate<Action<IDetour>>(hook => AddRuntimeHook(id, level, hook));
             }
