@@ -16,10 +16,13 @@ using UnityEngine;
 namespace BuildInBuff.Duality
 {
     class DreamtOfABatBuff : Buff<DreamtOfABatBuff, DreamtOfABatBuffData> { public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID; }
-    class DreamtOfABatBuffData : BuffData
+    class DreamtOfABatBuffData : CountableBuffData
     {
         public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID;
         public override bool CanStackMore() => StackLayer < 4;
+
+        public override int MaxCycleCount => 3;
+
     }
     class DreamtOfABatBuffEntry : IBuffEntry
     {
@@ -292,6 +295,7 @@ namespace BuildInBuff.Duality
             ButteFly.modules.Add(fly, new ButteFly(color));
         }
     }
+
     public class ButteFly
     {
         public static ConditionalWeakTable<AbstractCreature, ButteFly> modules = new ConditionalWeakTable<AbstractCreature, ButteFly>();
