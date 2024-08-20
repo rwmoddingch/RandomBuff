@@ -41,14 +41,7 @@ namespace RandomBuff.Core.Game
 
             Instance = this;
 
-            if (BuffPoolManager.Instance.GameSetting.fallbackPick is { } pick)
-            {
-                foreach (var pickSlot in pick)
-                    inGameSlot.RequestPickCards((id) => BuffPoolManager.Instance.CreateBuff(id, true), pickSlot.major, pickSlot.additive,pickSlot.selectCount);
-                
-
-                BuffPoolManager.Instance.GameSetting.fallbackPick = null;
-            }
+  
 
 
             if (BuffCustom.TryGetGame(out var game) && game.GetStorySession.saveState.cycleNumber == 0 && !BuffPoolManager.Instance.isInitHud)
@@ -56,6 +49,18 @@ namespace RandomBuff.Core.Game
                 BuffPoolManager.Instance.isInitHud = true;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
+            }
+            else
+            {
+                if (BuffPoolManager.Instance.GameSetting.fallbackPick is { } pick)
+                {
+                    BuffPlugin.Log("Request fallback pick");
+                    foreach (var pickSlot in pick)
+                        inGameSlot.RequestPickCards((id) => BuffPoolManager.Instance.CreateBuff(id, true), pickSlot.major, pickSlot.additive, pickSlot.selectCount);
+
+
+                    BuffPoolManager.Instance.GameSetting.fallbackPick = null;
+                }
             }
         }
 
@@ -103,7 +108,6 @@ namespace RandomBuff.Core.Game
 
             }
 
-            //TODO : Obsolete
             if (setting.CurrentPacket.NeedMenu)
             {
                 for (int i = 0; i < setting.CurrentPacket.positive.pickTimes; i++)

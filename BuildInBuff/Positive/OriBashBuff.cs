@@ -205,6 +205,8 @@ namespace BuiltinBuffs.Positive
 
         public Vector2 GetInputDirection(Player player,Vector2 sourcePos)
         {
+            if(OriBashBuff.Instance.Data[player.playerState.playerNumber] != KeyCode.None)
+                return RWInput.PlayerInput(player.playerState.playerNumber).analogueDir;
             if (BuffPlayerData.Instance.GetKeyBind(OriBashBuffEntry.OriBash) == KeyCode.None.ToString())
                 return Custom.DirVec(sourcePos,
                     new Vector2(Input.mousePosition.x, Input.mousePosition.y));
@@ -239,7 +241,7 @@ namespace BuiltinBuffs.Positive
                 sLeaser.sprites[startSprite + 1].color = Color.white;
                 sLeaser.sprites[startSprite + 1].alpha = 1;
                 
-                if (!GetInput(self) || bashTarget == null || !self.Consious)
+                if (!GetInput(self) || bashTimer == 4 || bashTarget == null || !self.Consious)
                 {
                     isBash = false;
                     OriBashBuffEntry.UpdateSpeed = 1000;
@@ -336,15 +338,8 @@ namespace BuiltinBuffs.Positive
             }
 
             if (isBash)
-            {
                 bashTimer++;
-                if (bashTimer == 4)
-                {
-                    isBash = false;
-                    OriBashBuffEntry.UpdateSpeed = 1000;
-                    bashTarget = null;
-                }
-            }
+            
 
             if (GetInput(self) && !isPressUse)
             { 
