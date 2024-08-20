@@ -244,6 +244,8 @@ namespace RandomBuff.Core.Game.Settings
                 LoadTemplate("Normal");
                 return;
             }
+
+            fallbackPick = null;
             TemplateName = name;
         }
 

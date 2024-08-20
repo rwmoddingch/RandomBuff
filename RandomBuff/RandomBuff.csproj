@@ -51,6 +51,9 @@
       <HintPath>..\include\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\..\LizardImpactBuffPack\include\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
     <Reference Include="MonoMod">
       <HintPath>..\include\MonoMod.dll</HintPath>
       <Private>False</Private>
