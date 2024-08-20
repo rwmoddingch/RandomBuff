@@ -148,7 +148,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         //禁用所有hook
         internal void DisableHook()
         {
-            runtimeHooks.ForEach(i => i.Dispose());
+            runtimeHooks.ForEach(i =>
+            {
+                i.Dispose();
+            });
             runtimeHooks.Clear();
             BuffPlugin.LogDebug($"Disable Condition Hook for Name: {TypeName}");
             BuffHookWarpper.DisableCondition(this);

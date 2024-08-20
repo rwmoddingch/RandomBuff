@@ -139,9 +139,8 @@ namespace RandomBuff.Core.Entry
         {
             if (hookAssembly == null)
                 hookAssembly = typeof(On.Player).Assembly;
-            DynamicMethodDefinition method = new(origMethod);
-            method.Definition.Body.Instructions.Clear();
-            method.Definition.Body.ExceptionHandlers.Clear();
+            DynamicMethodDefinition method = new($"BuffDisableHook_{type.Name}", origMethod.ReturnType,
+                new []{type});
             ILProcessor ilProcessor = method.GetILProcessor();
             BuffPlugin.Log($"RegisterCondition - {Helper.GetUninit<Condition>(type).ID}");
 
@@ -149,7 +148,8 @@ namespace RandomBuff.Core.Entry
             _ = new ILHook(origMethod, (il) =>
             {
                 bool hasShownBranchMessage = false;
-
+                foreach (var v in il.Body.Variables)
+                    ilProcessor.Body.Variables.Add(new VariableDefinition(v.VariableType));
                 List<(Instruction target, Instruction from)> labelList = new();
                 Dictionary<Instruction, Instruction> labelDictionary = new();
                 foreach (var str in il.Instrs)
@@ -209,6 +209,7 @@ namespace RandomBuff.Core.Entry
 
                 foreach (var exception in il.Body.ExceptionHandlers)
                 {
+                    method.Module.ImportReference(exception.CatchType);
                     var re = new ExceptionHandler(exception.HandlerType)
                     {
                         TryStart = labelDictionary[exception.TryStart],
@@ -217,7 +218,6 @@ namespace RandomBuff.Core.Entry
                         HandlerEnd = labelDictionary[exception.HandlerEnd],
                         CatchType = exception.CatchType
                     };
-                    method.Module.ImportReference(exception.CatchType);
                     if (exception.FilterStart != null)
                         re.FilterStart = labelDictionary[exception.FilterStart];
                     ilProcessor.Body.ExceptionHandlers.Add(re);
@@ -226,21 +226,23 @@ namespace RandomBuff.Core.Entry
                 foreach (var pair in labelList)
                     pair.from.Operand = labelDictionary[pair.target];
 
+                var tmpValueIndex = il.Body.Variables.Count;
 
+                il.Body.Variables.Add(new VariableDefinition(il.Body.Method.Module.ImportReference(typeof(IDetour))));
                 ILCursor c = new ILCursor(il);
                 while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj(out var newObj) && newObj.DeclaringType.HasInterface<IDetour>()))
                 {
                     c.Emit(OpCodes.Dup);
+                    c.Emit(OpCodes.Stloc, tmpValueIndex);
                     c.Emit(OpCodes.Ldarg_0);
                     c.Emit(OpCodes.Ldfld,
                         typeof(Condition).GetField("runtimeHooks", BindingFlags.Instance | BindingFlags.NonPublic));
+                    c.Emit(OpCodes.Ldloc, tmpValueIndex);
                     c.Emit(OpCodes.Call, typeof(List<IDetour>).GetMethod(nameof(List<IDetour>.Add)));
                 }
 
-;           
-
-
             });
+   
             var deg = method.Generate().CreateDelegate<Action<TCondition>>();
             RegistedRemoveCondition.Add(Helper.GetUninit<Condition>(type).ID, (condition => deg.Invoke(condition as TCondition)));
 
@@ -249,10 +251,10 @@ namespace RandomBuff.Core.Entry
 
         private static bool HasInterface<T>(this TypeReference type)
         {
-            if (type.Is(typeof(Hook)) || type.Is(typeof(ILHook)))
-                return true;
+   
             if (type.SafeResolve() is { } def)
-                return def.Interfaces.Any(i => i.InterfaceType == type.Module.ImportReference(typeof(T)));
+                return def.Interfaces.Any(i => i.InterfaceType.Is(typeof(T)));
+            //BuffPlugin.LogWarning($"Can't resolve type:{type.Name}");
             return false;
         }
 
@@ -339,6 +341,8 @@ namespace RandomBuff.Core.Entry
 
             foreach (var exception in il.Body.ExceptionHandlers)
             {
+                method.Module.ImportReference(exception.CatchType);
+
                 var re = new ExceptionHandler(exception.HandlerType)
                 {
                     TryStart = labelDictionary[exception.TryStart],
@@ -347,7 +351,6 @@ namespace RandomBuff.Core.Entry
                     HandlerEnd = labelDictionary[exception.HandlerEnd],
                     CatchType = exception.CatchType
                 };
-                method.Module.ImportReference(exception.CatchType);
                 if (exception.FilterStart != null)
                     re.FilterStart = labelDictionary[exception.FilterStart];
                 ilProcessor.Body.ExceptionHandlers.Add(re);
@@ -367,7 +370,6 @@ namespace RandomBuff.Core.Entry
             while (c.TryGotoNext(MoveType.After,
                        i => i.MatchNewobj(out var newObj) && newObj.DeclaringType.HasInterface<IDetour>()))
             {
-                BuffPlugin.Log("Sdsd");
                 c.Emit(OpCodes.Dup);
                 c.EmitDelegate<Action<IDetour>>(hook => AddRuntimeHook(id, level, hook));
             }
