@@ -36,8 +36,6 @@ namespace HotDogGains.Duality
         private static void RainWorldGame_RawUpdate1(MonoMod.Cil.ILContext il)
         {
             var c = new ILCursor(il);
-
-            //修改每口的间隔
             if (c.TryGotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdcI4(40)
@@ -56,7 +54,7 @@ namespace HotDogGains.Duality
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig.Invoke(self, eu);
-            if (!self.dead && self.bodyChunks[1].contactPoint.y >= 0 && self.bodyChunks[0].contactPoint.y >= 0 && self.bodyMode != Player.BodyModeIndex.WallClimb && self.bodyMode != Player.BodyModeIndex.Swimming && self.bodyMode != Player.BodyModeIndex.ClimbingOnBeam &&
+            if (self.Consious&& self.bodyChunks[1].contactPoint.y >= 0 && self.bodyChunks[0].contactPoint.y >= 0 && self.bodyMode != Player.BodyModeIndex.WallClimb && self.bodyMode != Player.BodyModeIndex.Swimming && self.bodyMode != Player.BodyModeIndex.ClimbingOnBeam &&
                 self.bodyMode != Player.BodyModeIndex.ClimbIntoShortCut && self.bodyMode != Player.BodyModeIndex.CorridorClimb&&self.mainBodyChunk.vel.y<0)
             {
                 //if (!stagnant)FeatherfallBuff.Instance.TriggerSelf(true);//弹出卡牌使用提示
