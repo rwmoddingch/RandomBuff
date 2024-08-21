@@ -268,7 +268,10 @@ namespace BuiltinBuffs.Positive
                         if (heatSource.GetHeat(corruption, corruption.room.MiddleOfTile(s.tile)) > 0f)
                         {
                             if (!cleanTile.ContainsKey(s.tile))
+                            {
                                 cleanTile[s.tile] = new StrongBox<float>(0);
+                                s.eatChunk = null;
+                            }
                         }
                     }
                 }

@@ -37,7 +37,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
-            if (creature.Template.type == type)
+            if (creature.Template.type == type &&
+                creature.abstractCreature.world.game.Players.Any(i => i == creature.killTag))
             {
                 currentKillCount++;
                 if (currentKillCount >= killCount && !Finished)

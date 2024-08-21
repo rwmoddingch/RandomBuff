@@ -57,7 +57,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.7";
+        public const string ModVersion = "1.0.7.1";
 
         public void OnEnable()
         {
@@ -128,7 +128,7 @@ namespace RandomBuff
             {
                 if (!isLoaded)
                 {
-                    Log($"[Random Buff], Version: {ModVersion}, Current save version: {saveVersion}, {System.DateTime.Now}");
+                    Log($"Version: {ModVersion}, Current save version: {saveVersion}, {System.DateTime.Now}");
 
 #if TESTVERSION
                     Log($"!!!!TEST BUILD!!!!");

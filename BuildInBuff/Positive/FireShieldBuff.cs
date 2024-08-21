@@ -94,7 +94,7 @@ namespace BuiltinBuffs.Positive
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!FireShieldFeatures.TryGetValue(self, out _))
+            if (!FireShieldFeatures.TryGetValue(self, out _) && self.room != null)
             {
                 FireShield fireShield = new FireShield(self, self.room);
                 FireShieldFeatures.Add(self, fireShield);
