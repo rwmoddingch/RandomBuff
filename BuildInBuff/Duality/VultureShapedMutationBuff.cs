@@ -29,6 +29,17 @@ namespace BuiltinBuffs.Duality
 
         public override BuffID ID => VultureShapedMutationBuffEntry.VultureShapedMutation;
 
+        public int SpeedLevel
+        {
+            get
+            {
+                int num = 0;
+                if (new BuffID("unl-agility").GetBuffData()?.StackLayer >= 2)
+                    num++;
+                return num;
+            }
+        }
+
         public VultureShapedMutationBuff()
         {
             if (BuffCustom.TryGetGame(out var game))
@@ -90,7 +101,6 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
-            //On.VultureAI.DoIWantToBiteCreature += VultureAI_DoIWantToBiteCreature;
 
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten; 
@@ -115,6 +125,7 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
         }
+
         public static void LongLifeCycleHookOn()
         {
             On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
@@ -186,10 +197,12 @@ namespace BuiltinBuffs.Duality
         {
             int result = orig(self);
             if (VultureCatFeatures.TryGetValue(self, out var vultureCat))
-                if (self.grasps[0] != null || self.grasps[1] != null)
+            {
+                if (self.grasps[0] != null || (self.grasps[1] != null && !(vultureCat.CanWearMask && (self.grasps[1].grabbed is VultureMask))))
                 {
                     result = -1;
                 }
+            }
             return result;
         }
 
@@ -243,11 +256,12 @@ namespace BuiltinBuffs.Duality
         #endregion
         private static void Grasp_Release(On.Creature.Grasp.orig_Release orig, Creature.Grasp self)
         {
-            orig(self);
             if (self.grabber is Player && VultureCatFeatures.TryGetValue(self.grabber as Player, out var vultureCat))
             {
                 var mask = vultureCat.Mask;
-                if (mask != null)
+
+                BuffPlugin.Log("vultureCat.maskGrasp is null: " + (vultureCat.maskGrasp == null));
+                if (mask != null && vultureCat.maskGrasp != null)
                 {/*
                 if(mask.grabbedBy.Count == 0)
                     mask.Grabbed(maskGrasp);*/
@@ -256,6 +270,7 @@ namespace BuiltinBuffs.Duality
                     //BuffPlugin.Log("mask.grabbedBy[0].grabber: " + mask.grabbedBy[0].grabber.ToString());
                 }
             }
+            orig(self);
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -413,7 +428,7 @@ namespace BuiltinBuffs.Duality
 
         #region 面具相关
         private VultureMask mask;
-        private Creature.Grasp maskGrasp;
+        public Creature.Grasp maskGrasp;
         private float grabChunkCollisionRad;
         private int wearCount;
         private bool hasReleasePickButton;
@@ -469,6 +484,14 @@ namespace BuiltinBuffs.Duality
         public int laserCounter;
 
         public int cantFindNewGripCounter;
+
+        public float DefaultWingSpeed
+        {
+            get
+            {
+                return 10f + 5f * VultureShapedMutationBuff.Instance.SpeedLevel;
+            }
+        }
 
         public void StopFlight()
         {
@@ -715,7 +738,7 @@ namespace BuiltinBuffs.Duality
         {
             ownerRef = new WeakReference<Player>(player);
             state = new VultureCatState(player.abstractCreature, this);
-            wingSpeed = 10f;
+            wingSpeed = DefaultWingSpeed;
             wingFlapAmplitude = 1f;
             foldScaleWhenClimb = 0.5f;
             groundRetractionScale = 0.9f;
@@ -1173,9 +1196,15 @@ namespace BuiltinBuffs.Duality
             if (!player.Consious) 
                 StopFlight();
 
-            if (player.grasps[0] != null && player.grasps[1] != null && player.grasps[1].grabbed is VultureMask)
+            if (player.grasps[1] != null && !(CanWearMask && (player.grasps[1].grabbed is VultureMask) && this.mask != null))
             {
-                player.ReleaseGrasp(1);
+                if (player.grasps[0] != null)
+                    player.ReleaseGrasp(1);
+                else
+                {
+                    var obj = player.grasps[1].grabbed;
+                    player.SwitchGrasps(1, 0);
+                }
             }
 
             //WearMaskUpdate();
@@ -1341,12 +1370,12 @@ namespace BuiltinBuffs.Duality
             if (player.aerobicLevel >= 0.5f && MassFacCondition)
             {
                 massSpeedFac = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 1f, 0f);
-                wingSpeed = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 10f, 0f);
+                wingSpeed = Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, DefaultWingSpeed, 0f);
                 wantPos += Custom.LerpMap(player.aerobicLevel, 0.5f, 1f, 0f, 4f) * Vector2.down;
             }
             else
             {
-                wingSpeed = 10f;
+                wingSpeed = DefaultWingSpeed;
             }
 
             wantPos += wingSpeed * new Vector2(player.input[0].x, player.input[0].y);//player.bodyChunks[0].pos + 
@@ -1455,7 +1484,8 @@ namespace BuiltinBuffs.Duality
                 this.ReleaseGraspMask();
                 return;
             }
-            if (player.input[0].pckp)
+            if ((this.mask == null && player.input[0].pckp && player.input[0].y > 0) ||
+                (this.mask != null && player.input[0].pckp && player.input[0].y < 0))
                 wearCount++;
             else
             {
@@ -1468,16 +1498,16 @@ namespace BuiltinBuffs.Duality
                 //戴上面具
                 if (this.mask == null && FindMaskInHands(player) != -1)
                 {
-                    int hand = FindMaskInHands(player);
                     wearCount = 0;
                     hasReleasePickButton = false;
+                    int hand = FindMaskInHands(player);
                     this.mask = player.grasps[hand].grabbed as VultureMask;
-                    player.ReleaseGrasp(hand);
+                    player.SwitchGrasps(0, 1);/*
                     maskGrasp = new Creature.Grasp(player, mask, player.grasps.Length - 1, 0, Creature.Grasp.Shareability.CanNotShare, 1f, false);
                     mask.Grabbed(maskGrasp);
                     grabChunkCollisionRad = maskGrasp.grabbed.collisionRange;
                     mask.collisionRange = -200f;
-                    new AbstractPhysicalObject.CreatureGripStick(player.abstractCreature, mask.abstractPhysicalObject, 0, mask.TotalMass < player.TotalMass);
+                    new AbstractPhysicalObject.CreatureGripStick(player.abstractCreature, mask.abstractPhysicalObject, 0, mask.TotalMass < player.TotalMass);*/
                     player.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, player.mainBodyChunk);
                     BuffPlugin.Log("Player wear mask on face!");
                 }
@@ -1488,7 +1518,8 @@ namespace BuiltinBuffs.Duality
                     hasReleasePickButton = false;
                     this.mask = null;
                     this.ReleaseGraspMask();
-                    player.room.PlaySound(SoundID.Slugcat_Step_A, player.mainBodyChunk);
+                    player.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, player.mainBodyChunk);
+                    //player.room.PlaySound(SoundID.Slugcat_Step_A, player.mainBodyChunk);
                 }
             }
             if (mask != null)
@@ -1497,8 +1528,7 @@ namespace BuiltinBuffs.Duality
                     mask.Grabbed(maskGrasp);*/
                 BuffPlugin.Log("mask.grabbedBy is null: " + (mask.grabbedBy == null)); 
                 BuffPlugin.Log("mask.grabbedBy.Count: " + (mask.grabbedBy.Count));
-                BuffPlugin.Log("maskGrasp.grabber.grasps[player.grasps.Length - 1] = null: " + (maskGrasp.grabber.grasps[player.grasps.Length - 1] = null));
-                //BuffPlugin.Log("mask.grabbedBy[0].grabber: " + mask.grabbedBy[0].grabber.ToString());
+                BuffPlugin.Log("player.grasps[1] = null: " + (player.grasps[1] = null));
             }
             /*
             if (this.mask != null && player.room != null && player.graphicsModule != null)
@@ -1535,13 +1565,16 @@ namespace BuiltinBuffs.Duality
 
         public void ReleaseGraspMask()
         {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
             try
-            {
+            {/*
                 if (maskGrasp != null)
                     maskGrasp.grabbed.collisionRange = grabChunkCollisionRad;
-                grabChunkCollisionRad = -1f;
+                grabChunkCollisionRad = -1f;*/
                 maskGrasp?.Release();
                 maskGrasp = null;
+                player.grasps[1]?.Release();
                 mask = null;
                 BuffPlugin.Log("Player remove mask on face!");
             }
@@ -2255,6 +2288,7 @@ namespace BuiltinBuffs.Duality
                         float waveScale = Mathf.Lerp(Mathf.Pow(1 - tChunks[m].tPos, 1 - Mathf.Sqrt(vultureCat.wingLength / 20f)), 1f, 0.5f) * 
                                           vultureCat.wingLength * Mathf.Lerp(10f, 30f, vultureCat.wingFlapAmplitude);
                         waveScale *= player.input[0].y < 0 ? 0f : 1f;
+                        waveScale *= 1f + player.mainBodyChunk.vel.magnitude / 10f;
                         wantPos += perp * waveScale * wave;
                         tChunks[m].vel += Vector2.ClampMagnitude(wantPos - tChunks[m].pos, 1.5f * vultureCat.wingLength) / (1.5f * vultureCat.wingLength) * 5f * Mathf.Lerp(0.2f, 1f, vultureCat.wingFlapAmplitude);
                         if (tChunks[m].contactPoint.x != 0 || tChunks[m].contactPoint.y != 0)

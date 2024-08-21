@@ -16,10 +16,13 @@ using UnityEngine;
 namespace BuildInBuff.Duality
 {
     class DreamtOfABatBuff : Buff<DreamtOfABatBuff, DreamtOfABatBuffData> { public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID; }
-    class DreamtOfABatBuffData : BuffData
+    class DreamtOfABatBuffData : CountableBuffData
     {
         public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID;
         public override bool CanStackMore() => StackLayer < 4;
+
+        public override int MaxCycleCount => 3;
+
     }
     class DreamtOfABatBuffEntry : IBuffEntry
     {
@@ -56,9 +59,9 @@ namespace BuildInBuff.Duality
                 (i) => i.Match(OpCodes.Callvirt)
                 ))
             {
-                c.EmitDelegate<Func<PhysicalObject,PhysicalObject>>((obj) =>
+                c.EmitDelegate<Func<PhysicalObject, PhysicalObject>>((obj) =>
                 {
-                    if(obj is Fly fly&&fly.IsButterFly())
+                    if (obj is Fly fly && fly.IsButterFly())
                     {
                         return null;//如果是梦蝶就传个空值
                     }
@@ -109,7 +112,7 @@ namespace BuildInBuff.Duality
             if (self.room != null && self.room.updateList != null)
             {
                 //fp房间内不发动卡牌防止卡死
-                if (self.room.abstractRoom.name.Length>2&&self.room.abstractRoom.name.Substring(self.room.abstractRoom.name.Length-2) == "AI") return;
+                if (self.room.abstractRoom.name.Length > 2 && self.room.abstractRoom.name.Substring(self.room.abstractRoom.name.Length - 2) == "AI") return;
                 if (self.room.abstractRoom.name == "SB_E05SAINT") return;
 
 
@@ -125,8 +128,8 @@ namespace BuildInBuff.Duality
                 //稍微添加一点阈值防止莫名其妙的发动卡牌
                 var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
                 //虚弱状态更难发动变蝙蝠
-                activeLimite*= self.exhausted ? 2 : 1;
-                if (st>activeLimite ) self.room.AddObject(new BatBody(self.abstractCreature));
+                activeLimite *= self.exhausted ? 2 : 1;
+                if (st > activeLimite) self.room.AddObject(new BatBody(self.abstractCreature));
             }
 
 
@@ -254,11 +257,22 @@ namespace BuildInBuff.Duality
             {
                 if (player.dead) batBody.dead = true;
 
-                if (DreamtOfABatBuffEntry.DreamtOfABatID.GetBuffData().StackLayer > 1 && batBody.Consious)
+                
+                if (batBody.Consious)
                 {
-                    batBody.abstractCreature.controlled=true;
-                    batBody.inputWithDiagonals = RWInput.PlayerInput(player.playerState.playerNumber);
+                    if (player.airInLungs > 0)
+                    {
+                        player.airInLungs -= 1f / (40f * (player.lungsExhausted ? 4.5f : 9f) * ((float)this.room.game.setupValues.lungs / 100f)) * player.slugcatStats.lungsFac * 2;
+                        batBody.drown = 0;
+                    }
+
+                    if (DreamtOfABatBuffEntry.DreamtOfABatID.GetBuffData().StackLayer > 1)
+                    {
+                        batBody.abstractCreature.controlled = true;
+                        batBody.inputWithDiagonals = RWInput.PlayerInput(player.playerState.playerNumber);
+                    }
                 }
+
 
                 if (batBody.slatedForDeletetion) player.stun = 0;
 
@@ -276,7 +290,7 @@ namespace BuildInBuff.Duality
                 }
             }
 
-            
+
         }
 
 
@@ -285,13 +299,14 @@ namespace BuildInBuff.Duality
     public static class EXFly
     {
         public static bool IsButterFly(this Fly fly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out var butteFly);
-        public static bool IsButterFly(this Fly fly,out ButteFly butteFly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out butteFly);
+        public static bool IsButterFly(this Fly fly, out ButteFly butteFly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out butteFly);
 
-        public static void TurnButteFLy(this AbstractCreature fly,Color color)
+        public static void TurnButteFLy(this AbstractCreature fly, Color color)
         {
             ButteFly.modules.Add(fly, new ButteFly(color));
         }
     }
+
     public class ButteFly
     {
         public static ConditionalWeakTable<AbstractCreature, ButteFly> modules = new ConditionalWeakTable<AbstractCreature, ButteFly>();

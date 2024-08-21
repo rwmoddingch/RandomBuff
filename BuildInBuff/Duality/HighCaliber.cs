@@ -179,7 +179,7 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
         private static void ScavengerBomb_Update(On.ScavengerBomb.orig_Update orig, ScavengerBomb self, bool eu)
         {
             orig.Invoke(self, eu);
-            if(self.thrownBy is Player)
+            if(self.thrownBy is Player && emitter != null)
             {
                 emitter.ApplyParticleModule(new SetRandomRotation(emitter, Custom.VecToDeg(self.bodyChunks[0].vel), Custom.VecToDeg(self.bodyChunks[0].vel)));
                 //这边需要实现一下速度太低就去除粒子的功能
@@ -210,6 +210,10 @@ namespace BuiltinBuffs.Duality //命名空间在BuiltinBuffs的Duality下
             }
             //正常的小爆炸
             orig.Invoke(self, hitChunk);
+            if (emitter != null)
+            {
+                emitter.Die();
+            }
         }
         public void OnEnable()
         {
