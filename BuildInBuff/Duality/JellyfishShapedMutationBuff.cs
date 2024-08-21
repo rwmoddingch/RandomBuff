@@ -532,8 +532,6 @@ namespace BuiltinBuffs.Duality
         }
 
         public static int UpdateSpeed = 1000;
-
-        public static int OldUpdateSpeed = 1000;
         #endregion
         #region 外观
         private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -671,7 +669,10 @@ namespace BuiltinBuffs.Duality
         { 
             get
             {
-                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation));
+                if (!ownerRef.TryGetTarget(out var player))
+                    return false;
+                return  this.Electric && player.FoodInStomach >= 1 &&
+                        BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation));
             }
         }
 
@@ -713,6 +714,8 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
+                if (!ownerRef.TryGetTarget(out var player) || player.dead)
+                    return false;
                 return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(JellyfishShapedMutationBuffEntry.JellyfishShapedMutation));
             }
         }
@@ -1856,7 +1859,7 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var self) || creature is BigEel || creature is Player)
                 return false;
 
-            if (this.TryToAttack && this.Electric && self.FoodInStomach >= 1)
+            if (this.TryToAttack)
             {
                 return true;
             }
@@ -1869,13 +1872,16 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player) || creature is BigEel || creature is Player)
                 return;
 
-            for (int j = 0; j < creature.grasps.Length; j++)
+            if (creature.grasps != null)
             {
-                if (creature.grasps[j] != null &&
-                    creature.grasps[j].grabbed != null &&
-                    creature.grasps[j].grabbed == player)
+                for (int j = 0; j < creature.grasps.Length; j++)
                 {
-                    creature.ReleaseGrasp(j);
+                    if (creature.grasps[j] != null &&
+                        creature.grasps[j].grabbed != null &&
+                        creature.grasps[j].grabbed == player)
+                    {
+                        creature.ReleaseGrasp(j);
+                    }
                 }
             }
 
@@ -1913,15 +1919,19 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player))
                 return;
 
+            JellyfishShapedMutationBuffEntry.UpdateSpeed = 1000;
             //时缓
-            if (WantToMoveTentacle && JellyfishShapedMutationBuffEntry.UpdateSpeed != 10 && player.room.game.framesPerSecond != 10)
+            for (int i = 0; i < player.room.game.AlivePlayers.Count; i++)
             {
-                JellyfishShapedMutationBuffEntry.OldUpdateSpeed = player.room.game.framesPerSecond;
-                JellyfishShapedMutationBuffEntry.UpdateSpeed = 10;
-            }
-            else
-            {
-                JellyfishShapedMutationBuffEntry.UpdateSpeed = JellyfishShapedMutationBuffEntry.OldUpdateSpeed;
+                if (player.room.game.AlivePlayers[i].realizedCreature != null && 
+                    JellyfishShapedMutationBuffEntry.JellyfishCatFeatures.TryGetValue(player.room.game.AlivePlayers[i].realizedCreature as Player, out var jellyfishCat))
+                {
+                    if (jellyfishCat.WantToMoveTentacle)// && JellyfishShapedMutationBuffEntry.UpdateSpeed != 10 && player.room.game.framesPerSecond != 10
+                    {
+                        JellyfishShapedMutationBuffEntry.UpdateSpeed = 10;
+                        break;
+                    }
+                }
             }
 
             //身体几乎不再移动
@@ -1939,7 +1949,7 @@ namespace BuiltinBuffs.Duality
             }
 
             //水下直接以自身为中心放电
-            if (player.Submersion > 0.5f && this.TryToAttack && this.Electric && player.FoodInStomach >= 1)
+            if (player.Submersion > 0.5f && this.TryToAttack)
                 ElectricAttackInWater();
 
             anyTentaclePulled = false;
