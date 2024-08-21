@@ -216,8 +216,8 @@ namespace BuiltinBuffs.Negative
                     {
                         if (num > 0)
                             self.AerobicIncrease(0.03f * num);
-                        if (scorchingSunPlayer.LastStun >= scorchingSunPlayer.CoolingTime)
-                            self.AerobicIncrease(0.03f * num);
+                        //if (scorchingSunPlayer.LastStun >= scorchingSunPlayer.CoolingTime)
+                        //    self.AerobicIncrease(0.03f * num);
                     }
 
                     float heatstroke = 0;
