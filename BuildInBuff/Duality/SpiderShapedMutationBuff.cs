@@ -25,6 +25,17 @@ namespace BuiltinBuffs.Duality
     {
         public override BuffID ID => SpiderShapedMutationBuffEntry.SpiderShapedMutation;
 
+        public int SpeedLevel
+        {
+            get
+            {
+                int num = 0;
+                if (new BuffID("unl-agility").GetBuffData()?.StackLayer >= 2)
+                    num++;
+                return num;
+            }
+        }
+
         public int SpiderLevel
         {
             get
@@ -400,6 +411,14 @@ namespace BuiltinBuffs.Duality
 
         Vector2 modify = Vector2.down;
 
+        public float DefaultArthropodSpeed
+        {
+            get
+            {
+                return 60f + 30f * SpiderShapedMutationBuff.Instance.SpeedLevel + 10f * SpiderShapedMutationBuff.spiderLevel;
+            }
+        }
+
         public bool Footing
         {
             get
@@ -454,7 +473,7 @@ namespace BuiltinBuffs.Duality
         {
             this.ownerRef = new WeakReference<Player>(player);
 
-            this.arthropodSpeed = 60f + SpiderShapedMutationBuff.spiderLevel * 10f;
+            this.arthropodSpeed = DefaultArthropodSpeed;
             this.wantPos = player.bodyChunks[0].pos;
 
             this.legLength = 65f + SpiderShapedMutationBuff.spiderLevel * 10f;

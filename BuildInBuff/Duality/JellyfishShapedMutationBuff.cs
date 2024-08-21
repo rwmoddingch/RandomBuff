@@ -34,7 +34,7 @@ namespace BuiltinBuffs.Duality
 
         public override BuffID ID => JellyfishShapedMutationBuffEntry.JellyfishShapedMutation;
 
-        public float JellyfishCatLevel
+        public float JellyfishLevel
         {
             get
             {
@@ -312,7 +312,7 @@ namespace BuiltinBuffs.Duality
                     (self as Player).AddQuarterFood();
                     i--;
                 }
-                float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
+                float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishLevel + 1f, 1.5f);
                 newDamage *= scale;
                 newStunBonus *= scale;
                 newDirectionAndMomentum *= scale;
@@ -390,7 +390,7 @@ namespace BuiltinBuffs.Duality
             {
                 Player player = (Player)otherObject;
                 player.AddQuarterFood();
-                player.stun = Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
+                player.stun = Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishLevel + 1))));
             }
         }
 
@@ -431,7 +431,7 @@ namespace BuiltinBuffs.Duality
                         player.AddQuarterFood();
                         i--;
                     }
-                    float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1f, 1.5f);
+                    float scale = 1f / Mathf.Pow(JellyfishShapedMutationBuff.Instance.JellyfishLevel + 1f, 1.5f);
                     player.stun = origStun + Mathf.RoundToInt(player.stun * scale);
                     //player.stun = origStun + Mathf.FloorToInt(Mathf.Lerp(origStun, player.stun, Mathf.InverseLerp(2f, -1f, Mathf.Sqrt(JellyfishShapedMutationBuff.Instance.JellyfishCatLevel + 1))));
                 }
@@ -1886,7 +1886,7 @@ namespace BuiltinBuffs.Duality
             }
 
             player.SubtractFood(1);
-            float damage = 0.05f + 0.05f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel;
+            float damage = 0.05f + 0.05f * JellyfishShapedMutationBuff.Instance.JellyfishLevel;
             float stun = 320f * Mathf.Lerp(creature.Template.baseStunResistance, 1f, 0.5f);
             if (player.Submersion > 0.5f)
                 player.room.AddObject(new SimpleRangeDamage(player.room, Creature.DamageType.Electric, player.firstChunk.pos, 80f, damage, stun, player, 0.5f));
@@ -1906,8 +1906,8 @@ namespace BuiltinBuffs.Duality
                 return;
 
             player.SubtractFood(1);
-            float rad = 80f + 40f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel;
-            float damage = 1f + 0.5f * JellyfishShapedMutationBuff.Instance.JellyfishCatLevel;
+            float rad = 80f + 40f * JellyfishShapedMutationBuff.Instance.JellyfishLevel;
+            float damage = 1f + 0.5f * JellyfishShapedMutationBuff.Instance.JellyfishLevel;
             player.room.AddObject(new UnderwaterShock(player.room, player, player.mainBodyChunk.pos, 14, rad, damage, player, new Color(0.7f, 0.7f, 1f)));
             player.room.AddObject(new Explosion.ExplosionLight(player.firstChunk.pos, 200f, 1f, 4, new Color(0.7f, 1f, 1f)));
             player.room.PlaySound(SoundID.Jelly_Fish_Tentacle_Stun, player.firstChunk.pos);
