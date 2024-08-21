@@ -130,10 +130,19 @@ namespace RandomBuff.Core.Hooks
                     return orig(self);
                 });
             On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+            On.SlugcatStats.SlugcatStoryRegions += SlugcatStats_SlugcatStoryRegions;
 
             On.ScavengerBomb.Update += ScavengerBomb_Update;
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
 
+        }
+
+        private static List<string> SlugcatStats_SlugcatStoryRegions(On.SlugcatStats.orig_SlugcatStoryRegions orig, SlugcatStats.Name i)
+        {
+            var re = orig(i);
+            if (Custom.rainWorld.BuffMode())
+                re.Remove("HR");
+            return re;
         }
 
         private static void ScavengerBomb_Explode(On.ScavengerBomb.orig_Explode orig, ScavengerBomb self, BodyChunk hitChunk)
