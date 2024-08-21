@@ -29,7 +29,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         }
         private void BuffEvent_OnCreatureKilled(Creature creature, int playerNumber)
         {
-            if (!creature.Template.smallCreature && creature.Template.type != CreatureTemplate.Type.Spider)
+            if (!creature.Template.smallCreature && creature.Template.type != CreatureTemplate.Type.Spider && 
+                creature.abstractCreature.world.game.Players.Any(i => i == creature.killTag))
             {
                 currentCount++;
                 if (currentCount >= huntCount && !Finished)
