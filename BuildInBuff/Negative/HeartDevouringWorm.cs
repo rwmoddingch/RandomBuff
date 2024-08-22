@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
+using BuildInBuff.Duality;
+using BuiltinBuffs.Duality;
 using BuiltinBuffs.Positive;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MoreSlugcats;
-using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
@@ -45,6 +41,19 @@ namespace BuiltinBuffs.Negative
                         new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.2f);
                 }
             }
+
+            foreach (var template in CreatureTemplate.Type.values.entries.Select(i =>
+                             StaticWorld.GetCreatureTemplate(new CreatureTemplate.Type(i)))
+                         .Where(NeedReplaceFlee))
+            {
+                if (template.relationships[CreatureTemplate.Type.Fly.Index].type !=
+                    CreatureTemplate.Relationship.Type.Afraid)
+                {
+                    origRelationships.Add(template.type, template.relationships[CreatureTemplate.Type.Fly.Index]);
+                    template.relationships[CreatureTemplate.Type.Fly.Index] =
+                        new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.85f);
+                }
+            }
         }
 
 
@@ -54,11 +63,13 @@ namespace BuiltinBuffs.Negative
             base.Destroy();
             foreach (var template in CreatureTemplate.Type.values.entries.Select(i =>
                              StaticWorld.GetCreatureTemplate(new CreatureTemplate.Type(i)))
-                         .Where(NeedReplace))
+                         .Where(i => NeedReplace(i) || NeedReplaceFlee(i)))
             {
                 if (origRelationships.TryGetValue(template.type, out var relationship))
                     template.relationships[CreatureTemplate.Type.Fly.index] = relationship;
             }
+
+
         }
 
         private readonly Dictionary<CreatureTemplate.Type, CreatureTemplate.Relationship> origRelationships
@@ -70,12 +81,23 @@ namespace BuiltinBuffs.Negative
                    template.TopAncestor().type == CreatureTemplate.Type.BigSpider || 
                    template.type == CreatureTemplate.Type.DropBug;
         }
+
+        private static bool NeedReplaceFlee(CreatureTemplate template)
+        {
+            return Flee.Contains(template.type);
+        }
+
+        private static readonly HashSet<CreatureTemplate.Type> Flee = new HashSet<CreatureTemplate.Type>()
+        {
+            CreatureTemplate.Type.EggBug, CreatureTemplate.Type.BigNeedleWorm, CreatureTemplate.Type.SmallNeedleWorm,
+            CreatureTemplate.Type.LanternMouse, MoreSlugcatsEnums.CreatureTemplateType.FireBug
+        };
     }
 
     internal class HeartDevouringWormBuffData : CountableBuffData
     {
         public override BuffID ID => HeartDevouringWormBuffEntry.HeartDevouringWorm;
-        public override int MaxCycleCount => 10;
+        public override int MaxCycleCount => 5;
     }
 
     internal class HeartDevouringWormBuffEntry : IBuffEntry
@@ -94,7 +116,7 @@ namespace BuiltinBuffs.Negative
 
         private static readonly HashSet<CreatureTemplate.Type> Ignored = new HashSet<CreatureTemplate.Type>()
         {
-            CreatureTemplate.Type.PoleMimic, CreatureTemplate.Type.Overseer, CreatureTemplate.Type.TempleGuard,
+            CreatureTemplate.Type.PoleMimic, CreatureTemplate.Type.Overseer, CreatureTemplate.Type.TempleGuard, CreatureTemplate.Type.LanternMouse,
             CreatureTemplate.Type.TentaclePlant, CreatureTemplate.Type.TubeWorm , CreatureTemplate.Type.Centipede, CreatureTemplate.Type.Spider
         };
 
@@ -113,7 +135,8 @@ namespace BuiltinBuffs.Negative
 
         private static bool IsIgnored(CreatureTemplate template)
         {
-            return Ignored.Contains(template.type) || template.TopAncestor().type == CreatureTemplate.Type.Centipede;
+            return Ignored.Contains(template.type) || template.TopAncestor().type == CreatureTemplate.Type.Centipede ||
+                   (PixieSlug.Instance != null && template.type == CreatureTemplate.Type.Slugcat);
         }
         private static bool IsNeedChangeRad(Creature crit)
         {
@@ -127,7 +150,7 @@ namespace BuiltinBuffs.Negative
                    template.TopAncestor().type == CreatureTemplate.Type.Vulture;
         }
 
-        private static bool IsInfected(Creature crit)
+        public static bool IsInfected(Creature crit)
         {
             return ExplodeModules.TryGetValue(crit.abstractCreature, out _);
         }
@@ -165,19 +188,98 @@ namespace BuiltinBuffs.Negative
             On.DaddyLongLegs.Update += DaddyLongLegs_Update;
 
             On.ScavengerAI.IUseARelationshipTracker_UpdateDynamicRelationship += ScavengerAI_IUseARelationshipTracker_UpdateDynamicRelationship;
-
+            On.ScavengerAI.DontWantToThrowAt += ScavengerAI_DontWantToThrowAt;
+            On.ScavengerAI.WantToThrowSpearAtCreature += ScavengerAI_WantToThrowSpearAtCreature;
+            On.ScavengerAI.CreateTrackerRepresentationForCreature += ScavengerAI_CreateTrackerRepresentationForCreature;
+            On.ScavengerAI.ViolenceTypeAgainstCreature += ScavengerAI_ViolenceTypeAgainstCreature;
 
             On.Vulture.Update += Vulture_Update;
+            On.NeedleWormAI.CreateTrackerRepresentationForCreature += NeedleWormAI_CreateTrackerRepresentationForCreature;
+            On.EggBugAI.CreateTrackerRepresentationForCreature += EggBugAI_CreateTrackerRepresentationForCreature;
 
             On.ThreatDetermination.ThreatOfCreature += ThreatDetermination_ThreatOfCreature;
 
-
+            
         }
 
+        private static Tracker.CreatureRepresentation EggBugAI_CreateTrackerRepresentationForCreature(On.EggBugAI.orig_CreateTrackerRepresentationForCreature orig, 
+            EggBugAI self, AbstractCreature otherCreature)
+        {
+            if (otherCreature.creatureTemplate.type == CreatureTemplate.Type.Fly)
+                return new Tracker.ElaborateCreatureRepresentation(self.tracker, otherCreature, 1f, 3);
+            return orig(self, otherCreature);
+        }
+
+        private static Tracker.CreatureRepresentation NeedleWormAI_CreateTrackerRepresentationForCreature(On.NeedleWormAI.orig_CreateTrackerRepresentationForCreature orig, 
+            NeedleWormAI self, AbstractCreature otherCreature)
+        {
+            if (otherCreature.creatureTemplate.type == CreatureTemplate.Type.Fly)
+                return new Tracker.ElaborateCreatureRepresentation(self.tracker, otherCreature, 1f, 3);
+            return orig(self, otherCreature);
+        }
+
+        private static ScavengerAI.ViolenceType ScavengerAI_ViolenceTypeAgainstCreature(On.ScavengerAI.orig_ViolenceTypeAgainstCreature orig, 
+            ScavengerAI self, Tracker.CreatureRepresentation critRep)
+        {
+            if (critRep.representedCreature != null && (critRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Fly ||
+                                                        IsInfected(critRep.representedCreature)))
+            {
+                return ScavengerAI.ViolenceType.Lethal;
+            }
+            return orig(self, critRep);
+        }
+
+        private static Tracker.CreatureRepresentation ScavengerAI_CreateTrackerRepresentationForCreature(On.ScavengerAI.orig_CreateTrackerRepresentationForCreature orig, 
+            ScavengerAI self, AbstractCreature otherCreature)
+        {
+            if(otherCreature.creatureTemplate.type == CreatureTemplate.Type.Fly)
+                return new Tracker.ElaborateCreatureRepresentation(self.tracker, otherCreature, 1f, 3);
+            return orig(self, otherCreature);
+        }
+
+        private static float ScavengerAI_WantToThrowSpearAtCreature(On.ScavengerAI.orig_WantToThrowSpearAtCreature orig, ScavengerAI self, Tracker.CreatureRepresentation rep)
+        {
+            var re = orig(self,rep);
+            if(rep.representedCreature != null && IsInfected(rep.representedCreature))
+                return Mathf.Pow(1 * Custom.LerpMap(self.creature.pos.Tile.FloatDist(rep.BestGuessForPosition().Tile), 
+                    5f, 50f, 1f, 0.5f), (rep == self.focusCreature) ? 0.5f : 1f);
+            return re;
+        }
+
+        private static bool ScavengerAI_DontWantToThrowAt(On.ScavengerAI.orig_DontWantToThrowAt orig, ScavengerAI self, Tracker.CreatureRepresentation rep)
+        {
+            var re = orig(self, rep);
+            if(rep.representedCreature?.realizedCreature is Fly fly && Modules.TryGetValue(fly.AI,out var module) &&
+               (module.Crit == self.scavenger || Custom.DistLess(fly.DangerPos, self.scavenger.DangerPos, Mathf.Lerp(100,400, self.creature.personality.nervous))))
+                return false;
+            if (rep.representedCreature != null && IsInfected(rep.representedCreature))
+                return false;
+            return re;
+        }
+
+        private static CreatureTemplate.Relationship ScavengerAI_IUseARelationshipTracker_UpdateDynamicRelationship(On.ScavengerAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, ScavengerAI self, RelationshipTracker.DynamicRelationship dRelation)
+        {
+            var re = orig(self, dRelation);
+            if (dRelation.trackerRep.representedCreature.Room != self.creature.Room || dRelation.trackerRep.representedCreature.state.dead)
+                return re;
+            if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Fly)
+                return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Attacks,
+                    Mathf.Clamp(
+                        self.creature.Room.creatures.Count(i => i.creatureTemplate.type == CreatureTemplate.Type.Fly) *
+                        Custom.LerpMap(self.creature.personality.nervous, 0, 1, 0.35f, 0.85f), 0, 1));
+            if (IsInfected(dRelation.trackerRep.representedCreature))
+                return new CreatureTemplate.Relationship(
+                    CreatureTemplate.Relationship.Type.Attacks,
+                    (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Scavenger ||
+                     dRelation.trackerRep.representedCreature.creatureTemplate.TopAncestor().type == CreatureTemplate.Type.Scavenger) ? 1 :
+                    Custom.LerpMap(self.creature.personality.nervous, 0, 1, 0.7f, 1f));
+
+            return re;
+        }
         private static float ThreatDetermination_ThreatOfCreature(On.ThreatDetermination.orig_ThreatOfCreature orig, ThreatDetermination self, Creature creature, Player player)
         {
            var re= orig(self, creature, player);
-           if (creature is Fly fly && fly.AI != null && Modules.TryGetValue(fly.AI, out var module))
+           if (creature is Fly fly && fly.AI != null && Modules.TryGetValue(fly.AI, out var module) && PixieSlug.Instance == null)
            {
                if (module.Crit == player)
                    return Mathf.Max(re, Custom.LerpMap(Custom.Dist(player.DangerPos, creature.DangerPos), 300, 100, 0.1f, 0.3f));
@@ -237,30 +339,7 @@ namespace BuiltinBuffs.Negative
             }
         }
 
-        private static CreatureTemplate.Relationship ScavengerAI_IUseARelationshipTracker_UpdateDynamicRelationship(On.ScavengerAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, ScavengerAI self, RelationshipTracker.DynamicRelationship dRelation)
-        {
-            var re = orig(self, dRelation);
-            if (dRelation.trackerRep.representedCreature.Room != self.creature.Room || dRelation.trackerRep.representedCreature.state.dead)
-                return re;
-            if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Fly)
-                return new CreatureTemplate.Relationship(
-                    self.creature.personality.aggression > 0.6F
-                        ? CreatureTemplate.Relationship.Type.Attacks
-                        : CreatureTemplate.Relationship.Type.Afraid,
-                    Mathf.Clamp(
-                        self.creature.Room.creatures.Count(i => i.creatureTemplate.type == CreatureTemplate.Type.Fly) *
-                        Custom.LerpMap(self.creature.personality.nervous, 0, 1, 0.35f, 0.6f), 0, 1));
-            if(IsInfected(dRelation.trackerRep.representedCreature))
-                return new CreatureTemplate.Relationship(self.creature.personality.aggression > 0.6F &&
-                                                         dRelation.trackerRep.representedCreature.creatureTemplate.type !=CreatureTemplate.Type.Scavenger &&
-                                                         dRelation.trackerRep.representedCreature.creatureTemplate.TopAncestor().type != CreatureTemplate.Type.Scavenger ?
-                    CreatureTemplate.Relationship.Type.Attacks : CreatureTemplate.Relationship.Type.Afraid,
-                    (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Scavenger ||
-                     dRelation.trackerRep.representedCreature.creatureTemplate.TopAncestor().type == CreatureTemplate.Type.Scavenger) ? 1 :
-                    Custom.LerpMap(self.creature.personality.nervous, 0, 1, 0.45f, 1f));
 
-            return re;
-        }
 
   
 
@@ -283,7 +362,7 @@ namespace BuiltinBuffs.Negative
         private static void FlyGraphics_DrawSprites(On.FlyGraphics.orig_DrawSprites orig, FlyGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig(self,sLeaser,rCam,timeStacker,camPos);
-            if (self.fly.AI != null && Modules.TryGetValue(self.fly.AI, out _))
+            if (self.fly.AI != null && Modules.TryGetValue(self.fly.AI, out _) && PixieSlug.Instance == null)
             {
                 sLeaser.sprites[3].color = FlyRed;
                 for (int i = 0; i < 3; i++)
@@ -406,12 +485,13 @@ namespace BuiltinBuffs.Negative
                 if (!flyRef.TryGetTarget(out var ai))
                     return false;
                 var template = StaticWorld.GetCreatureTemplate(newCrit.creatureTemplate.type);
-                if ((template.relationships[CreatureTemplate.Type.Fly.Index].type ==
-                     CreatureTemplate.Relationship.Type.Eats || IsDontEat(template)) &&
-                    newCrit.realizedCreature != null &&
+                if ((template.relationships[CreatureTemplate.Type.Fly.Index].type == CreatureTemplate.Relationship.Type.Eats || IsDontEat(template)) &&
+                    newCrit.realizedCreature != null  &&
+                    newCrit.state.alive &&
                     !IsInfected(newCrit.realizedCreature) &&
                     ai.room.VisualContact(ai.fly.DangerPos,newCrit.realizedCreature.DangerPos) &&
-                    !IsIgnored(template))
+                    !IsIgnored(template) &&
+                    (ai.fly.abstractCreature.Room.creatures.Count(i => i.creatureTemplate.type == CreatureTemplate.Type.Fly) <= 20 || newCrit.realizedCreature is Player))
                 {
                     if ((Crit == null || Custom.Dist(ai.fly.DangerPos, Crit.DangerPos) >
                         Custom.Dist(ai.fly.DangerPos, newCrit.realizedCreature.DangerPos)) &&
@@ -450,24 +530,37 @@ namespace BuiltinBuffs.Negative
             public void Update()
             {
                 if (!flyRef.TryGetTarget(out var ai)) return;
+                if (ai.fly.IsButterFly()) return;
+
+                if (playerEatCounter == 0 && otherEatCounter == 0 && ai.fly.abstractCreature.Room.creatures.Count(i => i.creatureTemplate.type == CreatureTemplate.Type.Fly) >= 20 &&
+                    Crit != null)
+                {
+                    Crit = null;
+                }
                 if (emitter == null && ai.fly.room != null && !ai.fly.inShortcut && !ai.fly.dead)
                 {
                     emitter = new ParticleEmitter(ai.fly.room);
                     emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, ai.fly));
 
-                    emitter.ApplyParticleSpawn(new RandomRateSpawnerModule(emitter, 50, 1.2f,3f));
+                    emitter.ApplyParticleSpawn(new RandomRateSpawnerModule(emitter, 50, PixieSlug.Instance == null ? 1.2f : 3f, PixieSlug.Instance == null ? 3f : 6f));
 
                     emitter.ApplyParticleModule(new SetRandomLife(emitter, 25, 60));
-                    emitter.ApplyParticleModule(new SetConstColor(emitter, FlyRed));
+
+                    if(PixieSlug.Instance == null)
+                        emitter.ApplyParticleModule(new SetConstColor(emitter, FlyRed));
+                    else 
+                        emitter.ApplyParticleModule(new SetRandomColor(emitter, 0,360,1,0.6f));
+
+
                     emitter.ApplyParticleModule(new SetRandomScale(emitter, 1, 4));
                     emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
                     emitter.ApplyParticleModule(new SetRandomPos(emitter, 20));
                     emitter.ApplyParticleModule(new AddElement(emitter,
-                        new Particle.SpriteInitParam("Circle20", "", 8, 1, 0.05f)));
+                        new Particle.SpriteInitParam("Circle20", "", PixieSlug.Instance == null ? 8 : 9, 1, 0.05f)));
                     emitter.ApplyParticleModule(new AddElement(emitter,
-                        new Particle.SpriteInitParam("Futile_White", "LightSource", 8, 0.2f, 3)));
+                        new Particle.SpriteInitParam("Futile_White", "LightSource", PixieSlug.Instance == null ? 8 : 9, 0.2f, 3)));
                     emitter.ApplyParticleModule(new AddElement(emitter,
-                        new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.2f, 1f)));
+                        new Particle.SpriteInitParam("Futile_White", "FlatLight", PixieSlug.Instance == null ? 8 : 9, 0.2f, 1f)));
                     emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0));
                     emitter.ApplyParticleModule(new AlphaOverLife(emitter, (particle, f) =>
                     {
@@ -483,7 +576,7 @@ namespace BuiltinBuffs.Negative
                 if (emitter?.slateForDeletion ?? false)
                     emitter = null;
 
-                if (light == null && ai.room != null && !ai.fly.dead)
+                if (light == null && ai.room != null && !ai.fly.dead && PixieSlug.Instance == null)
                 {
                     ai.room.AddObject(light = new LightSource(ai.FlyPos, false, FlyRed, ai.fly)
                     {
@@ -541,6 +634,7 @@ namespace BuiltinBuffs.Negative
                     }
                 }
 
+                
 
                 PlayerEatUpdate(ai.fly);
                 OtherCreatureEatUpdate(ai.fly);
@@ -645,6 +739,7 @@ namespace BuiltinBuffs.Negative
             private readonly Vector2[] pos;
 
             private LightSource light;
+            private float hue = 0;
 
             public FlyExplodeModule(Creature crit)
             {
@@ -695,7 +790,7 @@ namespace BuiltinBuffs.Negative
                         alpha = Custom.LerpMap(preCounter, 0, MaxPreCounter, 0.7F, 0f)
                     });
                 }
-
+                hue += 180 / 40f;
                 if (light != null)
                 {
                     if (light.room != self.realizedCreature.room)
@@ -708,11 +803,21 @@ namespace BuiltinBuffs.Negative
                         light.requireUpKeep = true;
                         light.setPos = self.realizedCreature.mainBodyChunk.pos;
                         light.alpha = Custom.LerpMap(preCounter, 0, MaxPreCounter, 0.7F, 0f);
+                        if(PixieSlug.Instance != null)
+                            light.color = Custom.HSL2RGB(hue/360f, 1, 0.3f);
                     }
                 }
 
                 if (counter > 0)
                 {
+                    if (DreamtOfABatBuff.Instance != null && self.world.game.Players.Contains(self))
+                    {
+                        self.realizedCreature.Stun(300);
+                        counter--;
+                        Explode(self.realizedCreature);
+                        Destroy(self);
+                        return;
+                    }
                     if (self.state.dead)
                     {
                         counter = -1;
@@ -734,8 +839,7 @@ namespace BuiltinBuffs.Negative
                         var rnv = new Vector2((Random.value - 0.5f), (Random.value - 0.5f) / 2).normalized;
                         if(IsNeedChangeRad(self.realizedCreature))
                             self.realizedCreature.bodyChunks[i].rad = rads[i] * Custom.LerpMap(counter, 0, maxCounter, 2, 1.25f);
-                        self.realizedCreature.bodyChunks[i].vel += rnv * Custom.LerpMap(counter, 0, maxCounter, 6, 1f) 
-                                                                       * Mathf.Clamp(self.realizedCreature.bodyChunks[i].mass, 0.4f, 1.5f);
+                        self.realizedCreature.bodyChunks[i].vel += rnv * Custom.LerpMap(counter, 0, maxCounter, 6, 1f) *0.7f;
                         if (Random.value > 2 / 40f)
                         {
                             self.realizedCreature.Stun(Mathf.CeilToInt(Random.Range(10, 20) *
@@ -801,7 +905,8 @@ namespace BuiltinBuffs.Negative
             public void AbstractExplode(AbstractCreature crit)
             {
                 BuffUtils.Log(HeartDevouringWorm, "Fly abstract explode from " + crit.ID);
-                int count = Mathf.Clamp(Mathf.RoundToInt(Random.Range(4f, 6f) * massFac), 1, 12);
+                int count = Mathf.Min(Mathf.Clamp(Mathf.RoundToInt(Random.Range(2f, 4f) * massFac), 1, 10),
+                    20 - crit.Room.creatures.Count(i => i.creatureTemplate.type == CreatureTemplate.Type.Fly));
                 for (int i = 0; i < count; i++)
                 {
                     AbstractCreature abstractCreature = new AbstractCreature(crit.world,
@@ -821,11 +926,12 @@ namespace BuiltinBuffs.Negative
                 crit.abstractCreature.state.meatLeft = 0;
                 crit.room.AddObject(new FirecrackerPlant.ScareObject(crit.firstChunk.pos)
                 {
-                    fearRange = 200f,
+                    fearRange = 350f,
                     fearScavs = true,
-                    lifeTime = 450
+                    lifeTime = 400
                 });
-                int count = Mathf.Clamp(Mathf.RoundToInt(Random.Range(4f, 6f) * massFac),1,12);
+                int count = Mathf.Min(Mathf.Clamp(Mathf.RoundToInt(Random.Range(2f, 4f) * massFac), 1, 10),
+                    20 - crit.abstractCreature.Room.creatures.Count(i => i.creatureTemplate.type == CreatureTemplate.Type.Fly));
                 float randomFac = Custom.LerpMap(count, 25, 50,1,0.5f);
                 for (int i = 0; i < count; i++)
                 {
@@ -892,6 +998,8 @@ namespace BuiltinBuffs.Negative
             private readonly Color darkColor;
             private readonly Color color;
 
+            private readonly Color randomColor;
+
             public int SlimeSprite(int s)
             {
                 return 1 + s;
@@ -903,6 +1011,8 @@ namespace BuiltinBuffs.Negative
                 this.vel = vel;
                 this.pos = pos + vel;
                 massLeft = 1f;
+                randomColor = Custom.HSL2RGB(Random.value, 1, 0.8f);
+
                 disapearSpeed = Random.value;
                 maxRad =  Mathf.Clamp(Random.Range(0.7f, 4f) * targetRad, 6f,float.MaxValue);
                 slime = new Vector2[(int)Mathf.Lerp(8f, 15f, Random.value), 4];
@@ -924,9 +1034,9 @@ namespace BuiltinBuffs.Negative
 
                 color = crit.ShortCutColor();
 
-                var initLerp = Random.value;
-                darkColor = Color.Lerp(darkColor, FlyDarkRed, initLerp);
-                color = Color.Lerp(color, FlyRed, initLerp);
+                var initLerp = Random.value * 0.5f;
+                darkColor = Color.Lerp(darkColor, PixieSlug.Instance == null ? FlyDarkRed : randomColor * 0.5f, initLerp);
+                color = Color.Lerp(color, PixieSlug.Instance == null ? FlyRed : randomColor, initLerp);
 
 
 
@@ -1054,12 +1164,12 @@ namespace BuiltinBuffs.Negative
                     sLeaser.sprites[SlimeSprite(i)].rotation = Custom.AimFromOneVectorToAnother(vector2, vector3);
                     sLeaser.sprites[SlimeSprite(i)].scaleX = Custom.LerpMap(Vector2.Distance(vector2, vector3), 0f, slime[i, 3].y * 3.5f, 6f, 2f, 2f) * massLeft / 16f;
                 }
-                sLeaser.sprites[JaggedSprite].color = Color.Lerp(darkColor, FlyDarkRed,(1 - massLeft) * 3);
+                sLeaser.sprites[JaggedSprite].color = Color.Lerp(darkColor, PixieSlug.Instance == null ? FlyDarkRed : randomColor * 0.5f, (1 - massLeft) * 3);
 
-                sLeaser.sprites[DotSprite].color = Color.Lerp(color, FlyRed,(1 - massLeft)*3);
+                sLeaser.sprites[DotSprite].color = Color.Lerp(color, PixieSlug.Instance == null ? FlyRed : randomColor, (1 - massLeft)*3);
 
                 for (int i = 0; i < slime.GetLength(0); i++)
-                    sLeaser.sprites[SlimeSprite(i)].color = Color.Lerp(darkColor, FlyDarkRed, (1 - massLeft) * 3);
+                    sLeaser.sprites[SlimeSprite(i)].color = Color.Lerp(darkColor, PixieSlug.Instance == null ? FlyDarkRed : randomColor * 0.5f, (1 - massLeft) * 3);
                 if (base.slatedForDeletetion || room != rCam.room)
                 {
                     sLeaser.CleanSpritesAndRemove();
