@@ -395,7 +395,7 @@ namespace RandomBuff.Core.Game
             if (buffDictionary.ContainsKey(id))
             {
                 BuffPlugin.LogWarning($"Buff: {id} Already Contain");
-                if(needStack)
+                if(needStack && id.GetStaticData().Stackable)
                     GetBuffData(id).Stack();
                 return buffDictionary[id];
             }

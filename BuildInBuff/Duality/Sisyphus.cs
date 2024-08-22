@@ -68,7 +68,8 @@ namespace HotDogGains.Duality
                 var data = rock.SisyphusData();
 
                 Warp(self, data.saveRoom, data.savePos,data.saveWorldCoordinate);
-                Warp(rock, data.saveRoom, data.savePos,data.saveWorldCoordinate);
+                Warp(rock, data.saveRoom, data.savePos, data.saveWorldCoordinate);
+
                 SisyphusBuff.Instance.TriggerSelf(true);
 
 
@@ -91,24 +92,43 @@ namespace HotDogGains.Duality
 
         }
 
-        public static void Warp(PhysicalObject obj,AbstractRoom newRoom,Vector2 newPos,WorldCoordinate worldCoordinate)
+        public static void Warp(PhysicalObject owner,AbstractRoom newRoom,Vector2 newPos,WorldCoordinate worldCoordinate)
         {
-            if (obj.room.abstractRoom!=newRoom)
-            {
-                newRoom.RealizeRoom(newRoom.world, newRoom.world.game);
+            var useList = new List<PhysicalObject> { owner };
 
-                obj.abstractPhysicalObject.Move(worldCoordinate);
-                obj.PlaceInRoom(newRoom.realizedRoom);
-                obj.abstractPhysicalObject.pos = newRoom.realizedRoom.GetWorldCoordinate(newPos);
-            }
-            else
+            for(int i =0;i<useList.Count;i++)
             {
-                foreach (var item in obj.bodyChunks)
+                var obj = useList[i];
+                foreach (var stick in obj.abstractPhysicalObject.stuckObjects.Select(s =>
+                             s.A == obj.abstractPhysicalObject ? s.B : s.A))
                 {
-                    item.HardSetPosition(newPos);
+                    if (stick.realizedObject == null || useList.Contains(stick.realizedObject))
+                        continue;
+                    useList.Add(stick.realizedObject);
                 }
-
             }
+
+            foreach (var obj in useList)
+            {
+                if (obj.room.abstractRoom != newRoom)
+                {
+                    newRoom.RealizeRoom(newRoom.world, newRoom.world.game);
+
+                    obj.abstractPhysicalObject.Move(worldCoordinate);
+                    obj.PlaceInRoom(newRoom.realizedRoom);
+                    obj.abstractPhysicalObject.pos = newRoom.realizedRoom.GetWorldCoordinate(newPos);
+                }
+                else
+                {
+                    foreach (var item in obj.bodyChunks)
+                    {
+                        item.HardSetPosition(newPos);
+                    }
+                    obj.graphicsModule?.Reset();
+
+                }
+            }
+           
             
         }
     }

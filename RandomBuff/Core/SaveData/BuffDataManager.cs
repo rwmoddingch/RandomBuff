@@ -146,7 +146,7 @@ namespace RandomBuff.Core.SaveData
                 else
                     return null;
             }
-            if (createOrStack)
+            if (createOrStack && id.GetStaticData().Stackable)
                 cardInfos[id].Stack();
 
             return cardInfos[id];
