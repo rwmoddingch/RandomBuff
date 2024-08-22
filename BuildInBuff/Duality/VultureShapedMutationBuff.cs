@@ -20,15 +20,19 @@ using System.Numerics;
 using System.Runtime.Remoting.Messaging;
 using Newtonsoft.Json.Linq;
 using BuiltinBuffs.Negative;
+using System.Reflection;
+using System.Drawing;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 
 namespace BuiltinBuffs.Duality
 {
     internal class VultureShapedMutationBuff : Buff<VultureShapedMutationBuff, VultureShapedMutationBuffData>
     {
-        public override bool Triggerable => false;//true;
+        public override bool Triggerable => true;//VultureShapedMutationBuffEntry.StackLayer >= 3;//
 
         public override BuffID ID => VultureShapedMutationBuffEntry.VultureShapedMutation;
-
+        //飞行速度
         public int SpeedLevel
         {
             get
@@ -39,6 +43,14 @@ namespace BuiltinBuffs.Duality
                 return num;
             }
         }
+        //发射角矛时会发射可以击落飞行物的防御导弹
+        public bool ActiveProtectionSysytem => GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.ActiveProtectionSystemBuffEntry.activeProtectionSysytem);
+        //大幅提高角矛的射击和回收速度
+        public bool AerialFirepower => GetTemporaryBuffPool().allBuffIDs.Contains(HotDogGains.Negative.AerialFirepowerBuffEntry.AerialFirepowerID);
+        //角矛载弹量提升两倍，并大幅增加发射速度
+        public bool ArmedKingVulture => GetTemporaryBuffPool().allBuffIDs.Contains(HotDogGains.Negative.ArmedKingVultureBuffEntry.ArmedKingVultureID);
+        //角矛发射后会追踪一点时间后快速射出，并且获得更快的发射速度和更远的攻击范围，攻击到目标或墙的情况会发生一次无伤害的爆炸
+        //public bool RocketBoostTusks => GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.RocketBoostTusksEntry.RocketBoostTusks);
 
         public VultureShapedMutationBuff()
         {
@@ -50,28 +62,12 @@ namespace BuiltinBuffs.Duality
                     var vultureCat = new VultureCat(player);
                     VultureShapedMutationBuffEntry.VultureCatFeatures.Add(player, vultureCat);
                     vultureCat.VultureWing(player.graphicsModule as PlayerGraphics);
+                    vultureCat.KingTusk(player.graphicsModule as PlayerGraphics);
                     vultureCat.InitiateSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
             }
         }
-
-        /*
-        public override bool Trigger(RainWorldGame game)
-        {
-            foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
-                             .Where(i => i != null && i.graphicsModule != null))
-            {
-                if (VultureShapedMutationBuffEntry.VultureCatFeatures.TryGetValue(player, out var vultureCat))
-                {
-                    if (vultureCat.isFlying)
-                        vultureCat.StopFlight();
-                    else if (vultureCat.CanSustainFlight(player))
-                        vultureCat.InitiateFlight(player);
-                }
-            }
-            return false;
-        }*/
     }
 
     internal class VultureShapedMutationBuffData : BuffData
@@ -100,17 +96,19 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
+            IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+
             On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
+            On.LizardAI.IUseARelationshipTracker_UpdateDynamicRelationship += LizardAI_UpdateDynamicRelationship;
 
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
             On.MoreSlugcats.SlugNPCAI.TheoreticallyEatMeat += SlugNPCAI_TheoreticallyEatMeat;
 
-            On.Player.Grabability += Player_Grabability;
-            On.Player.FreeHand += Player_FreeHand;
             On.SlugcatHand.Update += SlugcatHand_Update;
-            //On.Creature.Grab += Creature_Grab;
-            //On.Creature.Grasp.Release += Grasp_Release;
+            On.Player.Grabability += Player_Grabability;
+
+            On.VultureMask.DrawSprites += VultureMask_DrawSprites;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -127,14 +125,12 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
         }
 
-        
-
         public static void LongLifeCycleHookOn()
         {
             On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
         }
-        #region 额外特性
 
+        #region 额外特性
         //允许吃肉
         private static bool Player_CanEatMeat(On.Player.orig_CanEatMeat orig, Player self, Creature crit)
         {
@@ -148,6 +144,7 @@ namespace BuiltinBuffs.Duality
                      (!ModManager.MSC || self.pyroJumpCooldown <= 60f);
             return result;
         }
+
         //让猫仔也可以吃肉
         private static bool SlugNPCAI_TheoreticallyEatMeat(On.MoreSlugcats.SlugNPCAI.orig_TheoreticallyEatMeat orig, SlugNPCAI self, Creature crit, bool excludeCentipedes)
         {
@@ -167,8 +164,8 @@ namespace BuiltinBuffs.Duality
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
             IntVector2 origFoodRequirement = orig(slugcat);
-            int newHibernateRequirement = origFoodRequirement.y + 2;
-            int newTotalFoodRequirement = origFoodRequirement.x + 1;
+            int newHibernateRequirement = origFoodRequirement.y + (StackLayer >= 3 ? 4 : 2);
+            int newTotalFoodRequirement = origFoodRequirement.x + (StackLayer >= 3 ? 2 : 1);
             if (newHibernateRequirement > newTotalFoodRequirement)
             {
                 newHibernateRequirement++;
@@ -202,30 +199,27 @@ namespace BuiltinBuffs.Duality
             return result;
         }
 
-        private static int Player_FreeHand(On.Player.orig_FreeHand orig, Player self)
+        //佩戴面具时让面具抬一下
+        private static void VultureMask_DrawSprites(On.VultureMask.orig_DrawSprites orig, VultureMask self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            int result = orig(self);
-            if (VultureCatFeatures.TryGetValue(self, out var vultureCat))
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            if (self.grabbedBy.Count > 0 && self.grabbedBy[0].grabber is Player player &&
+                VultureCatFeatures.TryGetValue(player, out var vultureCat))
             {
-                if (self.grasps[0] != null || (self.grasps[1] != null && !(vultureCat.CanWearMask && (self.grasps[1].grabbed is VultureMask))))
+                if (vultureCat.wearCount >= 20 && vultureCat.wearCount <= 40)
                 {
-                    result = -1;
+                    float num = Mathf.Lerp(self.lastDonned, self.donned, timeStacker);
+                    Vector2 vector3 = Vector3.Slerp(self.lastRotationB, self.rotationB, timeStacker);
+                    self.maskGfx.overrideDrawVector += Custom.DirVec(Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker), Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker)) *
+                                                       7f * Mathf.InverseLerp(40f, 20f, vultureCat.wearCount);
+                    self.maskGfx.overrideAnchorVector = Vector3.Slerp(vector3, new Vector2(0f, -1f), num);
+                    self.maskGfx.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+                    if (self.slatedForDeletetion || self.room != rCam.room)
+                    {
+                        sLeaser.CleanSpritesAndRemove();
+                    }
                 }
             }
-            return result;
-        }
-
-        //佩戴面具
-        private static bool Creature_Grab(On.Creature.orig_Grab orig, Creature self, PhysicalObject obj, int graspUsed, int chunkGrabbed, Creature.Grasp.Shareability shareability, float dominance, bool overrideEquallyDominant, bool pacifying)
-        {
-            if (self is Player && VultureCatFeatures.TryGetValue(self as Player, out var vultureCat))
-            {
-                if (vultureCat.Mask != null && !vultureCat.HasReleasePickButton)
-                {
-                    return true;
-                }
-            }
-            return orig(self, obj, graspUsed, chunkGrabbed, shareability, dominance, overrideEquallyDominant, pacifying);
         }
         #endregion
         #region 生物关系
@@ -245,15 +239,51 @@ namespace BuiltinBuffs.Duality
             {
                 CreatureTemplate.Relationship relationship = self.StaticRelationship(dRelation.trackerRep.representedCreature);
                 if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat &&
-                    dRelation.trackerRep.representedCreature.realizedCreature is Player &&
-                    VultureCatFeatures.TryGetValue(dRelation.trackerRep.representedCreature.realizedCreature as Player, out var vultureCat))
+                    dRelation.trackerRep.representedCreature.realizedCreature is Player player &&
+                    VultureCatFeatures.TryGetValue(player, out var vultureCat))
                 {
-                    if (vultureCat.State.mask)
+                    if (vultureCat.State.mask && self.vulture.killTag != player.abstractCreature)
                         result = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
                 }
             }
             return result;
         }
+
+        //修改生物关系（蜥蜴会恐惧携带面具的鹫形玩家）
+        public static CreatureTemplate.Relationship LizardAI_UpdateDynamicRelationship(On.LizardAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, LizardAI self, RelationshipTracker.DynamicRelationship dRelation)
+        {
+            CreatureTemplate.Relationship result = orig(self, dRelation);
+            if (StackLayer >= 2)
+            {
+                CreatureTemplate.Relationship relationship = self.StaticRelationship(dRelation.trackerRep.representedCreature);
+                if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat &&
+                    dRelation.trackerRep.representedCreature.realizedCreature is Player player &&
+                    VultureCatFeatures.TryGetValue(player, out var vultureCat) &&
+                    (vultureCat.mask != null || vultureCat.State.mask))
+                {
+                    float maskFac = ((dRelation.state as LizardAI.LizardTrackState).vultureMask == 2) ? 1.5f : 1f;
+                    bool immunity = (self.creature.creatureTemplate.type == CreatureTemplate.Type.GreenLizard && (dRelation.state as LizardAI.LizardTrackState).vultureMask < 2) ||
+                                    (self.creature.creatureTemplate.type == CreatureTemplate.Type.RedLizard);
+                    bool canIntimidate = (self.lizard.lizardParams.biteDamage * Mathf.Pow(self.lizard.TotalMass, 0.5f) <= (1.2f + 0.1f * StackLayer) * maskFac);
+                    if (!immunity && canIntimidate)//永久恐吓
+                    {
+                        self.usedToVultureMask = 0;//恐惧计时一直归零
+                    }
+                    /*
+                    if (self.creature.creatureTemplate.type == CreatureTemplate.Type.GreenLizard && (dRelation.state as LizardAI.LizardTrackState).vultureMask < 2)
+                    {
+                        return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                    }
+                    return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, Mathf.InverseLerp((float)(((dRelation.state as LizardAI.LizardTrackState).vultureMask == 2) ? 1200 : 700), 
+                        600f, 
+                        (float)self.usedToVultureMask) * (((dRelation.state as LizardAI.LizardTrackState).vultureMask == 2) ? 
+                        ((self.creature.creatureTemplate.type == CreatureTemplate.Type.GreenLizard) ? 0.4f : 0.9f) : 
+                        ((self.creature.creatureTemplate.type == CreatureTemplate.Type.BlueLizard) ? 0.8f : 0.6f)));*/
+                }
+            }
+            return result;
+        }
+
         //修改生物关系（钢鸟、钢鹫不再攻击玩家）（未应用）
         public static bool VultureAI_DoIWantToBiteCreature(On.VultureAI.orig_DoIWantToBiteCreature orig, VultureAI self, AbstractCreature creature)
         {
@@ -263,24 +293,6 @@ namespace BuiltinBuffs.Duality
             return result;
         }
         #endregion
-        private static void Grasp_Release(On.Creature.Grasp.orig_Release orig, Creature.Grasp self)
-        {
-            if (self.grabber is Player && VultureCatFeatures.TryGetValue(self.grabber as Player, out var vultureCat))
-            {
-                var mask = vultureCat.Mask;
-
-                BuffPlugin.Log("vultureCat.maskGrasp is null: " + (vultureCat.maskGrasp == null));
-                if (mask != null && vultureCat.maskGrasp != null)
-                {/*
-                if(mask.grabbedBy.Count == 0)
-                    mask.Grabbed(maskGrasp);*/
-                    BuffPlugin.Log("mask.grabbedBy is null: " + (mask.grabbedBy == null));
-                    BuffPlugin.Log("mask.grabbedBy[0]: " + (mask.grabbedBy[0].ToString()));
-                    //BuffPlugin.Log("mask.grabbedBy[0].grabber: " + mask.grabbedBy[0].grabber.ToString());
-                }
-            }
-            orig(self);
-        }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
@@ -358,7 +370,10 @@ namespace BuiltinBuffs.Duality
         {
             orig(self, ow);
             if (VultureCatFeatures.TryGetValue(self.player, out var vultureCat))
+            {
                 vultureCat.VultureWing(self);
+                vultureCat.KingTusk(self);
+            }
         }
 
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
@@ -375,11 +390,32 @@ namespace BuiltinBuffs.Duality
                 vultureCat.Reset(self);
         }
         #endregion
+        #region 时缓
+        private static void RainWorldGame_RawUpdate(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
+                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
+            {
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Action<RainWorldGame>>(game =>
+                {
+                    if (UpdateSpeed < game.framesPerSecond)
+                        game.framesPerSecond = UpdateSpeed;
+                });
+            }
+            else
+                BuffUtils.LogError(VultureShapedMutation, "IL HOOK FAILED");
+        }
+
+        public static int UpdateSpeed = 1000;
+        #endregion
     }
 
     internal class VultureCat
     {
         WeakReference<Player> ownerRef;
+        private int origThrowingSkill;
 
         public bool ChargingSnap
         {
@@ -396,12 +432,6 @@ namespace BuiltinBuffs.Duality
                 return this.snapFrames > 0 && this.snapFrames <= 21;
             }
         }
-
-        public bool CanWearMask => VultureShapedMutationBuffEntry.StackLayer >= 2;
-
-        public bool IsKing => VultureShapedMutationBuffEntry.StackLayer >= 3;
-
-        public bool IsMiros => VultureShapedMutationBuffEntry.StackLayer >= 10;
 
         private float MassFac
         {
@@ -435,16 +465,17 @@ namespace BuiltinBuffs.Duality
             }
         }
 
+        #region 等级相关
+        public bool CanWearMask => VultureShapedMutationBuffEntry.StackLayer >= 2;
+
+        public bool IsKing => VultureShapedMutationBuffEntry.StackLayer >= 3;
+
+        public bool IsMiros => false;//VultureShapedMutationBuffEntry.StackLayer >= 10;
+        #endregion
+
         #region 面具相关
-        private VultureMask mask;
-        public Creature.Grasp maskGrasp;
-        private float grabChunkCollisionRad;
-        private int wearCount;
-        private bool hasReleasePickButton;
-
-        public VultureMask Mask => mask;
-
-        public bool HasReleasePickButton => hasReleasePickButton;
+        public VultureMask mask;
+        public int wearCount;
         #endregion
 
         #region 行为相关
@@ -592,37 +623,30 @@ namespace BuiltinBuffs.Duality
 
         private int NeckLumpStart => FeatherSpriteStart + FeatherSpritesLength;
 
-        private int NeckLumpLength => 2;
+        private int NeckLumpLength => (this.kingTusks == null ? 0 : this.kingTusks.tusks.Length);
 
         private int TuskSpriteStart => NeckLumpStart + NeckLumpLength;
 
-        private int TuskSpriteLength => 2;
+        private int TuskSpriteLength => kngtskSprCount * (this.kingTusks == null ? 0 : this.kingTusks.tusks.Length);
 
         private int TuskWireSpriteStart => TuskSpriteStart + TuskSpriteLength;
 
-        private int TuskWireSpriteLength => 2;
+        private int TuskWireSpriteLength => (this.kingTusks == null ? 0 : this.kingTusks.tusks.Length);
 
-        private int TotalSprites => wings.Length + FeatherSpritesLength + (IsKing ? NeckLumpLength + TuskSpriteLength + TuskWireSpriteLength : 0);
+        private int TotalSprites => wings.Length + FeatherSpritesLength + (IsKing ? NeckLumpLength + TuskSpriteLength + TuskWireSpriteLength : 0); 
+        
+        public int kngtskSprCount => (this.kingTusks == null ? 0 : KingTusks.Tusk.TotalSprites);
 
         private int WingsSprite(int index, int side)
         {
             return WingsSpriteStart + index * wings.GetLength(1) + side;
         }
 
-        private int FeatherSprite(int w, int i)
-        {
-            return FeatherSpriteStart + i * 2 + this.feathersPerWing * w * 2;
-        }
         private int FeatherSprite(int index, int side, int i)
         {
             return FeatherSpriteStart + i * 2 + this.feathersPerWing * (index * wings.GetLength(1) + side) * 2;
         }
 
-        private int FeatherColorSprite(int w, int i)
-        {
-            return FeatherSpriteStart + i * 2 + 1 + this.feathersPerWing * w * 2;
-        
-        }
         private int FeatherColorSprite(int index, int side, int i)
         {
             return FeatherSpriteStart + i * 2 + 1 + this.feathersPerWing * (index * wings.GetLength(1) + side) * 2;
@@ -634,9 +658,9 @@ namespace BuiltinBuffs.Duality
             return NeckLumpStart + s;
         }
 
-        private int TuskSprite(int i)
+        public int TuskSprite(int i)
         {
-            return TuskSpriteStart + i;
+            return TuskSpriteStart + KingTusks.Tusk.TotalSprites * i;
         }
 
         public int TuskWireSprite(int side)
@@ -644,16 +668,17 @@ namespace BuiltinBuffs.Duality
             return TuskWireSpriteStart + side;
         }
 
-        public int FirstKingTuskSpriteBehind => TuskSpriteStart;
-
-        public int FirstKingTuskSpriteFront => TuskSpriteStart;
-
         public bool IsKingTuskSprite(int i)
         {
-            return this.IsKing && 
-                ((i >= TuskSpriteStart && i < TuskSpriteStart + KingTusks.Tusk.TotalSprites) || 
-                  i == this.TuskWireSprite(0) || i == this.TuskWireSprite(1));
+            bool isTuskWireSprite = false;
+            for (int j = 0; j < TuskWireSpriteLength; j++)
+                if (i == this.TuskWireSprite(j))
+                    isTuskWireSprite = true;
+            return this.IsKing &&
+                ((i >= TuskSpriteStart && i < TuskSpriteStart + KingTusks.Tusk.TotalSprites) || isTuskWireSprite);
         }
+
+        public int TusksLength => VultureShapedMutationBuff.Instance.ArmedKingVulture ? 4 : 2;
         #endregion
 
         public void VultureWing(PlayerGraphics self)
@@ -743,6 +768,18 @@ namespace BuiltinBuffs.Duality
             this.Reset(self);
         }
 
+        public void KingTusk(PlayerGraphics self)
+        {
+            if (this.IsKing && (this.kingTusks == null || this.kingTusks.tusks.Length != TusksLength))
+            {
+                this.kingTusks = new KingTusks(self.owner as Player, this);
+            }
+            if (!this.IsKing && this.kingTusks != null)
+            {
+                this.kingTusks = null;
+            }
+        }
+
         public VultureCat(Player player)
         {
             ownerRef = new WeakReference<Player>(player);
@@ -751,8 +788,8 @@ namespace BuiltinBuffs.Duality
             wingFlapAmplitude = 1f;
             foldScaleWhenClimb = 0.5f;
             groundRetractionScale = 0.9f;
+            origThrowingSkill = player.slugcatStats.throwingSkill;
             mask = null; 
-            hasReleasePickButton = false;
             if (player.playerState.isPup)
             {
                 wingLength = 3f;
@@ -779,10 +816,17 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
+
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            KingTusk(self);
+
             firstSprite = sLeaser.sprites.Length;
             Array.Resize(ref sLeaser.sprites, firstSprite + TotalSprites);
 
+            if (this.kingTusks != null)
+            {
+                this.kingTusks.InitiateSprites(self, sLeaser, rCam);
+            }
             for (int i = 0; i < this.wings.GetLength(0); i++)
                 for (int j = 0; j < this.wings.GetLength(1); j++)
                     sLeaser.sprites[this.WingsSprite(i, j)] = TriangleMesh.MakeLongMesh(this.wings[i, j].tChunks.Length, false, false);
@@ -820,7 +864,7 @@ namespace BuiltinBuffs.Duality
             if (sLeaser.sprites.Length >= 9)
                 for (int i = 5; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
-            //this.MaskUpdate(sLeaser, rCam, timeStacker, camPos);
+
             this.WingColorForSpecificSlugcat(sLeaser);
             this.darkness = rCam.room.Darkness(Vector2.Lerp(player.mainBodyChunk.lastPos, player.mainBodyChunk.pos, timeStacker));
             this.darkness *= 1f - 0.5f * rCam.room.LightSourceExposure(Vector2.Lerp(player.mainBodyChunk.lastPos, player.mainBodyChunk.pos, timeStacker));
@@ -852,14 +896,14 @@ namespace BuiltinBuffs.Duality
                             {
                                 vector8 = Vector2.Lerp(this.vulture.bodyChunks[0].lastPos, this.vulture.bodyChunks[0].pos, timeStacker);
                             }
-                            Vector2 normalized2 = (vector8 - vector6).normalized;
-                            Vector2 a2 = Custom.PerpendicularVector(normalized2);
+                            Vector2 wireDir = (vector8 - vector6).normalized;
+                            Vector2 a2 = Custom.PerpendicularVector(wireDir);
                             float d2 = Vector2.Distance(vector8, vector6) / 5f;
                             float num5 = (l % 3 == 0) ? 2.5f : 1.5f;
-                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4, vector6 - a2 * (num5 + num4) * 0.5f + normalized2 * d2 - camPos);
-                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4 + 1, vector6 + a2 * (num5 + num4) * 0.5f + normalized2 * d2 - camPos);
-                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4 + 2, vector8 - a2 * num5 - normalized2 * d2 - camPos);
-                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4 + 3, vector8 + a2 * num5 - normalized2 * d2 - camPos);
+                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4, vector6 - a2 * (num5 + num4) * 0.5f + wireDir * d2 - camPos);
+                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4 + 1, vector6 + a2 * (num5 + num4) * 0.5f + wireDir * d2 - camPos);
+                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4 + 2, vector8 - a2 * num5 - wireDir * d2 - camPos);
+                            (sLeaser.sprites[this.TubeSprite(k, l)] as TriangleMesh).MoveVertice(l * 4 + 3, vector8 + a2 * num5 - wireDir * d2 - camPos);
                             num4 = num5;
                             vector6 = vector8;
                         }
@@ -924,6 +968,11 @@ namespace BuiltinBuffs.Duality
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             this.palette = palette;
+            if (this.kingTusks != null)
+            {
+                Color color3 = Color.Lerp(this.ColorA.rgb, new Color(1f, 1f, 1f), 0.35f);
+                this.kingTusks.ApplyPalette(self, this.palette, color3, sLeaser, rCam);
+            }
         }
 
         public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -974,6 +1023,10 @@ namespace BuiltinBuffs.Duality
                         if (this.IsKingTuskSprite(firstSprite + k))
                         {
                             this.kingTusks.AddToContainer(self, firstSprite + k, sLeaser, rCam, newContatiner);
+
+                            if (firstSprite + k >= TuskSpriteStart && 
+                                firstSprite + k < TuskSpriteStart + TuskWireSpriteLength)
+                                sLeaser.sprites[firstSprite + k].MoveBehindOtherNode(sLeaser.sprites[3]);
                         }
                         else
                         {
@@ -1197,7 +1250,6 @@ namespace BuiltinBuffs.Duality
         }
         #endregion
 
-        //进行飞行
         public void Update()
         {
             if (!ownerRef.TryGetTarget(out var player))
@@ -1205,28 +1257,29 @@ namespace BuiltinBuffs.Duality
             if (!player.Consious) 
                 StopFlight();
 
-            if (player.grasps[1] != null && !(CanWearMask && (player.grasps[1].grabbed is VultureMask) && this.mask != null))
+            player.slugcatStats.throwingSkill = Mathf.Max(-1, origThrowingSkill - VultureShapedMutationBuffEntry.StackLayer + 1);
+
+            WearMaskUpdate();
+            if (player.grasps != null)
             {
-                if (player.grasps[0] != null)
-                    player.ReleaseGrasp(1);
+                if (player.grasps[1] != null && !(CanWearMask && (player.grasps[1].grabbed is VultureMask) && this.mask != null))
+                {
+                    if (player.grasps[0] != null)
+                        player.ReleaseGrasp(1);
+                    else
+                        player.SwitchGrasps(1, 0);
+                }
+
+                if ((player.grasps[0] != null && player.grasps[0].grabbed is VultureMask) ||
+                    (player.grasps[1] != null && player.grasps[1].grabbed is VultureMask) ||
+                    this.mask != null)
+                {
+                    this.State.mask = true;
+                }
                 else
                 {
-                    var obj = player.grasps[1].grabbed;
-                    player.SwitchGrasps(1, 0);
+                    this.State.mask = false;
                 }
-            }
-
-            //WearMaskUpdate();
-
-            if ((player.grasps[0] != null && player.grasps[0].grabbed is VultureMask) ||
-                (player.grasps[1] != null && player.grasps[1].grabbed is VultureMask) ||
-                this.mask != null)
-            {
-                this.State.mask = true;
-            }
-            else
-            {
-                this.State.mask = false;
             }
 
             this.hangingInTentacle = false;
@@ -1317,6 +1370,10 @@ namespace BuiltinBuffs.Duality
                 player.gravity = normalGravity;
 
                 wantPos = player.bodyChunks[0].pos + wingSpeed * new Vector2(player.input[0].x, player.input[0].y);
+            }
+            if (this.kingTusks != null)
+            {
+                this.kingTusks.Update();
             }
         }
 
@@ -1490,54 +1547,37 @@ namespace BuiltinBuffs.Duality
                 return;
             if (!this.CanWearMask)
             {
-                this.ReleaseGraspMask();
+                if (this.mask != null)
+                    this.ReleaseGraspMask();
                 return;
             }
-            if ((this.mask == null && player.input[0].pckp && player.input[0].y > 0) ||
-                (this.mask != null && player.input[0].pckp && player.input[0].y < 0))
+            if (this.mask == null && player.input[0].pckp && player.input[0].y > 0)
                 wearCount++;
             else
-            {
                 wearCount = 0;
-                hasReleasePickButton = true;
-            }
 
-            if (wearCount == 40 && hasReleasePickButton)
+            if (wearCount >= 40)
             {
                 //戴上面具
                 if (this.mask == null && FindMaskInHands(player) != -1)
                 {
                     wearCount = 0;
-                    hasReleasePickButton = false;
                     int hand = FindMaskInHands(player);
                     this.mask = player.grasps[hand].grabbed as VultureMask;
-                    player.SwitchGrasps(0, 1);/*
-                    maskGrasp = new Creature.Grasp(player, mask, player.grasps.Length - 1, 0, Creature.Grasp.Shareability.CanNotShare, 1f, false);
-                    mask.Grabbed(maskGrasp);
-                    grabChunkCollisionRad = maskGrasp.grabbed.collisionRange;
-                    mask.collisionRange = -200f;
-                    new AbstractPhysicalObject.CreatureGripStick(player.abstractCreature, mask.abstractPhysicalObject, 0, mask.TotalMass < player.TotalMass);*/
+                    player.SwitchGrasps(0, 1);
                     player.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, player.mainBodyChunk);
                     BuffPlugin.Log("Player wear mask on face!");
                 }
-                //取下面具
-                else if (this.mask != null)
-                {
-                    wearCount = 0;
-                    hasReleasePickButton = false;
-                    this.mask = null;
-                    this.ReleaseGraspMask();
-                    player.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, player.mainBodyChunk);
-                    //player.room.PlaySound(SoundID.Slugcat_Step_A, player.mainBodyChunk);
-                }
             }
-            if (mask != null)
-            {/*
-                if(mask.grabbedBy.Count == 0)
-                    mask.Grabbed(maskGrasp);*/
-                BuffPlugin.Log("mask.grabbedBy is null: " + (mask.grabbedBy == null)); 
-                BuffPlugin.Log("mask.grabbedBy.Count: " + (mask.grabbedBy.Count));
-                BuffPlugin.Log("player.grasps[1] = null: " + (player.grasps[1] = null));
+            if (this.mask != null)
+            {
+                if (player.grasps != null && player.grasps[1] == null)
+                {
+                    if (player.grasps[0] != null && player.grasps[0].grabbed == this.mask)//这是换手
+                        player.SwitchGrasps(0, 1);
+                    else//这是考虑按拾取 + ↓放下面具的情况
+                        this.ReleaseGraspMask();
+                }
             }
             /*
             if (this.mask != null && player.room != null && player.graphicsModule != null)
@@ -1554,37 +1594,17 @@ namespace BuiltinBuffs.Duality
             */
         }
 
-        public void MaskUpdate(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            if (!ownerRef.TryGetTarget(out var player))
-                return;
-            if (!this.CanWearMask)
-            {
-                this.ReleaseGraspMask();
-                return;
-            }
-            if (mask != null)
-            {
-                mask.lastDonned = 1f;
-                mask.donned = 1f;/*
-                mask.firstChunk.HardSetPosition(sLeaser.sprites[9].GetPosition() + camPos);
-                mask.firstChunk.vel *= 0f;*/
-            }
-        }
-
         public void ReleaseGraspMask()
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
             try
-            {/*
-                if (maskGrasp != null)
-                    maskGrasp.grabbed.collisionRange = grabChunkCollisionRad;
-                grabChunkCollisionRad = -1f;*/
-                maskGrasp?.Release();
-                maskGrasp = null;
-                player.grasps[1]?.Release();
+            {
                 mask = null;
+                int hand = FindMaskInHands(player);
+                if (hand != -1)
+                    player.grasps[hand].Release();
+                player.room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, player.mainBodyChunk);
                 BuffPlugin.Log("Player remove mask on face!");
             }
             catch (Exception ex)
@@ -1663,7 +1683,7 @@ namespace BuiltinBuffs.Duality
             self.pos = pos;
             self.absoluteHuntPos = pos; 
             (self.owner.owner as Player).craftingObject = true;
-
+            
             for (int i = 0; i < 2; i++)
             {
                 if ((self.owner.owner as Player).grasps[i] != null)
@@ -1689,7 +1709,6 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var self))
                 return result;
-
             if (result == Player.ObjectGrabability.OneHand)
                 result = Player.ObjectGrabability.BigOneHand;
             else if (result == Player.ObjectGrabability.BigOneHand)
@@ -1699,14 +1718,14 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.Drag)
                 result = Player.ObjectGrabability.Drag;
 
-            if (obj == this.mask)
-                result = Player.ObjectGrabability.CantGrab;
-
+            if (this.mask != null && result == Player.ObjectGrabability.BigOneHand)
+                result = Player.ObjectGrabability.OneHand;
             return result;
         }
         #endregion
     }
 
+    #region 翅膀
     internal class VultureCatFeather : BodyPart
     {
         private enum ContractMode
@@ -1896,7 +1915,7 @@ namespace BuiltinBuffs.Duality
 
         public float GetTentacleAngle(int index, int side)
         {
-            if (index == 0 && side == 0)
+            if (index == 0 && side % 2 == 0)
             {
                 return 1f;
             }
@@ -1904,7 +1923,7 @@ namespace BuiltinBuffs.Duality
             {
                 return -1f;
             }
-            if (index == 1 && side == 0)
+            if (index == 1 && side % 2 == 0)
             {
                 return 4f;
             }
@@ -1951,7 +1970,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                if (index == 0 && side == 0)
+                if (index == 0 && side % 2 == 0)
                 {
                     return -1f;
                 }
@@ -1963,7 +1982,7 @@ namespace BuiltinBuffs.Duality
                 {
                     return 1f;
                 }
-                if (index == 1 && side == 0)
+                if (index == 1 && side % 2 == 0)
                 {
                     return -4f;
                 }
@@ -2179,7 +2198,7 @@ namespace BuiltinBuffs.Duality
                     flyingMode -= 0.025f;
                     base.Tip.collideWithTerrain = !attachedAtTip;
                     UpdateDesiredGrabPos();
-                    bool flag = side == 0;
+                    bool flag = side % 2 == 0;
                     BodyChunk bodyChunk = player.bodyChunks[0];//(flag ? vultureCat.bodyChunks[3] : vultureCat.bodyChunks[2]);
                     segmentsGrippingTerrain = 0;
                     for (int l = 0; l < tChunks.Length; l++)
@@ -2287,7 +2306,7 @@ namespace BuiltinBuffs.Duality
                     {
                         tChunks[m].vel *= 0.95f;
                         tChunks[m].vel.x += tentacleDir * 0.6f;
-                        bool shouldBeMirrored = side == 0;
+                        bool shouldBeMirrored = side % 2 == 0;
                         Vector2 wantDir = Vector2.Lerp(Custom.PerpendicularVector(Custom.DirVec(player.bodyChunks[0].pos, player.bodyChunks[1].pos)) * (shouldBeMirrored ? (-1f) : 1f),
                                                        new Vector2(tentacleDir, 0f),
                                                        0.5f);
@@ -2553,6 +2572,7 @@ namespace BuiltinBuffs.Duality
             (vultureCat.State as VultureCatState).wingHealth[index, side] -= damage;
         }
     }
+    #endregion
 
     internal class VultureCatState : HealthState
     {
@@ -2634,8 +2654,8 @@ namespace BuiltinBuffs.Duality
             unrecognizedSaveStrings.Remove(rColor);
         }
     }
-
-    #region 鱼叉
+    
+    #region 角矛
     internal class KingTusks
     {
         public class Tusk : SharedPhysics.IProjectileTracer
@@ -2661,60 +2681,41 @@ namespace BuiltinBuffs.Duality
                 {
                 }
             }
-
-
+            #region 字段
             public KingTusks owner;
-
             public int side;
-
             public static int TotalSprites = 3;
-
-            private static int tuskSegs = 15;
-
+            private static int tuskSegs = 15;//15;
             public Vector2 lastZRot;
-
             public Vector2 zRot;
-
             public Rope rope;
-
             public Vector2[,] chunkPoints;
-
-            public static float length = 30f;
-
+            public static float length = 30f;//30f;
             public static float maxWireLength = 500f;
-
             public static float shootRange = 550f;
-
             public static float minShootRange = 250f;
-
             public float attached;
 
             public Vector2[,] wire;
-
             private float wireLoose;
-
             private float lastWireLoose;
-
-            public Mode mode;
-
             private float currWireLength;
-
             private float wireExtraSlack;
-
             private float elasticity;
 
+            public Mode mode;
             public int modeCounter;
+            private int preparationTime;
+            private int retractingTime;
+            private float retractingSpeed;
 
             public Vector2? stuckInWallPos;
-
             public Vector2 shootDir;
-
+            public Vector2 wantShootDir;
             private float stuck;
 
             private float laserAlpha;
-
             private float lastLaserAlpha;
-
             private float laserPower;
 
             private SharedPhysics.TerrainCollisionData scratchTerrainCollisionData;
@@ -2722,12 +2723,18 @@ namespace BuiltinBuffs.Duality
             public BodyChunk impaleChunk;
 
             public Color armorColor;
-
+            #endregion
+            //火箭助推角矛
+            private int shootCounter;
+            private Creature focusCreature;
+            public float InitSpeed => Custom.LerpMap(shootCounter, 20, 30, 0, 20);
+            //
+            #region 属性
             public Player player => owner.player;
 
             public Room room => owner.player.room;
 
-            public BodyChunk head => owner.player.bodyChunks[4];
+            public BodyChunk head => owner.player.bodyChunks[1];
 
             public bool FullyAttached => attached == 1f;
 
@@ -2766,14 +2773,15 @@ namespace BuiltinBuffs.Duality
                     return false;
                 }
             }
-
+            #endregion
+            #region sprites序号
             public int FirstSprite(PlayerGraphics vGraphics)
             {
-                if (side == 0 == (Mathf.Sign(owner.HeadRotVector.x) == Mathf.Sign(owner.HeadRotVector.y)))
+                if (side % 2 == 0 == (Mathf.Sign(owner.HeadRotVector.x) == Mathf.Sign(owner.HeadRotVector.y)))
                 {
-                    return owner.vultureCat.FirstKingTuskSpriteFront;
+                    return owner.vultureCat.TuskSprite(1 + Mathf.FloorToInt(side / 2) * 2);
                 }
-                return owner.vultureCat.FirstKingTuskSpriteBehind;
+                return owner.vultureCat.TuskSprite(0 + Mathf.FloorToInt(side / 2) * 2);
             }
 
             public int LaserSprite(PlayerGraphics vGraphics)
@@ -2790,7 +2798,8 @@ namespace BuiltinBuffs.Duality
             {
                 return FirstSprite(vGraphics) + 2;
             }
-
+            #endregion
+            #region 角矛属性
             public float TuskBend(float f)
             {
                 return Mathf.Sin(Mathf.Pow(f, 0.85f) * (float)Math.PI * 2f) * Mathf.Pow(1f - f, 2f);
@@ -2805,21 +2814,31 @@ namespace BuiltinBuffs.Duality
             {
                 return 0.5f + 2f * Mathf.Pow(Mathf.Clamp01(Mathf.Sin(Mathf.Pow(f, Mathf.Lerp(0.65f, 0.5f, profileFac)) * (float)Math.PI)), 1.2f - 0.3f * profileFac);
             }
-
+            #endregion
             public Vector2 AimDir(float timeStacker)
             {
-                Vector2 vector = Custom.DirVec(Vector2.Lerp((player.graphicsModule as PlayerGraphics).head.lastPos, (player.graphicsModule as PlayerGraphics).head.pos, timeStacker), Vector2.Lerp(head.lastPos, head.pos, timeStacker));//Custom.DirVec(Vector2.Lerp(player.neck.tChunks[player.neck.tChunks.Length - 1].lastPos, player.neck.tChunks[player.neck.tChunks.Length - 1].pos, timeStacker), Vector2.Lerp(head.lastPos, head.pos, timeStacker));
-                float num = Mathf.InverseLerp(0f, 25f, (float)modeCounter + timeStacker);
-                if (owner.lastEyesHome > 0f || owner.eyesHomeIn > 0f)
+                if (mode == Mode.Charging || mode == Mode.ShootingOut)
                 {
-                    Vector3 vector2 = Custom.DirVec(Vector2.Lerp(head.lastPos, head.pos, timeStacker), Vector2.Lerp(owner.lastPreyPos, owner.preyPos, timeStacker));
-                    vector = Vector3.Slerp(vector, vector2, Mathf.Lerp(owner.lastEyesHome, owner.eyesHomeIn, timeStacker) * Mathf.Pow(Mathf.InverseLerp(0.2f, 0.85f - 0.2f * num, Vector2.Dot(vector, vector2)), 2f - 1.5f * num));
+                    Vector2 inputDir = new Vector2(player.input[0].x, player.input[0].y).normalized;
+                    wantShootDir = Vector3.Slerp(wantShootDir, inputDir, 0.02f);
                 }
-                if (owner.lastEyesOut > 0f || owner.eyesOut > 0f)
+                else
                 {
-                    vector += Custom.PerpendicularVector(vector) * Vector3.Slerp(Custom.DegToVec(owner.lastHeadRot + ((side == 0) ? (-90f) : 90f)), Custom.DegToVec(owner.headRot + ((side == 0) ? (-90f) : 90f)), timeStacker).x * Mathf.Lerp(owner.lastEyesOut, owner.eyesOut, timeStacker) * 0.5f;
+                    Vector2 vector = Custom.DirVec(Vector2.Lerp((player.graphicsModule as PlayerGraphics).head.lastPos, (player.graphicsModule as PlayerGraphics).head.pos, timeStacker), 
+                                                   Vector2.Lerp(head.lastPos, head.pos, timeStacker));//Custom.DirVec(Vector2.Lerp(player.neck.tChunks[player.neck.tChunks.Length - 1].lastPos, player.neck.tChunks[player.neck.tChunks.Length - 1].pos, timeStacker), Vector2.Lerp(head.lastPos, head.pos, timeStacker));
+                    float num = Mathf.InverseLerp(0f, 25f, (float)modeCounter + timeStacker);
+                    if (owner.lastEyesHome > 0f || owner.eyesHomeIn > 0f)
+                    {
+                        Vector3 vector2 = Custom.DirVec(Vector2.Lerp(head.lastPos, head.pos, timeStacker), Vector2.Lerp(owner.lastPreyPos, owner.preyPos, timeStacker));
+                        vector = Vector3.Slerp(vector, vector2, Mathf.Lerp(owner.lastEyesHome, owner.eyesHomeIn, timeStacker) * Mathf.Pow(Mathf.InverseLerp(0.2f, 0.85f - 0.2f * num, Vector2.Dot(vector, vector2)), 2f - 1.5f * num));
+                    }
+                    if (owner.lastEyesOut > 0f || owner.eyesOut > 0f)
+                    {
+                        vector += Custom.PerpendicularVector(vector) * Vector3.Slerp(Custom.DegToVec(owner.lastHeadRot + ((side % 2 == 0) ? (-90f) : 90f)), Custom.DegToVec(owner.headRot + ((side % 2 == 0) ? (-90f) : 90f)), timeStacker).x * Mathf.Lerp(owner.lastEyesOut, owner.eyesOut, timeStacker) * 0.5f;
+                    }
+                    wantShootDir = Vector2.Lerp(wantShootDir, vector, 0.02f);
                 }
-                return vector.normalized;
+                return wantShootDir.normalized;
             }
 
             public Tusk(KingTusks owner, int side)
@@ -2829,6 +2848,9 @@ namespace BuiltinBuffs.Duality
                 chunkPoints = new Vector2[2, 3];
                 wire = new Vector2[20, 4];
                 Reset(room);
+
+                //shootRange = VultureShapedMutationBuff.Instance.RocketBoostTusks ? 700f : 550f;
+                //maxWireLength = VultureShapedMutationBuff.Instance.RocketBoostTusks ? 650f : 500f;
             }
 
             public void Reset(Room newRoom)
@@ -2836,7 +2858,7 @@ namespace BuiltinBuffs.Duality
                 attached = 1f;
                 for (int i = 0; i < chunkPoints.GetLength(0); i++)
                 {
-                    chunkPoints[i, 0] = owner.player.bodyChunks[4].pos + Custom.RNV();
+                    chunkPoints[i, 0] = owner.player.bodyChunks[1].pos + Custom.RNV();
                     chunkPoints[i, 1] = chunkPoints[i, 0];
                     chunkPoints[i, 2] *= 0f;
                 }
@@ -2858,10 +2880,43 @@ namespace BuiltinBuffs.Duality
                 lastWireLoose = 0f;
                 wireExtraSlack = 0f;
                 elasticity = 0.9f;
+                //角矛蓄力时间
+                preparationTime = Mathf.FloorToInt(Custom.LerpMap(VultureShapedMutationBuffEntry.StackLayer, 3, 10, 10, 5));
+                if (VultureShapedMutationBuff.Instance.AerialFirepower)
+                {
+                    preparationTime = Mathf.FloorToInt(preparationTime / 2f);
+                }
+                //绳索收回时间
+                retractingTime = 80;
+                if (VultureShapedMutationBuff.Instance.AerialFirepower)
+                {
+                    retractingTime = 0;
+                }
+                //绳索收回速度
+                retractingSpeed = 1f / 90f;
+                if (VultureShapedMutationBuff.Instance.AerialFirepower)
+                {
+                    retractingSpeed = 1f / 4f;
+                }
             }
 
             public void SwitchMode(Mode newMode)
-            {
+            {/*
+                if (VultureShapedMutationBuff.Instance.RocketBoostTusks)
+                {
+                    if (newMode == KingTusks.Tusk.Mode.StuckInWall)
+                    {
+                        this.room.AddObject(new Explosion(this.room, null, this.stuckInWallPos.Value,
+                            7, 150f, 6.2f, 0f, 10f, 0.25f, player, 0.7f, 0f, 1f));
+                        var pos = this.stuckInWallPos.Value;
+                        this.room.AddObject(new Explosion.ExplosionLight(pos, 100f, 1f, 7, Color.white));
+                        this.room.AddObject(new Explosion.ExplosionLight(pos, 90f, 1f, 3, new Color(1f, 1f, 1f)));
+                        this.room.AddObject(new ExplosionSpikes(this.room, pos, 10, 30f, 9f, 7f, 100f, Color.white));
+                        this.room.AddObject(new ShockWave(pos, 130f, 0.025f, 5, false));
+                        this.modeCounter = 30;
+                        newMode = KingTusks.Tusk.Mode.Dangling;
+                    }
+                }*/
                 if (!(mode == newMode))
                 {
                     if (newMode != Mode.StuckInCreature)
@@ -2870,7 +2925,21 @@ namespace BuiltinBuffs.Duality
                     }
                     modeCounter = 0;
                     mode = newMode;
-                }
+                }/*
+                if (VultureShapedMutationBuff.Instance.RocketBoostTusks)
+                {
+                    if (this.mode == KingTusks.Tusk.Mode.StuckInCreature)
+                    {
+                        var pos = this.impaleChunk?.pos ?? TuskPos(this);
+                        this.room.AddObject(new Explosion(this.room, null, pos,
+                            7, 150f, 6.2f, 0f, 10f, 0.25f, player, 0.3f, 0f, 1f));
+
+                        this.room.AddObject(new Explosion.ExplosionLight(pos, 100f, 1f, 7, Color.white));
+                        this.room.AddObject(new Explosion.ExplosionLight(pos, 90f, 1f, 3, new Color(1f, 1f, 1f)));
+                        this.room.AddObject(new ExplosionSpikes(this.room, pos, 10, 30f, 9f, 7f, 100f, Color.white));
+                        this.room.AddObject(new ShockWave(pos, 130f, 0.025f, 5, false));
+                    }
+                }*/
             }
 
             public void Shoot(Vector2 tuskHangPos)
@@ -2916,11 +2985,11 @@ namespace BuiltinBuffs.Duality
                     wire[j, 2] = vector * 160f * UnityEngine.Random.value;
                 }
                 if (player.room.BeingViewed && !player.room.PointSubmerged(head.pos))
-                {
+                {/*
                     if (owner.smoke == null)
-                    {/*
+                    {
                         owner.smoke = new Smoke.NewVultureSmoke(room, head.pos, owner.player);
-                        room.AddObject(owner.smoke);*/
+                        room.AddObject(owner.smoke);
                     }
                     Vector2 a = Custom.DirVec(head.pos, tuskHangPos);
                     for (int k = 0; k < 8; k++)
@@ -2928,7 +2997,19 @@ namespace BuiltinBuffs.Duality
                         float num2 = Mathf.InverseLerp(0f, 8f, k);
                         owner.smoke.pos = (head.pos + chunkPoints[0, 0] + chunkPoints[1, 0]) / 3f;
                         owner.smoke.EmitSmoke(Vector2.Lerp(a, -shootDir, num2) * Mathf.Lerp(15f, 60f, UnityEngine.Random.value * (1f - num2)) + Custom.RNV() * UnityEngine.Random.value * 60f, 1f);
+                    }*/
+                }
+                if (VultureShapedMutationBuff.Instance.ActiveProtectionSysytem)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        player.room.AddObject(new ProtectionMissile(player.room, player.DangerPos, Custom.DegToVec(Custom.VecToDeg(shootDir) + i == 0 ? -60f : 60f), player));
                     }
+                }
+                if (VultureShapedMutationBuff.Instance.AerialFirepower)
+                {
+                    owner.noShootDelay = 3;
+                    laserPower = 1f;
                 }
             }
 
@@ -2944,7 +3025,9 @@ namespace BuiltinBuffs.Duality
                     owner.smoke.pos = chunkPoints[1, 0];
                     owner.smoke.EmitSmoke(Custom.RNV() * UnityEngine.Random.value * 3f - shootDir * UnityEngine.Random.value * 3f, 1f);
                 }
-                float num = 20f;
+                float num = 20f;/*
+                if (VultureShapedMutationBuff.Instance.RocketBoostTusks)
+                    num = InitSpeed;*/
                 Vector2 vector = chunkPoints[0, 0] + shootDir * num;
                 Vector2 vector2 = chunkPoints[0, 0] + shootDir * (num + speed);
                 FloatRect? floatRect = SharedPhysics.ExactTerrainRayTrace(room, vector, vector2);
@@ -3058,8 +3141,8 @@ namespace BuiltinBuffs.Duality
                 {
                     return;
                 }
-                float num2 = ((rope != null) ? rope.totalLength : Vector2.Distance(head.pos, chunkPoints[1, 0]));
-                wireExtraSlack = Mathf.InverseLerp(shootRange * 0.8f, shootRange * 0.5f, num2);
+                float ropeLength = ((rope != null) ? rope.totalLength : Vector2.Distance(head.pos, chunkPoints[1, 0]));
+                wireExtraSlack = Mathf.InverseLerp(shootRange * 0.8f, shootRange * 0.5f, ropeLength);
                 if (wireExtraSlack < 1f)
                 {
                     for (int m = 0; m < wire.GetLength(0); m++)
@@ -3073,10 +3156,10 @@ namespace BuiltinBuffs.Duality
                         }
                     }
                 }
-                if (num2 > shootRange)
+                if (ropeLength > shootRange)
                 {
                     SwitchMode(Mode.Dangling);
-                    room.PlaySound(SoundID.King_Vulture_Tusk_Wire_End, vector2, Custom.LerpMap(num2, shootRange, shootRange + 30f, 0.5f, 1f), 1f);
+                    room.PlaySound(SoundID.King_Vulture_Tusk_Wire_End, vector2, Custom.LerpMap(ropeLength, shootRange, shootRange + 30f, 0.5f, 1f), 1f);
                     head.pos += Custom.DirVec(head.pos, chunkPoints[1, 0]) * 10f;
                     head.vel += Custom.DirVec(head.pos, chunkPoints[1, 0]) * 10f;
                     chunkPoints[0, 2] = shootDir * speed * 0.4f;
@@ -3094,14 +3177,20 @@ namespace BuiltinBuffs.Duality
                 lastZRot = zRot;
                 lastWireLoose = wireLoose;
                 lastLaserAlpha = laserAlpha;
-                zRot = Vector3.Slerp(zRot, Custom.DegToVec(owner.headRot + ((side == 0) ? (-90f) : 90f)), 0.9f * attached);
-                Vector2 vector = Custom.DirVec((player.graphicsModule as PlayerGraphics).head.pos, player.bodyChunks[0].pos); //Custom.DirVec(player.neck.tChunks[player.neck.tChunks.Length - 1].pos, player.bodyChunks[4].pos);
-                Vector2 vector2 = Custom.PerpendicularVector(vector);
-                Vector2 vector3 = player.bodyChunks[4].pos + vector * -5f;
-                vector3 += vector2 * zRot.x * 15f;
-                vector3 += vector2 * zRot.y * ((side == 0) ? (-1f) : 1f) * 7f;
+                zRot = Vector3.Slerp(zRot, Custom.DegToVec(owner.headRot + ((side % 2 == 0) ? (-90f) : 90f)), 0.9f * attached);
+                Vector2 headToBody = Custom.DirVec((player.graphicsModule as PlayerGraphics).head.pos, player.bodyChunks[0].pos); //Custom.DirVec(player.neck.tChunks[player.neck.tChunks.Length - 1].pos, player.bodyChunks[1].pos);
+                Vector2 perpBody = Custom.PerpendicularVector(headToBody);
+                Vector2 rootPos = (player.graphicsModule as PlayerGraphics).head.pos + headToBody * 2f;//player.bodyChunks[1].pos + headToBody * -5f;
+                rootPos += perpBody * zRot.x * (10f + 5f * Mathf.FloorToInt(side / 2f) * 2f);// 15f;
+                rootPos += perpBody * zRot.y * ((side % 2 == 0) ? (-1f) : 1f) * (7f + 5f * Mathf.FloorToInt(side / 2f) * 2f);
                 laserPower = Custom.LerpAndTick(laserPower, attached, 0.01f, 1f / 120f);
-                if (owner.tusks[1 - side].mode == Mode.Charging || !player.Consious)
+                bool isAnyTuskCharging = false;
+                for (int i = 0; i < owner.tusks.Length; i++)
+                {
+                    if (i != side && (owner.tusks[i].mode == Mode.Charging || !player.Consious))
+                        isAnyTuskCharging = true;
+                }
+                if (isAnyTuskCharging)
                 {
                     laserAlpha = Mathf.Max(laserAlpha - 0.1f, 0f);
                 }
@@ -3122,23 +3211,28 @@ namespace BuiltinBuffs.Duality
                 else if (mode == Mode.Charging)
                 {
                     attached = Custom.LerpMap(modeCounter, 0f, 25f, 0.2f, 1f);
-                    if (modeCounter > (owner.CloseQuarters ? 10 : 25))
+                    if (modeCounter >= preparationTime)//(owner.CloseQuarters ? 10 : 25)
                     {
-                        if (player.Consious && (owner.targetRep != null || player.safariControlled) && owner.noShootDelay < 1 && (player.safariControlled || owner.GoodShootAngle(side, checkMinDistance: false) > (owner.CloseQuarters ? 0.6f : (owner.tusks[1 - side].ReadyToShoot ? 0.2f : 0.4f))) && (owner.VisualOnAnyTargetChunk() || player.safariControlled))
+                        if (modeCounter == preparationTime)
                         {
-                            Shoot(vector3);
+                            room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, head);
+                            for (int j = 0; j < 6; j++)
+                            {
+                                if (UnityEngine.Random.value < Mathf.InverseLerp(0f, 0.5f, room.roomSettings.CeilingDrips))
+                                {
+                                    room.AddObject(new WaterDrip(rootPos, -shootDir * 8f + Custom.RNV() * 8f * UnityEngine.Random.value, waterColor: false));
+                                }
+                            }
                         }
-                        else
+                        if (player.Consious && (//owner.noShootDelay < 1 || //时间一到自动释放
+                            !BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(VultureShapedMutationBuffEntry.VultureShapedMutation))))
                         {
-                            room.PlaySound(SoundID.King_Vulture_Tusk_Cancel_Shot, chunkPoints[0, 0]);
-                            SwitchMode(Mode.Attached);
-                            owner.noShootDelay = Mathf.Max(owner.noShootDelay, 10);
-                            Custom.Log("cancel shot");
+                            Shoot(rootPos);
                         }
                     }
-                    if (modeCounter % 6 == 0)
+                    if (modeCounter % 3 == 0)
                     {
-                        room.PlaySound(SoundID.King_Vulture_Tusk_Aim_Beep, chunkPoints[0, 0]);
+                        room.PlaySound(SoundID.King_Vulture_Tusk_Aim_Beep, chunkPoints[0, 0], 1f, 2f);
                     }
                 }
                 else if (mode == Mode.ShootingOut)
@@ -3154,7 +3248,7 @@ namespace BuiltinBuffs.Duality
                 else if (mode == Mode.Dangling)
                 {
                     attached = 0f;
-                    if (modeCounter > 80)
+                    if (modeCounter > retractingTime)
                     {
                         SwitchMode(Mode.Retracting);
                     }
@@ -3163,7 +3257,7 @@ namespace BuiltinBuffs.Duality
                 {
                     if (currWireLength > 0f)
                     {
-                        currWireLength = Mathf.Max(0f, currWireLength - maxWireLength / 90f);
+                        currWireLength = Mathf.Max(0f, currWireLength - maxWireLength * retractingSpeed);
                         attached = 0f;
                     }
                     else
@@ -3221,18 +3315,18 @@ namespace BuiltinBuffs.Duality
                         }
                     }
                 }
-                Vector2 vector4 = vector;
+                Vector2 vector4 = headToBody;
                 if (mode == Mode.Charging)
                 {
-                    vector4 = Vector3.Slerp(vector, AimDir(1f), Mathf.InverseLerp(0f, 25f, modeCounter));
+                    vector4 = Vector3.Slerp(headToBody, AimDir(1f), Mathf.InverseLerp(0f, 25f, modeCounter));
                 }
                 if (!StuckOrShooting)
                 {
                     Vector2 vector6;
                     for (int j = 0; j < chunkPoints.GetLength(0); j++)
                     {
-                        chunkPoints[j, 1] = chunkPoints[j, 0];
-                        chunkPoints[j, 0] += chunkPoints[j, 2];
+                        chunkPoints[j, 1] = chunkPoints[j, 0];//lastPos
+                        chunkPoints[j, 0] += chunkPoints[j, 2];//vel
                         if (room.PointSubmerged(chunkPoints[j, 0]))
                         {
                             chunkPoints[j, 2] *= 0.95f;
@@ -3261,7 +3355,7 @@ namespace BuiltinBuffs.Duality
                         }
                         if (attached > 0f)
                         {
-                            Vector2 vector5 = vector3 + vector4 * length * ((j == 0) ? 0.5f : (-0.5f));
+                            Vector2 vector5 = rootPos + vector4 * length * ((j == 0) ? 0.5f : (-0.5f));
                             float num2 = Mathf.Lerp(6f, 1f, attached);
                             if (!Custom.DistLess(chunkPoints[j, 0], vector5, num2))
                             {
@@ -3345,8 +3439,8 @@ namespace BuiltinBuffs.Duality
                         AlignWireToRopeSim();
                     }
                     Vector2 pos = (player.graphicsModule as PlayerGraphics).head.pos;//owner.player.neck.tChunks[owner.player.neck.tChunks.Length - 1].pos;
-                    pos += vector2 * zRot.x * 15f;
-                    pos += vector2 * zRot.y * ((side == 0) ? (-1f) : 1f) * 7f;
+                    pos += perpBody * zRot.x * 15f;
+                    pos += perpBody * zRot.y * ((side % 2 == 0) ? (-1f) : 1f) * 7f;
                     if (!Custom.DistLess(wire[0, 0], pos, num3))
                     {
                         Vector2 vector6 = Custom.DirVec(wire[0, 0], pos) * (Vector2.Distance(wire[0, 0], pos) - num3);
@@ -3402,11 +3496,11 @@ namespace BuiltinBuffs.Duality
                         {
                             for (int num5 = 0; num5 < impaleChunk.owner.bodyChunks.Length; num5++)
                             {
-                                if (Custom.DistLess(impaleChunk.owner.bodyChunks[num5].pos, player.bodyChunks[4].pos, impaleChunk.owner.bodyChunks[num5].rad + player.bodyChunks[4].rad))
+                                if (Custom.DistLess(impaleChunk.owner.bodyChunks[num5].pos, player.bodyChunks[1].pos, impaleChunk.owner.bodyChunks[num5].rad + player.bodyChunks[1].rad))
                                 {
                                     Custom.Log("grab impaled");
                                     player.Grab(impaleChunk.owner, 0, num5, Creature.Grasp.Shareability.CanOnlyShareWithNonExclusive, 1f, overrideEquallyDominant: true, pacifying: true);
-                                    room.PlaySound(SoundID.Vulture_Grab_NPC, player.bodyChunks[4]);
+                                    room.PlaySound(SoundID.Vulture_Grab_NPC, player.bodyChunks[1]);
                                     break;
                                 }
                             }
@@ -3500,6 +3594,13 @@ namespace BuiltinBuffs.Duality
                 {
                     wire[num11, 0] = head.pos + Custom.RNV();
                 }
+                if (VultureShapedMutationBuff.Instance.AerialFirepower)
+                {
+                    if (stuck > 0)
+                    {
+                        stuck = Mathf.Max(0, stuck - 0.1f);
+                    }
+                }
             }
 
             private Vector2 WireAttachPos(float timeStacker)
@@ -3528,7 +3629,7 @@ namespace BuiltinBuffs.Duality
                     wire[num2, 3].x = 1f;
                 }
             }
-
+            #region 绳子
             private Vector2 RopePos(int i)
             {
                 if (i == rope.TotalPositions - 1)
@@ -3579,7 +3680,8 @@ namespace BuiltinBuffs.Duality
                 float t = Mathf.InverseLerp(RopeFloatAtSegment(num), RopeFloatAtSegment(num2), fPos);
                 return Vector2.Lerp(RopePos(num), RopePos(num2), t);
             }
-
+            #endregion
+            #region 外观
             public void UpdateTuskColors(RoomCamera.SpriteLeaser sLeaser)
             {
                 PlayerGraphics vultureGraphics = player.graphicsModule as PlayerGraphics;
@@ -3595,10 +3697,10 @@ namespace BuiltinBuffs.Duality
 
             public void InitiateSprites(PlayerGraphics vGraphics, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
-                sLeaser.sprites[LaserSprite(vGraphics)] = new CustomFSprite("Futile_White");
-                sLeaser.sprites[LaserSprite(vGraphics)].shader = rCam.game.rainWorld.Shaders["HologramBehindTerrain"];
                 sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)] = new FSprite("Circle20");
                 sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].anchorY = 0f;
+                sLeaser.sprites[LaserSprite(vGraphics)] = new CustomFSprite("Futile_White");
+                sLeaser.sprites[LaserSprite(vGraphics)].shader = rCam.game.rainWorld.Shaders["HologramBehindTerrain"];
                 sLeaser.sprites[TuskSprite(vGraphics)] = TriangleMesh.MakeLongMesh(tuskSegs, pointyTip: true, customColor: true);
                 sLeaser.sprites[TuskDetailSprite(vGraphics)] = TriangleMesh.MakeLongMesh(tuskSegs, pointyTip: true, customColor: true);
                 sLeaser.sprites[TuskDetailSprite(vGraphics)].shader = rCam.game.rainWorld.Shaders["KingTusk"];
@@ -3615,82 +3717,101 @@ namespace BuiltinBuffs.Duality
                 {
                     UpdateTuskColors(sLeaser);
                 }
-                Vector2 vector = Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker);
-                Vector2 vector2 = Custom.DirVec(Vector2.Lerp((player.graphicsModule as PlayerGraphics).head.lastPos, (player.graphicsModule as PlayerGraphics).head.pos, timeStacker), Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker));//Custom.DirVec(Vector2.Lerp(player.neck.tChunks[player.neck.tChunks.Length - 1].lastPos, player.neck.tChunks[player.neck.tChunks.Length - 1].pos, timeStacker), Vector2.Lerp(player.bodyChunks[4].lastPos, player.bodyChunks[4].pos, timeStacker));
-                Vector2 vector3 = Custom.PerpendicularVector(vector2);
-                Vector2 vector4 = Vector3.Slerp(lastZRot, zRot, timeStacker);
-                float num = Mathf.Lerp(lastLaserAlpha, laserAlpha, timeStacker);
+                Vector2 bodyPos = Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker);
+                Vector2 headToBody = Custom.DirVec(Vector2.Lerp((player.graphicsModule as PlayerGraphics).head.lastPos, (player.graphicsModule as PlayerGraphics).head.pos, timeStacker), 
+                                                   Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker));//Custom.DirVec(Vector2.Lerp(player.neck.tChunks[player.neck.tChunks.Length - 1].lastPos, player.neck.tChunks[player.neck.tChunks.Length - 1].pos, timeStacker), Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker));
+                Vector2 perpToBody = Custom.PerpendicularVector(headToBody);
+                Vector2 nowZRot = Vector3.Slerp(lastZRot, zRot, timeStacker);
+                float nowLaserAlpha = Mathf.Lerp(lastLaserAlpha, laserAlpha, timeStacker);
                 Color color = Custom.HSL2RGB(owner.vultureCat.ColorB.hue, 1f, 0.5f);
                 if (mode == Mode.Charging)
                 {
-                    num = ((modeCounter % 6 < 3) ? 1f : 0f);
+                    nowLaserAlpha = ((modeCounter % 6 < 3) ? 1f : 0f);
                     if (modeCounter % 2 == 0)
-                    {
                         color = Color.Lerp(color, Color.white, UnityEngine.Random.value);
-                    }
+                    if (modeCounter >= preparationTime)
+                        color = Color.white;
                 }
-                Vector2 vector5 = vector + vector2 * 15f + vector3 * Vector3.Slerp(Custom.DegToVec(owner.lastHeadRot + ((side == 0) ? (-90f) : 90f)), Custom.DegToVec(owner.headRot + ((side == 0) ? (-90f) : 90f)), timeStacker).x * 7f;
-                Vector2 vector6 = AimDir(timeStacker);
-                if (num <= 0f)
+                float laserRootX = 7f;
+                float laserRootY = -2f;//15f
+                Vector2 laserRootPos = bodyPos + headToBody * laserRootY +
+                                       perpToBody * laserRootX * Vector3.Slerp(Custom.DegToVec(owner.lastHeadRot + ((side % 2 == 0) ? (-90f) : 90f)), 
+                                                                               Custom.DegToVec(owner.headRot + ((side % 2 == 0) ? (-90f) : 90f)), 
+                                                                               timeStacker).x;
+                Vector2 aimDir = AimDir(timeStacker);
+                if (nowLaserAlpha <= 0f)
                 {
                     sLeaser.sprites[LaserSprite(vGraphics)].isVisible = false;
                 }
                 else
                 {
                     sLeaser.sprites[LaserSprite(vGraphics)].isVisible = true;
-                    sLeaser.sprites[LaserSprite(vGraphics)].alpha = num;
-                    Vector2 corner = Custom.RectCollision(vector5, vector5 + vector6 * 100000f, rCam.room.RoomRect.Grow(200f)).GetCorner(FloatRect.CornerLabel.D);
-                    IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(rCam.room, vector5, corner);
+                    sLeaser.sprites[LaserSprite(vGraphics)].alpha = nowLaserAlpha;
+                    Vector2 corner = Custom.RectCollision(laserRootPos, laserRootPos + aimDir * 100000f, rCam.room.RoomRect.Grow(200f)).GetCorner(FloatRect.CornerLabel.D);
+                    IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(rCam.room, laserRootPos, corner);
                     if (intVector.HasValue)
                     {
-                        corner = Custom.RectCollision(corner, vector5, rCam.room.TileRect(intVector.Value)).GetCorner(FloatRect.CornerLabel.D);
+                        corner = Custom.RectCollision(corner, laserRootPos, rCam.room.TileRect(intVector.Value)).GetCorner(FloatRect.CornerLabel.D);
                     }
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[0] = Custom.RGB2RGBA(color, num);
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[1] = Custom.RGB2RGBA(color, num);
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[2] = Custom.RGB2RGBA(color, Mathf.Pow(num, 2f) * ((mode == Mode.Charging) ? 1f : 0.5f));
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[3] = Custom.RGB2RGBA(color, Mathf.Pow(num, 2f) * ((mode == Mode.Charging) ? 1f : 0.5f));
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(0, vector5 + vector6 * 2f + Custom.PerpendicularVector(vector6) * 0.5f - camPos);
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(1, vector5 + vector6 * 2f - Custom.PerpendicularVector(vector6) * 0.5f - camPos);
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(2, corner - Custom.PerpendicularVector(vector6) * 0.5f - camPos);
-                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(3, corner + Custom.PerpendicularVector(vector6) * 0.5f - camPos);
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[0] = Custom.RGB2RGBA(color, nowLaserAlpha);
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[1] = Custom.RGB2RGBA(color, nowLaserAlpha);
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[2] = Custom.RGB2RGBA(color, Mathf.Pow(nowLaserAlpha, 2f) * ((mode == Mode.Charging) ? 1f : 0.5f));
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).verticeColors[3] = Custom.RGB2RGBA(color, Mathf.Pow(nowLaserAlpha, 2f) * ((mode == Mode.Charging) ? 1f : 0.5f));
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(0, laserRootPos + aimDir * 2f + Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(1, laserRootPos + aimDir * 2f - Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(2, corner - Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
+                    (sLeaser.sprites[LaserSprite(vGraphics)] as CustomFSprite).MoveVertice(3, corner + Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
                 }
-                Vector2 vector7 = (Vector2.Lerp(chunkPoints[0, 1], chunkPoints[0, 0], timeStacker) + Vector2.Lerp(chunkPoints[1, 1], chunkPoints[1, 0], timeStacker)) / 2f;
-                Vector2 vector8 = Custom.DirVec(Vector2.Lerp(chunkPoints[1, 1], chunkPoints[1, 0], timeStacker), Vector2.Lerp(chunkPoints[0, 1], chunkPoints[0, 0], timeStacker));
-                Vector2 vector9 = Custom.PerpendicularVector(vector8);
+                Vector2 averageChunkPoints = (Vector2.Lerp(chunkPoints[0, 1], chunkPoints[0, 0], timeStacker) + Vector2.Lerp(chunkPoints[1, 1], chunkPoints[1, 0], timeStacker)) / 2f;
+                Vector2 chunkPointsDir = Custom.DirVec(Vector2.Lerp(chunkPoints[1, 1], chunkPoints[1, 0], timeStacker), Vector2.Lerp(chunkPoints[0, 1], chunkPoints[0, 0], timeStacker));
+                Vector2 perpChunkPoints = Custom.PerpendicularVector(chunkPointsDir);
                 if (mode == Mode.Charging)
                 {
-                    vector7 += vector8 * Mathf.Lerp(-6f, 6f, UnityEngine.Random.value);
+                    averageChunkPoints += chunkPointsDir * Mathf.Lerp(-6f, 6f, UnityEngine.Random.value);
                 }
-                Vector2 vector10 = vector - vector8 * 10f;
-                Vector2 vector11 = Vector2.Lerp(vector, vector7, Mathf.InverseLerp(0f, 0.25f, attached));
-                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].x = vector10.x - camPos.x;
-                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].y = vector10.y - camPos.y;
-                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].scaleY = (Vector2.Distance(vector10, vector11) + 4f) / 20f;
-                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].rotation = Custom.AimFromOneVectorToAnother(vector10, vector11);
-                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].scaleX = 0.6f;
-                Vector2 vector12 = vector7 + vector8 * -35f + vector9 * vector4.y * ((side == 0) ? (-1f) : 1f) * -15f;
-                float num2 = 0f;
+                float neckLumpPosScaleX = 7f;
+                float neckLumpPosScaleY = 7f + 3f * Mathf.FloorToInt(side / 2f) * 2f;//10f;
+                Vector2 neckLumpPos = bodyPos - chunkPointsDir * neckLumpPosScaleX;
+                Vector2 attachedPos = Vector2.Lerp(bodyPos, averageChunkPoints, Mathf.InverseLerp(0f, 0.25f, attached));
+                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].x = neckLumpPos.x - camPos.x;
+                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].y = neckLumpPos.y - camPos.y;
+                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].scaleY = (Vector2.Distance(bodyPos - chunkPointsDir * neckLumpPosScaleY, attachedPos) + 4f) / 20f;//(Vector2.Distance(neckLumpPos, attachedPos) + 4f) / 20f;
+                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].rotation = Custom.AimFromOneVectorToAnother(neckLumpPos, attachedPos);
+                sLeaser.sprites[owner.vultureCat.NeckLumpSprite(side)].scaleX = 0.6f * neckLumpPosScaleX / 10f;
+
+                //角矛
+                float tuskRootPosScale = -17.5f;//-35f;
+                float tuskRootPerpY = -7.5f;//-15f;
+                float tuskRootLength = -15f;// -30f;
+                float tuskTipLength = 30f;// 60f;
+                float tuskPerpX = 10f;// 20f;
+                float tuskPerpY = 5f;// 10f;
+                Vector2 lastTuskSegPos = averageChunkPoints + chunkPointsDir * tuskRootPosScale + 
+                                      perpChunkPoints * nowZRot.y * ((side % 2 == 0) ? (-1f) : 1f) * tuskRootPerpY;
+                float lastTuskRad = 0f;
                 for (int i = 0; i < tuskSegs; i++)
                 {
-                    float num3 = Mathf.InverseLerp(0f, tuskSegs - 1, i);
-                    Vector2 vector13 = vector7 + vector8 * Mathf.Lerp(-30f, 60f, num3) + TuskBend(num3) * vector9 * 20f * vector4.x + TuskProfBend(num3) * vector9 * vector4.y * ((side == 0) ? (-1f) : 1f) * 10f;
-                    Vector2 normalized = (vector13 - vector12).normalized;
-                    Vector2 vector14 = Custom.PerpendicularVector(normalized);
-                    float num4 = Vector2.Distance(vector13, vector12) / 5f;
-                    float num5 = TuskRad(num3, Mathf.Abs(vector4.y));
-                    (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4, vector12 - vector14 * (num5 + num2) * 0.5f + normalized * num4 - camPos);
-                    (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 1, vector12 + vector14 * (num5 + num2) * 0.5f + normalized * num4 - camPos);
+                    float t = Mathf.InverseLerp(0f, tuskSegs - 1, i);
+                    Vector2 tuskSegPos = averageChunkPoints + chunkPointsDir * Mathf.Lerp(tuskRootLength, tuskTipLength, t) + 
+                                         TuskBend(t)     * perpChunkPoints * nowZRot.x * tuskPerpX + 
+                                         TuskProfBend(t) * perpChunkPoints * nowZRot.y * tuskPerpY * ((side % 2 == 0) ? (-1f) : 1f);
+                    Vector2 tuskDir = (tuskSegPos - lastTuskSegPos).normalized;
+                    Vector2 perpTuskDir = Custom.PerpendicularVector(tuskDir);
+                    float segDist = Vector2.Distance(tuskSegPos, lastTuskSegPos) / 5f;
+                    float tuskRad = TuskRad(t, Mathf.Abs(nowZRot.y));
+                    (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4, lastTuskSegPos - perpTuskDir * (tuskRad + lastTuskRad) * 0.5f + tuskDir * segDist - camPos);
+                    (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 1, lastTuskSegPos + perpTuskDir * (tuskRad + lastTuskRad) * 0.5f + tuskDir * segDist - camPos);
                     if (i == tuskSegs - 1)
                     {
-                        (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 2, vector13 + normalized * num4 - camPos);
+                        (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 2, tuskSegPos + tuskDir * segDist - camPos);
                     }
                     else
                     {
-                        (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 2, vector13 - vector14 * num5 - normalized * num4 - camPos);
-                        (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 3, vector13 + vector14 * num5 - normalized * num4 - camPos);
+                        (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 2, tuskSegPos - perpTuskDir * tuskRad - tuskDir * segDist - camPos);
+                        (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).MoveVertice(i * 4 + 3, tuskSegPos + perpTuskDir * tuskRad - tuskDir * segDist - camPos);
                     }
-                    num2 = num5;
-                    vector12 = vector13;
+                    lastTuskRad = tuskRad;
+                    lastTuskSegPos = tuskSegPos;
                 }
                 for (int j = 0; j < (sLeaser.sprites[TuskSprite(vGraphics)] as TriangleMesh).vertices.Length; j++)
                 {
@@ -3699,31 +3820,33 @@ namespace BuiltinBuffs.Duality
                 if (lastWireLoose > 0f || wireLoose > 0f)
                 {
                     sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)].isVisible = true;
-                    float num6 = Mathf.Lerp(lastWireLoose, wireLoose, timeStacker);
-                    vector12 = vector - vector2 * 14f;
+                    float nowWireLoose = Mathf.Lerp(lastWireLoose, wireLoose, timeStacker);
+                    float wireRootPosScale = 7f;// 14f;
+                    Vector2 lastWirePos = bodyPos - headToBody * wireRootPosScale;
                     for (int k = 0; k < wire.GetLength(0); k++)
                     {
-                        Vector2 vector15 = Vector2.Lerp(wire[k, 1], wire[k, 0], timeStacker);
-                        if (num6 < 1f)
+                        Vector2 wirePos = Vector2.Lerp(wire[k, 1], wire[k, 0], timeStacker);
+                        if (nowWireLoose < 1f)
                         {
-                            vector15 = Vector2.Lerp(Vector2.Lerp(vector - vector2 * 14f, vector7 + vector8 * 6f, Mathf.InverseLerp(0f, wire.GetLength(0) - 1, k)), vector15, num6);
+                            wirePos = Vector2.Lerp(Vector2.Lerp(bodyPos - headToBody * wireRootPosScale, averageChunkPoints + chunkPointsDir * 6f, Mathf.InverseLerp(0f, wire.GetLength(0) - 1, k)), 
+                                                   wirePos, nowWireLoose);
                         }
                         if (k == wire.GetLength(0) - 1)
                         {
-                            vector15 = WireAttachPos(timeStacker);
+                            wirePos = WireAttachPos(timeStacker);
                         }
-                        Vector2 normalized2 = (vector15 - vector12).normalized;
-                        Vector2 vector16 = Custom.PerpendicularVector(normalized2);
-                        float num7 = Vector2.Distance(vector15, vector12) / 5f;
+                        Vector2 wireDir = (wirePos - lastWirePos).normalized;
+                        Vector2 perpWireDir = Custom.PerpendicularVector(wireDir);
+                        float wireDist = Vector2.Distance(wirePos, lastWirePos) / 5f;
                         if (k == wire.GetLength(0) - 1)
                         {
-                            num7 = 0f;
+                            wireDist = 0f;
                         }
-                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4, vector12 - vector16 + normalized2 * num7 - camPos);
-                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4 + 1, vector12 + vector16 + normalized2 * num7 - camPos);
-                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4 + 2, vector15 - vector16 - normalized2 * num7 - camPos);
-                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4 + 3, vector15 + vector16 - normalized2 * num7 - camPos);
-                        vector12 = vector15;
+                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4, lastWirePos - perpWireDir + wireDir * wireDist - camPos);
+                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4 + 1, lastWirePos + perpWireDir + wireDir * wireDist - camPos);
+                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4 + 2, wirePos - perpWireDir - wireDir * wireDist - camPos);
+                        (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).MoveVertice(k * 4 + 3, wirePos + perpWireDir - wireDir * wireDist - camPos);
+                        lastWirePos = wirePos;
                     }
                 }
                 else
@@ -3759,7 +3882,7 @@ namespace BuiltinBuffs.Duality
                     (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).verticeColors[j] = Color.Lerp(palette.blackColor, palette.fogColor, 0.33f * Mathf.Sin(Mathf.InverseLerp(0f, (sLeaser.sprites[owner.vultureCat.TuskWireSprite(side)] as TriangleMesh).verticeColors.Length - 1, j) * (float)Math.PI));
                 }
             }
-
+            #endregion
             public bool HitThisObject(PhysicalObject obj)
             {
                 if (obj != player)
@@ -3773,43 +3896,30 @@ namespace BuiltinBuffs.Duality
             {
                 return true;
             }
+
+            //火箭助推角矛
+            public static Vector2 TuskPos(Tusk tusk)
+            {
+                return (tusk.chunkPoints[0, 0] + tusk.chunkPoints[1, 0]) / 2f;
+            }
         }
 
         private Player player;
-
         private VultureCat vultureCat;
-
         public Tusk[] tusks;
-
         private float headRot;
-
         private float lastHeadRot;
-
         public float eyesOut;
-
         public float lastEyesOut;
-
         public float eyesOutCycle;
-
         public float eyesHomeIn;
-
         public float lastEyesHome;
-
         private Vector2 preyPos;
-
         private Vector2 lastPreyPos;
-
         private Vector2 preyVelEstimate;
-
         private Smoke.NewVultureSmoke smoke;
-
         public int noShootDelay;
-
         public float patternDisplace;
-
-        public Vector2[] targetTrail;
-
-        public Tracker.CreatureRepresentation targetRep;
 
         private Vector2 HeadRotVector => Custom.DegToVec(headRot);
 
@@ -3841,9 +3951,9 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                if (player.room.aimap.getTerrainProximity(preyPos) != 1 || player.room.aimap.getTerrainProximity(player.bodyChunks[4].pos) >= 2)
+                if (player.room.aimap.getTerrainProximity(preyPos) != 1 || player.room.aimap.getTerrainProximity(player.bodyChunks[1].pos) >= 2)
                 {
-                    return player.room.aimap.getAItile(player.bodyChunks[4].pos).narrowSpace;
+                    return player.room.aimap.getAItile(player.bodyChunks[1].pos).narrowSpace;
                 }
                 return true;
             }
@@ -3865,12 +3975,11 @@ namespace BuiltinBuffs.Duality
         {
             this.player = player;
             this.vultureCat = vultureCat;
-            tusks = new Tusk[2];
+            this.tusks = new Tusk[vultureCat.TusksLength];
             for (int i = 0; i < tusks.Length; i++)
             {
                 tusks[i] = new Tusk(this, i);
             }
-            targetTrail = new Vector2[15];
         }
 
         public void NewRoom(Room newRoom)
@@ -3882,10 +3991,6 @@ namespace BuiltinBuffs.Duality
             lastPreyPos = player.mainBodyChunk.pos;
             preyPos = player.mainBodyChunk.pos;
             smoke = null;
-            for (int j = 0; j < targetTrail.Length; j++)
-            {
-                targetTrail[j] = player.mainBodyChunk.pos;
-            }
             preyVelEstimate *= 0f;
             noShootDelay = 220;
         }
@@ -3906,7 +4011,7 @@ namespace BuiltinBuffs.Duality
                 noShootDelay--;
             }
             lastHeadRot = headRot;
-            headRot = Custom.AimFromOneVectorToAnother((player.graphicsModule as PlayerGraphics).head.pos, player.bodyChunks[0].pos);// Custom.AimFromOneVectorToAnother(player.neck.tChunks[player.neck.tChunks.Length - 1].pos, player.bodyChunks[4].pos);
+            headRot = Custom.AimFromOneVectorToAnother((player.graphicsModule as PlayerGraphics).head.pos, player.bodyChunks[0].pos);// Custom.AimFromOneVectorToAnother(player.neck.tChunks[player.neck.tChunks.Length - 1].pos, player.bodyChunks[1].pos);
             headRot -= Custom.AimFromOneVectorToAnother(player.bodyChunks[0].pos, player.bodyChunks[1].pos);
             for (int i = 0; i < tusks.Length; i++)
             {
@@ -3920,13 +4025,14 @@ namespace BuiltinBuffs.Duality
                     smoke = null;
                 }
             }
+            /*
             if (vultureCat.behavior == VultureAI.Behavior.Hunt && player.Consious)
             {
-                if (player.AI.preyTracker.MostAttractivePrey != null && (player.AI.preyTracker.MostAttractivePrey.VisualContact || player.room.VisualContact(preyPos, player.bodyChunks[4].pos)))
+                if (player.AI.preyTracker.MostAttractivePrey != null && (player.AI.preyTracker.MostAttractivePrey.VisualContact || player.room.VisualContact(preyPos, player.bodyChunks[1].pos)))
                 {
                     if (targetRep == player.AI.preyTracker.MostAttractivePrey)
                     {
-                        eyesHomeIn = Mathf.Min(1f, eyesHomeIn + Mathf.InverseLerp(0.25f, 0.9f, Vector2.Dot(((player.graphicsModule as PlayerGraphics).head.pos - player.bodyChunks[0].pos).normalized, (player.bodyChunks[0].pos - preyPos).normalized)) / 40f);//Mathf.Min(1f, eyesHomeIn + Mathf.InverseLerp(0.25f, 0.9f, Vector2.Dot((player.neck.tChunks[player.neck.tChunks.Length - 1].pos - player.bodyChunks[4].pos).normalized, (player.bodyChunks[4].pos - preyPos).normalized)) / 40f);
+                        eyesHomeIn = Mathf.Min(1f, eyesHomeIn + Mathf.InverseLerp(0.25f, 0.9f, Vector2.Dot(((player.graphicsModule as PlayerGraphics).head.pos - player.bodyChunks[0].pos).normalized, (player.bodyChunks[0].pos - preyPos).normalized)) / 40f);//Mathf.Min(1f, eyesHomeIn + Mathf.InverseLerp(0.25f, 0.9f, Vector2.Dot((player.neck.tChunks[player.neck.tChunks.Length - 1].pos - player.bodyChunks[1].pos).normalized, (player.bodyChunks[1].pos - preyPos).normalized)) / 40f);
                     }
                     else
                     {
@@ -3945,41 +4051,36 @@ namespace BuiltinBuffs.Duality
             else
             {
                 eyesHomeIn = Custom.LerpAndTick(eyesHomeIn, 0f, 0.07f, 0.025f);
-            }
-            if (targetRep != null && targetRep.BestGuessForPosition().room == player.room.abstractRoom.index)
-            {
-                Vector2 vector;
-                if (targetRep.VisualContact)
-                {
-                    vector = targetRep.representedCreature.realizedCreature.mainBodyChunk.pos;
-                    preyVelEstimate = Custom.MoveTowards(preyVelEstimate, targetRep.representedCreature.realizedCreature.mainBodyChunk.pos - targetRep.representedCreature.realizedCreature.mainBodyChunk.lastPos, 0.1f);
-                }
-                else
-                {
-                    vector = player.room.MiddleOfTile(targetRep.BestGuessForPosition());
-                    preyVelEstimate *= 0.99f;
-                }
-                for (int num = targetTrail.Length - 1; num > 0; num--)
-                {
-                    targetTrail[num] = targetTrail[num - 1];
-                }
-                targetTrail[0] = vector;
-                preyPos = targetTrail[targetTrail.Length - 1] + preyVelEstimate * targetTrail.Length * Custom.LerpMap(Vector2.Distance(targetTrail[targetTrail.Length - 1], player.bodyChunks[4].pos), 100f, 500f, 1f, 1.5f);
-                if (eyesHomeIn == 1f && !player.safariControlled && noShootDelay < 1 && player.Consious && Custom.DistLess(preyPos, player.bodyChunks[4].pos, Tusk.shootRange) && !vultureCat.ChargingSnap && tusks[0].mode != Tusk.Mode.Charging && tusks[1].mode != Tusk.Mode.Charging && WantToShoot(checkVisualOnAnyTargetChunk: true, !CloseQuarters) && GoodShootAngle(-1, !CloseQuarters) > (CloseQuarters ? 0.3f : 0.7f))
-                {
-                    TryToShoot();
-                }
-            }
-            else
-            {
-                targetRep = null;
-            }
-            if (player.safariControlled && player.inputWithDiagonals.HasValue && player.inputWithDiagonals.Value.thrw && !player.lastInputWithDiagonals.Value.thrw && player.grasps[0] == null)
+            }*/
+            eyesHomeIn = Custom.LerpAndTick(eyesHomeIn, 0f, 0.07f, 0.025f);
+            if (BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(VultureShapedMutationBuffEntry.VultureShapedMutation)))
             {
                 TryToShoot();
             }
+            else
+            {
+                StopShoot();
+            }
+            VultureShapedMutationBuffEntry.UpdateSpeed = 1000;
+            for (int i = 0; i < tusks.Length; i++)
+            {
+                if (tusks[i].mode == Tusk.Mode.Charging)
+                {
+                    //时缓
+                    for (int j = 0; j < player.room.game.AlivePlayers.Count; j++)
+                    {
+                        if (player.room.game.AlivePlayers[j].realizedCreature != null &&
+                             VultureShapedMutationBuffEntry.VultureCatFeatures.TryGetValue(player.room.game.AlivePlayers[j].realizedCreature as Player, out var vultureCat))
+                        {
+                            VultureShapedMutationBuffEntry.UpdateSpeed = 10;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
+        #region 外观
         public void InitiateSprites(PlayerGraphics vGraphics, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             for (int i = 0; i < tusks.Length; i++)
@@ -4011,6 +4112,7 @@ namespace BuiltinBuffs.Duality
                 tusks[i].AddToContainer(vGraphics, sprite, sLeaser, rCam, newContatiner);
             }
         }
+        #endregion
 
         public bool DoIWantToHoldCreature(Creature creature)
         {
@@ -4025,119 +4127,62 @@ namespace BuiltinBuffs.Duality
             return player.AI.DynamicRelationship(creature.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats;
         }
 
-        public bool VisualOnAnyTargetChunk()
-        {
-            if (targetRep == null || targetRep.representedCreature.realizedCreature == null)
-            {
-                return false;
-            }
-            if (targetRep.VisualContact)
-            {
-                return true;
-            }
-            for (int i = 0; i < targetRep.representedCreature.realizedCreature.bodyChunks.Length; i++)
-            {
-                if (player.room.VisualContact(player.bodyChunks[4].pos, targetRep.representedCreature.realizedCreature.bodyChunks[i].pos))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool HitBySpear(Vector2 directionAndMomentum)
-        {
-            int num = UnityEngine.Random.Range(0, 2);
-            if (tusks[num].mode != Tusk.Mode.Attached && tusks[num].mode != Tusk.Mode.Charging)
-            {
-                return false;
-            }
-            tusks[num].SwitchMode(Tusk.Mode.Dangling);
-            tusks[num].chunkPoints[UnityEngine.Random.Range(0, 2), 2] += directionAndMomentum * 3.3f;
-            return true;
-        }
-
-        public bool WantToShoot(bool checkVisualOnAnyTargetChunk, bool checkMinDistance)
-        {
-            if (player.grasps[0] != null)
-            {
-                return false;
-            }
-            if (vultureCat.behavior != VultureAI.Behavior.Hunt && vultureCat.behavior != VultureAI.Behavior.Idle)
-            {
-                return false;
-            }
-            if (targetRep == null || targetRep.representedCreature.realizedCreature == null)
-            {
-                return false;
-            }
-            for (int i = 0; i < tusks.Length; i++)
-            {
-                if (tusks[i].impaleChunk != null && tusks[i].impaleChunk.owner == targetRep.representedCreature.realizedCreature)
-                {
-                    return false;
-                }
-            }
-            if (checkMinDistance && (Custom.DistLess(preyPos, player.bodyChunks[4].pos, Tusk.minShootRange) || Custom.DistLess(preyPos, player.bodyChunks[0].pos, Tusk.minShootRange)))
-            {
-                for (int j = 0; j < 9; j++)
-                {
-                    if (player.AI.pathFinder.CoordinateReachable(targetRep.BestGuessForPosition() + Custom.eightDirectionsAndZero[j]))
-                    {
-                        return false;
-                    }
-                }
-            }
-            if (checkVisualOnAnyTargetChunk && !VisualOnAnyTargetChunk())
-            {
-                return false;
-            }
-            return player.AI.DynamicRelationship(targetRep.representedCreature).type == CreatureTemplate.Relationship.Type.Eats;
-        }
-
         public void TryToShoot()
         {
-            int num = UnityEngine.Random.Range(0, 2);
-            if (!tusks[num].ReadyToShoot)
+            for (int i = 0; i < tusks.Length; i++)
             {
-                num = 1 - num;
-            }
-            if (tusks[num].ReadyToShoot)
-            {
-                tusks[num].SwitchMode(Tusk.Mode.Charging);
-                player.room.PlaySound(SoundID.King_Vulture_Tusk_Aim, player.bodyChunks[4]);
-                if (!Custom.DistLess(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, 5f))
+                if (tusks[i].mode == Tusk.Mode.Charging)
                 {
-                    vultureCat.AirBrake(15);
+                    //身体几乎不再移动
+                    for (int j = 0; j < player.bodyChunks.Length; j++)
+                    {
+                        player.bodyChunks[j].vel *= 0.05f;
+                    }
+                    if (player.bodyMode == Player.BodyModeIndex.Stand)
+                        player.bodyMode = Player.BodyModeIndex.Default;
+                    else if (player.bodyMode == Player.BodyModeIndex.Swimming)
+                        player.bodyMode = Player.BodyModeIndex.Default;
+                    return;
+                }
+            }
+            bool isAnyTuskReadyToShoot = false;
+            for (int i = 0; i < tusks.Length; i++) 
+                if (tusks[i].ReadyToShoot)
+                {
+                    isAnyTuskReadyToShoot = true;
+                    return;
+                }
+            if (isAnyTuskReadyToShoot)
+            {
+                int num = UnityEngine.Random.Range(0, tusks.Length);
+                while (!tusks[num].ReadyToShoot)
+                {
+                    num = UnityEngine.Random.Range(0, tusks.Length);
+                }
+                if (tusks[num].ReadyToShoot)
+                {
+                    tusks[num].SwitchMode(Tusk.Mode.Charging);
+                    player.room.PlaySound(SoundID.King_Vulture_Tusk_Aim, player.bodyChunks[1]);
+                    if (!Custom.DistLess(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, 5f))
+                    {
+                        vultureCat.AirBrake(15);
+                    }
                 }
             }
         }
 
-        public float GoodShootAngle(int tusk, bool checkMinDistance)
+        public void StopShoot()
         {
-            if (targetRep == null || targetRep.TicksSinceSeen > 20)
+            for (int i = 0; i < tusks.Length; i++)
             {
-                return 0f;
-            }
-            Vector2 lhs = ((tusk != -1) ? tusks[tusk].AimDir(1f) : ((Vector2)Vector3.Slerp(tusks[0].AimDir(1f), tusks[1].AimDir(1f), 0.5f)));
-            float num = Mathf.InverseLerp(0.8f, 1f, Vector2.Dot(lhs, Custom.DirVec(player.bodyChunks[4].pos, preyPos)));
-            num *= Mathf.InverseLerp(Tusk.shootRange, Tusk.shootRange * 0.8f, Vector2.Distance(player.bodyChunks[4].pos, preyPos));
-            if (num == 0f)
-            {
-                return 0f;
-            }
-            if (checkMinDistance)
-            {
-                for (int i = 0; i < 9; i++)
+                if (tusks[i].mode == Tusk.Mode.Charging)
                 {
-                    if (player.AI.pathFinder.CoordinateReachable(targetRep.BestGuessForPosition() + Custom.eightDirectionsAndZero[i]))
-                    {
-                        num *= Mathf.InverseLerp(Tusk.minShootRange, Mathf.Lerp(Tusk.minShootRange, Tusk.shootRange, 0.3f), Vector2.Distance(player.bodyChunks[4].pos, preyPos));
-                        break;
-                    }
+                    player.room.PlaySound(SoundID.King_Vulture_Tusk_Cancel_Shot, tusks[i].chunkPoints[0, 0]);
+                    tusks[i].SwitchMode(Tusk.Mode.Attached);
+                    noShootDelay = Mathf.Max(noShootDelay, 10);
+                    Custom.Log("cancel shot");
                 }
             }
-            return num;
         }
     }
     #endregion
