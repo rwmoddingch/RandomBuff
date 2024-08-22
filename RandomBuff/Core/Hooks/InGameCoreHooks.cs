@@ -135,6 +135,8 @@ namespace RandomBuff.Core.Hooks
             On.ScavengerBomb.Update += ScavengerBomb_Update;
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
 
+           
+
         }
 
         private static List<string> SlugcatStats_SlugcatStoryRegions(On.SlugcatStats.orig_SlugcatStoryRegions orig, SlugcatStats.Name i)

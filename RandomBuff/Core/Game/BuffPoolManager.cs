@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MoreSlugcats;
 using RandomBuff.Core.Buff;
@@ -103,6 +104,22 @@ namespace RandomBuff.Core.Game
         private BuffPoolManager(RainWorldGame game)
         {
 
+#if TESTVERSION
+            if (File.Exists(AssetManager.ResolveFilePath("hotreload.txt")))
+            {
+                foreach (var id in File.ReadAllLines(AssetManager.ResolveFilePath("hotreload.txt")).Select(i => new BuffID(i)))
+                {
+                    if (BuffConfigManager.ContainsId(id))
+                    {
+                        BuffPlugin.Log($"Hot reload {id}");
+                        var staticData = id.GetStaticData();
+                        Futile.atlasManager.UnloadImage(staticData.FaceName);
+                        Futile.atlasManager.LoadImage(staticData.FaceName);
+
+                    }
+                }
+            }
+#endif
             Game = game;
             record = new InGameRecord();
             BuffPlugin.Log("Clone all data to CycleData");
@@ -395,7 +412,7 @@ namespace RandomBuff.Core.Game
             if (buffDictionary.ContainsKey(id))
             {
                 BuffPlugin.LogWarning($"Buff: {id} Already Contain");
-                if(needStack)
+                if(needStack && id.GetStaticData().Stackable)
                     GetBuffData(id).Stack();
                 return buffDictionary[id];
             }

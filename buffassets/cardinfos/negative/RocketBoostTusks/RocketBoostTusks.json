@@ -5,7 +5,10 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "ff4200",
-
+    "MultiLayerFace":true,
+    "FaceLayer":13,
+    "MaxFaceDepth":1.2,
+    "FaceBackgroundColor": "211B1D",
     "Chinese" : {
         "BuffName" : "火箭助推角矛",
         "Description" : "角矛发射后会追踪一点时间后快速射出，并且获得更快的发射速度和更远的攻击范围，攻击到目标或墙的情况会发生一次无伤害的爆炸"
