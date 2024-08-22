@@ -148,6 +148,8 @@ namespace RandomBuff.Render.CardRender
                 if (inactiveCardRenderers[i].inactiveTimer > maxDestroyTime)
                 {
                     var card = inactiveCardRenderers[i];
+                    card.DestroyRenderer();
+
                     totalRenderers.Remove(card);
                     BuffPlugin.LogDebug($"Destroy inactive card renderer of id{card._id}");
 

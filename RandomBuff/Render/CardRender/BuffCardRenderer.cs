@@ -104,7 +104,6 @@ namespace RandomBuff.Render.CardRender
         {
             try
             {
-                _id = id;
                 _buffStaticData = buffStaticData;
                 _cardTextureFront = buffStaticData.GetFaceTexture();
                 _cardTextureBack = buffStaticData.GetBackTexture();
@@ -130,6 +129,7 @@ namespace RandomBuff.Render.CardRender
 
         protected virtual void FirstInit(int id, BuffStaticData buffStaticData)
         {
+            _id = id;
             cardCameraController = gameObject.AddComponent<CardCameraController>();
             //初始化卡面和卡背
             _cardQuadFront = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -190,7 +190,7 @@ namespace RandomBuff.Render.CardRender
             return meshFilter.sharedMesh.vertices.Select(v => meshFilter.gameObject.transform.TransformPoint(v)).ToList();
         }
 
-        public virtual void OnDestroy()
+        public virtual void DestroyRenderer()
         {
             _texture.RemoveFromContainer();
             Futile.atlasManager._atlases.Remove(renderAtlas);
@@ -201,7 +201,6 @@ namespace RandomBuff.Render.CardRender
                 FAtlasElement fAtlasElement = renderAtlas.elements[i];
                 Futile.atlasManager._allElementsByName.Remove(fAtlasElement.name);
             }
-
         }
 
         public virtual string Salt()
