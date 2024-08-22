@@ -178,7 +178,7 @@ namespace RandomBuff.Render.UI.Component
             lastSelectedBuffs.Clear();
             foreach (var id in buffIDs)
             {
-                var rep = slot.TryGetRep(id);
+                var rep = slot.TryGetRep(id,true,true);
                 currentSelectedBuffs.Add(rep);
                 lastSelectedBuffs.Add(rep);
             }
@@ -569,10 +569,14 @@ namespace RandomBuff.Render.UI.Component
             return CurrentSelectedBuffs.Contains(buffID);
         }
 
-        public BuffRep TryGetRep(BuffID buffID, bool create = true)
+        public BuffRep TryGetRep(BuffID buffID, bool create = true, bool needRefresh = false)
         {
             if (id2RepMapping.TryGetValue(buffID, out var result))
+            {
+                if(needRefresh)
+                    return result.Refresh();
                 return result;
+            }
             
             if(create)
             {
@@ -747,10 +751,17 @@ namespace RandomBuff.Render.UI.Component
             public int stackCount;
             public bool stackable;
 
+            public BuffRep Refresh()
+            {
+                stackCount = buffID.GetBuffData()?.StackLayer ?? 0;
+                return this;
+            }
+
             public BuffRep(BuffID buffID)
             {
                 this.buffID = buffID;
                 stackable = buffID.GetStaticData().Stackable;
+                stackCount = buffID.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

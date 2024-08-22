@@ -825,6 +825,7 @@ namespace BuiltinBuffs.Negative
                     lifeTime = 450
                 });
                 int count = Mathf.Clamp(Mathf.RoundToInt(Random.Range(4f, 6f) * massFac),1,12);
+                float randomFac = Custom.LerpMap(count, 25, 50,1,0.5f);
                 for (int i = 0; i < count; i++)
                 {
                     AbstractCreature abstractCreature = new AbstractCreature(crit.abstractCreature.world,
@@ -851,7 +852,7 @@ namespace BuiltinBuffs.Negative
                             bodyChunk.pos = targetPos + targetRad/2 * Random.value * bodyChunk.vel.normalized;
                         }
 
-                        for (int j = 0; j < Random.Range(3,7); j++)
+                        for (int j = 0; j < Mathf.CeilToInt(Random.Range(3f,7f) * randomFac) ; j++)
                         {
                             crit.room.AddObject(new WormSpit(targetPos, Custom.RNV() * Random.Range(10f, 20f),crit,targetRad/2));
                         }
@@ -902,7 +903,7 @@ namespace BuiltinBuffs.Negative
                 this.pos = pos + vel;
                 massLeft = 1f;
                 disapearSpeed = Random.value;
-                maxRad =  Mathf.Clamp(Random.Range(0.7f, 4f) * targetRad, 6f,55f);
+                maxRad =  Mathf.Clamp(Random.Range(0.7f, 4f) * targetRad, 6f,float.MaxValue);
                 slime = new Vector2[(int)Mathf.Lerp(8f, 15f, Random.value), 4];
                 for (int i = 0; i < slime.GetLength(0); i++)
                 {
