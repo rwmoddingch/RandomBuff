@@ -103,7 +103,8 @@ namespace BuiltinBuffs.Duality
             On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
 
             On.Player.CanEatMeat += Player_CanEatMeat;
-            On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten; 
+            On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
+            On.MoreSlugcats.SlugNPCAI.TheoreticallyEatMeat += SlugNPCAI_TheoreticallyEatMeat;
 
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
@@ -126,6 +127,8 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.Reset += PlayerGraphics_Reset;
         }
 
+        
+
         public static void LongLifeCycleHookOn()
         {
             On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
@@ -144,6 +147,12 @@ namespace BuiltinBuffs.Duality
                      (!ModManager.CoopAvailable || !(crit is Player)) &&
                      (!ModManager.MSC || self.pyroJumpCooldown <= 60f);
             return result;
+        }
+        //让猫仔也可以吃肉
+        private static bool SlugNPCAI_TheoreticallyEatMeat(On.MoreSlugcats.SlugNPCAI.orig_TheoreticallyEatMeat orig, SlugNPCAI self, Creature crit, bool excludeCentipedes)
+        {
+            bool flag = orig.Invoke(self, crit, excludeCentipedes);
+            return true;
         }
 
         //修改获取的食物点数

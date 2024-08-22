@@ -1,5 +1,6 @@
 ﻿using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,9 @@ namespace BuiltinBuffs.Negative
         public override BuffID ID => CorruptionSpreadBuffEntry.corruptionSpread;
 
         public override int MaxCycleCount => 3;
+
+        [CustomBuffConfigRange(0.33f ,0.1f, 1f)]
+        public float SpawnRate { get; set; }
     }
 
     internal class CorruptionSpreadBuffEntry : IBuffEntry
@@ -67,6 +71,9 @@ namespace BuiltinBuffs.Negative
             var state = Random.state;
             int hash = self.abstractRoom.name.GetHashCode() + CorruptionSpreadBuff.Instance.randomSeed;
             Random.InitState(hash);
+
+            if (Random.value > CorruptionSpreadBuff.Instance.Data.SpawnRate && !self.abstractRoom.name.Contains("_AI"))
+                return;
 
             addedObject.Add(self, new List<PlacedObject>());
 
