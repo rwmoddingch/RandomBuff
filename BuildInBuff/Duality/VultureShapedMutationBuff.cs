@@ -2662,7 +2662,8 @@ namespace BuiltinBuffs.Duality
                 }
             }
 
-            private KingTusks owner;
+
+            public KingTusks owner;
 
             public int side;
 
@@ -2722,9 +2723,9 @@ namespace BuiltinBuffs.Duality
 
             public Color armorColor;
 
-            private Player player => owner.player;
+            public Player player => owner.player;
 
-            private Room room => owner.player.room;
+            public Room room => owner.player.room;
 
             public BodyChunk head => owner.player.bodyChunks[4];
 

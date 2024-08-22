@@ -1,0 +1,16 @@
+{
+    "FaceName": "HeartDevouringWorm",
+    "BuffID" : "HeartDevouringWorm",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Color" : "FF0000",
+
+    "Chinese" : {
+        "BuffName" : "噬心蛊",
+        "Description" : ""    
+    },
+    "English" : {
+        "BuffName" : "Heart-Devouring Worm",
+        "Description" : ""
+    }
+}
