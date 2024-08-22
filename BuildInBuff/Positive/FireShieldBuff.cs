@@ -75,7 +75,8 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return FireShield.GetBuffData().StackLayer;
+                //护盾obj不会即时删除，所以可能拿到null
+                return FireShield.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

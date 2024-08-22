@@ -131,10 +131,13 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
                     //避免了大部分需要由图标判断是否可以存在的情况，但仍然存在特例，比如如果生物死亡则需要播放动画
                     else
                     {
-                        if (awacsHUD.TryGetValue(creature.realizedCreature, out _))
+                        if (creature.realizedCreature != null)
                         {
-                            awacsHUD.Remove(creature.realizedCreature);
-                        } 
+                            if (awacsHUD.TryGetValue(creature.realizedCreature, out _))
+                            {
+                                awacsHUD.Remove(creature.realizedCreature);
+                            }
+                        }
                     }
                 }
             }

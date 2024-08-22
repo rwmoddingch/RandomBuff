@@ -311,7 +311,7 @@ namespace BuiltinBuffs.Duality
             if (slatedForDeletetion)
                 return;
 
-            if (bindBomb.slatedForDeletetion)
+            if (bindBomb.slatedForDeletetion || bindBomb.mode != Weapon.Mode.Thrown)
                 Destroy();
 
             rotation += rotationVel / 40f;
@@ -322,6 +322,7 @@ namespace BuiltinBuffs.Duality
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
             if (slatedForDeletetion)
                 return;
 
