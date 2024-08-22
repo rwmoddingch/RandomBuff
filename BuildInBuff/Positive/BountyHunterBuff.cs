@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -84,6 +85,7 @@ namespace BuiltinBuffs.Positive
                     if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat ||
                         creature.creatureTemplate.type == CreatureTemplate.Type.Overseer ||
                         creature.creatureTemplate.smallCreature || 
+                        creature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.SlugNPC ||
                         creature.state.dead)
                         continue;
                     lst.Add(creature);
