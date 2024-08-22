@@ -72,9 +72,10 @@ namespace BuiltinBuffs.Negative
         }
     }
 
-    internal class HeartDevouringWormBuffData : BuffData
+    internal class HeartDevouringWormBuffData : CountableBuffData
     {
         public override BuffID ID => HeartDevouringWormBuffEntry.HeartDevouringWorm;
+        public override int MaxCycleCount => 10;
     }
 
     internal class HeartDevouringWormBuffEntry : IBuffEntry
@@ -414,7 +415,7 @@ namespace BuiltinBuffs.Negative
                 {
                     if ((Crit == null || Custom.Dist(ai.fly.DangerPos, Crit.DangerPos) >
                         Custom.Dist(ai.fly.DangerPos, newCrit.realizedCreature.DangerPos)) &&
-                        Custom.DistLess(ai.fly.DangerPos, newCrit.realizedCreature.DangerPos, (IsDontEat(newCrit.creatureTemplate) ? 200 : 150)) &&
+                        Custom.DistLess(ai.fly.DangerPos, newCrit.realizedCreature.DangerPos, (IsDontEat(newCrit.creatureTemplate) ? 300 : 200)) &&
                         newCrit.state.alive)
                     {
                         Crit = newCrit.realizedCreature;
@@ -520,7 +521,7 @@ namespace BuiltinBuffs.Negative
                     ai.behavior = FollowCrit;
                 else if (Crit != null && 
                          (Crit.room != ai.room || IsInfected(Crit) || 
-                          !Custom.DistLess(Crit.mainBodyChunk.pos,ai.fly.DangerPos, (IsDontEat(crit.Template) ? 300 : 200)) ||
+                          !Custom.DistLess(Crit.mainBodyChunk.pos,ai.fly.DangerPos, (IsDontEat(crit.Template) ? 500 : 370)) ||
                           ai.fly.grabbedBy.Count > 0))
                     Crit = null;
                 
@@ -611,7 +612,7 @@ namespace BuiltinBuffs.Negative
                         if (playerEatCounter == MaxPlayerSingleEatCounter*3)
                         {
                             self.killTag = crit.abstractCreature;
-                            player.ObjectEaten(self);
+                            //player.ObjectEaten(self);
                             self.Die();
                             self.Destroy();
                             CreateExplodeModule(player);

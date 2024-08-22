@@ -6,6 +6,10 @@
     "Triggerable" :  false,
     "Stackable" :  false,
     "Color" : "#ffffff",
+    "MultiLayerFace":true,
+    "FaceLayer":8,
+    "MaxFaceDepth":0.8,
+    "FaceBackgroundColor": "000000",
     "Chinese":{
         "BuffName":"主动防御系统",
         "Description":"魔王秃鹫发射角矛时会发射可以击落飞行物的防御导弹"

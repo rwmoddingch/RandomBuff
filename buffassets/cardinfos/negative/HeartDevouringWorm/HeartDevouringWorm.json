@@ -4,13 +4,16 @@
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
     "Color" : "FF0000",
-
+    "MultiLayerFace":true,
+    "FaceLayer":10,
+    "MaxFaceDepth":1.5,
+    "FaceBackgroundColor": "000000",
     "Chinese" : {
         "BuffName" : "噬心蛊",
-        "Description" : ""    
+        "Description" : "蝠蝇会钻入其他生物体内，被钻入的生物会在一段时间后死亡并从爆出大量蝠蝇"    
     },
     "English" : {
         "BuffName" : "Heart-Devouring Worm",
-        "Description" : ""
+        "Description" : "The batflies will burrow into other creatures, which will die after a while and release a large number of batflies."
     }
 }
