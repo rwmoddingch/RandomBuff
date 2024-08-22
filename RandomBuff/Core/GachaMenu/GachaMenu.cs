@@ -60,7 +60,9 @@ namespace RandomBuff.Core.GachaMenu
             BuffPlugin.Log($"Pick buff : {id}");
             BuffDataManager.Instance.GetOrCreateBuffData(id, true);
             picked.Add(id);
-            RequestNewPicker();
+            if (pickerSlots.Last().majorSelections.Contains(id) ||
+                pickerSlots.Last().additionalSelections.Contains(id))
+                RequestNewPicker();
         }
 
         public void RequestNewPicker()
