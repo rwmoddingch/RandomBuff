@@ -100,6 +100,7 @@ namespace BuiltinBuffs.Duality
             On.SlugcatStats.SlugcatCanMaul += SlugcatStats_SlugcatCanMaul;
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
+            On.MoreSlugcats.SlugNPCAI.TheoreticallyEatMeat += SlugNPCAI_TheoreticallyEatMeat;
             //On.Player.BiteEdibleObject += Player_BiteEdibleObject;
 
             On.Player.ctor += Player_ctor;
@@ -203,6 +204,13 @@ namespace BuiltinBuffs.Duality
                      (!ModManager.CoopAvailable || !(crit is Player)) &&
                      (!ModManager.MSC || self.pyroJumpCooldown <= 60f);
             return result;
+        }
+
+        //让猫仔也可以吃肉
+        private static bool SlugNPCAI_TheoreticallyEatMeat(On.MoreSlugcats.SlugNPCAI.orig_TheoreticallyEatMeat orig, SlugNPCAI self, Creature crit, bool excludeCentipedes)
+        {
+            bool flag = orig.Invoke(self, crit, excludeCentipedes);
+            return true;
         }
 
         //修改获取的食物点数
