@@ -81,7 +81,7 @@ namespace BuiltinBuffs.Positive
             {
                 return;
             }
-            orig(self);           
+            orig(self);
         }
 
 
@@ -103,7 +103,7 @@ namespace BuiltinBuffs.Positive
             catch (Exception ex)
             {
                 UnityEngine.Debug.Log(ex);
-            }            
+            }
         }
 
         private static void VultureAI_Update(ILContext il)
@@ -113,7 +113,7 @@ namespace BuiltinBuffs.Positive
                 i => i.MatchLdsfld(typeof(VultureAI.Behavior).GetField(nameof(VultureAI.Behavior.Disencouraged))),
                 i => i.MatchStfld(typeof(VultureAI).GetField(nameof(VultureAI.behavior))),
                 i => i.Match(OpCodes.Ldarg_0)))
-            {               
+            {
                 c.EmitDelegate<Action<VultureAI>>(delegate (VultureAI self)
                 {
                     if (self.vulture.grasps[0] != null && self.vulture.grasps[0].grabbed is GeckoTail)
@@ -128,7 +128,7 @@ namespace BuiltinBuffs.Positive
         private static void Vulture_Carry(On.Vulture.orig_Carry orig, Vulture self)
         {
             try
-            {                
+            {
                 if (self.grasps[0].grabbedChunk.owner is GeckoTail)
                 {
                     if (!self.Consious)
@@ -139,7 +139,7 @@ namespace BuiltinBuffs.Positive
                     self.AI.behavior = VultureAI.Behavior.ReturnPrey;
 
                     BodyChunk grabbedChunk = self.grasps[0].grabbedChunk;
-                    
+
                     float num2 = grabbedChunk.mass / (grabbedChunk.mass + self.bodyChunks[4].mass);
                     float num3 = grabbedChunk.mass / (grabbedChunk.mass + self.bodyChunks[0].mass);
                     if (self.neck.backtrackFrom != -1 || self.enteringShortCut != null)
@@ -197,7 +197,7 @@ namespace BuiltinBuffs.Positive
                 Vector2 vector = self.mainBodyChunk.pos + Custom.DirVec(self.bodyChunks[1].pos, self.mainBodyChunk.pos) * 25f * self.lizardParams.headSize;
                 PhysicalObject grabbed = self.grasps[0].grabbed;
                 Vector2 vector2 = grabbed.bodyChunks[self.grasps[0].chunkGrabbed].vel - self.mainBodyChunk.vel;
-                
+
                 grabbed.bodyChunks[self.grasps[0].chunkGrabbed].vel = self.mainBodyChunk.vel;
                 if (self.enteringShortCut == null && (vector2.magnitude * grabbed.bodyChunks[self.grasps[0].chunkGrabbed].mass > 30f || !Custom.DistLess(vector, grabbed.bodyChunks[self.grasps[0].chunkGrabbed].pos, 70f + grabbed.bodyChunks[self.grasps[0].chunkGrabbed].rad)))
                 {
@@ -391,21 +391,27 @@ namespace BuiltinBuffs.Positive
 
                         GeckoStrategyBuff.collisionChecked = true;
                     }
-                    
-                    if(!GeckoStrategyBuff.discoveredCollision)
+
+                    if (!GeckoStrategyBuff.discoveredCollision)
                         geckoModule.Add(self, new GeckoModule());
                 }
 
-                if (self.room != null && self.grabbedBy.Count > 0)
+
+                if (geckoModule.TryGetValue(self, out var module))
                 {
-                    if (geckoModule.TryGetValue(self, out var module))
-                    {                        
-                        if (self.GetExPlayerData().HaveTail)
+                    if (module.tailCut && module.escapeCount > -5)
+                    {
+                        module.escapeCount--;
+                    }
+
+                    if (self.room != null && self.grabbedBy.Count > 0)
+                    {
+                        if (!module.tailCut)
                         {
                             for (int i = 0; i < self.grabbedBy.Count; i++)
                             {
                                 if (self.grabbedBy[i].grabber is Player || self.grabbedBy[i].grabber is Leech) continue;
-                                
+
                                 int num = self.grabbedBy[i].graspUsed;
                                 var grabber = self.grabbedBy[i].grabber;
                                 self.grabbedBy[i].grabber.ReleaseGrasp(num);
@@ -427,17 +433,14 @@ namespace BuiltinBuffs.Positive
                                 (tail.realizedObject as GeckoTail).tailColor = self.ShortCutColor();
                                 grabber.Grab(tail.realizedObject, num, 0, Creature.Grasp.Shareability.CanOnlyShareWithNonExclusive, 1f, false, false);
                                 module.tailCut = true;
-                                self.GetExPlayerData().HaveTail = false;
+                                if (self.GetExPlayerData() != null)
+                                    self.GetExPlayerData().HaveTail = false;
                                 break;
                             }
                         }
-                        else
-                        {
-                            if (module.escapeCount > -1) module.escapeCount--;
-
-                        }
-                    }                   
+                    }
                 }
+
             }
             catch (Exception ex)
             {
@@ -473,6 +476,7 @@ namespace BuiltinBuffs.Positive
                 }
                 Vector2 pos2 = Vector2.Lerp(self.pGraphics.drawPositions[1, 1], self.pGraphics.drawPositions[1, 0], timeStacker);
                 sLeaser.sprites[self.startSprite + self.rows * self.lines].SetPosition(Vector2.Lerp(pos2, pos, 0.2f) - camPos);
+                sLeaser.sprites[self.startSprite + self.rows * self.lines].MoveToBack();
             }
         }
 
@@ -534,7 +538,7 @@ namespace BuiltinBuffs.Positive
             base.Update(eu);
             bodyChunks[1].pos = firstChunk.pos;
 
-            if(segments.Count > 0)
+            if (segments.Count > 0)
                 segments[0].connectedPoint = firstChunk.pos;
             for (int i = 0; i < segments.Count; i++)
             {
@@ -572,7 +576,7 @@ namespace BuiltinBuffs.Positive
         }
 
         public class TailGrafModule : GraphicsModule
-        {            
+        {
             public TailGrafModule(GeckoTail ow) : base(ow, false)
             {
                 owner = ow;
@@ -612,7 +616,7 @@ namespace BuiltinBuffs.Positive
 
                 float d2 = 6f;
                 Vector2 vector = Vector2.Lerp((owner as GeckoTail).segments[0].lastPos, (owner as GeckoTail).segments[0].pos, timeStacker);
-                
+
                 for (int i = 0; i < 4; i++)
                 {
                     Vector2 vector3 = Vector2.Lerp((owner as GeckoTail).segments[i].lastPos, (owner as GeckoTail).segments[i].pos, timeStacker);
