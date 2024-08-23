@@ -97,7 +97,7 @@ namespace BuiltinBuffs.Negative
     internal class HeartDevouringWormBuffData : CountableBuffData
     {
         public override BuffID ID => HeartDevouringWormBuffEntry.HeartDevouringWorm;
-        public override int MaxCycleCount => 5;
+        public override int MaxCycleCount => 3;
     }
 
     internal class HeartDevouringWormBuffEntry : IBuffEntry

@@ -57,7 +57,9 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.7.1";
+        public const string ModVersion = "1.0.8";
+
+        public static string CacheFolder { get; private set; }
 
         public void OnEnable()
         {
@@ -129,6 +131,11 @@ namespace RandomBuff
                 if (!isLoaded)
                 {
                     Log($"Version: {ModVersion}, Current save version: {saveVersion}, {System.DateTime.Now}");
+
+                    CacheFolder = ModManager.ActiveMods.First(i => i.id == ModId).basePath +
+                                  Path.AltDirectorySeparatorChar + "buffcaches";
+                    if (!Directory.Exists(CacheFolder))
+                        Directory.CreateDirectory(CacheFolder);
 
 #if TESTVERSION
                     Log($"!!!!TEST BUILD!!!!");

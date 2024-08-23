@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Permissions;
-
+using MonoMod.Cil;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using MonoOpCodes = Mono.Cecil.Cil.OpCodes;
@@ -30,22 +30,9 @@ namespace RandomBuff.Core.Buff
                 assemblyDefs.Add(modId, AssemblyDefinition.CreateAssembly(
                     new AssemblyNameDefinition($"DynamicBuff_{modId}", new Version(1, 0)),
                     $"Main", ModuleKind.Dll));
-                var attrType = typeof(SecurityPermissionAttribute);
-
-                var ctor = attrType.GetConstructor(new[] { typeof(SecurityAction) });
-                var attr = new CustomAttribute(assemblyDefs[modId].MainModule.ImportReference(ctor));
-
-#pragma warning disable CS0618
-                var attrArg = new CustomAttributeArgument(
-                    assemblyDefs[modId].MainModule.ImportReference(typeof(SecurityAction)), SecurityAction.RequestMinimum);
-#pragma warning restore CS0618
-                attr.ConstructorArguments.Add(attrArg);
-                attr.Properties.Add(new CustomAttributeNamedArgument("SkipVerification",
-                    new CustomAttributeArgument(assemblyDefs[modId].MainModule.TypeSystem.Boolean, true)));
-                assemblyDefs[modId].CustomAttributes.Add(attr);
             }
 
-
+      
             var moduleDef = assemblyDefs[modId].MainModule;
 
             var buffType = new TypeDefinition(modId, $"{usedId}Buff", TypeAttributes.Public | TypeAttributes.Class,

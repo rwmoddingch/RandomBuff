@@ -292,7 +292,7 @@ namespace RandomBuff.Core.Entry
         public static void RegisterStaticData([NotNull] BuffStaticData data)
         {
             var staticDatas =
-                (Dictionary<BuffID, BuffStaticData>)typeof(BuffConfigManager).GetField("staticDatas", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+                (Dictionary<BuffID, BuffStaticData>)typeof(BuffConfigManager).GetField("StaticDatas", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
             if (!staticDatas.ContainsKey(data.BuffID))
             {
                 BuffUtils.Log("BuffExtend", $"Register Buff:{data.BuffID} static data by Code ");

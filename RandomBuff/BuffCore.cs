@@ -266,10 +266,9 @@ namespace RandomBuff
 
         public delegate bool ClampKarmaForBuffModeHandler(ref int karma, ref int karmaCap);
 
-        internal static void OnCustomStaticDataLoadedInternal(BuffData data, BuffStaticData staticData,
-            Dictionary<string, object> customArgs)
+        internal static void OnCustomStaticDataLoadedInternal(BuffData data, BuffStaticData staticData)
         {
-            OnCustomStaticDataLoaded?.SafeInvoke("OnCustomStaticDataLoaded", data, staticData, customArgs);
+            OnCustomStaticDataLoaded?.SafeInvoke("OnCustomStaticDataLoaded", data, staticData);
         }
 
         internal static void OnGameSettingSpecialSetupInternal(SaveState saveState, GameSetting gameSetting)

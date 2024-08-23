@@ -213,7 +213,7 @@ namespace BuiltinBuffs.Expeditions
         private static void RegisterExpeditionType()
         {
             var ass = BuffBuilder.FinishGenerate("BuffExtend");
-            var ctor = typeof(BuffStaticData).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic)[0];
+            var ctor = typeof(BuffStaticData).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic).First(i => i.GetParameters().Length == 0);
             Futile.atlasManager.LoadImage("buffassets/cardinfos/expedition/expeditionPositive");
             Futile.atlasManager.LoadImage("buffassets/cardinfos/expedition/expeditionNegative");
 
