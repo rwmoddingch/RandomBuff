@@ -24,6 +24,8 @@ namespace BuiltinBuffs.Negative
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (DamoclesBugBuffEntry.DamoclesBugFeatures.TryGetValue(player, out _))
+                        DamoclesBugBuffEntry.DamoclesBugFeatures.Remove(player);
                     var damoclesBug = new DamoclesBug(player);
                     DamoclesBugBuffEntry.DamoclesBugFeatures.Add(player, damoclesBug);
                 }

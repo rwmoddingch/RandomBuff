@@ -59,6 +59,8 @@ namespace BuiltinBuffs.Duality
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (VultureShapedMutationBuffEntry.VultureCatFeatures.TryGetValue(player, out _))
+                        VultureShapedMutationBuffEntry.VultureCatFeatures.Remove(player);
                     var vultureCat = new VultureCat(player);
                     VultureShapedMutationBuffEntry.VultureCatFeatures.Add(player, vultureCat);
                     vultureCat.VultureWing(player.graphicsModule as PlayerGraphics);
@@ -3726,11 +3728,14 @@ namespace BuiltinBuffs.Duality
                 Color color = Custom.HSL2RGB(owner.vultureCat.ColorB.hue, 1f, 0.5f);
                 if (mode == Mode.Charging)
                 {
-                    nowLaserAlpha = ((modeCounter % 6 < 3) ? 1f : 0f);
+                    nowLaserAlpha = ((modeCounter % 4 < 2) ? 1f : 0f);//((modeCounter % 6 < 3) ? 1f : 0f);
                     if (modeCounter % 2 == 0)
                         color = Color.Lerp(color, Color.white, UnityEngine.Random.value);
                     if (modeCounter >= preparationTime)
+                    {
+                        nowLaserAlpha = 1f;
                         color = Color.white;
+                    }
                 }
                 float laserRootX = 7f;
                 float laserRootY = -2f;//15f
@@ -3864,6 +3869,8 @@ namespace BuiltinBuffs.Duality
                 else if (spr == owner.vultureCat.TuskWireSprite(side) || spr == TuskSprite(vGraphics) || spr == TuskDetailSprite(vGraphics))
                 {
                     rCam.ReturnFContainer("Midground").AddChild(sLeaser.sprites[spr]);
+                    if(spr == owner.vultureCat.TuskWireSprite(side))
+                        sLeaser.sprites[spr].MoveBehindOtherNode(sLeaser.sprites[3]);
                 }
             }
 
@@ -4146,12 +4153,14 @@ namespace BuiltinBuffs.Duality
                 }
             }
             bool isAnyTuskReadyToShoot = false;
-            for (int i = 0; i < tusks.Length; i++) 
+            for (int i = 0; i < tusks.Length; i++)
+            {
                 if (tusks[i].ReadyToShoot)
                 {
                     isAnyTuskReadyToShoot = true;
-                    return;
+                    break;
                 }
+            }
             if (isAnyTuskReadyToShoot)
             {
                 int num = UnityEngine.Random.Range(0, tusks.Length);

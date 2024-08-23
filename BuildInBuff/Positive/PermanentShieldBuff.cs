@@ -30,6 +30,9 @@ namespace BuiltinBuffs.Positive
                              .Where(i => i != null && i.graphicsModule != null))
                 {
                     var permanentShieldList = new PermanentShieldList(player);
+
+                    if (PermanentShieldBuffEntry.PermanentShieldFeatures.TryGetValue(player, out _))
+                        PermanentShieldBuffEntry.PermanentShieldFeatures.Remove(player);
                     PermanentShieldBuffEntry.PermanentShieldFeatures.Add(player, permanentShieldList);
                     if (permanentShieldList.permanentShieldList.Count > 0)
                     {

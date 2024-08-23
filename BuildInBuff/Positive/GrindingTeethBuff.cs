@@ -29,6 +29,8 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (GrindingTeethBuffEntry.GrindingTeethFeatures.TryGetValue(player, out _))
+                        GrindingTeethBuffEntry.GrindingTeethFeatures.Remove(player);
                     GrindingTeeth grindingTeeth = new GrindingTeeth(player);
                     GrindingTeethBuffEntry.GrindingTeethFeatures.Add(player, grindingTeeth);
                 }
