@@ -29,6 +29,8 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (WaterDancerBuffEntry.WaterDancerFeatures.TryGetValue(player, out _))
+                        WaterDancerBuffEntry.WaterDancerFeatures.Remove(player);
                     var waterdancer = new WaterDancer(player);
                     WaterDancerBuffEntry.WaterDancerFeatures.Add(player, waterdancer);
                 }

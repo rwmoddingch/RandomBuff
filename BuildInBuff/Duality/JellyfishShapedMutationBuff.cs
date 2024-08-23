@@ -60,6 +60,8 @@ namespace BuiltinBuffs.Duality
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (JellyfishShapedMutationBuffEntry.JellyfishCatFeatures.TryGetValue(player, out _))
+                        JellyfishShapedMutationBuffEntry.JellyfishCatFeatures.Remove(player);
                     var jellyfishCat = new JellyfishCat(player);
                     JellyfishShapedMutationBuffEntry.JellyfishCatFeatures.Add(player, jellyfishCat);
                     jellyfishCat.JellyfishBody(player.graphicsModule as PlayerGraphics);

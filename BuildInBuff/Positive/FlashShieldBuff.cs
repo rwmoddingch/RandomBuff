@@ -31,6 +31,11 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null && i.room != null))
                 {
+                    if (FlashShieldBuffEntry.FlashShieldFeatures.TryGetValue(player, out _))
+                        FlashShieldBuffEntry.FlashShieldFeatures.Remove(player);
+                    if (FlashShieldBuffEntry.FlashShieldStateFeatures.TryGetValue(player, out _))
+                        FlashShieldBuffEntry.FlashShieldStateFeatures.Remove(player);
+
                     var flashShield = new FlashShield(player, player.room);
                     player.room.AddObject(flashShield);
                     FlashShieldBuffEntry.FlashShieldFeatures.Add(player, flashShield);

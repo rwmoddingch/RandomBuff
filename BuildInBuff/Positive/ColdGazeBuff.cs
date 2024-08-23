@@ -22,6 +22,7 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using BuiltinBuffs.Duality;
 using static ExtraExtentions;
+using BuiltinBuffs.Negative;
 
 namespace BuiltinBuffs.Positive
 {
@@ -36,8 +37,13 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (ColdGazeBuffEntry.ColdGazeFeatures.TryGetValue(player, out _))
+                        ColdGazeBuffEntry.ColdGazeFeatures.Remove(player);
+                    if (ColdGazeBuffEntry.ColdGazeFeatures.TryGetValue(player, out _))
+                        ColdGazeBuffEntry.MedusaFeatures.Remove(player);
+
                     var coldGaze = new ColdGaze(player, player.room);
-                    ColdGazeBuffEntry.ColdGazeFeatures.Add(player, coldGaze); 
+                    ColdGazeBuffEntry.ColdGazeFeatures.Add(player, coldGaze);
 
                     if (ColdGazeBuffEntry.StackLayer >= 3)
                     {
