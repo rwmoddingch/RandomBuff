@@ -100,6 +100,8 @@ namespace BuiltinBuffs.Duality
         {
             IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 
+            IL.Player.MovementUpdate += Player_MovementUpdate;
+
             On.VultureAI.IUseARelationshipTracker_UpdateDynamicRelationship += VultureAI_UpdateDynamicRelationship;
             On.LizardAI.IUseARelationshipTracker_UpdateDynamicRelationship += LizardAI_UpdateDynamicRelationship;
 
@@ -200,29 +202,6 @@ namespace BuiltinBuffs.Duality
 
             return result;
         }
-
-        //佩戴面具时让面具抬一下
-        private static void VultureMask_DrawSprites(On.VultureMask.orig_DrawSprites orig, VultureMask self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            orig(self, sLeaser, rCam, timeStacker, camPos);
-            if (self.grabbedBy.Count > 0 && self.grabbedBy[0].grabber is Player player &&
-                VultureCatFeatures.TryGetValue(player, out var vultureCat))
-            {
-                if (vultureCat.wearCount >= 20 && vultureCat.wearCount <= 40)
-                {
-                    float num = Mathf.Lerp(self.lastDonned, self.donned, timeStacker);
-                    Vector2 vector3 = Vector3.Slerp(self.lastRotationB, self.rotationB, timeStacker);
-                    self.maskGfx.overrideDrawVector += Custom.DirVec(Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker), Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker)) *
-                                                       7f * Mathf.InverseLerp(40f, 20f, vultureCat.wearCount);
-                    self.maskGfx.overrideAnchorVector = Vector3.Slerp(vector3, new Vector2(0f, -1f), num);
-                    self.maskGfx.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-                    if (self.slatedForDeletetion || self.room != rCam.room)
-                    {
-                        sLeaser.CleanSpritesAndRemove();
-                    }
-                }
-            }
-        }
         #endregion
         #region 生物关系
         //修改生物关系（携带面具时，秃鹫、魔王鹫不再攻击玩家）
@@ -293,6 +272,54 @@ namespace BuiltinBuffs.Duality
             if (creature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
                 result = false;
             return result;
+        }
+        #endregion
+        #region 调整
+        //佩戴面具时让面具抬一下
+        private static void VultureMask_DrawSprites(On.VultureMask.orig_DrawSprites orig, VultureMask self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            if (self.grabbedBy.Count > 0 && self.grabbedBy[0].grabber is Player player &&
+                VultureCatFeatures.TryGetValue(player, out var vultureCat))
+            {
+                if (vultureCat.wearCount >= 20 && vultureCat.wearCount <= 40)
+                {
+                    float num = Mathf.Lerp(self.lastDonned, self.donned, timeStacker);
+                    Vector2 vector3 = Vector3.Slerp(self.lastRotationB, self.rotationB, timeStacker);
+                    self.maskGfx.overrideDrawVector += Custom.DirVec(Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker), Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker)) *
+                                                       7f * Mathf.InverseLerp(40f, 20f, vultureCat.wearCount);
+                    self.maskGfx.overrideAnchorVector = Vector3.Slerp(vector3, new Vector2(0f, -1f), num);
+                    self.maskGfx.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+                    if (self.slatedForDeletetion || self.room != rCam.room)
+                    {
+                        sLeaser.CleanSpritesAndRemove();
+                    }
+                }
+            }
+        }
+
+        //飞行时不抓杆子
+        private static void Player_MovementUpdate(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.After,
+                              i => i.Match(OpCodes.Ldc_I4_1),
+                              i => i.Match(OpCodes.Br_S),
+                              i => i.Match(OpCodes.Ldc_I4_0),
+                              i => i.MatchStfld<Player>("wantToGrab")))
+            {
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Action<Player>>((player) =>
+                {
+                    if (VultureCatFeatures.TryGetValue(player, out var vultureCat) &&
+                        vultureCat.isFlying)
+                    {
+                        player.wantToGrab = 0;
+                    }
+                });
+            }
+            else
+                BuffUtils.LogError(VultureShapedMutation, "IL HOOK FAILED");
         }
         #endregion
 
