@@ -57,6 +57,9 @@ namespace RandomBuff.Core.Entry
         }
 
 
+        /// <summary>
+        /// 后备函数，强制清除所有Hook
+        /// </summary>
         public static void CheckAndDisableAllHook()
         {
             List<(BuffID, HookLifeTimeLevel)> list = new ();
@@ -73,6 +76,21 @@ namespace RandomBuff.Core.Entry
             {
                 BuffPlugin.LogError($"Fallback Disable Hook {needDisable.Item1}:{needDisable.Item2}, Forget call DisableBuff?");
                 DisableBuff(needDisable.Item1,needDisable.Item2);
+            }
+        }
+
+        /// <summary>
+        /// 在重开的时候关闭所有UntilQuit
+        /// TODO:或许可以改成存档清除时处理
+        /// </summary>
+        /// <param name="allUsed"></param>
+        public static void DisableAllUtilQuitNoUsed(HashSet<BuffID> allUsed)
+        {
+            foreach(var dic in HasEnabled)
+            {
+                if(!allUsed.Contains(dic.Key) && dic.Value.TryGetValue(HookLifeTimeLevel.UntilQuit,out var value) && value)
+                    DisableBuff(dic.Key, HookLifeTimeLevel.UntilQuit);
+
             }
         }
 
@@ -124,6 +142,8 @@ namespace RandomBuff.Core.Entry
                 }
             }
         }
+
+
 
 
         public static void DisableCondition(Condition condition)

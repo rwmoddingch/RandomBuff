@@ -130,7 +130,7 @@ namespace RandomBuff
             {
                 if (!isLoaded)
                 {
-                    Log($"Version: {ModVersion}, Current save version: {saveVersion}, {System.DateTime.Now}");
+                    Log($"Version: {ModVersion}, Current save version: {saveVersion}, {DateTime.Now}");
 
                     CacheFolder = ModManager.ActiveMods.First(i => i.id == ModId).basePath +
                                   Path.AltDirectorySeparatorChar + "buffcaches";
@@ -139,6 +139,7 @@ namespace RandomBuff
 
                     if (File.Exists(Path.Combine(CacheFolder, "buffVersion")))
                     {
+                        bool hasDeleteAll = false;
                         var lines = File.ReadAllLines(Path.Combine(CacheFolder, "buffVersion")).ToList();
                         var lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
 
@@ -152,8 +153,14 @@ namespace RandomBuff
                                     lines.Add($"{mod.id}|{mod.version}");
                                     lines.Remove($"{mod.id}|{version}");
                                     BuffPlugin.Log($"Enabled mod version changed : [{mod.id},{mod.version}], last version:{version}");
-                                    foreach(var all in Directory.GetFiles(CacheFolder,$"{mod.id}*"))
-                                        File.Delete(all);
+                                    if (!hasDeleteAll)
+                                    {
+                                        foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
+                                        {
+                                            File.Delete(all);
+                                            hasDeleteAll = true;
+                                        }
+                                    }
                                 }
                             }
                             else
@@ -275,7 +282,7 @@ namespace RandomBuff
                         if (devVersion == null)
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
-                                $"Random Buff, Build: 2024_08_22\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                $"Random Buff, Build: 2024_08_24\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
                                 new Vector2(1000, 200), 0.4f)
                             {
                                 Alignment = TMPro.TextAlignmentOptions.BottomLeft,

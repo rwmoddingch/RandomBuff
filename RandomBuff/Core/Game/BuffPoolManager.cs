@@ -125,7 +125,7 @@ namespace RandomBuff.Core.Game
             BuffPlugin.Log("Clone all data to CycleData");
             foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
                 cycleDatas.Add(data.Key, data.Value.Clone());
-
+            BuffHookWarpper.DisableAllUtilQuitNoUsed(cycleDatas.Keys.ToHashSet());
             Instance = this;
 
             GameSetting = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).Clone();

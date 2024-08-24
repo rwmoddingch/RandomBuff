@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using RandomBuff;
+using RandomBuffUtils;
 
 namespace BuiltinBuffs.Duality
 {
@@ -46,7 +48,7 @@ namespace BuiltinBuffs.Duality
                 {
                     for (int i = 0; i < self.savedObjects.Count; i++)
                     {
-                        UnityEngine.Debug.Log("Saving for Travel: " + self.savedObjects[i]);
+                        BuffUtils.Log(DreamTraveller,"Saving for Travel: " + self.savedObjects[i]);
 
                         string newPos = string.Empty;
                         string newSavedObj = string.Empty;
@@ -86,7 +88,7 @@ namespace BuiltinBuffs.Duality
                             if (j < array.Length - 1) newSavedObj += "<oA>"; 
                         }                       
                         self.savedObjects[i] = newSavedObj;
-                        UnityEngine.Debug.Log("Dream travel object: " + newSavedObj);
+                        BuffUtils.Log(DreamTraveller, "Dream travel object: " + newSavedObj);
                     }
                 }
 
@@ -94,7 +96,7 @@ namespace BuiltinBuffs.Duality
                 {
                     for (int i = 0; i < self.saveState.pendingObjects.Count; i++)
                     {
-                        UnityEngine.Debug.Log("Saving for Travel: " + self.saveState.pendingObjects[i]);
+                        BuffUtils.Log(DreamTraveller, "Saving for Travel: " + self.saveState.pendingObjects[i]);
 
                         string newPos = string.Empty;
                         string newSavedObj = string.Empty;
@@ -126,15 +128,15 @@ namespace BuiltinBuffs.Duality
                                 newSavedObj += newPos;
                             }
                             if (j < array.Length - 1) newSavedObj += "<oA>";
-                        }
+                        } 
                         self.saveState.pendingObjects[i] = newSavedObj;
-                        UnityEngine.Debug.Log("Dream travel object: " + newSavedObj);
+                        BuffUtils.Log(DreamTraveller, "Dream travel object: " + newSavedObj);
                     }
                 }
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogException(ex);
+                BuffUtils.LogException(DreamTraveller,ex);
             }
 
         }
@@ -154,7 +156,7 @@ namespace BuiltinBuffs.Duality
                 {
                     if (game.world.shelters.Length > 1)
                     {
-                        UnityEngine.Debug.Log("Dream Travel!");
+                        BuffUtils.Log(DreamTraveller, "Dream Travel!");
                         int num = UnityEngine.Random.Range(0, game.world.shelters.Length);
                         self.denPosition = game.world.GetAbstractRoom(game.world.shelters[num]).name;
                     }
