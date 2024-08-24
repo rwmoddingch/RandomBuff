@@ -48,40 +48,25 @@ namespace RandomBuff.Core.Buff
 
         public int MaxStackLayers { get; private set; } = int.MaxValue;
 
-      
-
-        internal BuffStaticData(BuffID buffID, bool triggerable, string faceName, Color color, BuffType buffType, bool asPositive,
-            BuffProperty buffProperty, bool stackable, bool hidden, int maxCycleCount, string assetPath, bool multiLayerFace, int faceLayer,
-            float maxFaceDepth, Color faceBackgroundColor, HashSet<string> conflict, HashSet<string> tag, int maxStackLayers, Dictionary<InGameTranslator.LanguageID, CardInfo> cardInfos)
-        {
-            BuffID = buffID;
-            Triggerable = triggerable;
-            FaceName = faceName;
-            Color = color;
-            BuffType = buffType;
-            AsPositive = asPositive;
-            BuffProperty = buffProperty;
-            Stackable = stackable;
-            Hidden = hidden;
-            MaxCycleCount = maxCycleCount;
-            AssetPath = assetPath;
-            MultiLayerFace = multiLayerFace;
-            FaceLayer = faceLayer;
-            MaxFaceDepth = maxFaceDepth;
-            FaceBackgroundColor = faceBackgroundColor;
-            Conflict = conflict;
-            Tag = tag;
-            MaxStackLayers = maxStackLayers;
-            CardInfos = cardInfos;
-            GetCustomStaticBuffData((BuffData)Activator.CreateInstance(BuffRegister.GetDataType(BuffID)), this);
-        }
 
 
+
+        private bool tryLoad = false;
 
 
         //帮助方法
         internal Texture GetFaceTexture()
         {
+            try
+            {
+                if (!Futile.atlasManager.DoesContainAtlas(FaceName))
+                    Futile.atlasManager.LoadImage(FaceName);
+            }
+            catch (FutileException _)
+            {
+                BuffPlugin.LogError($"Card image not found at :{FaceName}");
+            }
+            tryLoad = true;
             if (!Futile.atlasManager.DoesContainAtlas(FaceName))
             {
                 BuffPlugin.LogWarning($"Can;t Get face for {BuffID} {FaceName}");
@@ -201,14 +186,6 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "FaceName"))
                 {
                     newData.FaceName = $"{dirPath.Substring(1)}/{rawData[loadState]}";
-                    try
-                    {
-                        Futile.atlasManager.LoadImage(newData.FaceName);
-                    }
-                    catch (FutileException _)
-                    {
-                        BuffPlugin.LogError($"Card image not found at :{newData.FaceName}");
-                    }
                 }
                 else
                 {
@@ -448,21 +425,11 @@ namespace RandomBuff.Core.Buff
                 builder.AppendLine($"---BuffName: {info.Value.BuffName}");
                 builder.AppendLine($"---Description: {info.Value.Description}");
             }
-            builder.AppendLine("Custom Parameters : ");
-            foreach (var info in customParameterNames)
-            {
-                builder.AppendLine($"------");
-                builder.AppendLine($"---PropertyName: {info.Key}");
-                builder.AppendLine($"---DisplayName: {info.Value}");
-            }
             return builder.ToString();
         }
 
 
-        internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; } = new();
-
-        internal Dictionary<string, string> customParameterNames = new();
-        internal Dictionary<string, string> customParameterDefaultValues = new();
+        internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; private set; } = new();
 
 
     }

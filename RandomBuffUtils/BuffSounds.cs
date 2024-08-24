@@ -43,9 +43,10 @@ namespace RandomBuffUtils
         {
             if (name.StartsWith("BUFF-"))
             {
-                int count = 1;
-                for (int i = 0; i < 100; i++)
-                    count += File.Exists(AssetManager.ResolveFilePath(name.Replace("BUFF-", "") + $"_{i}.wav")) ? 1 : 0;
+                var dir = new DirectoryInfo(AssetManager.ResolveDirectory(Path.GetDirectoryName(name.Replace("BUFF-", ""))));
+                var fileName = Path.GetFileName(name);
+                int count = 1 + dir.GetFiles($"{fileName}_*.wav").Length;
+                BuffUtils.Log(nameof(BuffSounds), $"{dir},{fileName},{count}");
                 return count;
             }
             return orig(self, name);

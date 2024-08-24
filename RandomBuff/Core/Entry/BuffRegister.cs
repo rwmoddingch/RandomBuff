@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Pdb;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
@@ -388,6 +389,7 @@ namespace RandomBuff.Core.Entry
         {
             allEntry.Clear();
             allBuffAssemblies.Clear();
+            var dt = DateTime.Now;
             foreach (var mod in ModManager.ActiveMods)
             {
              
@@ -396,11 +398,11 @@ namespace RandomBuff.Core.Entry
                     continue;
                 BuffPlugin.Log($"Find correct path in {CurrentModId = mod.id} to load plugins");
                 DirectoryInfo info = new DirectoryInfo(path);
+               
 
-        
                 foreach (var file in info.GetFiles("*.dll"))
                 {
-
+                    AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName, new ReaderParameters { ReadSymbols = true });
                     Assembly assembly = Assembly.LoadFile(file.FullName);
                     allBuffAssemblies.Add(assembly);
 
@@ -493,7 +495,10 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogException(e,$"Exception when load {mod.id}'s RuntimeBuff");
                 }
                 currentRuntimeBuffName.Clear();
+
             }
+            BuffPlugin.Log($"Cost time {DateTime.Now - dt}");
+
             CurrentModId = string.Empty;
             var somePath = Path.Combine(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).basePath, "buffassets",
                 "assetbundles", "extend");
