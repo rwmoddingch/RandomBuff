@@ -15,11 +15,9 @@ using Color = UnityEngine.Color;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 using MoreSlugcats;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using HotDogGains.Positive;
 using RandomBuff.Core.SaveData;
+using BuiltinBuffs.Positive;
 
 namespace BuiltinBuffs.Duality
 {
@@ -107,19 +105,16 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
-            //这是在使部分游戏日志可以输出
-            //On.RWCustom.Custom.Log += Custom_Log;
-
             IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
 
             IL.FlareBomb.Update += FlareBomb_UpdateIL;
             On.SporeCloud.Update += SporeCloud_Update;
             On.SlugcatStats.SlugcatCanMaul += SlugcatStats_SlugcatCanMaul;
             On.Player.IsCreatureLegalToHoldWithoutStun += Player_IsCreatureLegalToHoldWithoutStun;
+            On.Creature.Violence += Creature_Violence;
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
             On.MoreSlugcats.SlugNPCAI.TheoreticallyEatMeat += SlugNPCAI_TheoreticallyEatMeat;
-            //On.Player.BiteEdibleObject += Player_BiteEdibleObject;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -142,13 +137,6 @@ namespace BuiltinBuffs.Duality
         public static void LongLifeCycleHookOn()
         {
             On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
-        }
-
-        private static void Custom_Log(On.RWCustom.Custom.orig_Log orig, params string[] values)
-        {
-            orig(values);
-            for (int i = 0; i < values.Length; i++)
-                BuffPlugin.Log("Custom_Log: " + values[i]);
         }
         #region 额外特性
         //被闪光果致死
@@ -229,8 +217,19 @@ namespace BuiltinBuffs.Duality
             bool result = orig(self, grabCheck);
             if (SpiderCatFeatures.TryGetValue(self, out var spider) && spider.LikeSpider)
                 result = true;
-            BuffPlugin.Log(result);
             return result;
+        }
+
+        //撕咬伤害改变
+        public static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            if (source != null && source.owner is Player player && type == Creature.DamageType.Bite &&
+                SpiderCatFeatures.TryGetValue(player, out var spider) && spider.LikeSpider)
+            {
+                //第二层0.4，第三层0.6，以此类推
+                damage *= 0.2f * StackLayer;//参考：普通狼蛛撕咬伤害0.4或1.2（各为50%概率），烈焰狼蛛撕咬伤害0.6
+            }
+            orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
         }
 
         //允许吃肉
@@ -266,8 +265,8 @@ namespace BuiltinBuffs.Duality
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
             IntVector2 origFoodRequirement = orig(slugcat);
-            int newHibernateRequirement = origFoodRequirement.y + 2;
-            int newTotalFoodRequirement = origFoodRequirement.x + 3;
+            int newHibernateRequirement = origFoodRequirement.y + (StackLayer >= 3 ? 4 : 2);
+            int newTotalFoodRequirement = origFoodRequirement.x + (StackLayer >= 3 ? 5 : 3);
 
             return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
         }
@@ -377,7 +376,7 @@ namespace BuiltinBuffs.Duality
         private static void Player_MaulingUpdate(On.Player.orig_MaulingUpdate orig, Player self, int graspIndex)
         {
             orig(self, graspIndex);
-            if (SpiderCatFeatures.TryGetValue(self, out var spider) && spider.LikeSpider)
+            if (SpiderCatFeatures.TryGetValue(self, out var spider))
             {
                 spider.MaulingUpdate(graspIndex);
             }
@@ -1132,15 +1131,77 @@ namespace BuiltinBuffs.Duality
 
         public void MaulingUpdate(int graspIndex)
         {
-            if (!ownerRef.TryGetTarget(out var player))
+            if (!ownerRef.TryGetTarget(out var player) || !this.LikeSpider)
                 return;
             if (player.room == null)
+                return; 
+            if (player.grasps[graspIndex] == null || 
+                !(player.grasps[graspIndex].grabbed is Creature crit) ||
+                !ShouldFired(crit))
                 return;
-            while (player.maulTimer % 5 != 0)
+
+            Vector2 vector = player.grasps[graspIndex].grabbedChunk.pos * player.grasps[graspIndex].grabbedChunk.mass;
+            float num = player.grasps[graspIndex].grabbedChunk.mass;
+            for (int i = 0; i < player.grasps[graspIndex].grabbed.bodyChunkConnections.Length; i++)
             {
-                player.maulTimer++;
-                player.MaulingUpdate(graspIndex); 
+                if (player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1 == player.grasps[graspIndex].grabbedChunk)
+                {
+                    vector += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2.pos * player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2.mass;
+                    num += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2.mass;
+                }
+                else if (player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2 == player.grasps[graspIndex].grabbedChunk)
+                {
+                    vector += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1.pos * player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1.mass;
+                    num += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1.mass;
+                }
             }
+            vector /= num;
+            if (player.maulTimer >= 8)
+            {
+                player.mainBodyChunk.pos += Custom.DegToVec(Mathf.Lerp(-90f, 90f, UnityEngine.Random.value)) * 4f;
+                player.grasps[graspIndex].grabbedChunk.vel += Custom.DirVec(vector, player.mainBodyChunk.pos) * 0.9f / player.grasps[graspIndex].grabbedChunk.mass;
+                for (int j = UnityEngine.Random.Range(0, 3); j >= 0; j--)
+                {
+                    player.room.AddObject(new WaterDrip(Vector2.Lerp(player.grasps[graspIndex].grabbedChunk.pos, player.mainBodyChunk.pos, UnityEngine.Random.value) + player.grasps[graspIndex].grabbedChunk.rad * Custom.RNV() * UnityEngine.Random.value, Custom.RNV() * 6f * UnityEngine.Random.value + Custom.DirVec(vector, (player.mainBodyChunk.pos + (player.graphicsModule as PlayerGraphics).head.pos) / 2f) * 7f * UnityEngine.Random.value + Custom.DegToVec(Mathf.Lerp(-90f, 90f, UnityEngine.Random.value)) * UnityEngine.Random.value * player.EffectiveRoomGravity * 7f, false));
+                }
+                if (player.Grab(player.grasps[graspIndex].grabbed, 0, player.grasps[graspIndex].grabbedChunk.index, Creature.Grasp.Shareability.CanNotShare, 0.5f, false, true))
+                    player.room.PlaySound(SoundID.Big_Spider_Grab_Creature, player.mainBodyChunk);
+                else
+                    player.room.PlaySound(SoundID.Big_Spider_Slash_Creature, player.mainBodyChunk);
+                player.room.PlaySound(SoundID.Slugcat_Eat_Meat_B, player.mainBodyChunk);
+                player.room.PlaySound(SoundID.Drop_Bug_Grab_Creature, player.mainBodyChunk, false, 1f, 0.76f);
+                BuffPlugin.Log("Mauled target");
+                if (!(player.grasps[graspIndex].grabbed as Creature).dead)
+                {
+                    for (int num12 = UnityEngine.Random.Range(8, 14); num12 >= 0; num12--)
+                    {
+                        player.room.AddObject(new WaterDrip(Vector2.Lerp(player.grasps[graspIndex].grabbedChunk.pos, player.mainBodyChunk.pos, UnityEngine.Random.value) + player.grasps[graspIndex].grabbedChunk.rad * Custom.RNV() * UnityEngine.Random.value, Custom.RNV() * 6f * UnityEngine.Random.value + Custom.DirVec(player.grasps[graspIndex].grabbed.firstChunk.pos, (player.mainBodyChunk.pos + (player.graphicsModule as PlayerGraphics).head.pos) / 2f) * 7f * UnityEngine.Random.value + Custom.DegToVec(Mathf.Lerp(-90f, 90f, UnityEngine.Random.value)) * UnityEngine.Random.value * player.EffectiveRoomGravity * 7f, false));
+                    }
+                    Creature creature = player.grasps[graspIndex].grabbed as Creature;
+                    creature.SetKillTag(player.abstractCreature);
+                    creature.Violence(player.bodyChunks[0], new Vector2?(new Vector2(0f, 0f)), player.grasps[graspIndex].grabbedChunk, null, Creature.DamageType.Bite, 1f, 15f);
+                    creature.stun = 5;
+                    if (creature.abstractCreature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.Inspector)
+                    {
+                        creature.Die();
+                    }
+                }
+                player.maulTimer = 0;
+                player.wantToPickUp = 0;
+                if (player.grasps[graspIndex] != null)
+                {
+                    player.TossObject(graspIndex, false);
+                    player.ReleaseGrasp(graspIndex);
+                }
+                player.standing = true;
+            }
+            /*
+            while (player.maulTimer % 5 != 0 && player.maulTimer < 40)
+            {
+                BuffPlugin.Log(player.maulTimer);
+                player.maulTimer++;
+                player.MaulingUpdate(graspIndex);
+            }*/
         }
 
         public void Collide(PhysicalObject otherObject, int myChunk, int otherChunk)
@@ -1393,6 +1454,50 @@ namespace BuiltinBuffs.Duality
                 (num >= 1 && (player.room.gravity <= 0.3f || player.Submersion >= 0.5f)))
                 return true;
             return false;
+        }
+
+        public bool ShouldFired(Creature creature)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return false;
+
+            bool shouldFire = !creature.dead;
+            bool inRange = true;
+            
+            if (creature is Player)
+                shouldFire = false;
+            if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(player.abstractCreature) > 0.5f)
+            {
+                shouldFire = false;
+            }
+            if (creature is Lizard)
+            {
+                foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Lizard).AI.relationshipTracker.relationships.
+                    Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == player.abstractCreature))
+                {
+                    if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                        shouldFire = false;
+                }
+            }
+            if (creature is Scavenger &&
+                (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
+                LikeOfPlayer(CreatureCommunities.CommunityID.Scavengers,
+                            (creature as Scavenger).abstractCreature.world.game.world.RegionNumber,
+                            player.playerState.playerNumber) > 0.5)
+            {
+                shouldFire = false;
+            }
+            if (creature is Cicada)
+            {
+                foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Cicada).AI.relationshipTracker.relationships.
+                    Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == player.abstractCreature))
+                {
+                    if ((creature as Cicada).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                        shouldFire = false;
+                }
+            }
+
+            return shouldFire && inRange;
         }
 
         #region 发射毒镖
@@ -1659,7 +1764,10 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.Drag)
                 result = Player.ObjectGrabability.Drag;
 
-            if (this.LikeSpider && obj is Creature && player.dontGrabStuff < 1 && obj != player && 
+            //允许抓住其他生物（不含小生物）
+            if (this.LikeSpider && obj is Creature creature && 
+                player.dontGrabStuff < 1 && player.grabbedBy.Count <= 0 &&
+                creature != player && !creature.Template.smallCreature &&
                 result == Player.ObjectGrabability.CantGrab)
                 result = Player.ObjectGrabability.Drag;
 
