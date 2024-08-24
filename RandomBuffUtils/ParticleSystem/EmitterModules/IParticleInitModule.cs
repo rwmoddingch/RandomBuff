@@ -109,6 +109,20 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         }
     }
 
+    public class SetAlpha : EmitterModule, IParticleInitModule
+    {
+        float alpha;
+        public SetAlpha(ParticleEmitter emitter, float alpha) : base(emitter)
+        {
+            this.alpha = alpha;
+        }
+
+        public void ApplyInit(Particle particle)
+        {
+            particle.HardSetAlpha(alpha);
+        }
+    }
+
     public class SetRandomLife : EmitterModule, IParticleInitModule
     {
         int a;

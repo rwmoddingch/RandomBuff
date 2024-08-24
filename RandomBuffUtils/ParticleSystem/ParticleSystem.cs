@@ -54,7 +54,7 @@ namespace RandomBuffUtils.ParticleSystem
             for (int i = managedEmitter.Count - 1; i >= 0; i--)
                 managedEmitter[i].DrawSprites(rCam, timeStacker, camPos);
 
-            if (slatedForDeletetion || room != rCam.room)
+            if (!sLeaser.deleteMeNextFrame && (slatedForDeletetion || room != rCam.room))
                 sLeaser.CleanSpritesAndRemove();
         }
 
