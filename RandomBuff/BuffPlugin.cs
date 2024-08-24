@@ -137,6 +137,44 @@ namespace RandomBuff
                     if (!Directory.Exists(CacheFolder))
                         Directory.CreateDirectory(CacheFolder);
 
+                    if (File.Exists(Path.Combine(CacheFolder, "buffVersion")))
+                    {
+                        var lines = File.ReadAllLines(Path.Combine(CacheFolder, "buffVersion")).ToList();
+                        var lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
+
+                        foreach (var mod in ModManager.ActiveMods.Where(i => Directory.Exists(Path.Combine(i.basePath,"buffplugins")) || 
+                                                                             Directory.Exists(Path.Combine(i.basePath, "buffassets"))))
+                        {
+                            if (lastVersion.TryGetValue(mod.id, out var version))
+                            {
+                                if (version != mod.version)
+                                {
+                                    lines.Add($"{mod.id}|{mod.version}");
+                                    lines.Remove($"{mod.id}|{version}");
+                                    BuffPlugin.Log($"Enabled mod version changed : [{mod.id},{mod.version}], last version:{version}");
+                                    foreach(var all in Directory.GetFiles(CacheFolder,$"{mod.id}*"))
+                                        File.Delete(all);
+                                }
+                            }
+                            else
+                            {
+                                lines.Add($"{mod.id}|{mod.version}");
+                                BuffPlugin.Log($"New enable mod : [{mod.id},{mod.version}");
+                            }
+                        }
+                        File.WriteAllLines(Path.Combine(CacheFolder, "buffVersion"),lines);
+                    }
+                    else
+                    {
+                        foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
+                            File.Delete(all);
+                        File.WriteAllLines(Path.Combine(CacheFolder, "buffVersion"), ModManager.ActiveMods.Where(i =>
+                                Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
+                                Directory.Exists(Path.Combine(i.basePath, "buffassets")))
+                            .Select(i => $"{i.id}|{i.version}")
+                            .ToArray());
+                    }
+
 #if TESTVERSION
                     Log($"!!!!TEST BUILD!!!!");
 
@@ -204,6 +242,7 @@ namespace RandomBuff
             }
             try
             {
+                //var dt = DateTime.Now;
                 if (!isPostLoaded)
                 {
                     if (!isLoaded)
@@ -218,7 +257,7 @@ namespace RandomBuff
                     }
                     //延迟加载以保证其他plugin的注册完毕后再加载
                     BuffConfigManager.InitBuffStaticData();
-                    BuffConfigManager.InitTemplateStaticData()  ;
+                    BuffConfigManager.InitTemplateStaticData();
                     BuffRegister.LoadBuffPluginAsset();
 
                     //这个会用到template数据（嗯
@@ -227,7 +266,7 @@ namespace RandomBuff
 
                     BuffRegister.BuildAllDataStaticWarpper();
 
-
+                    //Log($"Cost Time: {DateTime.Now-dt}");
 #if TESTVERSION
                     On.StaticWorld.InitCustomTemplates += orig =>
                     {

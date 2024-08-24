@@ -16,64 +16,91 @@ using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 using CustomAttributeNamedArgument = Mono.Cecil.CustomAttributeNamedArgument;
 using SecurityAction = System.Security.Permissions.SecurityAction;
+using SecurityAttribute = Mono.Cecil.SecurityAttribute;
+using RandomBuff.Core.Entry;
+
 namespace RandomBuff.Core.Buff
 {
     internal static class BuffBuilder
     {
+        internal static (TypeDefinition buffType, TypeDefinition dataType)
+            GenerateBuffTypeWithCache(string modId, string usedId, bool needRegisterId = false,
+                Action<ILProcessor> buffCtor = null,
+                Action<ILProcessor> dataCtor = null)
+        {
+            return GenerateBuffType($"{modId}_dynamicCache", usedId, needRegisterId, buffCtor, dataCtor);
+        }
+
         public static (TypeDefinition buffType, TypeDefinition dataType) 
             GenerateBuffType(string modId, string usedId,bool needRegisterId = false,
             Action<ILProcessor> buffCtor = null,
             Action<ILProcessor> dataCtor = null)
         {
-            if (!assemblyDefs.ContainsKey(modId))
+            if(!File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{modId}.dll")))
             {
-                assemblyDefs.Add(modId, AssemblyDefinition.CreateAssembly(
-                    new AssemblyNameDefinition($"DynamicBuff_{modId}", new Version(1, 0)),
-                    $"Main", ModuleKind.Dll));
-            }
-
-      
-            var moduleDef = assemblyDefs[modId].MainModule;
-
-            var buffType = new TypeDefinition(modId, $"{usedId}Buff", TypeAttributes.Public | TypeAttributes.Class,
-                moduleDef.ImportReference(typeof(RuntimeBuff)));
-            moduleDef.Types.Add(buffType);
-
-            var staticField = new FieldDefinition(usedId, FieldAttributes.Static, moduleDef.ImportReference(typeof(BuffID)));
-            buffType.Fields.Add(staticField);
-            {
-                buffType.DefineStaticConstructor((cctorIl) =>
+                if (!assemblyDefs.ContainsKey(modId))
                 {
-                    cctorIl.Emit(MonoOpCodes.Ldstr, usedId);
-                    cctorIl.Emit(needRegisterId ? MonoOpCodes.Ldc_I4_1 : MonoOpCodes.Ldc_I4_0);
-                    cctorIl.Emit(MonoOpCodes.Newobj, buffType.Module.ImportReference(
-                        typeof(BuffID).GetConstructor(new[] { typeof(string), typeof(bool) })));
-                    cctorIl.Emit(MonoOpCodes.Stsfld, staticField);
-                    cctorIl.Emit(MonoOpCodes.Ret);
-                });
+                    assemblyDefs.Add(modId, AssemblyDefinition.CreateAssembly(
+                        new AssemblyNameDefinition($"DynamicBuff_{modId}", new Version(BuffPlugin.ModVersion)),
+                        $"Main", ModuleKind.Dll));
+                    var decl = new SecurityDeclaration(Mono.Cecil.SecurityAction.RequestMinimum);
+                    assemblyDefs[modId].SecurityDeclarations.Add(decl);
+                    var attr = new SecurityAttribute(assemblyDefs[modId].MainModule
+                        .ImportReference(typeof(SecurityPermissionAttribute)));
+                    decl.SecurityAttributes.Add(attr);
+                    attr.Properties.Add(new CustomAttributeNamedArgument("SkipVerification",
+                        new CustomAttributeArgument(assemblyDefs[modId].MainModule.TypeSystem.Boolean, true)));
+
+                }
+                var space = modId.Replace("_dynamicCache", "");
+
+                var moduleDef = assemblyDefs[modId].MainModule;
+
+                var buffType = new TypeDefinition(space, $"{usedId}Buff", TypeAttributes.Public | TypeAttributes.Class,
+                    moduleDef.ImportReference(typeof(RuntimeBuff)));
+                moduleDef.Types.Add(buffType);
+
+                var staticField = new FieldDefinition(usedId, FieldAttributes.Static,
+                    moduleDef.ImportReference(typeof(BuffID)));
+                buffType.Fields.Add(staticField);
+                {
+                    buffType.DefineStaticConstructor((cctorIl) =>
+                    {
+                        cctorIl.Emit(MonoOpCodes.Ldstr, usedId);
+                        cctorIl.Emit(needRegisterId ? MonoOpCodes.Ldc_I4_1 : MonoOpCodes.Ldc_I4_0);
+                        cctorIl.Emit(MonoOpCodes.Newobj, buffType.Module.ImportReference(
+                            typeof(BuffID).GetConstructor(new[] { typeof(string), typeof(bool) })));
+                        cctorIl.Emit(MonoOpCodes.Stsfld, staticField);
+                        cctorIl.Emit(MonoOpCodes.Ret);
+                    });
 
 
-                buffType.DefinePropertyOverride("ID", typeof(BuffID), MethodAttributes.Public,
-                     buffType == null ? null : (il) => BuildIdGet(il, staticField));
-                buffType.DefineConstructor(buffType.Module.ImportReference(typeof(RuntimeBuff).
-                        GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First()), buffCtor == null ? null : (il) => buffCtor?.Invoke(il));
-            }
+                    buffType.DefinePropertyOverride("ID", typeof(BuffID), MethodAttributes.Public,
+                        buffType == null ? null : (il) => BuildIdGet(il, staticField));
+                    buffType.DefineConstructor(
+                        buffType.Module.ImportReference(typeof(RuntimeBuff)
+                            .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First()),
+                        buffCtor == null ? null : (il) => buffCtor?.Invoke(il));
+                }
 
 
-            var dataType = new TypeDefinition(modId, $"{usedId}BuffData", TypeAttributes.Public | TypeAttributes.Class,
-                moduleDef.ImportReference(typeof(BuffData)));
+                var dataType = new TypeDefinition(space, $"{usedId}BuffData",
+                    TypeAttributes.Public | TypeAttributes.Class,
+                    moduleDef.ImportReference(typeof(BuffData)));
 
-            moduleDef.Types.Add(dataType);
-            {
-                dataType.DefinePropertyOverride("ID", typeof(BuffID), MethodAttributes.Public,
+                moduleDef.Types.Add(dataType);
+                {
+                    dataType.DefinePropertyOverride("ID", typeof(BuffID), MethodAttributes.Public,
                         (il) => BuildIdGet(il, staticField));
 
-                dataType.DefineConstructor(dataType.Module.ImportReference(typeof(BuffData)
-                    .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First()),
-                    dataCtor == null ? null : (il) => dataCtor?.Invoke(il));
-            }
+                    dataType.DefineConstructor(dataType.Module.ImportReference(typeof(BuffData)
+                            .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First()),
+                        dataCtor == null ? null : (il) => dataCtor?.Invoke(il));
+                }
 
-            return (buffType, dataType);
+                return (buffType, dataType);
+            }
+            return (null, null);
         }
 
         public static MethodDefinition DefineMethodOverride(this TypeDefinition type, string methodName
@@ -160,27 +187,34 @@ namespace RandomBuff.Core.Buff
             return property;
         }
 
-        public static Assembly FinishGenerate(string modId, string debugOutputPath = null)
+        public static IEnumerable<Assembly> FinishGenerate(string modId, string debugOutputPath = null)
         {
             if (hasUse.Contains(modId))
             {
-                BuffPlugin.LogError($"Already load DynamicBuff_{modId}.dll!");
-                return null;
+                BuffPlugin.LogError($"Already load dynamic {modId}.dll!");
+                yield break;
             }
+
             if (Directory.Exists("Debug") && debugOutputPath == null)
                 debugOutputPath = $"Debug/DynamicBuff_{modId}.dll";
-            using (MemoryStream ms = new MemoryStream())
+
+
+            if (assemblyDefs.ContainsKey($"{modId}_dynamicCache"))
+                assemblyDefs[$"{modId}_dynamicCache"].Write(Path.Combine(BuffPlugin.CacheFolder, $"{modId}_dynamicCache.dll"));
+            if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{modId}_dynamicCache.dll")))
+                yield return Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{modId}_dynamicCache.dll"));
+
+            if (assemblyDefs.ContainsKey(modId))
             {
-                if (assemblyDefs.ContainsKey(modId))
+                using (MemoryStream ms = new MemoryStream())
                 {
+
                     assemblyDefs[modId].Write(ms);
                     if (debugOutputPath != null)
                         assemblyDefs[modId].Write(debugOutputPath);
                     hasUse.Add(modId);
-                    return Assembly.Load(ms.GetBuffer());
+                    yield return Assembly.Load(ms.GetBuffer());
                 }
-
-                return null;
             }
         }
 

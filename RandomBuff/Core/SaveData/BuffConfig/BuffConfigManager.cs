@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
@@ -19,6 +20,7 @@ using MonoMod.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Option;
 using RandomBuff.Core.Progression;
@@ -44,7 +46,7 @@ namespace RandomBuff.Core.SaveData
 
         internal static void LoadConfig(string config, BuffFormatVersion formatVersion)
         {
-            BuffPlugin.Log($"Load config : {config}");
+            //BuffPlugin.Log($"Load config : {config}");
             Instance = new BuffConfigManager(config, formatVersion);
             BuffConfigurableManager.FetchAllConfigs();
         }
@@ -218,7 +220,6 @@ namespace RandomBuff.Core.SaveData
         internal static void InitBuffStaticData()
         {
             BuffPlugin.Log("Loading All Buff Static Data!");
-            var dt = DateTime.Now;
 
             foreach (var mod in ModManager.ActiveMods)
             {
@@ -226,10 +227,10 @@ namespace RandomBuff.Core.SaveData
 
                 if (!Directory.Exists(path))
                     continue;
-                if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_cache.dll")) && 
-                    CheckFileNoUpdated(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_cache.dll"), path)) 
+                if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_dataCache.dll")) && 
+                    CheckFileNoUpdated(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_dataCache.dll"), path)) 
                 {
-                    var ass = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_cache.dll"));
+                    var ass = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_dataCache.dll"));
                     Type[] types = ass.GetTypes();
                     if (types.FirstOrDefault(i => i.Name.Contains("StaticCache_")) is { } type)
                     {
@@ -254,8 +255,9 @@ namespace RandomBuff.Core.SaveData
 
                 }
 
-                AssemblyDefinition assembly = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition($"{mod.id}_cache", new Version(1,0)),
+                AssemblyDefinition assembly = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition($"{mod.id}_dataCache", new Version(BuffPlugin.ModVersion)),
                     "Main", ModuleKind.Dll);
+
                 var decl = new SecurityDeclaration(Mono.Cecil.SecurityAction.RequestMinimum);
                 assembly.SecurityDeclarations.Add(decl);
                 var attr = new SecurityAttribute(assembly.MainModule.ImportReference(typeof(SecurityPermissionAttribute)));
@@ -267,7 +269,7 @@ namespace RandomBuff.Core.SaveData
                 LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName, mod.id);
 
                 CreateStaticDataCache(assembly.MainModule, mod.id);
-                assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_cache.dll"));
+                assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_dataCache.dll"));
 
 
             }
@@ -286,8 +288,6 @@ namespace RandomBuff.Core.SaveData
                 }
                 return true;
             }
-
-            BuffPlugin.Log($"Cost time {DateTime.Now-dt}");
         }
 
 
@@ -424,7 +424,6 @@ namespace RandomBuff.Core.SaveData
         public static void InitQuestData()
         {
             BuffPlugin.Log("Loading All BuffQuest Data!");
-            var dt = DateTime.Now;
 
             foreach (var mod in ModManager.ActiveMods)
             {
@@ -490,8 +489,6 @@ namespace RandomBuff.Core.SaveData
                 }
 #endif
             }
-
-            BuffPlugin.Log($"Quest Cost time {DateTime.Now - dt}");
 
         }
 

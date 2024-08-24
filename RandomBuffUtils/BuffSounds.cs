@@ -46,7 +46,6 @@ namespace RandomBuffUtils
                 var dir = new DirectoryInfo(AssetManager.ResolveDirectory(Path.GetDirectoryName(name.Replace("BUFF-", ""))));
                 var fileName = Path.GetFileName(name);
                 int count = 1 + dir.GetFiles($"{fileName}_*.wav").Length;
-                BuffUtils.Log(nameof(BuffSounds), $"{dir},{fileName},{count}");
                 return count;
             }
             return orig(self, name);
@@ -144,7 +143,7 @@ namespace RandomBuffUtils
                     loader.externalAudio[sounds[i].audioClip] = new AudioClip[loader.soundVariations[sounds[i].audioClip]];
 
                     LoadSingleClips(ref loader.externalAudio[sounds[i].audioClip], soundPath, datas[i].soundName);
-                    BuffUtils.Log(nameof(BuffSounds), $"Loaded audio clip, Name:{datas[i].soundName}, Count:{loader.externalAudio[sounds[i].audioClip].Length}, ID:{sounds[i].audioClip}");
+                    //BuffUtils.Log(nameof(BuffSounds), $"Loaded audio clip, Name:{datas[i].soundName}, Count:{loader.externalAudio[sounds[i].audioClip].Length}, ID:{sounds[i].audioClip}");
                 }
 
             }

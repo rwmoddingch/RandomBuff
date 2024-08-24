@@ -9,34 +9,44 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using BepInEx;
 using Mono.Cecil;
 using On.Menu;
 using RandomBuff.Core.Game.Settings.Conditions;
 using UnityEngine;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
+using Mono.Cecil.Rocks;
 
 namespace RandomBuff.Core.Entry
 {
     internal static partial class BuffHookWarpper
     {
 
-        public static void RegisterHook(BuffID id, Type type)
+        public static void RegisterBuffHook(BuffID id, Type type)
         {
-            if (type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) == null)
-                BuffPlugin.LogWarning("No HookOn");
-            else
-            {
-                var method = type.GetMethod("HookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                ILHook hook = new ILHook(method,
-                    (il) => RegisterHook_Impl(id, type, il, method, HookLifeTimeLevel.InGame));
-            }
+             HookLifeTimeLevel[] levels = new[] { HookLifeTimeLevel.InGame, HookLifeTimeLevel.UntilQuit };
 
-            if (type.GetMethod("LongLifeCycleHookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) != null)
-            {
-                var method = type.GetMethod("LongLifeCycleHookOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                ILHook hook = new ILHook(method,
-                    (il) => RegisterHook_Impl(id, type, il, method, HookLifeTimeLevel.UntilQuit));
-            }
+             string GetHookName(HookLifeTimeLevel level) => level == HookLifeTimeLevel.InGame ? "HookOn" : "LongLifeCycleHookOn";
+
+             foreach (var level in levels)
+             {
+                 if (type.GetMethod($"__BuffHook_{level}", BindingFlags.NonPublic | BindingFlags.Static) is { })
+                 {
+                     RegisterBuffHook_Impl(id, type, $"__BuffHook_{level}", $"__BuffDisableHook_{level}", level);
+                 }
+                 else if (type.GetMethod(GetHookName(level),
+                              BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic) is not {} method)
+                 {
+                     if(level == HookLifeTimeLevel.InGame)
+                         BuffPlugin.LogWarning($"No HookOn, Type:{type.Name}");
+                 }
+                 else
+                 {
+                     _ = new ILHook(method, (il) => RegisterBuffHook_Impl(id, type, il, method, HookLifeTimeLevel.InGame));
+                 }
+             }
+             
         }
 
         public static void RegisterConditionHook<TCondition>() where TCondition : Condition
@@ -80,7 +90,7 @@ namespace RandomBuff.Core.Entry
 
                 try
                 {
-                    action.Invoke();
+                    action.Invoke(buffID.value);
                     HasEnabled[buffID][level] = true;
                     BuffPlugin.Log($"HookWarpper Enable Buff - {buffID}:{level}");
                 }
@@ -104,7 +114,7 @@ namespace RandomBuff.Core.Entry
 
                 try
                 {
-                    action.Invoke();
+                    action.Invoke(buffID.value);
                     HasEnabled[buffID][level] = false;
                     BuffPlugin.Log($"HookWarpper Disable Buff - {buffID}:{level}");
                 }
@@ -134,6 +144,15 @@ namespace RandomBuff.Core.Entry
 
     internal static partial class BuffHookWarpper
     {
+        internal static bool HasInterface<T>(this TypeReference type)
+        {
+
+            if (type.SafeResolve() is { } def)
+                return def.Interfaces.Any(i => i.InterfaceType.Is(typeof(T)));
+            //BuffPlugin.LogWarning($"Can't resolve type:{type.Name}");
+            return false;
+        }
+
 
         private static void RegisterConditionHook_Impl<TCondition>(Type type, MethodInfo origMethod) where TCondition : Condition
         {
@@ -249,29 +268,27 @@ namespace RandomBuff.Core.Entry
         }
 
 
-        private static bool HasInterface<T>(this TypeReference type)
-        {
-   
-            if (type.SafeResolve() is { } def)
-                return def.Interfaces.Any(i => i.InterfaceType.Is(typeof(T)));
-            //BuffPlugin.LogWarning($"Can't resolve type:{type.Name}");
-            return false;
-        }
-
-        private static void RegisterHook_Impl(BuffID id, Type type, ILContext il, MethodBase origMethod, HookLifeTimeLevel level)
+        private static void RegisterBuffHook_Impl(BuffID id, Type type, ILContext il, MethodBase origMethod, HookLifeTimeLevel level)
         {
             if(hookAssembly == null)
                 hookAssembly = typeof(On.Player).Assembly;
 
             bool hasShownBranchMessage = false;
 
-            DynamicMethodDefinition method = new ($"BuffDisableHook_{id}_{level}", typeof(void), Type.EmptyTypes);
-            var ilProcessor = method.GetILProcessor();
-            foreach (var v in il.Body.Variables)
-                ilProcessor.Body.Variables.Add(new VariableDefinition(v.VariableType));
+            DynamicMethodDefinition disableMethod = new ($"BuffDisableHook_{id}_{level}", typeof(void), new[] {typeof(string)});
+            DynamicMethodDefinition method = new($"BuffHook_{id}_{level}", typeof(void), new[] { typeof(string) });
 
-            List<(Instruction target, Instruction from)> labelList = new();
-            Dictionary<Instruction, Instruction> labelDictionary = new();
+            var eil = method.GetILProcessor();
+            var dil = disableMethod.GetILProcessor();
+
+            foreach (var v in il.Body.Variables)
+            {
+                dil.Body.Variables.Add(new VariableDefinition(v.VariableType));
+                eil.Body.Variables.Add(new VariableDefinition(v.VariableType));
+            }
+
+            Dictionary<ILProcessor, List<(Instruction target, Instruction from)>> labelList = new() {{dil, new()},{eil, new()}};
+            Dictionary<ILProcessor, Dictionary<Instruction, Instruction>> labelDictionary = new() { { dil, new() }, { eil, new() } };
             foreach (var str in il.Instrs)
             {
             
@@ -279,106 +296,122 @@ namespace RandomBuff.Core.Entry
                 {
                     if (TryGetRemoveMethod(origMethod, m, out var removeMethod))
                     {
-                        ilProcessor.Emit(OpCodes.Call, removeMethod);
-                        labelDictionary.Add(str,ilProcessor.Body.Instructions.Last());
+                        dil.Emit(OpCodes.Callvirt, removeMethod);
+                        labelDictionary[dil].Add(str,dil.Body.Instructions.Last());
                     }
                     else
                         BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
+
+                    eil.Emit(OpCodes.Callvirt, m);
+                    labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+
                 }
                 else if (str.MatchNewobj(out var ctor) && ctor.DeclaringType.HasInterface<IDetour>())
                 {
                     if (ctor.Parameters.Count != 0)
                     {
-                        ilProcessor.Emit(OpCodes.Pop);
-                        labelDictionary.Add(str, ilProcessor.Body.Instructions.Last());
-
+                        dil.Emit(OpCodes.Pop);
+                        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
                         for (int i = 1; i < ctor.Parameters.Count; i++)
-                            ilProcessor.Emit(OpCodes.Pop);
-
-                        ilProcessor.Emit(OpCodes.Ldnull);
-
+                            dil.Emit(OpCodes.Pop);
+                        dil.Emit(OpCodes.Ldnull);
                     }
                     else
                     {
-                        ilProcessor.Emit(OpCodes.Ldnull);
-                        labelDictionary.Add(str, ilProcessor.Body.Instructions.Last());
-
+                        dil.Emit(OpCodes.Ldnull);
+                        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
                     }
+                    eil.Append(str);
+                    labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+
+                    eil.Emit(OpCodes.Dup);
+                    eil.Emit(OpCodes.Ldarg_0);
+                    eil.Emit(OpCodes.Ldc_I4, (int)level);
+                    eil.Emit(OpCodes.Call, typeof(BuffHookWarpper).GetMethod("AddRuntimeHook", BindingFlags.NonPublic | BindingFlags.Static));
 
                 }
                 else if (str.OpCode == OpCodes.Ret)
                 {
-                    ilProcessor.Emit(OpCodes.Ldstr, id.value);
-                    labelDictionary.Add(str, ilProcessor.Body.Instructions.Last());
+                    dil.Emit(OpCodes.Ldarg_0);
+                    labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
 
+                    dil.Emit(OpCodes.Ldc_I4, (int)level);
+                    dil.Emit(OpCodes.Call, typeof(BuffHookWarpper).GetMethod("RemoveRuntimeHook", BindingFlags.NonPublic | BindingFlags.Static));
+                    dil.Append(str);
 
-                    ilProcessor.Emit(OpCodes.Ldstr, level.ToString());
-
-                    ilProcessor.Emit(OpCodes.Call, typeof(BuffHookWarpper).GetMethod("RemoveRuntimeHook", BindingFlags.NonPublic | BindingFlags.Static));
-                    ilProcessor.Append(str);
+                    eil.Append(str);
+                    labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
 
                 }
                 else if (str.Operand is ILLabel label)
                 {
-                    var from = ilProcessor.Create(str.OpCode, str);
-                    ilProcessor.Append(from);
-                    labelDictionary.Add(str, ilProcessor.Body.Instructions.Last());
+                    var dFrom = dil.Create(str.OpCode, str);
+                    dil.Append(dFrom);
+                    labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                    labelList[dil].Add(new (label.Target,dFrom));
 
-                    labelList.Add(new (label.Target,from));
+                    var eFrom = eil.Create(str.OpCode, str);
+                    eil.Append(eFrom);
+                    labelDictionary[eil].Add(str, dil.Body.Instructions.Last());
+                    labelList[eil].Add(new(label.Target, eFrom));
+
                     if (!hasShownBranchMessage)
                     {
-                        BuffPlugin.LogWarning("Find Branch in HookOn, maybe cause error!");
+                        BuffPlugin.LogWarning($"Find Branch in {type.Name}:HookOn, maybe cause error!");
                         hasShownBranchMessage = true;
                     }
                 }
                 else
                 {
-                    ilProcessor.Append(str);
-                    labelDictionary.Add(str, ilProcessor.Body.Instructions.Last());
+                    dil.Append(str);
+                    labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+
+                    eil.Append(str);
+                    labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
 
                 }
             }
 
             foreach (var exception in il.Body.ExceptionHandlers)
             {
-                method.Module.ImportReference(exception.CatchType);
-
-                var re = new ExceptionHandler(exception.HandlerType)
+                foreach (var item in labelList)
                 {
-                    TryStart = labelDictionary[exception.TryStart],
-                    TryEnd = labelDictionary[exception.TryEnd],
-                    HandlerStart = labelDictionary[exception.HandlerStart],
-                    HandlerEnd = labelDictionary[exception.HandlerEnd],
-                    CatchType = exception.CatchType
-                };
-                if (exception.FilterStart != null)
-                    re.FilterStart = labelDictionary[exception.FilterStart];
-                ilProcessor.Body.ExceptionHandlers.Add(re);
+                    var re = new ExceptionHandler(exception.HandlerType)
+                    {
+                        TryStart = labelDictionary[item.Key][exception.TryStart],
+                        TryEnd = labelDictionary[item.Key][exception.TryEnd],
+                        HandlerStart = labelDictionary[item.Key][exception.HandlerStart],
+                        HandlerEnd = labelDictionary[item.Key][exception.HandlerEnd],
+                        CatchType = exception.CatchType
+                    };
+                    if (exception.FilterStart != null)
+                        re.FilterStart = labelDictionary[item.Key][exception.FilterStart];
+                    item.Key.Body.ExceptionHandlers.Add(re);
+                    item.Key.Body.Method.Module.ImportReference(exception.CatchType);
+                }
             }
-            foreach (var pair in labelList)
-                pair.from.Operand = labelDictionary[pair.target];
-            
+            foreach(var item in labelList)
+            foreach (var pair in item.Value)
+                pair.from.Operand = labelDictionary[item.Key][pair.target];
 
 
 
-            RegistedAddHooks.JustAAdd(id, level, type.GetMethod(origMethod.Name).CreateDelegate<Action>());
-            RegistedRemoveHooks.JustAAdd(id, level, method.Generate().CreateDelegate<Action>());
-            RegistedRuntimeHooks.JustAAdd(id, level, new List<IDetour>());
-            HasEnabled.JustAAdd(id, level, false);
-
-            ILCursor c = new ILCursor(il);
-            while (c.TryGotoNext(MoveType.After,
-                       i => i.MatchNewobj(out var newObj) && newObj.DeclaringType.HasInterface<IDetour>()))
-            {
-                c.Emit(OpCodes.Dup);
-                c.EmitDelegate<Action<IDetour>>(hook => AddRuntimeHook(id, level, hook));
-            }
-
-
+            RegistedAddHooks.SimplyAdd(id, level, method.Generate().CreateDelegate<Action<string>>());
+            RegistedRemoveHooks.SimplyAdd(id, level, disableMethod.Generate().CreateDelegate<Action<string>>());
+            RegistedRuntimeHooks.SimplyAdd(id, level, new List<IDetour>());
+            HasEnabled.SimplyAdd(id, level, false);
 
         }
 
-        private static void JustAAdd<T>(this Dictionary<BuffID, Dictionary<HookLifeTimeLevel, T>> dics, BuffID id,HookLifeTimeLevel level, T data)
+
+        private static void RegisterBuffHook_Impl(BuffID id, Type type,string enableMethod, string disableMethod ,HookLifeTimeLevel level)
+        {
+            RegistedAddHooks.SimplyAdd(id, level, type.GetMethod(enableMethod, BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<Action<string>>());
+            RegistedRemoveHooks.SimplyAdd(id, level, type.GetMethod(disableMethod, BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<Action<string>>());
+            RegistedRuntimeHooks.SimplyAdd(id, level, new List<IDetour>());
+            HasEnabled.SimplyAdd(id, level, false);
+        }
+        private static void SimplyAdd<T>(this Dictionary<BuffID, Dictionary<HookLifeTimeLevel, T>> dics, BuffID id,HookLifeTimeLevel level, T data)
         {
             if (!dics.ContainsKey(id)) dics.Add(id, new ());
             if (!dics[id].ContainsKey(level)) dics[id].Add(level, data);
@@ -435,19 +468,15 @@ namespace RandomBuff.Core.Entry
         }
 
   
-        private static void AddRuntimeHook(BuffID id, HookLifeTimeLevel level, IDetour hook)
+        private static void AddRuntimeHook(IDetour hook, string id, HookLifeTimeLevel level)
         {
-            RegistedRuntimeHooks[id][level].Add(hook);
+            RegistedRuntimeHooks[new BuffID(id)][level].Add(hook);
         }
-        private static void RemoveRuntimeHook(string idStr,string levelStr)
+        private static void RemoveRuntimeHook(string idStr, HookLifeTimeLevel level)
         {
             var id = new BuffID(idStr);
-            if (Enum.TryParse(levelStr, out HookLifeTimeLevel level))
-            {
-                BuffPlugin.LogDebug($"RemoveRuntimeHook: {idStr},{levelStr}, Count:{RegistedRuntimeHooks[id][level].Count}");
-                RegistedRuntimeHooks[id][level].ForEach(i => i.Dispose());
-            }
-
+            BuffPlugin.LogDebug($"RemoveRuntimeHook: {idStr},{level}, Count:{RegistedRuntimeHooks[id][level].Count}");
+            RegistedRuntimeHooks[id][level].ForEach(i => i.Dispose());
             RegistedRuntimeHooks[id][level].Clear();
         }
 
@@ -455,13 +484,173 @@ namespace RandomBuff.Core.Entry
         private static Assembly hookAssembly;
 
 
-        private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, Action>> RegistedAddHooks = new();
-        private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, Action>> RegistedRemoveHooks = new();
+        private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, Action<string>>> RegistedAddHooks = new();
+        private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, Action<string>>> RegistedRemoveHooks = new();
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, List<IDetour>>> RegistedRuntimeHooks = new();
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, bool>> HasEnabled = new();
 
 
         private static readonly Dictionary<ConditionID,Action<Condition>> RegistedRemoveCondition = new();
 
+    }
+
+
+
+    //预处理部分
+    internal static partial class BuffHookWarpper
+    {
+        internal static void BuildStaticHook(TypeDefinition type)
+        {
+            HookLifeTimeLevel[] levels = new[] { HookLifeTimeLevel.InGame, HookLifeTimeLevel.UntilQuit };
+
+            BuffPlugin.Log($"Built static hook for Type:{type.FullName}");
+
+            string GetHookName(HookLifeTimeLevel level) => level == HookLifeTimeLevel.InGame ? "HookOn" : "LongLifeCycleHookOn";
+
+            foreach (var level in levels)
+            {
+                bool hasShownBranchMessage = false;
+                if (type.FindMethod(GetHookName(level)) is not {} origMethod)
+                    continue;
+                MethodDefinition disableMethod = new($"__BuffDisableHook_{level}", MethodAttributes.Static | MethodAttributes.Private,type.Module.TypeSystem.Void)
+                    { Parameters = { new ParameterDefinition(type.Module.TypeSystem.String) } };
+                MethodDefinition method = new($"__BuffHook_{level}", MethodAttributes.Static | MethodAttributes.Private, type.Module.TypeSystem.Void)
+                    { Parameters = { new ParameterDefinition(type.Module.TypeSystem.String) } };
+                type.Methods.Add(disableMethod);
+                type.Methods.Add(method);
+                var attrCtor =
+                    type.Module.ImportReference(typeof(CompilerGeneratedAttribute).GetConstructor(Type.EmptyTypes));
+                disableMethod.CustomAttributes.Add(new CustomAttribute(attrCtor));
+                method.CustomAttributes.Add(new CustomAttribute(attrCtor));
+
+                var eil = method.Body.GetILProcessor();
+                var dil = disableMethod.Body.GetILProcessor();
+
+                foreach (var v in origMethod.Body.Variables)
+                {
+                    dil.Body.Variables.Add(new VariableDefinition(v.VariableType));
+                    eil.Body.Variables.Add(new VariableDefinition(v.VariableType));
+                }
+
+                Dictionary<ILProcessor, List<(Instruction target, Instruction from)>> labelList = new() { { dil, new() }, { eil, new() } };
+                Dictionary<ILProcessor, Dictionary<Instruction, Instruction>> labelDictionary = new() { { dil, new() }, { eil, new() } };
+                foreach (var str in origMethod.Body.Instructions)
+                {
+                    if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add"))
+                    {
+                        if (m.DeclaringType.SafeResolve() is {} methodType) 
+                        {
+                            if (methodType.FindMethod(m.Name.Replace("add","remove")) is { } removeMethod)
+                            {
+                                dil.Emit(OpCodes.Callvirt, type.Module.ImportReference(removeMethod));
+                                labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                            }
+                            else
+                            {
+                                BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
+                            }
+                        }
+                        else
+                            BuffPlugin.LogError($"Can't find method type for:{m.DeclaringType.Name}");
+
+                        eil.Emit(OpCodes.Callvirt, m);
+                        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+
+                    }
+                    else if (str.MatchNewobj(out var ctor) && ctor.DeclaringType.HasInterface<IDetour>())
+                    {
+                        if (ctor.Parameters.Count != 0)
+                        {
+                            dil.Emit(OpCodes.Pop);
+                            labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                            for (int i = 1; i < ctor.Parameters.Count; i++)
+                                dil.Emit(OpCodes.Pop);
+                            dil.Emit(OpCodes.Ldnull);
+                        }
+                        else
+                        {
+                            dil.Emit(OpCodes.Ldnull);
+                            labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                        }
+                        eil.Append(str);
+                        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+
+                        eil.Emit(OpCodes.Dup);
+                        eil.Emit(OpCodes.Ldarg_0);
+                        eil.Emit(OpCodes.Ldc_I4, (int)level);
+                        eil.Emit(OpCodes.Call, typeof(BuffHookWarpper).GetMethod("AddRuntimeHook", BindingFlags.NonPublic | BindingFlags.Static));
+
+                    }
+                    else if (str.OpCode == OpCodes.Ret)
+                    {
+                        dil.Emit(OpCodes.Ldarg_0);
+                        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+
+                        dil.Emit(OpCodes.Ldc_I4, (int)level);
+                        dil.Emit(OpCodes.Call, typeof(BuffHookWarpper).GetMethod("RemoveRuntimeHook", BindingFlags.NonPublic | BindingFlags.Static));
+                        dil.Append(str);
+
+                        eil.Append(str);
+                        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+
+                    }
+                    else if (str.Operand is Instruction label)
+                    {
+                        var dFrom = dil.Create(str.OpCode, str);
+                        dil.Append(dFrom);
+                        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                        labelList[dil].Add(new(label, dFrom));
+
+                        var eFrom = eil.Create(str.OpCode, str);
+                        eil.Append(eFrom);
+                        labelDictionary[eil].Add(str, dil.Body.Instructions.Last());
+                        labelList[eil].Add(new(label, eFrom));
+
+                        if (!hasShownBranchMessage)
+                        {
+                            BuffPlugin.LogWarning($"Find Branch in {type.Name}:HookOn, maybe cause error!");
+                            hasShownBranchMessage = true;
+                        }
+                    }
+                    else
+                    {
+                        dil.Append(str);
+                        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+
+                        eil.Append(str);
+                        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+
+                    }
+                }
+
+                foreach (var exception in origMethod.Body.ExceptionHandlers)
+                {
+                    foreach (var item in labelList)
+                    {
+                        var re = new ExceptionHandler(exception.HandlerType)
+                        {
+                            TryStart = labelDictionary[item.Key][exception.TryStart],
+                            TryEnd = labelDictionary[item.Key][exception.TryEnd],
+                            HandlerStart = labelDictionary[item.Key][exception.HandlerStart],
+                            HandlerEnd = labelDictionary[item.Key][exception.HandlerEnd],
+                            CatchType = exception.CatchType
+                        };
+                        if (exception.FilterStart != null)
+                            re.FilterStart = labelDictionary[item.Key][exception.FilterStart];
+                        item.Key.Body.ExceptionHandlers.Add(re);
+                        item.Key.Body.Method.Module.ImportReference(exception.CatchType);
+
+                    }
+                }
+                foreach (var item in labelList)
+                    foreach (var pair in item.Value)
+                        pair.from.Operand = labelDictionary[item.Key][pair.target];
+
+                method.Body.Optimize();
+                disableMethod.Body.Optimize();
+
+
+            }
+        }
     }
 }
