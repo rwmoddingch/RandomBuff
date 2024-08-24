@@ -224,20 +224,29 @@ namespace BuiltinBuffs.Positive
 
         private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
-            if (type == Creature.DamageType.Electric && self is Player player && batteryModule.TryGetValue(player, out var battery))
+            bool goOn = true;
+            try
             {
-                if (source == null || source.owner != player)
+                if (type == Creature.DamageType.Electric && self is Player player && batteryModule.TryGetValue(player, out var battery))
                 {
-                    battery.Encharge(damage, BatteryModule.Capacity(player.slugcatStats.name, player.isSlugpup));
-                }
+                    if (source == null || source.owner != player)
+                    {
+                        battery.Encharge(damage, BatteryModule.Capacity(player.slugcatStats.name, player.isSlugpup));
+                    }
 
-                if (PlayerUtils.TryGetModulePart<ShockingSpeedBuff.ShockingSpeedModule>(player, ShockingSpeedBuff.Instance, out var part))
-                {
-                    part.GetShocked(player);
-                }
+                    if (ShockingSpeedBuff.Instance != null && PlayerUtils.TryGetModulePart<ShockingSpeedBuff.ShockingSpeedModule>(player, ShockingSpeedBuff.Instance, out var part))
+                    {
+                        part.GetShocked(player);
+                    }
 
-                return;
+                    goOn = false;
+                }
             }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+            }
+            if (!goOn) return;
             orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
         }
 

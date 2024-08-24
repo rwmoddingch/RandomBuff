@@ -146,26 +146,33 @@ namespace BuiltinBuffs.Duality
                         {
                             if ((module.mouthGrasp.grabbed as Creature).State != null)
                             {
+                                if ((module.mouthGrasp.grabbed as Creature).State.meatLeft == 0) module.ReleaseGrasp();
                                 if ((module.mouthGrasp.grabbed as Creature).State.meatLeft > 0 && self.FoodInStomach < self.MaxFoodInStomach)
                                 {
                                     (module.mouthGrasp.grabbed as Creature).State.meatLeft--;
-                                    if (ModManager.MSC && (self.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Gourmand || self.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel)
-                                        && !(module.mouthGrasp.grabbed is Centipede))
+                                    if (ModManager.MSC && self.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Saint)
                                     {
-                                        self.AddQuarterFood();
-                                        self.AddQuarterFood();
+                                        module.ReleaseGrasp();
+                                        self.Stun(60);
                                     }
                                     else
-                                    {
-                                        self.AddFood(1);
-                                    }
-
-                                    if ((module.mouthGrasp.grabbed as Creature).State.meatLeft == 0) module.ReleaseGrasp();
+                                    {                                        
+                                        if (ModManager.MSC && (self.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Gourmand || self.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel)
+                                            && !(module.mouthGrasp.grabbed is Centipede))
+                                        {
+                                            self.AddQuarterFood();
+                                            self.AddQuarterFood();
+                                        }
+                                        else
+                                        {
+                                            self.AddFood(1);
+                                        }                                       
+                                    }                                   
                                 }
                                 else
                                 {
                                     module.ReleaseGrasp();
-                                }
+                                }                                
                             }
                             module.grabCounter = 0;
                         }
@@ -195,6 +202,7 @@ namespace BuiltinBuffs.Duality
                     module.mouthGrasp = new Creature.Grasp(self, obj, 0, chunkGrabbed, shareability, dominance, pacifying);
                     obj.Grabbed(module.mouthGrasp);
                     module.grabChunkCollisionRad = module.mouthGrasp.grabbed.collisionRange;
+                    obj.bodyChunks[chunkGrabbed].collideWithObjects = false;
                     obj.collisionRange = -200f;
                     new AbstractPhysicalObject.CreatureGripStick(self.abstractCreature, obj.abstractPhysicalObject, graspUsed, pacifying || obj.TotalMass < self.TotalMass);
                     return true;
@@ -247,7 +255,11 @@ namespace BuiltinBuffs.Duality
             {
                 try
                 {                 
-                    if (mouthGrasp != null) mouthGrasp.grabbed.collisionRange = grabChunkCollisionRad;
+                    if (mouthGrasp != null)
+                    {
+                        mouthGrasp.grabbed.collisionRange = grabChunkCollisionRad;
+                        mouthGrasp.grabbedChunk.collideWithObjects = true;
+                    }                        
                     grabChunkCollisionRad = -1f;
                     mouthGrasp?.Release();
                     mouthGrasp = null;
