@@ -190,7 +190,7 @@ QuestRender_FreePick|Free pick count +1
 //Mission
 Mission_Display_DodgeTheRock|DODGE THE ROCKS
 Mission_Display_Meltdown|SEPHIRAH MELTDOWNS
-Mission_Display_Druid|DANCES WITH DRAGONS
+Mission_Display_Druid|DANCING WITH DRAGONS
 Mission_Display_Strayer|STRANGE LAND STRAYER
 Mission_Display_EmergnshyTreatment|EMERGNSHY TREATMENT
 Mission_Display_MidnightSnack|HAUNTED MIDNIGHT SNACK

@@ -42,10 +42,20 @@ namespace BuiltinBuffs.Duality
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
             On.Fly.Update += Fly_Update;
+            On.Fly.ctor += Fly_ctor;
             On.FlyGraphics.InitiateSprites += FlyGraphics_InitiateSprites;
             On.FlyGraphics.DrawSprites += FlyGraphics_DrawSprites;
             On.Rock.HitSomething += Rock_HitSomething;
             On.SporeCloud.Update += SporeCloud_Update;
+        }
+
+        private static void Fly_ctor(On.Fly.orig_ctor orig, Fly self, AbstractCreature abstractCreature, World world)
+        {
+            orig(self, abstractCreature, world);
+            if (!pixieFly.TryGetValue(self, out _))
+            {
+                pixieFly.Add(self, new PixieFly());
+            }
         }
 
         private static void Fly_Update(On.Fly.orig_Update orig, Fly self, bool eu)

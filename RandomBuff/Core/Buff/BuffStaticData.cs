@@ -48,12 +48,25 @@ namespace RandomBuff.Core.Buff
 
         public int MaxStackLayers { get; private set; } = int.MaxValue;
 
-        public Dictionary<string, object> ExtProperty { get; private set; } = new ();
+
+
+
+        private bool tryLoad = false;
 
 
         //帮助方法
         internal Texture GetFaceTexture()
         {
+            try
+            {
+                if (!Futile.atlasManager.DoesContainAtlas(FaceName))
+                    Futile.atlasManager.LoadImage(FaceName);
+            }
+            catch (FutileException _)
+            {
+                BuffPlugin.LogError($"Card image not found at :{FaceName}");
+            }
+            tryLoad = true;
             if (!Futile.atlasManager.DoesContainAtlas(FaceName))
             {
                 BuffPlugin.LogWarning($"Can;t Get face for {BuffID} {FaceName}");
@@ -97,8 +110,19 @@ namespace RandomBuff.Core.Buff
         {
         }
 
-        internal class CardInfo
+        /// <summary>
+        /// 卡面信息
+        /// </summary>
+        public class CardInfo
         {
+
+            internal CardInfo(string buffName, string description)
+            {
+                BuffName = buffName;
+                Description = description;
+            }
+            internal CardInfo() { }
+
             public string BuffName { get; internal set; } = null;
             public string Description { get; internal set; } = null;
         }
@@ -162,14 +186,6 @@ namespace RandomBuff.Core.Buff
                 if (rawData.ContainsKey(loadState = "FaceName"))
                 {
                     newData.FaceName = $"{dirPath.Substring(1)}/{rawData[loadState]}";
-                    try
-                    {
-                        Futile.atlasManager.LoadImage(newData.FaceName);
-                    }
-                    catch (FutileException _)
-                    {
-                        BuffPlugin.LogError($"Card image not found at :{newData.FaceName}");
-                    }
                 }
                 else
                 {
@@ -299,23 +315,23 @@ namespace RandomBuff.Core.Buff
                     newData.CardInfos.Add(InGameTranslator.LanguageID.English, info);
                 }
 
-                if (rawData.ContainsKey("Custom"))
-                {
-                    var customObject = (JArray)rawData["Custom"];
-                    foreach (var data in customObject)
-                    {
-                        if (data is not JObject param)
-                        {
-                            BuffPlugin.LogWarning($"Error JToken at Custom:{data} At {jsonFile.Name}");
-                            continue;
-                        }
-                        newData.customParameterNames.Add((string)param.GetValue(loadState = "PropertyName"),
-                            (string)param.GetValue(loadState = "DisplayName"));
+                //if (rawData.ContainsKey("Custom"))
+                //{
+                //    var customObject = (JArray)rawData["Custom"];
+                //    foreach (var data in customObject)
+                //    {
+                //        if (data is not JObject param)
+                //        {
+                //            BuffPlugin.LogWarning($"Error JToken at Custom:{data} At {jsonFile.Name}");
+                //            continue;
+                //        }
+                //        newData.customParameterNames.Add((string)param.GetValue(loadState = "PropertyName"),
+                //            (string)param.GetValue(loadState = "DisplayName"));
 
-                        newData.customParameterDefaultValues.Add((string)param.GetValue(loadState = "PropertyName"),string.Empty);
-                        //BuffPlugin.LogDebug($"Load {newData.BuffID} CustomParameter :{(string)param.GetValue(loadState = "PropertyName")}");
-                    }
-                }
+                //        newData.customParameterDefaultValues.Add((string)param.GetValue(loadState = "PropertyName"),string.Empty);
+                //        //BuffPlugin.LogDebug($"Load {newData.BuffID} CustomParameter :{(string)param.GetValue(loadState = "PropertyName")}");
+                //    }
+                //}
 
                 if (newData.CardInfos.Count == 0)
                 {
@@ -325,7 +341,7 @@ namespace RandomBuff.Core.Buff
 
                 newData.AssetPath = dirPath.Remove(0,1);
                 var rdata = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(newData.BuffID));
-                GetCustomStaticBuffData(rdata, newData, rawData);
+                GetCustomStaticBuffData(rdata, newData);
                 //BuffPlugin.LogDebug(newData.ToDebugString());
                 return true;
 
@@ -360,7 +376,7 @@ namespace RandomBuff.Core.Buff
 
         }
 
-        internal static void GetCustomStaticBuffData(BuffData data, BuffStaticData staticData, Dictionary<string,object> customArgs)
+        internal static void GetCustomStaticBuffData(BuffData data, BuffStaticData staticData)
         {
             if (data is CountableBuffData countable)
             {
@@ -368,7 +384,7 @@ namespace RandomBuff.Core.Buff
                 BuffPlugin.LogDebug($"{staticData.BuffID},{staticData.MaxCycleCount}");
             }
 
-            BuffCore.OnCustomStaticDataLoadedInternal(data,staticData, customArgs);
+            BuffCore.OnCustomStaticDataLoadedInternal(data,staticData);
         }
 
         /// <summary>
@@ -409,21 +425,11 @@ namespace RandomBuff.Core.Buff
                 builder.AppendLine($"---BuffName: {info.Value.BuffName}");
                 builder.AppendLine($"---Description: {info.Value.Description}");
             }
-            builder.AppendLine("Custom Parameters : ");
-            foreach (var info in customParameterNames)
-            {
-                builder.AppendLine($"------");
-                builder.AppendLine($"---PropertyName: {info.Key}");
-                builder.AppendLine($"---DisplayName: {info.Value}");
-            }
             return builder.ToString();
         }
 
 
-        internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; } = new();
-
-        internal Dictionary<string, string> customParameterNames = new();
-        internal Dictionary<string, string> customParameterDefaultValues = new();
+        internal Dictionary<InGameTranslator.LanguageID, CardInfo> CardInfos { get; private set; } = new();
 
 
     }

@@ -30,6 +30,8 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (WallNutBowlingBuffEntry.WallNutBowlingFeatures.TryGetValue(player, out _))
+                        WallNutBowlingBuffEntry.WallNutBowlingFeatures.Remove(player);
                     var nut = new WallNutBowling(player);
                     WallNutBowlingBuffEntry.WallNutBowlingFeatures.Add(player, nut);
                 }

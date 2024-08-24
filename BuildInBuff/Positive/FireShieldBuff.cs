@@ -31,11 +31,16 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (FireShieldBuffEntry.FireShieldFeatures.TryGetValue(player, out _))
+                        FireShieldBuffEntry.FireShieldFeatures.Remove(player);
+                    if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out _))
+                        FireShieldBuffEntry.FireShieldStateFeatures.Remove(player);
+
                     var fireShield = new FireShield(player, player.room);
                     FireShieldBuffEntry.FireShieldFeatures.Add(player, fireShield);
                     player.room.AddObject(fireShield);
 
-                    FireShieldState fireShieldState = new FireShieldState(player);
+                    FireShieldState fireShieldState = new FireShieldState(player); 
                     FireShieldBuffEntry.FireShieldStateFeatures.Add(player, fireShieldState);
                     FireShieldBuffEntry.PlayerList.Add(player);
                 }
@@ -75,7 +80,8 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return FireShield.GetBuffData().StackLayer;
+                //护盾obj不会即时删除，所以可能拿到null
+                return FireShield.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

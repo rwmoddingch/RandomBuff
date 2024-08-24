@@ -1,4 +1,5 @@
-﻿using RandomBuff.Core.Buff;
+﻿using BuiltinBuffs.Duality;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using System;
@@ -22,6 +23,8 @@ namespace BuiltinBuffs.Negative
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (AmputationBuffEntry.AmputationFeatures.TryGetValue(player, out _))
+                        AmputationBuffEntry.AmputationFeatures.Remove(player);
                     var amputation = new Amputation(player);
                     AmputationBuffEntry.AmputationFeatures.Add(player, amputation);
                 }

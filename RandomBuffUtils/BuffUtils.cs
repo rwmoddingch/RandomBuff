@@ -35,7 +35,8 @@ namespace RandomBuffUtils
                 canAccessLog = false;
                 UnityEngine.Debug.LogException(e);
             }
-
+            gameObject = new GameObject("BuffUtils");
+            Instance = gameObject.AddComponent<BuffUtilsBehavior>();
             DeathPersistentSaveDataRx.HookOn();
             PlayerUtils.OnEnable();
 
@@ -53,6 +54,11 @@ namespace RandomBuffUtils
             UniformLighting.OnModsInit();
             everInit = true;
         }
+
+        private class BuffUtilsBehavior : MonoBehaviour { }
+
+        private static GameObject gameObject;
+        public static MonoBehaviour Instance { get; private set; }
 
         public static void Log(object header, object m)
         {

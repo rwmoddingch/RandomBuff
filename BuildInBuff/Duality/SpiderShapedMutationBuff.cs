@@ -11,13 +11,13 @@ using RWCustom;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Random = UnityEngine.Random;
+using Color = UnityEngine.Color;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 using MoreSlugcats;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using HotDogGains.Positive;
+using RandomBuff.Core.SaveData;
+using BuiltinBuffs.Positive;
 
 namespace BuiltinBuffs.Duality
 {
@@ -60,8 +60,10 @@ namespace BuiltinBuffs.Duality
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (SpiderShapedMutationBuffEntry.SpiderCatFeatures.TryGetValue(player, out _))
+                        SpiderShapedMutationBuffEntry.SpiderCatFeatures.Remove(player);
                     var spider = new SpiderCat(player);
-                    SpiderShapedMutationBuffEntry.SpiderFeatures.Add(player, spider);
+                    SpiderShapedMutationBuffEntry.SpiderCatFeatures.Add(player, spider);
                     spider.SpiderArthropod(player.graphicsModule as PlayerGraphics);
                     spider.InitiateSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
@@ -86,7 +88,15 @@ namespace BuiltinBuffs.Duality
     {
         public static BuffID SpiderShapedMutation = new BuffID("SpiderShapedMutation", true);
 
-        public static ConditionalWeakTable<Player, SpiderCat> SpiderFeatures = new ConditionalWeakTable<Player, SpiderCat>();
+        public static ConditionalWeakTable<Player, SpiderCat> SpiderCatFeatures = new ConditionalWeakTable<Player, SpiderCat>();
+
+        public static int StackLayer
+        {
+            get
+            {
+                return SpiderShapedMutation.GetBuffData().StackLayer;
+            }
+        }
 
         public void OnEnable()
         {
@@ -95,16 +105,21 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
+            IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+
             IL.FlareBomb.Update += FlareBomb_UpdateIL;
             On.SporeCloud.Update += SporeCloud_Update;
             On.SlugcatStats.SlugcatCanMaul += SlugcatStats_SlugcatCanMaul;
+            On.Player.IsCreatureLegalToHoldWithoutStun += Player_IsCreatureLegalToHoldWithoutStun;
+            On.Creature.Violence += Creature_Violence;
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
             On.MoreSlugcats.SlugNPCAI.TheoreticallyEatMeat += SlugNPCAI_TheoreticallyEatMeat;
-            //On.Player.BiteEdibleObject += Player_BiteEdibleObject;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
+            On.Player.MaulingUpdate += Player_MaulingUpdate;
+            On.Player.Collide += Player_Collide;
             On.Player.Grabability += Player_Grabability;
             On.Player.FreeHand += Player_FreeHand;
             On.Player.Jump += Player_Jump;
@@ -138,13 +153,17 @@ namespace BuiltinBuffs.Duality
                     c.Emit(OpCodes.Ldloc_0);
                     c.EmitDelegate<Action<FlareBomb, int>>((self, i) =>
                     {
-                        if (self.room.abstractRoom.creatures[i].realizedCreature is Player)
+                            if (self.room.abstractRoom.creatures[i].realizedCreature is Player)
                         {
                             Player player = self.room.abstractRoom.creatures[i].realizedCreature as Player;
-                            player.Die();
-                            if (self.thrownBy != null)
+                            if (SpiderCatFeatures.TryGetValue(player, out var spider) &&
+                                !spider.IsSpitter)
                             {
-                                player.SetKillTag(self.thrownBy.abstractCreature);
+                                player.Die();
+                                if (self.thrownBy != null)
+                                {
+                                    player.SetKillTag(self.thrownBy.abstractCreature);
+                                }
                             }
                         }
                     });
@@ -192,6 +211,27 @@ namespace BuiltinBuffs.Duality
             return result;
         }
 
+        //允许撕咬未眩晕生物
+        private static bool Player_IsCreatureLegalToHoldWithoutStun(On.Player.orig_IsCreatureLegalToHoldWithoutStun orig, Player self, Creature grabCheck)
+        {
+            bool result = orig(self, grabCheck);
+            if (SpiderCatFeatures.TryGetValue(self, out var spider) && spider.LikeSpider)
+                result = true;
+            return result;
+        }
+
+        //撕咬伤害改变
+        public static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            if (source != null && source.owner is Player player && type == Creature.DamageType.Bite &&
+                SpiderCatFeatures.TryGetValue(player, out var spider) && spider.LikeSpider)
+            {
+                //第二层0.4，第三层0.6，以此类推
+                damage *= 0.2f * StackLayer;//参考：普通狼蛛撕咬伤害0.4或1.2（各为50%概率），烈焰狼蛛撕咬伤害0.6
+            }
+            orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
+        }
+
         //允许吃肉
         private static bool Player_CanEatMeat(On.Player.orig_CanEatMeat orig, Player self, Creature crit)
         {
@@ -225,8 +265,8 @@ namespace BuiltinBuffs.Duality
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
             IntVector2 origFoodRequirement = orig(slugcat);
-            int newHibernateRequirement = origFoodRequirement.y + 2;
-            int newTotalFoodRequirement = origFoodRequirement.x + 3;
+            int newHibernateRequirement = origFoodRequirement.y + (StackLayer >= 3 ? 4 : 2);
+            int newTotalFoodRequirement = origFoodRequirement.x + (StackLayer >= 3 ? 5 : 3);
 
             return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
         }
@@ -272,11 +312,11 @@ namespace BuiltinBuffs.Duality
         //双手位置
         private static void SlugcatHand_Update(On.SlugcatHand.orig_Update orig, SlugcatHand self)
         {
-            if (SpiderFeatures.TryGetValue(self.owner.owner as Player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.owner.owner as Player, out var spider))
                 (self.owner.owner as Player).craftingObject = true;
             orig(self);
 
-            if (SpiderFeatures.TryGetValue(self.owner.owner as Player, out spider))
+            if (SpiderCatFeatures.TryGetValue(self.owner.owner as Player, out spider))
                 spider.SlugcatHandUpdate(self);
         }
 
@@ -285,9 +325,9 @@ namespace BuiltinBuffs.Duality
         {
             Player.ObjectGrabability result = orig(self, obj);
 
-            if (SpiderFeatures.TryGetValue(self, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self, out var spider))
             {
-                result = spider.Grabability(result);
+                result = spider.Grabability(result, obj);
             }
 
             return result;
@@ -296,7 +336,7 @@ namespace BuiltinBuffs.Duality
         private static int Player_FreeHand(On.Player.orig_FreeHand orig, Player self)
         {
             int result = orig(self);
-            if (SpiderFeatures.TryGetValue(self, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self, out var spider))
                 if (self.grasps[0] != null || self.grasps[1] != null)
                 {
                     result = -1;
@@ -316,9 +356,9 @@ namespace BuiltinBuffs.Duality
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!SpiderFeatures.TryGetValue(self, out _))
+            if (!SpiderCatFeatures.TryGetValue(self, out _))
             {
-                SpiderFeatures.Add(self, new SpiderCat(self));
+                SpiderCatFeatures.Add(self, new SpiderCat(self));
                 EstablishRelationship();
             }
         }
@@ -326,17 +366,35 @@ namespace BuiltinBuffs.Duality
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
-            if (SpiderFeatures.TryGetValue(self, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self, out var spider))
             {
                 spider.Update();
                 self.GetExPlayerData().HaveHands = false;
             }
         }
 
+        private static void Player_MaulingUpdate(On.Player.orig_MaulingUpdate orig, Player self, int graspIndex)
+        {
+            orig(self, graspIndex);
+            if (SpiderCatFeatures.TryGetValue(self, out var spider))
+            {
+                spider.MaulingUpdate(graspIndex);
+            }
+        }
+
+        private static void Player_Collide(On.Player.orig_Collide orig, Player self, PhysicalObject otherObject, int myChunk, int otherChunk)
+        {
+            orig(self, otherObject, myChunk, otherChunk);
+            if (SpiderCatFeatures.TryGetValue(self, out var spider) && spider.LikeSpider)
+            {
+                spider.Collide(otherObject, myChunk, otherChunk);
+            }
+        }
+
         private static void Player_Jump(On.Player.orig_Jump orig, Player self)
         {
             orig(self);
-            if (SpiderFeatures.TryGetValue(self, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self, out var spider))
                 spider.Jump(self.bodyChunks[0].vel.normalized, 1f);
         }
 
@@ -344,21 +402,21 @@ namespace BuiltinBuffs.Duality
         private static void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
             orig(self, sLeaser, rCam, palette);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
                 spider.ApplyPalette(sLeaser, rCam, palette);
         }
 
         private static void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig(self, sLeaser, rCam, timeStacker, camPos);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
                 spider.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         }
 
         private static void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             orig(self, sLeaser, rCam);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
             {
                 spider.InitiateSprites(sLeaser, rCam);
             }
@@ -367,36 +425,60 @@ namespace BuiltinBuffs.Duality
         private static void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
             orig(self, sLeaser, rCam, newContatiner);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
                 spider.AddToContainer(sLeaser, rCam, newContatiner);
         }
 
         private static void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
         {
             orig(self, ow);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
                 spider.SpiderArthropod(self);
         }
 
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
         {
             orig(self);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
                 spider.GraphicsUpdate();
         }
 
         private static void PlayerGraphics_Reset(On.PlayerGraphics.orig_Reset orig, PlayerGraphics self)
         {
             orig(self);
-            if (SpiderFeatures.TryGetValue(self.player, out var spider))
+            if (SpiderCatFeatures.TryGetValue(self.player, out var spider))
                 spider.Reset(self);
         }
+        #endregion
+        #region 时缓
+        private static void RainWorldGame_RawUpdate(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
+                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
+            {
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Action<RainWorldGame>>(game =>
+                {
+                    if (UpdateSpeed < game.framesPerSecond)
+                        game.framesPerSecond = UpdateSpeed;
+                });
+            }
+            else
+                BuffUtils.LogError(SpiderShapedMutation, "IL HOOK FAILED");
+        }
+
+        public static int UpdateSpeed = 1000;
         #endregion
     }
 
     internal class SpiderCat
     {
         WeakReference<Player> ownerRef;
+
+        public bool LikeSpider => SpiderShapedMutationBuffEntry.StackLayer >= 2;
+
+        public bool IsSpitter => SpiderShapedMutationBuffEntry.StackLayer >= 3;
 
         #region 行动相关
         //指定位置
@@ -433,6 +515,71 @@ namespace BuiltinBuffs.Duality
             {
                 return this.footingCounter > 5 || this.outOfWaterFooting > 0;
             }
+        }
+        #endregion
+
+        #region 大跳击晕相关
+        private bool hasSuperLaunchJump;
+        private int hasSuperLaunchJumpCount;
+        #endregion
+
+        #region 毒镖相关
+        private float charging;
+        private Vector2? spitPos;
+        private Vector2 spitDir;
+
+        private Vector2 wantShootDir;
+        private Vector2 aimDir;
+        private Vector2 targetPoint;
+        private Tracker.CreatureRepresentation spitAtCrit;
+        private int ammo = 4;
+        private float ammoRegen;
+        private bool fastAmmoRegen;
+        private bool goToSpitPos;
+        private int noSitDelay;
+
+        private int laserSprite;
+        private float laserAlpha;
+        private float lastLaserAlpha;
+        private float laserPower;
+
+        public Vector2 LookDirection
+        {
+            get
+            {
+                if (!ownerRef.TryGetTarget(out var player))
+                    return Vector2.zero;
+                if (player.room != null && player.room == player.room.game.cameras[0].room && player.graphicsModule != null)
+                {
+                    RoomCamera.SpriteLeaser spriteLeaser = player.room.game.cameras[0].spriteLeasers.FirstOrDefault(i => i.drawableObject == player.graphicsModule);
+                    if (spriteLeaser != null)
+                    {
+                        for (int i = 3; i <= 7; i++)
+                        {
+                            if (spriteLeaser.sprites[3].element.name.Contains(i.ToString()))
+                            {
+                                if (player.input[0].x != 0 || !(player.graphicsModule is PlayerGraphics graphic))
+                                    return new Vector2(player.input[0].x, 0);
+                                else
+                                    return (graphic.head.pos - player.bodyChunks[0].pos).normalized;
+                            }
+                        }
+                    }
+                }
+
+                if (player.graphicsModule is PlayerGraphics graphics)
+                {
+                    if (graphics.lookDirection != Vector2.zero)
+                        return graphics.lookDirection;
+                    return (graphics.head.pos - player.bodyChunks[0].pos).normalized;
+                }
+                return new Vector2(player.input[0].x, 0);
+            }
+        }
+        
+        public int LaserSprite()
+        {
+            return laserSprite;
         }
         #endregion
 
@@ -500,7 +647,8 @@ namespace BuiltinBuffs.Duality
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             arthropodSprite = sLeaser.sprites.Length;
-            Array.Resize(ref sLeaser.sprites, arthropodSprite + this.legs.GetLength(0) * this.legs.GetLength(1) * 3);
+            laserSprite = arthropodSprite + this.legs.GetLength(0) * this.legs.GetLength(1) * 3;
+            Array.Resize(ref sLeaser.sprites, laserSprite + 1);
 
             for (int i = 0; i < this.legs.GetLength(0); i++)
             {
@@ -521,6 +669,9 @@ namespace BuiltinBuffs.Duality
                     sLeaser.sprites[LegSprite(i, j, 2)].color = sLeaser.sprites[0].color;
                 }
             }
+
+            sLeaser.sprites[LaserSprite()] = new CustomFSprite("Futile_White");
+            sLeaser.sprites[LaserSprite()].shader = rCam.game.rainWorld.Shaders["HologramBehindTerrain"];
 
             self.AddToContainer(sLeaser, rCam, null);
         }
@@ -565,6 +716,10 @@ namespace BuiltinBuffs.Duality
                         }
                     }
                 }
+            }
+            if (laserSprite >= 1 && sLeaser.sprites.Length >= laserSprite + 1)
+            {
+                rCam.ReturnFContainer(ModManager.MMF ? "Midground" : "Foreground").AddChild(sLeaser.sprites[LaserSprite()]);
             }
         }
 
@@ -646,6 +801,49 @@ namespace BuiltinBuffs.Duality
                     sLeaser.sprites[this.LegSprite(j, k, 2)].rotation = Custom.AimFromOneVectorToAnother(outerLeg, legPos);
                     sLeaser.sprites[this.LegSprite(j, k, 2)].scaleY = (Vector2.Distance(outerLeg, legPos) + 1f) / sLeaser.sprites[this.LegSprite(j, k, 2)].element.sourcePixelSize.y;
                 }
+            }
+
+            //瞄准线
+            Vector2 headPos = Vector2.Lerp((player.graphicsModule as PlayerGraphics).head.lastPos, (player.graphicsModule as PlayerGraphics).head.pos, timeStacker);
+            float nowLaserAlpha = Mathf.Lerp(lastLaserAlpha, laserAlpha, timeStacker);
+            Color color = Custom.HSL2RGB(Custom.RGB2HSL(sLeaser.sprites[0].color).x, 1f, 0.5f);
+            if (this.charging > 0)
+            {
+                nowLaserAlpha = ((Mathf.FloorToInt(10f * this.charging) % 2 < 1) ? 1f : 0f);//((modeCounter % 6 < 3) ? 1f : 0f);
+                if (Mathf.FloorToInt(10f * this.charging) % 2 == 0)
+                    color = Color.Lerp(color, Color.white, UnityEngine.Random.value);
+                if (this.charging >= 1)
+                {
+                    nowLaserAlpha = 1f;
+                    color = Color.white;
+                }
+            }
+            Vector2 laserRootPos = headPos;
+            Vector2 aimDir = AimDir(timeStacker);
+            if (nowLaserAlpha <= 0f)
+            {
+                sLeaser.sprites[LaserSprite()].isVisible = false;
+            }
+            else
+            {
+                sLeaser.sprites[LaserSprite()].isVisible = true;
+                sLeaser.sprites[LaserSprite()].alpha = nowLaserAlpha;
+                Vector2 corner = Custom.RectCollision(laserRootPos, laserRootPos + aimDir * 100000f, rCam.room.RoomRect.Grow(200f)).GetCorner(FloatRect.CornerLabel.D);
+                IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(rCam.room, laserRootPos, corner);
+                if (intVector.HasValue)
+                {
+                    corner = Custom.RectCollision(corner, laserRootPos, rCam.room.TileRect(intVector.Value)).GetCorner(FloatRect.CornerLabel.D);
+                }
+                if (Custom.Dist(laserRootPos, corner) > 150f)
+                    corner = laserRootPos + 150f * Custom.DirVec(laserRootPos, corner);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).verticeColors[0] = Custom.RGB2RGBA(color, nowLaserAlpha);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).verticeColors[1] = Custom.RGB2RGBA(color, nowLaserAlpha);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).verticeColors[2] = Custom.RGB2RGBA(color, Mathf.Pow(nowLaserAlpha, 2f) * 0.5f);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).verticeColors[3] = Custom.RGB2RGBA(color, Mathf.Pow(nowLaserAlpha, 2f) * 0.5f);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).MoveVertice(0, laserRootPos + aimDir * 2f + Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).MoveVertice(1, laserRootPos + aimDir * 2f - Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).MoveVertice(2, corner - Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
+                (sLeaser.sprites[LaserSprite()] as CustomFSprite).MoveVertice(3, corner + Custom.PerpendicularVector(aimDir) * 0.5f - camPos);
             }
         }
 
@@ -804,6 +1002,17 @@ namespace BuiltinBuffs.Duality
                     num6++;
                 }
             }
+
+            //瞄准线
+            lastLaserAlpha = laserAlpha;
+            if (charging <= 0)
+            {
+                laserAlpha = Mathf.Max(laserAlpha - 0.1f, 0f);
+            }
+            else if (UnityEngine.Random.value < 0.25f)
+            {
+                laserAlpha = ((UnityEngine.Random.value < laserPower) ? Mathf.Lerp(laserAlpha, Mathf.Pow(laserPower, 0.25f), Mathf.Pow(UnityEngine.Random.value, 0.5f)) : (laserAlpha * UnityEngine.Random.value * UnityEngine.Random.value));
+            }
         }
 
         public void Reset(PlayerGraphics self)
@@ -830,7 +1039,17 @@ namespace BuiltinBuffs.Duality
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);
+            }/*
+            if (player.bodyMode == Player.BodyModeIndex.Stand || 
+                player.bodyMode == Player.BodyModeIndex.Crawl ||
+                player.bodyMode == Player.BodyModeIndex.Swimming ||
+                hasSuperLaunchJumpCount > 80)
+            {
+                hasSuperLaunchJump = false;
+                hasSuperLaunchJumpCount = 0;
             }
+            if (hasSuperLaunchJump)
+                hasSuperLaunchJumpCount++;*/
             /*
             if (player.animation == Player.AnimationIndex.StandUp)
                 this.standCount++;
@@ -910,6 +1129,113 @@ namespace BuiltinBuffs.Duality
             }
         }
 
+        public void MaulingUpdate(int graspIndex)
+        {
+            if (!ownerRef.TryGetTarget(out var player) || !this.LikeSpider)
+                return;
+            if (player.room == null)
+                return; 
+            if (player.grasps[graspIndex] == null || 
+                !(player.grasps[graspIndex].grabbed is Creature crit) ||
+                !ShouldFired(crit))
+                return;
+
+            Vector2 vector = player.grasps[graspIndex].grabbedChunk.pos * player.grasps[graspIndex].grabbedChunk.mass;
+            float num = player.grasps[graspIndex].grabbedChunk.mass;
+            for (int i = 0; i < player.grasps[graspIndex].grabbed.bodyChunkConnections.Length; i++)
+            {
+                if (player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1 == player.grasps[graspIndex].grabbedChunk)
+                {
+                    vector += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2.pos * player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2.mass;
+                    num += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2.mass;
+                }
+                else if (player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk2 == player.grasps[graspIndex].grabbedChunk)
+                {
+                    vector += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1.pos * player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1.mass;
+                    num += player.grasps[graspIndex].grabbed.bodyChunkConnections[i].chunk1.mass;
+                }
+            }
+            vector /= num;
+            if (player.maulTimer >= 8)
+            {
+                player.mainBodyChunk.pos += Custom.DegToVec(Mathf.Lerp(-90f, 90f, UnityEngine.Random.value)) * 4f;
+                player.grasps[graspIndex].grabbedChunk.vel += Custom.DirVec(vector, player.mainBodyChunk.pos) * 0.9f / player.grasps[graspIndex].grabbedChunk.mass;
+                for (int j = UnityEngine.Random.Range(0, 3); j >= 0; j--)
+                {
+                    player.room.AddObject(new WaterDrip(Vector2.Lerp(player.grasps[graspIndex].grabbedChunk.pos, player.mainBodyChunk.pos, UnityEngine.Random.value) + player.grasps[graspIndex].grabbedChunk.rad * Custom.RNV() * UnityEngine.Random.value, Custom.RNV() * 6f * UnityEngine.Random.value + Custom.DirVec(vector, (player.mainBodyChunk.pos + (player.graphicsModule as PlayerGraphics).head.pos) / 2f) * 7f * UnityEngine.Random.value + Custom.DegToVec(Mathf.Lerp(-90f, 90f, UnityEngine.Random.value)) * UnityEngine.Random.value * player.EffectiveRoomGravity * 7f, false));
+                }
+                if (player.Grab(player.grasps[graspIndex].grabbed, 0, player.grasps[graspIndex].grabbedChunk.index, Creature.Grasp.Shareability.CanNotShare, 0.5f, false, true))
+                    player.room.PlaySound(SoundID.Big_Spider_Grab_Creature, player.mainBodyChunk);
+                else
+                    player.room.PlaySound(SoundID.Big_Spider_Slash_Creature, player.mainBodyChunk);
+                player.room.PlaySound(SoundID.Slugcat_Eat_Meat_B, player.mainBodyChunk);
+                player.room.PlaySound(SoundID.Drop_Bug_Grab_Creature, player.mainBodyChunk, false, 1f, 0.76f);
+                BuffPlugin.Log("Mauled target");
+                if (!(player.grasps[graspIndex].grabbed as Creature).dead)
+                {
+                    for (int num12 = UnityEngine.Random.Range(8, 14); num12 >= 0; num12--)
+                    {
+                        player.room.AddObject(new WaterDrip(Vector2.Lerp(player.grasps[graspIndex].grabbedChunk.pos, player.mainBodyChunk.pos, UnityEngine.Random.value) + player.grasps[graspIndex].grabbedChunk.rad * Custom.RNV() * UnityEngine.Random.value, Custom.RNV() * 6f * UnityEngine.Random.value + Custom.DirVec(player.grasps[graspIndex].grabbed.firstChunk.pos, (player.mainBodyChunk.pos + (player.graphicsModule as PlayerGraphics).head.pos) / 2f) * 7f * UnityEngine.Random.value + Custom.DegToVec(Mathf.Lerp(-90f, 90f, UnityEngine.Random.value)) * UnityEngine.Random.value * player.EffectiveRoomGravity * 7f, false));
+                    }
+                    Creature creature = player.grasps[graspIndex].grabbed as Creature;
+                    creature.SetKillTag(player.abstractCreature);
+                    creature.Violence(player.bodyChunks[0], new Vector2?(new Vector2(0f, 0f)), player.grasps[graspIndex].grabbedChunk, null, Creature.DamageType.Bite, 1f, 15f);
+                    creature.stun = 5;
+                    if (creature.abstractCreature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.Inspector)
+                    {
+                        creature.Die();
+                    }
+                }
+                player.maulTimer = 0;
+                player.wantToPickUp = 0;
+                if (player.grasps[graspIndex] != null)
+                {
+                    player.TossObject(graspIndex, false);
+                    player.ReleaseGrasp(graspIndex);
+                }
+                player.standing = true;
+            }
+            /*
+            while (player.maulTimer % 5 != 0 && player.maulTimer < 40)
+            {
+                BuffPlugin.Log(player.maulTimer);
+                player.maulTimer++;
+                player.MaulingUpdate(graspIndex);
+            }*/
+        }
+
+        public void Collide(PhysicalObject otherObject, int myChunk, int otherChunk)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (player.room == null)
+                return;
+            if (hasSuperLaunchJump && otherObject is Creature)
+            {
+                bool flag4 = otherObject is Player && !Custom.rainWorld.options.friendlyFire;
+                if (!(otherObject as Creature).dead && (otherObject as Creature).abstractCreature.creatureTemplate.type != MoreSlugcatsEnums.CreatureTemplateType.SlugNPC && (!ModManager.CoopAvailable || !flag4))
+                {
+                    player.room.ScreenMovement(new Vector2?(player.bodyChunks[0].pos), player.mainBodyChunk.vel * player.bodyChunks[0].mass * 5f * 0.1f, Mathf.Max((player.bodyChunks[0].mass - 30f) / 50f, 0f));
+                    player.room.PlaySound(SoundID.Slugcat_Terrain_Impact_Hard, player.mainBodyChunk);
+                    (otherObject as Creature).SetKillTag(player.abstractCreature);
+                    (otherObject as Creature).Violence(player.mainBodyChunk, 
+                                                       new Vector2?(new Vector2(player.mainBodyChunk.vel.x * 5f, player.mainBodyChunk.vel.y)), 
+                                                       otherObject.firstChunk, null, Creature.DamageType.Blunt, 0f, 30f);
+                    player.animation = Player.AnimationIndex.None;
+                    player.mainBodyChunk.vel.Scale(new Vector2(-0.5f, -0.5f));
+                    if (((otherObject as Creature).State is HealthState && ((otherObject as Creature).State as HealthState).ClampedHealth == 0f) || (otherObject as Creature).State.dead)
+                    {
+                        player.room.PlaySound(SoundID.Spear_Stick_In_Creature, player.mainBodyChunk, false, 1.7f, 1f);
+                    }
+                    else
+                    {
+                        player.room.PlaySound(SoundID.Big_Needle_Worm_Impale_Terrain, player.mainBodyChunk, false, 1.2f, 1f);
+                    }
+                }
+            }
+            hasSuperLaunchJump = false;
+        }
+
         //移动速度
         private void Act(Player self)
         {
@@ -919,6 +1245,7 @@ namespace BuiltinBuffs.Duality
                 return;
             }
 
+            SpitUpdate();
             PlayerMoveByLegs();
 
             if (this.jumping)
@@ -985,24 +1312,28 @@ namespace BuiltinBuffs.Duality
         //跳跃
         public void Jump(Vector2 jumpDir, float soundVol)
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return;
-            float scale = self.simulateHoldJumpButton >= 6 ? 2f : 1f;
-            float num = Custom.AimFromOneVectorToAnother(self.bodyChunks[1].pos, self.bodyChunks[0].pos);
-            /*if (self.superLaunchJump >= 19)
+            float scale = player.simulateHoldJumpButton >= 6 ? 2f : 1f;
+            float num = Custom.AimFromOneVectorToAnother(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
+            if (player.killSuperLaunchJumpCounter > 0)
+            {
+                hasSuperLaunchJump = true;
+            }
+            /*if (killSuperLaunchJumpCounter > 0)
             {
                 for (int i = 0; i < this.legs.GetLength(0); i++)
                     for (int j = 0; j < this.legs.GetLength(1); j++)
-                        this.legs[i, j].FindGrip(self.room, self.bodyChunks[0].pos, self.bodyChunks[0].pos + 20f * Mathf.Abs(Mathf.Sin(num)) * Vector2.down, this.legLength * 1.1f, self.bodyChunks[0].pos + 100f * Mathf.Abs(Mathf.Sin(num)) * Vector2.down, -2, -2, false);
+                        this.legs[i, j].FindGrip(player.room, player.bodyChunks[0].pos, player.bodyChunks[0].pos + 20f * Mathf.Abs(Mathf.Sin(num)) * Vector2.down, this.legLength * 1.1f, player.bodyChunks[0].pos + 100f * Mathf.Abs(Mathf.Sin(num)) * Vector2.down, -2, -2, false);
             }*/
             float d = Custom.LerpMap(jumpDir.y, -1f, 1f, 0.7f, 1.2f, 1.1f);
             this.footingCounter = 0;
-            self.mainBodyChunk.vel *= 0.5f;
-            self.bodyChunks[1].vel *= 0.5f;
-            self.mainBodyChunk.vel += jumpDir * 8f * d * scale;
-            self.bodyChunks[1].vel += jumpDir * 5.5f * d * scale;
+            player.mainBodyChunk.vel *= 0.5f;
+            player.bodyChunks[1].vel *= 0.5f;
+            player.mainBodyChunk.vel += jumpDir * 8f * d * scale;
+            player.bodyChunks[1].vel += jumpDir * 5.5f * d * scale;
             this.jumping = true;
-            if (self.graphicsModule != null)
+            if (player.graphicsModule != null)
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -1013,7 +1344,7 @@ namespace BuiltinBuffs.Duality
                     }
                 }
             }
-            self.room.PlaySound(SoundID.Big_Spider_Jump, self.mainBodyChunk, false, soundVol, 1f);
+            player.room.PlaySound(SoundID.Big_Spider_Jump, player.mainBodyChunk, false, soundVol, 1f);
         }
 
         private void Swim()
@@ -1125,6 +1456,259 @@ namespace BuiltinBuffs.Duality
             return false;
         }
 
+        public bool ShouldFired(Creature creature)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return false;
+
+            bool shouldFire = !creature.dead;
+            bool inRange = true;
+            
+            if (creature is Player)
+                shouldFire = false;
+            if (creature is Overseer && (creature as Overseer).AI.LikeOfPlayer(player.abstractCreature) > 0.5f)
+            {
+                shouldFire = false;
+            }
+            if (creature is Lizard)
+            {
+                foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Lizard).AI.relationshipTracker.relationships.
+                    Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == player.abstractCreature))
+                {
+                    if ((creature as Lizard).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                        shouldFire = false;
+                }
+            }
+            if (creature is Scavenger &&
+                (double)(creature as Scavenger).abstractCreature.world.game.session.creatureCommunities.
+                LikeOfPlayer(CreatureCommunities.CommunityID.Scavengers,
+                            (creature as Scavenger).abstractCreature.world.game.world.RegionNumber,
+                            player.playerState.playerNumber) > 0.5)
+            {
+                shouldFire = false;
+            }
+            if (creature is Cicada)
+            {
+                foreach (RelationshipTracker.DynamicRelationship relationship in (creature as Cicada).AI.relationshipTracker.relationships.
+                    Where((RelationshipTracker.DynamicRelationship m) => m.trackerRep.representedCreature == player.abstractCreature))
+                {
+                    if ((creature as Cicada).AI.LikeOfPlayer(relationship.trackerRep) > 0.5f)
+                        shouldFire = false;
+                }
+            }
+
+            return shouldFire && inRange;
+        }
+
+        #region 发射毒镖
+        public void SpitUpdate()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if (player.room == null)
+                return;
+            if (!this.IsSpitter)
+                return;
+            /*
+            if (this.spitPos != null)
+            {
+                if (this.AbandonSitAndSpit())
+                {
+                    this.spitPos = null;
+                    this.noSitDelay = 60;
+                }
+                else
+                {
+                    if (!Custom.DistLess(this.spitDir, this.aimDir, 0.3f))
+                    {
+                        this.spitDir = (this.spitDir + this.aimDir * 0.2f).normalized;
+                    }
+                    float dist = 25f;//this.bodyChunkConnections[0].distance
+                    player.bodyChunks[0].vel *= 0.5f;
+                    player.bodyChunks[1].vel -= this.spitDir;
+                    Vector2 a = this.spitPos.Value + this.spitDir * Mathf.Lerp(5f, -5f, this.charging);
+                    player.bodyChunks[1].pos = Vector2.Lerp(player.bodyChunks[1].pos, a + -this.spitDir * dist * 0.5f, 0.2f);
+                    player.bodyChunks[0].vel *= 0.5f;
+                    player.bodyChunks[0].vel += this.spitDir;
+                    player.bodyChunks[0].pos = Vector2.Lerp(player.bodyChunks[0].pos, a + this.spitDir * dist * 0.5f, 0.2f);
+                    this.footingCounter = 30;
+                }
+                //this.AI.Update();
+            }
+            else if (this.SitAndSpit())
+            {
+                this.spitPos = new Vector2?(player.bodyChunks[0].pos);
+                this.spitDir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
+            }*/
+            AmmoUpdate();
+
+            if (this.charging > 0f)
+            {
+                if (player.room.aimap.getAItile(player.mainBodyChunk.pos).fallRiskTile.y > player.abstractCreature.pos.Tile.y - 20)
+                {
+                    player.bodyChunks[1].vel -= this.aimDir * this.charging * 2f;
+                    player.bodyChunks[0].vel += this.aimDir * this.charging;
+                }
+
+                //身体几乎不再移动
+                for (int j = 0; j < player.bodyChunks.Length; j++)
+                {
+                    player.bodyChunks[j].vel *= 0.05f;
+                }
+                if (player.bodyMode == Player.BodyModeIndex.Stand)
+                    player.bodyMode = Player.BodyModeIndex.Default;
+                else if (player.bodyMode == Player.BodyModeIndex.Swimming)
+                    player.bodyMode = Player.BodyModeIndex.Default;
+
+                this.spitDir = (this.spitDir + this.aimDir * 0.2f).normalized;
+                this.aimDir = AimDir(1f);
+                if (this.charging > 1f && !BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(SpiderShapedMutationBuffEntry.SpiderShapedMutation)))
+                {
+                    this.Spit();
+                }
+            }
+            if (BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(SpiderShapedMutationBuffEntry.SpiderShapedMutation)) &&
+                this.CanSpit(false))
+                this.charging += 0.05f;
+            else
+                this.charging = 0f;
+            /*
+            if (this.spitPos != null || this.charging > 0f)
+            {
+                return;
+            }
+            */
+
+            SpiderShapedMutationBuffEntry.UpdateSpeed = 1000;
+            if (this.charging > 0)
+            {
+                //时缓
+                for (int j = 0; j < player.room.game.AlivePlayers.Count; j++)
+                {
+                    if (player.room.game.AlivePlayers[j].realizedCreature != null &&
+                         SpiderShapedMutationBuffEntry.SpiderCatFeatures.TryGetValue(player.room.game.AlivePlayers[j].realizedCreature as Player, out var spiderCat))
+                    {
+                        SpiderShapedMutationBuffEntry.UpdateSpeed = 10;
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void Spit()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            Vector2 shootDir = this.aimDir;
+            if (shootDir == Vector2.zero)
+                shootDir = this.travelDir.normalized;
+            Creature creature = null;
+            float num = float.MaxValue;
+            float current = Custom.VecToDeg(shootDir);
+            for (int i = 0; i < player.abstractCreature.Room.creatures.Count; i++)
+            {
+                if (player.abstractCreature != player.abstractCreature.Room.creatures[i] && player.abstractCreature.Room.creatures[i].realizedCreature != null)
+                {
+                    float target = Custom.AimFromOneVectorToAnother(player.mainBodyChunk.pos, player.abstractCreature.Room.creatures[i].realizedCreature.mainBodyChunk.pos);
+                    float num2 = Custom.Dist(player.mainBodyChunk.pos, player.abstractCreature.Room.creatures[i].realizedCreature.mainBodyChunk.pos);
+                    if (Mathf.Abs(Mathf.DeltaAngle(current, target)) < 22.5f && num2 < num)
+                    {
+                        num = num2;
+                        creature = player.abstractCreature.Room.creatures[i].realizedCreature;
+                    }
+                }
+            }
+            if (creature != null)
+            {
+                shootDir = Custom.DirVec(player.mainBodyChunk.pos, creature.mainBodyChunk.pos);
+            }
+            this.charging = 0f;
+            player.mainBodyChunk.pos += shootDir * 12f;
+            player.mainBodyChunk.vel += shootDir * 2f;
+            AbstractPhysicalObject absPhysicalObject = new AbstractPhysicalObject(player.room.world, AbstractPhysicalObject.AbstractObjectType.DartMaggot, null, player.abstractCreature.pos, player.room.game.GetNewID());
+            absPhysicalObject.RealizeInRoom();
+            (absPhysicalObject.realizedObject as DartMaggot).Shoot(player.mainBodyChunk.pos, shootDir, player);
+            player.room.PlaySound(SoundID.Big_Spider_Spit, player.mainBodyChunk);
+            this.SpiderHasSpit();
+        }
+
+        public void SpiderHasSpit()
+        {
+            this.ammo--;
+            this.ammoRegen = 0f;
+            if (this.ammo < 1)
+                this.fastAmmoRegen = true;
+            else
+                this.fastAmmoRegen = false;
+        }
+
+        public void AmmoUpdate()
+        {
+            if (this.ammo < 4)
+            {
+                this.ammoRegen += 1f / (this.fastAmmoRegen ? 60f : 1200f);
+                if (this.ammoRegen > 1f)
+                {
+                    this.ammo++;
+                    this.ammoRegen -= 1f;
+                    if (this.ammo > 3)
+                    {
+                        this.ammoRegen = 0f;
+                        this.fastAmmoRegen = false;
+                    }
+                }
+            }
+        }
+
+        public Vector2 AimDir(float timeStacker)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return Vector2.zero;
+            if (this.charging > 0f)
+            {
+                Vector2 inputDir = new Vector2(player.input[0].x, player.input[0].y).normalized;
+                wantShootDir = Vector3.Slerp(wantShootDir, inputDir, 0.02f);
+            }
+            else
+            {
+                Vector2 vector = LookDirection;
+                wantShootDir = Vector2.Lerp(wantShootDir, vector, 0.02f);
+            }
+            return wantShootDir.normalized;
+        }
+
+        public bool CanSpit(bool initiate)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return false;
+            return player.Consious && player.grasps[0] == null && IsSpitter && this.ammo > 0;
+        }
+
+        public bool AbandonSitAndSpit()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return false;
+            Vector2 spitPos = this.spitPos == null ? Vector2.zero : this.spitPos.Value;
+            return !this.goToSpitPos || !Custom.DistLess(player.mainBodyChunk.pos, spitPos, 120f) || 
+                   this.spitAtCrit == null || this.spitAtCrit.TicksSinceSeen > 20 || //this.bugAI.behavior != BigSpiderAI.Behavior.Hunt || 
+                   Custom.DistLess(spitPos, this.targetPoint, 220f);
+        }
+
+        public bool SitAndSpit()
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return false;
+            Vector2 spitPos = this.spitPos == null ? Vector2.zero : this.spitPos.Value;
+            return this.goToSpitPos && this.noSitDelay < 1 && //this.bugAI.behavior == BigSpiderAI.Behavior.Hunt && 
+                    Custom.DistLess(player.bodyChunks[0].pos, spitPos, 80f) && 
+                    !Custom.DistLess(spitPos, this.targetPoint, 300f) && this.spitAtCrit != null && 
+                    this.spitAtCrit.VisualContact && 
+                    (player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos, player.Template) || 
+                     player.room.aimap.TileAccessibleToCreature(player.bodyChunks[1].pos, player.Template)) && 
+                    player.room.VisualContact(player.bodyChunks[0].pos, this.spitAtCrit.representedCreature.realizedCreature.DangerPos);
+        }
+        #endregion
+
         #region 拿东西
         //拿东西的手的位置
         public void SlugcatHandUpdate(SlugcatHand self)
@@ -1166,9 +1750,9 @@ namespace BuiltinBuffs.Duality
         }
 
         //只能一次叼一个东西
-        public Player.ObjectGrabability Grabability(Player.ObjectGrabability result)
+        public Player.ObjectGrabability Grabability(Player.ObjectGrabability result, PhysicalObject obj)
         {
-            if (!ownerRef.TryGetTarget(out var self))
+            if (!ownerRef.TryGetTarget(out var player))
                 return result;
 
             if (result == Player.ObjectGrabability.OneHand)
@@ -1178,6 +1762,13 @@ namespace BuiltinBuffs.Duality
             else if (result == Player.ObjectGrabability.TwoHands)
                 result = Player.ObjectGrabability.Drag;
             else if (result == Player.ObjectGrabability.Drag)
+                result = Player.ObjectGrabability.Drag;
+
+            //允许抓住其他生物（不含小生物）
+            if (this.LikeSpider && obj is Creature creature && 
+                player.dontGrabStuff < 1 && player.grabbedBy.Count <= 0 &&
+                creature != player && !creature.Template.smallCreature &&
+                result == Player.ObjectGrabability.CantGrab)
                 result = Player.ObjectGrabability.Drag;
 
             return result;

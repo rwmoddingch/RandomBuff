@@ -40,7 +40,11 @@
 
 	<Name>Moyang
 	<Detail>under capacity
-	<BuffIDs>FakeCreature
+	<BuffIDs>FakeCreature, HeartDevouringWorm
+
+	<Name>ACI
+	<Detail>
+	<BuffIDs>CorruptionSpread
 
 	<Name>Seron
 	<Detail>-127.0.0.1-

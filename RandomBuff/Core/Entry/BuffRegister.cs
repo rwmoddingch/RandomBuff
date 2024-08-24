@@ -3,20 +3,23 @@
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using BepInEx;
 using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Pdb;
+using Mono.Cecil.Rocks;
 using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
 using RandomBuff.Core.Buff;
-using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -24,10 +27,7 @@ using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
-using RandomBuff.Render.UI.ExceptionTracker;
 using RandomBuffUtils;
-using UnityEngine;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 
 namespace RandomBuff.Core.Entry
@@ -62,7 +62,7 @@ namespace RandomBuff.Core.Entry
         public static void RegisterBuff<TBuffType, TDataType, THookType>(BuffID id) where TBuffType : IBuff, new()
             where TDataType : BuffData, new()
         {
-            BuffHookWarpper.RegisterHook(id, typeof(THookType));
+            BuffHookWarpper.RegisterBuffHook(id, typeof(THookType));
             RegisterBuff<TBuffType, TDataType>(id);
         }
 
@@ -85,39 +85,38 @@ namespace RandomBuff.Core.Entry
         /// </summary>
         /// <typeparam name="THookType"></typeparam>
         /// <param name="id"></param>
-        public static (TypeDefinition buffType, TypeDefinition dataTypeDefinition) RegisterBuff<THookType>(BuffID id)
+        public static void RegisterBuff<THookType>(BuffID id)
         {
-            BuffHookWarpper.RegisterHook(id, typeof(THookType));
-            return RegisterBuff(id);
+            BuffHookWarpper.RegisterBuffHook(id, typeof(THookType));
+            RegisterBuff(id);
         }
 
         /// <summary>
         /// 无Buff类型注册Buff
         /// </summary>
         /// <param name="id"></param>
-        public static (TypeDefinition buffType, TypeDefinition dataTypeDefinition) RegisterBuff(BuffID id)
+        public static void RegisterBuff(BuffID id)
         {
             if (CurrentModId == string.Empty)
             {
                 BuffPlugin.LogError("Missing Mod ID!, can't use this out of IBuffEntry.OnEnable");
-                return (null, null);
+                return;
             }
             if (BuffTypes.ContainsKey(id) || currentRuntimeBuffName.Contains(id.value))
             {
                 BuffPlugin.LogError($"{id} has already registered!");
-                return (null, null);
+                return;
             }
             try
-            {
-                var re = BuffBuilder.GenerateBuffType(CurrentModId, id.value);
+            { 
+                BuffBuilder.GenerateBuffTypeWithCache(CurrentModId, id.value);
                 currentRuntimeBuffName.Add(id.value);
-                return re;
             }
             catch (Exception e)
             {
                 BuffPlugin.LogException(e,$"Exception in GenerateBuffType:{CurrentModId}:{id}");
             }
-            return (null, null);
+         
         }
 
         internal static void InternalRegisterBuff(BuffID id,Type buffType,Type dataType,Type hookType = null)
@@ -131,7 +130,7 @@ namespace RandomBuff.Core.Entry
                 }
 
                 if (hookType != null)
-                    BuffHookWarpper.RegisterHook(id, hookType);
+                    BuffHookWarpper.RegisterBuffHook(id, hookType);
 
                 if (id != Helper.GetUninit<IBuff>(buffType).ID || id != Helper.GetUninit<BuffData>(dataType).ID)
                 {
@@ -292,7 +291,7 @@ namespace RandomBuff.Core.Entry
         public static void RegisterStaticData([NotNull] BuffStaticData data)
         {
             var staticDatas =
-                (Dictionary<BuffID, BuffStaticData>)typeof(BuffConfigManager).GetField("staticDatas", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+                (Dictionary<BuffID, BuffStaticData>)typeof(BuffConfigManager).GetField("StaticDatas", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
             if (!staticDatas.ContainsKey(data.BuffID))
             {
                 BuffUtils.Log("BuffExtend", $"Register Buff:{data.BuffID} static data by Code ");
@@ -341,24 +340,14 @@ namespace RandomBuff.Core.Entry
 
         internal static string CurrentModId { get; private set; } = string.Empty;
 
-        private static readonly HashSet<string> currentRuntimeBuffName = new ();
+        private static readonly List<string> currentRuntimeBuffName = new ();
 
         private static readonly List<Type> allEntry = new();
 
         public static readonly List<Assembly> allBuffAssemblies = new();
 
-        private static bool IsDerivedType(this Type checkType, Type baseType)
-        {
-            var aType = checkType?.BaseType;
-            while (aType != null)
-            {
-                if (aType.FullName == baseType.FullName)
-                    return true;
-                aType = aType?.BaseType;
-            }
 
-            return false;
-        }
+
 
         internal static void LoadBuffPluginAsset()
         {
@@ -388,86 +377,58 @@ namespace RandomBuff.Core.Entry
         {
             allEntry.Clear();
             allBuffAssemblies.Clear();
+            HashSet<string> refLocations = new HashSet<string>();
+            foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
+            {
+               if(refLocations.Add(
+                    Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies().First(i => i.GetName().Name == refAssembly.Name).Location)))
+                    BuffPlugin.Log(refLocations.Last());
+
+            }
+
             foreach (var mod in ModManager.ActiveMods)
             {
-             
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
                 if (!Directory.Exists(path))
                     continue;
                 BuffPlugin.Log($"Find correct path in {CurrentModId = mod.id} to load plugins");
                 DirectoryInfo info = new DirectoryInfo(path);
+               
 
-        
                 foreach (var file in info.GetFiles("*.dll"))
                 {
+                    if (!File.Exists(Path.Combine(BuffPlugin.CacheFolder,
+                            $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")) ||
+                        file.LastWriteTime > new FileInfo(Path.Combine(BuffPlugin.CacheFolder,
+                            $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")).LastWriteTime)
+                    {
+                        File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dynamicCache.dll");
+                        var def = BuildCachePlugin(mod, file.FullName, refLocations);
+                        def.Write(
+                            Path.Combine(BuffPlugin.CacheFolder,
+                                $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"),
+                            new WriterParameters() { WriteSymbols = true });
 
-                    Assembly assembly = Assembly.LoadFile(file.FullName);
+                    }
+
+                    Assembly assembly = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"));
                     allBuffAssemblies.Add(assembly);
-
+                    var entryType = typeof(IBuffEntry);
                     foreach (var type in assembly.GetTypes())
                     {
-                        if (type.IsDerivedType(typeof(BuffData)))
+                        
+                        if (entryType.IsAssignableFrom(type))
                         {
-                            foreach (var property in type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance))
-                            {
-                                if (property.CustomAttributes.Any(i =>
-                                        i.AttributeType.IsDerivedType(typeof(CustomBuffConfigAttribute))))
-                                {
-                                    BuffPlugin.Log($"Find Property {type.Name}:{property.Name}");
-                                    if (property.SetMethod != null)
-                                    {
-                                        BuffPlugin.LogWarning($"{type.Name}:{property.Name} has set method!");
-                                        _ = new ILHook(property.SetMethod, (il) =>
-                                        {
-                                            il.Instrs.Clear();
-                                            var setIl = il.Body.GetILProcessor();
-                                            setIl.Emit(OpCodes.Ldarg_0);
-                                            setIl.Emit(OpCodes.Callvirt,
-                                                typeof(BuffData).GetProperty(nameof(BuffData.ID)).GetGetMethod());
-                                            setIl.Emit(OpCodes.Ldstr, $"Try to set config:{property.Name}");
-                                            setIl.Emit(OpCodes.Call,
-                                                typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
-                                            setIl.Emit(OpCodes.Ret);
-                                        });
-                                    }
-
-                                    if (property.GetMethod != null)
-                                    {
-                                        _ = new ILHook(property.GetMethod, (il) =>
-                                        {
-                                            il.Instrs.Clear();
-                                            var getIl = il.Body.GetILProcessor();
-                                            getIl.Emit(OpCodes.Ldarg_0);
-                                            getIl.Emit(OpCodes.Ldstr, property.Name);
-                                            getIl.Emit(OpCodes.Call, typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
-                                                BindingFlags.NonPublic | BindingFlags.Instance));
-                                            getIl.Emit(property.PropertyType.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, property.PropertyType);
-                                            getIl.Emit(OpCodes.Ret);
-                                            BuffPlugin.LogDebug($"Warp config property for {type.Name} : {property.Name} : {property.PropertyType}");
-
-                                        });
-                                    }
-                                    else
-                                    {
-                                        BuffPlugin.LogError($"{type.Name} : {property.Name} Has NO Get Method");
-                                    }
-                                }
-                            }
-                        }
-
-                        if (type.GetInterfaces().Contains(typeof(IBuffEntry)))
-                        {
-                            var obj = type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
+                            var obj = Helper.GetUninit<IBuffEntry>(type);
                             try
                             {
-                                type.GetMethod("OnEnable").Invoke(obj, Array.Empty<object>());
-                                BuffPlugin.Log($"Invoke {type.Name}.OnEnable");
+                                obj.OnEnable();
+                                BuffPlugin.LogDebug($"Invoke {type.Name}.OnEnable");
                             }
                             catch (Exception e)
                             {
                                 BuffPlugin.LogException(e);
                                 BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
-                                ExceptionTracker.TrackException(e, $"Invoke {type.Name}.OnEnable Failed!");
                             }
                             allEntry.Add(type);
                         }
@@ -478,13 +439,18 @@ namespace RandomBuff.Core.Entry
                 try
                 {
                     var runtimeAss = BuffBuilder.FinishGenerate(CurrentModId);
-                    if (runtimeAss != null)
+                    foreach(var ass in runtimeAss)
                     {
-                        foreach (var name in currentRuntimeBuffName)
+                        for(int i = currentRuntimeBuffName.Count-1;i>=0;i--)
                         {
-                            InternalRegisterBuff(new BuffID(name),
-                                runtimeAss.GetType($"{CurrentModId}.{name}Buff", true),
-                                runtimeAss.GetType($"{CurrentModId}.{name}BuffData", true));
+                            var name = currentRuntimeBuffName[i];
+                            if (ass.GetType($"{CurrentModId}.{name}Buff") is {} type)
+                            {
+                                InternalRegisterBuff(new BuffID(name),
+                                    type, ass.GetType($"{CurrentModId}.{name}BuffData", true));
+                            }
+
+                            currentRuntimeBuffName.Remove(name);
                         }
                     }
                 }
@@ -493,7 +459,9 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogException(e,$"Exception when load {mod.id}'s RuntimeBuff");
                 }
                 currentRuntimeBuffName.Clear();
+
             }
+
             CurrentModId = string.Empty;
             var somePath = Path.Combine(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).basePath, "buffassets",
                 "assetbundles", "extend");
@@ -530,17 +498,7 @@ namespace RandomBuff.Core.Entry
                 foreach (var property in dataType.Value.GetProperties().
                              Where(i => i.GetCustomAttribute<CustomBuffConfigAttribute>(true) != null))
                 {
-                    //不存在get方法
-                    if (property.GetGetMethod() == null)
-                    {
-                        BuffPlugin.LogError($"Property {property.Name} at Type {dataType.Value.Name} has no get method!");
-                        continue;
-                    }
-
-                    //有set属性
-                    if (property.CanWrite)
-                        BuffPlugin.LogWarning($"Property {property.Name} can write!");
-
+            
                     //读取特性
                     var configAttribute = property.GetCustomAttribute<CustomBuffConfigAttribute>();
                     var infoAttribute = property.GetCustomAttribute<CustomBuffConfigInfoAttribute>();//可为null
@@ -629,4 +587,97 @@ namespace RandomBuff.Core.Entry
         private static readonly Dictionary<ConditionID, ConditionType> ConditionTypes = new();
 
     }
+
+    public partial class BuffRegister
+    {
+        private static AssemblyDefinition BuildCachePlugin(ModManager.Mod mod,string filePath, HashSet<string> refLocations)
+        {
+            var resolver = new DefaultAssemblyResolver();
+            resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/plugins");
+            foreach (var modPath in ModManager.ActiveMods.Where(i => mod.requirements.Contains(i.id)
+                                                                     && i.requirements.Contains(BuffPlugin.ModId)))
+            {
+                resolver.AddSearchDirectory(modPath.path + "/plugins");
+                resolver.AddSearchDirectory(modPath.path + "/buffplugins");
+            }
+            foreach (var location in refLocations)
+                resolver.AddSearchDirectory(location);
+            AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(filePath, new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver});
+            foreach (var data in assemblyDef.MainModule.GetAllTypes().Where(i => i.IsSubtypeOf(typeof(BuffData))))
+            {
+                foreach (var property in data.Properties)
+                {
+                    if (property.CustomAttributes.Any(i =>
+                            i.AttributeType.Resolve().IsSubtypeOf((typeof(CustomBuffConfigAttribute))))) 
+                    {
+                        BuffPlugin.Log($"Find Property {data.Name}:{property.Name}");
+                        if (property.SetMethod != null)
+                        {
+                            property.SetMethod.Body.Instructions.Clear();
+                            var il = property.SetMethod.Body.GetILProcessor();
+                            il.Emit(OpCodes.Ldstr, "Custom Buff Config");
+                            il.Emit(OpCodes.Ldstr, $"Try Access {data.Name}.{property.Name}");
+                            il.Emit(OpCodes.Call,typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
+                            il.Emit(OpCodes.Ret);
+                        }
+
+                        if (property.GetMethod != null)
+                        {
+                            property.GetMethod.Body.Instructions.Clear();
+                            var getIl = property.GetMethod.Body.GetILProcessor();
+                            getIl.Emit(OpCodes.Ldarg_0);
+                            getIl.Emit(OpCodes.Ldstr, property.Name);
+                            getIl.Emit(OpCodes.Call, typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
+                                BindingFlags.NonPublic | BindingFlags.Instance));
+                            getIl.Emit(property.PropertyType.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, property.PropertyType);
+                            getIl.Emit(OpCodes.Ret);
+                            BuffPlugin.LogDebug($"Warp config property for {data.Name} : {property.Name} : {property.PropertyType}");
+                        }
+                        else
+                        {
+                            BuffPlugin.LogError($"{property.Name} : {property.Name} Has NO Get Method");
+                        }
+                    }
+                }
+            }
+
+            HashSet<TypeDefinition> hookTypeDef = new HashSet<TypeDefinition>();
+            foreach (var enable in assemblyDef.MainModule.GetAllTypes().Where(i => i.HasInterface<IBuffEntry>()).Select(i => i.FindMethod("OnEnable")))
+            {
+                WarpperMethod(enable);
+            }
+
+            foreach(var hookType in hookTypeDef)
+                BuffHookWarpper.BuildStaticHook(hookType);
+            return assemblyDef;
+
+            void WarpperMethod(MethodDefinition enable)
+            {
+                var instructions = enable.Body.Instructions;
+                foreach (var instr in instructions)
+                {
+                    if (instr.MatchCallOrCallvirt(out var method))
+                    {
+
+                        if (method.FullName.Contains("RegisterBuff") &&
+                            method.DeclaringType.Name == "BuffRegister" &&
+                            method is GenericInstanceMethod genericInstance &&
+                            genericInstance.GenericArguments.Count is not 0 or 2)
+                        {
+                            if (genericInstance.GenericArguments.Last().SafeResolve() is { } def)
+                                hookTypeDef.Add(def);
+                        }
+                        else if (method.DeclaringType.Module == enable.Module &&
+                                 method.SafeResolve() is { IsStatic: true ,HasBody:true} checkModule)
+                        {
+                            WarpperMethod(checkModule);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+    } 
 }

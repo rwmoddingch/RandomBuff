@@ -5,7 +5,10 @@
     "BuffProperty" : "Normal",
     "Triggerable" : false,
     "Color" : "0B00FF",
-
+    "MultiLayerFace":true,
+    "FaceLayer":3,
+    "MaxFaceDepth":1,
+    "FaceBackgroundColor": "000000",
     "Chinese" : {
         "BuffName" : "腐化蔓延",
         "Description" : "除业力门和避难所外的所有房间都有可能生成长腿菌。每个轮回生成的腐化位置都不相同。该buff生成的腐化有可能会导致死路出现。"

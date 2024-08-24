@@ -34,6 +34,11 @@ namespace BuiltinBuffs.Positive
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (SporePuff_sCrestBuffEntry.SporePuff_sCrestFeatures.TryGetValue(player, out _))
+                        SporePuff_sCrestBuffEntry.SporePuff_sCrestFeatures.Remove(player);
+                    if (SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.TryGetValue(player, out _))
+                        SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.Remove(player);
+
                     var sporePuff_sCrest = new SporePuff_sCrest(player);
                     SporePuff_sCrestBuffEntry.SporePuff_sCrestFeatures.Add(player, sporePuff_sCrest);
 

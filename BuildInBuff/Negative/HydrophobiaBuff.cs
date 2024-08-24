@@ -27,6 +27,8 @@ namespace BuiltinBuffs.Negative
                 foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
                              .Where(i => i != null && i.graphicsModule != null))
                 {
+                    if (HydrophobiaBuffEntry.HydrophobiaFeatures.TryGetValue(player, out _))
+                        HydrophobiaBuffEntry.HydrophobiaFeatures.Remove(player);
                     var hydrophobia = new Hydrophobia(player);
                     HydrophobiaBuffEntry.HydrophobiaFeatures.Add(player, hydrophobia);
                 }

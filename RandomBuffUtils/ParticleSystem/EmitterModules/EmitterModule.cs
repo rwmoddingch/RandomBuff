@@ -71,7 +71,7 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
         public override void OnDie()
         {
             killed = true;
-            BuffUtils.Log("SetEmitterLife", "Die");
+            //BuffUtils.Log("SetEmitterLife", "Die");
         }
     }
 

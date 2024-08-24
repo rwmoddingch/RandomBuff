@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using BuiltinBuffs.Negative;
 using UnityEngine;
 
 namespace BuildInBuff.Duality
@@ -129,7 +130,7 @@ namespace BuildInBuff.Duality
                 var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
                 //虚弱状态更难发动变蝙蝠
                 activeLimite *= self.exhausted ? 2 : 1;
-                if (st > activeLimite) self.room.AddObject(new BatBody(self.abstractCreature));
+                if (st > activeLimite) self.room.AddObject(new BatBody(self.abstractCreature, HeartDevouringWormBuffEntry.IsInfected(self)));
             }
 
 
@@ -144,10 +145,12 @@ namespace BuildInBuff.Duality
 
         public Fly batBody;
 
-        public BatBody(AbstractCreature absPlayer)
+        private bool dieAfterDestroy;
+
+        public BatBody(AbstractCreature absPlayer, bool dieAfterDestroy)
         {
             DreamtOfABatBuff.Instance.TriggerSelf(true);
-
+            this.dieAfterDestroy = dieAfterDestroy;
             this.absPlayer = absPlayer;
 
 
@@ -227,6 +230,11 @@ namespace BuildInBuff.Duality
                     }
                     //让玩家能站着
                     player.standing = true;
+                    if (dieAfterDestroy)
+                    {
+                        player.Die();
+                        player.abstractCreature.state.meatLeft = 0;
+                    }
 
                     player.graphicsModule.Reset();
                 }

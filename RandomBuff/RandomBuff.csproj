@@ -55,6 +55,9 @@
     <Reference Include="Mono.Cecil.Rocks">
       <HintPath>..\include\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\include\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
     <Reference Include="MonoMod">
       <HintPath>..\include\MonoMod.dll</HintPath>
       <Private>False</Private>
