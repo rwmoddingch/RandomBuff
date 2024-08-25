@@ -3,23 +3,20 @@ using MonoMod.Cil;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData;
+using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
-using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RandomBuffUtils.ParticleSystem;
+using RandomBuffUtils.ParticleSystem.EmitterModules;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using static BuiltinBuffs.Positive.LanceThrowerBuff;
-using static BuiltinBuffs.Positive.StagnantForcefieldPlayerModule;
 using static RandomBuffUtils.PlayerUtils;
-using System.IO;
-using System.Runtime.CompilerServices;
-using RandomBuff.Core.SaveData.BuffConfig;
-using RandomBuff.Core.SaveData;
 
 namespace BuiltinBuffs.Positive
 {
@@ -91,8 +88,11 @@ namespace BuiltinBuffs.Positive
                 }
                 else
                 {
+                    bool rewindLancerCounter = false;
                     bool hold = LanceThrowerBuff.Instance.Data.UseThrowKey ? player.input[0].thrw : GetInput(player);
-                    if ((player.bodyMode == Player.BodyModeIndex.Crawl || player.bodyMode == Player.BodyModeIndex.Stand || player.bodyMode == Player.BodyModeIndex.Default) && player.lowerBodyFramesOnGround > 0)
+                    if ((player.bodyMode == Player.BodyModeIndex.Crawl ||
+                         player.bodyMode == Player.BodyModeIndex.Stand ||
+                         player.bodyMode == Player.BodyModeIndex.Default) && player.lowerBodyFramesOnGround > 0)
                     {
                         if (hold)
                         {
@@ -105,9 +105,15 @@ namespace BuiltinBuffs.Positive
                             {
                                 player.ThrowObject(lanceHand, false);
                             }
+                            else
+                            {
+                                rewindLancerCounter = true;
+                            }
                         }
                     }
-                    else if (lanceCounter > 0)
+                    else
+                        rewindLancerCounter = true;
+                    if (rewindLancerCounter && lanceCounter > 0)
                     {
                         lanceCounter -= 5;
 
@@ -209,45 +215,13 @@ namespace BuiltinBuffs.Positive
         public override BuffID ID => LanceThrowerBuffEntry.lanceThrowerBuffID;
     }
 
-    internal class LanceThrowerBuffData : BuffData
+    internal class LanceThrowerBuffData : KeyBindBuffData
     {
         public override BuffID ID => LanceThrowerBuffEntry.lanceThrowerBuffID;
 
         [CustomBuffConfigInfo("UseThrow","")]
         [CustomBuffConfigTwoValue(true, false)]
-        public bool UseThrowKey { get; set; }
-
-        [CustomBuffConfigInfo("Player1", "bind key for player 1")]
-        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player1 { get; set; }
-
-        [CustomBuffConfigInfo("Player2", "bind key for player 2")]
-        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player2 { get; set; }
-
-        [CustomBuffConfigInfo("Player3", "bind key for player 3")]
-        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player3 { get; set; }
-
-        [CustomBuffConfigInfo("Player4", "bind key for player 4")]
-        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player4 { get; set; }
-
-        public KeyCode this[int index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0: return Player1;
-                    case 1: return Player2;
-                    case 2: return Player3;
-                    case 3: return Player4;
-                    default:
-                        return KeyCode.None;
-                }
-            }
-        }
+        public bool UseThrowKey { get; }
     }
 
     internal class LanceThrowerBuffEntry : IBuffEntry
@@ -270,6 +244,7 @@ namespace BuiltinBuffs.Positive
             On.Player.ThrownSpear += Player_ThrownSpear;
             On.Spear.HitSomething += Spear_HitSomething;
             On.Spear.LodgeInCreature_CollisionResult_bool_bool += Spear_LodgeInCreature_CollisionResult_bool_bool;
+            _ = new BuffAutoCallBack(() => BuffPlugin.LogDebug("HELLO"), () => BuffPlugin.LogDebug("GoodBye"));
         }
 
         private static void Lizard_SpearStick(ILContext il)

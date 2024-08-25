@@ -30,6 +30,9 @@ using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
+using UnityEngine;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
+using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
 
 namespace RandomBuff.Core.Entry
@@ -611,42 +614,81 @@ namespace RandomBuff.Core.Entry
             foreach (var location in refLocations)
                 resolver.AddSearchDirectory(location);
             AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(filePath, new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver});
+            var attrCtor =
+                assemblyDef.MainModule.ImportReference(typeof(CompilerGeneratedAttribute).GetConstructor(Type.EmptyTypes));
             foreach (var data in assemblyDef.MainModule.GetAllTypes().Where(i => i.IsSubtypeOf(typeof(BuffData))))
             {
-                foreach (var property in data.Properties)
+                
+                foreach (var property in GetAllCustomPropertyDefinitions(data))
                 {
-                    if (property.CustomAttributes.Any(i =>
-                            i.AttributeType.Resolve().IsSubtypeOf((typeof(CustomBuffConfigAttribute))))) 
+                    var trulyProperty = property;
+                    bool isVirtual = false;
+                    if (property.DeclaringType != data)
                     {
-                        BuffPlugin.Log($"Find Property {data.Name}:{property.Name}");
+                        isVirtual = true;
+                        data.Properties.Add(trulyProperty = new PropertyDefinition(trulyProperty.Name, trulyProperty.Attributes, data.Module.ImportReference(trulyProperty.PropertyType)));
+                        trulyProperty.CustomAttributes.Add(new CustomAttribute(attrCtor));
                         if (property.SetMethod != null)
                         {
-                            property.SetMethod.Body.Instructions.Clear();
-                            var il = property.SetMethod.Body.GetILProcessor();
-                            il.Emit(OpCodes.Ldstr, "Custom Buff Config");
-                            il.Emit(OpCodes.Ldstr, $"Try Access {data.Name}.{property.Name}");
-                            il.Emit(OpCodes.Call,typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
-                            il.Emit(OpCodes.Ret);
-                        }
+                            var method = new MethodDefinition($"set_{trulyProperty.Name}",
+                                MethodAttributes.SpecialName | MethodAttributes.HideBySig  |
+                                (property.SetMethod.IsPublic  ? MethodAttributes.Public : 0) | MethodAttributes.Virtual, data.Module.TypeSystem.Void);
+                            method.Parameters.Add(new ParameterDefinition(trulyProperty.PropertyType));
+                            data.Methods.Add(method);
+                            trulyProperty.SetMethod = method;
+                            method.CustomAttributes.Add(new CustomAttribute(attrCtor));
 
-                        if (property.GetMethod != null)
-                        {
-                            property.GetMethod.Body.Instructions.Clear();
-                            var getIl = property.GetMethod.Body.GetILProcessor();
-                            getIl.Emit(OpCodes.Ldarg_0);
-                            getIl.Emit(OpCodes.Ldstr, property.Name);
-                            getIl.Emit(OpCodes.Call, typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
-                                BindingFlags.NonPublic | BindingFlags.Instance));
-                            getIl.Emit(property.PropertyType.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, property.PropertyType);
-                            getIl.Emit(OpCodes.Ret);
-                            BuffPlugin.LogDebug($"Warp config property for {data.Name} : {property.Name} : {property.PropertyType}");
-                        }
-                        else
-                        {
-                            BuffPlugin.LogError($"{property.Name} : {property.Name} Has NO Get Method");
                         }
                     }
+
+                    BuffPlugin.Log($"Find Property {data.Name}:{trulyProperty.Name}");
+                    if (trulyProperty.SetMethod != null)
+                    {
+                        trulyProperty.SetMethod.Body.Instructions.Clear();
+                        var il = trulyProperty.SetMethod.Body.GetILProcessor();
+                        il.Emit(OpCodes.Ldstr, "Custom Buff Config");
+                        il.Emit(OpCodes.Ldstr, $"Try Access {data.Name}.{trulyProperty.Name}");
+                        il.Emit(OpCodes.Call, typeof(BuffUtils).GetMethod(nameof(BuffUtils.LogError)));
+                        il.Emit(OpCodes.Ret);
+                    }
+
+                    if (trulyProperty.GetMethod == null)
+                    {
+                       
+                        var method = new MethodDefinition($"get_{trulyProperty.Name}",
+                            MethodAttributes.SpecialName | 
+                            (property.GetMethod != null ? MethodAttributes.HideBySig : MethodAttributes.NewSlot) | 
+                            ((property.GetMethod?.IsPublic ?? false) ? MethodAttributes.Public : 0) |
+                            (isVirtual ? MethodAttributes.Virtual : 0), trulyProperty.PropertyType);
+                        data.Methods.Add(method);
+
+                        trulyProperty.GetMethod = method;
+                        method.CustomAttributes.Add(new CustomAttribute(attrCtor));
+
+                    }
+                    trulyProperty.GetMethod!.Body.Instructions.Clear();
+                    var getIl = trulyProperty.GetMethod.Body.GetILProcessor();
+                    getIl.Emit(OpCodes.Ldarg_0);
+                    getIl.Emit(OpCodes.Ldstr, trulyProperty.Name);
+                    getIl.Emit(OpCodes.Call, typeof(BuffData).GetMethod(nameof(BuffData.GetConfigurableValue),
+                        BindingFlags.NonPublic | BindingFlags.Instance));
+                    getIl.Emit(trulyProperty.PropertyType.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, trulyProperty.PropertyType);
+                    getIl.Emit(OpCodes.Ret);
+                    BuffPlugin.LogDebug($"Warp config property for {data.Name} : {trulyProperty.Name} : {trulyProperty.PropertyType}");
                 }
+            }
+
+            IEnumerable<PropertyDefinition> GetAllCustomPropertyDefinitions(TypeDefinition type ,bool mustVirtual = false)
+            {
+                if (type == null || type.Name == "BuffData")
+                    return new List<PropertyDefinition>();
+                return GetAllCustomPropertyDefinitions(type.BaseType.SafeResolve(), true).Concat(type.Properties.Where(
+                    i =>
+                        i.CustomAttributes.Any(attr =>
+                            attr.AttributeType.Resolve().IsSubtypeOf(typeof(CustomBuffConfigAttribute)))
+                        && (!mustVirtual || (i.GetMethod?.IsVirtual ?? false))));
+
+
             }
 
             HashSet<TypeDefinition> hookTypeDef = new HashSet<TypeDefinition>();

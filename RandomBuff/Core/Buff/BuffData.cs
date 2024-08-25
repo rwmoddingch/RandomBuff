@@ -194,19 +194,19 @@ namespace RandomBuff.Core.Buff
     {
         [CustomBuffConfigInfo("Player1", "bind key for player 1")]
         [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player1 { get; }
+        public virtual KeyCode Player1 { get; }
 
         [CustomBuffConfigInfo("Player2", "bind key for player 2")]
         [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player2 { get; }
+        public virtual KeyCode Player2 { get; }
 
         [CustomBuffConfigInfo("Player3", "bind key for player 3")]
         [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player3 { get; }
+        public virtual KeyCode Player3 { get; }
 
         [CustomBuffConfigInfo("Player4", "bind key for player 4")]
         [CustomBuffConfigEnum(typeof(KeyCode), "None")]
-        public KeyCode Player4 { get; }
+        public virtual KeyCode Player4 { get; }
 
         public KeyCode this[int index]
         {

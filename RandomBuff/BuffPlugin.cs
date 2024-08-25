@@ -28,6 +28,7 @@ using RandomBuff.Core.Option;
 using Steamworks;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.ExceptionTracker;
+using MonoMod.RuntimeDetour;
 
 
 #pragma warning disable CS0618

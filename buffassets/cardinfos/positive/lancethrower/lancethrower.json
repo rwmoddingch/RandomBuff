@@ -1,7 +1,7 @@
 {
     "FaceName": "lancethrower",
     "BuffID" : "LanceThrower",
-    "BuffType" : "Duality",
+    "BuffType" : "Positive",
     "BuffProperty" : "Normal",
     "Triggerable" : true,
     "Color" : "FF9E00",
