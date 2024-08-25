@@ -373,20 +373,14 @@ namespace RandomBuff.Core.Entry
             allEntry.Clear();
         }
 
+        private static HashSet<string> refLocations = null;
 
 
         internal static void InitAllBuffPlugin()
         {
             allEntry.Clear();
             allBuffAssemblies.Clear();
-            HashSet<string> refLocations = new HashSet<string>();
-            foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
-            {
-               if(refLocations.Add(
-                    Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies().First(i => i.GetName().Name == refAssembly.Name).Location)))
-                    BuffPlugin.Log(refLocations.Last());
 
-            }
 
             foreach (var mod in ModManager.ActiveMods)
             {
@@ -406,6 +400,16 @@ namespace RandomBuff.Core.Entry
                     {
                         File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dynamicCache.dll");
                         File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dataCache.dll");
+
+                        if (refLocations == null)
+                        {
+                            refLocations = new HashSet<string>();
+                            foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
+                                refLocations.Add(
+                                    Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies()
+                                        .First(i => i.GetName().Name == refAssembly.Name).Location));
+
+                        }
 
                         var def = BuildCachePlugin(mod, file.FullName, refLocations);
                         def.Write(
