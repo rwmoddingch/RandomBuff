@@ -441,7 +441,7 @@ namespace RandomBuff.Core.Entry
                 }
 
                 try
-                {
+                {   
                     var runtimeAss = BuffBuilder.FinishGenerate(CurrentModId);
                     foreach(var ass in runtimeAss)
                     {

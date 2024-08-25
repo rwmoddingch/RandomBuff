@@ -6,14 +6,14 @@
     "Color" : "FF0000",
     "MultiLayerFace":true,
     "FaceLayer":10,
-    "MaxFaceDepth":1.5,
+    "MaxFaceDepth":1,
     "FaceBackgroundColor": "000000",
     "Chinese" : {
         "BuffName" : "噬心蛊",
-        "Description" : "蝠蝇会钻入其他生物体内，被钻入的生物会在一段时间后死亡并从爆出大量蝠蝇"    
+        "Description" : "蝠蝇会尝试钻入其他生物体内吸收生物养分进行繁殖，被钻入的生物会在一段时间后死亡并爆出大量蝠蝇。同时蝠蝇也会吸引更多生物捕食"    
     },
     "English" : {
         "BuffName" : "Heart-Devouring Worm",
-        "Description" : "The batflies will burrow into other creatures, which will die after a while and release a large number of batflies."
+        "Description" : "Flies attempt to enter other creature' bodies to absorb for reproduction. The invaded creatures will die after a period of time and explode with a large number of flies. And the flies also attract more predators."
     }
 }

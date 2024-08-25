@@ -546,6 +546,10 @@ namespace RandomBuff.Core.Entry
                 var eil = method.Body.GetILProcessor();
                 var dil = disableMethod.Body.GetILProcessor();
 
+                //原跳转地址，如果化简发现跳转则不进行优化
+                var origJumpTargets = origMethod.Body.Instructions.Where(i => i.Operand is Instruction)
+                    .Select(i => i.Operand as Instruction).ToHashSet();
+
                 foreach (var v in origMethod.Body.Variables)
                 {
                     dil.Body.Variables.Add(new VariableDefinition(v.VariableType));
@@ -554,8 +558,9 @@ namespace RandomBuff.Core.Entry
 
                 Dictionary<ILProcessor, List<(Instruction target, Instruction from)>> labelList = new() { { dil, new() }, { eil, new() } };
                 Dictionary<ILProcessor, Dictionary<Instruction, Instruction>> labelDictionary = new() { { dil, new() }, { eil, new() } };
-                foreach (var str in origMethod.Body.Instructions)
+                for(int index =0; index < origMethod.Body.Instructions.Count; index++) 
                 {
+                    var str = origMethod.Body.Instructions[index];
                     if (str.MatchCallOrCallvirt(out var m) && m.Name.Contains("add"))
                     {
                         if (m.DeclaringType.SafeResolve() is {} methodType) 
@@ -566,9 +571,8 @@ namespace RandomBuff.Core.Entry
                                 labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
                             }
                             else
-                            {
                                 BuffPlugin.LogError($"Can't find remove for:{m.FullName}");
-                            }
+                            
                         }
                         else
                             BuffPlugin.LogError($"Can't find method type for:{m.DeclaringType.Name}");
@@ -577,6 +581,80 @@ namespace RandomBuff.Core.Entry
                         labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
 
                     }
+                    //静态反射优化
+                    //else if (str.MatchLdtoken(out var token) &&
+                    //         token is TypeReference tokenRef &&
+                    //         tokenRef.SafeResolve() is {} tokenType &&
+                    //         str.Next.MatchCallOrCallvirt<Type>("GetTypeFromHandle") &&
+                    //         str.Next.Next.MatchLdstr(out var name) &&
+                    //         str.Next?.Next?.Next != null &&
+                    //         !origJumpTargets.Contains(str.Next) &&
+                    //         !origJumpTargets.Contains(str.Next.Next) &&
+                    //         !origJumpTargets.Contains(str.Next.Next.Next))
+                    //{   
+                    //    BuffPlugin.Log($"{type.Name}|{name}");
+                    //    MethodReference getMethod;
+                    //    Instruction offsetStr = str.Next.Next.Next;
+                    //    int offset = 0;
+                    //    if (offsetStr.MatchCallOrCallvirt(out getMethod))
+                    //    {
+                    //        offsetStr = str.Next.Next.Next;
+                    //        offset = 3;
+                    //    }
+                    //    else if (offsetStr.Next != null && 
+                    //             !origJumpTargets.Contains(offsetStr.Next) &&
+                    //             offsetStr.Next.MatchCallOrCallvirt(out getMethod) && 
+                    //             offsetStr.MatchLdcI4(out _))
+                    //    {
+                    //        offsetStr = str.Next.Next.Next.Next;
+                    //        offset = 4;
+                    //    }
+
+                    //    if (getMethod?.Name == "GetMethod" && tokenType.FindMethod(name) is {} tokenMethod)
+                    //    {
+                    //        var methodRef = origMethod.Module.ImportReference(tokenMethod);
+                    //        dil.Emit(OpCodes.Ldtoken, methodRef);
+                    //        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                    //        dil.Emit(OpCodes.Call, typeof(MethodBase).GetMethod("GetMethodFromHandle", 
+                    //            BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(RuntimeMethodHandle) }, null));
+
+                    //        eil.Emit(OpCodes.Ldtoken, methodRef);
+                    //        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+                    //        eil.Emit(OpCodes.Call, typeof(MethodBase).GetMethod("GetMethodFromHandle",
+                    //            BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(RuntimeMethodHandle) }, null));
+
+                    //        index+= offset;
+                    //    }
+                    //    else if (getMethod?.Name == "GetProperty" && offsetStr.Next != null &&
+                    //             tokenType.FindProperty(name) is {} property &&
+                    //             !origJumpTargets.Contains(offsetStr.Next) &&
+                    //             offsetStr.Next.MatchCallOrCallvirt(out var propertyMethod) &&
+                    //             propertyMethod.Name is "GetGetMethod" or "GetSetMethod")
+                    //    {
+                    //        var propertyToken = origMethod.Module.ImportReference(propertyMethod.Name == "GetGetMethod"
+                    //            ? property.GetMethod
+                    //            : property.SetMethod);
+                        
+                    //        dil.Emit(OpCodes.Ldtoken, propertyToken);
+                    //        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+                    //        dil.Emit(OpCodes.Call, typeof(MethodBase).GetMethod("GetMethodFromHandle",
+                    //            BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(RuntimeMethodHandle) }, null));
+
+                    //        eil.Emit(OpCodes.Ldtoken, propertyToken);
+                    //        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+                    //        eil.Emit(OpCodes.Call, typeof(MethodBase).GetMethod("GetMethodFromHandle",
+                    //            BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(RuntimeMethodHandle) }, null));
+                    //        index += offset + 1;
+                    //    }
+                    //    else
+                    //    {
+                    //        dil.Append(str);
+                    //        labelDictionary[dil].Add(str, dil.Body.Instructions.Last());
+
+                    //        eil.Append(str);
+                    //        labelDictionary[eil].Add(str, eil.Body.Instructions.Last());
+                    //    }
+                    //}
                     else if (str.MatchNewobj(out var ctor) && ctor.DeclaringType.HasInterface<IDetour>())
                     {
                         if (ctor.Parameters.Count != 0)
