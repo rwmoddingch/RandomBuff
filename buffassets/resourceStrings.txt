@@ -1,5 +1,5 @@
 //MainMenu
-MainMenu_Buff|BUFF
+MainMenu_Buff|BUFF mode
 MainMenu_Cardpedia|CARDPEDIA
 
 
@@ -52,10 +52,10 @@ Notification_TooManyMods_Title|Mod amount warning:
 Notification_TooManyMods_Info|It seems you have enabled too many mods, be aware that this may cause more exception or crash.<LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
 
 //BuffMenu:
-Survival|SURVIVAL
-Normal|NORMAL
-Quick|QUICK
-Sandbox|SANDBOX
+Survival|SURVIVAL MODE
+Normal|NORMAL MODE
+Quick|QUICK MODE
+Sandbox|SANDBOX MODE
 ProgressionMenu_Show|PROGRESSION
 
 
@@ -156,6 +156,8 @@ DisplayName_PermanentlyHold|Permanently hold {0}
 DisplayName_HuntAll|Kill {0} creatures
 DisplayName_ContinuousSurvival|Survive for {0} consecutive cycles
 DisplayName_WithInCycle|Completed the mission within {0} cycles 
+DisplayName_BreakShellCondition|Penetrate {0} lizards' head and kill them
+
 
 //BuffCondition_BuffTypes
 all types|all types
@@ -190,7 +192,7 @@ QuestRender_FreePick|Free pick count +1
 //Mission
 Mission_Display_DodgeTheRock|DODGE THE ROCKS
 Mission_Display_Meltdown|SEPHIRAH MELTDOWNS
-Mission_Display_Druid|DANCING WITH DRAGONS
+Mission_Display_Druid|DANCES WITH DRAGONS
 Mission_Display_Strayer|STRANGE LAND STRAYER
 Mission_Display_EmergnshyTreatment|EMERGNSHY TREATMENT
 Mission_Display_MidnightSnack|HAUNTED MIDNIGHT SNACK
@@ -206,6 +208,7 @@ Mission_Display_SlugOfTheFlame|SLUG OF THE FLAME
 Mission_Display_KingOfIsles|KING OF THE ISLES
 Mission_Display_TunnelBattle|TUNNEL BATTLE
 Mission_Display_RegularCleanup|REGULAR CLEANUP
+Mission_Display_ShellBreaker|SHELL PENETRATOR
 
 //Credit
 CreditTitle_Intro|Random Buff

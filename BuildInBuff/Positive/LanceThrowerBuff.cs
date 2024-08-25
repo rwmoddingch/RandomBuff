@@ -1,5 +1,4 @@
-﻿using BuiltinBuffs.Positive;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RandomBuff;
 using RandomBuff.Core.Buff;
@@ -14,24 +13,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static BuiltinBuffs.Duality.LanceThrowerBuff;
+using static BuiltinBuffs.Positive.LanceThrowerBuff;
 using static BuiltinBuffs.Positive.StagnantForcefieldPlayerModule;
 using static RandomBuffUtils.PlayerUtils;
 using System.IO;
 using System.Runtime.CompilerServices;
+using RandomBuff.Core.SaveData.BuffConfig;
+using RandomBuff.Core.SaveData;
 
-namespace BuiltinBuffs.Duality
+namespace BuiltinBuffs.Positive
 {
     internal class LanceThrowerBuff : Buff<LanceThrowerBuff, LanceThrowerBuffData>, IOWnPlayerUtilsPart
     {
         public LanceThrowerBuff()
         {
-            PlayerUtils.AddPart(this);
+            AddPart(this);
         }
 
         public override void Destroy()
         {
-            PlayerUtils.RemovePart(this);
+            RemovePart(this);
         }
 
         public PlayerModulePart InitPart(PlayerModule module)
@@ -46,7 +47,7 @@ namespace BuiltinBuffs.Duality
 
         public class LanceModule : PlayerModulePart
         {
-            public static int lanceRequirement = 80;
+            public static int lanceRequirement = 60;
             public static int intoLanceMode = 15;
             public int lastLanceCounter;
             public int lanceCounter;
@@ -65,7 +66,7 @@ namespace BuiltinBuffs.Duality
 
                 bool anyHandHoldSpear = false;
 
-                if(player.grasps != null)
+                if (player.grasps != null)
                 {
                     for (int i = 0; i < player.grasps.Length; i++)
                     {
@@ -85,7 +86,8 @@ namespace BuiltinBuffs.Duality
                     lanceCounter = 0;
                 else
                 {
-                    if (player.input[0].thrw && (player.bodyMode == Player.BodyModeIndex.Crawl || player.bodyMode == Player.BodyModeIndex.Stand || player.bodyMode == Player.BodyModeIndex.Default) && player.lowerBodyFramesOnGround > 0)
+                    bool hold = LanceThrowerBuff.Instance.Data.UseThrowKey ? player.input[0].thrw : GetInput(player);
+                    if (hold && (player.bodyMode == Player.BodyModeIndex.Crawl || player.bodyMode == Player.BodyModeIndex.Stand || player.bodyMode == Player.BodyModeIndex.Default) && player.lowerBodyFramesOnGround > 0)
                     {
                         if (lanceCounter < lanceRequirement)
                             lanceCounter++;
@@ -101,9 +103,9 @@ namespace BuiltinBuffs.Duality
 
                 if (!LastLanceMode && LanceMode)
                 {
-                    player.slugcatStats.Modify(Multiply, "runspeedFac", 0.2f, this);
+                    player.slugcatStats.Modify(Multiply, "runspeedFac", 0.4f, this);
                 }
-                if(LastLanceMode && !LanceMode)
+                if (LastLanceMode && !LanceMode)
                 {
                     player.slugcatStats.Undo(this);
                 }
@@ -114,9 +116,9 @@ namespace BuiltinBuffs.Duality
                     {
                         player.room.AddObject(effect = new LanceEffect(player.room, player.grasps[lanceHand].grabbed.firstChunk.pos));
                     }
-                    else if(effect != null)
+                    else if (effect != null)
                     {
-                        if(player.room != null && player.grasps != null && player.grasps[lanceHand] != null)
+                        if (player.room != null && player.grasps != null && player.grasps[lanceHand] != null)
                         {
                             effect.pos = player.grasps[lanceHand].grabbed.firstChunk.pos;
                             effect.holdStrength = (lanceCounter - intoLanceMode) / (float)(lanceRequirement - intoLanceMode);
@@ -144,17 +146,26 @@ namespace BuiltinBuffs.Duality
                 }
                 else
                 {
-                    if(effect != null)
+                    if (effect != null)
                     {
                         effect.Destroy();
                         effect = null;
-                    }                
+                    }
                 }
+            }
+
+            public bool GetInput(Player player)
+            {
+                if (LanceThrowerBuff.Instance.Data[player.playerState.playerNumber] != KeyCode.None)
+                    return Input.GetKey(OriBashBuff.Instance.Data[player.playerState.playerNumber]);
+                if (BuffPlayerData.Instance.GetKeyBind(LanceThrowerBuffEntry.lanceThrowerBuffID) == KeyCode.None.ToString())
+                    return Input.GetMouseButton(1);
+                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(LanceThrowerBuffEntry.lanceThrowerBuffID));
             }
 
             public void LanceThrow(Player player, Spear spear)
             {
-                if(effect != null)
+                if (effect != null)
                 {
                     effect.LanceThrow(spear);
                     effect = null;
@@ -183,9 +194,13 @@ namespace BuiltinBuffs.Duality
         public override BuffID ID => LanceThrowerBuffEntry.lanceThrowerBuffID;
     }
 
-    internal class LanceThrowerBuffData : BuffData
+    internal class LanceThrowerBuffData : KeyBindBuffData
     {
         public override BuffID ID => LanceThrowerBuffEntry.lanceThrowerBuffID;
+
+        [CustomBuffConfigInfo("UseThrow","")]
+        [CustomBuffConfigTwoValue(true, false)]
+        public bool UseThrowKey { get; set; }
     }
 
     internal class LanceThrowerBuffEntry : IBuffEntry
@@ -201,7 +216,7 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             IL.Player.GrabUpdate += Player_GrabUpdate;
-            //IL.Lizard.Violence += Lizard_Violence;
+            IL.Lizard.Violence += Lizard_Violence;
             IL.Lizard.SpearStick += Lizard_SpearStick;
             On.SlugcatHand.Update += SlugcatHand_Update;
             On.Player.GraphicsModuleUpdated += Player_GraphicsModuleUpdated;
@@ -250,17 +265,40 @@ namespace BuiltinBuffs.Duality
                 c1.EmitDelegate<Func<bool, BodyChunk, bool>>((orig, source) =>
                 {
                     bool result = orig;
-                    if(result && source.owner is Spear spear && LanceEffect.spear2EffectMapper.TryGetValue(spear, out var effect))
+                    if (result && source != null && source.owner is Spear spear && LanceEffect.spear2EffectMapper.TryGetValue(spear, out var effect))
                     {
                         effect.Burst(-spear.firstChunk.vel, false);
-                        result = false;
                     }
-                    
+
                     return result;
                 });
             }
             else
                 BuffUtils.Log("LanceThrower", "Lizard_Violence c1 failed");
+
+            if (c1.TryGotoNext(MoveType.After,
+                (i) => i.MatchLdloc(0),
+                (i) => i.MatchLdcR4(0.1f),
+                (i) => i.MatchMul(),
+                (i) => i.MatchStloc(0)))
+            {
+                c1.Emit(OpCodes.Ldloc_0);
+                c1.Emit(OpCodes.Ldarg_1);
+                c1.EmitDelegate<Func<float, BodyChunk, float>>((orig, source) =>
+                {
+                    float result = orig;
+                    if (source != null && source.owner is Spear spear && LanceEffect.spear2EffectMapper.TryGetValue(spear, out var effect))
+                    {
+                        result *= 3f;
+                    }
+
+                    return result;
+                });
+                c1.Emit(OpCodes.Stloc_0);
+                return;
+            }
+            else
+                BuffUtils.Log("LanceThrower", "Lizard_Violence c1 2 failed");
         }
 
         private static void Spear_LodgeInCreature_CollisionResult_bool_bool(On.Spear.orig_LodgeInCreature_CollisionResult_bool_bool orig, Spear self, SharedPhysics.CollisionResult result, bool eu, bool isJellyFish)
@@ -275,9 +313,9 @@ namespace BuiltinBuffs.Duality
         private static bool Spear_HitSomething(On.Spear.orig_HitSomething orig, Spear self, SharedPhysics.CollisionResult result, bool eu)
         {
             bool re = orig.Invoke(self, result, eu);
-            if(re)
+            if (re)
             {
-                foreach(var effect in self.room.updateList.OfType<LanceEffect>().ToArray())
+                foreach (var effect in self.room.updateList.OfType<LanceEffect>().ToArray())
                 {
                     if (effect.bindSpear == self)
                     {
@@ -293,9 +331,9 @@ namespace BuiltinBuffs.Duality
         private static void Player_ThrownSpear(On.Player.orig_ThrownSpear orig, Player self, Spear spear)
         {
             orig.Invoke(self, spear);
-            if (PlayerUtils.TryGetModulePart<LanceModule>(self, LanceThrowerBuff.Instance, out var module) && module.LanceReady)
+            if (TryGetModulePart<LanceModule>(self, LanceThrowerBuff.Instance, out var module) && module.LanceReady)
             {
-                module.LanceThrow(self,spear);
+                module.LanceThrow(self, spear);
                 spear.firstChunk.vel += spear.throwDir.ToVector2() * 80f;
                 spear.spearDamageBonus *= 3.5f;
             }
@@ -316,7 +354,7 @@ namespace BuiltinBuffs.Duality
                 return;
             if (self.grasps == null)
                 return;
-            for (int i = 0;i < self.grasps.Length; i++)
+            for (int i = 0; i < self.grasps.Length; i++)
             {
                 if (self.grasps[i] == null)
                     continue;
@@ -325,7 +363,7 @@ namespace BuiltinBuffs.Duality
                 if (!(self.grasps[i].grabbed is Spear spear))
                     continue;
 
-                if (PlayerUtils.TryGetModulePart<LanceModule>(self, LanceThrowerBuff.Instance, out var module) && module.LanceMode && module.lanceHand == i)
+                if (TryGetModulePart<LanceModule>(self, LanceThrowerBuff.Instance, out var module) && module.LanceMode && module.lanceHand == i)
                 {
                     spear.setRotation = Custom.DegToVec((self.graphicsModule as PlayerGraphics).spearDir > 0 ? 90f : -90f);
                     spear.rotationSpeed = 0f;
@@ -349,29 +387,29 @@ namespace BuiltinBuffs.Duality
             if (!(player.grasps[self.limbNumber].grabbed is Spear spear))
                 return;
 
-            if (PlayerUtils.TryGetModulePart<LanceModule>(self.owner.owner as Player, LanceThrowerBuff.Instance, out var module))
+            if (TryGetModulePart<LanceModule>(self.owner.owner as Player, LanceThrowerBuff.Instance, out var module))
             {
                 if (module.LanceMode && module.lanceHand == self.limbNumber)
                 {
                     self.mode = Limb.Mode.HuntRelativePosition;
 
-                    self.relativeHuntPos.x = -20f + 40f * (float)self.limbNumber;
+                    self.relativeHuntPos.x = -20f + 40f * self.limbNumber;
                     self.relativeHuntPos.y = 12f;
 
                     self.relativeHuntPos.x = self.relativeHuntPos.x * (1f - Mathf.Sin((self.owner.owner as Player).switchHandsProcess * 3.1415927f));
 
-                    Vector2 b = Custom.DegToVec(180f + ((self.limbNumber == 0) ? (-1f) : 1f) * 8f + (float)(self.owner.owner as Player).input[0].x * 4f) * 12f;
-                    b.y += Mathf.Sin((float)player.animationFrame / 6f * 2f * 3.1415927f) * 2f;
-                    b.x -= Mathf.Cos((float)(player.animationFrame + (player.leftFoot ? 0 : 6)) / 12f * 2f * 3.1415927f) * 4f * (float)player.input[0].x;
-                    b.x += (float)(self.owner.owner as Player).input[0].x * 2f;
+                    Vector2 b = Custom.DegToVec(180f + (self.limbNumber == 0 ? -1f : 1f) * 8f + (self.owner.owner as Player).input[0].x * 4f) * 12f;
+                    b.y += Mathf.Sin(player.animationFrame / 6f * 2f * 3.1415927f) * 2f;
+                    b.x -= Mathf.Cos((player.animationFrame + (player.leftFoot ? 0 : 6)) / 12f * 2f * 3.1415927f) * 4f * player.input[0].x;
+                    b.x += (self.owner.owner as Player).input[0].x * 2f;
                     self.relativeHuntPos = Vector2.Lerp(self.relativeHuntPos, b, Mathf.Abs((self.owner as PlayerGraphics).spearDir));
-                    spear.ChangeOverlap((graphic.spearDir > -0.4f && self.limbNumber == 0) || graphic.spearDir < 0.4f && self.limbNumber == 1);
-                }          
+                    spear.ChangeOverlap(graphic.spearDir > -0.4f && self.limbNumber == 0 || graphic.spearDir < 0.4f && self.limbNumber == 1);
+                }
             }
         }
 
         static bool throw0;
-        private static void Player_GrabUpdate(MonoMod.Cil.ILContext il)
+        private static void Player_GrabUpdate(ILContext il)
         {
             ILCursor c1 = new ILCursor(il);
 
@@ -397,14 +435,14 @@ namespace BuiltinBuffs.Duality
             {
                 c1.Index--;
                 c1.Emit(OpCodes.Ldarg_0);
-                c1.EmitDelegate<Func<bool,Player, bool>>((orig, self) =>
+                c1.EmitDelegate<Func<bool, Player, bool>>((orig, self) =>
                 {
                     //if (PlayerUtils.TryGetModulePart<LanceModule>(self, LanceThrowerBuff.Instance, out var module))
                     //{
                     //    module.TryLanceStamina(self);
                     //}
 
-                    return true;
+                    return LanceThrowerBuff.Instance.Data.UseThrowKey ? true : orig;
                 });
             }
             else
@@ -426,7 +464,7 @@ namespace BuiltinBuffs.Duality
                 c1.Emit(OpCodes.Ldarg_0);
                 c1.EmitDelegate<Func<bool, Player, bool>>((orig, self) =>
                 {
-                    return !(!self.input[0].thrw && self.input[1].thrw);
+                    return LanceThrowerBuff.Instance.Data.UseThrowKey ? !(!self.input[0].thrw && self.input[1].thrw) : orig;
                 });
             }
             else
@@ -465,8 +503,8 @@ namespace BuiltinBuffs.Duality
         public LanceEffect(Room room, Vector2 pos)
         {
             this.room = room;
-            this.pos = lastPos = pos; 
-            
+            this.pos = lastPos = pos;
+
             for (int i = 0; i < tailPosCount; i++)
                 tailPosList.Add(pos);
         }
@@ -484,7 +522,7 @@ namespace BuiltinBuffs.Duality
             if (tailPosList.Count > tailPosCount)
                 tailPosList.RemoveAt(tailPosCount);
 
-            if(bindSpear != null)
+            if (bindSpear != null)
             {
                 pos = bindSpear.firstChunk.pos;
                 if (bindSpear.mode != Weapon.Mode.Thrown)
@@ -493,7 +531,7 @@ namespace BuiltinBuffs.Duality
                     Destroy();
             }
 
-            if(fadeCounter > 0)
+            if (fadeCounter > 0)
             {
                 fadeCounter--;
                 alpha = fadeCounter / 40f;
@@ -518,7 +556,7 @@ namespace BuiltinBuffs.Duality
                 color = gold,
                 alpha = 0f,
                 scale = 0f,
-            }; 
+            };
             sLeaser.sprites[2] = new FSprite(FlameThrowerBuffEntry.flameVFX1)
             {
                 shader = rCam.game.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"],
@@ -589,7 +627,7 @@ namespace BuiltinBuffs.Duality
 
                 for (int j = 0; j < 4; j++)
                 {
-                    triangleMesh.verticeColors[i * 4 + j] = Color.Lerp(gold, goldAlphaZero, (i / (float)tailPosCount));
+                    triangleMesh.verticeColors[i * 4 + j] = Color.Lerp(gold, goldAlphaZero, i / (float)tailPosCount);
                     triangleMesh.verticeColors[i * 4 + j].a *= smoothAlpha;
                 }
 
@@ -600,13 +638,13 @@ namespace BuiltinBuffs.Duality
 
         public void OnSpearStoped()
         {
-            if(fadeCounter == 0)
+            if (fadeCounter == 0)
                 fadeCounter = 40;
         }
 
         public override void Destroy()
         {
-            if(bindSpear != null)
+            if (bindSpear != null)
             {
                 spear2EffectMapper.Remove(bindSpear);
                 bindSpear = null;
@@ -620,7 +658,7 @@ namespace BuiltinBuffs.Duality
             burstParam = 1f;
             CreateSparkleEmitter(room, movement ?? Vector2.zero);
 
-            if(resetTail)
+            if (resetTail)
             {
                 tailPosList.Clear();
                 for (int i = 0; i < tailPosCount; i++)

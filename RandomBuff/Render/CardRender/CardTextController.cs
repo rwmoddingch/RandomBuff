@@ -137,8 +137,11 @@ namespace RandomBuff.Render.CardRender
             }
 
             Text = text;
+            _textNeedUpdate = true;
             _needInit = false;
- 
+            textMesh.alpha = 0f;
+
+
             SwitchMode(Mode.Scroll);
 
             TMP_Text SetupTextMesh(GameObject obj, TMP_FontAsset font, bool isTitle)
@@ -188,7 +191,7 @@ namespace RandomBuff.Render.CardRender
             if (_textNeedRefresh)
             {
                 RefreshTextInfo();
-                UpdateTextMesh();
+                UpdateTextMesh(true);
             }
 
 
