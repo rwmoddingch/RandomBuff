@@ -105,15 +105,18 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private static float RainApproachingHook(Func<RainCycle, float> orig, RainCycle self)
         {
             if (RainInst > 0)
-                return Mathf.Clamp01(RainInst * (SephirahMeltdownEntry.Hell ? 1 : 0.5f));
+                return Mathf.Min(RainInst * (SephirahMeltdownEntry.Hell ? 1 : 0.4f), (SephirahMeltdownEntry.Hell ? 1 : 0.4f));
             return orig(self);
         }
 
         private static float preCycleRain_IntensityHook(Func<RainCycle, float> orig, RainCycle self)
         {
-            if(RainInst > 0)
-                return (Mathf.Sin(self.preCycleRainPulse_WaveA) +
-                        Mathf.Sin(self.preCycleRainPulse_WaveB) / 2f + Mathf.Cos(self.preCycleRainPulse_WaveC) * RainAlpha * 2f) * RainInst * (SephirahMeltdownEntry.Hell ? 1 : 0.5f);
+            if (RainInst > 0)
+                return Mathf.Min((Mathf.Sin(self.preCycleRainPulse_WaveA) +
+                                  Mathf.Sin(self.preCycleRainPulse_WaveB) / 2f +
+                                  Mathf.Cos(self.preCycleRainPulse_WaveC) * RainAlpha * 2f) * RainInst *
+                                 (SephirahMeltdownEntry.Hell ? 1 : 0.4f),
+                    SephirahMeltdownEntry.Hell ? float.MaxValue : 0.8f);
             return orig(self);
         }
 

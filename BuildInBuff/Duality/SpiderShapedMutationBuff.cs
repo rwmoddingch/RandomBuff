@@ -475,6 +475,7 @@ namespace BuiltinBuffs.Duality
     internal class SpiderCat
     {
         WeakReference<Player> ownerRef;
+        private int origThrowingSkill;
 
         public bool LikeSpider => SpiderShapedMutationBuffEntry.StackLayer >= 2;
 
@@ -638,6 +639,7 @@ namespace BuiltinBuffs.Duality
 
             this.deathConvulsions = (player.State.alive ? 1f : 0f);
             this.standCount = 0;
+            this.origThrowingSkill = player.slugcatStats.throwingSkill;
         }
 
         #region 外观
@@ -1036,6 +1038,9 @@ namespace BuiltinBuffs.Duality
                 return;
             if (player.room == null)
                 return;
+
+            player.slugcatStats.throwingSkill = Mathf.Max(-1, origThrowingSkill - VultureShapedMutationBuffEntry.StackLayer + 1);
+
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);

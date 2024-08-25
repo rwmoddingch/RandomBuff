@@ -106,6 +106,8 @@ namespace BuiltinBuffs.Duality
         public static BuffID JellyfishShapedMutation = new BuffID("JellyfishShapedMutation", true);
         public static ConditionalWeakTable<Player, JellyfishCat> JellyfishCatFeatures = new ConditionalWeakTable<Player, JellyfishCat>();
 
+        public static int StackLayer => JellyfishShapedMutation.GetBuffData().StackLayer;
+
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<JellyfishShapedMutationBuff, JellyfishShapedMutationBuffData, JellyfishShapedMutationBuffEntry>(JellyfishShapedMutation);
@@ -595,6 +597,7 @@ namespace BuiltinBuffs.Duality
     internal class JellyfishCat
     {
         WeakReference<Player> ownerRef;
+        private int origThrowingSkill;
 
         #region 脱水相关
         public JellyfishCatIllnessEffect effect;
@@ -743,7 +746,6 @@ namespace BuiltinBuffs.Duality
         public float lastDarkness;
 
         private Vector2? huntPos;
-        private int huntingCounter;
         private List<Creature> consumedCreatures;
 
         private int CoreChunk;
@@ -791,7 +793,7 @@ namespace BuiltinBuffs.Duality
         public int BodySpriteLength => 0;//5;
         //伞盖
         private int hoodSpriteStart => BodySpriteStart + BodySpriteLength;
-        private int hoodSpriteLength => 0;//2;
+        private int hoodSpriteLength => 2;
         //口珠
         private int MouthSpriteStart => hoodSpriteStart + hoodSpriteLength;
 
@@ -809,19 +811,19 @@ namespace BuiltinBuffs.Duality
         #region 身体部件
         public void JellyfishBody(PlayerGraphics self)
         {
-            newBody = new BodyPart[2];//7
+            newBody = new BodyPart[4];//7
             newBody[0] = new GenericBodyPart(self, 12.1f, 0.7f, 0.999f, self.owner.firstChunk);
 
             CoreChunk = 1;
             newBody[CoreChunk] = new BodyPart(self);//new GenericBodyPart(self, 0.28f * newBody[0].rad, 0.7f, 0.999f, self.owner.bodyChunks[1]);
             newBody[CoreChunk].pos = self.tail[self.tail.Length - 1].pos;//newBody[0].pos + new Vector2(0f, -coreLength);
-            /*
+            
             leftHoodChunk = CoreChunk + 1;
             newBody[leftHoodChunk] = new GenericBodyPart(self, 0f, 0.7f, 0.999f, self.owner.firstChunk);
 
             rightHoodChunk = CoreChunk + 2;
             newBody[rightHoodChunk] = new GenericBodyPart(self, 0f, 0.7f, 0.999f, self.owner.firstChunk);
-
+            /*
             newBody[4] = new GenericBodyPart(self, 0.28f * newBody[0].rad, 0.7f, 0.999f, self.owner.firstChunk);
             newBody[4].pos = newBody[0].pos + new Vector2(0f, 10f);
             newBody[5] = new GenericBodyPart(self, 0.28f * newBody[0].rad, 0.7f, 0.999f, self.owner.firstChunk);
@@ -837,9 +839,9 @@ namespace BuiltinBuffs.Duality
             newBody[CoreChunk].ConnectToPoint(self.tail[self.tail.Length - 1].pos, coreLength, false, 0.4f, self.tail[self.tail.Length - 1].vel, 0.1f, 0.4f);/*
             newBody[4].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);
             newBody[5].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);
-            newBody[6].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);
+            newBody[6].ConnectToPoint(newBody[0].pos, canopyLength, false, 0.7f, newBody[0].vel, 0.1f, 0.7f);*/
             newBody[leftHoodChunk].ConnectToPoint(newBody[0].pos, hoodLength, false, 0.1f, newBody[0].vel, 0.1f, 0.1f);
-            newBody[rightHoodChunk].ConnectToPoint(newBody[0].pos, hoodLength, false, 0.1f, newBody[0].vel, 0.1f, 0.1f);*/
+            newBody[rightHoodChunk].ConnectToPoint(newBody[0].pos, hoodLength, false, 0.1f, newBody[0].vel, 0.1f, 0.1f);
         }
 
         //触须
@@ -978,6 +980,7 @@ namespace BuiltinBuffs.Duality
 
             electricChargingTime = 120;
             electricCounter = 0;
+            origThrowingSkill = player.slugcatStats.throwingSkill;
         }
 
         #region 外观
@@ -1054,10 +1057,10 @@ namespace BuiltinBuffs.Duality
             sLeaser.sprites[BodySpriteStart + 3].scale = newBody[6].rad / 2f;
             sLeaser.sprites[BodySpriteStart + 3].shader = rCam.room.game.rainWorld.Shaders["VectorCircle"];
             sLeaser.sprites[BodySpriteStart + 4] = TriangleMesh.MakeLongMesh(3, pointyTip: false, customColor: true);
-
+            */
             sLeaser.sprites[hoodSpriteStart] = TriangleMesh.MakeLongMesh(6, pointyTip: false, customColor: true);
             sLeaser.sprites[hoodSpriteStart + 1] = TriangleMesh.MakeLongMesh(6, pointyTip: false, customColor: true);
-            */
+            
             for (int j = 0; j < mouthBeads.Length; j++)
             {
                 sLeaser.sprites[MouthSpriteStart + j] = new FSprite("DangleFruit0A");
@@ -1113,12 +1116,12 @@ namespace BuiltinBuffs.Duality
                 {
                     a4 = (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).verticeColors[k];
                 }
-            }
+            }*/
             for (int l = 0; l < (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).verticeColors.Length; l++)
             {
                 (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).verticeColors[l] = Color.Lerp(a4, a, (float)l / (float)((sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).verticeColors.Length - 1));
                 (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).verticeColors[l] = Color.Lerp(a4, a, (float)l / (float)((sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).verticeColors.Length - 1));
-            }*/
+            }
             for (int m = 0; m < (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).verticeColors.Length; m++)
             {
                 (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).verticeColors[m] = Color.Lerp(a, coreColor, (float)m / (float)((sLeaser.sprites[CoreSpriteStart] as TriangleMesh).verticeColors.Length - 1));
@@ -1141,6 +1144,12 @@ namespace BuiltinBuffs.Duality
                 {
                     sLeaser.sprites[firstSprite + i].RemoveFromContainer();
                     midgroundContainer.AddChild(sLeaser.sprites[firstSprite + i]);
+                }
+
+                for (int k = 0; k < this.hoodSpriteLength; k++)
+                {
+                    var sprite = sLeaser.sprites[this.hoodSpriteStart + k];
+                    sprite.MoveBehindOtherNode(sLeaser.sprites[0]);
                 }
 
                 for (int i = 0; i < this.oralArm.GetLength(0); i++)
@@ -1167,7 +1176,7 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player) || player.graphicsModule == null || sLeaser == null || player.room == null)
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
-            
+
             if (sLeaser.sprites.Length >= 9)
                 for (int i = 5; i <= 8; i++)
                     sLeaser.sprites[i].isVisible = false;
@@ -1183,8 +1192,8 @@ namespace BuiltinBuffs.Duality
             Vector2 p = Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[1].pos, timeStacker);//Vector2.Lerp(newBody[5].lastPos, newBody[5].pos, timeStacker);
             Vector2 bodyPos = Vector2.Lerp(newBody[0].lastPos, newBody[0].pos, timeStacker);
             Vector2 corePos = Vector2.Lerp(newBody[CoreChunk].lastPos, newBody[CoreChunk].pos, timeStacker);
-            Vector2 p2 = Vector3.Slerp(lastRotation, rotation, timeStacker);
-            p2 = Custom.DirVec(Vector2.zero, p2);
+            Vector2 nowRotation = Vector3.Slerp(lastRotation, rotation, timeStacker);
+            nowRotation = Custom.DirVec(Vector2.zero, nowRotation);
             lastDarkness = darkness;
             darkness = rCam.room.Darkness(bodyPos) * (1f - rCam.room.LightSourceExposure(bodyPos));
             if (darkness != lastDarkness)
@@ -1200,56 +1209,59 @@ namespace BuiltinBuffs.Duality
             {
                 float t = (float)i / (float)mouthBeads.Length;
                 float num = 0f;
-                Vector2 vector5 = Custom.PerpendicularVector(p2) * -1.6f + p2 * 0.6f + Vector2.Lerp(MouthLeftPos(timeStacker), MouthRightPos(timeStacker), t); //Custom.PerpendicularVector(p2) * -8f + p2 * 3f + Vector2.Lerp(MouthLeftPos(timeStacker), MouthRightPos(timeStacker), t);
+                Vector2 vector5 = Custom.PerpendicularVector(nowRotation) * -1.6f + nowRotation * 0.6f + Vector2.Lerp(MouthLeftPos(timeStacker), MouthRightPos(timeStacker), t); //Custom.PerpendicularVector(nowRotation) * -8f + nowRotation * 3f + Vector2.Lerp(MouthLeftPos(timeStacker), MouthRightPos(timeStacker), t);
                 if (canBeSurfaceMode && player.Submersion > 0.1f)
                 {
-                    num = player.room.FloatWaterLevel(vector5.x) - (float)(player.room.defaultWaterLevel + 1) * 4f;//player.room.FloatWaterLevel(vector5.x) - (float)(player.room.defaultWaterLevel + 1) * 20f;
+                    num = player.room.FloatWaterLevel(vector5.x) - (float)(player.room.defaultWaterLevel + 1) * 20f;
                     num /= 2f;
                 }
-                Vector2 vector6 = p2 * num;
-                sLeaser.sprites[MouthSpriteStart + i].x = vector5.x + vector6.x - camPos.x;
-                sLeaser.sprites[MouthSpriteStart + i].y = vector5.y + vector6.y - 5f - camPos.y;
+                Vector2 nowRotationFac = nowRotation * num;
+                sLeaser.sprites[MouthSpriteStart + i].x = vector5.x + nowRotationFac.x - camPos.x;
+                sLeaser.sprites[MouthSpriteStart + i].y = vector5.y + nowRotationFac.y - 5f - camPos.y;
                 sLeaser.sprites[MouthSpriteStart + i].rotation = mouthBeads[i];
                 if (i == 0)
                 {
-                    mouthLeftPos = vector5 + vector6;
+                    mouthLeftPos = vector5 + nowRotationFac;
                 }
                 if (i == mouthBeads.Length - 1)
                 {
-                    mouthRightPos = vector5 + vector6;
+                    mouthRightPos = vector5 + nowRotationFac;
                 }
             }
-            int num2 = 8;
-            Vector2 vector7 = bodyPos;
-            Vector2 vector8 = Custom.DirVec(bodyPos, corePos).normalized;
-            Vector2 vector9 = Custom.PerpendicularVector(vector8);
-            float num3 = Vector2.Distance(bodyPos, corePos) / (float)num2;
-            float num4 = Vector2.Distance(bodyPos, corePos) / 3.137254f;
-            float num5 = 0f;
-            for (int j = 0; j < num2; j++)
+            #region 核心
+            int coreSec = 8;
+            Vector2 coreSecPos = bodyPos;
+            Vector2 bodyToCore = Custom.DirVec(bodyPos, corePos).normalized;
+            Vector2 perpBodyToCore = Custom.PerpendicularVector(bodyToCore);
+            float coreSecLength = Vector2.Distance(bodyPos, corePos) / (float)coreSec;
+            float coreSecLengthStandard = Vector2.Distance(bodyPos, corePos) / 3.137254f;
+            float coreSecLengthSum = 0f;
+            float SMSuckFac = (float)SMSuckCounter / 100f;
+            for (int j = 0; j < coreSec; j++)
             {
-                vector8 = Vector2.Lerp(Custom.DirVec(bodyPos, corePos).normalized, Custom.DirVec(p, bodyPos).normalized, j / num2);
-                float t2 = (float)SMSuckCounter / 100f;
-                Vector2 vector10 = vector7;
-                float num6 = Mathf.Sin(num5 / num4);
-                Vector2 vector11 = vector9 * (Mathf.Lerp(4f, 1.6f, t2) - 2f * num6); //vector9 * (Mathf.Lerp(20f, 8f, t2) - 10f * num6);
+                bodyToCore = Vector2.Lerp(Custom.DirVec(bodyPos, corePos).normalized, Custom.DirVec(p, bodyPos).normalized, j / coreSec);
+                Vector2 lastCoreSecPos = coreSecPos;
+                float coreSecWidthFac = Mathf.Sin(coreSecLengthSum / coreSecLengthStandard);
+                Vector2 coreSecWidth = perpBodyToCore * (Mathf.Lerp(4f, 1.6f, SMSuckFac) - 2f * coreSecWidthFac); //perpBodyToCore * (Mathf.Lerp(20f, 8f, SMSuckFac) - 10f * coreSecWidthFac);
                 if (j == 0)
                 {
                     (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4, mouthLeftPos - camPos);
                     (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 1, mouthRightPos - camPos);
-                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 2, Vector2.Lerp(vector10 - vector11, mouthLeftPos, 0.5f) - camPos);
-                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 3, Vector2.Lerp(vector10 + vector11, mouthRightPos, 0.5f) - camPos);
+                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 2, Vector2.Lerp(lastCoreSecPos - coreSecWidth, mouthLeftPos, 0.5f) - camPos);
+                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 3, Vector2.Lerp(lastCoreSecPos + coreSecWidth, mouthRightPos, 0.5f) - camPos);
                 }
                 else
                 {
-                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4, vector10 - vector11 - camPos);
-                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 1, vector10 + vector11 - camPos);
-                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 2, vector10 - vector11 - camPos);
-                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 3, vector10 + vector11 - camPos);
+                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4, lastCoreSecPos - coreSecWidth - camPos);
+                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 1, lastCoreSecPos + coreSecWidth - camPos);
+                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 2, lastCoreSecPos - coreSecWidth - camPos);
+                    (sLeaser.sprites[CoreSpriteStart] as TriangleMesh).MoveVertice(j * 4 + 3, lastCoreSecPos + coreSecWidth - camPos);
                 }
-                num5 += num3;
-                vector7 = vector10 + vector8 * num3;
-            }/*
+                coreSecLengthSum += coreSecLength;
+                coreSecPos = lastCoreSecPos + bodyToCore * coreSecLength;
+            }
+            #endregion
+            /*
             for (int k = 0; k < BodySpriteLength - 1; k++)
             {
                 Vector2 vector12 = bodyPos;
@@ -1267,54 +1279,56 @@ namespace BuiltinBuffs.Duality
                 }
                 sLeaser.sprites[BodySpriteStart + k].x = vector12.x - camPos.x;
                 sLeaser.sprites[BodySpriteStart + k].y = vector12.y - camPos.y;
-                sLeaser.sprites[BodySpriteStart + k].rotation = Custom.VecToDeg(p2);
-            }
-            num2 = 6;
-            Vector2 a = (vector7 = bodyPos + p2 * 2f); //(vector7 = bodyPos + p2 * 10f);
-            Vector2 vector13 = p2 * -1f;
-            num3 = Vector2.Distance(a, AttachPos(0, 1f)) / (float)num2;
-            num4 = Vector2.Distance(a, AttachPos(0, 1f)) / 3.137254f;
-            num5 = 0f;
-            for (int l = 0; l < num2; l++)
+                sLeaser.sprites[BodySpriteStart + k].rotation = Custom.VecToDeg(nowRotation);
+            }*/
+            int hoodSec = 6;
+            Vector2 hoodSecPos = coreSecPos;
+            Vector2 a = (hoodSecPos = bodyPos + nowRotation * 2f); //(hoodSecPos = bodyPos + nowRotation * 10f);
+            Vector2 nowInvRotation = nowRotation * -1f;
+            coreSecLength = Vector2.Distance(a, AttachPos(0, 1f)) / (float)hoodSec;
+            coreSecLengthStandard = Vector2.Distance(a, AttachPos(0, 1f)) / 3.137254f;
+            coreSecLengthSum = 0f;
+            sLeaser.sprites[hoodSpriteStart].isVisible = JellyfishShapedMutationBuffEntry.StackLayer >= 3;
+            sLeaser.sprites[hoodSpriteStart + 1].isVisible = JellyfishShapedMutationBuffEntry.StackLayer >= 3;
+            for (int l = 0; l < hoodSec; l++)
             {
-                float t3 = (float)l / ((float)num2 - 1f);
-                Vector2 vector14 = vector7;
-                Vector2 vector15 = vector7 + p2 * -5f;//vector7 + p2 * -25f;
-                float num7 = Mathf.Sin(num5 / num4);
-                Vector2 vector16 = vector9 * (10f + 4f * num7); //vector9 * (50f + 20f * num7);
-                Vector2 vector17 = vector9 * (2f + 12f * num7);//vector9 * (10f + 60f * num7);
-                
-                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4, Vector2.Lerp(vector15 - vector17, mouthLeftPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 1, Vector2.Lerp(vector15 + vector17, mouthRightPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 2, Vector2.Lerp(vector15 - vector17, mouthLeftPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 3, Vector2.Lerp(vector15 + vector17, mouthRightPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4, Vector2.Lerp(vector14 - vector16, mouthLeftPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4 + 1, Vector2.Lerp(vector14 + vector16, mouthRightPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4 + 2, Vector2.Lerp(vector14 - vector16, mouthLeftPos, t3) - camPos);
-                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4 + 3, Vector2.Lerp(vector14 + vector16, mouthRightPos, t3) - camPos);
-                num5 += num3;
-                vector7 = vector14 + vector13 * num3;
-            }
-            Vector2 vector18 = Vector2.Lerp(newBody[4].lastPos, newBody[4].pos, timeStacker) + p2 * newBody[4].rad / 2f;
+                float hoodSecScale = (float)l / ((float)hoodSec - 1f);
+                Vector2 lastHoodSecPos = hoodSecPos;
+                Vector2 hoodSecRotationPos = hoodSecPos + nowRotation * -5f;//hoodSecPos + nowRotation * -25f;
+                float hoodSecWidthFac = Mathf.Sin(coreSecLengthSum / coreSecLengthStandard);
+                Vector2 hoodSecWidth = perpBodyToCore * (10f + 4f * hoodSecWidthFac); //perpBodyToCore * (50f + 20f * hoodSecWidthFac);
+                Vector2 hoodSecRotationWidth = perpBodyToCore * (2f + 12f * hoodSecWidthFac);//perpBodyToCore * (10f + 60f * hoodSecWidthFac);
+
+                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4,     Vector2.Lerp(hoodSecRotationPos - hoodSecRotationWidth, mouthLeftPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 1, Vector2.Lerp(hoodSecRotationPos + hoodSecRotationWidth, mouthRightPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 2, Vector2.Lerp(hoodSecRotationPos - hoodSecRotationWidth, mouthLeftPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart] as TriangleMesh).MoveVertice(l * 4 + 3, Vector2.Lerp(hoodSecRotationPos + hoodSecRotationWidth, mouthRightPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4,     Vector2.Lerp(lastHoodSecPos - hoodSecWidth, mouthLeftPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4 + 1, Vector2.Lerp(lastHoodSecPos + hoodSecWidth, mouthRightPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4 + 2, Vector2.Lerp(lastHoodSecPos - hoodSecWidth, mouthLeftPos, hoodSecScale) - camPos);
+                (sLeaser.sprites[hoodSpriteStart + 1] as TriangleMesh).MoveVertice(l * 4 + 3, Vector2.Lerp(lastHoodSecPos + hoodSecWidth, mouthRightPos, hoodSecScale) - camPos);
+                coreSecLengthSum += coreSecLength;
+                hoodSecPos = lastHoodSecPos + nowInvRotation * coreSecLength;
+            }/*
+            Vector2 vector18 = Vector2.Lerp(newBody[4].lastPos, newBody[4].pos, timeStacker) + nowRotation * newBody[4].rad / 2f;
             Vector2 vector19 = Vector2.Lerp(newBody[6].lastPos, newBody[6].pos, timeStacker);
             Vector2 vector20 = Vector2.Lerp(newBody[5].lastPos, newBody[5].pos, timeStacker);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(0, bodyPos + p2 * -15f + Custom.PerpendicularVector(p2) * (newBody[4].rad * -0.3f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(1, bodyPos + p2 * -15f + Custom.PerpendicularVector(p2) * (newBody[4].rad * 0.3f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(2, bodyPos + p2 * -10f + Custom.PerpendicularVector(p2) * (newBody[4].rad * -0.45f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(3, bodyPos + p2 * -10f + Custom.PerpendicularVector(p2) * (newBody[4].rad * 0.45f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(4, bodyPos + p2 * 5f + Custom.PerpendicularVector(vector8) * Mathf.Lerp(48f, 55f, 1f - hoodSwayingPulse) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(5, bodyPos + p2 * 5f + Custom.PerpendicularVector(vector8) * Mathf.Lerp(-48f, -55f, 1f - hoodSwayingPulse) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(6, vector19 + Custom.PerpendicularVector(p2) * (newBody[6].rad * Mathf.Lerp(-0.8f, -0.6f, 1f - hoodSwayingPulse)) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(7, vector20 + Custom.PerpendicularVector(p2) * (newBody[5].rad * Mathf.Lerp(0.8f, 0.6f, 1f - hoodSwayingPulse)) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(8, vector19 + p2 * newBody[6].rad / 1.9f + Custom.PerpendicularVector(p2) * (newBody[5].rad * -0.4f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(9, vector20 + p2 * newBody[5].rad / 1.9f + Custom.PerpendicularVector(p2) * (newBody[6].rad * 0.4f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(10, vector18 + Custom.PerpendicularVector(p2) * (newBody[4].rad * -0.5f) - camPos);
-            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(11, vector18 + Custom.PerpendicularVector(p2) * (newBody[4].rad * 0.5f) - camPos);*/
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(0, bodyPos + nowRotation * -15f + Custom.PerpendicularVector(nowRotation) * (newBody[4].rad * -0.3f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(1, bodyPos + nowRotation * -15f + Custom.PerpendicularVector(nowRotation) * (newBody[4].rad * 0.3f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(2, bodyPos + nowRotation * -10f + Custom.PerpendicularVector(nowRotation) * (newBody[4].rad * -0.45f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(3, bodyPos + nowRotation * -10f + Custom.PerpendicularVector(nowRotation) * (newBody[4].rad * 0.45f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(4, bodyPos + nowRotation * 5f + Custom.PerpendicularVector(bodyToCore) * Mathf.Lerp(48f, 55f, 1f - hoodSwayingPulse) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(5, bodyPos + nowRotation * 5f + Custom.PerpendicularVector(bodyToCore) * Mathf.Lerp(-48f, -55f, 1f - hoodSwayingPulse) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(6, vector19 + Custom.PerpendicularVector(nowRotation) * (newBody[6].rad * Mathf.Lerp(-0.8f, -0.6f, 1f - hoodSwayingPulse)) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(7, vector20 + Custom.PerpendicularVector(nowRotation) * (newBody[5].rad * Mathf.Lerp(0.8f, 0.6f, 1f - hoodSwayingPulse)) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(8, vector19 + nowRotation * newBody[6].rad / 1.9f + Custom.PerpendicularVector(nowRotation) * (newBody[5].rad * -0.4f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(9, vector20 + nowRotation * newBody[5].rad / 1.9f + Custom.PerpendicularVector(nowRotation) * (newBody[6].rad * 0.4f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(10, vector18 + Custom.PerpendicularVector(nowRotation) * (newBody[4].rad * -0.5f) - camPos);
+            (sLeaser.sprites[BodySpriteStart + 4] as TriangleMesh).MoveVertice(11, vector18 + Custom.PerpendicularVector(nowRotation) * (newBody[4].rad * 0.5f) - camPos);*/
             sLeaser.sprites[CoreSpriteStart + 1].x = corePos.x - camPos.x;
             sLeaser.sprites[CoreSpriteStart + 1].y = corePos.y - camPos.y;
             sLeaser.sprites[CoreSpriteStart + 2].x = corePos.x - camPos.x;
             sLeaser.sprites[CoreSpriteStart + 2].y = corePos.y - camPos.y;
-
             #region 口腕
             //身体位置
             Vector2 drawPos1 = Vector2.Lerp(player.bodyChunks[0].lastPos, player.bodyChunks[0].pos, timeStacker);
@@ -1338,9 +1352,9 @@ namespace BuiltinBuffs.Duality
                     //实际偏移
                     var nowSpacing = oralArmSpacing * (Mathf.Abs(moveDeg) > 10 ? 0.3f : 1f) * (j == 0 ? 0.5f : 1f);
                     var rootPos = player.bodyChunks[0].pos + 5f * dif + (i == 0 ? -1 : 1) * Custom.PerpendicularVector(dir).normalized * nowSpacing + dir * -0.2f;
-                    Vector2 vector2 = Vector2.Lerp(Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[0].lastPos, 0.35f) + 
-                                      (i == 0 ? -1 : 1) * Custom.PerpendicularVector(lastDir).normalized * nowSpacing + lastDir * 5f, 
-                                      rootPos, 
+                    Vector2 vector2 = Vector2.Lerp(Vector2.Lerp(player.bodyChunks[1].lastPos, player.bodyChunks[0].lastPos, 0.35f) +
+                                      (i == 0 ? -1 : 1) * Custom.PerpendicularVector(lastDir).normalized * nowSpacing + lastDir * 5f,
+                                      rootPos,
                                       timeStacker);
                     Vector2 vector4 = (vector2 * 3f + rootPos) / 4f;
                     float d2 = 6f;
@@ -1380,6 +1394,7 @@ namespace BuiltinBuffs.Duality
                 }
             }
             #endregion
+            #region 触须
             for (int i = 0; i < tentacles.GetLength(0); i++)
             {
                 for (int j = 0; j < tentacles.GetLength(1); j++)
@@ -1403,6 +1418,7 @@ namespace BuiltinBuffs.Duality
                     }
                 }
             }
+            #endregion
         }
 
         public void GraphicsUpdate()
@@ -1522,6 +1538,8 @@ namespace BuiltinBuffs.Duality
             if (player.room == null)
                 return;
 
+            player.slugcatStats.throwingSkill = Mathf.Max(-1, origThrowingSkill - VultureShapedMutationBuffEntry.StackLayer + 1);
+
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);
@@ -1564,15 +1582,6 @@ namespace BuiltinBuffs.Duality
                     return;
                 }
             }
-            if (huntingCounter > 0)
-            {
-                huntingCounter--;
-            }
-            else
-            {
-                huntingCounter = 0;
-                huntPos = null;
-            }
             oralArmSway += 0.05f + 0.05f * Mathf.Clamp(newBody[0].vel.magnitude, 0f, 5f);
             ConsumeCreateUpdate();
             surfaceMode = player.animation == Player.AnimationIndex.SurfaceSwim;/*
@@ -1597,7 +1606,7 @@ namespace BuiltinBuffs.Duality
             {
                 driftGoalPos = player.room.MiddleOfTile(player.abstractCreature.pos);
             }
-            else if(player.animation == Player.AnimationIndex.DeepSwim)
+            else// if(player.animation == Player.AnimationIndex.DeepSwim)
             {
                 driftGoalPos = player.bodyChunks[0].pos + 30f * new Vector2(player.input[0].x, player.input[0].y);// abstractState.DriftPos;
             }/*
@@ -1617,11 +1626,11 @@ namespace BuiltinBuffs.Duality
             newBody[0].pos = player.firstChunk.pos;
             PlayerGraphics g = player.graphicsModule as PlayerGraphics;
             newBody[CoreChunk].pos = g.tail[g.tail.Length - 1].pos;// newBody[0].pos + new Vector2(0f, -8f);
-            newBody[CoreChunk].vel *= 0f;/*
+            newBody[CoreChunk].vel *= 0f;
             newBody[leftHoodChunk].pos = newBody[0].pos + new Vector2(-4f, -2f);
             newBody[leftHoodChunk].vel *= 0f;
             newBody[rightHoodChunk].pos = newBody[0].pos + new Vector2(4f, -2f);
-            newBody[rightHoodChunk].vel *= 0f;*/
+            newBody[rightHoodChunk].vel *= 0f;
             if (canBeSurfaceMode)
             {/*
                 if (player.firstChunk.pos.y < StartPos.y)
@@ -1713,8 +1722,8 @@ namespace BuiltinBuffs.Duality
                     PlayHorrifyingMoo();
                 }
             }
-            //newBody[leftHoodChunk].vel *= 0.2f;
-            //newBody[rightHoodChunk].vel *= 0.2f;
+            newBody[leftHoodChunk].vel *= 0.2f;
+            newBody[rightHoodChunk].vel *= 0.2f;
             Vector2 zero = Vector2.zero;
             zero = ((!goHome) ? (Custom.DirVec(newBody[0].pos, driftGoalPos) / 10f) : (Custom.DirVec(newBody[0].pos, newBody[0].pos) / 10f));
             bool flag2 = false;
@@ -1760,12 +1769,12 @@ namespace BuiltinBuffs.Duality
                 hoodSwayingPulse = 0.1f + hoodSwayingPulse * 0.9f;
             }
             newBody[CoreChunk].vel += Custom.DirVec(newBody[CoreChunk].pos, newBody[0].pos) / 5f;
-            /*Custom.DirVec(newBody[CoreChunk].pos, player.firstChunk.pos);
-            Vector2 vector3 = player.firstChunk.pos + Custom.DirVec(player.firstChunk.pos, newBody[4].pos).normalized * 4f + Custom.DirVec(player.firstChunk.pos, newBody[CoreChunk].pos) * 26f * hoodSwayingPulse;
+            Custom.DirVec(newBody[CoreChunk].pos, player.firstChunk.pos);
+            Vector2 vector3 = player.firstChunk.pos + Custom.DirVec(player.firstChunk.pos, newBody[1].pos).normalized * 4f + Custom.DirVec(player.firstChunk.pos, newBody[CoreChunk].pos) * 26f * hoodSwayingPulse;
             float speed = 5.8f;
             Vector2 vector4 = Custom.PerpendicularVector(vector3) * 6f;
             newBody[leftHoodChunk].pos = Custom.MoveTowards(newBody[leftHoodChunk].pos, vector3 - vector4, speed);
-            newBody[rightHoodChunk].pos = Custom.MoveTowards(newBody[rightHoodChunk].pos, vector3 + vector4, speed);*/
+            newBody[rightHoodChunk].pos = Custom.MoveTowards(newBody[rightHoodChunk].pos, vector3 + vector4, speed);
             tentaclesWithdrawn = 0f;
             /*
             if (!anyTentaclePulled)
@@ -2222,7 +2231,6 @@ namespace BuiltinBuffs.Duality
         private void newHuntPos(Vector2 pos)
         {
             huntPos = pos;
-            huntingCounter = Random.Range(60, 100);
         }
 
         public Vector2 MouthLeftPos(float timestacker)
@@ -2240,7 +2248,6 @@ namespace BuiltinBuffs.Duality
         public void newCuriousHuntPos(Vector2 pos)
         {
             huntPos = pos;
-            huntingCounter = Random.Range(10, 90);
         }
         #endregion
 
