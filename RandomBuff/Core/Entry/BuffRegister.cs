@@ -3,12 +3,14 @@
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using BepInEx;
@@ -399,10 +401,12 @@ namespace RandomBuff.Core.Entry
                 {
                     if (!File.Exists(Path.Combine(BuffPlugin.CacheFolder,
                             $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")) ||
-                        file.LastWriteTime > new FileInfo(Path.Combine(BuffPlugin.CacheFolder,
+                        GetTrulyWriteTime(file.FullName) > new FileInfo(Path.Combine(BuffPlugin.CacheFolder,
                             $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")).LastWriteTime)
                     {
                         File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dynamicCache.dll");
+                        File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dataCache.dll");
+
                         var def = BuildCachePlugin(mod, file.FullName, refLocations);
                         def.Write(
                             Path.Combine(BuffPlugin.CacheFolder,
@@ -677,7 +681,68 @@ namespace RandomBuff.Core.Entry
             }
         }
 
+        internal static DateTime GetTrulyWriteTime(string path)
+        {
+            var attr = File.GetAttributes(path);
+            if ((attr & FileAttributes.ReparsePoint) != 0)
+                return new FileInfo(NativeMethods.GetFinalPathName(path)).LastWriteTime;
+            return new FileInfo(path).LastWriteTime;
+        }
 
+
+        private static class NativeMethods
+        {
+            private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+
+            private const uint FILE_READ_EA = 0x0008;
+            private const uint FILE_FLAG_BACKUP_SEMANTICS = 0x2000000;
+
+            [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+            static extern uint GetFinalPathNameByHandle(IntPtr hFile, [MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpszFilePath, uint cchFilePath, uint dwFlags);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            static extern bool CloseHandle(IntPtr hObject);
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern IntPtr CreateFile(
+                [MarshalAs(UnmanagedType.LPTStr)] string filename,
+                [MarshalAs(UnmanagedType.U4)] uint access,
+                [MarshalAs(UnmanagedType.U4)] FileShare share,
+                IntPtr securityAttributes, // optional SECURITY_ATTRIBUTES struct or IntPtr.Zero
+                [MarshalAs(UnmanagedType.U4)] FileMode creationDisposition,
+                [MarshalAs(UnmanagedType.U4)] uint flagsAndAttributes,
+                IntPtr templateFile);
+
+            public static string GetFinalPathName(string path)
+            {
+                var h = CreateFile(path,
+                    FILE_READ_EA,
+                    FileShare.ReadWrite | FileShare.Delete,
+                    IntPtr.Zero,
+                    FileMode.Open,
+                    FILE_FLAG_BACKUP_SEMANTICS,
+                    IntPtr.Zero);
+                if (h == INVALID_HANDLE_VALUE)
+                    throw new Win32Exception();
+
+                try
+                {
+                    var sb = new StringBuilder(1024);
+                    var res = GetFinalPathNameByHandle(h, sb, 1024, 0);
+                    if (res == 0)
+                        throw new Win32Exception();
+
+                    return sb.ToString();
+                }
+                finally
+                {
+                    CloseHandle(h);
+                }
+            }
+        }
 
     } 
+
+
 }
