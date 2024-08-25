@@ -3,7 +3,7 @@
     "BuffID" : "LanceThrower",
     "BuffType" : "Duality",
     "BuffProperty" : "Normal",
-    "Triggerable" : false,
+    "Triggerable" : true,
     "Color" : "FF9E00",
 
     "Chinese" : {

@@ -62,6 +62,7 @@ namespace BuiltinBuffs.Negative
                 target.room.AddObject(new UpgradationSign(target.DangerPos, target.room));
                 if (SpawnUperCreature(target.abstractCreature))
                 {
+                    target.LoseAllGrasps();
                     target.Destroy();
                     target.abstractCreature.Destroy();
                 }

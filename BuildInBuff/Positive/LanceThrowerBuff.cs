@@ -25,6 +25,7 @@ namespace BuiltinBuffs.Positive
 {
     internal class LanceThrowerBuff : Buff<LanceThrowerBuff, LanceThrowerBuffData>, IOWnPlayerUtilsPart
     {
+        public override bool Triggerable => false;
         public LanceThrowerBuff()
         {
             AddPart(this);
@@ -37,6 +38,8 @@ namespace BuiltinBuffs.Positive
 
         public PlayerModulePart InitPart(PlayerModule module)
         {
+            module.PlayerRef.TryGetTarget(out var player);
+            BuffUtils.Log("LanceThrower", $"{player.playerState.playerNumber} - {LanceThrowerBuff.Instance.Data[player.playerState.playerNumber]}");
             return new LanceModule();
         }
 
@@ -83,14 +86,26 @@ namespace BuiltinBuffs.Positive
                 }
 
                 if (!anyHandHoldSpear)
+                {
                     lanceCounter = 0;
+                }
                 else
                 {
                     bool hold = LanceThrowerBuff.Instance.Data.UseThrowKey ? player.input[0].thrw : GetInput(player);
-                    if (hold && (player.bodyMode == Player.BodyModeIndex.Crawl || player.bodyMode == Player.BodyModeIndex.Stand || player.bodyMode == Player.BodyModeIndex.Default) && player.lowerBodyFramesOnGround > 0)
+                    if ((player.bodyMode == Player.BodyModeIndex.Crawl || player.bodyMode == Player.BodyModeIndex.Stand || player.bodyMode == Player.BodyModeIndex.Default) && player.lowerBodyFramesOnGround > 0)
                     {
-                        if (lanceCounter < lanceRequirement)
-                            lanceCounter++;
+                        if (hold)
+                        {
+                            if (lanceCounter < lanceRequirement)
+                                lanceCounter++;
+                        }
+                        else
+                        {
+                            if (LanceReady)
+                            {
+                                player.ThrowObject(lanceHand, false);
+                            }
+                        }
                     }
                     else if (lanceCounter > 0)
                     {
@@ -157,10 +172,10 @@ namespace BuiltinBuffs.Positive
             public bool GetInput(Player player)
             {
                 if (LanceThrowerBuff.Instance.Data[player.playerState.playerNumber] != KeyCode.None)
-                    return Input.GetKey(OriBashBuff.Instance.Data[player.playerState.playerNumber]);
-                if (BuffPlayerData.Instance.GetKeyBind(LanceThrowerBuffEntry.lanceThrowerBuffID) == KeyCode.None.ToString())
-                    return Input.GetMouseButton(1);
-                return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(LanceThrowerBuffEntry.lanceThrowerBuffID));
+                    return Input.GetKey(LanceThrowerBuff.Instance.Data[player.playerState.playerNumber]);
+                if (BuffPlayerData.Instance.GetKeyBind(LanceThrowerBuffEntry.lanceThrowerBuffID) != KeyCode.None.ToString())
+                    return BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(LanceThrowerBuffEntry.lanceThrowerBuffID));
+                return false;
             }
 
             public void LanceThrow(Player player, Spear spear)
@@ -194,13 +209,45 @@ namespace BuiltinBuffs.Positive
         public override BuffID ID => LanceThrowerBuffEntry.lanceThrowerBuffID;
     }
 
-    internal class LanceThrowerBuffData : KeyBindBuffData
+    internal class LanceThrowerBuffData : BuffData
     {
         public override BuffID ID => LanceThrowerBuffEntry.lanceThrowerBuffID;
 
         [CustomBuffConfigInfo("UseThrow","")]
         [CustomBuffConfigTwoValue(true, false)]
         public bool UseThrowKey { get; set; }
+
+        [CustomBuffConfigInfo("Player1", "bind key for player 1")]
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player1 { get; set; }
+
+        [CustomBuffConfigInfo("Player2", "bind key for player 2")]
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player2 { get; set; }
+
+        [CustomBuffConfigInfo("Player3", "bind key for player 3")]
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player3 { get; set; }
+
+        [CustomBuffConfigInfo("Player4", "bind key for player 4")]
+        [CustomBuffConfigEnum(typeof(KeyCode), "None")]
+        public KeyCode Player4 { get; set; }
+
+        public KeyCode this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return Player1;
+                    case 1: return Player2;
+                    case 2: return Player3;
+                    case 3: return Player4;
+                    default:
+                        return KeyCode.None;
+                }
+            }
+        }
     }
 
     internal class LanceThrowerBuffEntry : IBuffEntry
