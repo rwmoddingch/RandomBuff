@@ -583,8 +583,14 @@ namespace RandomBuffUtils
                         var field = typeof(SlugcatStats).GetField(modify.fieldName,
                             BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
+                        var value = field.GetValue(target);
+                        float trulyValue;
+                        if (value is float fl)
+                            trulyValue = fl;
+                        else
+                            trulyValue = (float)Convert.ChangeType(value, typeof(float));
                         field.SetValue(target,
-                            Convert.ChangeType(modify.op.Invoke((float)field.GetValue(target), modify.ExecValue),
+                            Convert.ChangeType(modify.op.Invoke(trulyValue, modify.ExecValue),
                                 field.FieldType));
                     }
                 }

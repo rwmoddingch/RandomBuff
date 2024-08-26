@@ -423,9 +423,46 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             On.RegionGate.Update += RegionGate_Update;
 
             On.SlugcatStats.SpearSpawnModifier += SlugcatStats_SpearSpawnModifier;
+            On.Explosion.ctor += Explosion_ctor;
+
             currentDarkness = 0;
+            _ = new Hook(typeof(Freeze).GetMethod(nameof(Freeze.ShouldAllowUpdate)),typeof(BinahHook).GetMethod("Freeze_ShouldAllowUpdate", BindingFlags.Static | BindingFlags.NonPublic));
+            _ = new Hook(typeof(Freeze).GetMethod(nameof(Freeze.ShouldSkipUpdate)), typeof(BinahHook).GetMethod("Freeze_ShouldSkipUpdate", BindingFlags.Static | BindingFlags.NonPublic));
+            _ = new Hook(typeof(Freeze).GetMethod(nameof(Freeze.ShouldBeFired)), typeof(BinahHook).GetMethod("Freeze_ShouldSkipUpdate", BindingFlags.Static | BindingFlags.NonPublic));
 
             _ = new Hook(typeof(RoomSettings).GetProperty("RandomItemDensity").GetGetMethod(), typeof(BinahHook).GetMethod("Room_RandomItemDensity" , BindingFlags.Static | BindingFlags.NonPublic));
+        }
+        private static bool Freeze_ShouldSkipUpdate(Func<Freeze, bool> orig, Freeze self)
+        {
+            if (self.ownerRef.TryGetTarget(out var target) &&
+                target.creatureTemplate.type == CreatureTemplate.Type.TempleGuard &&
+                target.ID.spawner == BinahBuffData.Binah.valueHash)
+                return false;
+            return orig(self);
+        }
+        private static bool Freeze_ShouldAllowUpdate(Func<Freeze, bool> orig, Freeze self)
+        {
+            if (self.ownerRef.TryGetTarget(out var target) &&
+                target.creatureTemplate.type == CreatureTemplate.Type.TempleGuard &&
+                target.ID.spawner == BinahBuffData.Binah.valueHash)
+                return true;
+            return orig(self);
+        }
+
+        private static void Explosion_ctor(On.Explosion.orig_ctor orig, Explosion self, Room room, PhysicalObject sourceObject, Vector2 pos, int lifeTime, float rad, float force, float damage, float stun, float deafen, Creature killTagHolder, float killTagHolderDmgFactor, float minStun, float backgroundNoise)
+        {
+            orig(self,room, sourceObject, pos, lifeTime, rad, force, damage, stun, deafen, killTagHolder, killTagHolderDmgFactor, minStun, backgroundNoise);
+            foreach (var chain in room.updateList.OfType<BinahChain>().ToList())
+            {
+                for (int i = 0; i < chain.segments.GetLength(0); i++)
+                {
+                    if (Custom.DistLess(chain.segments[i, 0], pos, rad*1.2f))
+                    {
+                        chain.Destroy();
+                        break;
+                    }
+                }
+            }
         }
 
         private static float Room_RandomItemDensity(Func<RoomSettings, float> orig, RoomSettings self)
@@ -1265,7 +1302,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                     bool canHit = false;
                     for (int i = 0; i < segments.GetLength(0); i++)
                         if ((canHit = weapon.bodyChunks.Any(chunk =>
-                                Custom.DistLess(chunk.pos, segments[i, 0], chunk.rad*1.5f+ weapon.firstChunk.vel.magnitude*0.8f)))==true)
+                                Custom.DistLess(chunk.pos, segments[i, 0], chunk.rad*1.5f+ weapon.firstChunk.vel.magnitude)) ||
+                                     Vector2.Dot(Custom.DirVec(weapon.firstChunk.pos, segments[i,0]), Custom.DirVec(weapon.firstChunk.lastPos, segments[i, 0])) < 0))
                             break;
                     if (canHit)
                     {
