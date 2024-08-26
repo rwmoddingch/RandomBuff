@@ -980,7 +980,13 @@ namespace BuiltinBuffs.Duality
 
             electricChargingTime = 120;
             electricCounter = 0;
-            origThrowingSkill = player.slugcatStats.throwingSkill;
+
+            //投掷技巧下降
+            foreach (var self in (BuffCustom.TryGetGame(out var game) ? game.Players : new List<AbstractCreature>())
+                .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
+            {
+                self.slugcatStats.Modify(this, PlayerUtils.Subtraction, "throwingSkill", JellyfishShapedMutationBuffEntry.StackLayer - 1);
+            }
         }
 
         #region 外观
@@ -1537,8 +1543,6 @@ namespace BuiltinBuffs.Duality
                 return;
             if (player.room == null)
                 return;
-
-            player.slugcatStats.throwingSkill = Mathf.Max(-1, origThrowingSkill - VultureShapedMutationBuffEntry.StackLayer + 1);
 
             if (player.grasps[0] != null && player.grasps[1] != null)
             {

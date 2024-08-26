@@ -18,6 +18,8 @@ using MoreSlugcats;
 using HotDogGains.Positive;
 using RandomBuff.Core.SaveData;
 using BuiltinBuffs.Positive;
+using BuiltinBuffs.Negative.SephirahMeltdown;
+using System.Collections.Generic;
 
 namespace BuiltinBuffs.Duality
 {
@@ -639,7 +641,15 @@ namespace BuiltinBuffs.Duality
 
             this.deathConvulsions = (player.State.alive ? 1f : 0f);
             this.standCount = 0;
-            this.origThrowingSkill = player.slugcatStats.throwingSkill;
+            //走路速度下降，投掷技巧下降，爬行速度提升
+            foreach (var self in (BuffCustom.TryGetGame(out var game) ? game.Players : new List<AbstractCreature>())
+                .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
+            {
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", 2f);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", 2f);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac", 0.5f);
+                self.slugcatStats.Modify(this, PlayerUtils.Subtraction, "throwingSkill", SpiderShapedMutationBuffEntry.StackLayer - 1);
+            }
         }
 
         #region 外观
@@ -1038,8 +1048,6 @@ namespace BuiltinBuffs.Duality
                 return;
             if (player.room == null)
                 return;
-
-            player.slugcatStats.throwingSkill = Mathf.Max(-1, origThrowingSkill - VultureShapedMutationBuffEntry.StackLayer + 1);
 
             if (player.grasps[0] != null && player.grasps[1] != null)
             {

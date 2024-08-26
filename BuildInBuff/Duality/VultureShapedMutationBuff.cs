@@ -838,6 +838,13 @@ namespace BuiltinBuffs.Duality
             {
                 this.kingTusks = new KingTusks(player, this);
             }
+            
+            //投掷技巧下降
+            foreach (var self in (BuffCustom.TryGetGame(out var game) ? game.Players : new List<AbstractCreature>())
+                .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
+            {
+                self.slugcatStats.Modify(this, PlayerUtils.Subtraction, "throwingSkill", VultureShapedMutationBuffEntry.StackLayer - 1);
+            }
         }
 
         #region 外观
