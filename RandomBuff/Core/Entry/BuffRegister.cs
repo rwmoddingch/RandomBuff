@@ -414,11 +414,11 @@ namespace RandomBuff.Core.Entry
 
                         }
 
-                        var def = BuildCachePlugin(mod, file.FullName, refLocations);
+                        var def = BuildCachePlugin(mod, file.FullName, refLocations,out var hasPdb);
                         def.Write(
                             Path.Combine(BuffPlugin.CacheFolder,
                                 $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"),
-                            new WriterParameters() { WriteSymbols = true });
+                            new WriterParameters() { WriteSymbols = hasPdb });
 
                     }
 
@@ -601,8 +601,9 @@ namespace RandomBuff.Core.Entry
 
     public partial class BuffRegister
     {
-        private static AssemblyDefinition BuildCachePlugin(ModManager.Mod mod,string filePath, HashSet<string> refLocations)
+        private static AssemblyDefinition BuildCachePlugin(ModManager.Mod mod,string filePath, HashSet<string> refLocations, out bool hasPdb)
         {
+            hasPdb = File.Exists(filePath.Replace(".dll", ".pdb"));
             var resolver = new DefaultAssemblyResolver();
             resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/plugins");
             foreach (var modPath in ModManager.ActiveMods.Where(i => mod.requirements.Contains(i.id)
@@ -613,12 +614,16 @@ namespace RandomBuff.Core.Entry
             }
             foreach (var location in refLocations)
                 resolver.AddSearchDirectory(location);
-            AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(filePath, new ReaderParameters { ReadSymbols = true, AssemblyResolver = resolver});
+
+            AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(filePath,
+                new ReaderParameters
+                    { ReadSymbols = File.Exists(filePath.Replace(".dll", ".pdb")), AssemblyResolver = resolver });
             var attrCtor =
                 assemblyDef.MainModule.ImportReference(typeof(CompilerGeneratedAttribute).GetConstructor(Type.EmptyTypes));
+
             foreach (var data in assemblyDef.MainModule.GetAllTypes().Where(i => i.IsSubtypeOf(typeof(BuffData))))
             {
-                
+        
                 foreach (var property in GetAllCustomPropertyDefinitions(data))
                 {
                     var trulyProperty = property;
