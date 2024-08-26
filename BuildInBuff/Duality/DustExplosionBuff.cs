@@ -182,52 +182,9 @@ namespace BuiltinBuffs.Duality
             }
 
             if (burn)
-            {/*
-                if (fire != null && fire.slatedForDeletetion)
-                    fire = null;
-
-                if (fire == null && smoke.room != null)
-                {
-                    //fire = new BurnFire(smoke.room, smoke);
-                    smoke.room.AddObject(fire);
-                }*/
-
+            {
                 BurnBehaviour(smoke);
             }
-            else
-            {/*
-                if (fire != null)
-                {
-                    fire.Kill();
-                    fire = null;
-                }*/
-            }
-            /*
-            if (freeze)
-            {
-                if (freezeIce != null && freezeIce.slatedForDeletetion)
-                    freezeIce = null;
-
-                if (freezeIce == null && smoke.room != null)
-                {
-                    freezeIce = new FreezeIce(smoke, smoke.DangerPos);
-                    smoke.room.AddObject(freezeIce);
-                }
-            }
-            else
-            {
-                if (freezeIce != null)
-                {
-                    freezeIce.Destroy();
-                    freezeIce = null;
-                }
-            }*/
-        }
-
-        public void DestroyIce()
-        {/*
-            freezeIce.Destroy();
-            freezeIce = null;*/
         }
 
         private void BurnBehaviour(SmokeSystem smoke)
@@ -244,7 +201,7 @@ namespace BuiltinBuffs.Duality
             {
                 averageRad += 2f * Mathf.Sqrt((centroidPos - p.pos).magnitude) / num;
             }
-
+            /*
             foreach (var crit in smoke.room.updateList.Where((u) => (u is Creature)).Select((u) => u as Creature))
             {
                 if (TryGetTemperatureModule(crit, out var module))
@@ -286,11 +243,11 @@ namespace BuiltinBuffs.Duality
                         }
                     }
                 }
-            }
+            }*/
 
             smoke.room.PlaySound(SoundID.Bomb_Explode, centroidPos);
-            smoke.room.AddObject(new Explosion(smoke.room, null, centroidPos, 7, 2.5f * averageRad, 6.2f, 10f, 280f, 0f, null, 0.3f, 160f, 1f));
-            smoke.room.AddObject(new Explosion(smoke.room, null, centroidPos, 7, 10f * averageRad, 4f, 0f, 400f, 0f, null, 0.3f, 200f, 1f));
+            smoke.room.AddObject(new Explosion(smoke.room, null, centroidPos, 7, 2.5f * averageRad, 6.2f, 0.99f, 280f, 0f, null, 0.3f, 160f, 1f));
+            smoke.room.AddObject(new Explosion(smoke.room, null, centroidPos, 7, 10f * averageRad, 4f, 0.1f, 400f, 0f, null, 0.3f, 200f, 1f));
             smoke.room.AddObject(new Explosion.ExplosionLight(centroidPos, averageRad, 1f, 7, this.explodeColor));
             smoke.room.AddObject(new Explosion.ExplosionLight(centroidPos, 0.8f * averageRad, 1f, 3, new Color(1f, 1f, 1f)));
             smoke.room.AddObject(new Explosion.ExplosionLight(centroidPos, 5f * averageRad, 2f, 60, this.explodeColor));
@@ -407,18 +364,13 @@ namespace BuiltinBuffs.Duality
                 }
             }
 
-            if (Input.GetKey(KeyCode.H))
-                temperature += 0.1f;
-            else if (Input.GetKey(KeyCode.J))
-                temperature -= 0.1f;
-
             if (burn)
             {
                 BurnBehaviour(sp);
             }
         }
         private void BurnBehaviour(CosmeticSprite sp)//由于爆炸，只运行一帧
-        {
+        {/*
             foreach (var crit in sp.room.updateList.Where((u) => (u is Creature)).Select((u) => u as Creature))
             {
                 if (TryGetTemperatureModule(crit, out var module))
@@ -461,11 +413,11 @@ namespace BuiltinBuffs.Duality
                         module.AddTemperature(coolOffRate);
                     }
                 }
-            }
+            }*/
 
             sp.room.PlaySound(SoundID.Bomb_Explode, sp.pos);
-            sp.room.AddObject(new Explosion(sp.room, null, sp.pos, 7, 2.5f * rad, 6.2f, 10f, 280f, 0f, null, 0.3f, 160f, 1f));
-            sp.room.AddObject(new Explosion(sp.room, null, sp.pos, 7, 10f * rad, 4f, 0f, 400f, 0f, null, 0.3f, 200f, 1f));
+            sp.room.AddObject(new Explosion(sp.room, null, sp.pos, 7, 2.5f * rad, 6.2f, 0.99f, 280f, 0f, null, 0.3f, 160f, 1f));
+            sp.room.AddObject(new Explosion(sp.room, null, sp.pos, 7, 10f * rad, 4f, 0f, 400f, 0.1f, null, 0.3f, 200f, 1f));
             sp.room.AddObject(new Explosion.ExplosionLight(sp.pos, rad, 1f, 7, this.explodeColor));
             sp.room.AddObject(new Explosion.ExplosionLight(sp.pos, 0.8f * rad, 1f, 3, new Color(1f, 1f, 1f)));
             sp.room.AddObject(new Explosion.ExplosionLight(sp.pos, 5f * rad, 2f, 60, this.explodeColor));
