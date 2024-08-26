@@ -14,6 +14,6 @@
   },
   "English": {
     "BuffName": "Cold Gaze",
-    "Description": "Creatures in the your gaze will have difficulty moving."
+    "Description": "Creatures in the your gaze will have difficulty moving. At 3 stacks, freezes everything in the room until your slugcat leaves."
   }
 }

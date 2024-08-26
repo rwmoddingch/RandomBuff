@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "Desperate Eater",
-        "Description" : "When starving, slugcat can consume normally non edible items like rocks."
+        "Description" : "When starving, slugcat can consume non edible items like rocks and spears for varying food amounts."
     }
 }

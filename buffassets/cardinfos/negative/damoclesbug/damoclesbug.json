@@ -12,6 +12,6 @@
   },
   "English": {
     "BuffName": "The Bug of Damocles",
-    "Description": "When there is an obstacle above your head, there is a very low probability of generating a lurking Dropwig in each frame."
+    "Description": "While your slugcat is under an object, there is a very low chance for a dropwig to spawn."
   }
 }

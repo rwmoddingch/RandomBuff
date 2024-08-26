@@ -103,7 +103,7 @@ InitPickCount|Initial draw count:
 
 //BasicInGameBuffCardSlot
 BasicInGameBuffCardSlot_OnMouseFocus|[Single click/press throw] to check <BuffID> in detail
-BasicInGameBuffCardSlot_OnCardExclusiveShow|[Single click/press throw] to turn over the card<LINE>[Single click at blank space/press Esc] to exit detail mode<LINE>[Scroll/Hold up or down] to browse discription if it's too long
+BasicInGameBuffCardSlot_OnCardExclusiveShow|[Single click/press throw] to turn over the card<LINE>[Single click at blank space/press Esc] to exit detail mode<LINE>[Scroll/Hold up or down] to browse description if it's too long
 BasicInGameBuffCardSlot_NoCardFocus|Move mouse over a card and [click/press throw] to check it
 BasicInGameBuffCardSlot_ExitHUD|<LINE>Press <HUD_KEY> to turn off hud
 BasicInGameBuffCardSlot_BindKey|<LINE>Press another key while holding <KEYBINDER_KEY> to bind the shortcut key for <BuffID>
@@ -133,20 +133,20 @@ DisplayName_Achievement|Earn {0} passage
 DisplayName_Cycle|Survive {0} cycles
 DisplayName_Card|Collect {0} {1} buffcards
 DisplayName_Like|Maximize reputation with {0}
-DisplayName_MeetSS_SL|Meet Pebbles and Moon in {0} cycles
-DisplayName_Gourmand|Complete Gourmand Feast
+DisplayName_MeetSS_SL|Meet Pebbles and Moon within {0} cycles
+DisplayName_Gourmand|Complete Gourmand's Feast
 DisplayName_Interval_OutRange|Completed the task within {0}-{1} cycles, now hidden
 DisplayName_FixCycle|Complete the mission in {0} cycle
 DisplayName_MeltDownHunt|Kill {0} {1} 
-DisplayName_Death|Complete the mission within {0} death  
+DisplayName_Death|Complete the mission within {0} deaths  
 DisplayName_CycleScore|Earn {0} points from creature kills this cycle
 DisplayName_SaveMoon|Save Moon in {0} cycles
-DisplayName_Battery|Install the Pebbles core to Moon
+DisplayName_Battery|Install the Pebbles core into Moon
 DisplayName_MeltDownBinah|Defeat An Arbiter
-DisplayName_Extermination|Kill {0} ceatures with {1}
+DisplayName_Extermination|Kill {0} creatures with {1}
 DisplayName_Score|Earn {0} points from creature kills
 DisplayName_TreeOfLight|Collect a full amount of energy (food)
-DisplayName_Abyss|Go to the depth
+DisplayName_Abyss|Go to the depths
 DisplayName_Ascend|Ascend all creatures in {0} regions
 DisplayName_AscendOracle|Ascend Pebbles and Moon
 DisplayName_Distance|Move at least {0} meters
@@ -264,7 +264,7 @@ BuffManual_CardPedia_1|Browse BuffCard
 BuffManual_Summary_Content_0|Random Buff is a game mode that is played with a random mix of buff effects. You can add challenges for yourself or complete special missions to unlock rewards.
 BuffManual_Gameplay_Content_0|The gameplay can be affected slightly or greatly by enabling different buffs. <LINE> Most changes are dynamic, and different buffs can be combined to produce unexpected effects.
 BuffManual_Gameplay_Content_1|You can choose from two different modes to play Random Buff, Free Mode and Mission Mode.
-BuffManual_Gameplay_Content_2|Different game modes have conditions that can be completed. <LINE> Each condition has its own requirements and progression, and completing them reward you with different amounts of experience.
+BuffManual_Gameplay_Content_2|Different game modes have conditions that can be completed. <LINE> Each condition has its own requirements and progression, and completing them rewards you with different amounts of experience.
 BuffManual_FreeMode_Content_0|The most conventional way to play. <LINE>If you succeed in making a settlement, you will only gain experience points to level up based on the completed conditions, number of kills, and number of cards held. <LINE>Sub-modes can be switched in the lower left corner of the screen.
 BuffManual_FreeMode_Content_1|You can choose from 0 to 5 conditions to play, after each successful hibernation you will draw in a round, and the game will be settled when hibernating with all conditions completed. <LINE>No settlement will happen at 0 conditions. <LINE>Depending on the slugcat selected, the initial room is the same as the one of the slugcat's Story Mode.
 BuffManual_FreeMode_Content_2|Conditions are selected in the same way as Normal Mode, but a completely randomized draw will be made every 30 seconds. <LINE>The earliest drawn buff will be automatically removed when the number of cards exceeds the limit.<LINE>The initial room will be randomly selected from all shelters in the current area.
