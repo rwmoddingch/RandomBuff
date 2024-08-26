@@ -36,9 +36,12 @@ namespace BuiltinBuffs.Positive
                     if (FlashShieldBuffEntry.FlashShieldStateFeatures.TryGetValue(player, out _))
                         FlashShieldBuffEntry.FlashShieldStateFeatures.Remove(player);
 
-                    var flashShield = new FlashShield(player, player.room);
-                    player.room.AddObject(flashShield);
-                    FlashShieldBuffEntry.FlashShieldFeatures.Add(player, flashShield);
+                    if (player.room != null)
+                    {
+                        var flashShield = new FlashShield(player, player.room);
+                        player.room.AddObject(flashShield);
+                        FlashShieldBuffEntry.FlashShieldFeatures.Add(player, flashShield);
+                    }
 
                     FlashShieldState flashShieldState = new FlashShieldState(player);
                     FlashShieldBuffEntry.FlashShieldStateFeatures.Add(player, flashShieldState);

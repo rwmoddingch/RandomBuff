@@ -125,7 +125,7 @@ namespace BuiltinBuffs.Positive
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!ColdGazeFeatures.TryGetValue(self, out _))
+            if (!ColdGazeFeatures.TryGetValue(self, out _) && self.room != null)
             {
                 ColdGaze newColdGaze = new ColdGaze(self, self.room);
                 self.room.AddObject(newColdGaze);
@@ -673,7 +673,7 @@ namespace BuiltinBuffs.Positive
 
     internal class Freeze
     {
-        WeakReference<AbstractCreature> ownerRef; 
+        public WeakReference<AbstractCreature> ownerRef; 
         private int freezeCount;
         private int cycleCount;
         private int allowUpdateCount;
@@ -682,6 +682,7 @@ namespace BuiltinBuffs.Positive
         private Dictionary<FSprite, Color> newColor;
         private Dictionary<FSprite, Color[]> oldMeshColor;
         private Dictionary<FSprite, Color[]> newMeshColor;
+
 
         private float FreezeRatio
         {
