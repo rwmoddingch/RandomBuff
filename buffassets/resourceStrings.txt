@@ -175,6 +175,7 @@ ProgressionUI_Record|RECORD
 ProgressionUI_Quest|QUEST
 ProgressionUI_Cosmetic|COSMETIC
 ScoreCaculator_ExpMulti|Exp multiplier
+ScoreCaculator_KillScoreLimit|Kill score limit
 
 
 //QuestCondition

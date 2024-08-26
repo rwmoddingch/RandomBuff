@@ -185,6 +185,7 @@ ProgressionUI_Record|记录
 ProgressionUI_Quest|收集
 ProgressionUI_Cosmetic|装饰品
 ScoreCaculator_ExpMulti|经验倍率
+ScoreCaculator_KillScoreLimit|击杀分数限制
 
 //QuestCondition
 Quest_Display_MissionQuest|完成 {0} 使命
