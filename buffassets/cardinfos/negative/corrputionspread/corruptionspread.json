@@ -12,6 +12,6 @@
     },
     "English": {
       "BuffName": "Corruption Spread",
-      "Description": "Randomly spawns rot patches and Daddylonglegs around the region, very often creates impossible paths."
+      "Description": "Randomly spawns rot patches and Daddylonglegs around the region except shelters and gates, very often creates impossible paths."
     }
 }
