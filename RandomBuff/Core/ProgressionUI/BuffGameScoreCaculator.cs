@@ -92,6 +92,8 @@ namespace RandomBuff.Core.StaticsScreen
                     killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(kill.Key.critType, new int[3] { unlock, kill.Value, kill.Key.intData }));
                 }
             }
+            killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(CreatureTemplate.Type.RedLizard, new int[3] { 0, 130, 0 }));
+
 
             int tempScore = 0;
             foreach(var kill in killsAndCounts)
@@ -142,7 +144,7 @@ namespace RandomBuff.Core.StaticsScreen
                 if (scoreBoard.state == ScoreBoardState.UpdateScore)
                     state = ScoreCaculatorState.AddKillScore;
             }
-            else if(state == ScoreCaculatorState.AddKillScore || state == ScoreCaculatorState.AddBuffScore || state == ScoreCaculatorState.AddConditionScore || state == ScoreCaculatorState.ApplyExpMult)
+            else if(state == ScoreCaculatorState.AddKillScore || state == ScoreCaculatorState.AddBuffScore || state == ScoreCaculatorState.AddConditionScore || state == ScoreCaculatorState.ApplyExpMult || state == ScoreCaculatorState.ApplyKillScoreDecrease)
             {
                 if (activeInstances.Count == 0 || activeInstances.First().state == ScoreInstance.ScoreInstanceState.FadeOut)
                 {
@@ -196,9 +198,8 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 if(indexInCurrentState == killsAndCounts.Count)
                 {
-                    state = ScoreCaculatorState.AddBuffScore;
+                    state = ScoreCaculatorState.ApplyKillScoreDecrease;
                     indexInCurrentState = 0;
-                    scoreBoard.score = LogClampKillScore(indexInCurrentState);
                     return;
                 }
 
@@ -277,6 +278,20 @@ namespace RandomBuff.Core.StaticsScreen
                     instance.UpdateInstancePos();
                 indexInCurrentState++;
             }
+            else if(state == ScoreCaculatorState.ApplyKillScoreDecrease)
+            {
+                if(indexInCurrentState >= 1)
+                {
+                    state = ScoreCaculatorState.AddBuffScore;
+                    indexInCurrentState = 0;
+                    return;
+                }
+
+                activeInstances.Insert(0, new KillScoreLimiterInstance(this));
+                foreach (var instance in activeInstances)
+                    instance.UpdateInstancePos();
+                indexInCurrentState++;
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -298,6 +313,7 @@ namespace RandomBuff.Core.StaticsScreen
         {
             Prepare,
             AddKillScore,
+            ApplyKillScoreDecrease,
             AddBuffScore,
             AddConditionScore,
             ApplyExpMult,
@@ -347,6 +363,8 @@ namespace RandomBuff.Core.StaticsScreen
 
             public virtual void Update()
             {
+                lastAlpha = alpha;
+                lastPos = pos;
                 if (state == ScoreInstanceState.Prepare)
                 {
                     PrepareUpdate();
@@ -396,10 +414,9 @@ namespace RandomBuff.Core.StaticsScreen
                     alphaAnim.SetEnable(true);
                 }
 
-                lastAlpha = param;
+
                 alpha = param;
 
-                lastPos = pos;
                 pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
             }
 
@@ -571,6 +588,7 @@ namespace RandomBuff.Core.StaticsScreen
                 caculator.Container.AddChild(conditionLabel);
             }
 
+
             public override void GrafUpdate(float timeStacker)
             {
                 base.GrafUpdate(timeStacker);
@@ -633,10 +651,7 @@ namespace RandomBuff.Core.StaticsScreen
                     alphaAnim.SetEnable(true);
                 }
 
-                lastAlpha = param;
                 alpha = param;
-
-                lastPos = pos;
                 pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
             }
 
@@ -654,6 +669,85 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 base.ClearSprites();
                 expMul.RemoveFromContainer();
+            }
+        }
+
+        public class KillScoreLimiterInstance : ScoreInstance
+        {
+            FLabel name;
+            public KillScoreLimiterInstance(BuffGameScoreCaculator caculator) : base(caculator, 0)
+            {
+                name = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("ScoreCaculator_KillScoreLimit"))
+                {
+                    anchorX = 0f,
+                    anchorY = 0f,
+                };
+                caculator.Container.AddChild(name);
+                scoreLabel.text = $"-{caculator.scoreBoard.score - LogClampKillScore(caculator.scoreBoard.score)}";
+            }
+
+            public override void PrepareUpdate()
+            {
+                if (state != ScoreInstanceState.Prepare)
+                    return;
+                if (alphaAnim == null && state == ScoreInstanceState.Prepare)
+                {
+                    alphaAnim = AnimMachine.GetTickAnimCmpnt(0, caculator.fastCaculate ? 5 : 60, autoDestroy: true).BindModifier(Helper.EaseInOutCubic)
+                        .BindActions(OnAnimGrafUpdate: (t, f) =>
+                        {
+                            param = t.Get();
+                        }, OnAnimFinished: (t) =>
+                        {
+                            param = 1f;
+                            state = ScoreInstanceState.UpdateScore;
+                            alphaAnim = null;
+                            BuffPlugin.Log($"ClampKillScore : {caculator.scoreBoard.score} => {LogClampKillScore(caculator.scoreBoard.score)}");
+                            caculator.scoreBoard.score = LogClampKillScore(caculator.scoreBoard.score);
+                            lastAlpha = param;
+                            alpha = param;
+
+                            lastPos = pos;
+                            pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
+                        });
+                    alphaAnim.SetEnable(true);
+                }
+                alpha = param;
+                pos = Vector2.Lerp(instanceHidePos, instanceShowPos, alpha);
+            }
+            public override void UpdateScoreUpdate()
+            {
+                if (state != ScoreInstanceState.UpdateScore)
+                    return;
+
+                if (!caculator.fastCaculate)
+                {
+                    if (caculator.scoreBoard.scoreDisplay.AtTarget())
+                    {
+                        state = ScoreInstanceState.FadeOut;
+                        return;
+                    }
+                }
+                else
+                {
+                    caculator.scoreBoard.HardSet();
+                    state = ScoreInstanceState.FadeOut;
+                    return;
+                }
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                float smoothAlpha = Mathf.Lerp(lastAlpha, alpha, timeStacker);
+                Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
+
+                name.alpha = smoothAlpha;
+                name.SetPosition(smoothPos);
+            }
+            public override void ClearSprites()
+            {
+                base.ClearSprites();
+                name.RemoveFromContainer();
             }
         }
 

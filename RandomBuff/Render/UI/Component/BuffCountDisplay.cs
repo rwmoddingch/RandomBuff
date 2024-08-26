@@ -113,6 +113,16 @@ namespace RandomBuff.Render.UI.Component
             }
         }
 
+        public bool AtTarget()
+        {
+            foreach(var number in numbers)
+            {
+                if(!number.AtTarget)
+                    return false;
+            }
+            return true;
+        }
+
         internal class SingleNumber
         {
             readonly BuffCountDisplay countDisplay;
@@ -140,6 +150,8 @@ namespace RandomBuff.Render.UI.Component
 
             public bool EffectiveCurrent => currentNumberInt >= 0;
             public bool EffectiveNext => nextNumberInt >= 0;
+
+            public bool AtTarget => Mathf.Approximately(currentNumber, targetNumber) || !EffectiveCurrent;
 
 
             public SingleNumber(BuffCountDisplay countDisplay, int digit)

@@ -256,6 +256,12 @@ namespace RandomBuffUtils
 
         public static bool TryGetModulePart<T>(Player player, IOWnPlayerUtilsPart owner, out T modulePart) where T : PlayerModulePart
         {
+            if (player == null)
+            {
+                modulePart = null;
+                return false;
+            }
+
             if (weakTable.TryGetValue(player, out var module) && module.moduleParts.TryGetValue(owner, out var part))
             {
                 modulePart = part as T;
@@ -267,6 +273,12 @@ namespace RandomBuffUtils
 
         public static bool TryGetModulePart<T, OwnerT>(Player player, out T modulePart) where T : PlayerModulePart where OwnerT : IOWnPlayerUtilsPart
         {
+            if (player == null)
+            {
+                modulePart = null;
+                return false;
+            }
+
             if (weakTable.TryGetValue(player, out var module))
             {
                 foreach (var pair in module.moduleParts)
@@ -284,6 +296,12 @@ namespace RandomBuffUtils
 
         public static bool TryGetGraphicPart<T>(Player player, IOWnPlayerUtilsPart owner, out T graphicPart) where T : PlayerModuleGraphicPart
         {
+            if (player == null)
+            {
+                graphicPart = null;
+                return false;
+            }
+
             if (weakTable.TryGetValue(player, out var module) && module.graphicParts.TryGetValue(owner, out var part))
             {
                 graphicPart = part as T;
@@ -295,6 +313,11 @@ namespace RandomBuffUtils
 
         public static bool TryGetGraphicPart<T, OwnerT>(Player player, out T graphicPart) where T : PlayerModuleGraphicPart where OwnerT : IOWnPlayerUtilsPart
         {
+            if (player == null)
+            {
+                graphicPart = null;
+                return false;
+            }
             if (weakTable.TryGetValue(player, out var module))
             {
                 foreach (var pair in module.graphicParts)
