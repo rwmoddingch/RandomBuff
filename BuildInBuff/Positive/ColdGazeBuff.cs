@@ -125,7 +125,7 @@ namespace BuiltinBuffs.Positive
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-            if (!ColdGazeFeatures.TryGetValue(self, out _))
+            if (!ColdGazeFeatures.TryGetValue(self, out _) && self.room != null)
             {
                 ColdGaze newColdGaze = new ColdGaze(self, self.room);
                 self.room.AddObject(newColdGaze);
