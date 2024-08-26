@@ -12,6 +12,6 @@
     },
     "English" : {
         "BuffName" : "DesolateDive",
-        "Description" : "If the player is holding down as they hit the ground from high up, cause a tremor which knocks back and stuns nearby creatures. Activation is based on when you started holding down, not your total fall height."
+        "Description" : "If the player is holding down as they hit the ground from high up, cause a tremor which knocks back and stuns nearby creatures."
     }
 }
