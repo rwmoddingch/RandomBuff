@@ -58,7 +58,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.8";
+        public const string ModVersion = "1.0.8.1";
 
         public static string CacheFolder { get; private set; }
 

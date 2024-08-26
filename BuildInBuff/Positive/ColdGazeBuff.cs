@@ -673,7 +673,7 @@ namespace BuiltinBuffs.Positive
 
     internal class Freeze
     {
-        WeakReference<AbstractCreature> ownerRef; 
+        public WeakReference<AbstractCreature> ownerRef; 
         private int freezeCount;
         private int cycleCount;
         private int allowUpdateCount;
@@ -682,6 +682,7 @@ namespace BuiltinBuffs.Positive
         private Dictionary<FSprite, Color> newColor;
         private Dictionary<FSprite, Color[]> oldMeshColor;
         private Dictionary<FSprite, Color[]> newMeshColor;
+
 
         private float FreezeRatio
         {
