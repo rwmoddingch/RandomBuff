@@ -36,9 +36,12 @@ namespace BuiltinBuffs.Positive
                     if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out _))
                         FireShieldBuffEntry.FireShieldStateFeatures.Remove(player);
 
-                    var fireShield = new FireShield(player, player.room);
-                    FireShieldBuffEntry.FireShieldFeatures.Add(player, fireShield);
-                    player.room.AddObject(fireShield);
+                    if (player.room != null)
+                    {
+                        var fireShield = new FireShield(player, player.room);
+                        FireShieldBuffEntry.FireShieldFeatures.Add(player, fireShield);
+                        player.room.AddObject(fireShield);
+                    }
 
                     FireShieldState fireShieldState = new FireShieldState(player); 
                     FireShieldBuffEntry.FireShieldStateFeatures.Add(player, fireShieldState);
