@@ -74,14 +74,14 @@ namespace BuiltinBuffs.Positive
                         self.killTag.realizedCreature is Player)
                     {
                         Player player = self.killTag.realizedCreature as Player;
-                        float damage = drainLife.LastHealth - (self.State as HealthState).health;
+                        float damage = Mathf.Min(drainLife.LastHealth - (self.State as HealthState).health, drainLife.LastHealth);
                         for (int i = 0; i < Mathf.FloorToInt(StackLayer * damage / 0.25f); i++)
                         {
                             player.AddQuarterFood();
                         }
                     }
 
-                    drainLife.LastHealth = (self.State as HealthState).health;
+                    drainLife.LastHealth = Mathf.Max((self.State as HealthState).health, 0f);
                 }
                 if (!self.abstractCreature.state.alive)
                 {
@@ -91,7 +91,8 @@ namespace BuiltinBuffs.Positive
 
             }
             else if (!DrainLifeFeatures.TryGetValue(self, out _) &&
-                     self.abstractCreature.state is HealthState && self.abstractCreature.state.alive)
+                     self.abstractCreature.state is HealthState && 
+                     self.abstractCreature.state.alive)
             {
                 DrainLifeFeatures.Add(self, new DrainLife(self));
             }
