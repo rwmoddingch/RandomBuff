@@ -459,7 +459,7 @@ namespace RandomBuff.Core.Entry
 
             LoadAllReferenceAssembly(origMethod);
 
-            foreach (var ass in resolvedAssembly.Values)
+            foreach (var ass in ResolvedAssembly.Values)
             {
                 method = ass.GetType(methodRef.DeclaringType.FullName)?.
                     GetMethod(methodRef.Name.Replace("add", "remove"));
@@ -479,9 +479,9 @@ namespace RandomBuff.Core.Entry
                     a.Name.Contains("System") ||
                     a.Name is "mscorlib" or "Newtonsoft.Json" or "HOOKS-Assembly-CSharp")
                     continue;
-                if (!resolvedAssembly.ContainsKey(a.FullName))
+                if (!ResolvedAssembly.ContainsKey(a.FullName))
                 {
-                    resolvedAssembly.Add(a.FullName, Assembly.Load(a));
+                    ResolvedAssembly.Add(a.FullName, Assembly.Load(a));
                     BuffPlugin.LogDebug($"load reference assembly: {a.FullName}");
                 }
             }
@@ -500,7 +500,7 @@ namespace RandomBuff.Core.Entry
             RegistedRuntimeHooks[id][level].Clear();
         }
 
-        private static Dictionary<string, Assembly> resolvedAssembly = new();
+        private static readonly Dictionary<string, Assembly> ResolvedAssembly = new();
         private static Assembly hookAssembly;
 
 
