@@ -55,28 +55,28 @@ namespace BuiltinBuffs.Missions
                         {
                             baseCrit = CreatureTemplate.Type.BlueLizard,
                             boostCrit = CreatureTemplate.Type.BlueLizard,
-                            boostCount = 4,
+                            boostCount = 2,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add,
                         },
                         new GachaTemplate.BoostCreatureInfo()
                         {
                             baseCrit = CreatureTemplate.Type.PinkLizard,
                             boostCrit = CreatureTemplate.Type.PinkLizard,
-                            boostCount = 4,
+                            boostCount = 2,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add,
                         },
                         new GachaTemplate.BoostCreatureInfo()
                         {
-                            baseCrit = CreatureTemplate.Type.YellowLizard,
-                            boostCrit = CreatureTemplate.Type.YellowLizard,
-                            boostCount = 4,
+                            baseCrit = CreatureTemplate.Type.WhiteLizard,
+                            boostCrit = CreatureTemplate.Type.WhiteLizard,
+                            boostCount = 1,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add,
                         },
                         new GachaTemplate.BoostCreatureInfo()
                         {
                             baseCrit = CreatureTemplate.Type.CyanLizard,
                             boostCrit = CreatureTemplate.Type.CyanLizard,
-                            boostCount = 4,
+                            boostCount = 1,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add,
                         }
                     },
@@ -86,7 +86,6 @@ namespace BuiltinBuffs.Missions
             startBuffSet.Add(LanceThrowerBuffEntry.lanceThrowerBuffID);
             startBuffSet.Add(StagnantForcefieldBuffEntry.stagnantForcefieldBuffID);
             startBuffSet.Add(SpearMasterIBuffEntry.spearMasterBuffID);
-            startBuffSet.Add(DivineBeingIBuffEntry.DivineBeingBuffID);
         }
 
         public void RegisterMission()
