@@ -40,7 +40,7 @@ namespace RandomBuff.Cardpedia.Elements
             sheetBuffType = buffType;
             sheetPage = 0;
 
-            var allIDs = (BuffConfigManager.buffTypeTable[buffType]);
+            var allIDs = (BuffConfigManager.BuffTypeTable[buffType]);
 
             sheetIDs.Add(new List<BuffID>());
             for(int i = 0;i < allIDs.Count; i++)

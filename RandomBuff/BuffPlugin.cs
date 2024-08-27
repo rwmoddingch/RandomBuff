@@ -58,7 +58,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.0.8.1";
+        public const string ModVersion = "1.0.9";
 
         public static string CacheFolder { get; private set; }
 
@@ -186,20 +186,18 @@ namespace RandomBuff
 #if TESTVERSION
                     Log($"!!!!TEST BUILD!!!!");
 
-                    if (File.Exists(AssetManager.ResolveFilePath("buff.dev")))
-                    {
-                        DevEnabled = true;
-                        LogWarning("Debug Enable");
-                    }
-
 #endif
-                    //DevEnabled = true;
                     Application.logMessageReceived += Application_logMessageReceived;
 
                     BuffUIAssets.LoadUIAssets();
 
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();
+
+                    CardpediaMenuHooks.LoadAsset();
+
+                    BuffUtils.OnEnable();
+
                     BuffResourceString.Init();
 
                     GachaTemplate.Init();
@@ -212,16 +210,14 @@ namespace RandomBuff
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
-                    BuffRegister.InitAllBuffPlugin();
 
-
-                    BuffUtils.OnEnable();
-
-
-                    CardpediaMenuHooks.LoadAsset();
                     SoapBubblePool.Hook();
 
                     AnimMachine.Init();
+
+
+                    BuffRegister.InitAllBuffPlugin();
+
 
                     MachineConnector.SetRegisteredOI(ModId, Option);
                     StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());
@@ -264,6 +260,7 @@ namespace RandomBuff
                         }
                     }
                     //延迟加载以保证其他plugin的注册完毕后再加载
+                    BuffConfigManager.InitBuffPluginInfo();
                     BuffConfigManager.InitBuffStaticData();
                     BuffConfigManager.InitTemplateStaticData();
                     BuffRegister.LoadBuffPluginAsset();
@@ -271,7 +268,6 @@ namespace RandomBuff
                     //这个会用到template数据（嗯
                     MissionRegister.RegisterAllMissions();
                     BuffConfigManager.InitQuestData();
-
                     BuffRegister.BuildAllDataStaticWarpper();
 
                     //Log($"Cost Time: {DateTime.Now-dt}");
@@ -333,7 +329,12 @@ namespace RandomBuff
         private static bool isPostLoaded = false;
         private static bool canAccessLog = true;
 
-        internal static bool DevEnabled { get; private set; }
+#if TESTVERSION
+        internal static bool DevEnabled => true;
+
+#else
+        internal static bool DevEnabled => false;
+#endif
 
 
 

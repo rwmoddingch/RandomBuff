@@ -1,0 +1,14 @@
+{
+    "Assembly":"BuiltinBuffs",
+    "Thumbnail": "thumbnail",
+    "Chinese":
+    {
+        "Name": "内置卡牌",
+        "Description":"待办"
+    },
+    "English":
+    {
+        "Name": "Built-in Buffs",
+        "Description":"TODO"
+    }
+}
