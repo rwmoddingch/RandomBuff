@@ -244,8 +244,8 @@ namespace BuiltinBuffs.Positive
             emitter.ApplyEmitterModule(new BindEmitterToPhysicalObject(emitter, owner));
             emitter.ApplyEmitterModule(new SetEmitterLife(emitter, emitterMaxCount, false));
             emitter.ApplyEmitterModule(new BurstSpawnerModule(emitter, Mathf.FloorToInt((2 + level) * rad / Radius(1))));
-            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "")));
-            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 2f, this.color)));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "", 8, 1f, 2f, this.color)));
+            //emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", 8, 0.3f, 2f, this.color)));
             emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
             emitter.ApplyParticleModule(new SetRandomLife(emitter, 40, 60));
             emitter.ApplyParticleModule(new SetRotateRingPosAddFire(emitter, owner, rad, angle, 2 + level));
@@ -311,7 +311,7 @@ namespace BuiltinBuffs.Positive
         Vector2 pos;
 
         HolyFire.HolyFireSprite fire;
-        LightSource[] lightSources;
+        //LightSource[] lightSources;
         float[] getToRads;
 
         int lifeTime;
@@ -330,7 +330,7 @@ namespace BuiltinBuffs.Positive
             this.pos = bindCreature.mainBodyChunk.pos + relativePosition;
             this.lifeTime = 40;
             this.rad = 20f;
-
+            /*
             lightSources = new LightSource[1];
             getToPositions = new Vector2[this.lightSources.Length];
             getToRads = new float[this.lightSources.Length];
@@ -339,7 +339,7 @@ namespace BuiltinBuffs.Positive
                 lightSources[i] = new LightSource(pos, false, new Color(227f / 255f, 171f / 255f, 78f / 255f), this);
                 room.AddObject(this.lightSources[i]);
                 lightSources[i].setAlpha = 0f;
-            }
+            }*/
         }
 
         public float GetHeat(UpdatableAndDeletable updatableAndDeletable, Vector2 pos)
@@ -415,9 +415,9 @@ namespace BuiltinBuffs.Positive
             {
                 if (counter < this.lifeTime / 2f)
                 {
-                    counter++;
+                    counter++;/*
                     for (int i = 0; i < lightSources.Length; i++)
-                        lightSources[i].setAlpha = 0.1f * ((float)counter) / (this.lifeTime / 2f);
+                        lightSources[i].setAlpha = 0.1f * ((float)counter) / (this.lifeTime / 2f);*/
                 }
                 else
                     Kill();
@@ -426,10 +426,10 @@ namespace BuiltinBuffs.Positive
             {
                 if (counter > 0)
                 {
-                    counter--;
+                    counter--;/*
                     for (int i = 0; i < lightSources.Length; i++)
                         lightSources[i].setAlpha = 0.1f * ((float)counter) / (this.lifeTime / 2f);
-
+                    */
                     if (counter == 0)
                         this.Destroy();
                 }
@@ -439,14 +439,14 @@ namespace BuiltinBuffs.Positive
                 fire = new HolyFire.HolyFireSprite(bindCreature.mainBodyChunk.pos + relativePosition);
                 room.AddObject(fire);
             }
-
+            /*
             for (int i = 0; i < lightSources.Length; i++)
             {
                 getToPositions[i] = relativePosition; 
                 getToRads[i] = 40f;
                 lightSources[i].setPos = new Vector2?(Vector2.Lerp(lightSources[i].Pos, bindCreature.mainBodyChunk.pos + getToPositions[i], 0.2f));
                 lightSources[i].setRad = new float?(Mathf.Lerp(lightSources[i].Rad, this.getToRads[i], 0.2f));
-            }
+            }*/
         }
 
         public void Kill()
@@ -456,12 +456,12 @@ namespace BuiltinBuffs.Positive
 
         public override void Destroy()
         {
-            base.Destroy();
+            base.Destroy();/*
             for (int i = 0; i < lightSources.Length; i++)
             {
                 if (lightSources[i] != null && !lightSources[i].slatedForDeletetion)
                     lightSources[i].Destroy();
-            }
+            }*/
             if(fire != null && !fire.slatedForDeletetion)
             {
                 room.RemoveObject(fire);

@@ -366,6 +366,12 @@ namespace BuiltinBuffs.Duality
             StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.BigJelly, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.SeaLeech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.JungleLeech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+
+            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.BigJelly, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.SeaLeech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.JungleLeech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
         }
 
         //修改生物关系（巨型水母不再攻击玩家）

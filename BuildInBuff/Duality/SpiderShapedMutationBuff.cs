@@ -352,6 +352,8 @@ namespace BuiltinBuffs.Duality
         {
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.BigSpider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Spider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.BigSpider, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Spider, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
         }
         #endregion
 
@@ -646,7 +648,7 @@ namespace BuiltinBuffs.Duality
                 .Select(i => i.realizedCreature as Player).Where(i => !(i is null)))
             {
                 self.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", 2f);
-                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", 2f);
+                self.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", 1.5f);
                 self.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac", 0.5f);
                 self.slugcatStats.Modify(this, PlayerUtils.Subtraction, "throwingSkill", SpiderShapedMutationBuffEntry.StackLayer - 1);
             }

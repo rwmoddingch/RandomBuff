@@ -219,7 +219,7 @@ namespace BuiltinBuffs.Duality
             if ((self.vulture.State as Vulture.VultureState).mask && !self.IsMiros)
             {
                 CreatureTemplate.Relationship relationship = self.StaticRelationship(dRelation.trackerRep.representedCreature);
-                if (dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat &&
+                if (dRelation.trackerRep.representedCreature.realizedCreature != null &&
                     dRelation.trackerRep.representedCreature.realizedCreature is Player player &&
                     VultureCatFeatures.TryGetValue(player, out var vultureCat))
                 {
