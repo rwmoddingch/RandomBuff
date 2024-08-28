@@ -49,22 +49,6 @@ namespace BuiltinBuffs.Positive
                 }
             }
         }
-
-        public override bool Trigger(RainWorldGame game)
-        {
-            foreach (var player in FlashShieldBuffEntry.PlayerList)
-            {
-                if (FlashShieldBuffEntry.FlashShieldStateFeatures.TryGetValue(player, out var flashShield) &&
-                    BuffInput.GetKeyDown(GetBindKey()))
-                {
-                    if (flashShield.IsActivate)
-                        flashShield.Deactivate();
-                    else if (!flashShield.IsActivate)
-                        flashShield.Activate();
-                }
-            }
-            return false;
-        }
     }
 
     internal class FlashShieldBuffData : BuffData
@@ -97,6 +81,7 @@ namespace BuiltinBuffs.Positive
 
             On.Player.ctor += Player_ctor;
             On.Player.NewRoom += Player_NewRoom;
+            On.Player.Update += Player_Update;
         }
 
         private static void Room_UpdateIL(ILContext il)
@@ -230,6 +215,16 @@ namespace BuiltinBuffs.Positive
                 FlashShield newFlashShield = new FlashShield(self, self.room);
                 self.room.AddObject(newFlashShield);
                 FlashShieldFeatures.Add(self, newFlashShield);
+            }
+        }
+
+        private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            orig(self, eu);
+
+            if (FlashShieldStateFeatures.TryGetValue(self, out var flashShieldState))
+            {
+                flashShieldState.Update();
             }
         }
     }
@@ -564,6 +559,22 @@ namespace BuiltinBuffs.Positive
         {
             this.ownerRef = new WeakReference<Player>(c);
             this.IsActivate = true;
+        }
+
+        public void Update()
+        {
+            foreach (var player in FlashShieldBuffEntry.PlayerList)
+            {
+                if (FlashShieldBuffEntry.FlashShieldStateFeatures.TryGetValue(player, out var flashShield) &&
+                    BuffInput.GetKeyDown(FlashShieldBuff.Instance.GetBindKey()))
+                {
+                    FlashShieldBuff.Instance.TriggerSelf(true);
+                    if (flashShield.IsActivate)
+                        flashShield.Deactivate();
+                    else if (!flashShield.IsActivate)
+                        flashShield.Activate();
+                }
+            }
         }
 
         public void Activate()
