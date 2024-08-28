@@ -20,13 +20,11 @@ using MonoMod.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RandomBuff.Core.Buff;
-using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Option;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData.BuffConfig;
-using UnityEngine;
 using Color = UnityEngine.Color;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
@@ -143,16 +141,67 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     public partial class BuffConfigManager
     {
+        internal static readonly Dictionary<BuffType, List<BuffID>> BuffTypeTable = new();
+        internal static readonly Dictionary<string, List<BuffID>> BuffAssemblyTable = new();
+
+        internal static readonly Dictionary<string, BuffPluginInfo> PluginInfos = new();
+
+
         private static readonly Dictionary<BuffID, BuffStaticData> StaticDatas = new();
         private static readonly Dictionary<string, TemplateStaticData> TemplateDatas = new();
         private static readonly Dictionary<string, BuffQuest> QuestDatas = new();
 
-        private static readonly Dictionary<string, HashSet<BuffStaticData>> ModStaticDatas = new();
 
         private static readonly Dictionary<QuestUnlockedType,Dictionary<string, string>> LockedMap = new();
 
-        private static readonly Dictionary<string, Assembly> CacheAssemblies = new();
-        private static readonly Dictionary<string, AssemblyDefinition> CacheAssembliesDef = new();
+        private static readonly Dictionary<BuffID, string> BuffAssemblyMap = new();
+
+        //没什么用的中间变量
+        private static readonly Dictionary<string, HashSet<BuffStaticData>> ModStaticDatas = new();
+
+        /// <summary>
+        /// 传入ID可能重复，只保留第一个输入
+        /// </summary>
+        /// <param name="buff"></param>
+        /// <param name="name"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddBuffAssemblyBind(BuffID buff, AssemblyName name)
+        {
+            if (!BuffAssemblyMap.ContainsKey(buff))
+            {
+                BuffAssemblyMap.Add(buff, name.Name);
+                if (!BuffAssemblyTable.TryGetValue(name.Name, out var list))
+                    BuffAssemblyTable.Add(name.Name, list = new List<BuffID>());
+                list.Add(buff);
+            }
+
+
+        }
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static BuffPluginInfo GetPluginInfo(AssemblyName assemblyName) => GetPluginInfo(assemblyName.Name);
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static BuffPluginInfo GetPluginInfo(BuffID buff) => GetPluginInfo(BuffAssemblyMap[buff]);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string GetAssemblyName(BuffID buff) => BuffAssemblyMap[buff];
+
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BuffPluginInfo GetPluginInfo(string assemblyName)
+        {
+            if (PluginInfos.TryGetValue(assemblyName, out var info))
+                return info;
+            PluginInfos.Add(assemblyName, info = new BuffPluginInfo(assemblyName));
+            return info;
+        }
+
 
 
 
@@ -202,12 +251,12 @@ namespace RandomBuff.Core.SaveData
         internal static int GetFreePickCount(float multiply) =>
             (int)((0.5f + LockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value))) * multiply);
 
-        internal static Dictionary<BuffType,List<BuffID>> buffTypeTable = new ();
+
 
         static BuffConfigManager()
         {
             foreach (var value in Enum.GetValues(typeof(BuffType)))
-                buffTypeTable.Add((BuffType)value, new List<BuffID>());
+                BuffTypeTable.Add((BuffType)value, new List<BuffID>());
             foreach (var value in QuestUnlockedType.values.entries)
                 LockedMap.Add(new(value),new());
         }
@@ -246,7 +295,7 @@ namespace RandomBuff.Core.SaveData
                                 continue;
                             }
                             StaticDatas.Add(data.BuffID, data);
-                            buffTypeTable[data.BuffType].Add(data.BuffID);
+                            BuffTypeTable[data.BuffType].Add(data.BuffID);
                 
                         }
                         continue;
@@ -268,8 +317,8 @@ namespace RandomBuff.Core.SaveData
                 ModStaticDatas.Add(mod.id, new());
                 LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName, mod.id);
 
-                CreateStaticDataCache(assembly.MainModule, mod.id);
-                assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_dataCache.dll"));
+                if(CreateStaticDataCache(assembly.MainModule, mod.id))
+                    assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_dataCache.dll"));
 
 
             }
@@ -291,67 +340,6 @@ namespace RandomBuff.Core.SaveData
         }
 
 
-        private static void CreateStaticDataCache(ModuleDefinition module,string modId)
-        {
-            var type = new TypeDefinition("RandomBuffCache", $"StaticCache_{modId}", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed |
-                TypeAttributes.BeforeFieldInit,module.TypeSystem.Object);
-            module.Types.Add(type);
-            module.ImportReference(typeof(Color));
-            var field = new FieldDefinition("StaticData", FieldAttributes.Static | FieldAttributes.Public, module.ImportReference(typeof(HashSet<BuffStaticData>)));
-            type.Fields.Add(field);
-    
-            BuffPlugin.Log($"Create static data cache for {modId}");
-            var staticDataType = typeof(BuffStaticData);
-            var staticDataCtor = staticDataType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
-                .First(i => i.GetParameters().Length == 0);
-
-            BuffStaticData defaultData = (BuffStaticData)staticDataCtor.Invoke(Array.Empty<object>());
-
-            type.DefineStaticConstructor((il) =>
-            {
-                //.Body.Method.Attributes |= MethodAttributes.UnmanagedExport
-                var dataVal = new VariableDefinition(type.Module.ImportReference(typeof(BuffStaticData)));
-                il.Body.Variables.Add(dataVal);
-
-                il.Emit(OpCodes.Newobj, typeof(HashSet<BuffStaticData>).GetConstructor(Type.EmptyTypes));
-                il.Emit(OpCodes.Stsfld, field);
-                foreach (var data in ModStaticDatas[modId])
-                {
-                    il.Emit(OpCodes.Ldsfld, field);
-                    il.Emit(OpCodes.Newobj, staticDataCtor);
-                    il.Emit(OpCodes.Stloc, dataVal);
-                    foreach (var property in staticDataType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public |
-                                                                          BindingFlags.Instance))
-                    {
-                        var defaultValue = property.GetValue(defaultData);
-                        var dataValue = property.GetValue(data);
-                        if((property.PropertyType.GetProperty("Count") is {} count &&
-                           (int)count.GetValue(dataValue) == 0) ||
-                           (property.PropertyType.GetProperty("Length") is { } length &&
-                            (int)length.GetValue(dataValue) == 0))
-                            continue;
-                        if(defaultValue == null && dataValue == null)
-                            continue;
-                        if(defaultValue != null && defaultValue.Equals(dataValue))
-                            continue;
-
-                        if ((property.GetSetMethod() ?? property.GetSetMethod(true)) is { } set)
-                        {
-                            il.Emit(OpCodes.Ldloc, dataVal);
-                            EmitValue(il, dataValue);
-                            il.Emit(OpCodes.Callvirt, set);
-                        }
-
-                    }
-                    il.Emit(OpCodes.Ldloc, dataVal);
-                    il.Emit(OpCodes.Callvirt, typeof(HashSet<BuffStaticData>).GetMethod("Add"));
-                    il.Emit(OpCodes.Pop);
-                }
-                il.Emit(OpCodes.Ret);
-                il.Body.Optimize();
-
-            });
-        }
 
         private static void LoadInDirectory(DirectoryInfo info, string rootPath, string modId)
         {
@@ -369,7 +357,7 @@ namespace RandomBuff.Core.SaveData
                     {
                         StaticDatas.Add(data.BuffID, data);
                         ModStaticDatas[modId].Add(data);
-                        buffTypeTable[data.BuffType].Add(data.BuffID);
+                        BuffTypeTable[data.BuffType].Add(data.BuffID);
                     }
                     else
                     {
@@ -493,6 +481,135 @@ namespace RandomBuff.Core.SaveData
         }
 
 
+        /// <summary>
+        /// 读取PluginInfo
+        /// post init时调用
+        /// 文件格式 mod根目录/buffplugins/
+        /// </summary>
+        internal static void InitBuffPluginInfo()
+        {
+            BuffPlugin.Log("Loading All buff plugin infos!");
+            foreach (var mod in ModManager.ActiveMods)
+            {
+                string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
+                if (!Directory.Exists(path))
+                    continue;
+                var dir = new DirectoryInfo(path);
+                BuffPlugin.LogDebug($"Load info file:{path}");
+
+                foreach (var file in dir.GetFiles("*.json"))
+                {
+                    if (BuffPluginInfo.LoadPluginInfo(file.FullName, out var info))
+                    {
+                        PluginInfos.Add(info.AssemblyName, info);
+                    }
+                }
+            }
+            //给其他未定义info的自动添加info
+            foreach (var item    in BuffAssemblyTable)
+            {
+                _ = GetPluginInfo(item.Key);
+
+            }
+
+#if TESTVERSION
+            foreach(var info in PluginInfos)
+                BuffPlugin.Log(info.Value.ToDebugString());
+
+            //foreach (var item in BuffConfigManager.BuffTypeTable)
+            //{
+            //    foreach (var id in item.Value)
+            //        BuffPlugin.LogDebug($"{id},{id.GetStaticData().AssemblyName}");
+            //}
+#endif
+
+
+
+
+        }
+
+        #region cache
+
+        private static bool CreateStaticDataCache(ModuleDefinition module, string modId)
+        {
+            try
+            {
+                var type = new TypeDefinition("RandomBuffCache", $"StaticCache_{modId}", TypeAttributes.Public |
+                    TypeAttributes.Abstract | TypeAttributes.Sealed |
+                    TypeAttributes.BeforeFieldInit, module.TypeSystem.Object);
+                module.Types.Add(type);
+                module.ImportReference(typeof(Color));
+                var field = new FieldDefinition("StaticData", FieldAttributes.Static | FieldAttributes.Public,
+                    module.ImportReference(typeof(HashSet<BuffStaticData>)));
+                type.Fields.Add(field);
+
+                BuffPlugin.Log($"Create static data cache for {modId}");
+                var staticDataType = typeof(BuffStaticData);
+                var staticDataCtor = staticDataType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+                    .First(i => i.GetParameters().Length == 0);
+
+                BuffStaticData defaultData = (BuffStaticData)staticDataCtor.Invoke(Array.Empty<object>());
+
+                type.DefineStaticConstructor((il) =>
+                {
+                    //.Body.Method.Attributes |= MethodAttributes.UnmanagedExport
+                    var dataVal = new VariableDefinition(type.Module.ImportReference(typeof(BuffStaticData)));
+                    il.Body.Variables.Add(dataVal);
+
+                    il.Emit(OpCodes.Newobj, typeof(HashSet<BuffStaticData>).GetConstructor(Type.EmptyTypes));
+                    il.Emit(OpCodes.Stsfld, field);
+                    foreach (var data in ModStaticDatas[modId])
+                    {
+#if TESTVERSION
+                        BuffPlugin.LogDebug($"Build static data cache for Mod:{modId}, ID:{data.BuffID}");
+#endif
+                        il.Emit(OpCodes.Ldsfld, field);
+                        il.Emit(OpCodes.Newobj, staticDataCtor);
+                        il.Emit(OpCodes.Stloc, dataVal);
+                        foreach (var property in staticDataType.GetProperties(
+                                     BindingFlags.NonPublic | BindingFlags.Public |
+                                     BindingFlags.Instance).Where(i => i.CanRead && i.CanWrite))
+                        {
+                            var defaultValue = property.GetValue(defaultData);
+                            var dataValue = property.GetValue(data);
+                            if ((property.PropertyType.GetProperty("Count") is { } count &&
+                                 (int)count.GetValue(dataValue) == 0) ||
+                                (property.PropertyType.GetProperty("Length") is { } length &&
+                                 (int)length.GetValue(dataValue) == 0))
+                                continue;
+                            if (defaultValue == null && dataValue == null)
+                                continue;
+                            if (defaultValue != null && defaultValue.Equals(dataValue))
+                                continue;
+
+                            if ((property.GetSetMethod() ?? property.GetSetMethod(true)) is { } set)
+                            {
+                                il.Emit(OpCodes.Ldloc, dataVal);
+                                EmitValue(il, dataValue);
+                                il.Emit(OpCodes.Callvirt, set);
+                            }
+
+                        }
+
+                        il.Emit(OpCodes.Ldloc, dataVal);
+                        il.Emit(OpCodes.Callvirt, typeof(HashSet<BuffStaticData>).GetMethod("Add"));
+                        il.Emit(OpCodes.Pop);
+                    }
+
+                    il.Emit(OpCodes.Ret);
+                    il.Body.Optimize();
+
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                BuffPlugin.LogException(ex);
+                BuffPlugin.LogError($"Build static cache for {modId} failed");
+            }
+
+            return false;
+        }
 
 
         private static void EmitValue(ILProcessor processor, object value)
@@ -622,5 +739,8 @@ namespace RandomBuff.Core.SaveData
                 return re;
             }
         }
+
+        #endregion
+
     }
 }

@@ -47,7 +47,7 @@ namespace RandomBuff.Core.Game.Settings.Missions
         internal static void RegisterAllMissions()
         {
 
-            foreach (var assembly in BuffRegister.allBuffAssemblies)
+            foreach (var assembly in BuffRegister.AllBuffAssemblies)
             {
 
 
@@ -72,7 +72,7 @@ namespace RandomBuff.Core.Game.Settings.Missions
                 }
             }
 
-            BuffRegister.allBuffAssemblies.Clear();
+            BuffRegister.AllBuffAssemblies.Clear();
 
             QuestRendererManager.AddProvider(new MissionQuestRendererProvider());
         }

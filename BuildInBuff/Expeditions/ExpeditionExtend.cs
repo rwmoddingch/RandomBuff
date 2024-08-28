@@ -4,6 +4,7 @@ using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -142,6 +143,20 @@ namespace BuiltinBuffs.Expeditions
                     InitExpeditionType();
                     RegisterExpeditionType();
                     ExpeditionCoreHooks.OnModsInit();
+                    BuffPluginInfo info;
+                    try
+                    {
+                        if (!File.Exists(AssetManager.ResolveFilePath("buffassets/cardinfos/expedition/ExpeditionInfo.txt")) ||
+                            !BuffPluginInfo.LoadPluginInfo(AssetManager.ResolveFilePath("buffassets/cardinfos/expedition/ExpeditionInfo.txt"), out info))
+                            info = new BuffPluginInfo("Expedition Extend");
+                    }
+                    catch (Exception e)
+                    {
+                        info = new BuffPluginInfo("Expedition Extend");
+                        BuffPlugin.LogException(e);
+                    }
+                    //BuffPlugin.Log(info.ToDebugString());
+                    BuffConfigManager.PluginInfos.Add(info.AssemblyName, info);
                     isLoaded = true;
                 }
             }
@@ -299,7 +314,7 @@ namespace BuiltinBuffs.Expeditions
                             + ForceUnlockedAndLoad(ExpeditionProgression.BurdenManualDescription, id),
                         });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{id}Buff", true),
-                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id));
+                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id), new AssemblyName("Expedition Extend"));
                     BuffRegister.RegisterStaticData(staticData);
                 }
             }

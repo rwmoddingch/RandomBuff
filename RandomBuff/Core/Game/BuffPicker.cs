@@ -73,8 +73,8 @@ namespace RandomBuff.Core.Game
             var copyUnique = new List<BuffID>();
             foreach (var type in types)
             {
-                copyUnique.AddRange(BuffConfigManager.buffTypeTable[type].ToArray());
-                copyUnique.AddRange(BuffConfigManager.buffTypeTable[BuffType.Duality].Where(i => i.GetStaticData().AsPositive == (type == BuffType.Positive)));
+                copyUnique.AddRange(BuffConfigManager.BuffTypeTable[type].ToArray());
+                copyUnique.AddRange(BuffConfigManager.BuffTypeTable[BuffType.Duality].Where(i => i.GetStaticData().AsPositive == (type == BuffType.Positive)));
             }
 
             copyUnique.RemoveAll(alreadyHasNoStackable.Contains);

@@ -21,7 +21,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             currentCard = allCards.Count;
             if (!all)
-                currentCard = allCards.Count(i => BuffConfigManager.buffTypeTable[type].Contains(i));
+                currentCard = allCards.Count(i => BuffConfigManager.BuffTypeTable[type].Contains(i));
             BuffPlugin.LogDebug($"GachaEnd Refresh Card Count: {currentCard}, type: {type}, all: {all}");
         }
 
@@ -75,7 +75,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
                     count = BuffPoolManager.Instance.GetAllBuffIds().Count;
                 else
                     count = BuffPoolManager.Instance.GetAllBuffIds()
-                        .Count(i => BuffConfigManager.buffTypeTable[type].Contains(i));
+                        .Count(i => BuffConfigManager.BuffTypeTable[type].Contains(i));
                 if (count != currentCard)
                 {
                     currentCard = count;

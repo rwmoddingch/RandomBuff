@@ -128,7 +128,7 @@ namespace RandomBuff.Cardpedia.PediaPage
 
             //构建ID页面
             sheetIDPages.Clear();
-            var allIDs = (BuffConfigManager.buffTypeTable[buffType]);
+            var allIDs = (BuffConfigManager.BuffTypeTable[buffType]);
             sheetIDPages.Add(new List<BuffID>());
             for (int i = 0; i < allIDs.Count; i++)
             {

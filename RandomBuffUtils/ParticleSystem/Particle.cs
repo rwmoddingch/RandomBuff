@@ -90,10 +90,13 @@ namespace RandomBuffUtils.ParticleSystem
                 fNodes = null;
         }
 
+        //东西不要只在Die清理，小心重复init
         public void Init(ParticleEmitter emitter, int index)
         {
             this.emitter = emitter;
             this.index = index;
+
+            uniqueDatas.Clear();
 
             setVel = vel = Vector2.zero;
             setColor = color = lastColor = Color.white;

@@ -85,6 +85,9 @@ namespace RandomBuff.Core.Entry
             InternalRegisterBuff(id,typeof(TBuffType),typeof(TDataType));
         }
 
+
+
+
         /// <summary>
         /// 无Buff类型注册Buff
         /// </summary>
@@ -93,38 +96,42 @@ namespace RandomBuff.Core.Entry
         public static void RegisterBuff<THookType>(BuffID id)
         {
             BuffHookWarpper.RegisterBuffHook(id, typeof(THookType));
-            RegisterBuff(id);
-        }
 
-        /// <summary>
-        /// 无Buff类型注册Buff
-        /// </summary>
-        /// <param name="id"></param>
-        public static void RegisterBuff(BuffID id)
-        {
+            //这里不得不提前注册，否则就需要BuffHookWarpper公开更多信息，我暂时没有好想法
+            BuffConfigManager.AddBuffAssemblyBind(id,typeof(THookType).Assembly.GetName());
+
             if (CurrentModId == string.Empty)
             {
                 BuffPlugin.LogError("Missing Mod ID!, can't use this out of IBuffEntry.OnEnable");
                 return;
             }
-            if (BuffTypes.ContainsKey(id) || currentRuntimeBuffName.Contains(id.value))
+            if (BuffTypes.ContainsKey(id) || CurrentRuntimeBuffName.Contains(id.value))
             {
                 BuffPlugin.LogError($"{id} has already registered!");
                 return;
             }
             try
-            { 
+            {
                 BuffBuilder.GenerateBuffTypeWithCache(CurrentModId, id.value);
-                currentRuntimeBuffName.Add(id.value);
+                CurrentRuntimeBuffName.Add(id.value);
             }
             catch (Exception e)
             {
-                BuffPlugin.LogException(e,$"Exception in GenerateBuffType:{CurrentModId}:{id}");
+                BuffPlugin.LogException(e, $"Exception in GenerateBuffType:{CurrentModId}:{id}");
             }
-         
+        
         }
 
-        internal static void InternalRegisterBuff(BuffID id,Type buffType,Type dataType,Type hookType = null)
+
+        /// <summary>
+        /// 唯一一个指定的BuffTypes添加方法
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="buffType"></param>
+        /// <param name="dataType"></param>
+        /// <param name="hookType">几乎不在这里注册</param>
+        /// <param name="originAssemblyName">原始的dll名称</param>
+        internal static void InternalRegisterBuff(BuffID id,Type buffType,Type dataType,Type hookType = null, AssemblyName originAssemblyName = null)
         {
             try
             {
@@ -134,16 +141,23 @@ namespace RandomBuff.Core.Entry
                     return;
                 }
 
-                if (hookType != null)
-                    BuffHookWarpper.RegisterBuffHook(id, hookType);
 
                 if (id != Helper.GetUninit<IBuff>(buffType).ID || id != Helper.GetUninit<BuffData>(dataType).ID)
                 {
                     BuffPlugin.LogError($"{id}'s Buff or BuffData has unexpected BuffID!");
                     return;
                 }
+                if(hookType != null)
+                    BuffHookWarpper.RegisterBuffHook(id, hookType);
+
+                originAssemblyName ??= buffType.Assembly.GetName();
                 BuffTypes.Add(id, buffType);
                 DataTypes.Add(id, dataType);
+
+
+                //注意仅注册HookType的buff提前进行了绑定
+                BuffConfigManager.AddBuffAssemblyBind(id, originAssemblyName);
+
             }
             catch (Exception e)
             {
@@ -301,7 +315,7 @@ namespace RandomBuff.Core.Entry
             {
                 BuffUtils.Log("BuffExtend", $"Register Buff:{data.BuffID} static data by Code ");
                 staticDatas.Add(data.BuffID, data);
-                BuffConfigManager.buffTypeTable[data.BuffType].Add(data.BuffID);
+                BuffConfigManager.BuffTypeTable[data.BuffType].Add(data.BuffID);
             }
             else
                 BuffUtils.Log("BuffExtend", $"already contains BuffID {data.BuffID}");
@@ -317,6 +331,15 @@ namespace RandomBuff.Core.Entry
     /// </summary>
     public static partial class BuffRegister
     {
+
+        internal static string CurrentModId { get; private set; } = string.Empty;
+
+        private static readonly List<string> CurrentRuntimeBuffName = new();
+
+        private static readonly List<Type> AllEntry = new();
+
+        internal static readonly List<Assembly> AllBuffAssemblies = new();
+
         internal static (BuffID id, Type type) GetDataType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
         internal static (BuffID id, Type type) GetBuffType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), BuffTypes));
 
@@ -343,20 +366,14 @@ namespace RandomBuff.Core.Entry
             return default;
         }
 
-        internal static string CurrentModId { get; private set; } = string.Empty;
-
-        private static readonly List<string> currentRuntimeBuffName = new ();
-
-        private static readonly List<Type> allEntry = new();
-
-        public static readonly List<Assembly> allBuffAssemblies = new();
+  
 
 
 
 
         internal static void LoadBuffPluginAsset()
         {
-            foreach (var type in allEntry)
+            foreach (var type in AllEntry)
             {
                 if (type.GetMethod("LoadAssets", BindingFlags.Static | BindingFlags.Public) is { } method &&
                     method.GetParameters().Length == 0)
@@ -373,7 +390,7 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogDebug($"Load Assets for {type.Name}");
                 }
             }
-            allEntry.Clear();
+            AllEntry.Clear();
         }
 
         private static HashSet<string> refLocations = null;
@@ -381,8 +398,8 @@ namespace RandomBuff.Core.Entry
 
         internal static void InitAllBuffPlugin()
         {
-            allEntry.Clear();
-            allBuffAssemblies.Clear();
+            AllEntry.Clear();
+            AllBuffAssemblies.Clear();
 
 
             foreach (var mod in ModManager.ActiveMods)
@@ -423,7 +440,7 @@ namespace RandomBuff.Core.Entry
                     }
 
                     Assembly assembly = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"));
-                    allBuffAssemblies.Add(assembly);
+                    AllBuffAssemblies.Add(assembly);
                     var entryType = typeof(IBuffEntry);
                     foreach (var type in assembly.GetTypes())
                     {
@@ -441,7 +458,7 @@ namespace RandomBuff.Core.Entry
                                 BuffPlugin.LogException(e);
                                 BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
                             }
-                            allEntry.Add(type);
+                            AllEntry.Add(type);
                         }
                         
                     }
@@ -452,16 +469,16 @@ namespace RandomBuff.Core.Entry
                     var runtimeAss = BuffBuilder.FinishGenerate(CurrentModId);
                     foreach(var ass in runtimeAss)
                     {
-                        for(int i = currentRuntimeBuffName.Count-1;i>=0;i--)
+                        for(int i = CurrentRuntimeBuffName.Count-1;i>=0;i--)
                         {
-                            var name = currentRuntimeBuffName[i];
+                            var name = CurrentRuntimeBuffName[i];
                             if (ass.GetType($"{CurrentModId}.{name}Buff") is {} type)
                             {
                                 InternalRegisterBuff(new BuffID(name),
                                     type, ass.GetType($"{CurrentModId}.{name}BuffData", true));
                             }
 
-                            currentRuntimeBuffName.Remove(name);
+                            CurrentRuntimeBuffName.Remove(name);
                         }
                     }
                 }
@@ -469,7 +486,7 @@ namespace RandomBuff.Core.Entry
                 {
                     BuffPlugin.LogException(e,$"Exception when load {mod.id}'s RuntimeBuff");
                 }
-                currentRuntimeBuffName.Clear();
+                CurrentRuntimeBuffName.Clear();
 
             }
 
@@ -491,6 +508,18 @@ namespace RandomBuff.Core.Entry
                     }
                 }
             }
+
+//#if TESTVERSION
+
+//            foreach (var item in BuffConfigManager.BuffAssemblyTable)
+//            {
+//                BuffPlugin.Log($"Assembly : {item.Key}");
+//                foreach (var id in item.Value)
+//                {
+//                    BuffPlugin.Log($"----{id}");
+//                }
+//            }
+//#endif
         }
 
 

@@ -12,6 +12,7 @@ using UnityEngine.Assertions;
 using static System.Net.Mime.MediaTypeNames;
 using Kittehface.Framework20;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Render.UI.ExceptionTracker;
 
@@ -48,8 +49,9 @@ namespace RandomBuff.Core.Buff
 
         public int MaxStackLayers { get; private set; } = int.MaxValue;
 
+        public string AssemblyName => BuffConfigManager.GetAssemblyName(BuffID);
 
-
+        internal BuffPluginInfo PluginInfo => BuffConfigManager.GetPluginInfo(BuffID);
 
         private bool tryLoad = false;
 
@@ -57,15 +59,19 @@ namespace RandomBuff.Core.Buff
         //帮助方法
         internal Texture GetFaceTexture()
         {
-            try
+            if (!tryLoad)
             {
-                if (!Futile.atlasManager.DoesContainAtlas(FaceName))
-                    Futile.atlasManager.LoadImage(FaceName);
+                try
+                {
+                    if (!Futile.atlasManager.DoesContainAtlas(FaceName))
+                        Futile.atlasManager.LoadImage(FaceName);
+                }
+                catch (FutileException _)
+                {
+                    BuffPlugin.LogError($"Card image not found at :{FaceName}");
+                }
             }
-            catch (FutileException _)
-            {
-                BuffPlugin.LogError($"Card image not found at :{FaceName}");
-            }
+
             tryLoad = true;
             if (!Futile.atlasManager.DoesContainAtlas(FaceName))
             {

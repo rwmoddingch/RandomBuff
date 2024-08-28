@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using MonoMod.RuntimeDetour;
 using RandomBuff;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using UnityEngine;
+
 
 namespace BuiltinBuffs.Expeditions
 {

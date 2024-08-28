@@ -1,0 +1,13 @@
+{
+    "Assembly":"Expedition Extend",
+    "Chinese":
+    {
+        "Name": "卡牌探险扩展",
+        "Description":"从探险移植的卡牌"
+    },
+    "English":
+    {
+        "Name": "Expedition Extend",
+        "Description":"Buffs transplanted from the expedition"
+    }
+}
