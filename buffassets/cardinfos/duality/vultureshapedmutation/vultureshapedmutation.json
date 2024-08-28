@@ -4,18 +4,18 @@
   "BuffType": "Duality",
   "BuffProperty": "Special",
   "AsPositive": true,
-  "Triggerable": false,
-  "Stackable": false,
+  "Triggerable": true,
+  "Stackable": true,
   "Color": "6ABFE5",
   "Tag": [ "ShapedMutation" ],
   "Conflict": [ "ShapedMutation" ],
 
   "Chinese": {
     "BuffName": "鹫形突变",
-    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。同时，你的食量增大，并倾向于食肉。按跳跃键以在空中开启飞行和结束飞行。当你持有面具时，秃鹫类生物对你不再有敌意。另外，请记住，一只太胖的鸟是飞不起来的。"
+    "Description": "你的双手变成翅膀，可以随意飞行，但你现在只能用嘴叼着一件东西。同时，你的食量增大，并倾向于食肉。按跳跃键以在空中开启飞行和结束飞行。当你持有面具时，秃鹫类生物对你不再有敌意。另外，请记住，一只太胖的鸟是飞不起来的。<LINE>叠加效果：你的投掷技巧降低，秃鹫面具可戴在你的脸上。再次叠加，则为你增加可发射和回收的角矛，你可以长按设定键，使用方向键进行瞄准，在蓄力完成后松开按键，即可发射角矛。蓄力时间根据叠加层数决定。"
   },
   "English": {
     "BuffName": "Vulture-Shaped Mutation",
-    "Description": "Slugcat turns into a vulture hybrid, acquiring wings which can be used to freely fly. However, slugcat will require more food and can eat meat. If slugcat has a vulture mask, other vultures become passive towards it. Also, please remember that a bird that is too fat cannot fly."
+    "Description": "Slugcat turns into a vulture hybrid, acquiring wings which can be used to freely fly. However, slugcat will require more food and can eat meat. If slugcat has a vulture mask, other vultures become passive towards it. Also, please remember that a bird that is too fat cannot fly.<LINE>Stacking effect: Your throwing skills are reduced, and the vulture mask can be worn on your face. By stacking again, you will have added tusks that can be launched and recovered. You can long press the setting button, use the directional keys to aim, and release the button after charging to launch a tusk. The charging time is determined by the number of stacking layers."
   }
 }
