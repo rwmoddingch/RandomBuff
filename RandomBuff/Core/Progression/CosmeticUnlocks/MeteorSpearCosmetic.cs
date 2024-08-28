@@ -12,6 +12,7 @@ using MoreSlugcats;
 using System.Runtime.CompilerServices;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
@@ -23,17 +24,20 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public override SlugcatStats.Name BindCat => MoreSlugcatsEnums.SlugcatStatsName.Spear;
 
+        bool applyForAll;
+
         private void Spear_Thrown(On.Spear.orig_Thrown orig, Spear self, Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             orig(self, thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
             
-            if(self.thrownBy is Player player && player.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+            if(self.thrownBy is Player player && (player.slugcatStats.name == MoreSlugcatsEnums.SlugcatStatsName.Spear || applyForAll))
                 self.room?.AddObject(TailPool.GetMeteorTail(self,self.room));
         }
 
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
+            applyForAll = BuffOptionInterface.Instance.CosmeticForEverySlug.Value;
             PlayerUtils.AddPart(new MeteorSpearUtils());
             On.Spear.Thrown += Spear_Thrown;
         }

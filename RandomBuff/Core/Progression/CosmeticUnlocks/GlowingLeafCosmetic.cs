@@ -1,4 +1,5 @@
-﻿using RandomBuffUtils;
+﻿using RandomBuff.Core.Option;
+using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
 using System;
@@ -18,6 +19,8 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public override SlugcatStats.Name BindCat => SlugcatStats.Name.Yellow;
 
+        bool applyForAll;
+
         public PlayerUtils.PlayerModuleGraphicPart InitGraphicPart(PlayerUtils.PlayerModule module)
         {
             return null;
@@ -25,7 +28,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public PlayerUtils.PlayerModulePart InitPart(PlayerUtils.PlayerModule module)
         {
-            if (module.Name == BindCat)
+            if (module.Name == BindCat || applyForAll)
                 return new LeafModule();
             return null;
         }
@@ -33,6 +36,8 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
+
+            applyForAll = BuffOptionInterface.Instance.CosmeticForEverySlug.Value;
             PlayerUtils.AddPart(this);
 
             BuffPlugin.Log("GlowingLeafCosmetic StartGame");

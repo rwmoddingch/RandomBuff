@@ -9,6 +9,7 @@ using MoreSlugcats;
 using RWCustom;
 using static RandomBuffUtils.PlayerUtils;
 using System.Diagnostics.Eventing.Reader;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
@@ -23,13 +24,17 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
-            PlayerUtils.AddPart(new FoodBagGraphicUtils());
+            PlayerUtils.AddPart(new FoodBagGraphicUtils(BuffOptionInterface.Instance.CosmeticForEverySlug.Value));
         }
     }
 
     public class FoodBagGraphicUtils : IOWnPlayerUtilsPart
     {
-
+        bool applyForAll;
+        public FoodBagGraphicUtils(bool applyForAll)
+        {
+            this.applyForAll = applyForAll;
+        }
         public PlayerModulePart InitPart(PlayerModule module)
         {
             return null;
@@ -37,7 +42,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
         {
-            if(module.Name == MoreSlugcatsEnums.SlugcatStatsName.Gourmand)
+            if(module.Name == MoreSlugcatsEnums.SlugcatStatsName.Gourmand || applyForAll)
                 return new FoodBagGraphicsModule();
             return null;
         }

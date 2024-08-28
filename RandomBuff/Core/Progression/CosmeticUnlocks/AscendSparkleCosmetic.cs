@@ -1,6 +1,7 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
+using RandomBuff.Core.Option;
 using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
@@ -32,7 +33,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
-            PlayerUtils.AddPart(new AscendSparkleUtils());
+            PlayerUtils.AddPart(new AscendSparkleUtils(BuffOptionInterface.Instance.CosmeticForEverySlug.Value));
         }
 
         private static void Player_ClassMechanicsSaint(MonoMod.Cil.ILContext il)
@@ -60,10 +61,16 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
     internal class AscendSparkleUtils : IOWnPlayerUtilsPart
     {
+        bool applyForAll;
+        public AscendSparkleUtils(bool applyForAll)
+        {
+            this.applyForAll = applyForAll;
+        }
+
         public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
         {
 
-            if (module.Name == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+            if (module.Name == MoreSlugcatsEnums.SlugcatStatsName.Saint || applyForAll)
                 return new AscendSparkleGraphicModule();
             return null;
         }
