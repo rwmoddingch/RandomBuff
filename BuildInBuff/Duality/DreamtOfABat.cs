@@ -34,16 +34,16 @@ namespace BuildInBuff.Duality
         }
         public static void HookOn()
         {
-            //ÔÎÑ£µÄÊ±ºò±ä³Éòùòğ
+            //ï¿½ï¿½Ñ£ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             On.Player.Stun += Player_Stun;
-            //·ÀÖ¹ÏûÊ§Ê±±»ÅĞËÀÍö
+            //ï¿½ï¿½Ö¹ï¿½ï¿½Ê§Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             On.Player.Die += Player_Die;
 
 
-            //¸Ä±äÍæ¼ÒòùòğµÄÑÕÉ«
+            //ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
             On.FlyGraphics.ApplyPalette += ButteFly_ApplyPalette;
 
-            //·ÀÖ¹ÈÜ¹âÏûÃğÍæ¼ÒµÄòùòğ
+            //ï¿½ï¿½Ö¹ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½
             IL.MeltLights.Update += MeltLights_Update;
         }
 
@@ -64,7 +64,7 @@ namespace BuildInBuff.Duality
                 {
                     if (obj is Fly fly && fly.IsButterFly())
                     {
-                        return null;//Èç¹ûÊÇÃÎµû¾Í´«¸ö¿ÕÖµ
+                        return null;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îµï¿½ï¿½Í´ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
                     }
                     return obj;
                 });
@@ -75,7 +75,7 @@ namespace BuildInBuff.Duality
         {
             orig.Invoke(self, sLeaser, rCam, palette);
 
-            //ÈÃòùòğÉíÌåµÄÑÕÉ«ºÍÍæ¼ÒµÄÑÕÉ«Ò»Ñù
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½É«Ò»ï¿½ï¿½
             if (self.fly.IsButterFly(out var butteFly))
             {
                 for (int i = 0; i < 3; i++)
@@ -112,12 +112,12 @@ namespace BuildInBuff.Duality
 
             if (self.room != null && self.room.updateList != null)
             {
-                //fp·¿¼äÄÚ²»·¢¶¯¿¨ÅÆ·ÀÖ¹¿¨ËÀ
+                //fpï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½
                 if (self.room.abstractRoom.name.Length > 2 && self.room.abstractRoom.name.Substring(self.room.abstractRoom.name.Length - 2) == "AI") return;
                 if (self.room.abstractRoom.name == "SB_E05SAINT") return;
 
 
-                //ÒÑ¾­
+                //ï¿½Ñ¾ï¿½
                 foreach (var item in self.room.updateList)
                 {
                     if (item is BatBody body && body.player == self)
@@ -126,9 +126,9 @@ namespace BuildInBuff.Duality
                     }
                 }
 
-                //ÉÔÎ¢Ìí¼ÓÒ»µããĞÖµ·ÀÖ¹ÄªÃûÆäÃîµÄ·¢¶¯¿¨ÅÆ
+                //ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ö¹Äªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
-                //ĞéÈõ×´Ì¬¸üÄÑ·¢¶¯±äòùòğ
+                //ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 activeLimite *= self.exhausted ? 2 : 1;
                 if (st > activeLimite) self.room.AddObject(new BatBody(self.abstractCreature, HeartDevouringWormBuffEntry.IsInfected(self)));
             }
@@ -154,25 +154,28 @@ namespace BuildInBuff.Duality
             this.absPlayer = absPlayer;
 
 
-            //ÕÙ»½¸ÄÉ«òùòğ
+            //ï¿½Ù»ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½
             var room = player.room;
             var absFly = new AbstractCreature(room.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly), null, room.GetWorldCoordinate(player.DangerPos), room.world.game.GetNewID());
 
             absFly.TurnButteFLy(absPlayer.realizedCreature.ShortCutColor());
+
+            absFly.lavaImmune = player.abstractCreature.lavaImmune;//è®©è™è åŒæ­¥ç©å®¶çš„å²©æµ†å…ç–«èƒ½åŠ›
+            absFly.tentacleImmune = player.abstractCreature.tentacleImmune;//è®©è™è åŒæ­¥ç©å®¶çš„è§¦æ‰‹å…ç–«èƒ½åŠ›
 
             room.abstractRoom.AddEntity(absFly);
             absFly.RealizeInRoom();
 
             batBody = absFly.realizedCreature as Fly;
 
-            //ÒÆ¶¯òùòğ
+            //ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
             batBody.firstChunk.HardSetPosition(player.firstChunk.pos);
             batBody.firstChunk.vel += player.firstChunk.vel;
 
 
             //batBody.abstractCreature.controlled=true;
 
-            //¹âĞ§
+            //ï¿½ï¿½Ğ§
             AddEffect(room);
 
             if ((ModManager.MSC || ModManager.CoopAvailable) && player.slugOnBack != null && player.slugOnBack.slugcat != null)
@@ -184,7 +187,7 @@ namespace BuildInBuff.Duality
                 player.spearOnBack.DropSpear();
             }
 
-            //ÈÃ·¿¼ä×Ô¶¯É¾³ıÍæ¼Ò
+            //ï¿½Ã·ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½É¾ï¿½ï¿½ï¿½ï¿½ï¿½
             player.slatedForDeletetion = true;
 
             player.wantToPickUp = 0;
@@ -197,19 +200,19 @@ namespace BuildInBuff.Duality
             {
                 player.slatedForDeletetion = false;
 
-                //·ÀÖ¹ÖØ¸´Ìí¼ÓÍæ¼Ò
+                //ï¿½ï¿½Ö¹ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 bool notHavePlayer = true;
-                //¼ì²éÍæ¼ÒÊÇ·ñÒÑ¾­±»¸´»î
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 foreach (var item in room.abstractRoom.creatures)
                 {
                     if (item == player.abstractCreature) notHavePlayer = false;
                 }
 
-                //ÖØÏÖÍæ¼Ò
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 if (notHavePlayer)
                 {
 
-                    //Èç¹ûÍæ¼ÒÃ»ÓĞ¾Í´´ÔìÒ»¸öÍæ¼Ò
+                    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ğ¾Í´ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½
                     //room.abstractRoom.AddEntity(player.abstractCreature);
                     //player.PlaceInRoom(room);
                     var absPlayer = player.abstractCreature;
@@ -221,14 +224,14 @@ namespace BuildInBuff.Duality
                         room.abstractRoom.realizedRoom.AddObject(player);
 
 
-                    //ÈÃÍæ¼Òµ½òùòğÎ»ÖÃ
+                    //ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                     for (int i = 0; i < player.bodyChunks.Length; i++)
                     {
                         //player.bodyChunks[i].HardSetPosition(batBody.firstChunk.pos);
 
                         //player.bodyChunks[i].vel = batBody.firstChunk.vel;
                     }
-                    //ÈÃÍæ¼ÒÄÜÕ¾×Å
+                    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¾ï¿½ï¿½
                     player.standing = true;
                     if (dieAfterDestroy)
                     {
@@ -257,7 +260,7 @@ namespace BuildInBuff.Duality
         {
             base.Update(eu);
 
-            //·ÀÖ¹½øÈë¹ÜµÀ
+            //ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½Üµï¿½
             batBody.enteringShortCut = null;
             batBody.shortcutDelay = 40;
 
@@ -289,7 +292,7 @@ namespace BuildInBuff.Duality
                 {
                     player.stun--;
                     player.AerobicIncrease(0.1f);
-                    //ÈÃÍæ¼Òµ½òùòğÎ»ÖÃ
+                    //ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                     for (int i = 0; i < player.bodyChunks.Length; i++)
                     {
                         player.bodyChunks[i].HardSetPosition(batBody.firstChunk.pos);
