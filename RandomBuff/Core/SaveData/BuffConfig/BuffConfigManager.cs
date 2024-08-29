@@ -489,6 +489,7 @@ namespace RandomBuff.Core.SaveData
         internal static void InitBuffPluginInfo()
         {
             BuffPlugin.Log("Loading All buff plugin infos!");
+            Futile.atlasManager.LoadImage("buffassets/illustrations/default_thumbnail");
             foreach (var mod in ModManager.ActiveMods)
             {
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";

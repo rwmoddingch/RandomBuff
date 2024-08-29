@@ -30,7 +30,7 @@ namespace RandomBuff.Core.Buff
 
         public string AssemblyName { get; private set; }
 
-        public string Thumbnail { get; private set; } = "buffassets/illustrations/missing";
+        public string Thumbnail { get; private set; } = "buffassets/illustrations/default_thumbnail";
 
 
 
@@ -53,6 +53,7 @@ namespace RandomBuff.Core.Buff
                 newData = new BuffPluginInfo { AssemblyName = (string)rawData[loadState = "Assembly"] };
                 bool hasMutli = false;
 
+                //或许未来改成延迟加载
                 if (rawData.TryGetValue(loadState = "Thumbnail", out var thumbnail))
                 {
                     try
