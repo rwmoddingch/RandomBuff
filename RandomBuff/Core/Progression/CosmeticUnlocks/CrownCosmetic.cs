@@ -7,6 +7,7 @@ using RandomBuffUtils;
 using RandomBuffUtils.FutileExtend;
 using UnityEngine;
 using static RandomBuffUtils.PlayerUtils;
+using Random = UnityEngine.Random;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
@@ -40,16 +41,33 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public class CrownGraphicsModule : PlayerUtils.PlayerModuleGraphicPart
         {
+            static int crownLightCount = 20;
             Vector2 pos;
             Vector2 lastPos;
+
+            float[] rotations = new float[crownLightCount];
+            float[] lastRotations = new float[crownLightCount];
+
             public override void InitSprites(SLeaserInstance sLeaserInstance, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
             {
-                sLeaserInstance.sprites = new FSprite[1];
-                sLeaserInstance.sprites[0] = new FMesh(grown, "buffassets/illustrations/crownTex", customColor: true)
+                sLeaserInstance.sprites = new FSprite[1 + crownLightCount];
+                sLeaserInstance.sprites[crownLightCount] = new FMesh(grown, "buffassets/illustrations/crownTex", customColor: true)
                 {
                     shader = rCam.game.rainWorld.Shaders["UniformSimpleLighting"]
                 };
-                var mesh = sLeaserInstance.sprites[0] as FMesh;
+
+                for(int i = 0;i < crownLightCount;i++)
+                {
+                    sLeaserInstance.sprites[i] = new FSprite("buffassets/illustrations/crownlight")
+                    {
+                        shader = rCam.game.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"],
+                        color = Color.yellow * 0.7f + Color.red * 0.3f,
+                        alpha = 0.1f,
+                        anchorY = 0f
+                    };
+                }
+
+                var mesh = sLeaserInstance.sprites[crownLightCount] as FMesh;
                 mesh.Scale3D = new Vector3(5f, 5f, 5f);
                 mesh.color = Color.yellow;
                 Reset(self);
@@ -60,10 +78,17 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             {
                 base.DrawSprites(sLeaserInstance, self, sLeaser, rCam, timeStacker, camPos);
                 Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
-                var mesh = sLeaserInstance.sprites[0] as FMesh;
+                Vector2 drawPos = smoothPos + Mathf.Sin(timer / 40f * Mathf.PI) * 3f * Vector2.up - camPos;
+                var mesh = sLeaserInstance.sprites[crownLightCount] as FMesh;
                 mesh.color = Color.yellow;
-                mesh.SetPosition(smoothPos - camPos + Mathf.Sin(timer/40f * Mathf.PI)*3f * Vector2.up);
+                mesh.SetPosition(drawPos);
                 mesh.rotation3D += new Vector3(90, 0, 0) * Time.deltaTime;
+                
+                for(int i = 0;i < crownLightCount;i++)
+                {
+                    sLeaserInstance.sprites[i].SetPosition(drawPos + Vector2.up * 10f);
+                    sLeaserInstance.sprites[i].rotation = Mathf.Lerp(lastRotations[i], rotations[i], timeStacker);
+                }
             }
 
             public override void Update(PlayerGraphics playerGraphics)
@@ -71,14 +96,25 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
                 base.Update(playerGraphics);
                 toPos = playerGraphics.head.pos + Vector2.up * 20f;
                 lastPos = pos;
-                pos = Vector2.Lerp(pos, toPos, 0.1f);
+                pos = Vector2.Lerp(pos, toPos, 0.15f);
                 timer++;
+
+                for (int i = 0; i < crownLightCount; i++)
+                {
+                    rotations[i] += ((i + 1) % 2 == 0) ? (i + 1) % 5 * 1f : (i + 1) % 5 * -1f;
+                    lastRotations[i] = rotations[i];
+                }
             }
 
             public override void Reset(PlayerGraphics playerGraphics)
             {
                 base.Reset(playerGraphics);
                 lastPos = pos = toPos = playerGraphics.head.pos + Vector2.up * 5f;
+                for(int i = 0;i < crownLightCount; i++)
+                {
+                    rotations[i] = Random.value * 360f;
+                    lastRotations[i] = rotations[i];
+                }
             }
 
             private int timer = 0;

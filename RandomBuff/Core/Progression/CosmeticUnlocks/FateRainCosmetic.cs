@@ -9,6 +9,7 @@ using UnityEngine;
 using RWCustom;
 using static RandomBuffUtils.PlayerUtils.PlayerModuleGraphicPart;
 using static RandomBuffUtils.PlayerUtils;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
@@ -23,12 +24,16 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
-            PlayerUtils.AddPart(new FateRainGraphicUtils());
+            PlayerUtils.AddPart(new FateRainGraphicUtils(BuffOptionInterface.Instance.CosmeticForEverySlug.Value));
         }
 
         public class FateRainGraphicUtils : IOWnPlayerUtilsPart
         {
-
+            bool applyForAll;
+            public FateRainGraphicUtils(bool applyForAll)
+            {
+                this.applyForAll = applyForAll;
+            }
             public PlayerModulePart InitPart(PlayerModule module)
             {
                 return null;
@@ -36,7 +41,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
             public PlayerModuleGraphicPart InitGraphicPart(PlayerModule module)
             {
-                if(module.Name == SlugcatStats.Name.White)
+                if(module.Name == SlugcatStats.Name.White || applyForAll)
                     return new FateRainGraphicsModule();
                 return null;
             }

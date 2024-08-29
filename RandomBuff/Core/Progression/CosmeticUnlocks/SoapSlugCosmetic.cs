@@ -10,6 +10,7 @@ using static RandomBuffUtils.PlayerUtils;
 using RandomBuffUtils;
 using MoreSlugcats;
 using System.Runtime.CompilerServices;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
@@ -24,15 +25,20 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override void StartGame(RainWorldGame game)
         {
             base.StartGame(game);
-            PlayerUtils.AddPart(new SoapSlugUtils());
+            PlayerUtils.AddPart(new SoapSlugUtils(BuffOptionInterface.Instance.CosmeticForEverySlug.Value));
         }
     }
 
     public class SoapSlugUtils : IOWnPlayerUtilsPart
     {
+        bool applyForAll;
+        public SoapSlugUtils(bool applyForAll)
+        {
+            this.applyForAll = applyForAll;
+        }
         public PlayerModulePart InitPart(PlayerModule module)
         {
-            if(module.Name == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)
+            if(module.Name == MoreSlugcatsEnums.SlugcatStatsName.Rivulet || applyForAll)
                 return new SoapSlugModule();
             return null;
         }

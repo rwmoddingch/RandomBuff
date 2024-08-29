@@ -125,6 +125,8 @@ namespace RandomBuff.Core.Progression
             LoadImgOfName("BuffCosmetic_MeteorSpear");
             LoadImgOfName("BuffCosmetic_AscendSparkle");
 
+            Futile.atlasManager.LoadImage("buffassets/illustrations/crownlight");
+
             void LoadImgOfName(string imgName)
             {
                 string imgPath = $"buffassets/BuffCosmeticIcons/{imgName}";

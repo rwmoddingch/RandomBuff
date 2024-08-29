@@ -13,6 +13,7 @@ using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Random = UnityEngine.Random;
 using System.Reflection;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Core.Progression.CosmeticUnlocks
 {
@@ -51,7 +52,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public static void PyroJumped(Player player)
         {
-            if (player.room == null)
+            if (player.room == null || (player.slugcatStats.name != MoreSlugcatsEnums.SlugcatStatsName.Artificer && !BuffOptionInterface.Instance.CosmeticForEverySlug.Value))
                 return;
             CreateFireworkEmitter(player.room, player.DangerPos);
             var game = player.room.game;

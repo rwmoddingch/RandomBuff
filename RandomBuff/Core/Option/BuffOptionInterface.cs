@@ -36,6 +36,7 @@ namespace RandomBuff.Core.Option
 
             DisableNotifyDialog = config.Bind(nameof(DisableNotifyDialog), false);
             DisableCardSlotText = config.Bind(nameof(DisableCardSlotText), false);
+            CosmeticForEverySlug = config.Bind(nameof(CosmeticForEverySlug), false);
             Instance = this;
 
         }
@@ -76,7 +77,10 @@ namespace RandomBuff.Core.Option
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_ShowExceptionLog", true),FLabelAlignment.Left),
                 new OpCheckBox(ShowExceptionLog,Vector2.zero));
 
+            AppendItems(option, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_CosmeticForEverySlug", true), FLabelAlignment.Left), new OpCheckBox(CosmeticForEverySlug, Vector2.zero));
+
             yIndex++;
+
 
 
             AppendItems(option, ref yIndex,
@@ -220,6 +224,8 @@ namespace RandomBuff.Core.Option
         public Configurable<bool> DisableNotifyDialog { get; private set; }
 
         public Configurable<bool> DisableCardSlotText { get; private set; }
+
+        public Configurable<bool> CosmeticForEverySlug { get; private set; }
 
 
         private OpCheckBox mainExpedition, modExpedition;

@@ -296,6 +296,7 @@ Remix_Option|Option
 Remix_CardSlotKey|View Card Slot Key
 Remix_KeyBindKey|Card Binding Key
 Remix_ShowExceptionLog|Exception Notifications
+Remix_CosmeticForEverySlug|Cosmetic for every slugcats
 Remix_EnableExpeditionExtend|Experimental - DLC Expedition Effects Conversion Cards
 Remix_EnableExpeditionModExtend|Experimental - MOD Expedition Effect Conversion Cards
 Remix_Cheat|Cheats
@@ -309,6 +310,7 @@ Remix_CheatAllCards_Desc|Allows free card drawing in sandbox mode. Cards usually
 Remix_CheatAllCosmetics_Desc|Usually requires completing specific missions to unlock.
 Remix_EnableExpeditionExtend_Desc|NEED RESTART TO APPLY, Converts Expedition and More Slugcat Expansion perks and burdens into cards.
 Remix_EnableExpeditionModExtend_Desc|NEED RESTART TO APPLY, Converts perks and burdens from other mods into cards. This may cause compatibility issues.
+Remix_CosmeticForEverySlug_Desc|Allow enabled cosmetics for every slugcats to use
 
 //SleepMenu
 SleepMenu_Stack|Stack Card

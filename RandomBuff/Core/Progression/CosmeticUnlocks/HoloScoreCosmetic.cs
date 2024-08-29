@@ -1,4 +1,5 @@
-﻿using RandomBuff.Render.UI.Component;
+﻿using RandomBuff.Core.Option;
+using RandomBuff.Render.UI.Component;
 using RandomBuffUtils;
 using RandomBuffUtils.Simple3D;
 using System.Collections.Generic;
@@ -14,11 +15,11 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public override string IconElement => "BuffCosmetic_HoloScore";
 
         public override SlugcatStats.Name BindCat => SlugcatStats.Name.Red;
-
+        bool applyForAll;
         private static void SocialEventRecognizer_Killing(On.SocialEventRecognizer.orig_Killing orig, SocialEventRecognizer self, Creature killer, Creature victim)
         {
             orig.Invoke(self, killer, victim);
-            if (killer is Player player && player.slugcatStats.name == SlugcatStats.Name.Red)
+            if (killer is Player player)
             {
                 Room room = player.room;
                 if(room == null)
@@ -38,6 +39,7 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         {
             base.StartGame(game);
             On.SocialEventRecognizer.Killing += SocialEventRecognizer_Killing;
+            applyForAll = BuffOptionInterface.Instance.CosmeticForEverySlug.Value;
             PlayerUtils.AddPart(this);
         }
 
@@ -50,7 +52,9 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
 
         public PlayerUtils.PlayerModulePart InitPart(PlayerUtils.PlayerModule module)
         {
-            return new HoloScoreModule();
+            if(module.Name ==  SlugcatStats.Name.Red || applyForAll)
+                return new HoloScoreModule();
+            return null;
         }
 
         public PlayerUtils.PlayerModuleGraphicPart InitGraphicPart(PlayerUtils.PlayerModule module)
@@ -61,15 +65,6 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         public class HoloScoreModule : PlayerUtils.PlayerModulePart
         {
             public int kills;
-
-            public override void Update(Player player, bool eu)
-            {
-                base.Update(player, eu);
-                //if (Input.GetKeyDown(KeyCode.W))
-                //{
-                //    player.room.AddObject(new HoloScore(player.room, player));
-                //}
-            }
         }
     
         public class HoloScore : CosmeticSprite, BuffCardTimer.IOwnBuffTimer

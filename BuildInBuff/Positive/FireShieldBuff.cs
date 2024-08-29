@@ -49,22 +49,6 @@ namespace BuiltinBuffs.Positive
                 }
             }
         }
-
-        public override bool Trigger(RainWorldGame game)
-        {
-            foreach (var player in FireShieldBuffEntry.PlayerList)
-            {
-                if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var fireShield) &&
-                    BuffInput.GetKeyDown(GetBindKey()))
-                {
-                    if (fireShield.IsActivate)
-                        fireShield.Deactivate();
-                    else if (!fireShield.IsActivate)
-                        fireShield.Activate();
-                }
-            }
-            return false;
-        }
     }
 
     internal class FireShieldBuffData : BuffData
@@ -144,6 +128,10 @@ namespace BuiltinBuffs.Positive
             {
                 if (fireShield.IsExisting)
                     self.Hypothermia = Mathf.Min(0, self.Hypothermia - 0.05f - 0.01f * StackLayer);
+            }
+            if (FireShieldStateFeatures.TryGetValue(self, out var fireShieldState))
+            {
+                fireShieldState.Update();
             }
         }
     }
@@ -290,6 +278,22 @@ namespace BuiltinBuffs.Positive
         {
             this.ownerRef = new WeakReference<Player>(c);
             this.IsActivate = true;
+        }
+
+        public void Update()
+        {
+            foreach (var player in FireShieldBuffEntry.PlayerList)
+            {
+                if (FireShieldBuffEntry.FireShieldStateFeatures.TryGetValue(player, out var fireShield) &&
+                    BuffInput.GetKeyDown(FireShieldBuff.Instance.GetBindKey()))
+                {
+                    FireShieldBuff.Instance.TriggerSelf(true);
+                    if (fireShield.IsActivate)
+                        fireShield.Deactivate();
+                    else if (!fireShield.IsActivate)
+                        fireShield.Activate();
+                }
+            }
         }
 
         public void Activate()

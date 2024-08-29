@@ -302,6 +302,7 @@ Remix_Option|配置
 Remix_CardSlotKey|查看卡牌按键
 Remix_KeyBindKey|卡牌绑键按键
 Remix_ShowExceptionLog|报错提示
+Remix_CosmeticForEverySlug|装饰品取消蛞蝓猫限制
 Remix_EnableExpeditionExtend|实验性 - DLC探险效果转化卡牌
 Remix_EnableExpeditionModExtend|实验性 - MOD探险效果转化卡牌
 Remix_Cheat|作弊
@@ -315,6 +316,7 @@ Remix_CheatAllCards_Desc|可在沙盒模式里自由抽取。通常需要获取�
 Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁
 Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫扩展的增益和负担转化为卡牌
 Remix_EnableExpeditionModExtend_Desc|需要重启以应用，将其他mod的增益和负担转化为卡牌，可能存在兼容性问题
+Remix_CosmeticForEverySlug_Desc|让启用的装饰品对所有猫生效
 
 //SleepMenu
 SleepMenu_Stack|叠加卡牌
