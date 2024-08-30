@@ -1991,6 +1991,8 @@ namespace BuiltinBuffs.Duality
                         else
                             huntPos = player.bodyChunks[0].pos + 100f * new Vector2(player.input[0].x, player.input[0].y);
                     }
+                    else
+                        huntPos = null;
                     float num2 = Mathf.Lerp(tentacleScaler[i, j], 1f, tentaclesWithdrawn);
                     for (int l = 0; l < tentacles[i, j].GetLength(0); l++)
                     {
