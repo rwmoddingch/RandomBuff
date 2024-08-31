@@ -96,7 +96,7 @@ namespace RandomBuff.Cardpedia
             scene = new InteractiveMenuScene(this, null, Menu.MenuScene.SceneID.Empty);
             pages[0].subObjects.Add(scene);
         }
-
+        
         public void InitMenuElements()
         {
             //Bling bling 背景

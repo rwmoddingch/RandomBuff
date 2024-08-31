@@ -235,7 +235,7 @@ namespace RandomBuff
         /// <summary>
         /// 清除全部Buff
         /// </summary>
-        internal void CleanAllBuffs()
+        internal static void CleanAllBuffs()
         {
             MissionRegister.CleanAll();
             BuffRegister.CleanAll();
@@ -248,7 +248,7 @@ namespace RandomBuff
         /// <summary>
         /// 重新加载全部Buff
         /// </summary>
-        internal void ReloadAllBuffs()
+        internal static void ReloadAllBuffs()
         {
             BuffPlugin.Log("Reload All buff plugins");
             CleanAllBuffs();
@@ -274,6 +274,11 @@ namespace RandomBuff
 
         }
 
+        internal static void UpdateNewEnableList(string[] list)
+        {
+            File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), list);
+        }
+
         private void Update()
         {
             CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
@@ -283,19 +288,6 @@ namespace RandomBuff
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();
 
-#if TESTVERSION
-            if (Input.GetKey(KeyCode.Y) && Input.GetKey(KeyCode.R) && Input.GetKeyDown(KeyCode.P))
-            {
-                File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), new[]
-                {
-                    "BuiltinBuffs",
-                    "ExpeditionExtend"
-                });
-                BuffPlugin.Log("Try Reload");
-
-                ReloadAllBuffs();
-            }
-#endif
         }
 
 

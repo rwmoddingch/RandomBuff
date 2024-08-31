@@ -56,6 +56,13 @@ namespace RandomBuff.Core.Buff
         private bool tryLoad = false;
 
 
+        internal void UnloadTexture()
+        {
+            if (FaceName != CardBasicAssets.MissingFace && Futile.atlasManager.DoesContainAtlas(FaceName))
+                Futile.atlasManager.UnloadImage(FaceName);
+            tryLoad = false;
+        }
+
         //帮助方法
         internal Texture GetFaceTexture()
         {

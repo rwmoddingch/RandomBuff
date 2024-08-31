@@ -32,8 +32,9 @@ namespace RandomBuff.Core.Buff
 
         public string Thumbnail { get; private set; } = "buffassets/illustrations/default_thumbnail";
 
-        public string[] Dependencies { get; private set; }
+        public string[] Dependencies { get; private set; } = Array.Empty<string>();
 
+        public bool Enabled => BuffPlugin.IsPluginsEnabled(AssemblyName);
 
         internal Assembly codeAssembly;
         internal Assembly dataAssembly;
@@ -67,14 +68,14 @@ namespace RandomBuff.Core.Buff
                     thumbnail = "thumbnail";
                 try
                 {
-                    Futile.atlasManager.LoadImage("buffinfos" + Path.AltDirectorySeparatorChar + newData + Path.AltDirectorySeparatorChar + (string)thumbnail);
-                    newData.Thumbnail = "buffinfos" + Path.AltDirectorySeparatorChar + newData + Path.AltDirectorySeparatorChar + (string)thumbnail;
+                    Futile.atlasManager.LoadImage("buffinfos" + Path.AltDirectorySeparatorChar + newData.AssemblyName + Path.AltDirectorySeparatorChar + (string)thumbnail);
+                    newData.Thumbnail = "buffinfos" + Path.AltDirectorySeparatorChar + newData.AssemblyName + Path.AltDirectorySeparatorChar + (string)thumbnail;
 
                 }
                 catch (FutileException e)
                 {
                     newData.Thumbnail = "buffassets/illustrations/default_thumbnail";
-                    BuffPlugin.LogError($"Card image not found at :{"buffplugins" + Path.AltDirectorySeparatorChar + (string)thumbnail}");
+                    BuffPlugin.LogWarning($"Card image not found at :{"buffplugins" + Path.AltDirectorySeparatorChar + (string)thumbnail}");
                 }
 
 

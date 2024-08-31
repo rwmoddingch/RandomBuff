@@ -169,7 +169,7 @@ namespace BuiltinBuffs.Expeditions
                 {
                   
                     if (IsUselessID(id)) continue;
-                    var re = BuffBuilder.GenerateBuffType("BuffExtend", id,
+                    var re = BuffBuilder.GenerateBuffType(typeof(ExpeditionExtend).Assembly.GetName().Name, id,
                         true, (il) => BuildILBuffCtor(il, id));
                     re.buffType.DefineMethodOverride("Destroy", typeof(void), Type.EmptyTypes,
                         Mono.Cecil.MethodAttributes.Public, (il) => BuildILDestroy(il, id));
@@ -189,7 +189,7 @@ namespace BuiltinBuffs.Expeditions
                 foreach (var id in group.Value)
                 {
                     if (IsUselessID(id)) continue;
-                    var re = BuffBuilder.GenerateBuffType("BuffExtend", id,
+                    var re = BuffBuilder.GenerateBuffType(typeof(ExpeditionExtend).Assembly.GetName().Name, id,
                    true, (il) => BuildILBuffCtor(il, id));
                     re.buffType.DefineMethodOverride("Destroy", typeof(void), Type.EmptyTypes,
                         Mono.Cecil.MethodAttributes.Public, (il) => BuildILDestroy(il, id));
@@ -209,7 +209,7 @@ namespace BuiltinBuffs.Expeditions
 
         private static void RegisterExpeditionType()
         {
-            var ass = BuffBuilder.FinishGenerate("BuffExtend").First();
+            var ass = BuffBuilder.FinishGenerate(typeof(ExpeditionExtend).Assembly.GetName().Name).First();
             var ctor = typeof(BuffStaticData).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic).First(i => i.GetParameters().Length == 0);
 
 
@@ -249,8 +249,8 @@ namespace BuiltinBuffs.Expeditions
                         $"(From:{Custom.rainWorld.inGameTranslator.Translate(ModManager.ActiveMods.FirstOrDefault(i => i.id == group.Key)?.name ?? group.Key)})\n") +
                         ForceUnlockedAndLoad(ExpeditionProgression.UnlockDescription, id),
                     });
-                    BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{id}Buff", true),
-                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
+                    BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}Buff", true),
+                        ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
                     BuffRegister.RegisterStaticData(staticData);
                 }
             }
@@ -294,8 +294,8 @@ namespace BuiltinBuffs.Expeditions
                                               $"(From:{Custom.rainWorld.inGameTranslator.Translate(ModManager.ActiveMods.FirstOrDefault(i => i.id == group.Key)?.name ?? group.Key)})\n")
                             + ForceUnlockedAndLoad(ExpeditionProgression.BurdenManualDescription, id),
                         });
-                    BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{id}Buff", true),
-                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
+                    BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}Buff", true),
+                        ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
                     BuffRegister.RegisterStaticData(staticData);
                 }
             }

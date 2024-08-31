@@ -53,7 +53,7 @@ namespace RandomBuff.Render.UI.BuffPack
                 enabledPlugins = new List<BuffPluginInfo>();
 
             packButtons = new List<PackButton>();
-            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values.Where(i => i.Enabled))
             {
                 var packButton = new PackButton(Vector2.zero, packButtonSize, pluginInfo, false, false)
                 {

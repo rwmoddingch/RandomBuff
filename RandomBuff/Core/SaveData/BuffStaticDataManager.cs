@@ -144,10 +144,8 @@ namespace RandomBuff.Core.SaveData
         internal static void CleanAll()
         {
             foreach (var data in StaticDatas)
-            {
-                if (data.Value.FaceName != CardBasicAssets.MissingFaceTexture && Futile.atlasManager.DoesContainAtlas(data.Value.FaceName))
-                    Futile.atlasManager.UnloadImage(data.Value.FaceName);
-            }
+                data.Value.UnloadTexture();
+            
 
             StaticDatas.Clear();
             BuffAssemblyMap.Clear();
@@ -173,19 +171,23 @@ namespace RandomBuff.Core.SaveData
             Futile.atlasManager.LoadImage("buffassets/illustrations/default_thumbnail");
             foreach (var mod in ModManager.ActiveMods)
             {
-                string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
-                if (!Directory.Exists(path))
+                string root = Path.Combine(mod.basePath, "buffinfos");
+                if (!Directory.Exists(root))
                     continue;
-                var dir = new DirectoryInfo(path);
-                BuffPlugin.LogDebug($"Load info file:{path}");
-
-                foreach (var file in dir.GetFiles("*.json"))
+                foreach (var dir in new DirectoryInfo(root).GetDirectories())
                 {
-                    if (BuffPluginInfo.LoadPluginInfo(file.FullName, out var info))
+                    BuffPlugin.LogDebug($"Load info file:{dir}");
+
+                    foreach (var file in dir.GetFiles("*.json"))
                     {
-                        PluginInfos.Add(info.AssemblyName, info);
+                        if (BuffPluginInfo.LoadPluginInfo(file.FullName, out var info))
+                        {
+                            PluginInfos.Add(info.AssemblyName, info);
+                        }
                     }
                 }
+
+           
             }
             //给其他未定义info的自动添加info
             foreach (var item in BuffAssemblyTable)

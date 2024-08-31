@@ -21,6 +21,17 @@ namespace RandomBuff.Core.Option
         private const float XSpacing = 50;
         private static readonly Color CheatColor = new Color(0.85f, 0.35f, 0.4f);
 
+
+        public List<PackButton> packButtons;
+
+        private bool[] isChanged;
+
+        public bool HasAnyChanged()
+        {
+            return isChanged.Any(i => i);
+        }
+
+
         public static BuffOptionInterface Instance { get; private set; }
 
         public BuffOptionInterface()
@@ -127,12 +138,21 @@ namespace RandomBuff.Core.Option
 
 
             float sizeY = 0f;
-            List<PackButton> packButtons = new List<PackButton>();
-            foreach(var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            packButtons = packButtons = new List<PackButton>();
+           
+            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values)
             {
-                packButtons.Add(new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo));
+                var button = new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo) { Enabled = pluginInfo.Enabled };
+                var index = packButtons.Count;
+                button.ToggleCallBack += () =>
+                {
+                    isChanged[index] = !isChanged[index];
+                };
+                packButtons.Add(button);
                 sizeY += 120f + 20f;
             }
+
+            isChanged = new bool[packButtons.Count];
 
             sizeY = Mathf.Max(sizeY, 560f);
 

@@ -71,7 +71,7 @@ namespace RandomBuff.Render.UI.Component
             this.hoverPos = hoverPos;
             this.anchor = anchor;
 
-            foreach(var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            foreach(var pluginInfo in BuffConfigManager.PluginInfos.Values.Where(i => i.Enabled))
                 currentEnabledBuffPlugins.Add(pluginInfo);
 
             container = new FContainer();

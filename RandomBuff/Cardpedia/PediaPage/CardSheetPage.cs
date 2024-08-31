@@ -53,7 +53,7 @@ namespace RandomBuff.Cardpedia.PediaPage
         {
             this.cardpediaMenu = cardpediaMenu;
 
-            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values.Where(i => i.Enabled))
                 enabledPlugins.Add(pluginInfo);
 
             sheetPageContainer = new FContainer();

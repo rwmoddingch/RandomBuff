@@ -524,7 +524,10 @@ namespace RandomBuff.Core.Entry
                 var assemblyName = assemblyDef.Name.Name;
                 assemblyDef.Dispose();
                 if (!BuffPlugin.IsPluginsEnabled(assemblyName))
+                {
+                    BuffConfigManager.GetPluginInfo(assemblyName);
                     return (null, true);
+                }
 
                 if (BuffConfigManager.GetPluginInfo(assemblyName).codeAssembly is { } assembly)
                 {

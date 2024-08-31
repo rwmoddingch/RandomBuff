@@ -5,6 +5,7 @@ using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -24,6 +25,7 @@ namespace RandomBuff.Render.UI.BuffPack
 
         bool showDescription;
         bool canBeDisable;
+
 
         Vector2 spriteRect;
 
@@ -76,7 +78,19 @@ namespace RandomBuff.Render.UI.BuffPack
                 descriptionLabel.color = MenuColorEffect.rgbMediumGrey;
             }
 
-            OnClick += PackButton_OnClick;
+            AddEvent(this, "OnClick", "PackButton_OnClick");
+        }
+
+        private void AddEvent(object owner, string eventName, string func)
+        {
+            var type = owner.GetType();
+            EventInfo eInfo = type.GetEvent(eventName);
+            eInfo.GetAddMethod().Invoke(owner,
+                new[]
+                {
+                    Delegate.CreateDelegate(eInfo.EventHandlerType, this,
+                        type.GetMethod(func, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                });
         }
 
         private void PackButton_OnClick(UIfocusable trigger)
