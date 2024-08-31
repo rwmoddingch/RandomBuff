@@ -90,14 +90,15 @@ namespace BuiltinBuffs.Negative
             if (!ownerRef.TryGetTarget(out var player) || player.room == null)
                 return;
 
-            //玩家位于管道中
-            if (player.room.aimap != null && player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace)
+            //玩家位于管道中、业力门或避难所
+            if ((player.room.aimap != null && player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace) || 
+                 InGateOrShelter())
                 delaySpawn = true;
             //玩家离开管道
             else
                 delaySpawn = false;
 
-            //玩家不处于管道中时，开始生成之前被推迟生成的落网虫
+            //玩家不处于管道中、业力门或避难所， 且满足条件时，开始生成之前被推迟生成的落网虫
             if (!delaySpawn && delayCount.Count > 0 && HasCeiling())
             {
                 delayCount[0]--;
@@ -176,6 +177,16 @@ namespace BuiltinBuffs.Negative
             Vector2 corner = Custom.RectCollision(player.DangerPos, player.DangerPos + 100000f * Vector2.up, player.room.RoomRect).GetCorner(FloatRect.CornerLabel.D);
             IntVector2? intVector = SharedPhysics.RayTraceTilesForTerrainReturnFirstSolid(player.room, player.DangerPos, corner);
             if (intVector != null)
+                return true;
+            else
+                return false;
+        }
+
+        public bool InGateOrShelter()
+        {
+            if (!ownerRef.TryGetTarget(out var player) || player.room == null)
+                return false;
+            if (player.room.abstractRoom.gate || player.room.abstractRoom.shelter)
                 return true;
             else
                 return false;
