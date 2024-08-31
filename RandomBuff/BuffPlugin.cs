@@ -1,8 +1,8 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using BepInEx;
@@ -28,8 +28,6 @@ using RandomBuff.Core.Option;
 using Steamworks;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.ExceptionTracker;
-using MonoMod.RuntimeDetour;
-using RandomBuff.Core.Buff;
 using RandomBuff.Core.Progression.Quest;
 
 
@@ -45,16 +43,11 @@ using RandomBuff.Core.Progression.Quest;
 namespace RandomBuff
 {
     [BepInPlugin(ModId, "Random Buff", ModVersion)]
-    internal class BuffPlugin : BaseUnityPlugin
+    internal partial class BuffPlugin : BaseUnityPlugin
     {
-        public static BuffFormatVersion saveVersion = new ("a-0.0.6");
+        public static BuffFormatVersion saveVersion = new("a-0.0.6");
 
         public static BuffFormatVersion outDateVersion = new("a-0.0.3");
-
-        internal static ManualLogSource LogInstance { get; private set; }
-
-        internal static BuffPlugin Instance { get; private set; }
-
 
         public static BuffOptionInterface Option { get; private set; }
 
@@ -64,11 +57,27 @@ namespace RandomBuff
 
         public static string CacheFolder { get; private set; }
 
+
+        internal static ManualLogSource LogInstance { get; private set; }
+        internal static BuffPlugin Instance { get; private set; }
+
+
+
+        private static bool isLoaded = false;
+        private static bool canAccessLog = true;
+
+#if TESTVERSION
+        internal static bool DevEnabled => true;
+        private FStage devVersion;
+#else
+        internal static bool DevEnabled => false;
+#endif
+
+
         public void OnEnable()
         {
             LogInstance = this.Logger;
             Instance = this;
-            
 
             try
             {
@@ -83,19 +92,8 @@ namespace RandomBuff
             }
         }
 
-        private void Update()
-        {
-            CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
-            ExceptionTracker.Singleton?.Update();
-            BuffExceptionTracker.Singleton?.RawUpdate();
-            
-            SoapBubblePool.UpdateInactiveItems();
-            FakeFoodPool.UpdateInactiveItems();
-        }
 
-#if TESTVERSION
-        private FStage devVersion;
-#endif
+
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
@@ -113,7 +111,7 @@ namespace RandomBuff
                 Logger.LogFatal(e.ToString());
                 UnityEngine.Debug.LogException(e);
             }
-          
+
             try
             {
                 orig(self);
@@ -126,15 +124,22 @@ namespace RandomBuff
             OnModsInit();
         }
 
+
         private void OnModsInit()
         {
             try
             {
                 if (!isLoaded)
                 {
+
+                    basePath = ModManager.ActiveMods.First(i => i.id == ModId).basePath;
                     Log($"Version: {ModVersion}, Current save version: {saveVersion}, {DateTime.Now}");
 
+
+
                     CheckBuffPluginVersion();
+
+
 #if TESTVERSION
                     Log($"!!!!TEST BUILD!!!!");
 
@@ -218,12 +223,37 @@ namespace RandomBuff
             }
         }
 
+    }
+
+    internal partial class BuffPlugin 
+    {
+
+        private static HashSet<string> EnabledPlugins { get; set; }
+
+        private static string basePath;
+
+        /// <summary>
+        /// 清除全部Buff
+        /// </summary>
+        internal void CleanAllBuffs()
+        {
+            MissionRegister.CleanAll();
+            BuffRegister.CleanAll();
+            BuffHookWarpper.CleanAll();
+            BuffConfigManager.CleanAll();
+            QuestCondition.CleanAll();
+
+        }
+
         /// <summary>
         /// 重新加载全部Buff
         /// </summary>
         internal void ReloadAllBuffs()
         {
+            BuffPlugin.Log("Reload All buff plugins");
             CleanAllBuffs();
+
+            LoadEnabledPlugins();
 
             BuffRegister.InitAllBuffPlugin();
             BuffRegister.BuildAllBuffConfigWarpper();
@@ -242,35 +272,45 @@ namespace RandomBuff
 
             BuffRegister.LoadBuffPluginAsset();
 
-
-
         }
 
-
-        /// <summary>
-        /// 清除全部Buff
-        /// </summary>
-        internal void CleanAllBuffs()
+        private void Update()
         {
-            BuffRegister.CleanBuffs();
-            BuffConfigManager.CleanAll();
+            CardRendererManager.UpdateInactiveRendererTimers(Time.deltaTime);
+            ExceptionTracker.Singleton?.Update();
+            BuffExceptionTracker.Singleton?.RawUpdate();
 
+            SoapBubblePool.UpdateInactiveItems();
+            FakeFoodPool.UpdateInactiveItems();
+
+#if TESTVERSION
+            if (Input.GetKey(KeyCode.Y) && Input.GetKey(KeyCode.R) && Input.GetKeyDown(KeyCode.P))
+            {
+                File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), new[]
+                {
+                    "BuiltinBuffs",
+                    "ExpeditionExtend"
+                });
+                BuffPlugin.Log("Try Reload");
+
+                ReloadAllBuffs();
+            }
+#endif
         }
+
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception && BuffOptionInterface.Instance.ShowExceptionLog.Value)
-                ExceptionTracker.TrackExceptionNew(stackTrace,condition);
-            
-        }
+                ExceptionTracker.TrackExceptionNew(stackTrace, condition);
 
+        }
 
 
 
         private void CheckBuffPluginVersion()
         {
-            CacheFolder = ModManager.ActiveMods.First(i => i.id == ModId).basePath +
-                                 Path.AltDirectorySeparatorChar + "buffcaches";
+            CacheFolder = basePath + Path.AltDirectorySeparatorChar + "buffcaches";
             if (!Directory.Exists(CacheFolder))
                 Directory.CreateDirectory(CacheFolder);
 
@@ -280,8 +320,9 @@ namespace RandomBuff
                 var lines = File.ReadAllLines(Path.Combine(CacheFolder, "buffVersion")).ToList();
                 var lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
 
-                foreach (var mod in ModManager.ActiveMods.Where(i => Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
-                                                                     Directory.Exists(Path.Combine(i.basePath, "buffassets"))))
+                foreach (var mod in ModManager.ActiveMods.Where(i =>
+                             Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
+                             Directory.Exists(Path.Combine(i.basePath, "buffassets"))))
                 {
                     if (lastVersion.TryGetValue(mod.id, out var version))
                     {
@@ -289,7 +330,8 @@ namespace RandomBuff
                         {
                             lines.Add($"{mod.id}|{mod.version}");
                             lines.Remove($"{mod.id}|{version}");
-                            BuffPlugin.Log($"Enabled mod version changed : [{mod.id},{mod.version}], last version:{version}");
+                            BuffPlugin.Log(
+                                $"Enabled mod version changed : [{mod.id},{mod.version}], last version:{version}");
                             if (!hasDeleteAll)
                             {
                                 foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
@@ -306,6 +348,7 @@ namespace RandomBuff
                         BuffPlugin.Log($"New enable mod : [{mod.id},{mod.version}");
                     }
                 }
+
                 File.WriteAllLines(Path.Combine(CacheFolder, "buffVersion"), lines);
             }
             else
@@ -321,15 +364,35 @@ namespace RandomBuff
 
         }
 
-        private static bool isLoaded = false;
-        private static bool canAccessLog = true;
+        private static void LoadEnabledPlugins()
+        {
+            if (!File.Exists(basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"))
+            {
+                File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), new[]
+                {
+                    "BuiltinBuffs",
+                    "ExpeditionExtend"
+                });
+            }
 
-#if TESTVERSION
-        internal static bool DevEnabled => true;
-#else
-        internal static bool DevEnabled => false;
-#endif
+            EnabledPlugins = File.ReadAllLines(basePath + Path.AltDirectorySeparatorChar + "EnablePlugins").ToHashSet();
+            foreach (var id in EnabledPlugins)
+                BuffPlugin.Log($"Enabled Buff Plugins: [{id}]");
+            
+        }
+    }
 
+
+
+
+    internal partial class BuffPlugin
+    {
+
+        internal static bool IsPluginsEnabled(string assemblyName)
+        {
+            BuffPlugin.LogDebug(assemblyName);
+            return EnabledPlugins.Contains(assemblyName);
+        }
 
 
         /// <summary>

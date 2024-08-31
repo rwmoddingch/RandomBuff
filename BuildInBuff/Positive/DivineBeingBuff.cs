@@ -45,11 +45,14 @@ namespace BuiltinBuffs.Positive
 
         public void OnEnable()
         {
+            //Custom.rainWorld.Shaders.Add("DivineBeingRing", FShader.CreateShader("DivineBeingRing", ));
+            BuffRegister.RegisterBuff<DivineBeingBuff, DivineBeingBuffData, DivineBeingIBuffEntry>(DivineBeingBuffID);
+        }
+
+        public static void LoadAssets()
+        {
             var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/builtinbundle"));
             RingShaderInstance = bundle.LoadAsset<Shader>("divinering");
-            //Custom.rainWorld.Shaders.Add("DivineBeingRing", FShader.CreateShader("DivineBeingRing", ));
-
-            BuffRegister.RegisterBuff<DivineBeingBuff, DivineBeingBuffData, DivineBeingIBuffEntry>(DivineBeingBuffID);
         }
 
         public static void HookOn()

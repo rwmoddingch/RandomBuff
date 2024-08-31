@@ -46,6 +46,11 @@ namespace RandomBuff.Core.Game.Settings.Missions
                 BuffPlugin.LogError($"Missing some dependence for Mission ID:{ID}");
         }
 
+        internal static void CleanAll()
+        {
+            registeredMissions.Clear();
+        }
+
         internal static void RegisterAllMissions()
         {
             

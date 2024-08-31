@@ -67,6 +67,11 @@ namespace RandomBuff.Core.Progression.Quest.Condition
 
         }
 
+        public static void CleanAll()
+        {
+            QuestConditionTypes.Clear();
+        }
+
         internal static void Init()
         {
             Register<LevelQuestCondition>();

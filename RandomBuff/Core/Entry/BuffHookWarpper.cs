@@ -43,7 +43,7 @@ namespace RandomBuff.Core.Entry
                  }
                  else
                  {
-                     _ = new ILHook(method, (il) => RegisterBuffHook_Impl(id, type, il, method, HookLifeTimeLevel.InGame));
+                     AllHooks.Add(new ILHook(method, (il) => RegisterBuffHook_Impl(id, type, il, method, HookLifeTimeLevel.InGame)));
                  }
              }
              
@@ -160,6 +160,19 @@ namespace RandomBuff.Core.Entry
             }
         }
 
+
+        public static void CleanAll()
+        {
+            RegistedAddHooks.Clear();
+            RegistedRemoveHooks.Clear();
+            RegistedRemoveCondition.Clear();
+
+            AllHooks.ForEach(i => i.Dispose());
+            AllHooks.Clear();
+            AllMethodDefinitions.ForEach(i => i.Dispose());
+            AllMethodDefinitions.Clear();
+        }
+
     }
 
     internal static partial class BuffHookWarpper
@@ -180,11 +193,14 @@ namespace RandomBuff.Core.Entry
                 hookAssembly = typeof(On.Player).Assembly;
             DynamicMethodDefinition method = new($"BuffDisableHook_{type.Name}", origMethod.ReturnType,
                 new []{type});
+
+            AllMethodDefinitions.Add(method);
+
             ILProcessor ilProcessor = method.GetILProcessor();
             BuffPlugin.Log($"RegisterCondition - {Helper.GetUninit<Condition>(type).ID}");
 
             
-            _ = new ILHook(origMethod, (il) =>
+            AllHooks.Add(new ILHook(origMethod, (il) =>
             {
                 bool hasShownBranchMessage = false;
                 foreach (var v in il.Body.Variables)
@@ -280,7 +296,7 @@ namespace RandomBuff.Core.Entry
                     c.Emit(OpCodes.Call, typeof(List<IDetour>).GetMethod(nameof(List<IDetour>.Add)));
                 }
 
-            });
+            }));
    
             var deg = method.Generate().CreateDelegate<Action<TCondition>>();
             RegistedRemoveCondition.Add(Helper.GetUninit<Condition>(type).ID, (condition => deg.Invoke(condition as TCondition)));
@@ -297,6 +313,11 @@ namespace RandomBuff.Core.Entry
 
             DynamicMethodDefinition disableMethod = new ($"BuffDisableHook_{id}_{level}", typeof(void), new[] {typeof(string)});
             DynamicMethodDefinition method = new($"BuffHook_{id}_{level}", typeof(void), new[] { typeof(string) });
+
+            AllMethodDefinitions.Add(disableMethod);
+            AllMethodDefinitions.Add(method);
+
+
 
             var eil = method.GetILProcessor();
             var dil = disableMethod.GetILProcessor();
@@ -508,6 +529,10 @@ namespace RandomBuff.Core.Entry
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, Action<string>>> RegistedRemoveHooks = new();
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, List<IDetour>>> RegistedRuntimeHooks = new();
         private static readonly Dictionary<BuffID, Dictionary<HookLifeTimeLevel, bool>> HasEnabled = new();
+
+
+        private static readonly List<ILHook> AllHooks = new();
+        private static readonly List<DynamicMethodDefinition> AllMethodDefinitions = new();
 
 
         private static readonly Dictionary<ConditionID,Action<Condition>> RegistedRemoveCondition = new();

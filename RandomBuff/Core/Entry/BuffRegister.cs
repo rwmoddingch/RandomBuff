@@ -376,7 +376,7 @@ namespace RandomBuff.Core.Entry
 
 
 
-        internal static void CleanBuffs()
+        internal static void CleanAll()
         {
             DataTypes.Clear();
             BuffTypes.Clear();
@@ -402,7 +402,7 @@ namespace RandomBuff.Core.Entry
 
                 if (!BuffConfigManager.ContainsId(type))
                 {
-                    BuffPlugin.LogError($"Can't find json data for ID：{type}!");
+                    BuffPlugin.LogError($"Can't find json data for ID：{type}!, UnRegister Buff");
                     BuffTypes.Remove(type);
                     DataTypes.Remove(type);
                     type.Unregister();
@@ -433,6 +433,13 @@ namespace RandomBuff.Core.Entry
                 foreach (var file in info.GetFiles("*.dll"))
                 {
                     (Assembly assembly, bool needLoadAsset) = CheckAndUpdateBuffPlugin(mod, file);
+
+                    //代表没启用
+                    if (assembly == null)
+                    {
+                        BuffPlugin.LogWarning($"Skip load {file} because Disabled");
+                        continue;
+                    }
                     AllBuffAssemblies.Add(assembly);
                     CurrentPluginId = assembly.GetName().Name;
                     BuffPlugin.Log(
@@ -516,6 +523,9 @@ namespace RandomBuff.Core.Entry
                 var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName);
                 var assemblyName = assemblyDef.Name.Name;
                 assemblyDef.Dispose();
+                if (!BuffPlugin.IsPluginsEnabled(assemblyName))
+                    return (null, true);
+
                 if (BuffConfigManager.GetPluginInfo(assemblyName).codeAssembly is { } assembly)
                 {
                     BuffPlugin.LogDebug($"Has load assembly for {assembly}");

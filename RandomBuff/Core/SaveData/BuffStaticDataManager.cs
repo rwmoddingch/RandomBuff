@@ -212,25 +212,24 @@ namespace RandomBuff.Core.SaveData
             if (!Directory.Exists(root))
                 yield break;
 
-            foreach (var dir in Directory.GetDirectories(root))
+            foreach (var dir in new DirectoryInfo(root).GetDirectories())
             {
-                var path = Path.Combine(dir, folderName);
-                if (Directory.Exists(path))
+                var path = Path.Combine(dir.FullName, folderName);
+                if (Directory.Exists(path) && BuffPlugin.IsPluginsEnabled(dir.Name))
                     yield return path;
-                
+
             }
         }
         private static IEnumerable<(string, string)> GetPluginFolderWithId(ModManager.Mod mod, string folderName)
         {
             string root = Path.Combine(mod.basePath, "buffinfos");
-            BuffPlugin.Log($"root :{root}");
             if (!Directory.Exists(root))
                 yield break;
 
             foreach (var dir in new DirectoryInfo(root).GetDirectories())
             {
                 var path = Path.Combine(dir.FullName, folderName);
-                if (Directory.Exists(path))
+                if (Directory.Exists(path) && BuffPlugin.IsPluginsEnabled(dir.Name))
                     yield return (path, dir.Name);
 
             }
@@ -245,14 +244,15 @@ namespace RandomBuff.Core.SaveData
             BuffPlugin.Log("Loading All Buff Static Data!");
 
             foreach (var mod in ModManager.ActiveMods)
-                foreach ((string path, string id) in GetPluginFolderWithId(mod, "cardinfos"))
+                foreach ((string path, string pluginId) in GetPluginFolderWithId(mod, "cardinfos"))
                 {
-                    if (GetPluginInfo(id).dataAssembly is not { } ass)
+                    BuffPlugin.Log($"Load static datas at {path}");
+                    if (GetPluginInfo(pluginId).dataAssembly is not { } ass)
                     {
                         ass = null;
-                        if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{id}_dataCache.dll")) &&
-                            CheckFileNoUpdated(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{id}_dataCache.dll"), path))
-                            ass = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{id}_dataCache.dll"));
+                        if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{pluginId}_dataCache.dll")) &&
+                            CheckFileNoUpdated(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{pluginId}_dataCache.dll"), path))
+                            ass = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{pluginId}_dataCache.dll"));
                     }
 
                     if (ass != null)
@@ -260,10 +260,10 @@ namespace RandomBuff.Core.SaveData
                         Type[] types = ass.GetTypes();
                         if (types.FirstOrDefault(i => i.Name.Contains("StaticCache_")) is { } type)
                         {
-                            BuffPlugin.Log($"Load cache file for mod:{mod.id}");
+                            BuffPlugin.Log($"Load cache file for mod:{mod.id}-{pluginId}");
                             var modStaticData = (HashSet<BuffStaticData>)type.GetField("StaticData", BindingFlags.Public | BindingFlags.Static)
                                 .GetValue(null);
-                            PluginStaticDataTable.Add(mod.id, modStaticData);
+                            PluginStaticDataTable.Add(pluginId, modStaticData);
                             foreach (var data in modStaticData)
                             {
                                 if (StaticDatas.ContainsKey(data.BuffID))
@@ -279,7 +279,7 @@ namespace RandomBuff.Core.SaveData
                         }
                     }
 
-                    using AssemblyDefinition assembly = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition($"{mod.id}_{id}_dataCache", new Version(BuffPlugin.ModVersion)),
+                    using AssemblyDefinition assembly = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition($"{mod.id}_{pluginId}_dataCache", new Version(BuffPlugin.ModVersion)),
                         "Main", ModuleKind.Dll);
                     var decl = new SecurityDeclaration(Mono.Cecil.SecurityAction.RequestMinimum);
                     assembly.SecurityDeclarations.Add(decl);
@@ -288,21 +288,21 @@ namespace RandomBuff.Core.SaveData
                     attr.Properties.Add(new Mono.Cecil.CustomAttributeNamedArgument("SkipVerification",
                         new CustomAttributeArgument(assembly.MainModule.TypeSystem.Boolean, true)));
 
-                    PluginStaticDataTable.Add(mod.id, new());
-                    LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName, mod.id);
+                    PluginStaticDataTable.Add(pluginId, new());
+                    LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName, pluginId);
 
-                    if (CreateStaticDataCache(assembly.MainModule, mod.id))
-                        assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{id}_dataCache.dll"));
+                    if (CreateStaticDataCache(assembly.MainModule, mod.id, pluginId))
+                        assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{pluginId}_dataCache.dll"));
                 }
 
 
             PluginStaticDataTable.Clear();
 
-            void LoadInDirectory(DirectoryInfo info, string rootPath, string modId)
+            void LoadInDirectory(DirectoryInfo info, string rootPath, string pluginId)
             {
                 foreach (var dir in info.GetDirectories())
                 {
-                    LoadInDirectory(dir, rootPath, modId);
+                    LoadInDirectory(dir, rootPath, pluginId);
                 }
 
                 foreach (var file in info.GetFiles("*.json"))
@@ -313,7 +313,7 @@ namespace RandomBuff.Core.SaveData
                         if (!StaticDatas.ContainsKey(data.BuffID))
                         {
                             StaticDatas.Add(data.BuffID, data);
-                            PluginStaticDataTable[modId].Add(data);
+                            PluginStaticDataTable[pluginId].Add(data);
                             BuffTypeTable[data.BuffType].Add(data.BuffID);
                         }
                         else
@@ -439,20 +439,20 @@ namespace RandomBuff.Core.SaveData
                     }
 
 
-#if TESTVERSION
-                foreach (var qId in GetQuestIDList())
-                {
-                    BuffPlugin.LogDebug($"Quest ID:{qId}");
-                    foreach (var con in GetQuestData(qId).QuestConditions)
-                        BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
-                    foreach (var reward in GetQuestData(qId).UnlockItem)
-                    foreach (var v in reward.Value)
-                        BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
+//#if TESTVERSION
+//                foreach (var qId in GetQuestIDList())
+//                {
+//                    BuffPlugin.LogDebug($"Quest ID:{qId}");
+//                    foreach (var con in GetQuestData(qId).QuestConditions)
+//                        BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
+//                    foreach (var reward in GetQuestData(qId).UnlockItem)
+//                    foreach (var v in reward.Value)
+//                        BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
 
 
 
-                }
-#endif
+//                }
+//#endif
                 }
 
         }
@@ -460,11 +460,11 @@ namespace RandomBuff.Core.SaveData
 
         #region cache
 
-        private static bool CreateStaticDataCache(ModuleDefinition module, string modId)
+        private static bool CreateStaticDataCache(ModuleDefinition module, string modId, string pluginId)
         {
             try
             {
-                var type = new TypeDefinition("RandomBuffCache", $"StaticCache_{modId}", Mono.Cecil.TypeAttributes.Public |
+                var type = new TypeDefinition("RandomBuffCache", $"StaticCache_{modId}_{pluginId}", Mono.Cecil.TypeAttributes.Public |
                     Mono.Cecil.TypeAttributes.Abstract | Mono.Cecil.TypeAttributes.Sealed |
                     Mono.Cecil.TypeAttributes.BeforeFieldInit, module.TypeSystem.Object);
                 module.Types.Add(type);
@@ -473,7 +473,7 @@ namespace RandomBuff.Core.SaveData
                     module.ImportReference(typeof(HashSet<BuffStaticData>)));
                 type.Fields.Add(field);
 
-                BuffPlugin.Log($"Create static data cache for {modId}");
+                BuffPlugin.Log($"Create static data cache for {modId}-{pluginId}");
                 var staticDataType = typeof(BuffStaticData);
                 var staticDataCtor = staticDataType.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
                     .First(i => i.GetParameters().Length == 0);
@@ -488,10 +488,10 @@ namespace RandomBuff.Core.SaveData
 
                     il.Emit(OpCodes.Newobj, typeof(HashSet<BuffStaticData>).GetConstructor(Type.EmptyTypes));
                     il.Emit(OpCodes.Stsfld, field);
-                    foreach (var data in PluginStaticDataTable[modId])
+                    foreach (var data in PluginStaticDataTable[pluginId])
                     {
 #if TESTVERSION
-                        BuffPlugin.LogDebug($"Build static data cache for Mod:{modId}, ID:{data.BuffID}");
+                        BuffPlugin.LogDebug($"Build static data cache for Buff Plugin:{pluginId}, ID:{data.BuffID}");
 #endif
                         il.Emit(OpCodes.Ldsfld, field);
                         il.Emit(OpCodes.Newobj, staticDataCtor);
