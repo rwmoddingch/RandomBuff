@@ -146,7 +146,7 @@ namespace BuiltinBuffs.Negative
 
             bool debugMode = false;
             #if TESTVERSION
-            debugMode = Input.GetKeyDown(KeyCode.C);
+            //debugMode = Input.GetKeyDown(KeyCode.C);
             #endif
 
             //概率和位置满足条件时
