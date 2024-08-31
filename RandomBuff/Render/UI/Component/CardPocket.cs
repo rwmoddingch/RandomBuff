@@ -14,6 +14,7 @@ using UnityEngine;
 using static RandomBuff.Render.UI.Component.CardPocketSlot;
 using Menu;
 using RandomBuff.Core.Game;
+using RandomBuff.Render.UI.BuffPack;
 
 namespace RandomBuff.Render.UI.Component
 {
@@ -30,20 +31,25 @@ namespace RandomBuff.Render.UI.Component
         public Action<List<BuffRep>> onSelectedBuffChange;
         public Action<bool> toggleShowCallBack;
 
+        public PackMenu packMenu;
+
         bool show = false;
         FContainer container;
         FContainer bottomContainer_2;
         FContainer bottomContainer_1;
         FContainer symbolContainer;
         CardPocketSlot slot;
+
         public List<BuffRep> currentSelectedBuffs = new List<BuffRep>();
         public List<BuffRep> lastSelectedBuffs = new List<BuffRep>();
+        public List<BuffPluginInfo> currentEnabledBuffPlugins = new List<BuffPluginInfo>();
 
         public FContainer Container => container;
         public FContainer SymbolContainer => symbolContainer;
         public FContainer BottomContainer_1 => bottomContainer_1;
         public FContainer BottomContainer_2 => bottomContainer_2;
         public bool Show => show;
+        public bool EnableInput => packMenu == null || !packMenu.ShowPack;
         public string Title
         {
             get => title;
@@ -65,6 +71,8 @@ namespace RandomBuff.Render.UI.Component
             this.hoverPos = hoverPos;
             this.anchor = anchor;
 
+            foreach(var pluginInfo in BuffConfigManager.PluginInfos.Values)
+                currentEnabledBuffPlugins.Add(pluginInfo);
 
             container = new FContainer();
             bottomContainer_1 = new FContainer();
@@ -81,6 +89,7 @@ namespace RandomBuff.Render.UI.Component
 
             slot.SetShow(false);
             container.alpha = 0f;
+
         }
 
         public void Update()
@@ -121,6 +130,16 @@ namespace RandomBuff.Render.UI.Component
                         showAnim = null;
                         container.alpha = 1f;
                     });
+
+                if(packMenu == null)
+                {
+                    packMenu = new PackMenu(Custom.rainWorld.processManager, new Vector2(40f, 40f), currentEnabledBuffPlugins);
+                    Custom.rainWorld.processManager.sideProcesses.Add(packMenu);
+                    packMenu.OnTogglePackCallBack = (lst) =>
+                    {
+                        slot.RecaculateBuffRolls(lst, true);
+                    };
+                }
             }
             else
             {
@@ -138,6 +157,12 @@ namespace RandomBuff.Render.UI.Component
                        slot.SetShow(false);
                        container.alpha = 0f;
                    });
+                if(packMenu != null)
+                {
+                    packMenu.ShutDownProcess();
+                    Custom.rainWorld.processManager.sideProcesses.Remove(packMenu);
+                    packMenu = null;
+                }
             }
         }
 
@@ -192,6 +217,13 @@ namespace RandomBuff.Render.UI.Component
             bottomContainer_2.RemoveAllChildren();
             symbolContainer.RemoveAllChildren();
             slot.Destory();
+
+            if (packMenu != null)
+            {
+                packMenu.ShutDownProcess();
+                Custom.rainWorld.processManager.sideProcesses.Remove(packMenu);
+                packMenu = null;
+            }
         }
 
         public IEnumerable<Vector2> GetAllButtonPos()
@@ -280,35 +312,7 @@ namespace RandomBuff.Render.UI.Component
             foreach (var buffType in Helper.EnumBuffTypes())
                 buffRolls.Add(buffType, new List<BuffRep[]>());
 
-            Dictionary<BuffType, List<BuffRep>> currentBuffRolls = new Dictionary<BuffType, List<BuffRep>>() {
-                { BuffType.Positive, new List<BuffRep>()},
-                { BuffType.Duality, new List<BuffRep>()},
-                { BuffType.Negative, new List<BuffRep>()}};
-
-            foreach (var buffIDValue in BuffID.values.entries)
-            {
-                var id = new BuffID(buffIDValue);
-                if (!BuffConfigManager.ContainsId(id) || !BuffPlayerData.Instance.IsCollected(id) ||
-                    BuffConfigManager.IsItemLocked(QuestUnlockedType.Card, id.value))
-                    continue;
-                var staticData = BuffConfigManager.GetStaticData(id);
-
-                var rep = TryGetRep(id);
-
-                currentBuffRolls[staticData.BuffType].Add(rep);
-                if (currentBuffRolls[staticData.BuffType].Count == cardsInRoll)
-                {
-                    buffRolls[staticData.BuffType].Add(currentBuffRolls[staticData.BuffType].ToArray());
-                    currentBuffRolls[staticData.BuffType].Clear();
-                }
-            }
-
-            foreach(var buffType in Helper.EnumBuffTypes())
-            {
-                if (currentBuffRolls[buffType].Count > 0)
-                    buffRolls[buffType].Add(currentBuffRolls[buffType].ToArray());
-                allContentSize[buffType] = buffRolls[buffType].Count * (buffCardSize.y + CardPocket.gap) + CardPocket.gap;
-            }
+            RecaculateBuffRolls();
             #endregion
 
             SetBuffType(BuffType.Positive, false);
@@ -365,6 +369,56 @@ namespace RandomBuff.Render.UI.Component
             };
         }
 
+        public void RecaculateBuffRolls(List<BuffPluginInfo> enabledPlugins = null, bool updateDisplay = false)
+        {
+            if (enabledPlugins != null)
+                pocket.currentEnabledBuffPlugins = enabledPlugins;
+
+            foreach (var buffType in Helper.EnumBuffTypes())
+            {
+                buffRolls[buffType].Clear();
+            }
+
+            Dictionary<BuffType, List<BuffRep>> currentBuffRolls = new Dictionary<BuffType, List<BuffRep>>() {
+                { BuffType.Positive, new List<BuffRep>()},
+                { BuffType.Duality, new List<BuffRep>()},
+                { BuffType.Negative, new List<BuffRep>()}};
+
+            foreach (var buffIDValue in BuffID.values.entries)
+            {
+                var id = new BuffID(buffIDValue);
+                if (!BuffConfigManager.ContainsId(id) || !BuffPlayerData.Instance.IsCollected(id) ||
+                    BuffConfigManager.IsItemLocked(QuestUnlockedType.Card, id.value))
+                    continue;
+
+                var staticData = BuffConfigManager.GetStaticData(id);
+                if (enabledPlugins != null && !enabledPlugins.Contains(staticData.PluginInfo))
+                    continue;
+
+                var rep = TryGetRep(id);
+
+                currentBuffRolls[staticData.BuffType].Add(rep);
+                if (currentBuffRolls[staticData.BuffType].Count == cardsInRoll)
+                {
+                    buffRolls[staticData.BuffType].Add(currentBuffRolls[staticData.BuffType].ToArray());
+                    currentBuffRolls[staticData.BuffType].Clear();
+                }
+            }
+
+            foreach (var buffType in Helper.EnumBuffTypes())
+            {
+                if (currentBuffRolls[buffType].Count > 0)
+                    buffRolls[buffType].Add(currentBuffRolls[buffType].ToArray());
+                allContentSize[buffType] = buffRolls[buffType].Count * (buffCardSize.y + CardPocket.gap) + CardPocket.gap;
+            }
+            
+            if (updateDisplay)
+            {
+                ScrollToTop();
+                UpdateDisplayRoll(true);
+            }
+        }
+
         static CardPocketSlot()
         {
             HelpInfoProvider.CustomProviders += HelpInfoProvider_CustomProviders;
@@ -404,13 +458,13 @@ namespace RandomBuff.Render.UI.Component
 
             mouseInside = false;
             Vector2 delta = InputAgency.Current.GetMousePosition() - BottomLeftPos;
-            if (delta.x > 0 && delta.x < pocket.size.x && delta.y > 0 && delta.y < pocket.size.y)
+            if (pocket.EnableInput && delta.x > 0 && delta.x < pocket.size.x && delta.y > 0 && delta.y < pocket.size.y)
                 mouseInside = true;
-            if (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Gamepad)
+            if (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Gamepad && pocket.EnableInput)
                 mouseInside = true;
 
 
-            if (scrollVel != 0f && pocket.Show)
+            if (scrollVel != 0f && pocket.Show && pocket.EnableInput)
             {
                 yPointer += scrollVel;
                 yPointer = Mathf.Clamp(yPointer, 0f, allContentSize[currentType]);
@@ -422,7 +476,7 @@ namespace RandomBuff.Render.UI.Component
                 UpdateDisplayRoll();
             }
 
-            if (enableScroll && pocket.Show && mouseInside)
+            if (enableScroll && pocket.Show && pocket.EnableInput && mouseInside)
             {
                 float scroll = InputAgency.Current.GetScroll();
                 if (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default)
@@ -439,13 +493,21 @@ namespace RandomBuff.Render.UI.Component
         public void ButtonUpdate()
         {
             foreach (var button in buffTypeSwitchButtons)
+            {
                 button.Update();
+                button.enableInput = pocket.EnableInput;
+            }    
             closeButton.Update();
+            closeButton.enableInput = pocket.EnableInput;
+
             stackButton.Update();
+            stackButton.enableInput = pocket.EnableInput;
+            
             unstackButton.Update();
+            unstackButton.enableInput = pocket.EnableInput;
 
             InputAgency.Current.GetMainFunctionButton(out _, out var single);
-            if (single)
+            if (single && pocket.EnableInput)
             {
                 foreach (var button in buffTypeSwitchButtons)
                     button.OnMouseLeftClick();
@@ -528,13 +590,13 @@ namespace RandomBuff.Render.UI.Component
                 StopScroll();
         }
 
-        public void UpdateDisplayRoll()
+        public void UpdateDisplayRoll(bool forceAllUpdate = false)
         {
             float downDisplayY = yPointer + actualDisplaySize.y;
             int minRoll = Mathf.Clamp(Mathf.CeilToInt(yPointer / singleRollHeight), 0, CurrentTypeRolls.Count - 1);
             int maxRoll = Mathf.Clamp(Mathf.CeilToInt(downDisplayY / singleRollHeight), 0, CurrentTypeRolls.Count - 1);
 
-            (BaseInteractionManager as CardPocketInteratctionManager)!.UpdateDisplayRoll(minRoll, maxRoll);
+            (BaseInteractionManager as CardPocketInteratctionManager)!.UpdateDisplayRoll(minRoll, maxRoll, forceAllUpdate);
         }
 
         public void ToggleSelectBuff(BuffID buffID)
@@ -653,7 +715,7 @@ namespace RandomBuff.Render.UI.Component
 
         public IEnumerable<Vector2> GetAllButtonPos()
         {
-            if (pocket.Show)
+            if (pocket.Show && pocket.EnableInput)
             {
                 yield return closeButton.MiddleOfButton();
                 foreach (var button in buffTypeSwitchButtons)
@@ -797,16 +859,19 @@ namespace RandomBuff.Render.UI.Component
         {
             if (currentState == State.Normal)
             {
-                foreach (var card in managedCards)
+                if(Slot.pocket.EnableInput)
                 {
-                    if (card.LocalMousePos.x > 0 &&
-                        card.LocalMousePos.x < 1f &&
-                        card.LocalMousePos.y > 0f &&
-                        card.LocalMousePos.y < 1f)
+                    foreach (var card in managedCards)
                     {
-                        Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_Hover, CurrentFocusCard != card, card.ID);
-                        CurrentFocusCard = card;
-                        return;
+                        if (card.LocalMousePos.x > 0 &&
+                            card.LocalMousePos.x < 1f &&
+                            card.LocalMousePos.y > 0f &&
+                            card.LocalMousePos.y < 1f)
+                        {
+                            Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_Hover, CurrentFocusCard != card, card.ID);
+                            CurrentFocusCard = card;
+                            return;
+                        }
                     }
                 }
 
@@ -814,7 +879,11 @@ namespace RandomBuff.Render.UI.Component
                 {
                     CurrentFocusCard = null;
                 }
-                Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_None);
+
+                if(Slot.pocket.EnableInput)
+                    Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_None);
+                else
+                    Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
             }
             else if (currentState == State.Exclusive)
             {
@@ -824,7 +893,12 @@ namespace RandomBuff.Render.UI.Component
                     exclusiveShowCard.LocalMousePos.y > 0f &&
                     exclusiveShowCard.LocalMousePos.y < 1f)
                 {
-                    CurrentFocusCard = exclusiveShowCard;
+                    CurrentFocusCard = exclusiveShowCard; 
+                    
+                    if (Slot.pocket.EnableInput)
+                        Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_Exclusive, false, exclusiveShowCard.ID);
+                    else
+                        Slot.HelpInfoProvider.UpdateHelpInfo(HelpInfoProvider.HelpInfoID.None);
                     return;
                 }
 
@@ -907,7 +981,6 @@ namespace RandomBuff.Render.UI.Component
             }
             else if(newState == State.Exclusive)
             {
-                Slot.HelpInfoProvider.UpdateHelpInfo(CardPocket_Exclusive, false, exclusiveShowCard.ID);
                 exclusiveShowCard.SetAnimatorState(BuffCard.AnimatorState.CardPocketSlot_Exclusive);
                 Slot.SetScrollEnable(false);
                 if(exclusiveShowCard.StaticData.Stackable)
@@ -937,13 +1010,13 @@ namespace RandomBuff.Render.UI.Component
             return card;
         }
 
-        public void UpdateDisplayRoll(int min, int max)
+        public void UpdateDisplayRoll(int min, int max, bool forceRemoveAll)
         {
             //移除超过显示区域的卡
             List<int> rollsToRemove = new List<int>();
             foreach(var key in rollsOfCards.Keys)
             {
-                if(key < min -1 || key > max + 1)
+                if(key < min -1 || key > max + 1 || forceRemoveAll)
                     rollsToRemove.Add(key);
             }
 

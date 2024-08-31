@@ -76,14 +76,14 @@ namespace RandomBuff.Core.Buff
             if (!Futile.atlasManager.DoesContainAtlas(FaceName))
             {
                 BuffPlugin.LogWarning($"Can;t Get face for {BuffID} {FaceName}");
-                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFaceTexture).texture;
+                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFace).texture;
             }
             var atlas = Futile.atlasManager.GetAtlasWithName(FaceName);
             //BuffPlugin.LogError($"Get face for {BuffID} {FaceName}");
             if (!atlas.isSingleImage)
             {
                 BuffPlugin.LogError($"Get face for {BuffID} {FaceName}, but get nonsingleimage : {atlas.name}");
-                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFaceTexture).texture;
+                return Futile.atlasManager.GetAtlasWithName(CardBasicAssets.MissingFace).texture;
             }
             return Futile.atlasManager.GetAtlasWithName(FaceName).texture;
         }
@@ -195,7 +195,7 @@ namespace RandomBuff.Core.Buff
                 }
                 else
                 {
-                    newData.FaceName = CardBasicAssets.MissingFaceTexture;
+                    newData.FaceName = CardBasicAssets.MissingFace;
                     BuffPlugin.LogWarning($"Can't find faceName At {jsonFile.Name}");
                 }
 

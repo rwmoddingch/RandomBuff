@@ -208,6 +208,12 @@ namespace RandomBuff.Render.CardRender
             return $"BuffCardRendererBase_{_id}_";
         }
 
+
+        public virtual void Deacive()
+        {
+
+        }
+
         public FSprite CleanGetTexture()
         {
             return _texture;
@@ -276,6 +282,13 @@ namespace RandomBuff.Render.CardRender
             cardCycleCounterTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, (_buffStaticData.BuffID.GetBuffData()?.StackLayer ?? 1).ToString(), Vector3.zero, CardNumberTextController.InternalPrimitiveType.Circle, 0.618f * 0.3f);
             cardKeyBinderTextController.Init(this, _cardQuadFront.transform, null, _buffStaticData.Color, string.Empty, Vector3.zero, CardNumberTextController.InternalPrimitiveType.Hexagon, 0.618f * -0.3f);
         }
+
+        public override void Deacive()
+        {
+            base.Deacive();
+            _cardQuadFront.GetComponent<MeshRenderer>().material.mainTexture = CardBasicAssets.MissingFaceTexture;
+        }
+
 
         public override string Salt()
         {
