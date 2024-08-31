@@ -1,0 +1,18 @@
+{
+    "Name":"Shell Penetrator",
+    "Color":"FFCC4D",
+    "ID":"builtin.quest.ShellPenetrator",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"ShellBreaker"
+        }
+    ],
+    "UnlockItem":
+    {
+        "Card":
+        [
+            "LanceThrower"
+        ]
+    }
+}

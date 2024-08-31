@@ -1,0 +1,15 @@
+{
+    "Name" : "Survival",
+    "ID" :"Normal",
+    "TemplateDescription": "GachaTemplate_Desc_Survival",
+    "PCount" : 0,
+    "NShow" : 2,
+    "SPSelect" : 2,
+    "SPShow" : 5,
+    "SPCount" : 1,
+    "SNSelect" : 2,
+    "SNShow" : 5,
+    "SNCount" : 1,
+    "ExpMultiply":1.5,
+    "RandomStart" : true
+}

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Progression.Quest;
 using UnityEngine;
+using RandomBuff.Core.Game.Settings.Missions;
 
 namespace RandomBuff.Render.Quest
 {
@@ -165,8 +166,10 @@ namespace RandomBuff.Render.Quest
         {
             AddProvider(new BuffCardQuestProvider());
             AddProvider(new FreePickQuestProvider());
+            AddProvider(new MissionQuestRendererProvider());
+
         }
-    
+
         public enum Mode
         {
             NotificationBanner,

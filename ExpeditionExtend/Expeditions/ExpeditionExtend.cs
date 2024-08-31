@@ -126,56 +126,38 @@ namespace BuiltinBuffs.Expeditions
 
         public void OnEnable()
         {
-            On.RainWorld.PostModsInit += RainWorld_PostModsInit;
-        }
-
-        private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
-        {
-            orig(self);
-            BuffPlugin.Log($"Current Expedition Extend state: Main:{BuffOptionInterface.Instance.EnableExpeditionExtend.Value}, Mod:{BuffOptionInterface.Instance.EnableExpeditionModExtend.Value}");
+            BuffPlugin.Log($"Current Expedition Extend state: Mod:{BuffOptionInterface.Instance.EnableExpeditionModExtend.Value}");
             try
             {
-                if (!isLoaded && BuffOptionInterface.Instance.EnableExpeditionExtend.Value)
-                {
-                    ExpeditionProgression.SetupPerkGroups();
-                    ExpeditionProgression.SetupBurdenGroups();
+                if(!Futile.atlasManager.DoesContainAtlas(PositiveTexture))
+                    Futile.atlasManager.LoadImage(PositiveTexture);
 
-                    InitExpeditionType();
-                    RegisterExpeditionType();
-                    ExpeditionCoreHooks.OnModsInit();
-                    BuffPluginInfo info;
-                    try
-                    {
-                        if (!File.Exists(AssetManager.ResolveFilePath("buffassets/cardinfos/expedition/ExpeditionInfo.txt")) ||
-                            !BuffPluginInfo.LoadPluginInfo(AssetManager.ResolveFilePath("buffassets/cardinfos/expedition/ExpeditionInfo.txt"), out info))
-                            info = new BuffPluginInfo("Expedition Extend");
-                    }
-                    catch (Exception e)
-                    {
-                        info = new BuffPluginInfo("Expedition Extend");
-                        BuffPlugin.LogException(e);
-                    }
-                    //BuffPlugin.Log(info.ToDebugString());
-                    BuffConfigManager.PluginInfos.Add(info.AssemblyName, info);
-                    isLoaded = true;
-                }
+                if (!Futile.atlasManager.DoesContainAtlas(NegativeTexture))
+                    Futile.atlasManager.LoadImage(NegativeTexture);
+
+                ExpeditionProgression.SetupPerkGroups();
+                ExpeditionProgression.SetupBurdenGroups();
+
+                InitExpeditionType();
+                RegisterExpeditionType();
+                ExpeditionCoreHooks.OnModsInit();
+
             }
             catch (Exception e)
             {
                 BuffUtils.LogException("BuffExtend", e);
             }
-
         }
-        
 
-        private static bool isLoaded = false;
-
- 
+        private const string NegativeTexture = "buffinfos/ExpeditionExtend/expedition/expeditionNegative";
+        private const string PositiveTexture = "buffinfos/ExpeditionExtend/expedition/expeditionPositive";
 
 
 
 
-        private static void InitExpeditionType()
+
+
+            private static void InitExpeditionType()
         {
             foreach (var group in ExpeditionProgression.perkGroups)
             {
@@ -229,8 +211,7 @@ namespace BuiltinBuffs.Expeditions
         {
             var ass = BuffBuilder.FinishGenerate("BuffExtend").First();
             var ctor = typeof(BuffStaticData).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic).First(i => i.GetParameters().Length == 0);
-            Futile.atlasManager.LoadImage("buffassets/cardinfos/expedition/expeditionPositive");
-            Futile.atlasManager.LoadImage("buffassets/cardinfos/expedition/expeditionNegative");
+
 
             foreach (var group in ExpeditionProgression.perkGroups)
             {
@@ -243,7 +224,7 @@ namespace BuiltinBuffs.Expeditions
                     var staticData = (BuffStaticData)ctor.Invoke(Array.Empty<object>());
                     SetProperty(staticData, "BuffID", new BuffID(id));
                     SetProperty(staticData, "BuffType", BuffType.Positive);
-                    SetProperty(staticData, "FaceName", "buffassets/cardinfos/expedition/expeditionPositive");
+                    SetProperty(staticData, "FaceName", PositiveTexture);
                     SetProperty(staticData, "Color", Custom.hexToColor("2EFFFF"));
 
                     SetProperty(staticData, "Triggerable", IsTriggerable(id));
@@ -269,7 +250,7 @@ namespace BuiltinBuffs.Expeditions
                         ForceUnlockedAndLoad(ExpeditionProgression.UnlockDescription, id),
                     });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{id}Buff", true),
-                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id));
+                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
                     BuffRegister.RegisterStaticData(staticData);
                 }
             }
@@ -284,7 +265,7 @@ namespace BuiltinBuffs.Expeditions
                     var staticData = (BuffStaticData)ctor.Invoke(Array.Empty<object>());
                     SetProperty(staticData, "BuffID", new BuffID(id));
                     SetProperty(staticData, "BuffType", BuffType.Negative);
-                    SetProperty(staticData, "FaceName", "buffassets/cardinfos/expedition/expeditionNegative");
+                    SetProperty(staticData, "FaceName", NegativeTexture);
                     SetProperty(staticData, "Color", Custom.hexToColor("FF462E"));
 
                     SetProperty(staticData, "Triggerable", IsTriggerable(id));
@@ -314,7 +295,7 @@ namespace BuiltinBuffs.Expeditions
                             + ForceUnlockedAndLoad(ExpeditionProgression.BurdenManualDescription, id),
                         });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"BuffExtend.{id}Buff", true),
-                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id), new AssemblyName("Expedition Extend"));
+                        ass.GetType($"BuffExtend.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
                     BuffRegister.RegisterStaticData(staticData);
                 }
             }

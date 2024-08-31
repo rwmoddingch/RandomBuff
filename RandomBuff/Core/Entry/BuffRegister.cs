@@ -389,6 +389,8 @@ namespace RandomBuff.Core.Entry
 
             foreach (var type in BuffID.values.entries.ToArray().Select(i => new BuffID(i)))
             {
+                if(type == BuffID.None)
+                    continue;
                 if (!BuffTypes.ContainsKey(type) || !DataTypes.ContainsKey(type))
                 {
                     BuffPlugin.LogError($"UnRegister buff: {type}");
@@ -433,7 +435,8 @@ namespace RandomBuff.Core.Entry
                     (Assembly assembly, bool needLoadAsset) = CheckAndUpdateBuffPlugin(mod, file);
                     AllBuffAssemblies.Add(assembly);
                     CurrentPluginId = assembly.GetName().Name;
-
+                    BuffPlugin.Log(
+                        $"load buff plugin, ID:{CurrentPluginId}, Name:{BuffConfigManager.GetPluginInfo(CurrentPluginId).GetInfo(InGameTranslator.LanguageID.English).Name}");
                     foreach (var type in assembly.GetTypes())
                     {
                         
@@ -443,7 +446,6 @@ namespace RandomBuff.Core.Entry
                             try
                             {
                                 obj.OnEnable();
-                                BuffPlugin.LogDebug($"Invoke {type.Name}.OnEnable");
                             }
                             catch (Exception e)
                             {

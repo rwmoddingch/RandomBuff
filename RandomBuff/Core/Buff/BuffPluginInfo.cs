@@ -67,8 +67,8 @@ namespace RandomBuff.Core.Buff
                     thumbnail = "thumbnail";
                 try
                 {
-                    Futile.atlasManager.LoadImage("buffinfos" + Path.AltDirectorySeparatorChar + (string)thumbnail);
-                    newData.Thumbnail = "buffinfos" + Path.AltDirectorySeparatorChar + (string)thumbnail;
+                    Futile.atlasManager.LoadImage("buffinfos" + Path.AltDirectorySeparatorChar + newData + Path.AltDirectorySeparatorChar + (string)thumbnail);
+                    newData.Thumbnail = "buffinfos" + Path.AltDirectorySeparatorChar + newData + Path.AltDirectorySeparatorChar + (string)thumbnail;
 
                 }
                 catch (FutileException e)

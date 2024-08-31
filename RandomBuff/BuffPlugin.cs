@@ -30,6 +30,7 @@ using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.ExceptionTracker;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Progression.Quest;
 
 
 #pragma warning disable CS0618
@@ -39,7 +40,7 @@ using RandomBuff.Core.Buff;
 
 //添加友元方便调试
 [assembly: InternalsVisibleTo("BuiltinBuffs")]
-[assembly: InternalsVisibleTo("BuffTest")]
+[assembly: InternalsVisibleTo("ExpeditionExtend")]
 
 namespace RandomBuff
 {
@@ -141,33 +142,29 @@ namespace RandomBuff
                     Application.logMessageReceived += Application_logMessageReceived;
 
                     BuffUIAssets.LoadUIAssets();
-
                     CardBasicAssets.LoadAssets();
                     CosmeticUnlock.LoadIconSprites();
-
                     CardpediaMenuHooks.LoadAsset();
 
                     BuffUtils.OnEnable();
 
                     BuffResourceString.Init();
 
-                    GachaTemplate.Init();
-                    Condition.Init();
                     InputAgency.Init();
                     TypeSerializer.Init();
-                    QuestCondition.Init();
                     CosmeticUnlock.Init();
                     QuestRendererManager.Init();
 
                     BuffFile.OnModsInit();
                     CoreHooks.OnModsInit();
-
                     SoapBubblePool.Hook();
-
                     AnimMachine.Init();
 
 
                     BuffConfigManager.InitBuffPluginInfo();
+
+
+                    QuestUnlockedType.Init();
 
 
                     MachineConnector.SetRegisteredOI(ModId, Option);
@@ -232,6 +229,11 @@ namespace RandomBuff
             BuffRegister.BuildAllBuffConfigWarpper();
             BuffConfigManager.InitBuffStaticData();
             BuffRegister.CheckAndRemoveInvalidBuff();
+
+
+            GachaTemplate.Init();
+            Condition.Init();
+            QuestCondition.Init();
 
             BuffConfigManager.InitTemplateStaticData();
             MissionRegister.RegisterAllMissions();

@@ -16,11 +16,6 @@ using RWCustom;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.Reflection.Emit;
-using BuiltinBuffs.Missions;
-using BuiltinBuffs.Negative;
-using BuiltinBuffs.Negative.SephirahMeltdown;
-using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
-using BuiltinBuffs.Positive;
 using MonoMod.Cil;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuffUtils.FutileExtend;
@@ -33,57 +28,57 @@ namespace BuiltinBuffs.Expeditions
     {
         #region DEBUG
 
-        private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
-        {
-            orig(self, dt);
-            //if(ExpeditionGame.egg == null)
-            //    ExpeditionGame.egg = new Eggspedition(self);
-            if (Input.GetKey(KeyCode.Y) && BuffPlugin.DevEnabled)
-            {
-                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
-                {
-                    BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(self.session.characterStats));
-                    AyinBuffData.Ayin.CreateNewBuff();
-                    self.Win(false);
-                    foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
-                    {
-                        if (con is TreeOfLightCondition)
-                            continue;
+        //private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
+        //{
+        //    orig(self, dt);
+        //    //if(ExpeditionGame.egg == null)
+        //    //    ExpeditionGame.egg = new Eggspedition(self);
+        //    if (Input.GetKey(KeyCode.Y) && BuffPlugin.DevEnabled)
+        //    {
+        //        if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.K))
+        //        {
+        //            BuffPoolManager.Instance.GameSetting.conditions.Add(new TreeOfLightCondition().SetTargetCount(self.session.characterStats));
+        //            AyinBuffData.Ayin.CreateNewBuff();
+        //            self.Win(false);
+        //            foreach (var con in BuffPoolManager.Instance.GameSetting.conditions)
+        //            {
+        //                if (con is TreeOfLightCondition)
+        //                    continue;
 
-                        con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
-                    }
-                    //FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
-                    //BinahBuffData.Binah.CreateNewBuff();
-                }
+        //                con.GetType().GetProperty("Finished").GetSetMethod(true).Invoke(con, new object[] { true });
+        //            }
+        //            //FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
+        //            //BinahBuffData.Binah.CreateNewBuff();
+        //        }
 
-                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
-                {
-                    BinahBuff.Instance.Data.Health -= 0.1f;
-                    if (BinahBuff.Instance.Data.Health < 0)
-                    {
-                        BinahBuff.Instance.Data.Health = 0;
-                        BinahGlobalManager.Die();
-                    }
-                }
+        //        if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.A))
+        //        {
+        //            BinahBuff.Instance.Data.Health -= 0.1f;
+        //            if (BinahBuff.Instance.Data.Health < 0)
+        //            {
+        //                BinahBuff.Instance.Data.Health = 0;
+        //                BinahGlobalManager.Die();
+        //            }
+        //        }
 
-                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.S))
-                {
-                    FakeCreatureBuffData.FakeCreatureID.UnstackBuff();
+        //        if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.S))
+        //        {
+        //            FakeCreatureBuffData.FakeCreatureID.UnstackBuff();
 
-                }
-                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
-                {
-                    FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
+        //        }
+        //        if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.L) )
+        //        {
+        //            FakeCreatureBuffData.FakeCreatureID.CreateNewBuff();
 
-                }
-                if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
-                {
-                    BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Key,0);
-                    self.Players[0].realizedCreature.room.AddObject(new BinahShowEffect(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos,300,RainWorld.SaturatedGold));
-                }
-            }
+        //        }
+        //        if (self.rainWorld.BuffMode() && Input.GetKeyDown(KeyCode.U))
+        //        {
+        //            BinahGlobalManager.DEBUG_ForceSetCd(BinahAttackType.Key,0);
+        //            self.Players[0].realizedCreature.room.AddObject(new BinahShowEffect(self.Players[0].realizedCreature.room, self.Players[0].realizedCreature.DangerPos,300,RainWorld.SaturatedGold));
+        //        }
+        //    }
 
-        }
+        //}
 
        
 
@@ -101,7 +96,7 @@ namespace BuiltinBuffs.Expeditions
                 typeof(ExpeditionCoreHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
             On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
 
-            On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+            //On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
             On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
             On.WinState.CycleCompleted += WinState_CycleCompleted;
             IL.RainWorldGame.Update += RainWorldGame_Update;

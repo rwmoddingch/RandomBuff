@@ -1,0 +1,18 @@
+{
+    "Name":"Lawn Cleaner",
+    "Color":"F0F0F0",
+    "ID":"builtin.quest.lawncleaner",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"LawnCleaner"
+        }
+    ],
+    "UnlockItem":
+    {
+        "Card":
+        [
+            "FlameThrower"
+        ]
+    }
+}

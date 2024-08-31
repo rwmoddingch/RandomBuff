@@ -1,0 +1,17 @@
+{
+    "Name":"FreePick8",
+    "Color":"FFFFFF",
+    "ID":"builtin.quest.FreePick8",
+    "Conditions":[
+        {
+            "Type":"RunCountCondition",
+            "TargetCount":20
+        }
+    ],
+    "UnlockItem":
+    {
+       "FreePick":[
+        "8"
+       ]
+    }
+}

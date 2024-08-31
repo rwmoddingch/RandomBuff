@@ -1,20 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\RandomBuff\RandomBuff.csproj" />
+    <Compile Remove=".vscode\**" />
+    <EmbeddedResource Remove=".vscode\**" />
+    <None Remove=".vscode\**" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Compile Remove="Duality\IteratorShapedMutationBuff.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RandomBuffUtils\RandomBuffUtils.csproj">
+      <CopyLocalSatelliteAssemblies></CopyLocalSatelliteAssemblies>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RandomBuff\RandomBuff.csproj">
+      <CopyLocalSatelliteAssemblies></CopyLocalSatelliteAssemblies>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\include\0Harmony.dll</HintPath>
       <Private>False</Private>
-    </Reference>
-    <Reference Include="Accessibility">
-      <HintPath>..\include\Accessibility.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\include\Assembly-CSharp-firstpass.dll</HintPath>
@@ -49,8 +59,16 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\include\PUBLIC-Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>..\include\Unity.Mathematics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\include\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\include\UnityEngine.AssetBundleModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
@@ -66,59 +84,49 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Update="System">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.Core">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.Data">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <Reference Update="System.Drawing">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.IO.Compression.FileSystem">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.Numerics">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.Runtime.Serialization">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.Xml">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Update="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
 </Project>

@@ -1,0 +1,25 @@
+{
+    "Name":"Sephirah Meltdowns",
+    "Color":"F0F0F0",
+    "ID":"builtin.quest.SephirahMeltdowns",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"SephirahMeltdowns"
+        }
+    ],
+    "UnlockItem":
+    {
+        "Card":
+        [
+            "Chesed",
+            "Hod",
+            "Hokma",
+            "Malkuth",
+            "Netzach",
+            "Tiphereth",
+            "Yesod", 
+            "Binah"
+        ]
+    }
+}

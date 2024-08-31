@@ -19,6 +19,7 @@ using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Option;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
+using RandomBuff.Render.CardRender;
 using UnityEngine;
 using static Rewired.Utils.Classes.Data.TypeWrapper;
 using SecurityAttribute = Mono.Cecil.SecurityAttribute;
@@ -142,6 +143,12 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         internal static void CleanAll()
         {
+            foreach (var data in StaticDatas)
+            {
+                if (data.Value.FaceName != CardBasicAssets.MissingFaceTexture && Futile.atlasManager.DoesContainAtlas(data.Value.FaceName))
+                    Futile.atlasManager.UnloadImage(data.Value.FaceName);
+            }
+
             StaticDatas.Clear();
             BuffAssemblyMap.Clear();
             LockedMap.Clear();
@@ -231,7 +238,7 @@ namespace RandomBuff.Core.SaveData
         /// <summary>
         /// 读取static data
         /// post init时调用
-        /// 文件格式 mod根目录/buffassets/卡牌名/卡牌资源
+        /// 文件格式 mod根目录/buffinfos/卡包名/cardinfos/卡牌名/卡牌资源
         /// </summary>
         internal static void InitBuffStaticData()
         {
@@ -339,7 +346,7 @@ namespace RandomBuff.Core.SaveData
         /// <summary>
         /// 读取templateData
         /// post init时调用
-        /// 文件格式 mod根目录/bufftemplates/
+        /// 文件格式 mod根目录/buffinfos/卡包名/templates/
         /// </summary>
         internal static void InitTemplateStaticData()
         {
@@ -375,7 +382,7 @@ namespace RandomBuff.Core.SaveData
         /// <summary>
         /// 读取templateData
         /// post init时调用
-        /// 文件格式 mod根目录/buffquests/
+        /// 文件格式 mod根目录/buffinfos/卡包名/quests/
         /// </summary>
         public static void InitQuestData()
         {

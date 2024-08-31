@@ -1,0 +1,17 @@
+{
+    "Name":"Holo Score",
+    "Color":"ff7373",
+    "ID":"builtin.quest.HoloScore",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"EmergnshyTreatment"
+        }
+    ],
+    "UnlockItem":
+    {
+       "Cosmetic":[
+        "HoloScore"
+       ]
+    }
+}

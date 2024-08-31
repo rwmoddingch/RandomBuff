@@ -74,7 +74,6 @@ namespace RandomBuff.Core.Progression.Quest.Condition
             Register<CardQuestCondition>();
             Register<RunCountQuestCondition>();
             Register<CosmeticQuestCondition>();
-            QuestUnlockedType.Init();
         }
 
         internal static bool TryGetType(string typeName, out Type type)
