@@ -382,7 +382,7 @@ namespace RandomBuff
 
         internal static bool IsPluginsEnabled(string assemblyName)
         {
-            BuffPlugin.LogDebug(assemblyName);
+            BuffPlugin.LogDebug($"Try {assemblyName}, {EnabledPlugins.Contains(assemblyName)}");
             return EnabledPlugins.Contains(assemblyName);
         }
 
