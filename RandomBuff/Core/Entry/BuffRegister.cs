@@ -31,6 +31,7 @@ using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using UnityEngine;
+using static Rewired.Utils.Classes.Data.TypeWrapper;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 
@@ -100,7 +101,7 @@ namespace RandomBuff.Core.Entry
             //这里不得不提前注册，否则就需要BuffHookWarpper公开更多信息，我暂时没有好想法
             BuffConfigManager.AddBuffAssemblyBind(id,typeof(THookType).Assembly.GetName());
 
-            if (CurrentModId == string.Empty)
+            if (CurrentPluginId == string.Empty)
             {
                 BuffPlugin.LogError("Missing Mod ID!, can't use this out of IBuffEntry.OnEnable");
                 return;
@@ -112,12 +113,12 @@ namespace RandomBuff.Core.Entry
             }
             try
             {
-                BuffBuilder.GenerateBuffTypeWithCache(CurrentModId, id.value);
+                BuffBuilder.GenerateBuffTypeWithCache(CurrentPluginId, id.value);
                 CurrentRuntimeBuffName.Add(id.value);
             }
             catch (Exception e)
             {
-                BuffPlugin.LogException(e, $"Exception in GenerateBuffType:{CurrentModId}:{id}");
+                BuffPlugin.LogException(e, $"Exception in GenerateBuffType:{CurrentPluginId}:{id}");
             }
         
         }
@@ -332,13 +333,21 @@ namespace RandomBuff.Core.Entry
     public static partial class BuffRegister
     {
 
-        internal static string CurrentModId { get; private set; } = string.Empty;
+        /// <summary>
+        /// 读取时使用的临时资源
+        /// </summary>
+        #region LoadTempValue
+
+        internal static string CurrentPluginId { get; private set; } = string.Empty;
 
         private static readonly List<string> CurrentRuntimeBuffName = new();
 
-        private static readonly List<Type> AllEntry = new();
+        private static readonly List<Type> NeedLoadAssetEntries = new();
 
         internal static readonly List<Assembly> AllBuffAssemblies = new();
+
+
+        #endregion
 
         internal static (BuffID id, Type type) GetDataType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), DataTypes));
         internal static (BuffID id, Type type) GetBuffType(string id) => (new BuffID(id),GetAnyType(new BuffID(id), BuffTypes));
@@ -355,7 +364,6 @@ namespace RandomBuff.Core.Entry
         internal static string GetConditionTypeName(ConditionID id) => GetAnyType(id, ConditionTypes).DisplayName;
         internal static List<ConditionID> GetAllConditionList() => ConditionTypes.Keys.ToList();
 
-
         internal static GachaTemplateType GetTemplateType(GachaTemplateID id) => GetAnyType(id, TemplateTypes);
 
 
@@ -366,40 +374,50 @@ namespace RandomBuff.Core.Entry
             return default;
         }
 
-  
 
 
-
-
-        internal static void LoadBuffPluginAsset()
+        internal static void CleanBuffs()
         {
-            foreach (var type in AllEntry)
-            {
-                if (type.GetMethod("LoadAssets", BindingFlags.Static | BindingFlags.Public) is { } method &&
-                    method.GetParameters().Length == 0)
-                {
-                    try
-                    {
-                        method.Invoke(null, null);
-
-                    }
-                    catch (Exception e)
-                    {
-                        BuffPlugin.LogException(e,$"{type.Name}.LoadAssets execute Failed!");
-                    }
-                    BuffPlugin.LogDebug($"Load Assets for {type.Name}");
-                }
-            }
-            AllEntry.Clear();
+            DataTypes.Clear();
+            BuffTypes.Clear();
+            ConditionTypes.Clear();
+            TemplateTypes.Clear();
         }
 
-        private static HashSet<string> refLocations = null;
+        internal static void CheckAndRemoveInvalidBuff()
+        {
 
+            foreach (var type in BuffID.values.entries.ToArray().Select(i => new BuffID(i)))
+            {
+                if (!BuffTypes.ContainsKey(type) || !DataTypes.ContainsKey(type))
+                {
+                    BuffPlugin.LogError($"UnRegister buff: {type}");
+                    BuffTypes.Remove(type);
+                    DataTypes.Remove(type);
+                    type.Unregister();
+                    return;
+                }
 
+                if (!BuffConfigManager.ContainsId(type))
+                {
+                    BuffPlugin.LogError($"Can't find json data for ID：{type}!");
+                    BuffTypes.Remove(type);
+                    DataTypes.Remove(type);
+                    type.Unregister();
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 读取全部Buff信息
+        /// </summary>
         internal static void InitAllBuffPlugin()
         {
-            AllEntry.Clear();
+            NeedLoadAssetEntries.Clear();
             AllBuffAssemblies.Clear();
+            HashSet<string> refLocations = null;
+            var entryType = typeof(IBuffEntry);
 
 
             foreach (var mod in ModManager.ActiveMods)
@@ -407,41 +425,15 @@ namespace RandomBuff.Core.Entry
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
                 if (!Directory.Exists(path))
                     continue;
-                BuffPlugin.Log($"Find correct path in {CurrentModId = mod.id} to load plugins");
+                BuffPlugin.Log($"Find correct path in {mod.id} to load plugins");
                 DirectoryInfo info = new DirectoryInfo(path);
-               
-
+                
                 foreach (var file in info.GetFiles("*.dll"))
                 {
-                    if (!File.Exists(Path.Combine(BuffPlugin.CacheFolder,
-                            $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")) ||
-                        GetTrulyWriteTime(file.FullName) > new FileInfo(Path.Combine(BuffPlugin.CacheFolder,
-                            $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")).LastWriteTime)
-                    {
-                        File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dynamicCache.dll");
-                        File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dataCache.dll");
-
-                        if (refLocations == null)
-                        {
-                            refLocations = new HashSet<string>();
-                            foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
-                                refLocations.Add(
-                                    Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies()
-                                        .First(i => i.GetName().Name == refAssembly.Name).Location));
-
-                        }
-
-                        var def = BuildCachePlugin(mod, file.FullName, refLocations,out var hasPdb);
-                        def.Write(
-                            Path.Combine(BuffPlugin.CacheFolder,
-                                $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"),
-                            new WriterParameters() { WriteSymbols = hasPdb });
-
-                    }
-
-                    Assembly assembly = Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"));
+                    (Assembly assembly, bool needLoadAsset) = CheckAndUpdateBuffPlugin(mod, file);
                     AllBuffAssemblies.Add(assembly);
-                    var entryType = typeof(IBuffEntry);
+                    CurrentPluginId = assembly.GetName().Name;
+
                     foreach (var type in assembly.GetTypes())
                     {
                         
@@ -458,39 +450,45 @@ namespace RandomBuff.Core.Entry
                                 BuffPlugin.LogException(e);
                                 BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
                             }
-                            AllEntry.Add(type);
+                            if(needLoadAsset)
+                                NeedLoadAssetEntries.Add(type);
                         }
                         
                     }
-                }
 
-                try
-                {   
-                    var runtimeAss = BuffBuilder.FinishGenerate(CurrentModId);
-                    foreach(var ass in runtimeAss)
+
+                    try
                     {
-                        for(int i = CurrentRuntimeBuffName.Count-1;i>=0;i--)
+                        var runtimeAss = BuffBuilder.FinishGenerate(CurrentPluginId);
+                        foreach (var ass in runtimeAss)
                         {
-                            var name = CurrentRuntimeBuffName[i];
-                            if (ass.GetType($"{CurrentModId}.{name}Buff") is {} type)
+                            for (int i = CurrentRuntimeBuffName.Count - 1; i >= 0; i--)
                             {
-                                InternalRegisterBuff(new BuffID(name),
-                                    type, ass.GetType($"{CurrentModId}.{name}BuffData", true));
+                                var name = CurrentRuntimeBuffName[i];
+                                if (ass.GetType($"{CurrentPluginId}.{name}Buff") is { } type)
+                                {
+                                    InternalRegisterBuff(new BuffID(name),
+                                        type, ass.GetType($"{CurrentPluginId}.{name}BuffData", true));
+                                }
+                                CurrentRuntimeBuffName.Remove(name);
                             }
 
-                            CurrentRuntimeBuffName.Remove(name);
                         }
                     }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e, $"Exception when load {mod.id}:{assembly.GetName().Name}'s RuntimeBuff");
+                    }
+                    CurrentRuntimeBuffName.Clear();
                 }
-                catch (Exception e)
-                {
-                    BuffPlugin.LogException(e,$"Exception when load {mod.id}'s RuntimeBuff");
-                }
-                CurrentRuntimeBuffName.Clear();
 
             }
 
-            CurrentModId = string.Empty;
+            CurrentPluginId = string.Empty;
+            BuffBuilder.CleanAllDatas();
+
+            #region Wawa
+
             var somePath = Path.Combine(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).basePath, "buffassets",
                 "assetbundles", "extend");
             if (Directory.Exists(somePath))
@@ -509,32 +507,88 @@ namespace RandomBuff.Core.Entry
                 }
             }
 
-//#if TESTVERSION
+            #endregion
 
-//            foreach (var item in BuffConfigManager.BuffAssemblyTable)
-//            {
-//                BuffPlugin.Log($"Assembly : {item.Key}");
-//                foreach (var id in item.Value)
-//                {
-//                    BuffPlugin.Log($"----{id}");
-//                }
-//            }
-//#endif
+            (Assembly Assembly,bool isNewLoad) CheckAndUpdateBuffPlugin(ModManager.Mod mod, FileInfo file)
+            {
+                var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName);
+                var assemblyName = assemblyDef.Name.Name;
+                assemblyDef.Dispose();
+                if (BuffConfigManager.GetPluginInfo(assemblyName).codeAssembly is { } assembly)
+                {
+                    BuffPlugin.LogDebug($"Has load assembly for {assembly}");
+                    return (assembly, false);
+                }
+
+                if (!File.Exists(Path.Combine(BuffPlugin.CacheFolder,
+                        $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")) ||
+                    GetTrulyWriteTime(file.FullName) > new FileInfo(Path.Combine(BuffPlugin.CacheFolder,
+                        $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")).LastWriteTime)
+                {
+                    File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dynamicCache.dll");
+                    File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dataCache.dll");
+
+                    if (refLocations == null)
+                    {
+                        refLocations = new HashSet<string>();
+                        foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
+                            refLocations.Add(
+                                Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies()
+                                    .First(i => i.GetName().Name == refAssembly.Name).Location));
+
+                    }
+
+                    var def = BuildCachePlugin(mod, file.FullName, refLocations, out var hasPdb);
+                    def.Write(
+                        Path.Combine(BuffPlugin.CacheFolder,
+                            $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"),
+                        new WriterParameters() { WriteSymbols = hasPdb });
+
+                }
+
+                return (BuffConfigManager.GetPluginInfo(assemblyName).codeAssembly = Assembly.LoadFile(
+                    Path.Combine(BuffPlugin.CacheFolder,
+                        $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")), true);
+            }
+        }
+
+
+        /// <summary>
+        /// 读取全部buff资源
+        /// 注意重复加载忽略
+        /// </summary>
+        internal static void LoadBuffPluginAsset()
+        {
+            foreach (var type in NeedLoadAssetEntries)
+            {
+                if (type.GetMethod("LoadAssets", BindingFlags.Static | BindingFlags.Public) is { } method &&
+                    method.GetParameters().Length == 0)
+                {
+                    try
+                    {
+                        method.Invoke(null, null);
+
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e, $"{type.Name}.LoadAssets execute Failed!");
+                    }
+
+                    BuffPlugin.LogDebug($"Load Assets for {type.Name}");
+                }
+
+            }
+            NeedLoadAssetEntries.Clear();
         }
 
 
         /// <summary>
         /// 给BuffData设置config的warpper
         /// </summary>
-        internal static void BuildAllDataStaticWarpper()
+        internal static void BuildAllBuffConfigWarpper()
         {
             foreach (var dataType in DataTypes)
             {
-                if (!BuffConfigManager.ContainsId(dataType.Key))
-                {
-                    BuffPlugin.LogError($"Can't find json data for ID :{dataType.Key}!");
-                    continue;
-                }
                 foreach (var property in dataType.Value.GetProperties().
                              Where(i => i.GetCustomAttribute<CustomBuffConfigAttribute>(true) != null))
                 {
@@ -760,6 +814,7 @@ namespace RandomBuff.Core.Entry
                 }
             }
         }
+
 
         internal static DateTime GetTrulyWriteTime(string path)
         {

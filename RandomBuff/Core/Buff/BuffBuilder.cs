@@ -18,43 +18,44 @@ using CustomAttributeNamedArgument = Mono.Cecil.CustomAttributeNamedArgument;
 using SecurityAction = System.Security.Permissions.SecurityAction;
 using SecurityAttribute = Mono.Cecil.SecurityAttribute;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.SaveData;
 
 namespace RandomBuff.Core.Buff
 {
     internal static class BuffBuilder
     {
         internal static (TypeDefinition buffType, TypeDefinition dataType)
-            GenerateBuffTypeWithCache(string modId, string usedId, bool needRegisterId = false,
+            GenerateBuffTypeWithCache(string pluginId, string usedId, bool needRegisterId = false,
                 Action<ILProcessor> buffCtor = null,
                 Action<ILProcessor> dataCtor = null)
         {
-            return GenerateBuffType($"{modId}_dynamicCache", usedId, needRegisterId, buffCtor, dataCtor);
+            return GenerateBuffType($"{pluginId}_dynamicCache", usedId, needRegisterId, buffCtor, dataCtor);
         }
 
         public static (TypeDefinition buffType, TypeDefinition dataType) 
-            GenerateBuffType(string modId, string usedId,bool needRegisterId = false,
+            GenerateBuffType(string pluginId, string usedId,bool needRegisterId = false,
             Action<ILProcessor> buffCtor = null,
             Action<ILProcessor> dataCtor = null)
         {
-            if(!File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{modId}.dll")))
+            if(!File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{pluginId}.dll")))
             {
-                if (!assemblyDefs.ContainsKey(modId))
+                if (!assemblyDefs.ContainsKey(pluginId))
                 {
-                    assemblyDefs.Add(modId, AssemblyDefinition.CreateAssembly(
-                        new AssemblyNameDefinition($"DynamicBuff_{modId}", new Version(BuffPlugin.ModVersion)),
+                    assemblyDefs.Add(pluginId, AssemblyDefinition.CreateAssembly(
+                        new AssemblyNameDefinition($"DynamicBuff_{pluginId}", new Version(BuffPlugin.ModVersion)),
                         $"Main", ModuleKind.Dll));
                     var decl = new SecurityDeclaration(Mono.Cecil.SecurityAction.RequestMinimum);
-                    assemblyDefs[modId].SecurityDeclarations.Add(decl);
-                    var attr = new SecurityAttribute(assemblyDefs[modId].MainModule
+                    assemblyDefs[pluginId].SecurityDeclarations.Add(decl);
+                    var attr = new SecurityAttribute(assemblyDefs[pluginId].MainModule
                         .ImportReference(typeof(SecurityPermissionAttribute)));
                     decl.SecurityAttributes.Add(attr);
                     attr.Properties.Add(new CustomAttributeNamedArgument("SkipVerification",
-                        new CustomAttributeArgument(assemblyDefs[modId].MainModule.TypeSystem.Boolean, true)));
+                        new CustomAttributeArgument(assemblyDefs[pluginId].MainModule.TypeSystem.Boolean, true)));
 
                 }
-                var space = modId.Replace("_dynamicCache", "");
+                var space = pluginId.Replace("_dynamicCache", "");
 
-                var moduleDef = assemblyDefs[modId].MainModule;
+                var moduleDef = assemblyDefs[pluginId].MainModule;
 
                 var buffType = new TypeDefinition(space, $"{usedId}Buff", TypeAttributes.Public | TypeAttributes.Class,
                     moduleDef.ImportReference(typeof(RuntimeBuff)));
@@ -187,35 +188,57 @@ namespace RandomBuff.Core.Buff
             return property;
         }
 
-        public static IEnumerable<Assembly> FinishGenerate(string modId, string debugOutputPath = null)
+        public static IEnumerable<Assembly> FinishGenerate(string pluginId, string debugOutputPath = null)
         {
-            if (hasUse.Contains(modId))
+            if (hasUse.Contains(pluginId))
             {
-                BuffPlugin.LogError($"Already load dynamic {modId}.dll!");
+                BuffPlugin.LogError($"Already load dynamic {pluginId}.dll!");
                 yield break;
             }
 
-            if (Directory.Exists("Debug") && debugOutputPath == null)
-                debugOutputPath = $"Debug/DynamicBuff_{modId}.dll";
 
+            if (assemblyDefs.ContainsKey($"{pluginId}_dynamicCache"))
+                assemblyDefs[$"{pluginId}_dynamicCache"].Write(Path.Combine(BuffPlugin.CacheFolder, $"{pluginId}_dynamicCache.dll"));
 
-            if (assemblyDefs.ContainsKey($"{modId}_dynamicCache"))
-                assemblyDefs[$"{modId}_dynamicCache"].Write(Path.Combine(BuffPlugin.CacheFolder, $"{modId}_dynamicCache.dll"));
-            if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{modId}_dynamicCache.dll")))
-                yield return Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{modId}_dynamicCache.dll"));
+            if (File.Exists(Path.Combine(BuffPlugin.CacheFolder, $"{pluginId}_dynamicCache.dll")))
+                yield return LoadOrGetAssembly(pluginId, $"{pluginId}_dynamicCache", () =>
+                    Assembly.LoadFile(Path.Combine(BuffPlugin.CacheFolder, $"{pluginId}_dynamicCache.dll")));
 
-            if (assemblyDefs.ContainsKey(modId))
+            if (assemblyDefs.ContainsKey(pluginId))
             {
-                using (MemoryStream ms = new MemoryStream())
+                yield return LoadOrGetAssembly(pluginId, pluginId, () =>
                 {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        assemblyDefs[pluginId].Write(ms);
+                        if (debugOutputPath != null)
+                            assemblyDefs[pluginId].Write(debugOutputPath);
+                        hasUse.Add(pluginId);
+                        return Assembly.Load(ms.GetBuffer());
+                    }
+                });
 
-                    assemblyDefs[modId].Write(ms);
-                    if (debugOutputPath != null)
-                        assemblyDefs[modId].Write(debugOutputPath);
-                    hasUse.Add(modId);
-                    yield return Assembly.Load(ms.GetBuffer());
-                }
             }
+
+            //读取或获取现有的动态程序集
+            Assembly LoadOrGetAssembly(string pluginId, string assemblyName, Func<Assembly> loadFunc)
+            {
+                var info = BuffConfigManager.GetPluginInfo(pluginId);
+                if(info.dynamicAssemblies.TryGetValue(assemblyName,out var assembly))
+                    return assembly;
+                info.dynamicAssemblies.Add(assemblyName, assembly = loadFunc());
+                return assembly;
+            }
+        }
+
+
+        internal static void CleanAllDatas()
+        {
+            foreach (var keyValuePair in assemblyDefs) 
+                keyValuePair.Value.Dispose();
+            assemblyDefs.Clear();
+
+            hasUse.Clear();
         }
 
 
