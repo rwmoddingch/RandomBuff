@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using RWCustom;
 using RandomBuff;
+using TemplateGains;
 
 namespace BuiltinBuffs.Negative
 {
@@ -30,6 +31,14 @@ namespace BuiltinBuffs.Negative
                     DamoclesBugBuffEntry.DamoclesBugFeatures.Add(player, damoclesBug);
                 }
             }
+            CreateMyTimer();
+        }
+
+        public void CreateMyTimer()
+        {
+            MyTimer = new DownCountBuffTimer((timer, game) => MyTimer.Reset(), 1000000);
+            MyTimer.ApplyStrategy(new DamoclesBugStrategy());
+            MyTimer.Paused = true;
         }
     }
 
@@ -68,15 +77,23 @@ namespace BuiltinBuffs.Negative
         }
     }
 
-    public class DamoclesBug
+    internal class DamoclesBug
     {
         WeakReference<Player> ownerRef;
-        //是否需要生成
-        bool shouldSpawn;
         //是否延迟生成
-        bool delaySpawn;
+        public bool delaySpawn;
         //条件合适时延迟生成的计时
-        List<int> delayCount;
+        public List<int> delayCount;
+
+        public int spawnCount
+        {
+            get
+            {
+                if (delayCount == null || delayCount.Count == 0)
+                    return -1;
+                return delayCount[0];
+            }
+        }
 
         public DamoclesBug(Player player)
         {
@@ -90,23 +107,41 @@ namespace BuiltinBuffs.Negative
             if (!ownerRef.TryGetTarget(out var player) || player.room == null)
                 return;
 
-            //玩家位于管道中
-            if (player.room.aimap != null && player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace)
+            //玩家位于管道中、业力门或避难所
+            if ((player.room.aimap != null && player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace) ||
+                 InGateOrShelter())
                 delaySpawn = true;
             //玩家离开管道
             else
                 delaySpawn = false;
 
-            //玩家不处于管道中时，开始生成之前被推迟生成的落网虫
-            if (!delaySpawn && delayCount.Count > 0 && HasCeiling())
-            {
+            //玩家不处于管道中、业力门或避难所， 且满足条件时，开始生成之前被推迟生成的落网虫
+            if (!delaySpawn && delayCount.Count > 0 && delayCount[0] > 0 && HasCeiling())
                 delayCount[0]--;
 
-                if (delayCount[0] <= 0)
+            if (delayCount.Count > 0)
+            {
+                if (DamoclesBugBuff.Instance.MyTimer != null)
                 {
-                    TrySpawnBug();
-                    delayCount.RemoveAt(0);
+                    int minCount = delayCount[0];
+                    foreach (var allPlayer in player.room.game.AlivePlayers.Select(i => i.realizedCreature as Player)
+                                     .Where(i => i != null && i.graphicsModule != null))
+                    {
+                        if (DamoclesBugBuffEntry.DamoclesBugFeatures.TryGetValue(player, out var damoclesBug))
+                        {
+                            if (damoclesBug.spawnCount < delayCount[0])
+                            {
+                                minCount = damoclesBug.spawnCount;
+                            }
+                        }
+                    }
+                    if (minCount == delayCount[0])
+                    {
+                        DamoclesBugBuff.Instance.MyTimer.frames = delayCount[0];
+                    }
                 }
+                else
+                    SetHerald();
             }
 
             bool debugMode = false;
@@ -117,15 +152,14 @@ namespace BuiltinBuffs.Negative
             //概率和位置满足条件时
             if ((UnityEngine.Random.value * 40 * 30 * 10 < 1 || debugMode) && HasCeiling())
             {
-                //位于管道中时，落网虫延迟生成
+                //落网虫延迟生成
                 if (delaySpawn)
-                {
-                    delayCount.Add(UnityEngine.Random.Range(40 * 3, 40 * 15));
-                    BuffPlugin.Log("[DamoclesBug] : A DropBug Has Delay Spawn. The number of bugs waiting to be generated now is: " + delayCount.Count);
-                }
-                //若不用延迟生成，那么立刻生成
+                    delayCount.Add(UnityEngine.Random.Range(40 * 3 + 1, 40 * 15));
                 else
-                    TrySpawnBug();
+                    delayCount.Add(UnityEngine.Random.Range(40 * 3 + 1, 40 * 5));
+
+                BuffUtils.Log(DamoclesBugBuff.Instance.ID, "A DropBug Has Delay Spawn. The number of bugs waiting to be generated now is: " + delayCount.Count);
+                SetHerald();
             }
         }
 
@@ -169,6 +203,29 @@ namespace BuiltinBuffs.Negative
             }
         }
 
+        public void SetHerald()
+        {
+            DamoclesBugBuff.Instance.MyTimer = new DownCountBuffTimer((timer, game) =>
+            {
+                foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
+                             .Where(i => i != null && i.graphicsModule != null))
+                {
+                    if (DamoclesBugBuffEntry.DamoclesBugFeatures.TryGetValue(player, out var damoclesBug))
+                    {
+                        if (damoclesBug.spawnCount == 0)
+                        {
+                            damoclesBug.TrySpawnBug();
+                            damoclesBug.delayCount.RemoveAt(0);
+                            BuffUtils.Log(DamoclesBugBuff.Instance.ID, "A DropBug Spawn! The number of bugs waiting to be generated now is: " + damoclesBug.delayCount.Count);
+                            DamoclesBugBuff.Instance.MyTimer.Reset();
+                        }
+                    }
+                }
+            }, Mathf.FloorToInt((float)delayCount[0] / 40f));
+            DamoclesBugBuff.Instance.MyTimer.ApplyStrategy(new DamoclesBugStrategy());
+            DamoclesBugBuff.Instance.MyTimer.Paused = false;
+        }
+
         public bool HasCeiling()
         {
             if (!ownerRef.TryGetTarget(out var player) || player.room == null)
@@ -180,5 +237,20 @@ namespace BuiltinBuffs.Negative
             else
                 return false;
         }
+
+        public bool InGateOrShelter()
+        {
+            if (!ownerRef.TryGetTarget(out var player) || player.room == null)
+                return false;
+            if (player.room.abstractRoom.gate || player.room.abstractRoom.shelter)
+                return true;
+            else
+                return false;
+        }
+    }
+
+    internal class DamoclesBugStrategy : BuffTimerDisplayStrategy
+    {
+        public override bool DisplayThisFrame => Second <= 3;
     }
 }
