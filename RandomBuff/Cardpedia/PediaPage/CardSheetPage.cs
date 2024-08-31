@@ -2,6 +2,7 @@
 using Menu.Remix;
 using Newtonsoft.Json.Linq;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Entry;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Render.UI;
@@ -28,6 +29,7 @@ namespace RandomBuff.Cardpedia.PediaPage
         CardpediaSlot cardpediaSlot;
         CardInfoDisplay infoDisplay;
 
+        public List<BuffPluginInfo> enabledPlugins = new List<BuffPluginInfo>();
         List<List<BuffID>> sheetIDPages = new();
 
         //页面元素
@@ -50,6 +52,9 @@ namespace RandomBuff.Cardpedia.PediaPage
         public CardSheetPage(CardpediaMenu cardpediaMenu, MenuObject owner, Vector2 pos) : base(cardpediaMenu, owner, pos)
         {
             this.cardpediaMenu = cardpediaMenu;
+
+            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values)
+                enabledPlugins.Add(pluginInfo);
 
             sheetPageContainer = new FContainer();
             owner.Container.AddChild(sheetPageContainer);
@@ -133,7 +138,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             for (int i = 0; i < allIDs.Count; i++)
             {
                 var lst = sheetIDPages.Last();
-                if (!BuffPlayerData.Instance.IsCollected(allIDs[i]))
+                if (!BuffPlayerData.Instance.IsCollected(allIDs[i]) || !enabledPlugins.Contains(BuffConfigManager.GetPluginInfo(allIDs[i])))
                     continue;
                 lst.Add(allIDs[i]);
                 if (lst.Count >= CardpediaStatics.sheetNumPerPage)
@@ -171,7 +176,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             string title;
             var language = Custom.rainWorld.inGameTranslator.currentLanguage;
 
-            var data = BuffDataManager.Instance.GetOrCreateBuffData(card.ID, true);
+            var data = (BuffData)Activator.CreateInstance(BuffRegister.GetDataType(card.ID));
             if (data != null)
             {                
                 if (data is CountableBuffData)

@@ -59,6 +59,7 @@ Normal|普通模式
 Quick|快速模式
 Sandbox|沙盒模式
 ProgressionMenu_Show|进度
+ExtraInfo_Label|额外信息
 
 
 //BuffConditionHUD

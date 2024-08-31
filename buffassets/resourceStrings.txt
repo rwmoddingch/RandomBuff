@@ -1,5 +1,5 @@
 //MainMenu
-MainMenu_Buff|BUFF mode
+MainMenu_Buff|BUFF
 MainMenu_Cardpedia|CARDPEDIA
 
 
@@ -57,6 +57,7 @@ Normal|NORMAL MODE
 Quick|QUICK MODE
 Sandbox|SANDBOX MODE
 ProgressionMenu_Show|PROGRESSION
+ExtraInfo_Label|extra info
 
 
 //BuffConditionHUD

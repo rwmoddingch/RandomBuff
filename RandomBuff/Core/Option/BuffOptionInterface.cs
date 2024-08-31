@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Menu;
 using Menu.Remix.MixedUI;
 using Menu.Remix.MixedUI.ValueTypes;
+using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI.BuffPack;
 using RandomBuffUtils.MixedUI;
 using RWCustom;
 using UnityEngine;
@@ -56,10 +58,11 @@ namespace RandomBuff.Core.Option
                 configurable.Value.info = new ConfigurableInfo(BuffResourceString.Get($"Remix_{configurable.Key}_Desc", true));
 
             OpTab option = InitNewTab(BuffResourceString.Get("Remix_Option", true));
+            OpTab pack = new OpTab(this, "BuffPack");
             OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
         
 
-            Tabs = new[] { option , cheat };
+            Tabs = new[] { option , pack, cheat };
             
             const float initYIndex = 1.5f + 1f + 2f;
             float yIndex = initYIndex;
@@ -123,7 +126,28 @@ namespace RandomBuff.Core.Option
             holdEvent.AddEventHandler(creditButton, Delegate.CreateDelegate(holdEvent.EventHandlerType, this, nameof(SwitchToCredit)));
 
 
+            float sizeY = 0f;
+            List<PackButton> packButtons = new List<PackButton>();
+            foreach(var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            {
+                packButtons.Add(new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo));
+                sizeY += 120f + 20f;
+            }
 
+            sizeY = Mathf.Max(sizeY, 560f);
+
+            OpScrollBox scrollBox;
+            pack.AddItems(scrollBox = new OpScrollBox(new Vector2(20f, 20f), new Vector2(560f, 560f), sizeY, hasSlideBar: false));
+
+            float anchorY = sizeY;
+            foreach(var button in packButtons)
+            {
+                anchorY -= button.size.y;
+                anchorY -= 10f;
+                button.SetPos(new Vector2(10f, anchorY));
+                scrollBox.AddItems(button);
+                anchorY -= 10f;
+            }
         }
 
 

@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 using RandomBuff.Cardpedia.PediaPage;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
+using RandomBuff.Render.UI.BuffPack;
 
 namespace RandomBuff.Cardpedia
 {
@@ -52,6 +53,7 @@ namespace RandomBuff.Cardpedia
         public BigFancyButton negaButton;
         public BigFancyButton dualButton;
         public BigFancyButton posiButton;
+        public Menu.Menu packMenu;
 
         private bool lastPauseClicked = false;
 
@@ -93,25 +95,6 @@ namespace RandomBuff.Cardpedia
             pages.Add(new Page(this, null, "main", 0));
             scene = new InteractiveMenuScene(this, null, Menu.MenuScene.SceneID.Empty);
             pages[0].subObjects.Add(scene);
-
-            //加载画面
-            Vector2 centerPos = new Vector2(683, 393);
-            string path = "buffassets/illustrations/SlugLoading_";
-            //loadingSprite_Dark = new FSprite("pixel");
-            //loadingSprite_Dark.scale = 2000f;
-            //loadingSprite_Dark.color = new Color(0.01f, 0.01f, 0.01f);
-            //loadingSprite_Dark.SetPosition(centerPos);
-            //cursorContainer.AddChild(loadingSprite_Dark);
-            ////loadingSprite_Main = new FSprite(path + "Main");
-            //loadingSprite_UI = new FSprite(path + "UI");
-            //loadingSprite_Cards = new FSprite(path + "Cards");
-            //loadingSprite_Cards.alpha = 0f;
-            ////loadingSprite_Main.SetPosition(centerPos);
-            //loadingSprite_UI.SetPosition(centerPos);
-            //loadingSprite_Cards.SetPosition(centerPos);
-            //cursorContainer.AddChild(loadingSprite_Main);
-            //cursorContainer.AddChild(loadingSprite_UI);
-            //cursorContainer.AddChild(loadingSprite_Cards);
         }
 
         public void InitMenuElements()
@@ -280,8 +263,17 @@ namespace RandomBuff.Cardpedia
             sheetPage = new CardSheetPage(this, pages[0], Vector2.zero);
             pages[0].subObjects.Add(sheetPage);
             pages[0].mouseCursor.cursorSprite.MoveToFront();
-          
 
+            packMenu = new PackMenu(manager, new Vector2(80f, 70f), sheetPage.enabledPlugins)
+            {
+                OnTogglePackCallBack = (lst) =>
+                {
+                    sheetPage.enabledPlugins = lst;
+                    if (sheetPage.Show)
+                        sheetPage.RefreshSheet(sheetPage.currentType);
+                }
+            };
+            manager.sideProcesses.Add(packMenu);
 
             Instance = this;
             inited = true;
@@ -348,6 +340,7 @@ namespace RandomBuff.Cardpedia
                 //backButton.pos = Vector2.Lerp(backButton.lastPos, Vector2.Lerp(new Vector2(100f, 30f), new Vector2(100f, -50f),SetAlpha),timeStacker);
                 leftFlipButton.pos.y = Mathf.Lerp(leftFlipButton.lastPos.y, Mathf.Lerp(-300f, 120f, SetAlpha), timeStacker);
                 rightFlipButton.pos.y = Mathf.Lerp(leftFlipButton.lastPos.y, Mathf.Lerp(-300f, 120f, SetAlpha), timeStacker);
+                packMenu.pages[0].pos.y = Mathf.Lerp(packMenu.pages[0].pos.y, Mathf.Lerp(-300f, 0f, SetAlpha), timeStacker);
 
                 //textBoxManager.Draw(timeStacker);
                 //cardSheetManager.GrafUpdate(timeStacker);
@@ -467,6 +460,7 @@ namespace RandomBuff.Cardpedia
                 {
                     BrowsingCards = false;
                     sheetPage.Show = false;
+                    packMenu.Singal(null, "Hide_Pack");
                 }
             }
             else if (message == "LEFTFLIP")
@@ -505,6 +499,13 @@ namespace RandomBuff.Cardpedia
             manager.RequestMainProcessSwitch(ProcessManager.ProcessID.MainMenu);
             BuffFile.Instance.SaveFile();
             PlaySound(SoundID.MENU_Switch_Page_Out);
+        }
+
+        public override void ShutDownProcess()
+        {
+            base.ShutDownProcess();
+            packMenu.ShutDownProcess();
+            Custom.rainWorld.processManager.sideProcesses.Remove(packMenu);
         }
 
 
