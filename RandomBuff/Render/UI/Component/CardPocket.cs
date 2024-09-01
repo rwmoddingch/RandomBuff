@@ -129,17 +129,25 @@ namespace RandomBuff.Render.UI.Component
                     {
                         showAnim = null;
                         container.alpha = 1f;
-                    });
 
-                if(packMenu == null)
-                {
-                    packMenu = new PackMenu(Custom.rainWorld.processManager, new Vector2(40f, 40f), currentEnabledBuffPlugins);
-                    Custom.rainWorld.processManager.sideProcesses.Add(packMenu);
-                    packMenu.OnTogglePackCallBack = (lst) =>
-                    {
-                        slot.RecaculateBuffRolls(lst, true);
-                    };
-                }
+
+                        if (packMenu == null)
+                        {
+                            packMenu = new PackMenu(Custom.rainWorld.processManager, new Vector2(40f, 40f), currentEnabledBuffPlugins, Container);
+                            Custom.rainWorld.processManager.sideProcesses.Add(packMenu);
+                            packMenu.OnTogglePackCallBack = (lst) =>
+                            {
+                                slot.RecaculateBuffRolls(lst, true);
+                            };
+
+                            for (int i = 0; i < 5; i++)
+                            {
+                                packMenu.Update();
+                                packMenu.GrafUpdate(1f);
+                            }
+
+                        }
+                    });
             }
             else
             {

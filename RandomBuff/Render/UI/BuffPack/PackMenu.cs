@@ -37,8 +37,14 @@ namespace RandomBuff.Render.UI.BuffPack
 
         public Action<List<BuffPluginInfo>> OnTogglePackCallBack;
 
-        public PackMenu(ProcessManager manager, Vector2 showPos, List<BuffPluginInfo> enabledPlugins = null) : base(manager, BuffEnums.ProcessID.BuffPackMenu)
+        public PackMenu(ProcessManager manager, Vector2 showPos, List<BuffPluginInfo> enabledPlugins = null, FContainer ownerContainer = null) : base(manager, BuffEnums.ProcessID.BuffPackMenu)
         {
+            if(ownerContainer != null)
+            {
+                container.RemoveFromContainer();
+                ownerContainer.AddChild(container);
+            }
+
             this.showPos = showPos;
             this.hidePos = new Vector2(-1000f, showPos.y);
             buttonPackShowPos = showPos + new Vector2(0f, ScrollBoxShowSize.y + 10f);
@@ -81,6 +87,9 @@ namespace RandomBuff.Render.UI.BuffPack
 
             showHideButton = new SimpleButton(this, pages[0], "Pack", "Show_Pack", showPos, ScrollBoxHideSize);
             pages[0].subObjects.Add(showHideButton);
+            packButtonScrollBox.Hide();
+            foreach (var button in packButtons)
+                button.Hide();
         }
 
         public void OnPackButtonClick()
@@ -123,6 +132,9 @@ namespace RandomBuff.Render.UI.BuffPack
                     packButtonScrollBox.size = ScrollBoxHideSize;
                     packButtonScrollBox.Update();
                     packButtonScrollBox.GrafUpdate(1f);
+                    packButtonScrollBox.Show(); 
+                    foreach (var button in packButtons)
+                        button.Show();
                 },
                 OnAnimGrafUpdate: (t, f) =>
                 {
@@ -166,6 +178,9 @@ namespace RandomBuff.Render.UI.BuffPack
 
                     packButtonScrollBox.Update();
                     packButtonScrollBox.GrafUpdate(1f);
+                    packButtonScrollBox.Hide();
+                    foreach (var button in packButtons)
+                        button.Hide();
 
                 }).BindModifier(Helper.EaseInOutCubic);
             }
