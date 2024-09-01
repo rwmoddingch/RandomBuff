@@ -30,6 +30,7 @@ namespace RandomBuff.Render.UI.Component
         public CardPocketCallBack updateSelectedBuffsCallBack;
         public Action<List<BuffRep>> onSelectedBuffChange;
         public Action<bool> toggleShowCallBack;
+        public SlugcatStats.Name bindSlug;
 
         public PackMenu packMenu;
 
@@ -215,6 +216,7 @@ namespace RandomBuff.Render.UI.Component
                 currentSelectedBuffs.Add(rep);
                 lastSelectedBuffs.Add(rep);
             }
+            slot?.RecaculateConflictState();
         }
 
         public void Destroy()
@@ -620,13 +622,48 @@ namespace RandomBuff.Render.UI.Component
                 if (buffRep.stackable)
                     buffRep.stackCount = 0;
                 pocket.onSelectedBuffChange?.Invoke(CurrentSelectedBuffs);
+                RecaculateConflictState();
             }
-            else if(maxSelectedCount == -1 || CurrentSelections < maxSelectedCount)
+            else if((maxSelectedCount == -1 || CurrentSelections < maxSelectedCount) && !buffRep.conflicted)
             {
                 CurrentSelectedBuffs.Add(buffRep);
                 if (buffRep.stackable)
                     buffRep.stackCount = 1;
                 pocket.onSelectedBuffChange?.Invoke(CurrentSelectedBuffs);
+                RecaculateConflictState();
+            }
+        }
+
+        public void RecaculateConflictState()
+        {
+            var conflict = new List<string>();
+            var conflictedReps = new List<BuffRep>();
+
+            foreach (var rep in CurrentSelectedBuffs)
+                conflict.AddRange(rep.buffID.GetStaticData().Conflict);
+
+            foreach(var id in BuffConfigManager.BuffTypeTable[currentType].ToArray())
+            {
+                var rep = TryGetRep(id, false, false);
+                if (rep != null)
+                {
+                    conflictedReps.Add(rep);
+                    rep.conflicted = false;
+                }
+            }
+
+            foreach(var rep in conflictedReps)
+            {
+                if ((conflict.Contains(rep.buffID.value) || conflict.Any(j => rep.buffID.GetStaticData().Tag.Contains(j))))
+                {
+                    rep.conflicted = true;
+                }
+                else if (rep.buffID.GetStaticData().Conflict.Contains(pocket.bindSlug?.value ?? string.Empty))
+                {
+                    rep.conflicted = true;
+                }
+                else
+                    rep.conflicted = false;
             }
         }
 
@@ -820,6 +857,7 @@ namespace RandomBuff.Render.UI.Component
 
             public int stackCount;
             public bool stackable;
+            public bool conflicted;
 
             public BuffRep Refresh()
             {
@@ -1127,9 +1165,10 @@ namespace RandomBuff.Render.UI.Component
         Vector2 targetInPocketPos;
         float baseScale;
 
+        bool conflictedGrey;
         Vector2 pos;
         Vector2 lastPos;
-         Vector3 targetRotation = Vector3.zero;
+        Vector3 targetRotation = Vector3.zero;
 
         Vector2 TargetPosition => pocketInteractionManager.Slot.TopLeftPos + new Vector2(targetInPocketPos.x, pocketInteractionManager.Slot.yPointer - targetInPocketPos.y - pocketInteractionManager.Slot.externGap);
         float TargetScaleFactor
@@ -1145,7 +1184,7 @@ namespace RandomBuff.Render.UI.Component
                     return 1f;
             }
         }
-        float ExternScale => (buffCard.CurrentFocused ? 0.05f : 0f);
+        float ExternScale => (buffCard.CurrentFocused && !conflictedGrey ? 0.05f : 0f);
 
         public CardPocketNormalAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
@@ -1156,15 +1195,14 @@ namespace RandomBuff.Render.UI.Component
             buffCard.KeyBinderFlash = false;
             buffCard.DisplayStacker = false;
 
-            buffCard.UpdateGrey();
             buffCard.UpdateGraphText();
             
-
             pocketInteractionManager = buffCard.interactionManager as CardPocketInteratctionManager;
             targetInPocketPos = pocketInteractionManager.GetInPocketPosition(buffCard);
             baseScale = pocketInteractionManager.Slot.pocket.cardScale;
 
-            
+            buffCard.Grey = pocketInteractionManager.Slot.TryGetRep(buffCard.ID).conflicted;
+
             if (buffCard.lastAnimatorState != BuffCard.AnimatorState.CardPocketSlot_Exclusive)
             {
                 buffCard.Scale = 0f;
@@ -1181,6 +1219,8 @@ namespace RandomBuff.Render.UI.Component
             pos = Vector2.Lerp(pos, TargetPosition, 0.25f);
             //BuffPlugin.Log($"{buffCard.ID} _ targetPos : {TargetPosition.x},{TargetPosition.y} | {targetInPocketPos.x},{targetInPocketPos.y}");
             buffCard.Alpha = Mathf.Lerp(buffCard.Alpha, TargetScaleFactor, 0.25f);
+            conflictedGrey = pocketInteractionManager.Slot.TryGetRep(buffCard.ID).conflicted && !pocketInteractionManager.Slot.IsBuffSelected(buffCard.ID);
+            buffCard.Grey = conflictedGrey;
         }
 
         public override void GrafUpdate(float timeStacker)
