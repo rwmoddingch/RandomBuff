@@ -60,7 +60,7 @@ namespace RandomBuff.Core.Buff
             try
             {
                 var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(filePath));
-                newData = new BuffPluginInfo { AssemblyName = (string)rawData[loadState = "Assembly"] };
+                newData = new BuffPluginInfo { AssemblyName = new DirectoryInfo(Path.GetDirectoryName(filePath)).Name };
                 bool hasMutli = false;
 
                 //TODO: 或许未来改成延迟加载
