@@ -14,6 +14,6 @@
     },
   "English": {
     "BuffName": "RJ250",
-    "Description": "Make bombs relatively harmless, modify the way bombs are thrown and stabilize the impact of the explosion so you can jump higher."
+    "Description": "Bomb damage is greatly reduced, but their knockback is stabilized and their aiming is fine-tuned for your rocketjumping convenience."
   }
 }

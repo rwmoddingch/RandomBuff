@@ -11,7 +11,7 @@
         "Description" : "较大体型的蜈蚣有几率在追击玩家时出现闪烁蓝白光的效果，几秒后会对所有靠近蜈蚣的手持有普通长矛/电矛的玩家造成电击眩晕，但普通长矛将会转化为电矛，未充能的电矛将完成充能"
     },
     "English": {
-        "BuffName" : "PointDischarge",
-        "Description" : "Large centipedes occasionally flash blue and white when following a slugcat, after a short delay it will release an electric shock which converts spears into electric spears and charges electric spears if needed."
+        "BuffName" : "Point Discharge",
+        "Description" : "Centipedes gain a ranged shock attack which electrocutes players holding spears, but also electrifies ordinary spears!"
     }
 }

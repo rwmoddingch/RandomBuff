@@ -12,6 +12,6 @@
     },
     "English":{
         "BuffName":"Unstable Slug",
-        "Description":"Slugcat will randomly explode which stuns it and everything around it, a timer can be seen at the top right before explosions."
+        "Description":"Your slugcat might randomly explode, stunning itself and nearby targets. (Explosions give a warning timer on the top-right of the screen.)"
     }	
 }

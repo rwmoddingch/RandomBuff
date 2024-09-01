@@ -16,7 +16,7 @@
         "Description" : "每次成功雨眠后，玩家都会在当前区域的随机避难所中醒来。"
     },
     "English": {
-        "BuffName" : "Dream Traveller",
-        "Description" : "When slugcat sleeps in a den, it will wake up in a random den in the same region. "
+        "BuffName" : "Dreamwalker",
+        "Description" : "After sleeping in a shelter, your slugcat wakes up in a random shelter in the same region."
     }
 }

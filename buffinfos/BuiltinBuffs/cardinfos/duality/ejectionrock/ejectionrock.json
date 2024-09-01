@@ -11,7 +11,7 @@
         "Description" : "石头会在击中墙壁的时候随机飞向另一个方向，直到命中生物才会停下。并且对命中目标造成大量击退（包括玩家自己）"
     },
     "English" : {
-        "BuffName" : "EjectionRock",
-        "Description" : "Rocks will bounce back and forth off walls indefinitely until they hit a creature, causing significant knockback to the creature hit.(including yourself)"
+        "BuffName" : "Ejection Rock",
+        "Description" : "Rocks bounce infinitely until they hit a creature, dealing massive knockback. Doesn't discriminate between friend and foe!"
     }
 }

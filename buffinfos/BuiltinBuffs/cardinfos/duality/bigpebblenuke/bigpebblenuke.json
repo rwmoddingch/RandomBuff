@@ -13,7 +13,7 @@
         "Description" : "拾荒炸弹将拥有超高的威力和更大的范围，并留下持续一段时间的辐射区。"
     },
     "English": {
-        "BuffName" : "BigPebbleNuke",
-        "Description" : "Turns regular bombs into radioctive mini-nukes."
+        "BuffName" : "Big Pebble Nuke",
+        "Description" : "Regular bombs become radioctive mini-nukes."
     }
 }

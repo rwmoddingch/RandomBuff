@@ -11,7 +11,7 @@
         "Description" : "玩家拿起的石头都会变成普通珍珠。"
     },
     "English": {
-        "BuffName" : "Wealth Finger",
-        "Description" : "Rocks held by slugcat will turn into pearls. "
+        "BuffName" : "Midas' Paws",
+        "Description" : "Rocks picked up by your slugcat turn into pearls."
     }
 }

@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "Armstron",
-        "Description" : "Once slugcat enters moon's room, set the global gravity to 1/6th of normal gravity."
+        "Description" : "After your slugcat enters Moon's room, (global) gravity becomes six times weaker."
     }
 }
