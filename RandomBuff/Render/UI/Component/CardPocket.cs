@@ -15,6 +15,7 @@ using static RandomBuff.Render.UI.Component.CardPocketSlot;
 using Menu;
 using RandomBuff.Core.Game;
 using RandomBuff.Render.UI.BuffPack;
+using RandomBuff.Core.Option;
 
 namespace RandomBuff.Render.UI.Component
 {
@@ -269,6 +270,8 @@ namespace RandomBuff.Render.UI.Component
         public SideSingleSelectButton stackButton;
         public FContainer stackButtonContainer;
 
+        public FLabel conflictLabel;
+
         public int maxSelectedCount = -1;
 
         public int cardsInRoll;
@@ -286,6 +289,7 @@ namespace RandomBuff.Render.UI.Component
         public float scrollVel;
         public bool enableScroll = true;
         public BuffType currentType;
+        bool disableConflict;
 
         bool mouseInside;
 
@@ -302,6 +306,7 @@ namespace RandomBuff.Render.UI.Component
             this.pocket = pocket;
             BaseInteractionManager = new CardPocketInteratctionManager(this);
             HelpInfoProvider = new HelpInfoProvider(this);
+            disableConflict = BuffOptionInterface.Instance.DisableCardPocketConflict.Value;
 
             #region 预计算参数
 
@@ -377,6 +382,18 @@ namespace RandomBuff.Render.UI.Component
                 },
                 enableInput = false
             };
+
+            if (!disableConflict)
+            {
+                conflictLabel = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("CardPocket_ConflictLabel"))
+                {
+                    //shader = Custom.rainWorld.Shaders["MenuTextCustom"],
+                    color = Color.red,
+                    alpha = 0f
+                };
+                pocket.SymbolContainer.AddChild(conflictLabel);
+                conflictLabel.SetPosition(screenSize.x / 2f, 80f);
+            }
         }
 
         public void RecaculateBuffRolls(List<BuffPluginInfo> enabledPlugins = null, bool updateDisplay = false)
@@ -636,6 +653,9 @@ namespace RandomBuff.Render.UI.Component
 
         public void RecaculateConflictState()
         {
+            if (disableConflict)
+                return;
+
             var conflict = new List<string>();
             var conflictedReps = new List<BuffRep>();
 
@@ -754,6 +774,7 @@ namespace RandomBuff.Render.UI.Component
         public override void Destory()
         {
             id2RepMapping.Clear();
+            conflictLabel?.RemoveFromContainer();
             InputAgency.Current.RecoverLastIfIsFocus(BaseInteractionManager, true);
             base.Destory();
         }
@@ -795,6 +816,32 @@ namespace RandomBuff.Render.UI.Component
             {
                 stackButtonContainer.alpha = show ? 1f : 0f;
                 stackButtonShowAnim = null;
+            });
+        }
+
+        float conflictLabelInitAlpha;
+        TickAnimCmpnt conflictLabelShowAlpha;
+        public void ConflictLabelShow(bool show)
+        {
+            if (conflictLabel == null)
+                return;
+
+            if (show && conflictLabel.alpha == 1f)
+                return;
+            else if (!show && conflictLabel.alpha == 0f)
+                return;
+
+            if (conflictLabelShowAlpha != null)
+                conflictLabelShowAlpha.Destroy();
+            conflictLabelInitAlpha = conflictLabel.alpha;
+
+            conflictLabelShowAlpha = AnimMachine.GetTickAnimCmpnt(0, 20, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, l) =>
+            {
+                conflictLabel.alpha = Mathf.Lerp(conflictLabelInitAlpha, show ? 1f : 0f, t.Get());
+            }, OnAnimFinished: (t) =>
+            {
+                conflictLabel.alpha = show ? 1f : 0f;
+                conflictLabelShowAlpha = null;
             });
         }
 
@@ -1024,6 +1071,7 @@ namespace RandomBuff.Render.UI.Component
                     InputAgency.Current.ResetToDefaultPos();
                 });
                 Slot.SetStackButtonShow(false);
+                Slot.ConflictLabelShow(false);
             }
             else if(newState == State.Exclusive)
             {
@@ -1033,6 +1081,11 @@ namespace RandomBuff.Render.UI.Component
                     Slot.SetStackButtonShow(true);
                 else
                     Slot.SetStackButtonShow(false);
+
+                if (Slot.TryGetRep(exclusiveShowCard.ID, true, false).conflicted)
+                    Slot.ConflictLabelShow(true);
+                else
+                    Slot.ConflictLabelShow(false);
             }
             currentState = newState;
         }

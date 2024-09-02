@@ -304,6 +304,7 @@ Remix_CardSlotKey|查看卡牌按键
 Remix_KeyBindKey|卡牌绑键按键
 Remix_ShowExceptionLog|报错提示
 Remix_CosmeticForEverySlug|装饰品取消蛞蝓猫限制
+Remix_DisableCardPocketConflict|选卡卡包允许选择冲突卡牌
 Remix_EnableExpeditionExtend|实验性 - DLC探险效果转化卡牌
 Remix_EnableExpeditionModExtend|实验性 - MOD探险效果转化卡牌
 Remix_Cheat|作弊
@@ -318,6 +319,8 @@ Remix_CheatAllCosmetics_Desc|通常需要完成对应使命解锁
 Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫扩展的增益和负担转化为卡牌
 Remix_EnableExpeditionModExtend_Desc|需要重启以应用，将其他mod的增益和负担转化为卡牌，可能存在兼容性问题
 Remix_CosmeticForEverySlug_Desc|让启用的装饰品对所有猫生效
+Remix_DisableCardPocketConflict_Desc|允许在选卡卡包中选择冲突的卡牌，有可能导致更多意外的问题
+
 
 //SleepMenu
 SleepMenu_Stack|叠加卡牌
@@ -329,6 +332,7 @@ SleepMenu_UnStack_Title|选择一张卡删除
 //CardPocket
 CardPocket_StackButton|增加叠加
 CardPocket_UnstackButton|减少叠加
+CardPocket_ConflictLabel|当前buff与已选择的buff存在冲突
 CardPocket_HelpInfo_None|buff类型按钮上[左键点击/按下投掷]来切换浏览的buff类型<LINE>在 X 按钮上[左键点击/按下投掷]来关闭卡包<LINE>在卡包中[滚动鼠标/按住上下]来浏览buff
 CardPocket_HelpInfo_Hover|在buff卡牌上[左键点击/按下投掷]以查看 {0} 的详情<LINE>在buff卡牌上[右键点击/按下抓取]来切换 {0} 的选择情况
 CardPocket_HelpInfo_Hover_Stackable|<LINE>在详情页面中调整 {0} 的堆叠层数
