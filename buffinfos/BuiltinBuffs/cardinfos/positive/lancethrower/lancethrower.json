@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "LanceThrower",
-        "Description" : "Your slugcat can charge up a spear throw when on the ground, dealing 3x damage. View the cardpedia to set your own keybind for charging."
+        "Description" : "Your slugcat can charge up a spear throw when grounded, dealing 3x damage and piercing armoured creatures. View the cardpedia to set your own keybind for charging."
     }
 }
