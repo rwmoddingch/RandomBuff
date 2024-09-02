@@ -12,6 +12,6 @@
     },
     "English": {
         "BuffName" : "LanceThrower",
-        "Description" : "Slugcats an store up and powerfully throw a spear for 3x damage that can penetrate appendages and lizard heads.\nIt can only be stored up on the ground and has a large slowdown when doing so.\nThere are two storing modes, which can be selected in the cardpedia configuration: \n Mode 1: Hold the throw button to store up, release to throw, this mode will modify the original throwing logic \n Mode 2: Hold the configuration button to store, release to throw"
+        "Description" : "Your slugcat can charge up a spear throw when on the ground, dealing 3x damage. View the cardpedia to set your own keybind for charging."
     }
 }
