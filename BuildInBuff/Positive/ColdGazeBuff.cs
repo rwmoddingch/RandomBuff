@@ -906,7 +906,10 @@ namespace BuiltinBuffs.Positive
             if (!ownerRef.TryGetTarget(out var creature))
                 return false;
 
-            if(allowUpdateCount > 0)
+            if (creature.realizedCreature != null && creature.realizedCreature is TentaclePlant)
+                return false;
+
+            if (allowUpdateCount > 0)
                 return true;
 
             return false;
