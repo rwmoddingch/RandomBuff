@@ -39,7 +39,6 @@ namespace RandomBuff.Core.Option
             
             ShowExceptionLog = config.Bind(nameof(ShowExceptionLog), true);
 
-            EnableExpeditionExtend = config.Bind(nameof(EnableExpeditionExtend), false);
             EnableExpeditionModExtend = config.Bind(nameof(EnableExpeditionModExtend), false);
 
             CheatAllCards = config.Bind(nameof(CheatAllCards), false);
@@ -96,14 +95,10 @@ namespace RandomBuff.Core.Option
 
             yIndex++;
 
-            AppendItems(option, ref yIndex,
-                new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionExtend", true), FLabelAlignment.Left),
-                mainExpedition = new OpCheckBox(EnableExpeditionExtend, Vector2.zero));
-
 
             AppendItems(option, ref yIndex,
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionModExtend", true), FLabelAlignment.Left),
-               modExpedition = new OpCheckBox(EnableExpeditionModExtend, Vector2.zero));
+                new OpCheckBox(EnableExpeditionModExtend, Vector2.zero));
 
             yIndex = initYIndex;
 
@@ -170,20 +165,6 @@ namespace RandomBuff.Core.Option
         }
 
 
-        public override void Update()
-        {
-            base.Update();
-            if (!mainExpedition.GetValueBool() && !modExpedition.IsInactive)
-            {
-                if (modExpedition.GetValueBool())
-                    modExpedition.SetValueBool(false);
-                modExpedition.Deactivate();
-            }
-            else if (mainExpedition.GetValueBool() && modExpedition.IsInactive)
-            {
-                modExpedition.Reactivate();
-            }
-        }
 
         public void SwitchToCredit(UIfocusable trigger)
         {
@@ -262,7 +243,6 @@ namespace RandomBuff.Core.Option
         public Configurable<bool> CheatAllCards { get; private set; }
         public Configurable<bool> CheatAllCosmetics { get; private set; }
 
-        public Configurable<bool> EnableExpeditionExtend {get; private set; }
         public Configurable<bool> EnableExpeditionModExtend { get; private set; }
         public Configurable<bool> DisableNotifyDialog { get; private set; }
 
@@ -272,7 +252,6 @@ namespace RandomBuff.Core.Option
         public Configurable<bool> DisableCardPocketConflict { get; private set; }
 
 
-        private OpCheckBox mainExpedition, modExpedition;
 
         private OpHoldButton cheatButton;
         private readonly List<UIelement> cheatList = new();

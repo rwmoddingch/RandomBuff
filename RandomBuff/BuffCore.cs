@@ -218,8 +218,35 @@ namespace RandomBuff
             return true;
         }
 
+        /// <summary>
+        /// 是否启用了对应卡包
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <returns></returns>
+        public static bool IsPluginEnabled(string pluginName)
+        {
+            return BuffPlugin.IsPluginsEnabled(pluginName);
+        }
 
-        
+        /// <summary>
+        /// 获取全部安装的卡包
+        /// </summary>
+        /// <returns></returns>
+        public static BuffPluginInfo[] GetAllBuffPlugins()
+        {
+            return BuffConfigManager.PluginInfos.Values.ToArray();
+        }
+
+
+        /// <summary>
+        /// 获取全部已启用卡包
+        /// </summary>
+        /// <returns></returns>
+        public static BuffPluginInfo[] GetAllEnabledBuffPlugins()
+        {
+            return BuffConfigManager.PluginInfos.Values.Where(i => i.Enabled).ToArray();
+        }
+
     }
 
     public static partial class BuffCore

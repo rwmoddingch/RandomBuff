@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RandomBuff.Render.UI.ExceptionTracker;
@@ -13,12 +14,15 @@ using static RandomBuff.Core.Buff.BuffStaticData;
 
 namespace RandomBuff.Core.Buff
 {
+    /// <summary>
+    /// 描述卡包信息，一个卡包对应一个程序集
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class BuffPluginInfo
+    public sealed class BuffPluginInfo
     {
         protected BuffPluginInfo() { }
 
-        public BuffPluginInfo(string assemblyName)
+        internal BuffPluginInfo(string assemblyName)
         {
             AssemblyName = assemblyName;
             infos.Add(InGameTranslator.LanguageID.English, new PluginInfo()
@@ -28,12 +32,28 @@ namespace RandomBuff.Core.Buff
             });
         }
 
+        /// <summary>
+        /// 程序集名称
+        /// </summary>
         public string AssemblyName { get; private set; }
 
+
+        /// <summary>
+        /// 封面位置（自动加载）
+        /// </summary>
         public string Thumbnail { get; private set; } = "buffassets/illustrations/default_thumbnail";
 
+
+        /// <summary>
+        /// 依赖关系
+        /// </summary>
+        [NotNull]
         public string[] Dependencies { get; private set; } = Array.Empty<string>();
 
+
+        /// <summary>
+        /// 是否启用
+        /// </summary>
         public bool Enabled => BuffPlugin.IsPluginsEnabled(AssemblyName);
 
         internal Assembly codeAssembly;
@@ -43,7 +63,11 @@ namespace RandomBuff.Core.Buff
 
         private Dictionary<InGameTranslator.LanguageID, PluginInfo> infos = new();
 
-
+        /// <summary>
+        /// 获取卡包的介绍信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public PluginInfo GetInfo(InGameTranslator.LanguageID id)
         {
             if(infos.TryGetValue(id,out var info)) return info;
@@ -52,8 +76,7 @@ namespace RandomBuff.Core.Buff
         }
 
 
-
-        public static bool LoadPluginInfo(string filePath,out BuffPluginInfo newData)
+        internal static bool LoadPluginInfo(string filePath,out BuffPluginInfo newData)
         {
             newData = null;
             string loadState = "";

@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 conditions = new List<Condition>()
                 {
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type = BuffOptionInterface.Instance.EnableExpeditionExtend.Value ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type =  BuffCore.IsPluginEnabled("ExpeditionExtend") ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
                     new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 20}
@@ -47,8 +47,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {4, new List<string>()
                         {
                             TipherethBuffData.Tiphereth.value,
-                            ChesedBuffData.Chesed.value,
-                            BuffOptionInterface.Instance.EnableExpeditionExtend.Value ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
+                            ChesedBuffData.Chesed.value, 
+                            BuffCore.IsPluginEnabled("ExpeditionExtend") ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
                         }},
                         {8, new List<string>()
                         {
