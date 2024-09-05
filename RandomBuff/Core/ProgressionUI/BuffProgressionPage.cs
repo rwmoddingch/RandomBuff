@@ -268,7 +268,7 @@ namespace RandomBuff.Core.ProgressionUI
                     questInfo.name = Custom.rainWorld.inGameTranslator.Translate(questData.QuestName);
                 questInfo.color = questData.QuestColor;
                 
-                foreach(var condition in questData.QuestConditions)
+                foreach(var condition in questData.questConditions)
                 {
                     if(condition is LevelQuestCondition levelQuestCondition)
                     {
