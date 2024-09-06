@@ -16,7 +16,6 @@ using On.Menu.Remix;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game;
-using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;

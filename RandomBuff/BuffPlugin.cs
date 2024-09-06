@@ -185,7 +185,7 @@ namespace RandomBuff
                         if (devVersion == null)
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
-                                $"Random Buff, Build: 2024_08_24\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                $"Random Buff, Build: 2024_09_06\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
                                 new Vector2(1000, 200), 0.4f)
                             {
                                 Alignment = TMPro.TextAlignmentOptions.BottomLeft,
@@ -236,7 +236,7 @@ namespace RandomBuff
         /// <summary>
         /// 清除全部Buff
         /// </summary>
-        internal static void CleanAllBuffs()
+        private static void CleanAllBuffs()
         {
             MissionRegister.CleanAll();
             BuffRegister.CleanAll();
@@ -272,6 +272,8 @@ namespace RandomBuff
             BuffConfigManager.InitQuestData();
 
             BuffRegister.LoadBuffPluginAsset();
+
+            BuffCore.AfterBuffReloadedInternal(BuffCore.GetAllEnabledBuffPlugins());
 
         }
 

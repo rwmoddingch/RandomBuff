@@ -139,14 +139,21 @@ namespace BuiltinBuffs.Expeditions
                 ExpeditionProgression.SetupBurdenGroups();
 
                 InitExpeditionType();
-                RegisterExpeditionType();
                 ExpeditionCoreHooks.OnModsInit();
+                
+                BuffCore.AfterBuffReloaded += BuffCoreOnAfterBuffReloaded;
 
             }
             catch (Exception e)
             {
                 BuffUtils.LogException("BuffExtend", e);
             }
+        }
+
+        private void BuffCoreOnAfterBuffReloaded(BuffPluginInfo[] enabledplugins)
+        {
+            RegisterExpeditionType();
+            BuffCore.AfterBuffReloaded -= BuffCoreOnAfterBuffReloaded;
         }
 
         private const string NegativeTexture = "buffinfos/ExpeditionExtend/expedition/expeditionNegative";
@@ -251,7 +258,6 @@ namespace BuiltinBuffs.Expeditions
                     });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}Buff", true),
                         ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
-                    BuffRegister.RegisterStaticData(staticData);
                 }
             }
             foreach (var group in ExpeditionProgression.burdenGroups)
@@ -296,7 +302,6 @@ namespace BuiltinBuffs.Expeditions
                         });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}Buff", true),
                         ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
-                    BuffRegister.RegisterStaticData(staticData);
                 }
             }
         }

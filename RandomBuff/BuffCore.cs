@@ -277,11 +277,17 @@ namespace RandomBuff
         /// 调整游戏的业力状态
         /// </summary>
         public static event ClampKarmaForBuffModeHandler OnClampKarmaForBuffMode;
+
+        /// <summary>
+        /// 在重新加载卡包后调用
+        /// </summary>
+        public static event AfterBuffReloadedHandler AfterBuffReloaded;
     }
 
 
     public static partial class BuffCore
     {
+        public delegate void AfterBuffReloadedHandler(BuffPluginInfo[] enabledPlugins);
         public delegate void CustomStaticBuffDataHandler(BuffData data, BuffStaticData staticData,
             Dictionary<string, object> customArgs);
 
@@ -360,6 +366,24 @@ namespace RandomBuff
                 }
             }
             return false;
+        }
+
+        internal static void AfterBuffReloadedInternal(BuffPluginInfo[] pluginInfos)
+        {
+            if (AfterBuffReloaded == null)
+                return;
+            foreach (var deg in AfterBuffReloaded.GetInvocationList())
+            {
+                try
+                {
+                    ((AfterBuffReloadedHandler)deg).Invoke(pluginInfos);
+                }
+                catch (Exception e)
+                {
+                    BuffUtils.LogException($"BuffEvent - AfterBuffReloadedHandler", e);
+                }
+            }
+            
         }
     }
 }

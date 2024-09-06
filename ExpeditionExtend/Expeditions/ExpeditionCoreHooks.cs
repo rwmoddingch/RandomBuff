@@ -26,6 +26,7 @@ namespace BuiltinBuffs.Expeditions
 {
     internal static class ExpeditionCoreHooks
     {
+        private static bool isLoaded = false;
         #region DEBUG
 
         //private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
@@ -87,29 +88,41 @@ namespace BuiltinBuffs.Expeditions
         #endregion
         public static void OnModsInit()
         {
-            _ = new Hook(typeof(RainWorld).GetProperty(nameof(RainWorld.ExpeditionMode)).GetGetMethod(),
-                typeof(ExpeditionCoreHooks).GetMethod(nameof(RainWorldExpeditionModeGet), BindingFlags.NonPublic | BindingFlags.Static));
-            _ = new Hook(typeof(ExpeditionGame).GetProperty(nameof(ExpeditionGame.activeUnlocks)).GetGetMethod(),
-                typeof(ExpeditionCoreHooks).GetMethod(nameof(ExpeditionGameActiveUnlocksGet),BindingFlags.NonPublic | BindingFlags.Static));
+            if (!isLoaded)
+            {
+                isLoaded = true;
+                _ = new Hook(typeof(RainWorld).GetProperty(nameof(RainWorld.ExpeditionMode)).GetGetMethod(),
+                    typeof(ExpeditionCoreHooks).GetMethod(nameof(RainWorldExpeditionModeGet),
+                        BindingFlags.NonPublic | BindingFlags.Static));
+                _ = new Hook(typeof(ExpeditionGame).GetProperty(nameof(ExpeditionGame.activeUnlocks)).GetGetMethod(),
+                    typeof(ExpeditionCoreHooks).GetMethod(nameof(ExpeditionGameActiveUnlocksGet),
+                        BindingFlags.NonPublic | BindingFlags.Static));
 
-            _ = new Hook(typeof(BuffPoolManager).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance,null,new Type[] { typeof(RainWorldGame) },Array.Empty<ParameterModifier>()),
-                typeof(ExpeditionCoreHooks).GetMethod(nameof(BuffPoolManager_ctor), BindingFlags.NonPublic | BindingFlags.Static));
-            On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
+                _ = new Hook(
+                    typeof(BuffPoolManager).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null,
+                        new Type[] { typeof(RainWorldGame) }, Array.Empty<ParameterModifier>()),
+                    typeof(ExpeditionCoreHooks).GetMethod(nameof(BuffPoolManager_ctor),
+                        BindingFlags.NonPublic | BindingFlags.Static));
+                On.Expedition.ExpeditionProgression.UnlockSprite += ExpeditionProgression_UnlockSprite;
 
-            //On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-            On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
-            On.WinState.CycleCompleted += WinState_CycleCompleted;
-            IL.RainWorldGame.Update += RainWorldGame_Update;
+                //On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+                On.RainWorldGame.GoToDeathScreen += RainWorldGame_GoToDeathScreen;
+                On.WinState.CycleCompleted += WinState_CycleCompleted;
+                IL.RainWorldGame.Update += RainWorldGame_Update;
 
-            _ = new Hook(typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),BindingFlags.Static | BindingFlags.Public).GetGetMethod(),
-                typeof(ExpeditionCoreHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet), BindingFlags.Static | BindingFlags.NonPublic));
+                _ = new Hook(
+                    typeof(ExpeditionData).GetProperty(nameof(ExpeditionData.challengeList),
+                        BindingFlags.Static | BindingFlags.Public).GetGetMethod(),
+                    typeof(ExpeditionCoreHooks).GetMethod(nameof(ExpeditionData_ChallengeListGet),
+                        BindingFlags.Static | BindingFlags.NonPublic));
 
-            On.Expedition.ExpeditionGame.IsMSCRoomScript += ExpeditionGame_IsMSCRoomScript;
-            On.Expedition.ExpeditionGame.IsUndesirableRoomScript += ExpeditionGame_IsUndesirableRoomScript;
+                On.Expedition.ExpeditionGame.IsMSCRoomScript += ExpeditionGame_IsMSCRoomScript;
+                On.Expedition.ExpeditionGame.IsUndesirableRoomScript += ExpeditionGame_IsUndesirableRoomScript;
 
-            On.Expedition.Eggspedition.Update += Eggspedition_Update;
-            On.RoomCamera.SpriteLeaser.rbUpdate += SpriteLeaser_rbUpdate;
-             
+                On.Expedition.Eggspedition.Update += Eggspedition_Update;
+                On.RoomCamera.SpriteLeaser.rbUpdate += SpriteLeaser_rbUpdate;
+            }
+
         }
 
         private static void SpriteLeaser_rbUpdate(On.RoomCamera.SpriteLeaser.orig_rbUpdate orig, RoomCamera.SpriteLeaser self, float timeStacker)
