@@ -58,6 +58,7 @@ namespace RandomBuff
 
         public static string CacheFolder { get; private set; }
 
+        public static string SaveFolder { get; private set; }
 
         internal static ManualLogSource LogInstance { get; private set; }
         internal static BuffPlugin Instance { get; private set; }
@@ -259,6 +260,8 @@ namespace RandomBuff
             BuffRegister.InitAllBuffPlugin();
             BuffRegister.BuildAllBuffConfigWarpper();
             BuffConfigManager.InitBuffStaticData();
+
+            BuffCore.AfterBuffReloadedInternal(BuffCore.GetAllEnabledBuffPlugins());
             BuffRegister.CheckAndRemoveInvalidBuff();
 
 
@@ -272,14 +275,12 @@ namespace RandomBuff
             BuffConfigManager.InitQuestData();
 
             BuffRegister.LoadBuffPluginAsset();
-
-            BuffCore.AfterBuffReloadedInternal(BuffCore.GetAllEnabledBuffPlugins());
-
+            
         }
 
         internal static void UpdateNewEnableList(string[] list)
         {
-            File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), list);
+            File.WriteAllLines((SaveFolder + Path.AltDirectorySeparatorChar + "EnableBuffPlugins.txt"), list);
         }
 
         private void Update()
@@ -306,13 +307,18 @@ namespace RandomBuff
         private void CheckBuffPluginVersion()
         {
             CacheFolder = basePath + Path.AltDirectorySeparatorChar + "buffcaches";
+            SaveFolder = Application.persistentDataPath + Path.AltDirectorySeparatorChar + "RandomBuff";
+            
             if (!Directory.Exists(CacheFolder))
                 Directory.CreateDirectory(CacheFolder);
+            if (!Directory.Exists(SaveFolder))
+                Directory.CreateDirectory(SaveFolder);
 
-            if (File.Exists(Path.Combine(CacheFolder, "buffVersion")))
+
+            if (File.Exists(Path.Combine(SaveFolder, "BuffPluginVersion.txt")))
             {
                 bool hasDeleteAll = false;
-                var lines = File.ReadAllLines(Path.Combine(CacheFolder, "buffVersion")).ToList();
+                var lines = File.ReadAllLines(Path.Combine(SaveFolder, "BuffPluginVersion.txt")).ToList();
                 var lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
 
                 foreach (var mod in ModManager.ActiveMods.Where(i =>
@@ -344,13 +350,13 @@ namespace RandomBuff
                     }
                 }
 
-                File.WriteAllLines(Path.Combine(CacheFolder, "buffVersion"), lines);
+                File.WriteAllLines(Path.Combine(SaveFolder, "BuffPluginVersion.txt"), lines);
             }
             else
             {
                 foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
                     File.Delete(all);
-                File.WriteAllLines(Path.Combine(CacheFolder, "buffVersion"), ModManager.ActiveMods.Where(i =>
+                File.WriteAllLines(Path.Combine(SaveFolder, "BuffPluginVersion.txt"), ModManager.ActiveMods.Where(i =>
                         Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
                         Directory.Exists(Path.Combine(i.basePath, "buffassets")))
                     .Select(i => $"{i.id}|{i.version}")
@@ -361,9 +367,9 @@ namespace RandomBuff
 
         private static void LoadEnabledPlugins()
         {
-            if (!File.Exists(basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"))
+            if (!File.Exists(SaveFolder + Path.AltDirectorySeparatorChar + "EnableBuffPlugins.txt"))
             {
-                File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), new[]
+                File.WriteAllLines((SaveFolder + Path.AltDirectorySeparatorChar + "EnableBuffPlugins.txt"), new[]
                 {
                     "BuiltinBuffs",
                     "BombExpand",
@@ -371,7 +377,7 @@ namespace RandomBuff
                 });
             }
 
-            EnabledPlugins = File.ReadAllLines(basePath + Path.AltDirectorySeparatorChar + "EnablePlugins").ToHashSet();
+            EnabledPlugins = File.ReadAllLines(SaveFolder + Path.AltDirectorySeparatorChar + "EnableBuffPlugins.txt").ToHashSet();
             foreach (var id in EnabledPlugins)
                 BuffPlugin.Log($"Enabled Buff Plugins: [{id}]");
             

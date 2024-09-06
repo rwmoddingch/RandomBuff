@@ -139,8 +139,9 @@ namespace BuiltinBuffs.Expeditions
                 ExpeditionProgression.SetupBurdenGroups();
 
                 InitExpeditionType();
+                dynamicAssembly = BuffBuilder.FinishGenerate(typeof(ExpeditionExtend).Assembly.GetName().Name).First();
+
                 ExpeditionCoreHooks.OnModsInit();
-                
                 BuffCore.AfterBuffReloaded += BuffCoreOnAfterBuffReloaded;
 
             }
@@ -152,10 +153,12 @@ namespace BuiltinBuffs.Expeditions
 
         private void BuffCoreOnAfterBuffReloaded(BuffPluginInfo[] enabledplugins)
         {
-            RegisterExpeditionType();
+            RegisterExpeditionType(dynamicAssembly);
+            dynamicAssembly = null;
             BuffCore.AfterBuffReloaded -= BuffCoreOnAfterBuffReloaded;
         }
 
+        private Assembly dynamicAssembly;
         private const string NegativeTexture = "buffinfos/ExpeditionExtend/expedition/expeditionNegative";
         private const string PositiveTexture = "buffinfos/ExpeditionExtend/expedition/expeditionPositive";
 
@@ -164,7 +167,7 @@ namespace BuiltinBuffs.Expeditions
 
 
 
-            private static void InitExpeditionType()
+        private static void InitExpeditionType()
         {
             foreach (var group in ExpeditionProgression.perkGroups)
             {
@@ -214,9 +217,8 @@ namespace BuiltinBuffs.Expeditions
             typeof(BuffStaticData).GetProperty(name).SetMethod.Invoke(data, new[] { value });
         }
 
-        private static void RegisterExpeditionType()
+        private static void RegisterExpeditionType(Assembly ass)
         {
-            var ass = BuffBuilder.FinishGenerate(typeof(ExpeditionExtend).Assembly.GetName().Name).First();
             var ctor = typeof(BuffStaticData).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic).First(i => i.GetParameters().Length == 0);
 
 
@@ -258,6 +260,8 @@ namespace BuiltinBuffs.Expeditions
                     });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}Buff", true),
                         ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
+                    BuffRegister.RegisterStaticData(staticData);
+
                 }
             }
             foreach (var group in ExpeditionProgression.burdenGroups)
@@ -302,6 +306,8 @@ namespace BuiltinBuffs.Expeditions
                         });
                     BuffRegister.InternalRegisterBuff(staticData.BuffID, ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}Buff", true),
                         ass.GetType($"{typeof(ExpeditionExtend).Assembly.GetName().Name}.{id}BuffData"), GetHookType(id), typeof(ExpeditionExtend).Assembly.GetName());
+                    BuffRegister.RegisterStaticData(staticData);
+
                 }
             }
         }
