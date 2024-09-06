@@ -13,6 +13,6 @@
     },
     "English": {
         "BuffName" : "Sensor Bomb",
-        "Description" : "Bombs no longer explode when colliding with a target, instead exploding when near a creature or when not moving. Trigger the buff to turn all bombs nearby into landmines which can only be activated by other creatures. Grab the landmine to defuse and convert into normal bomb."
+        "Description" : "Bombs no longer explode when colliding with a target, instead exploding when near a creature or when not moving. Trigger the buff to turn all bombs nearby into landmines which can only be activated by other creatures. Grab the landmine to defuse and convert into normal bomb"
     }
 }

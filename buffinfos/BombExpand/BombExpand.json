@@ -1,0 +1,13 @@
+{
+    "Assembly":"BombExpand",
+    "Chinese":
+    {
+        "Name": "炸弹拓展",
+        "Description":"给炸弹添加各式各样的变种"
+    },
+    "English":
+    {
+        "Name": "BombExpand",
+        "Description":"Add various variant for bombs"
+    }
+}
