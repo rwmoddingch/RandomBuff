@@ -8,6 +8,7 @@ using Menu;
 using Menu.Remix;
 using Menu.Remix.MixedUI;
 using MoreSlugcats;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Progression;
@@ -253,22 +254,37 @@ namespace RandomBuff.Core.ProgressionUI
         public static void CreateElementsForQuestPage(OpScrollBox opScrollBox, Vector2 size, BuffProgressionPage page)
         {
             //构建任务信息
-            List<QuestButton.QuestInfo> levelQuests = new List<QuestButton.QuestInfo>();
-            List<QuestButton.QuestInfo> otherQuests = new List<QuestButton.QuestInfo>();
+            List<BuffPluginInfo> pluginInfos = new List<BuffPluginInfo>();
+            List<List<QuestButton.QuestInfo>> levelQuests = new List<List<QuestButton.QuestInfo>>();
+            List<List<QuestButton.QuestInfo>> otherQuests = new List<List<QuestButton.QuestInfo>>();
 
-            foreach(var questID in BuffConfigManager.GetQuestIDList())
+            foreach (var pluginInfo in BuffConfigManager.GetEnabledPluginInfos())//同步plugin信息
             {
+                pluginInfos.Add(pluginInfo);
+                levelQuests.Add(new List<QuestInfo>());
+                otherQuests.Add(new List<QuestInfo>());
+            }
+
+            var builtin = BuffConfigManager.GetPluginInfo("BuiltinBuffs");//builtin顺序排在首位
+            pluginInfos.Remove(builtin);
+            pluginInfos.Insert(0, builtin);
+
+            foreach (var questID in BuffConfigManager.GetQuestIDList())
+            {
+                BuffQuest questData = BuffConfigManager.GetQuestData(questID);
+                if (!pluginInfos.Contains(questData.PluginInfo))//筛选启用plugin的buffquest
+                    continue;
+
                 bool isLevelQuest = false;
                 var questInfo = new QuestButton.QuestInfo();
                 questInfo.conditions = new List<string>();
                 questInfo.rewards = new Dictionary<QuestUnlockedType, List<string>>();
 
-                var questData = BuffConfigManager.GetQuestData(questID);
-                if(!BuffResourceString.TryGet($"QuestName_{questData.QuestName}", out questInfo.name))
+                if (!BuffResourceString.TryGet($"QuestName_{questData.QuestName}", out questInfo.name))//颜色、名称信息处理
                     questInfo.name = Custom.rainWorld.inGameTranslator.Translate(questData.QuestName);
                 questInfo.color = questData.QuestColor;
                 
-                foreach(var condition in questData.questConditions)
+                foreach(var condition in questData.questConditions)//添加条件信息
                 {
                     if(condition is LevelQuestCondition levelQuestCondition)
                     {
@@ -279,33 +295,38 @@ namespace RandomBuff.Core.ProgressionUI
                     questInfo.conditions.Add(condition.ConditionMessage());
                 }
 
-                foreach(var rewards in questData.UnlockItem)
+                foreach(var rewards in questData.UnlockItem)//添加解锁信息
                 {
                     questInfo.rewards.Add(rewards.Key, new List<string>());
                     foreach (var entry in rewards.Value)
                         questInfo.rewards[rewards.Key].Add(entry);
                 }
 
-                questInfo.finished = BuffPlayerData.Instance.IsQuestUnlocked(questID);
-                if (isLevelQuest)
+                questInfo.finished = BuffPlayerData.Instance.IsQuestUnlocked(questID);//同步完成信息
+
+                if (isLevelQuest)//添加至对应quest列表
                 {
-                    levelQuests.Add(questInfo);
+                    levelQuests[pluginInfos.IndexOf(questData.PluginInfo)].Add(questInfo);
                     BuffPlugin.Log($"Add level quest : {questInfo.name}");
                 }
                 else
                 {
-                    otherQuests.Add(questInfo);
+                    otherQuests[pluginInfos.IndexOf(questData.PluginInfo)].Add(questInfo);
                     BuffPlugin.Log($"Add other quest : {questInfo.name}");
                 }
             }
 
-            levelQuests.Sort((x, y) =>
+            foreach(var subLevelQuests in levelQuests)//按照等级排序
             {
-                int res = x.level.CompareTo(y.level);
-                if (res == 0)
-                    res = x.conditions.Count.CompareTo(y.conditions.Count);
-                return res;
-            });
+                subLevelQuests.Sort((x, y) =>
+                {
+                    int res = x.level.CompareTo(y.level);
+                    if (res == 0)
+                        res = x.conditions.Count.CompareTo(y.conditions.Count);
+                    return res;
+                });
+            }
+
 
 
             //构建按钮元素
@@ -313,31 +334,68 @@ namespace RandomBuff.Core.ProgressionUI
             Vector2 smallGap = new Vector2(5, 5);
             float bigGap = 20f;
 
-            int buttonsInALine = Mathf.FloorToInt((size.x - smallGap.x) / (smallGap.x + buttonSize.x));
-            int lineCount = Mathf.CeilToInt(levelQuests.Count / (float)buttonsInALine) + Mathf.CeilToInt(otherQuests.Count / (float)buttonsInALine);
+            float contentSize = bigGap;//顶部间隙   
 
-            //                  顶部间隙   两种按钮总行间距                            两类按钮之间间距    底部间隙
-            float contentSize = bigGap + lineCount * (smallGap.y + buttonSize.y) + bigGap     +     bigGap;
+            int buttonsInALine = Mathf.FloorToInt((size.x - smallGap.x) / (smallGap.x + buttonSize.x));
+
+            for(int i = 0;i < pluginInfos.Count; i++)
+            {
+                int lineCount = Mathf.CeilToInt(levelQuests[i].Count / (float)buttonsInALine) + Mathf.CeilToInt(otherQuests[i].Count / (float)buttonsInALine);
+
+                //             标题间距                分割线间距
+                contentSize += bigGap + smallGap.y + smallGap.y + smallGap.y;
+
+                //             两种按钮总行间距                             两类按钮之间间距底部间隙
+                contentSize += lineCount * (smallGap.y + buttonSize.y) + bigGap;
+            }
+            contentSize += bigGap;//底部间隙
+
             contentSize = Mathf.Max(contentSize, size.y);
             opScrollBox.contentSize = contentSize;
 
             int x = 0;
             float xPtr = smallGap.x;
-            float yPtr = contentSize - (bigGap + buttonSize.y);
-            
-            foreach(var info in levelQuests)
+            float yPtr = contentSize - (bigGap);
+
+            for(int i = 0;i < pluginInfos.Count; i++)
             {
-                CreateButtonForInfo(info);
+                yPtr -= bigGap;
+
+                string name = pluginInfos[i].GetInfo(Custom.rainWorld.inGameTranslator.currentLanguage).Name;
+
+                opScrollBox.AddItems(new OpLabel(new Vector2(xPtr, yPtr), new Vector2(bigGap, bigGap), name, FLabelAlignment.Left));
+                yPtr -= smallGap.y;
+
+                var subLevelQuests = levelQuests[i];
+                var subOtherQuests = otherQuests[i];
+
+                if (subLevelQuests.Count > 0)
+                    yPtr -= buttonSize.y;
+
+                foreach (var info in subLevelQuests)
+                {
+                    CreateButtonForInfo(info);
+                }
+
+                x = 0;
+                xPtr = smallGap.x;
+
+                if(subOtherQuests.Count > 0)
+                    yPtr -= bigGap + buttonSize.y;
+
+                foreach (var info in subOtherQuests)
+                {
+                    CreateButtonForInfo(info);
+                }
+
+                yPtr -= smallGap.y;
+                opScrollBox.AddItems(new OpHorizontalSplitLine(new Vector2(0f, yPtr), new Vector2(size.x, 2f)));
+                yPtr -= smallGap.y;
+
+                xPtr = smallGap.x;
+                x = 0;
             }
 
-            x = 0;
-            xPtr = smallGap.x;
-            yPtr -= bigGap + buttonSize.y;
-
-            foreach(var info in otherQuests)
-            {
-                CreateButtonForInfo(info);
-            }
 
             void CreateButtonForInfo(QuestButton.QuestInfo info)
             {
@@ -957,6 +1015,24 @@ namespace RandomBuff.Core.ProgressionUI
         void _InternalHide()
         {
             setAlpha = 0f;
+        }
+    }
+
+    public class OpHorizontalSplitLine : UIelement
+    {
+        FSprite split;
+        public OpHorizontalSplitLine(Vector2 pos, Vector2 size) : base(pos, size)
+        {
+            split = new FSprite("pixel", true) { scaleX = size.x, scaleY = size.y };
+            myContainer.AddChild(split);
+        }
+
+        public override void Change()
+        {
+            base.Change();
+            split.SetPosition(base.size.x / 2f, base.size.y / 2f);
+            split.scaleX = size.x;
+            split.scaleY = size.y;
         }
     }
 }

@@ -134,7 +134,7 @@ namespace RandomBuff.Core.Option
             float sizeY = 0f;
             packButtons = packButtons = new List<PackButton>();
            
-            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            foreach (var pluginInfo in BuffConfigManager.GetSortedPluginInfos())
             {
                 var button = new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo) { Enabled = pluginInfo.Enabled };
                 var index = packButtons.Count;

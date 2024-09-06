@@ -63,8 +63,6 @@ namespace RandomBuff.Core.SaveData
                     BuffAssemblyTable.Add(name.Name, list = new List<BuffID>());
                 list.Add(buff);
             }
-
-
         }
 
 
@@ -87,7 +85,19 @@ namespace RandomBuff.Core.SaveData
             return info;
         }
 
+        internal static IEnumerable<BuffPluginInfo> GetEnabledPluginInfos()
+        {
+            return GetSortedPluginInfos(false);
+        }
 
+        internal static IEnumerable<BuffPluginInfo> GetSortedPluginInfos(bool selectEnabled = false)
+        {
+            yield return GetPluginInfo("BuiltinBuffs");
+            foreach (var plugin in BuffConfigManager.PluginInfos.Values.Where(i => (i.Enabled || !selectEnabled) && i.AssemblyName != "BuiltinBuffs"))
+            {
+                yield return plugin;
+            }
+        }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
