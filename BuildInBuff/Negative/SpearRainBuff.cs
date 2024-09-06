@@ -281,7 +281,7 @@ namespace BuiltinBuffs.Negative
             }
         }
 
-        internal class SpearHitAndStuck : EmitterModule, IParticleUpdateModule, IOwnParticleUniqueData, SharedPhysics.IProjectileTracer, IParticleDieModules
+        public class SpearHitAndStuck : EmitterModule, IParticleUpdateModule, IOwnParticleUniqueData, SharedPhysics.IProjectileTracer, IParticleDieModules
         {
             float noDetectRate;
             public SpearHitAndStuck(ParticleEmitter emitter, float noDetectRate = 0.5f) : base(emitter)
@@ -342,7 +342,7 @@ namespace BuiltinBuffs.Negative
                 return obj is Creature;
             }
 
-            internal class HitData : Particle.ParticleUniqueData
+            public class HitData : Particle.ParticleUniqueData
             {
                 PhysicalObject stuckInObject;
                 PhysicalObject.Appendage.Pos stuckInAppendage;

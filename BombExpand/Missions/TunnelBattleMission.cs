@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using BuiltinBuffs.Positive;
+using RandomBuff.Core.Buff;
 
 namespace BuiltinBuffs.Missions
 {
@@ -34,15 +35,15 @@ namespace BuiltinBuffs.Missions
                 {
                     new ExterminationCondition() { weaponType = AbstractPhysicalObject.AbstractObjectType.ScavengerBomb, killRequirement = 200 },
                     new DeathCondition(){deathCount = 10},
-                    new PermanentHoldCondition() { HoldBuff = NoPassDayBuffEntry.noPassDayBuffID }
+                    new PermanentHoldCondition() { HoldBuff =  new BuffID("NoPassDay") }
                 }
             };
 
             startBuffSet.Add(SensorBombEntry.sensorBombBuffID);
             startBuffSet.Add(BombManiaBuffEntry.bombManiaBuffID);
-            startBuffSet.Add(MultiplierBuffEntry.multiplierBuffID);
-            startBuffSet.Add(FasterShortCutsEntry.FasterShortCuts);
-            startBuffSet.Add(DeathFreeMedallionIBuffEntry.deathFreeMedallionBuffID);
+            startBuffSet.Add(new BuffID("Multiplier"));
+            startBuffSet.Add(new BuffID("FasterShortCuts"));
+            startBuffSet.Add(new BuffID("DeathFreeMedallion"));
         }
 
         public void RegisterMission()

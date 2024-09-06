@@ -536,7 +536,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class BurstRadialBlurEffect : BuffPostEffectLimitTime
+    public class BurstRadialBlurEffect : BuffPostEffectLimitTime
     {
         private float blurFactor;
         private Vector2 blurCenter;

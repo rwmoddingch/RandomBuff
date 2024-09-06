@@ -62,7 +62,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class StagnantForcefieldPlayerModule : PlayerUtils.PlayerModulePart
+    public class StagnantForcefieldPlayerModule : PlayerUtils.PlayerModulePart
     {
         int StagnantCount => StagnantForcefieldBuff.Instance.stagnantCount;
 

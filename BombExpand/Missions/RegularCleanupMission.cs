@@ -17,6 +17,7 @@ using RandomBuffUtils;
 using RandomBuffUtils.SimplyOracle;
 using RWCustom;
 using UnityEngine;
+using RandomBuff.Core.Buff;
 
 namespace BuiltinBuffs.Missions
 {
@@ -39,7 +40,7 @@ namespace BuiltinBuffs.Missions
                 {
                     new HuntCondition() { type = CreatureTemplate.Type.DaddyLongLegs, killCount = 20 },
                     new WithInCycleCondition() { SetCycle = 5 },
-                    new PermanentHoldCondition() { HoldBuff = NoPassDayBuffEntry.noPassDayBuffID },
+                    new PermanentHoldCondition() { HoldBuff = new BuffID("NoPassDay") },
                 },
                 gachaTemplate = new RegularCleanUpTemplate()
                 {
@@ -68,7 +69,7 @@ namespace BuiltinBuffs.Missions
             };
             startBuffSet.Add(BombManiaBuffEntry.bombManiaBuffID);
             startBuffSet.Add(SpearBursterBuffEntry.spearBursterBuff);
-            startBuffSet.Add(TurboPropulsionIBuffEntry.turboPropulsionBuffID);
+            startBuffSet.Add(new BuffID("TurboPropulsion"));
         }
 
         public void RegisterMission()

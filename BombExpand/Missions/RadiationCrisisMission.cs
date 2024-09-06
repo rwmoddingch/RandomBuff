@@ -1,6 +1,7 @@
 ﻿using BuiltinBuffs.Duality;
 using BuiltinBuffs.Negative;
 using RandomBuff;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
@@ -39,7 +40,7 @@ namespace BuiltinBuffs.Missions
 
             startBuffSet.Add(BigPebbleNukeBuffEntry.BigPebbleNukeID);
             startBuffSet.Add(BombManiaBuffEntry.bombManiaBuffID);
-            startBuffSet.Add(MultiplierBuffEntry.multiplierBuffID);
+            startBuffSet.Add(new BuffID("Multiplier"));
         }
 
         public void RegisterMission()

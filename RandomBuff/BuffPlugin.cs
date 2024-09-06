@@ -39,7 +39,7 @@ using RandomBuff.Core.Progression.Quest;
 //添加友元方便调试
 [assembly: InternalsVisibleTo("BuiltinBuffs")]
 [assembly: InternalsVisibleTo("ExpeditionExtend")]
-
+[assembly: InternalsVisibleTo("BombExpand")]
 namespace RandomBuff
 {
     [BepInPlugin(ModId, "Random Buff", ModVersion)]

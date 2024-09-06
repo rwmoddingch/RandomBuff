@@ -19,7 +19,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace BuiltinBuffs.Missions
+namespace BombExpand.Missions
 {
     internal class SlugOfTheFlameMission : Mission, IMissionEntry
     {
@@ -28,7 +28,7 @@ namespace BuiltinBuffs.Missions
 
         public override SlugcatStats.Name BindSlug => null;
 
-        public override Color TextCol => Helper.GetRGBColor(255, 77,  0);
+        public override Color TextCol => Helper.GetRGBColor(255, 77, 0);
 
         public override string MissionName => BuffResourceString.Get("Mission_Display_SlugOfTheFlame");
 
@@ -39,15 +39,15 @@ namespace BuiltinBuffs.Missions
                 conditions = new List<Condition>()
                 {
                     new ScorchCreatureCondition(){ scorchRequirement =  200 },
-                    new PermanentHoldCondition(){HoldBuff = ScorchingSunBuffEntry.ScorchingSun}
+                    new PermanentHoldCondition(){HoldBuff = new BuffID("ScorchingSun")}
                 },
             };
             startBuffSet.AddRange(new[]
             {
                 NapalmBuffEntry.napalmBuffID,
-                FireShieldBuffEntry.FireShield,
-                AggressiveVentingBuffEntry.aggresiveVentingBuffID,
-                ScorchingSunBuffEntry.ScorchingSun
+                new BuffID("FireShield"),
+                new BuffID("AggressiveVenting"),
+                new BuffID("ScorchingSun")
             });
         }
 
@@ -89,7 +89,7 @@ namespace BuiltinBuffs.Missions
         {
             bool origDead = self.dead;
             orig.Invoke(self);
-            if(!origDead && self.dead)
+            if (!origDead && self.dead)
             {
                 if (TemperatureModule.TryGetTemperatureModule(self, out var temperature) && temperature.burn)
                 {
@@ -108,7 +108,7 @@ namespace BuiltinBuffs.Missions
 
         public override string DisplayProgress(InGameTranslator translator)
         {
-            if (Finished || (scorched >= scorchRequirement))
+            if (Finished || scorched >= scorchRequirement)
                 return "";
             else
                 return $"({scorched}/{scorchRequirement})";
@@ -117,72 +117,6 @@ namespace BuiltinBuffs.Missions
         public override string DisplayName(InGameTranslator translator)
         {
             return string.Format(BuffResourceString.Get("DisplayName_ScorchCreature"), scorchRequirement);
-        }
-    }
-
-    internal class PermanentHoldCondition : Condition
-    {
-        public static ConditionID permanentHoldConditionID = new ConditionID("PermanentlyHold", true);
-        public override ConditionID ID => permanentHoldConditionID;
-
-        [JsonProperty]
-        string id;
-
-        [JsonProperty]
-        string name;
-        public BuffID HoldBuff
-        {
-            get => new BuffID(id);
-            set
-            {
-                id = value.value;
-                
-                if(BuffConfigManager.GetStaticData(value).CardInfos.TryGetValue(Custom.rainWorld.inGameTranslator.currentLanguage, out var info))
-                {
-                    name = info.BuffName;
-                }
-                else
-                    name = BuffConfigManager.GetStaticData(value).CardInfos[InGameTranslator.LanguageID.English].BuffName;
-            }
-        }
-        public override int Exp => 200;
-
-        public override string DisplayName(InGameTranslator translator)
-        {
-            return string.Format(BuffResourceString.Get("DisplayName_PermanentlyHold"), name);
-        }
-
-        public override string DisplayProgress(InGameTranslator translator)
-        {
-            return "";
-        }
-
-        public override ConditionState SetRandomParameter(SlugcatStats.Name name, float difficulty, List<Condition> conditions)
-        {
-            return ConditionState.Fail;
-        }
-
-        int counter = 40;
-        public override void InGameUpdate(RainWorldGame game)
-        {
-            base.InGameUpdate(game);
-
-            if (counter > 80)
-                counter = 0;
-            else
-                counter++;
-
-            if (counter == 0)
-            {
-                if (!BuffCore.GetAllBuffIds().Contains(HoldBuff))
-                    BuffCore.CreateNewBuff(HoldBuff);
-
-                if (!Finished)
-                {
-                    Finished = true;
-                    //onLabelRefresh?.Invoke(this);
-                }
-            }
         }
     }
 }
