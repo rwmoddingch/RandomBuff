@@ -705,6 +705,7 @@ namespace RandomBuff.Core.Entry
             var resolver = new DefaultAssemblyResolver();
             resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/plugins");
             resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/buffplugins");
+
             foreach (var modPath in ModManager.ActiveMods.Where(i => mod.requirements.Contains(i.id)
                                                                      && i.requirements.Contains(BuffPlugin.ModId)))
             {

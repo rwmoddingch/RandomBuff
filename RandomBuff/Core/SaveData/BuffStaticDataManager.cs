@@ -46,6 +46,7 @@ namespace RandomBuff.Core.SaveData
 
         //临时数据，会在加载后自动清空
         private static readonly Dictionary<string, HashSet<BuffStaticData>> PluginStaticDataTable = new();
+        
 
         /// <summary>
         /// 传入ID可能重复，只保留第一个输入
@@ -135,9 +136,7 @@ namespace RandomBuff.Core.SaveData
         internal static int GetFreePickCount(float multiply) =>
             (int)((0.5f + LockedMap[QuestUnlockedType.FreePick].Count(i => BuffPlayerData.Instance.IsQuestUnlocked(i.Value))) * multiply);
 
-
-
-
+        
         /// <summary>
         /// 不会清理PluginInfo
         /// </summary>
@@ -391,7 +390,7 @@ namespace RandomBuff.Core.SaveData
             BuffPlugin.Log("Loading All BuffQuest Data!");
 
             foreach (var mod in ModManager.ActiveMods)
-                foreach (var path in GetPluginFolder(mod, "quests"))
+                foreach ((string path, string pluginId) in GetPluginFolderWithId(mod, "quests"))
                 {
                     var info = new DirectoryInfo(path);
                     BuffPlugin.LogDebug($"Load quest file:{path}");
@@ -401,8 +400,7 @@ namespace RandomBuff.Core.SaveData
                         {
                             var quest = JsonConvert.DeserializeObject<BuffQuest>(File.ReadAllText(file.FullName));
                             if (quest.QuestId == null || quest.QuestName == null)
-                                BuffPlugin.LogError(
-                                    $" BuffQuest Name or ID missing ,Mod:{mod.name} ,Path:{file.FullName}");
+                                BuffPlugin.LogError($" BuffQuest Name or ID missing ,Mod:{mod.name} ,Path:{file.FullName}");
                             else if ((quest.UnlockItem?.Sum(i => i.Value.Length) ?? 0) == 0)
                                 BuffPlugin.LogError($"Null BuffQuest Unlocked Item at:{quest.QuestId} ,Mod:{mod.name}");
                             else if (!quest.VerifyData())
@@ -427,6 +425,7 @@ namespace RandomBuff.Core.SaveData
                                     }
                                 }
 
+                                quest.PluginId = pluginId;
                                 QuestDatas.Add(quest.QuestId, quest);
                             }
 
@@ -440,21 +439,20 @@ namespace RandomBuff.Core.SaveData
 
                     }
 
-
-//#if TESTVERSION
-//                foreach (var qId in GetQuestIDList())
-//                {
-//                    BuffPlugin.LogDebug($"Quest ID:{qId}");
-//                    foreach (var con in GetQuestData(qId).QuestConditions)
-//                        BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
-//                    foreach (var reward in GetQuestData(qId).UnlockItem)
-//                    foreach (var v in reward.Value)
-//                        BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
-
+#if TESTVERSION
+                foreach (var qId in GetQuestIDList())
+                {
+                    BuffPlugin.LogDebug($"Quest ID:{qId}, PluginID:{GetQuestData(qId).PluginId}");
+                    // foreach (var con in GetQuestData(qId).questConditions)
+                    //     BuffPlugin.LogDebug($"---condition:{con.ConditionMessage()}");
+                    foreach (var reward in GetQuestData(qId).UnlockItem)
+                    foreach (var v in reward.Value)
+                        BuffPlugin.LogDebug($"---reward:{reward.Key},{v}");
 
 
-//                }
-//#endif
+
+                }
+#endif
                 }
 
         }

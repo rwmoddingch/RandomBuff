@@ -72,7 +72,17 @@ namespace RandomBuff.Core.Progression.Quest
         /// 解锁条件
         /// 目前只存在与关联，没有或关联
         /// </summary>
-        public List<QuestCondition> QuestConditions = new();
+        public List<QuestCondition> questConditions = new();
+
+        /// <summary>
+        /// 对应的卡包ID
+        /// </summary>
+        public string PluginId { get; internal set; }
+
+        /// <summary>
+        /// 对应的卡包Info
+        /// </summary>
+        public BuffPluginInfo PluginInfo => BuffConfigManager.GetPluginInfo(PluginId);
 
 
         /// <summary>
@@ -81,14 +91,14 @@ namespace RandomBuff.Core.Progression.Quest
         /// <returns></returns>
         public bool UpdateUnlockedState(WinGamePackage package)
         {
-            for(int i =0;i<QuestConditions.Count;i++)
-                if (QuestConditions[i].UpdateUnlockedState(package))
+            for(int i =0;i<questConditions.Count;i++)
+                if (questConditions[i].UpdateUnlockedState(package))
                 {
                     BuffPlugin.LogDebug($"Quest Name:{QuestId}, Condition Index:{i}, TotalCount: {BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId)}");
                     BuffPlayerData.Instance.UpdateQuestConditionState(QuestId, i);
                 }
 
-            if (BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId) == QuestConditions.Count)
+            if (BuffPlayerData.Instance.GetQuestConditionStateCount(QuestId) == questConditions.Count)
             {
                 RefreshUnlockItems();
                 return true;
@@ -115,7 +125,7 @@ namespace RandomBuff.Core.Progression.Quest
         /// <returns></returns>
         public bool VerifyData()
         {
-            return QuestConditions.Count != 0 && QuestConditions.All(i => i.VerifyData());
+            return questConditions.Count != 0 && questConditions.All(i => i.VerifyData());
         }
 
 
@@ -161,7 +171,7 @@ namespace RandomBuff.Core.Progression.Quest
         {
             set
             {
-                QuestConditions = new();
+                questConditions = new();
                 foreach (var raw in value)
                 {
                     var rawValue = raw.ToString();
@@ -187,7 +197,7 @@ namespace RandomBuff.Core.Progression.Quest
                         try
                         {
                             var conditions = (QuestCondition)JsonConvert.DeserializeObject(rawValue, type);
-                            QuestConditions.Add(conditions);
+                            questConditions.Add(conditions);
                         }
                         catch (Exception e)
                         {
