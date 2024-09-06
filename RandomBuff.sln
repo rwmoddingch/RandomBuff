@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpeditionExtend", "Expedit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BombExpand", "BombExpand\BombExpand.csproj", "{21660840-2285-491C-BD29-3385C4567CF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LobotomyCorporationPack", "LobotomyCorporationPack\LobotomyCorporationPack.csproj", "{F31D58C7-9F02-4907-85EB-75D07924280F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{21660840-2285-491C-BD29-3385C4567CF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21660840-2285-491C-BD29-3385C4567CF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21660840-2285-491C-BD29-3385C4567CF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F31D58C7-9F02-4907-85EB-75D07924280F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F31D58C7-9F02-4907-85EB-75D07924280F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F31D58C7-9F02-4907-85EB-75D07924280F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F31D58C7-9F02-4907-85EB-75D07924280F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

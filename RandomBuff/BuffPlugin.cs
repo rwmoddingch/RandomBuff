@@ -40,6 +40,7 @@ using RandomBuff.Core.Progression.Quest;
 [assembly: InternalsVisibleTo("BuiltinBuffs")]
 [assembly: InternalsVisibleTo("ExpeditionExtend")]
 [assembly: InternalsVisibleTo("BombExpand")]
+[assembly: InternalsVisibleTo("LobotomyCorporationPack")]
 namespace RandomBuff
 {
     [BepInPlugin(ModId, "Random Buff", ModVersion)]
@@ -363,7 +364,8 @@ namespace RandomBuff
                 File.WriteAllLines((basePath + Path.AltDirectorySeparatorChar + "EnablePlugins"), new[]
                 {
                     "BuiltinBuffs",
-                    "ExpeditionExtend"
+                    "BombExpand",
+                    "ExpeditionExtend",
                 });
             }
 

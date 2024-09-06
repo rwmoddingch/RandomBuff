@@ -1,6 +1,5 @@
 ﻿using BuiltinBuffs.Duality;
 using BuiltinBuffs.Negative;
-using BuiltinBuffs.Negative.SephirahMeltdown;
 using BuiltinBuffs.Positive;
 using HotDogBuff.Negative;
 using Newtonsoft.Json;

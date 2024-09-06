@@ -609,7 +609,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             emitter.ApplyParticleSpawn(new RateSpawnerModule(emitter, 100, 5));
             emitter.ApplyParticleModule(new SetOriginalAlpha(emitter, 0));
             emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Binah.Smoke2",
-                $"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain")));
+                $"FakeCreature.AlphaBehindTerrain")));
             emitter.ApplyParticleModule(new RectPositionModule(emitter,new Rect(-5,-5,5,0),0));
             emitter.ApplyParticleModule(new SetRandomScale(emitter,70/texSize,140/texSize));
             emitter.ApplyParticleModule(new SetRandomLife(emitter,3*40,5*40));
@@ -1372,7 +1372,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
                 particleEmitter.pos = this.pos;
                 particleEmitter.vel = this.vel;
             })));
-            emitter.ApplyParticleModule(new AddElement(emitter,new Particle.SpriteInitParam("Binah.Fairy",$"{FakeCreatureBuffData.FakeCreatureID}.AlphaBehindTerrain")));
+            emitter.ApplyParticleModule(new AddElement(emitter,new Particle.SpriteInitParam("Binah.Fairy","FakeCreature.AlphaBehindTerrain")));
             emitter.ApplyParticleModule(new SetRandomLife(emitter,20, 40));
             emitter.ApplyParticleModule(new SetOriginalAlpha(emitter,0));
             emitter.ApplyParticleModule(new AlphaOverLife(emitter,(particle,time) => Mathf.InverseLerp(0,0.03f,time) * Mathf.InverseLerp(1f, 0.75f,time)));

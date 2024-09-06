@@ -56,7 +56,7 @@ namespace HotDogGains.Negative
                 c.EmitDelegate<Action<KingTusks>>(
                    (kingTusks) =>
                    {
-                       //Debug.Log("¼ì²âÊÇ·ñÓĞÆäËûÔÚĞîÁ¦");
+                       //Debug.Log("æ£€æµ‹æ˜¯å¦æœ‰å…¶ä»–åœ¨è“„åŠ›");
                        for (int i = 0; i < kingTusks.tusks.Length; i++)
                        {
                            if (kingTusks.tusks[i].mode==KingTusks.Tusk.Mode.Charging)return;
@@ -117,7 +117,7 @@ namespace HotDogGains.Negative
             }
             else
             {
-                //»Ö¸´Éä»÷¼Ó³É
+                //æ¢å¤å°„å‡»åŠ æˆ
                 self.ArmeKingTusk().shootCD = Custom.LerpAndTick(0, 25, self.ArmeKingTusk().shootCD, 0.01f);
 
                 self.lastZRot = self.zRot;
@@ -130,7 +130,7 @@ namespace HotDogGains.Negative
 
                 vector2 += a * self.zRot.x * 15f * (self.side / 2f * spacing);
                 vector2 += a * self.zRot.y * ((self.side % 2 == 0) ? -1f : 1f) * 7f;
-                //vector2 += a * self.zRot.y * ((self.side%2 == 0) ? -1f : 1f) * 7f*(self.side/2f*0.2f);//¼ä¾àÏà¹Ø
+                //vector2 += a * self.zRot.y * ((self.side%2 == 0) ? -1f : 1f) * 7f*(self.side/2f*0.2f);//é—´è·ç›¸å…³
 
                 self.laserPower = Custom.LerpAndTick(self.laserPower, self.attached, 0.01f, 0.008333334f);
 
@@ -608,7 +608,7 @@ namespace HotDogGains.Negative
             Vector2 vector7 = a - vector6 * 10f;
             Vector2 vector8 = Vector2.Lerp(a, vector5, Mathf.InverseLerp(0f, 0.25f, self.attached));
 
-            #region  Ä§ÍõÇ¹Á¬½Ó´¦
+            #region  é­”ç‹æªè¿æ¥å¤„
 
             sLeaser.sprites[vGraphics.NeckLumpSprite(self.side%2)].x = vector7.x - camPos.x;
             sLeaser.sprites[vGraphics.NeckLumpSprite(self.side % 2)].y = vector7.y - camPos.y;
@@ -634,7 +634,7 @@ namespace HotDogGains.Negative
                     var tuskEnd = (vector10 +normalized * d);
                     (sLeaser.sprites[armeTusk.TuskSprite()] as TriangleMesh).MoveVertice(i * 4 + 2, tuskEnd- camPos);
 
-                    #region Ä§ÍõÇ¹ÀØÉä
+                    #region é­”ç‹æªé•­å°„
                     if (num <= 0f||self.mode!=KingTusks.Tusk.Mode.Charging)
                     {
                         sLeaser.sprites[armeTusk.LaserSprite()].isVisible = false;
@@ -801,7 +801,7 @@ namespace HotDogGains.Negative
 
         private static float KingTusks_GoodShootAngle(On.KingTusks.orig_GoodShootAngle orig, KingTusks self, int tusk, bool checkMinDistance)
         {
-            var num = orig.Invoke(self, tusk, checkMinDistance);//ÈÃÍºğÕ¶Ô×Ô¼ºµÄ×¼¶ÈÌá¸ßÈı±¶×ÔĞÅ(?
+            var num = orig.Invoke(self, tusk, checkMinDistance);//è®©ç§ƒé¹«å¯¹è‡ªå·±çš„å‡†åº¦æé«˜ä¸‰å€è‡ªä¿¡(?
             return num;
         }
 

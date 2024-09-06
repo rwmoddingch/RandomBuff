@@ -35,7 +35,8 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
             {
                 conditions = new List<Condition>()
                 {
-                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,type =  BuffCore.IsPluginEnabled("ExpeditionExtend") ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
+                    new MeltdownHuntCondition(){killCount = 1,minConditionCycle = 4,maxConditionCycle = 8,
+                        type = BuffCore.IsPluginEnabled("ExpeditionExtend") ? CreatureTemplate.Type.RedCentipede : CreatureTemplate.Type.KingVulture},
                     new BinahCondition(){minConditionCycle =8, maxConditionCycle = 12},
                     new FixedCycleCondition() {SetCycle = 12},
                     new DeathCondition(){deathCount = 20}
@@ -48,7 +49,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                         {
                             TipherethBuffData.Tiphereth.value,
                             ChesedBuffData.Chesed.value, 
-                            BuffCore.IsPluginEnabled("ExpeditionExtend") ?  "bur-pursued" : ArmedKingVultureBuffEntry.ArmedKingVultureID.value 
+                            BuffCore.IsPluginEnabled("ExpeditionExtend") ?  "bur-pursued" : "ArmedKingVultureID" 
                         }},
                         {8, new List<string>()
                         {
@@ -152,7 +153,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
         {
             var ghost = self.threatTracker?.ghostMode ?? -1;
             orig(self,musicEvent);
-            if (ghost != -1)
+            if (ghost != -1 && self.threatTracker != null)
                 self.threatTracker.ghostMode = ghost;
             
         }
@@ -164,7 +165,7 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
                 if(BuffCore.GetAllBuffIds().Contains(new BuffID("bur-pursued")))
                     BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("bur-pursued"));
                 else
-                    BuffPoolManager.Instance.RemoveBuffAndData(ArmedKingVultureBuffEntry.ArmedKingVultureID);
+                    BuffPoolManager.Instance.RemoveBuffAndData(new BuffID("ArmedKingVultureID"));
 
                 BuffUtils.Log("SephirahMeltdown","Remove bur-pursued at 8 cycles");
             }

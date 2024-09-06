@@ -671,7 +671,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class Freeze
+    public class Freeze
     {
         public WeakReference<AbstractCreature> ownerRef; 
         private int freezeCount;

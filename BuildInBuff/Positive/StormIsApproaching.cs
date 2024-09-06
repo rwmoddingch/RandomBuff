@@ -15,10 +15,10 @@ using Random = UnityEngine.Random;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class StormIsApproachingEntry : IBuffEntry
+    public class StormIsApproachingEntry : IBuffEntry
     {
-        public static readonly Color Sword1 = Custom.hexToColor("77D2FF");
-        public static readonly Color Sword2 = Custom.hexToColor("8377FF");
+        internal static readonly Color Sword1 = Custom.hexToColor("77D2FF");
+        internal static readonly Color Sword2 = Custom.hexToColor("8377FF");
 
         public static readonly BuffID StormIsApproaching = new BuffID(nameof(StormIsApproaching), true);
         public void OnEnable()
@@ -658,7 +658,7 @@ namespace BuiltinBuffs.Positive
     /// Effect
     /// </summary>
 
-    internal class ShockEffect : BuffPostEffectLimitTime
+    public class ShockEffect : BuffPostEffectLimitTime
     {
         public ShockEffect(int layer, float duringTime, float enterTime, float fadeTime,float start,float end, float maxInst, Vector2 center) : base(layer, duringTime, enterTime, fadeTime)
         {
@@ -688,7 +688,7 @@ namespace BuiltinBuffs.Positive
 
 
     }
-    internal class HueEffect : BuffPostEffectLimitTime
+    public class HueEffect : BuffPostEffectLimitTime
     {
         public HueEffect(int layer, float duringTime, float enterTime, float fadeTime, float maxLerp,  float maxInst) : base(layer, duringTime, enterTime, fadeTime)
         {
@@ -713,7 +713,7 @@ namespace BuiltinBuffs.Positive
 
 
     }
-    internal class SingleColorEffect : BuffPostEffectLimitTime
+    public class SingleColorEffect : BuffPostEffectLimitTime
     {
         public SingleColorEffect(int layer, float duringTime, float enterTime, float fadeTime, Color start, Color end, float maxInst) : base(layer, duringTime, enterTime, fadeTime)
         {
@@ -743,7 +743,7 @@ namespace BuiltinBuffs.Positive
 
     }
 
-    internal class CutEffect : BuffPostEffectLimitTime
+    public class CutEffect : BuffPostEffectLimitTime
     {
 
         private Vector4[] lineParams = new[]

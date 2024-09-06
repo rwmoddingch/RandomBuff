@@ -127,8 +127,4 @@
 			<Private>False</Private>
 		</Reference>
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Positive\" />
-	  <Folder Include="Negative\" />
-	</ItemGroup>
 </Project>

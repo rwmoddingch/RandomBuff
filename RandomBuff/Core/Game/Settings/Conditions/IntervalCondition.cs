@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using RandomBuff;
-using RandomBuff.Core.Game.Settings.Conditions;
-using RWCustom;
 
-namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
+namespace RandomBuff.Core.Game.Settings.Conditions
 {
     internal abstract class IntervalCondition : Condition
     {

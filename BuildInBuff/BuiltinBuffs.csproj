@@ -125,4 +125,7 @@
     </Reference>
     <Content Include=".vscode\HotDogBuffSnippets.code-snippets" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Negative\SephirahMeltdown\" />
+  </ItemGroup>
 </Project>

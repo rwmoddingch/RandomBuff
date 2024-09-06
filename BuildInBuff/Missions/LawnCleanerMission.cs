@@ -1,5 +1,4 @@
-﻿using BuiltinBuffs.Negative.SephirahMeltdown;
-using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
+﻿
 using BuiltinBuffs.Positive;
 using Newtonsoft.Json;
 using RandomBuff;

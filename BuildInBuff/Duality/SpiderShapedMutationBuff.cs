@@ -15,10 +15,7 @@ using Color = UnityEngine.Color;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 using MoreSlugcats;
-using HotDogGains.Positive;
 using RandomBuff.Core.SaveData;
-using BuiltinBuffs.Positive;
-using BuiltinBuffs.Negative.SephirahMeltdown;
 using System.Collections.Generic;
 
 namespace BuiltinBuffs.Duality

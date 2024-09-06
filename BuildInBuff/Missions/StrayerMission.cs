@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using BuiltinBuffs.Negative.SephirahMeltdown.Conditions;
 using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Game.Settings;
