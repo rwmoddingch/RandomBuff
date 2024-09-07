@@ -39,7 +39,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             int indexIncreasement = missionDisplay == null ? 0 : 1;
             foreach (var condition in gameSetting.conditions)
             {
-                condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh,OnUncompleted, OnUncompleted);
+                condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh, OnFailed, OnUndoFailed);
                 instances.Add(new ConditionInstance2(this, condition, instances.Count + indexIncreasement));
             }
             flagBanner = new FlagBanner(this);
@@ -63,6 +63,27 @@ namespace RandomBuff.Render.UI.BuffCondition
             foreach(var conditionalInstance in instances)
             {
                 conditionalInstance.Uncomplete(condition);
+            }
+            UpdateFlagMode();
+        }
+
+        public void OnFailed(Condition condition)
+        {
+            if (!flagMode)
+            {
+                foreach (var conditionalInstance in instances)
+                {
+                    conditionalInstance.Failed(condition);
+                }
+            }
+            UpdateFlagMode();
+        }
+
+        public void OnUndoFailed(Condition condition)
+        {
+            foreach (var conditionalInstance in instances)
+            {
+                conditionalInstance.UndoFailed(condition);
             }
             UpdateFlagMode();
         }
@@ -98,7 +119,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             }
             flagBanner.failedFlag = failedMode;
 
-            bool newFlagMode = allFinished && !flagBanner.failedShowed;
+            bool newFlagMode = allFinished && !flagBanner.everShowed;
             if (flagMode != newFlagMode)
             {
                 flagMode = newFlagMode;
@@ -243,7 +264,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             public static int MaxFlashTimer = 20;
             public static Color normalColor = Color.white * 0.6f + Color.black * 0.4f;
             public static Color completeColor = Color.green * 0.8f + Color.blue * 0.2f;
-            public static Color uncompleteColor = Color.red * 0.8f + Color.yellow * 0.2f;
+            public static Color failedColor = Color.red * 0.8f + Color.yellow * 0.2f;
             public static Color highLightColor = Color.white;
 
             BuffConditionHUD conditionHUD;
@@ -276,7 +297,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             TickAnimCmpnt showAnimCmpnt;
             TickAnimCmpnt flashColorAnimCmpnt;
 
-            public bool complete;
+            public InstanceState state;
 
             List<Action> TextChangeRequestQueue = new List<Action>();
             List<Action> CompleteStateChangeRequestQueue = new List<Action>();
@@ -286,6 +307,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                 this.conditionHUD = conditionHUD;
                 this.bindCondition = bindCondition;
                 this.index = index;
+                state = InstanceState.Normal;
 
                 hoverPos = conditionHUD.TopLeft + new Vector2(20, -30 * index);
                 hidePos = hoverPos + Vector2.right * 100f;
@@ -294,7 +316,7 @@ namespace RandomBuff.Render.UI.BuffCondition
 
                 RequestTextChange(bindCondition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
                              bindCondition.DisplayProgress(Custom.rainWorld.inGameTranslator), true);
-                RequestCompleteChange(bindCondition.Finished, true);
+                RequestInstanceStateChange(GetStateFromCondition(bindCondition), true);
                 
                 showAnimCmpnt = AnimMachine.GetTickAnimCmpnt(0, MaxShowAnimTimer, tick:-1, autoStart: false, autoDestroy: false)
                     .BindModifier(Helper.LerpEase)
@@ -309,57 +331,116 @@ namespace RandomBuff.Render.UI.BuffCondition
                 if (bindCondition != condition)
                     return;
                 RequestTextChange(condition.DisplayName(Custom.rainWorld.inGameTranslator) + " " +
-                             condition.DisplayProgress(Custom.rainWorld.inGameTranslator));
+                             condition.DisplayProgress(Custom.rainWorld.inGameTranslator), conditionHUD.flagMode);
             }
 
             public void Uncomplete(Condition condition)
             {
                 if (bindCondition != condition)
                     return;
-                RequestCompleteChange(false);
+                RequestInstanceStateChange(InstanceState.Normal, conditionHUD.flagMode);
             }
 
             public void Complete(Condition condition)
             {
                 if (bindCondition != condition)
                     return;
-                RequestCompleteChange(true);
+                RequestInstanceStateChange(InstanceState.Complete, conditionHUD.flagMode);
             }
 
-            public void RequestCompleteChange(bool complete, bool forceRefresh = false)
+            public void Failed(Condition condition)
+            {
+                if (bindCondition != condition)
+                    return;
+                RequestInstanceStateChange(InstanceState.Failed, conditionHUD.flagMode);
+            }
+
+            public void UndoFailed(Condition condition)
+            {
+                if (bindCondition != condition)
+                    return;
+                RequestInstanceStateChange(GetStateFromCondition(condition), conditionHUD.flagMode);
+            }
+
+
+            public void RequestInstanceStateChange(InstanceState newState, bool forceRefresh = false)
             {
                 if (forceRefresh || ShowAnimFinished && afterAnimFinishedShowState)
-                    _InternalRefreshComplete(complete, forceRefresh);
+                    _InternalRefreshInstanceState(newState, forceRefresh);
                 else
                 {
                     SetShow(true);
-                    CompleteStateChangeRequestQueue.Add(() => _InternalRefreshComplete(complete));
+                    CompleteStateChangeRequestQueue.Add(() => _InternalRefreshInstanceState(newState));
                 }
             }
 
-            void _InternalRefreshComplete(bool complete, bool forceRefresh = false)
+            void _InternalRefreshInstanceState(InstanceState newState, bool forceRefresh = false)
             {
                 if(forceRefresh)
                 {
-                    currentCol = lastCol = targetCol = complete ? completeColor : normalColor;
+                    switch(newState)
+                    {
+                        case InstanceState.Complete:
+                            currentCol = lastCol = targetCol = completeColor;
+                            break;
+                        case InstanceState.Normal:
+                            currentCol = lastCol = targetCol = normalColor;
+                            break;
+                        case InstanceState.Failed:
+                            currentCol = lastCol = targetCol = failedColor;
+                            break;
+                    }
                 }
                 else
                 {
-                    if(complete && !this.complete)
+                    if(newState != state)
                     {
-                        currentCol = lastCol = highLightColor;
-                        targetCol = completeColor;
+                        switch (state)
+                        {
+                            case InstanceState.Normal:
+                                currentCol = lastCol = highLightColor;
+
+                                if (newState == InstanceState.Complete)
+                                    targetCol = completeColor;
+                                else if (newState == InstanceState.Failed)
+                                    targetCol = failedColor;
+
+                                break;
+                            case InstanceState.Failed:
+                                if (newState == InstanceState.Normal)
+                                {
+                                    currentCol = lastCol = completeColor;
+                                    targetCol = normalColor;
+                                }
+                                else if (newState == InstanceState.Complete)
+                                {
+                                    currentCol = lastCol = highLightColor;
+                                    targetCol = completeColor;
+                                }
+                                break;
+
+                            case InstanceState.Complete:
+                                if (newState == InstanceState.Normal)
+                                {
+                                    currentCol = lastCol = failedColor;
+                                    targetCol = normalColor;
+                                }
+                                else if (newState == InstanceState.Failed)
+                                {
+                                    currentCol = lastCol = highLightColor;
+                                    targetCol = failedColor;
+                                }
+
+                                break;
+                        }
                     }
-                    else if(!complete && this.complete)
-                    {
-                        currentCol = lastCol = uncompleteColor;
-                        targetCol = normalColor;
-                    }
+
                     _InternalFireUpColorChangeAnim();
                     SetShow(true);
+                    Flash();
                 }
 
-                this.complete = complete;
+                state = newState;
             }
 
             void _InternalFireUpColorChangeAnim()
@@ -550,8 +631,33 @@ namespace RandomBuff.Render.UI.BuffCondition
                 flatLight.RemoveFromContainer();
                 rect.RemoveFromContainer();
             }
-        }
 
+            //
+            (bool failed, bool complete) GetFailed_CompleteStateFromCondition(Condition condition)
+            {
+                return new(condition.Failed, condition.Finished);
+            }
+
+            InstanceState GetStateFromCondition(Condition condition)
+            {
+                if (condition.Failed)
+                    return InstanceState.Failed;
+                else
+                {
+                    if (condition.Finished)
+                        return InstanceState.Complete;
+                    else
+                        return InstanceState.Normal;
+                }
+            }
+
+            public enum InstanceState
+            {
+                Normal,
+                Complete,
+                Failed
+            }
+        }
 
         internal class ConditionInstance
         {
@@ -862,7 +968,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             float setTextAlpha;
 
             public bool failedFlag, lastFailedFlag;
-            public bool failedShowed;
+            public bool everShowed;
 
             Vector2 flagHangPos;
 
@@ -885,12 +991,10 @@ namespace RandomBuff.Render.UI.BuffCondition
 
             public void Update()
             {
-                failedFlag = true;
                 if(lastFailedFlag != failedFlag)
                 {
                     lastFailedFlag = failedFlag;
-                    if (!failedFlag)
-                        failedShowed = false;
+                    everShowed = false;
 
                     renderer?.container.RemoveAllChildren();
                     renderer?.container.RemoveFromContainer();
@@ -950,12 +1054,12 @@ namespace RandomBuff.Render.UI.BuffCondition
                         textAlpha = setTextAlpha;
                 }
 
-                if (!failedShowed && failedFlag && lateFlagMode && cardTitle.readyForSwitch)
+                if (!everShowed && lateFlagMode && cardTitle.readyForSwitch)
                 {
                     failedShowcounter++;
-                    if(failedShowcounter == 160)
+                    if(failedShowcounter == 240)
                     {
-                        failedShowed = true;
+                        everShowed = true;
                         failedShowcounter = 0;
                         hud.UpdateFlagMode();
                     }

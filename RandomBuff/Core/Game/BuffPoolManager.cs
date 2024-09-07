@@ -129,8 +129,14 @@ namespace RandomBuff.Core.Game
             Instance = this;
 
             GameSetting = BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).Clone();
+#if TESTVERSION
+            //GameSetting.conditions.Add(new TestCondition());
+#endif
+
             GameSetting.EnterGame(Game);
-          
+
+
+
             BuffPlugin.Log($"------Enter Game,TemplateID: {GameSetting.gachaTemplate.ID}, Difficulty: {GameSetting.Difficulty}, Condition Count: {GameSetting.conditions.Count}{(GameSetting.MissionId is null ? "" : $", Mission: {GameSetting.MissionId}")}------");
 
 

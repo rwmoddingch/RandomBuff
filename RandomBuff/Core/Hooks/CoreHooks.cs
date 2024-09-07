@@ -141,7 +141,7 @@ namespace RandomBuff.Core.Hooks
                 ClearRandomBuffButton(self);
                 bool enabled = self.game.GetStorySession.saveState.cycleNumber >= 5 || BuffHud.Instance.Failed;
 
-                var finish = new SimpleButton(self, self.pages[0], enabled ?string.Format(BuffResourceString.Get("PauseMenu_EndRun"), 5 - self.game.GetStorySession.saveState.cycleNumber, BuffResourceString.GetPluralLetter()) : BuffResourceString.Get("PauseMenu_EndRun_CountDown"), "RANDOMBUFF_END_RUN", new Vector2(self.ContinueAndExitButtonsXPos - 460.2f - self.moveLeft - self.manager.rainWorld.options.SafeScreenOffset.x, Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)), new Vector2(110f, 30f));
+                var finish = new SimpleButton(self, self.pages[0], enabled ?string.Format(BuffResourceString.Get("PauseMenu_EndRun_CountDown"), 5 - self.game.GetStorySession.saveState.cycleNumber, BuffResourceString.GetPluralLetter()) : BuffResourceString.Get("PauseMenu_EndRun"), "RANDOMBUFF_END_RUN", new Vector2(self.ContinueAndExitButtonsXPos - 460.2f - self.moveLeft - self.manager.rainWorld.options.SafeScreenOffset.x, Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)), new Vector2(110f, 30f));
                 self.pages[0].subObjects.Add(finish);
 
                 finish.buttonBehav.greyedOut = !enabled;

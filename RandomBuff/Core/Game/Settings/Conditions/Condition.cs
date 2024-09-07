@@ -238,6 +238,9 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
             BuffRegister.RegisterCondition<FixedCycleCondition>(ConditionID.FixedCycle, "Fix Cycles", true);
             BuffRegister.RegisterCondition<WithInCycleCondition>(ConditionID.WithInCycle, "WithIn Cycle", true);
+#if TESTVERSION
+            BuffRegister.RegisterCondition<TestCondition>(TestCondition.id, "TEST CONDITION", true);
+#endif
         }
 
         public enum ConditionState

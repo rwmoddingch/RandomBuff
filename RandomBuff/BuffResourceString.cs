@@ -113,7 +113,7 @@ namespace RandomBuff
         public static string GetPluralLetter(bool upper = false)
         {
             if (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
-                return "";
+                return string.Empty;
             return upper ? "S" : "s";
         }
     }
