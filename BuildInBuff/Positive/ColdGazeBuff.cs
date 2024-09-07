@@ -85,6 +85,18 @@ namespace BuiltinBuffs.Positive
                 }
             }
         }
+
+        public override void CycleEnd()
+        {
+            base.CycleEnd();
+            if (CycleUse >= MaxCycleCount)
+            {
+                ID.UnstackBuff();
+                CycleUse = 0;
+            }
+        }
+
+        public override bool NeedDeletion => ColdGazeBuffEntry.StackLayer <= 1 && CycleUse >= MaxCycleCount;
     }
 
     internal class ColdGazeBuffEntry : IBuffEntry
