@@ -9,6 +9,8 @@ using UnityEngine;
 
 namespace RandomBuffUtils
 {
+#if TESTVERSION
+    
     public static class SteamHelper
     {
         public delegate void ReceiveAvatarCallBack(Texture2D avatarTex);
@@ -62,10 +64,6 @@ namespace RandomBuffUtils
                 CallBackMaps.Remove(param.m_steamID.m_SteamID);
             }
         }
-
-
-
-
     
         private static Texture2D GetSteamImageAsTexture2D(int iImage)
         {
@@ -95,4 +93,7 @@ namespace RandomBuffUtils
         private static readonly Dictionary<ulong, ReceiveAvatarCallBack> CallBackMaps = new();
 
     }
+#endif
+
+        
 }
