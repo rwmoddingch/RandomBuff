@@ -95,6 +95,9 @@ namespace RandomBuff.Core.Hooks
             On.Menu.SlugcatSelectMenu.SlugcatPage.Scroll += SlugcatPage_Scroll;
             On.Menu.SlugcatSelectMenu.SlugcatPage.NextScroll += SlugcatPage_NextScroll;
 
+            On.Menu.PauseMenu.SpawnExitContinueButtons += PauseMenu_SpawnExitContinueButtons;
+            On.Menu.PauseMenu.Singal += PauseMenu_Singal;
+
 
             On.SlugcatStats.SlugcatUnlocked += SlugcatStats_SlugcatUnlocked;
             On.JollyCoop.JollyCustom.SlugClassMenu += JollyCustom_SlugClassMenu;
@@ -112,10 +115,92 @@ namespace RandomBuff.Core.Hooks
 
 
             BuffPlugin.Log("Core Hook Loaded");
-
-            //BuffGameMenu = new("BuffGameMenu");
-
         }
+
+
+        static void ClearRandomBuffButton(PauseMenu pauseMenu)
+        {
+            for (int i = pauseMenu.pages[0].subObjects.Count - 1; i >= 0; i--)
+            {
+                if (pauseMenu.pages[0].subObjects[i] is SimpleButton button && button.signalText.StartsWith("RANDOMBUFF"))
+                {
+                    button.RemoveSprites();
+                    pauseMenu.pages[0].RemoveSubObject(button);
+                }
+            }
+        }
+
+        //添加强制结算按钮
+        private static void PauseMenu_SpawnExitContinueButtons(On.Menu.PauseMenu.orig_SpawnExitContinueButtons orig, PauseMenu self)
+        {
+            orig.Invoke(self);
+
+            if(BuffPoolManager.Instance != null)
+            {
+                ClearRandomBuffButton(self);
+                bool enabled = self.game.GetStorySession.saveState.cycleNumber >= 5 || BuffHud.Instance.Failed;
+
+                var finish = new SimpleButton(self, self.pages[0], enabled ?string.Format(BuffResourceString.Get("PauseMenu_EndRun"), 5 - self.game.GetStorySession.saveState.cycleNumber, BuffResourceString.GetPluralLetter()) : BuffResourceString.Get("PauseMenu_EndRun_CountDown"), "RANDOMBUFF_END_RUN", new Vector2(self.ContinueAndExitButtonsXPos - 460.2f - self.moveLeft - self.manager.rainWorld.options.SafeScreenOffset.x, Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)), new Vector2(110f, 30f));
+                self.pages[0].subObjects.Add(finish);
+
+                finish.buttonBehav.greyedOut = !enabled;
+                finish.nextSelectable[1] = finish;
+                finish.nextSelectable[3] = finish;
+            }
+        }
+        private static void PauseMenu_Singal(On.Menu.PauseMenu.orig_Singal orig, PauseMenu self, MenuObject sender, string message)
+        {
+            orig.Invoke(self, sender, message);
+
+            if(message == "RANDOMBUFF_END_RUN")
+            {
+                if (self.continueButton != null)
+                {
+                    self.continueButton.RemoveSprites();
+                    self.pages[0].RemoveSubObject(self.continueButton);
+                }
+                self.continueButton = null;
+                if (self.exitButton != null)
+                {
+                    self.exitButton.RemoveSprites();
+                    self.pages[0].RemoveSubObject(self.exitButton);
+                }
+                self.exitButton = null;
+                ClearRandomBuffButton(self);
+
+                var confirmYesButton = new SimpleButton(self, self.pages[0],self.Translate("YES"), "RANDOMBUFF_YES_ENDRUN", new Vector2(self.ContinueAndExitButtonsXPos - 180.2f - self.moveLeft - self.manager.rainWorld.options.SafeScreenOffset.x, Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)), new Vector2(110f, 30f));
+                self.pages[0].subObjects.Add(confirmYesButton);
+
+                var confirmNoButton = new SimpleButton(self, self.pages[0], self.Translate("NO"), "RANDOMBUFF_NO_ENDRUN", new Vector2(self.ContinueAndExitButtonsXPos - 320.2f - self.moveLeft - self.manager.rainWorld.options.SafeScreenOffset.x, Mathf.Max(self.manager.rainWorld.options.SafeScreenOffset.y, 15f)), new Vector2(110f, 30f));
+                self.pages[0].subObjects.Add(confirmNoButton);
+
+                self.selectedObject = confirmNoButton;
+                self.confirmMessage = new MenuLabel(self, self.pages[0], BuffResourceString.Get("PauseMenu_EndRun_ConfirmInfo"), new Vector2(confirmNoButton.pos.x, confirmNoButton.pos.y), new Vector2(10f, 30f), false, null);
+                self.confirmMessage.label.alignment = FLabelAlignment.Left;
+                self.confirmMessage.pos = new Vector2(self.confirmMessage.pos.x - self.confirmMessage.label.textRect.width - 40f, self.confirmMessage.pos.y);
+                self.pages[0].subObjects.Add(self.confirmMessage);
+
+                confirmYesButton.nextSelectable[1] = confirmYesButton;
+                confirmYesButton.nextSelectable[3] = confirmYesButton;
+                confirmNoButton.nextSelectable[1] = confirmNoButton;
+                confirmNoButton.nextSelectable[3] = confirmNoButton;
+
+                self.PlaySound(SoundID.MENU_Button_Standard_Button_Pressed);
+            }
+            else if (message == "RANDOMBUFF_YES_ENDRUN")
+            {
+                self.game.Win(false);
+                self.PlaySound(SoundID.HUD_Exit_Game);
+                self.ShutDownProcess();
+            }
+            else if(message == "RANDOMBUFF_NO_ENDRUN")
+            {
+                self.PlaySound(SoundID.MENU_Button_Standard_Button_Pressed);
+                self.SpawnExitContinueButtons();
+            }
+        }
+
+
 
         private static bool ConfigContainer_HasConfigChanged(On.Menu.Remix.ConfigContainer.orig_HasConfigChanged orig)
         {
@@ -352,7 +437,7 @@ namespace RandomBuff.Core.Hooks
             }
             else if (ID == BuffEnums.ProcessID.BuffGameWinScreen)
             {
-                self.currentMainLoop = new BuffGameWinScreen(self);
+                self.currentMainLoop = new BuffGameWinFailScreen(self);
             }
             else if (ID == BuffEnums.ProcessID.CreditID)
             {
@@ -392,7 +477,7 @@ namespace RandomBuff.Core.Hooks
                     foreach (var buff in BuffCore.GetAllBuffIds(menu.name))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
-                else if (self.oldProcess is BuffGameWinScreen win)
+                else if (self.oldProcess is BuffGameWinFailScreen win)
                 {
                     foreach (var buff in BuffCore.GetAllBuffIds(win.name))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);

@@ -26,6 +26,7 @@ namespace RandomBuff.Render.UI.BuffCondition
         public Mode currentMode = Mode.Refresh;
 
         public bool flagMode;
+        public bool failedMode;
         Mode origMode = Mode.Refresh;
         
         public BuffConditionHUD()
@@ -47,9 +48,12 @@ namespace RandomBuff.Render.UI.BuffCondition
 
         public void OnCompleted(Condition condition)
         {
-            foreach (var conditionalInstance in instances)
+            if (!flagMode)
             {
-                conditionalInstance.Complete(condition);
+                foreach (var conditionalInstance in instances)
+                {
+                    conditionalInstance.Complete(condition);
+                }
             }
             UpdateFlagMode();
         }
@@ -65,9 +69,12 @@ namespace RandomBuff.Render.UI.BuffCondition
 
         public void OnLabelRefresh(Condition condition)
         {
-            foreach(var conditionInstance in instances)
+            if (!flagMode)
             {
-                conditionInstance.Refresh(condition);
+                foreach (var conditionInstance in instances)
+                {
+                    conditionInstance.Refresh(condition);
+                }
             }
         }
 
@@ -78,14 +85,23 @@ namespace RandomBuff.Render.UI.BuffCondition
                 return;
 
             bool allFinished = true;
-            foreach (var condition in gameSetting.conditions)
+            failedMode = false;
+            foreach (Condition condition in gameSetting.conditions)
             {
                 allFinished &= condition.Finished;
+                if (condition.Failed || true)
+                {
+                    allFinished = true;
+                    failedMode = true;
+                    break;
+                }
             }
+            flagBanner.failedFlag = failedMode;
 
-            if(flagMode != allFinished)
+            bool newFlagMode = allFinished && !flagBanner.failedShowed;
+            if (flagMode != newFlagMode)
             {
-                flagMode = allFinished;
+                flagMode = newFlagMode;
                 if (flagMode)
                     ChangeMode(Mode.Refresh);
                 else
@@ -836,12 +852,17 @@ namespace RandomBuff.Render.UI.BuffCondition
 
             int lastCounter;
             int counter;
+            int failedShowcounter;
+
             float ShowFactor => counter / (float)showCounter;
             float LastShowFactor => lastCounter / (float)showCounter;
 
             float textAlpha;
             float lastTextAlpha;
             float setTextAlpha;
+
+            public bool failedFlag, lastFailedFlag;
+            public bool failedShowed;
 
             Vector2 flagHangPos;
 
@@ -864,6 +885,29 @@ namespace RandomBuff.Render.UI.BuffCondition
 
             public void Update()
             {
+                failedFlag = true;
+                if(lastFailedFlag != failedFlag)
+                {
+                    lastFailedFlag = failedFlag;
+                    if (!failedFlag)
+                        failedShowed = false;
+
+                    renderer?.container.RemoveAllChildren();
+                    renderer?.container.RemoveFromContainer();
+
+                    renderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.OuterTriangle, failedFlag ? RandomBuffFlagRenderer.FlagColorType.Grey : RandomBuffFlagRenderer.FlagColorType.Golden)
+                    {
+                        pos = flagHangPos,
+                        customAlpha = true,
+                        alpha = 0f,
+                        lastAlpha = 0f
+                    };
+                    hud.Container.AddChild(renderer.container);
+
+                    flagInfo.text = failedFlag ? BuffResourceString.Get("BuffConditionHUD_FailedInfo") : BuffResourceString.Get("BuffConditionHUD_WinInfo");
+                    renderer.container.MoveBehindOtherNode(flagInfo);
+                }
+
                 if(counter > 0)
                 {
                     flag.Update();
@@ -884,7 +928,7 @@ namespace RandomBuff.Render.UI.BuffCondition
                     counter++;
                     if (counter == showCounter)
                     {
-                        cardTitle.RequestSwitchTitle(BuffResourceString.Get("BuffConditionHUD_WinTitle"));
+                        cardTitle.RequestSwitchTitle(failedFlag ? BuffResourceString.Get("BuffConditionHUD_FailedTitle") : BuffResourceString.Get("BuffConditionHUD_WinTitle"));
                         setTextAlpha = 1f;
                     }
                 }
@@ -904,6 +948,17 @@ namespace RandomBuff.Render.UI.BuffCondition
                     textAlpha = Mathf.Lerp(textAlpha, setTextAlpha, 0.15f);
                     if(Mathf.Approximately(textAlpha, setTextAlpha))
                         textAlpha = setTextAlpha;
+                }
+
+                if (!failedShowed && failedFlag && lateFlagMode && cardTitle.readyForSwitch)
+                {
+                    failedShowcounter++;
+                    if(failedShowcounter == 160)
+                    {
+                        failedShowed = true;
+                        failedShowcounter = 0;
+                        hud.UpdateFlagMode();
+                    }
                 }
             }
 

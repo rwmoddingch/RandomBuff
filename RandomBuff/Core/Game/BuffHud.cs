@@ -171,6 +171,12 @@ namespace RandomBuff.Core.Game
 
         public override void Update()
         {
+            if (slatedForDeletion)
+            {
+                if (Instance == this)
+                    Instance = null;
+                return;
+            }
             InputAgency.StaticUpdate();
             if (BuffCustom.TryGetGame(out var game) && (inGameSlot.WaitingPickCard || (pocket?.Show ?? false)))
             {
@@ -293,6 +299,8 @@ namespace RandomBuff.Core.Game
 
         private Dictionary<BuffID, BuffHudPart> id2hudParts = new Dictionary<BuffID, BuffHudPart>();
         private List<BuffHudPart> hudParts = new List<BuffHudPart>();
+
+        public bool Failed => inGameSlot.ConditionHUD.failedMode;
     }
 
     public abstract class BuffHudPart

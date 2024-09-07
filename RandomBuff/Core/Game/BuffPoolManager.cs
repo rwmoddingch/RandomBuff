@@ -562,7 +562,16 @@ namespace RandomBuff.Core.Game
                 missionId = GameSetting.MissionId,
                 saveState = Game.GetStorySession.saveState,
                 expMultiply = GameSetting.gachaTemplate.ExpMultiply,
+#if TESTVERSION
+                failedRun = true,
+#endif
             };
+
+            if(winGamePackage.failedRun)
+            {
+                winGamePackage.expMultiply *= 0.5f;
+            }
+
             foreach (var buff in buffDictionary.Keys)
                 winGamePackage.winWithBuffs.Add(buff);
             foreach(var condition in GameSetting.conditions) 
@@ -639,5 +648,6 @@ namespace RandomBuff.Core.Game
 
         public float expMultiply;
         public string missionId;
+        public bool failedRun;
     }
 }

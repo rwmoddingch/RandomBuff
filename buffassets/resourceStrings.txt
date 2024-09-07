@@ -58,11 +58,16 @@ Quick|QUICK MODE
 Sandbox|SANDBOX MODE
 ProgressionMenu_Show|PROGRESSION
 ExtraInfo_Label|extra info
+PauseMenu_EndRun|END RUN
+PauseMenu_EndRun_CountDown|{0} MORE CYCLE{1}
+PauseMenu_EndRun_ConfirmInfo|Realy end run? All uncomplished conditios will count as failed, only half experience can be obtained from current run.
 
 
 //BuffConditionHUD
 BuffConditionHUD_WinInfo|sleep to finish the game
 BuffConditionHUD_WinTitle|WIN
+BuffConditionHUD_FailedInfo|manually finish the game<LINE>in the pause menu
+BuffConditionHUD_FailedTitle|FAILED
 
 //BuffHUD
 BuffHUD_FreePick|Select initial cards ({0}/{1})
@@ -177,6 +182,8 @@ ProgressionUI_Quest|QUEST
 ProgressionUI_Cosmetic|COSMETIC
 ScoreCaculator_ExpMulti|Exp multiplier
 ScoreCaculator_KillScoreLimit|Kill score limit
+ScoreCaculator_WinOrFailLabel_Win|-WIN-
+ScoreCaculator_WinOrFailLabel_Fail|-FAILED-
 
 
 //QuestCondition

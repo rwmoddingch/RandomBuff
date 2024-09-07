@@ -22,12 +22,12 @@ using RandomBuff.Core.Progression.Record;
 
 namespace RandomBuff.Core.StaticsScreen
 {
-    internal class BuffGameWinScreen : Menu.Menu
+    internal class BuffGameWinFailScreen : Menu.Menu
     {
         public SimpleButton continueButton;
 
-
         public FSprite gradient;
+        public FLabel winOrFailLabel;
 
         public RandomBuffFlag flag;
         public RandomBuffFlagRenderer flagRenderer;
@@ -43,6 +43,7 @@ namespace RandomBuff.Core.StaticsScreen
 
         bool recordShowed;
         bool questShow;
+        bool labelShow;
 
         Vector2 recordBoxHidePos;
         Vector2 recordBoxShowPos;
@@ -61,12 +62,15 @@ namespace RandomBuff.Core.StaticsScreen
 
         public SlugcatStats.Name name;
 
-        public BuffGameWinScreen(ProcessManager manager) : base(manager, BuffEnums.ProcessID.BuffGameWinScreen)
+        public BuffGameWinFailScreen(ProcessManager manager) : base(manager, BuffEnums.ProcessID.BuffGameWinScreen)
         {
+            var winPackage = BuffPoolManager.Instance.winGamePackage;
+            var record = winPackage.buffRecord as InGameTimerRecord;
+
             pages = new List<Page>();
             pages.Add(new Page(this, null, "Main", 0));
             pages.Add(notificationManager = new NotificationManager(this, container, 1));
-            scene = new InteractiveMenuScene(this, pages[0], MenuScene.SceneID.SleepScreen);
+            scene = new InteractiveMenuScene(this, pages[0], winPackage.failedRun ? MenuScene.SceneID.NewDeath: MenuScene.SceneID.SleepScreen);
             scene.camPos.x = scene.camPos.x - 400f;
             pages[0].subObjects.Add(scene);
             leftAnchor = Custom.GetScreenOffsets()[0];
@@ -92,12 +96,19 @@ namespace RandomBuff.Core.StaticsScreen
             name = BuffPoolManager.Instance.Game.StoryCharacter;
 
             title = new CardTitle(container, BuffCard.normalScale * 0.6f, new Vector2(middleX, 668f), 0.1f, spanAdjust: -50f);
+            
+            winOrFailLabel = new FLabel(Custom.GetDisplayFont(), winPackage.failedRun ? BuffResourceString.Get("ScoreCaculator_WinOrFailLabel_Fail") : BuffResourceString.Get("ScoreCaculator_WinOrFailLabel_Win"));
+            winOrFailLabel.color = winPackage.failedRun ? Color.red : Color.green;
+            pages[0].Container.AddChild(winOrFailLabel);
+            winOrFailLabel.SetPosition(middleX, 600f);
+            winOrFailLabel.shader = Custom.rainWorld.Shaders["MenuTextCustom"];
+            winOrFailLabel.scaleX = 0f;
 
             continueButton = new SimpleButton(this, pages[0], Translate("CONTINUE"), "CONTINUE", new Vector2(rightAnchor - 150f, 40f), new Vector2(100f, 30f));
             pages[0].subObjects.Add(continueButton);
 
             flag = new RandomBuffFlag(new IntVector2(40, 25), new Vector2(width + 200f, 500f));
-            flagRenderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.InnerTriangle, RandomBuffFlagRenderer.FlagColorType.Golden);
+            flagRenderer = new RandomBuffFlagRenderer(flag, RandomBuffFlagRenderer.FlagType.InnerTriangle, winPackage.failedRun ? RandomBuffFlagRenderer.FlagColorType.Grey : RandomBuffFlagRenderer.FlagColorType.Golden);
             flagRenderer.pos = new Vector2(middleX - (width + 200f) / 2f, 850f);
             flagRenderer.Show = true;
             pages[0].Container.AddChild(flagRenderer.container);
@@ -108,8 +119,7 @@ namespace RandomBuff.Core.StaticsScreen
 
             
             //winPackage
-            var winPackage = BuffPoolManager.Instance.winGamePackage;
-            var record = winPackage.buffRecord as InGameTimerRecord;
+            
             BuffPlugin.Log($"Win with kills : {winPackage.sessionRecord.kills.Count}, Mission Id: {winPackage.missionId ??"null"}");
             var str = "[RECORD]: ";
             foreach (var item in record.GetValueDictionary())
@@ -141,8 +151,6 @@ namespace RandomBuff.Core.StaticsScreen
                 showCredit = newFinishedQuests.Any(i => i.QuestId == "builtin.quest.Crown");
                 foreach (var quest in newFinishedQuests)
                     BuffPlugin.Log($"accomplish quest: {quest.QuestName}:{quest.QuestId}");
-                
-
             }
             else
             {
@@ -211,6 +219,20 @@ namespace RandomBuff.Core.StaticsScreen
             {
                 titleShowDelay--;
                 title.RequestSwitchTitle("Random Buff");
+            }
+            else if (titleShowDelay < 0)
+            {
+                if(title.readyForSwitch && !labelShow)
+                {
+                    labelShow = true;
+                    AnimMachine.GetTickAnimCmpnt(0, 20, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>
+                    {
+                        winOrFailLabel.scaleX = Mathf.Lerp(0f, 1f, t.Get());
+                    }, OnAnimFinished: (t) =>
+                    {
+                        winOrFailLabel.scaleX = 1f;
+                    }).BindModifier(Helper.EaseInOutCubic);
+                }
             }
 
             if(questShow && newFinishedQuests.Count > 0 && notificationManager.banners.Count == 0)

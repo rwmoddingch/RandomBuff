@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RandomBuff.Core.SaveData;
+using RWCustom;
 
 namespace RandomBuff
 {
@@ -107,6 +108,13 @@ namespace RandomBuff
             if (returnOrig)
                 return key;
             return $"ERROR!MISSING KEY {key}";
+        }
+
+        public static string GetPluralLetter(bool upper = false)
+        {
+            if (Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese)
+                return "";
+            return upper ? "S" : "s";
         }
     }
 }

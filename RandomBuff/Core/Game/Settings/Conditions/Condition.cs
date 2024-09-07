@@ -95,6 +95,8 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
+        public bool Failed {  get; protected set; }
+
         [JsonProperty] 
         private bool finished;
 

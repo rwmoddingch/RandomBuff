@@ -92,8 +92,9 @@ namespace RandomBuff.Core.StaticsScreen
                     killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(kill.Key.critType, new int[3] { unlock, kill.Value, kill.Key.intData }));
                 }
             }
-            killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(CreatureTemplate.Type.RedLizard, new int[3] { 0, 130, 0 }));
-
+#if TESTVERSION
+            //killsAndCounts.Add(new KeyValuePair<CreatureTemplate.Type, int[]>(CreatureTemplate.Type.RedLizard, new int[3] { 0, 130, 0 }));
+#endif
 
             int tempScore = 0;
             foreach(var kill in killsAndCounts)
@@ -184,7 +185,7 @@ namespace RandomBuff.Core.StaticsScreen
                 if(expBar.FinishState)
                 {
                     state = ScoreCaculatorState.Finish;
-                    (menu as BuffGameWinScreen).OnScoreCaculateFinish();
+                    (menu as BuffGameWinFailScreen).OnScoreCaculateFinish();
                 }
             }
             else if(state == ScoreCaculatorState.Finish)

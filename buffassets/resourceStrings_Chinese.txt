@@ -60,11 +60,16 @@ Quick|快速模式
 Sandbox|沙盒模式
 ProgressionMenu_Show|进度
 ExtraInfo_Label|额外信息
+PauseMenu_EndRun|强制结算
+PauseMenu_EndRun_CountDown|还有{0}轮回{1}
+PauseMenu_EndRun_ConfirmInfo|确认结算？所有未达成的条件将会计为失败，且该局游戏仅能获得50%的经验值。
 
 
 //BuffConditionHUD
 BuffConditionHUD_WinInfo|雨眠以进行结算
 BuffConditionHUD_WinTitle|胜利
+BuffConditionHUD_FailedInfo|可在暂停菜单中手动结算
+BuffConditionHUD_FailedTitle|失败
 
 //BuffHUD
 BuffHUD_FreePick|选择初始卡牌（{0}/{1}）
@@ -187,6 +192,8 @@ ProgressionUI_Quest|收集
 ProgressionUI_Cosmetic|装饰品
 ScoreCaculator_ExpMulti|经验倍率
 ScoreCaculator_KillScoreLimit|击杀分数限制
+ScoreCaculator_WinOrFailLabel_Win|-获胜-
+ScoreCaculator_WinOrFailLabel_Fail|-失败-
 
 //QuestCondition
 Quest_Display_MissionQuest|完成 {0} 使命
