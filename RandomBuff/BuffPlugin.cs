@@ -186,7 +186,7 @@ namespace RandomBuff
                         if (devVersion == null)
                         {
                             TMProFLabel label = new TMProFLabel(CardBasicAssets.TitleFont,
-                                $"Random Buff, Build: 2024_09_06\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
+                                $"Random Buff,TEST Build: 2024_09_06\nUSER: {SteamUser.GetSteamID().GetAccountID().m_AccountID},{SteamFriends.GetPersonaName()}",
                                 new Vector2(1000, 200), 0.4f)
                             {
                                 Alignment = TMPro.TextAlignmentOptions.BottomLeft,
@@ -201,18 +201,6 @@ namespace RandomBuff
                         }
 
                     };
-                    foreach (var file in Directory.GetFiles(UserData.GetPersistentDataPath(), "sav*"))
-                    {
-                        if (int.TryParse(Path.GetFileName(file).Substring(3), out var slot))
-                        {
-                            if (slot >= 100)
-                            {
-                                if (!File.Exists($"{UserData.GetPersistentDataPath()}/buffMain{slot - 1}"))
-                                    File.Copy(file, $"{UserData.GetPersistentDataPath()}/buffMain{slot - 1}");
-                                File.Delete(file);
-                            }
-                        }
-                    }
 
 #endif
                     isLoaded = true;

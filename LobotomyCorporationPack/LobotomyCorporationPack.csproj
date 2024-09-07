@@ -2,6 +2,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DebugType>portable</DebugType>
+        <DefineConstants>$(DefineConstants);TESTVERSION</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DefineConstants>$(DefineConstants)</DefineConstants>
+        <DebugType>portable</DebugType>
+        <Optimize>false</Optimize>
+        <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
     <ItemGroup>
         <Compile Remove=".vscode\**" />
