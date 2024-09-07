@@ -135,8 +135,19 @@ namespace RandomBuff.Core.Hooks
             On.ScavengerBomb.Update += ScavengerBomb_Update;
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
 
-           
+           On.RainWorldGame.BeatGameMode += RainWorldGame_BeatGameMode;
 
+        }
+
+        private static void RainWorldGame_BeatGameMode(On.RainWorldGame.orig_BeatGameMode orig, RainWorldGame game, bool standardvoidsea)
+        {
+            if (game.rainWorld.BuffMode())
+            {
+                BuffPoolManager.Instance.ForceSettlement = true;
+                BuffPoolManager.Instance.WinGame(false);
+                return;
+            }
+            orig(game, standardvoidsea);
         }
 
         private static List<string> SlugcatStats_SlugcatStoryRegions(On.SlugcatStats.orig_SlugcatStoryRegions orig, SlugcatStats.Name i)

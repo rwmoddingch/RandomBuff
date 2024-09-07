@@ -39,7 +39,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             int indexIncreasement = missionDisplay == null ? 0 : 1;
             foreach (var condition in gameSetting.conditions)
             {
-                condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh);
+                condition.BindHudFunction(OnCompleted, OnUncompleted, OnLabelRefresh,OnUncompleted, OnUncompleted);
                 instances.Add(new ConditionInstance2(this, condition, instances.Count + indexIncreasement));
             }
             flagBanner = new FlagBanner(this);
@@ -89,7 +89,7 @@ namespace RandomBuff.Render.UI.BuffCondition
             foreach (Condition condition in gameSetting.conditions)
             {
                 allFinished &= condition.Finished;
-                if (condition.Failed || true)
+                if (condition.Failed)
                 {
                     allFinished = true;
                     failedMode = true;

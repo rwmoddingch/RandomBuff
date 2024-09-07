@@ -44,9 +44,9 @@ namespace RandomBuff.Core.Game
   
 
 
-            if (BuffCustom.TryGetGame(out var game) && game.GetStorySession.saveState.cycleNumber == 0 && !BuffPoolManager.Instance.isInitHud)
+            if (BuffCustom.TryGetGame(out var game) && game.GetStorySession.saveState.cycleNumber == 0 && !BuffPoolManager.Instance.IsInitHud)
             {
-                BuffPoolManager.Instance.isInitHud = true;
+                BuffPoolManager.Instance.IsInitHud = true;
                 NewGame(Custom.rainWorld.progression.miscProgressionData
                     .currentlySelectedSinglePlayerSlugcat);
             }

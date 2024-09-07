@@ -87,7 +87,9 @@ namespace RandomBuff.Core.Game
     {
         public static BuffPoolManager Instance { get; private set; }
         public RainWorldGame Game { get;}
+        public bool IsInitHud { get; set; } = false;
 
+        public bool ForceSettlement { get; set; } = false;
 
         private readonly Dictionary<BuffID, IBuff> buffDictionary = new();
 
@@ -95,12 +97,10 @@ namespace RandomBuff.Core.Game
 
         private List<CosmeticUnlock> cosmeticList = new();
 
-        internal readonly Dictionary<BuffID, TemporaryBuffPool> temporaryBuffPools = new Dictionary<BuffID, TemporaryBuffPool>();
+        private readonly Dictionary<BuffID, TemporaryBuffPool> temporaryBuffPools = new Dictionary<BuffID, TemporaryBuffPool>();
 
         private InGameRecord record;
-
-        public bool isInitHud = false;
-
+        
         private BuffPoolManager(RainWorldGame game)
         {
 
@@ -390,10 +390,9 @@ namespace RandomBuff.Core.Game
 
             BuffFile.Instance.SaveFile();
 
-            if (GameSetting.Win || (Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A) && BuffPlugin.DevEnabled))
+            if (GameSetting.Win || ForceSettlement || (Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A) && BuffPlugin.DevEnabled))
             {
                 CreateWinGamePackage();
-                
                 Game.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameWinScreen,0.6f);
             }
         }
@@ -562,9 +561,7 @@ namespace RandomBuff.Core.Game
                 missionId = GameSetting.MissionId,
                 saveState = Game.GetStorySession.saveState,
                 expMultiply = GameSetting.gachaTemplate.ExpMultiply,
-#if TESTVERSION
-                failedRun = true,
-#endif
+                failedRun = GameSetting.conditions.Any(i => !i.Finished)
             };
 
             if(winGamePackage.failedRun)

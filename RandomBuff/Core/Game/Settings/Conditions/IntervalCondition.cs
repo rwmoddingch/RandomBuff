@@ -12,18 +12,21 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         public abstract string InRangeDisplayName();
         public abstract string InRangeDisplayProgress();
-
-
+        
 
         public override void EnterGame(RainWorldGame game)
         {
             base.EnterGame(game);
             currentCycle = game.GetStorySession.saveState.cycleNumber;
+            if(currentCycle >= maxConditionCycle)
+                Failed = true;
         }
 
         public override void SessionEnd(SaveState save)
         {
             currentCycle = save.cycleNumber + 1;
+            if(currentCycle >= maxConditionCycle)
+                Failed = true;
         }
 
 

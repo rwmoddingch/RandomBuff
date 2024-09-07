@@ -34,6 +34,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             {
                 currentDeathCount = game.GetStorySession.saveState.deathPersistentSaveData.deaths + game.GetStorySession.saveState.deathPersistentSaveData.quits;
                 Finished = currentDeathCount <= deathCount;
+                Failed = !Finished;
                 onLabelRefresh?.Invoke(this);
             }
         }

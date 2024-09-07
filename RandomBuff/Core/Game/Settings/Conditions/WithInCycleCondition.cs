@@ -25,12 +25,14 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             currentCycle = game.GetStorySession.saveState.cycleNumber;
             Finished = currentCycle <= cycle;
+            Failed = !Finished;
         }
 
         public override void SessionEnd(SaveState save)
         {
             currentCycle = save.cycleNumber + 1;
             Finished = currentCycle <= cycle;
+            Failed = !Finished;
             BuffPlugin.LogDebug($"With Cycle Condition  {save.cycleNumber+1}:{cycle}");
 
         }

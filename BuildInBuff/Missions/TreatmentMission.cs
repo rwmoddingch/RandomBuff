@@ -97,6 +97,7 @@ namespace BuiltinBuffs.Missions
         public override void EnterGame(RainWorldGame game)
         {
             currentCycle = game.GetStorySession.saveState.cycleNumber;
+            Failed = currentCycle > targetCycle;
             base.EnterGame(game);
         }
 
@@ -110,7 +111,7 @@ namespace BuiltinBuffs.Missions
         public override void SessionEnd(SaveState save)
         {
             currentCycle = save.cycleNumber + 1;
-
+            Failed = currentCycle > targetCycle;
         }
     }
 }

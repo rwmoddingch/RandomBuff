@@ -30,6 +30,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         public override void EnterGame(RainWorldGame game)
         {
             currentCycle = game.GetStorySession.saveState.cycleNumber;
+            Failed = currentCycle > cycleRequirement;
             base.EnterGame(game);
         }
 
@@ -78,6 +79,7 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             base.SessionEnd(save);
             currentCycle = save.cycleNumber + 1;
+            Failed = currentCycle > cycleRequirement;
         }
 
         private void SSOracleBehavior_SeePlayer(On.SSOracleBehavior.orig_SeePlayer orig, SSOracleBehavior self)

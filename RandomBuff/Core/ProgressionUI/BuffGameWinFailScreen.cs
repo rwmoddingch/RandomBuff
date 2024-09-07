@@ -124,8 +124,7 @@ namespace RandomBuff.Core.StaticsScreen
             var str = "[RECORD]: ";
             foreach (var item in record.GetValueDictionary())
                 str += $"{{{item.Key},{item.Value}}},";
-
-            BuffPlugin.Log(str);
+            
 
             Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
             Vector2 recordSize = new Vector2(400f, 300f);
@@ -141,11 +140,13 @@ namespace RandomBuff.Core.StaticsScreen
 
             if (BuffPoolManager.Instance.GameSetting.gachaTemplate is not SandboxGachaTemplate)
             {
-                BuffPlayerData.Instance.SlotRecord.RunCount++;
+                if (!winPackage.failedRun)
+                {
+                    BuffPlayerData.Instance.SlotRecord.RunCount++;
 
-                if (winPackage.missionId != null)
-                    BuffPlayerData.Instance.finishedMission.Add(winPackage.missionId);
-
+                    if (winPackage.missionId != null)
+                        BuffPlayerData.Instance.finishedMission.Add(winPackage.missionId);
+                }
 
                 newFinishedQuests = BuffPlayerData.Instance.UpdateQuestState(winPackage);
                 showCredit = newFinishedQuests.Any(i => i.QuestId == "builtin.quest.Crown");

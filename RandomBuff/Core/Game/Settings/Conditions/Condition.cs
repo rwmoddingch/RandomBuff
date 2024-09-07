@@ -95,20 +95,53 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             }
         }
 
-        public bool Failed {  get; protected set; }
+        
+        /// <summary>
+        /// 条件是否无法完成
+        /// </summary>
+        public bool Failed
+        {
+            get => failed;
+            protected set
+            {
+                if (failed != value)
+                {
+                    failed = value;
+                    if(failed)
+                        onFailed?.Invoke(this);
+                    else
+                        onUnFailed?.Invoke(this);
+                }
+            }
+            
+        }
 
         [JsonProperty] 
         private bool finished;
+
+        [JsonProperty] 
+        private bool failed;
 
         //当成功完成时触发
         private Action<Condition> onCompleted;
 
         //当撤回完成时触发
         private Action<Condition> onUncompleted;
+        
+        //当条件失败时触发
+        private Action<Condition> onFailed;
+        
+        //当撤回失败时触发
+        private Action<Condition> onUnFailed;
+        
 
         //当文本更改时触发
         //记得调用————
         protected Action<Condition> onLabelRefresh;
+        
+      
+    
+
 
         //轮回结束结算
         public virtual void SessionEnd(SaveState save) {}
@@ -163,19 +196,25 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         private List<IDetour> runtimeHooks = new();
 
         //绑定状态更新
-        internal void BindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
+        internal void BindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed, 
+            Action<Condition> hudFailed, Action<Condition> hudUndoFailed)
         {
             onCompleted += hudCompleted;
             onUncompleted += hudUncompleted;
             onLabelRefresh += hudLabelRefreshed;
+            onFailed += hudFailed;
+            onUnFailed += hudUndoFailed;
         }
 
         //解绑状态更新
-        internal void UnbindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed)
+        internal void UnbindHudFunction(Action<Condition> hudCompleted, Action<Condition> hudUncompleted, Action<Condition> hudLabelRefreshed,
+            Action<Condition> hudFailed,Action<Condition> hudUndoFailed)
         {
             onCompleted -= hudCompleted;
             onUncompleted -= hudUncompleted;
             onLabelRefresh -= hudLabelRefreshed;
+            onFailed -= hudFailed;
+            onUnFailed -= hudUndoFailed;
         }
 
 

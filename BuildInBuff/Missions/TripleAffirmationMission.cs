@@ -481,11 +481,12 @@ namespace BuiltinBuffs.Missions
                             this.karmaObj.color = new Color(0f, 0f, 0f);
                             this.karmaObj.container = "Bloom";
                             this.blackFade = new FadeOut(this.room, Color.black, 130f, false);
+                            
+                            BuffPoolManager.Instance.GameSetting.conditions.OfType<AbyssCondition>().FirstOrDefault()?.Finish();
                             typeof(BuffPoolManager)
                                 .GetMethod("CreateWinGamePackage", BindingFlags.NonPublic | BindingFlags.Instance)
                                 .Invoke(BuffPoolManager.Instance, Array.Empty<object>());
                             room.game.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameWinScreen, 3f);
-                            BuffPoolManager.Instance.GameSetting.conditions.OfType<AbyssCondition>().FirstOrDefault()?.Finish();
 
                             this.room.AddObject(this.blackFade);
                             this.room.AddObject(this.karmaObj);

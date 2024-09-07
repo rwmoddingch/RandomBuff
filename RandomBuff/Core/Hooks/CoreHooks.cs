@@ -130,6 +130,7 @@ namespace RandomBuff.Core.Hooks
             }
         }
 
+        
         //添加强制结算按钮
         private static void PauseMenu_SpawnExitContinueButtons(On.Menu.PauseMenu.orig_SpawnExitContinueButtons orig, PauseMenu self)
         {
@@ -189,6 +190,7 @@ namespace RandomBuff.Core.Hooks
             }
             else if (message == "RANDOMBUFF_YES_ENDRUN")
             {
+                BuffPoolManager.Instance.ForceSettlement = true;
                 self.game.Win(false);
                 self.PlaySound(SoundID.HUD_Exit_Game);
                 self.ShutDownProcess();
