@@ -38,7 +38,7 @@ namespace RandomBuff.Core.Buff
         public bool Hidden { get; private set; } = false;
 
         public int MaxCycleCount { get; private set; } = -1;
-        public bool Countable => MaxCycleCount != -1;
+        public bool Countable { get; private set; } = false;
         public string AssetPath { get; private set; }
         public bool MultiLayerFace { get; private set;} = false;
         public int FaceLayer { get; private set; } = 1;
@@ -389,14 +389,15 @@ namespace RandomBuff.Core.Buff
 
         }
 
-        internal static void GetCustomStaticBuffData(BuffData data, BuffStaticData staticData)
+        private static void GetCustomStaticBuffData(BuffData data, BuffStaticData staticData)
         {
             if (data is CountableBuffData countable)
             {
                 staticData.MaxCycleCount = countable.MaxCycleCount;
+                staticData.Countable = true;
                 BuffPlugin.LogDebug($"{staticData.BuffID},{staticData.MaxCycleCount}");
             }
-
+            
             BuffCore.OnCustomStaticDataLoadedInternal(data,staticData);
         }
 
