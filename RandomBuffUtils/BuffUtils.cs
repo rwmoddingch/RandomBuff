@@ -44,7 +44,7 @@ namespace RandomBuffUtils
             BuffRegionGateEvent.OnEnable();
             BuffExtraDialogBoxEvent.OnEnable();
             ObjectExtendHooks.OnEnable();
-#if TESTVERSION
+#if false
             SteamHelper.InitCallBack();
 #endif
             BuffSounds.OnEnable();
@@ -57,7 +57,7 @@ namespace RandomBuffUtils
             everInit = true;
         }
 
-        private class BuffUtilsBehavior : MonoBehaviour { }
+        private class BuffUtilsBehavior : MonoBehaviour { } 
 
         private static GameObject gameObject;
         public static MonoBehaviour Instance { get; private set; }

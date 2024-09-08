@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace RandomBuffUtils
 {
-#if TESTVERSION
+#if false
     
     public static class SteamHelper
     {
