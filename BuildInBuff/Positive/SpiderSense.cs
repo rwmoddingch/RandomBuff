@@ -36,7 +36,7 @@ namespace HotDogGains.Positive
             if (self.mode == Weapon.Mode.Thrown && self.thrownBy != null && Mathf.Abs(self.firstChunk.vel.x) > 0.5f)
             {
 
-                foreach (var player in self.room.PlayersInRoom)
+                foreach (var player in self.room.PlayersInRoom.Where(i => i != null))
                 {
                     if (player != self.thrownBy)
                     {
@@ -91,17 +91,17 @@ namespace HotDogGains.Positive
             if (player.room == null || player.inShortcut)
                 return;
 
-            //ÅÅ³ý²»ÐèÒª¶ãµÄÇé¿ö
+            //æŽ’é™¤ä¸éœ€è¦èº²çš„æƒ…å†µ
             if (!player.Consious || Mathf.Abs(weapon.firstChunk.pos.y - player.mainBodyChunk.pos.y) > 120f || !Custom.DistLess(weapon.firstChunk.pos, player.mainBodyChunk.pos, 400f + 600) || Mathf.Abs(weapon.firstChunk.pos.x - weapon.firstChunk.lastPos.x) < 1f || !weapon.HeavyWeapon || weapon.firstChunk.pos.x < weapon.firstChunk.lastPos.x != player.mainBodyChunk.pos.x < weapon.firstChunk.pos.x)
             {
                 return;
             }
 
-            //»÷ÖÐÍæ¼Ò»¹ÐèÒªµÄÊ±¼ä
+            //å‡»ä¸­çŽ©å®¶è¿˜éœ€è¦çš„æ—¶é—´
             float t = Mathf.Abs(player.mainBodyChunk.pos.x - weapon.firstChunk.pos.x) / Mathf.Abs(weapon.firstChunk.pos.x - weapon.firstChunk.lastPos.x);
 
 
-            //¼ì²âÍæ¼ÒÉíÌåÊÇ²»ÊÇ»á±»»÷ÖÐ
+            //æ£€æµ‹çŽ©å®¶èº«ä½“æ˜¯ä¸æ˜¯ä¼šè¢«å‡»ä¸­
             bool flag = false;
             for (int i = 0; i < player.bodyChunks.Length; i++)
             {
@@ -120,7 +120,7 @@ namespace HotDogGains.Positive
             for (int i = 0; i < testPos.Length; i++) testPos[i] = player.bodyChunks[i].pos;
 
 
-            //¼ì²âÅ¿ÏÂÄÜ²»ÄÜ¶ã¿ªÃ¬
+            //æ£€æµ‹è¶´ä¸‹èƒ½ä¸èƒ½èº²å¼€çŸ›
             if (player.room.aimap.getAItile(player.bodyChunks[1].pos).acc == AItile.Accessibility.Floor)
             {
                 float floorY = player.room.MiddleOfTile(player.bodyChunks[1].pos).y - 10f;
@@ -131,15 +131,15 @@ namespace HotDogGains.Positive
                         testPos[l].y = floorY + player.bodyChunks[l].rad;
                     }
 
-                    //Èç¹ûÅ¿ÏÂ¿ÉÒÔ¶ã¿ªÃ¬
+                    //å¦‚æžœè¶´ä¸‹å¯ä»¥èº²å¼€çŸ›
                     if (OutOfDanger(player, weapon.firstChunk.lastPos, weapon.firstChunk.pos, testPos, weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f))
                     {
                         for (int m = 0; m < player.bodyChunks.Length; m++)
                         {
-                            //ÈÃÉíÌåË²¼äµ½µØ°åÉÏÒ»µãµÄÎ»ÖÃ
+                            //è®©èº«ä½“çž¬é—´åˆ°åœ°æ¿ä¸Šä¸€ç‚¹çš„ä½ç½®
                             player.bodyChunks[m].pos.y = testPos[m].y;
                             BodyChunk bodyChunk = player.bodyChunks[m];
-                            //¸øÒ»¸ö¼ÌÐø°ÑÈ«ÉíÍùÏÂÀ­µÄËÙ¶È´´Ôì¶¯»­Ð§¹û
+                            //ç»™ä¸€ä¸ªç»§ç»­æŠŠå…¨èº«å¾€ä¸‹æ‹‰çš„é€Ÿåº¦åˆ›é€ åŠ¨ç”»æ•ˆæžœ
                             bodyChunk.vel.y = bodyChunk.vel.y - 8;
                         }
                         //player.stun = Mathf.Max(player.stun, (int)(24f * (1f - dodgeSkill)));
@@ -149,7 +149,7 @@ namespace HotDogGains.Positive
                 }
             }
 
-            //Í·ÉÏÓÐ¿Õ¼ä¿ÉÒÔÌøµÄÊ±ºò¶ã¿ª
+            //å¤´ä¸Šæœ‰ç©ºé—´å¯ä»¥è·³çš„æ—¶å€™èº²å¼€
             if (hitPositionY < Mathf.Max(player.bodyChunks[0].pos.y, player.bodyChunks[1].pos.y)
                 &&
                 (player.room.aimap.TileAccessibleToCreature(player.bodyChunks[0].pos + new Vector2(0f, 20f), player.Template)
@@ -213,7 +213,7 @@ namespace HotDogGains.Positive
                 }
             }
 
-            //Æ½µØÆðÌø¶ãÃ¬
+            //å¹³åœ°èµ·è·³èº²çŸ›
             for (int i = 0; i < player.bodyChunks.Length; i++)
             {
                 if (BallisticCollision(player.bodyChunks[i].pos, weapon.firstChunk.lastPos, weapon.firstChunk.pos, player.bodyChunks[i].rad + weapon.firstChunk.rad + 5f, (weapon is Spear) ? 0.45f : 0.9f) && t < 6f && player.room.GetTile(player.bodyChunks[i].pos + new Vector2(0f, -player.bodyChunks[i].rad - 5f)).Solid && !player.room.GetTile(player.mainBodyChunk.pos + new Vector2(0f, 20f)).Solid)
