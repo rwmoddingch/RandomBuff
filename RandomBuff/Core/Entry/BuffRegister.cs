@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using BepInEx;
@@ -34,6 +35,7 @@ using UnityEngine;
 using static Rewired.Utils.Classes.Data.TypeWrapper;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
+using SecurityAttribute = Mono.Cecil.SecurityAttribute;
 
 
 namespace RandomBuff.Core.Entry
@@ -718,6 +720,21 @@ namespace RandomBuff.Core.Entry
             AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(filePath,
                 new ReaderParameters
                     { ReadSymbols = File.Exists(filePath.Replace(".dll", ".pdb")), AssemblyResolver = resolver });
+            if (!assemblyDef.SecurityDeclarations.Any(i => 
+                    i.SecurityAttributes.Any(j => 
+                        j.Properties.Any(k => k.Name == "SkipVerification") &&
+                        j.AttributeType.Name == "SecurityPermissionAttribute")))
+            {
+                var decl = new SecurityDeclaration(Mono.Cecil.SecurityAction.RequestMinimum);
+                assemblyDef.SecurityDeclarations.Add(decl);
+                var attr = new SecurityAttribute(
+                    assemblyDef.MainModule.ImportReference(typeof(SecurityPermissionAttribute)));
+                decl.SecurityAttributes.Add(attr);
+                attr.Properties.Add(new Mono.Cecil.CustomAttributeNamedArgument("SkipVerification",
+                    new CustomAttributeArgument(assemblyDef.MainModule.TypeSystem.Boolean, true)));
+                BuffPlugin.LogError($"Add SecurityPermissionAttribute for Plugin:{assemblyDef.Name.Name}");
+            }
+
             var attrCtor =
                 assemblyDef.MainModule.ImportReference(typeof(CompilerGeneratedAttribute).GetConstructor(Type.EmptyTypes));
 

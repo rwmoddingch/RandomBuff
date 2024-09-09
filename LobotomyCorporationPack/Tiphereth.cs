@@ -56,20 +56,31 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             On.RainCycle.Update += RainCycle_Update;
             IL.RainCycle.Update += RainCycle_UpdateIL;
             On.RainWorldGame.AllowRainCounterToTick += RainWorldGame_AllowRainCounterToTick;
-            new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.MicroScreenShake)).GetGetMethod(),
+            _ = new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.MicroScreenShake)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(MicroScreenShakeHook), BindingFlags.NonPublic | BindingFlags.Static));
-            new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.ScreenShake)).GetGetMethod(),
+            _ =  new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.ScreenShake)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(ScreenShakeHook), BindingFlags.NonPublic | BindingFlags.Static));
-            new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.RainApproaching)).GetGetMethod(),
+            _ = new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.RainApproaching)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(RainApproachingHook), BindingFlags.NonPublic | BindingFlags.Static));
-            new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.RainDarkPalette)).GetGetMethod(),
+            _ = new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.RainDarkPalette)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(RainDarkPaletteHook), BindingFlags.NonPublic | BindingFlags.Static));
 
-            new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.preCycleRain_Intensity)).GetGetMethod(),
+            _ = new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.preCycleRain_Intensity)).GetGetMethod(),
                 typeof(TipherethHook).GetMethod(nameof(preCycleRain_IntensityHook), BindingFlags.NonPublic | BindingFlags.Static));
-
-            
+        
+            On.Room.AddWater += Room_AddWater;
           
+        }
+
+        private static void Room_AddWater(On.Room.orig_AddWater orig, Room self)
+        {
+            if (self.abstractRoom.shelter && self.world.brokenShelterIndexDueToPrecycle != self.abstractRoom.index)
+            {
+                BuffUtils.Log(TipherethBuffData.Tiphereth,$"Remove water object for {self.abstractRoom.name}");
+                return;
+            }
+
+            orig(self);
         }
 
         public static void LongLifeCycleHookOn()

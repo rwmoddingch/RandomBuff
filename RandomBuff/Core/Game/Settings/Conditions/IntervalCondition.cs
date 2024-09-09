@@ -18,15 +18,13 @@ namespace RandomBuff.Core.Game.Settings.Conditions
         {
             base.EnterGame(game);
             currentCycle = game.GetStorySession.saveState.cycleNumber;
-            if(currentCycle >= maxConditionCycle)
-                Failed = true;
+            Failed = currentCycle >= maxConditionCycle && !Finished;
         }
 
         public override void SessionEnd(SaveState save)
         {
             currentCycle = save.cycleNumber + 1;
-            if(currentCycle >= maxConditionCycle)
-                Failed = true;
+            Failed = currentCycle >= maxConditionCycle && !Finished;
         }
 
 
