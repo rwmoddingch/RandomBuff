@@ -310,8 +310,7 @@ namespace RandomBuff
             {
                 bool hasDeleteAll = false;
                 var lines = File.ReadAllLines(Path.Combine(CacheFolder, "buffVersion")).ToList();
-                var lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
-
+                var lastVersion = (lines == null || lines.Count == 0) ? [] : lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);    //修复读取空文件时无法分割导致数组越界无法正常初始化的问题
                 foreach (var mod in ModManager.ActiveMods.Where(i =>
                              Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
                              Directory.Exists(Path.Combine(i.basePath, "buffassets"))))
