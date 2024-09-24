@@ -38,7 +38,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return HomingShots.GetBuffData().StackLayer;
+                return HomingShots.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative
         {
             get
             {
-                return Photophobia.GetBuffData().StackLayer;
+                return Photophobia.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

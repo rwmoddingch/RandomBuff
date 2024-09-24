@@ -38,7 +38,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                float num = JellyfishShapedMutationBuffEntry.JellyfishShapedMutation.GetBuffData().StackLayer;
+                float num = JellyfishShapedMutationBuffEntry.StackLayer;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.BreathlessBuffEntry.Breathless))
                     num++;
                 if (GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Positive.SuperCapacitanceBuffEntry.SuperCapacitance))
@@ -106,7 +106,7 @@ namespace BuiltinBuffs.Duality
         public static BuffID JellyfishShapedMutation = new BuffID("JellyfishShapedMutation", true);
         public static ConditionalWeakTable<Player, JellyfishCat> JellyfishCatFeatures = new ConditionalWeakTable<Player, JellyfishCat>();
 
-        public static int StackLayer => JellyfishShapedMutation.GetBuffData().StackLayer;
+        public static int StackLayer => JellyfishShapedMutation.GetBuffData()?.StackLayer ?? 0;
 
         public void OnEnable()
         {

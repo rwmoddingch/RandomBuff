@@ -62,7 +62,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return PermanentShield.GetBuffData().StackLayer;
+                return PermanentShield.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

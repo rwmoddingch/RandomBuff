@@ -87,7 +87,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return VultureShapedMutation.GetBuffData().StackLayer;
+                return VultureShapedMutation.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

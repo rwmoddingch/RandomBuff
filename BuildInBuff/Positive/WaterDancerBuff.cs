@@ -52,7 +52,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return WaterDancer.GetBuffData().StackLayer;
+                return WaterDancer.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

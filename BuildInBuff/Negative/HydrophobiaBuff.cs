@@ -51,7 +51,7 @@ namespace BuiltinBuffs.Negative
         {
             get
             {
-                return Hydrophobia.GetBuffData().StackLayer;
+                return Hydrophobia.GetBuffData()?.StackLayer ?? 0;
             }
         }
 
