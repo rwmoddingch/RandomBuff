@@ -12,6 +12,6 @@
   },
   "English": {
     "BuffName": "The Bug of Damocles",
-    "Description": "While your slugcat is under an object, there is a very low chance for a dropwig to spawn."
+    "Description": "While your slugcat is under a ceiling, there is a very low chance for a dropwig to spawn above it."
   }
 }
