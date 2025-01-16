@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace RandomBuffUtils.CreatureExtend
 {
@@ -13,6 +14,8 @@ namespace RandomBuffUtils.CreatureExtend
         readonly CreatureTemplate.Relationship defaultOtherRelationship;
         readonly List<RelationshipEstablishInfo> relationshipEstablishInfo = new List<RelationshipEstablishInfo>();//注册关系使用的信息
         readonly Dictionary<string, RelationshipEstablishInfo> other2EstablishInfoMapper = new Dictionary<string, RelationshipEstablishInfo>();
+
+        internal bool currentlyEnabled;
 
         public CreatureTemplate.Type Type { get; private set; } //仅在启用后其中的类型才有意义
 
@@ -122,6 +125,26 @@ namespace RandomBuffUtils.CreatureExtend
             yield break;
         }
 
+        public virtual CreatureState CreateState(AbstractCreature abCreature)
+        {
+            return new HealthState(abCreature);
+        }
+
+        public virtual Creature Realize(AbstractCreature abCreature)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual ArtificialIntelligence InitiateAI(AbstractCreature abCreature)
+        {
+            return null;
+        }
+
+        public virtual AbstractCreatureAI InitiateAbstractAI(AbstractCreature abCreature)
+        {
+            return null;
+        }
+
         public struct RelationshipEstablishInfo
         {
             public string other;
@@ -135,6 +158,41 @@ namespace RandomBuffUtils.CreatureExtend
                 this.this2other = this2other;
                 this.other2this = other2this;
             }
+        }
+    }
+
+    /// <summary>
+    /// 额外信息部分
+    /// </summary>
+    public partial class BuffCreatureRegister
+    {
+        public DevMapInfo MyDevMapInfo { get; protected set; }
+        public RealizeCreatureInfo MyRealizeCreatureInfo { get; protected set; }
+    }
+
+    public struct DevMapInfo
+    {
+        public string name;
+        public Color color;
+
+        public DevMapInfo(string name, Color color)
+        {
+            this.name = name;
+            this.color = color;
+        }
+    }
+
+    public struct RealizeCreatureInfo
+    {
+        public int loadPerformanceCost;
+        public bool stunWhilePlayerGrabbing;
+        public Player.ObjectGrabability grabability;
+
+        public RealizeCreatureInfo(int loadPerformanceCost, bool stunWhilePlayerGrabbing, Player.ObjectGrabability grabability)
+        {
+            this.loadPerformanceCost = loadPerformanceCost;
+            this.stunWhilePlayerGrabbing = stunWhilePlayerGrabbing;
+            this.grabability = grabability;
         }
     }
 }

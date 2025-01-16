@@ -136,7 +136,7 @@ namespace RandomBuff.Core.Option
            
             foreach (var pluginInfo in BuffConfigManager.GetSortedPluginInfos())
             {
-                var button = new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo) { Enabled = pluginInfo.Enabled };
+                var button = new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo, true, pluginInfo.AssemblyName !=  "BuiltinBuffs") { Enabled = pluginInfo.Enabled };
                 var index = packButtons.Count;
                 button.ToggleCallBack += () =>
                 {
@@ -144,6 +144,7 @@ namespace RandomBuff.Core.Option
                 };
                 packButtons.Add(button);
                 sizeY += 120f + 20f;
+                BuffPlugin.Log(pluginInfo.AssemblyName);
             }
 
             isChanged = new bool[packButtons.Count];

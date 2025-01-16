@@ -146,7 +146,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             }
             pageIndex = 0;
             SwitchPage(0);
-            infoDisplay.SetText(null, null, null, null, null);
+            infoDisplay.SetInfoElement(null, null, null, null, null, null);
             //textBoxManager.currentType = buffType;
             //textBoxManager.titleBack.color = textBoxManager.currentType == BuffType.Negative ? CardpediaStatics.negativeColor : (textBoxManager.currentType == BuffType.Positive ? CardpediaStatics.positiveColor : CardpediaStatics.dualityColor);
             //textBoxManager.InitEmptyInfo();
@@ -203,7 +203,7 @@ namespace RandomBuff.Cardpedia.PediaPage
                 else
                     conflict += $", {con}";
             }
-            infoDisplay.SetText(life, trigger, stack, description, string.IsNullOrEmpty(conflict) ? "None" : conflict);
+            infoDisplay.SetInfoElement(life, trigger, stack, description, string.IsNullOrEmpty(conflict) ? "None" : conflict, card.ID.GetStaticData().PluginInfo);
             ResetCardTexture(staticData.BuffID);
             //sheetManager.owner.configManager.OnCardPick(card);
             //textBoxManager.RefreshInformation(life, stack, trigger, description, title, card.ID);

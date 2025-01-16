@@ -61,7 +61,7 @@ namespace RandomBuff.Render.UI.BuffPack
             packButtons = new List<PackButton>();
             foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values.Where(i => i.Enabled))
             {
-                var packButton = new PackButton(Vector2.zero, packButtonSize, pluginInfo, false, false)
+                var packButton = new PackButton(Vector2.zero, packButtonSize, pluginInfo, false, true)
                 {
                     Enabled = enabledPlugins.Contains(pluginInfo),
                     ToggleCallBack = OnPackButtonClick
@@ -85,7 +85,7 @@ namespace RandomBuff.Render.UI.BuffPack
                 anchorY -= 5f;
             }
 
-            showHideButton = new SimpleButton(this, pages[0], "Pack", "Show_Pack", showPos, ScrollBoxHideSize);
+            showHideButton = new SimpleButton(this, pages[0], BuffResourceString.Get("PackMenu_Show"), "Show_Pack", showPos, ScrollBoxHideSize);
             pages[0].subObjects.Add(showHideButton);
             packButtonScrollBox.Hide();
             foreach (var button in packButtons)
@@ -146,7 +146,7 @@ namespace RandomBuff.Render.UI.BuffPack
                     showAnim = null;
                     packButtonScrollBox.size = ScrollBoxShowSize;
                     showHideButton.signalText = "Hide_Pack";
-                    showHideButton.menuLabel.text = "Hide";
+                    showHideButton.menuLabel.text = BuffResourceString.Get("PackMenu_Hide");
                     showHideButton.pos = buttonPackShowPos;
 
                     packButtonScrollBox.Update();
@@ -172,7 +172,7 @@ namespace RandomBuff.Render.UI.BuffPack
                     showAnim = null;
                     packButtonScrollBox.size = ScrollBoxHideSize;
                     showHideButton.signalText = "Show_Pack";
-                    showHideButton.menuLabel.text = "Show";
+                    showHideButton.menuLabel.text = BuffResourceString.Get("PackMenu_Show");
                     showHideButton.pos = showPos;
                     _showPack = false;
 

@@ -2,6 +2,7 @@
 using Menu.Remix.MixedUI;
 using RandomBuff.Cardpedia.Elements.Config;
 using RandomBuff.Cardpedia.PediaPage;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.BuffMenu;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Render.UI;
@@ -28,24 +29,28 @@ namespace RandomBuff.Cardpedia
 
         //元素
         FSprite blurSprite;
+        FSprite packThumbnail;
 
         TMProFLabel typeTitleLabel;
         TMProFLabel triggleableTitleLabel;
         TMProFLabel stackableTitleLabel;
         TMProFLabel descriptionTitleLabel;
         TMProFLabel conflictTitleLabel;
+        TMProFLabel packTitleLabel;
 
         TMProFLabel typeInfoLabel;
         TMProFLabel triggleableInfoLabel;
         TMProFLabel stackableInfoLabel;
         TMProFLabel descriptionInfoLabel;
         TMProFLabel conflictInfoLabel;
+        TMProFLabel packInfoLabel;
 
         CosmeticRectInstance typeRect;
         CosmeticRectInstance triggleableRect;
         CosmeticRectInstance stackableRect;
         CosmeticRectInstance descriptionRect;
         CosmeticRectInstance conflictRect;
+        CosmeticRectInstance packRect;
 
         //状态变量
         public float alpha;
@@ -118,6 +123,18 @@ namespace RandomBuff.Cardpedia
             opNodeWrapper.WrapNode(conflictTitleLabel, pos);
             opNodeWrapper.WrapNode(conflictInfoLabel, pos + new Vector2(CardpediaStatics.tinyGap, -CardpediaStatics.tinyGap * 3 - CardpediaStatics.cosmeticRectHeight));
 
+            packTitleLabel = CreateLabel(BuffResourceString.Get("CardInfoDisplay_PackTitle"), fullRectScale);
+            pos -= new Vector2(0f, fullRectScale.y + CardpediaStatics.tinyGap);
+            packRect = CreateAndWrapCosmeticRect(pos, fullRectScale);
+            packInfoLabel = CreateLabel(BuffResourceString.Get("CardInfoDisplay_MissingPack"), fullRectScale, 0.8f);
+            opNodeWrapper.WrapNode(packTitleLabel, pos);
+            opNodeWrapper.WrapNode(packInfoLabel, pos + new Vector2(CardpediaStatics.tinyGap, -CardpediaStatics.tinyGap * 3 - CardpediaStatics.cosmeticRectHeight));
+
+            packThumbnail = new FSprite("pixel", true);
+            packThumbnail.isVisible = false;
+            packThumbnail.SetAnchor(0f, 1f);
+            opNodeWrapper.WrapNode(packThumbnail, pos + new Vector2(CardpediaStatics.tinyGap, -CardpediaStatics.tinyGap * 3 - CardpediaStatics.cosmeticRectHeight));
+
             scrollBox.ScrollToTop();
             contentSizeDirty = 2;
 
@@ -156,14 +173,19 @@ namespace RandomBuff.Cardpedia
             contentSizeDirty = -1;
             float newContentSize = CardpediaStatics.infoDisplay_BigRectHeight;
 
-            newContentSize += CardpediaStatics.tinyGap * 2f + CardpediaStatics.cosmeticRectHeight;//background;
+            newContentSize += CardpediaStatics.tinyGap * 2f + CardpediaStatics.cosmeticRectHeight;
             float descriptionLabelRectHeight = descriptionInfoLabel.TextRect.y + CardpediaStatics.tinyGap * 2f;
             newContentSize += descriptionLabelRectHeight;
             newContentSize += CardpediaStatics.tinyGap;
 
-            newContentSize += CardpediaStatics.tinyGap * 2f + CardpediaStatics.cosmeticRectHeight;//background;
+            newContentSize += CardpediaStatics.tinyGap * 2f + CardpediaStatics.cosmeticRectHeight;
             float conflictLabelRectHeigth = conflictInfoLabel.TextRect.y + CardpediaStatics.tinyGap * 2f;
             newContentSize += conflictLabelRectHeigth;
+
+            newContentSize += CardpediaStatics.tinyGap * 2f + CardpediaStatics.cosmeticRectHeight;
+            float packLabelRecetHeight = Mathf.Max(packInfoLabel.TextRect.y + CardpediaStatics.tinyGap * 2f, packThumbnail.isVisible ? CardpediaStatics.thumbnailSize.y + CardpediaStatics.tinyGap * 2 : 1f);
+            newContentSize += packLabelRecetHeight;
+            newContentSize += CardpediaStatics.smallGap * 2f;
 
             newContentSize = Mathf.Max(CardpediaStatics.infoDisplayWindowScale.y, newContentSize);
 
@@ -209,16 +231,43 @@ namespace RandomBuff.Cardpedia
             opNodeWrapper.WrapNode(conflictTitleLabel, pos);
             opNodeWrapper.WrapNode(conflictInfoLabel, pos + new Vector2(CardpediaStatics.tinyGap, -CardpediaStatics.tinyGap * 3 - CardpediaStatics.cosmeticRectHeight));
 
+            Vector2 packRectSize = new Vector2(CardpediaStatics.infoDisplayWindowScale.x - CardpediaStatics.tinyGap * 2, packLabelRecetHeight + CardpediaStatics.tinyGap * 2 + CardpediaStatics.cosmeticRectHeight);
+            pos -= new Vector2(0f, conflictRectSize.y + CardpediaStatics.tinyGap);
+            packRect.Rect = packRectSize;
+            packRect.Pos = pos;
+            opNodeWrapper.WrapNode(packTitleLabel, pos);
+            opNodeWrapper.WrapNode(packInfoLabel, pos + new Vector2(CardpediaStatics.tinyGap + (packThumbnail.isVisible ? (CardpediaStatics.thumbnailSize.x + CardpediaStatics.tinyGap * 2f) : 0f), -CardpediaStatics.tinyGap * 3 - CardpediaStatics.cosmeticRectHeight));
+            opNodeWrapper.WrapNode(packThumbnail, pos + new Vector2(CardpediaStatics.tinyGap, -CardpediaStatics.tinyGap * 3 - CardpediaStatics.cosmeticRectHeight));
+
             scrollBox.ScrollToTop();
         }
 
-        public void SetText(string type ,string triggleable, string stackable, string description, string conflict)
+        public void SetInfoElement(string type ,string triggleable, string stackable, string description, string conflict, BuffPluginInfo buffPluginInfo)
         {
             typeInfoLabel.Text = type ?? BuffResourceString.Get("CardInfoDisplay_Missing");
             triggleableInfoLabel.Text = triggleable ?? BuffResourceString.Get("CardInfoDisplay_Missing");
             stackableInfoLabel.Text = stackable ?? BuffResourceString.Get("CardInfoDisplay_Missing");
             descriptionInfoLabel.Text = description ?? BuffResourceString.Get("CardInfoDisplay_MissingDescription");
             conflictInfoLabel.Text = conflict ?? BuffResourceString.Get("CardInfoDisplay_MissingConflict");
+            
+
+            if (buffPluginInfo != null)
+            {
+                packThumbnail.SetElementByName(buffPluginInfo.Thumbnail);
+                packThumbnail.scaleX = CardpediaStatics.thumbnailSize.x / packThumbnail.element.sourcePixelSize.x;
+                packThumbnail.scaleY = CardpediaStatics.thumbnailSize.y / packThumbnail.element.sourcePixelSize.y;
+                packThumbnail.isVisible = true;
+
+                packInfoLabel.Rect = new Vector2(CardpediaStatics.infoDisplayWindowScale.x - CardpediaStatics.thumbnailSize.x - CardpediaStatics.tinyGap * 4, 200f);
+                packInfoLabel.Text = buffPluginInfo.GetInfo(Custom.rainWorld.inGameTranslator.currentLanguage).Name;
+            }
+            else
+            {
+                packThumbnail.isVisible = false;
+                packInfoLabel.Rect = new Vector2(CardpediaStatics.infoDisplayWindowScale.x - CardpediaStatics.tinyGap * 2, 200f);
+                packInfoLabel.Text = BuffResourceString.Get("CardInfoDisplay_MissingPack");
+            }
+      
             contentSizeDirty = 2;
         }
 
@@ -229,7 +278,10 @@ namespace RandomBuff.Cardpedia
             if (contentSizeDirty > 0)
                 contentSizeDirty--;
             else if(contentSizeDirty == 0)
+            {
                 RecaculateContextSizeAndPos();
+                contentSizeDirty--;
+            }
         }
 
         public void GrafUpdate(float timeStacker)
@@ -342,6 +394,6 @@ namespace RandomBuff.Cardpedia
 
             nodes.Remove(node);
             myContainer.RemoveChild(node);
-        }
+        } 
     }
 }

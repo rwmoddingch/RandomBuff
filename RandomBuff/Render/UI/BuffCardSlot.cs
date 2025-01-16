@@ -516,6 +516,8 @@ namespace RandomBuff.Render.UI
         {
             Menu = buffGameMenu;
             BaseInteractionManager = new DoNotingInteractionManager<BuffGameMenuSlot>(this);
+
+            
         }
 
         /// <summary>

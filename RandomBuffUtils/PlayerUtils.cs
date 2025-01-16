@@ -30,7 +30,6 @@ namespace RandomBuffUtils
         }
 
         
-
         #region PlayerHooks
         private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {

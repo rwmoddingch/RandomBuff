@@ -533,6 +533,7 @@ namespace RandomBuff.Cardpedia
 
         public static Vector2 infoDisplayWindowScale = new Vector2(670f, 480f);
         public static Vector2 infoDisplayWindowPos = new Vector2(leftBlurSpritePos.x + narrowBlurSpriteScale.x / 2f + smallGap, leftBlurSpritePos.y - narrowBlurSpriteScale.y / 2f);
+        public static Vector2 thumbnailSize = new Vector2(171f, 96f);
 
         public static Vector2 displayCardTexturePos = (new Vector2(203, 503));
 

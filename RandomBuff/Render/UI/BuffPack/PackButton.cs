@@ -30,6 +30,7 @@ namespace RandomBuff.Render.UI.BuffPack
         Vector2 spriteRect;
 
         bool _enabled;
+        bool _canBeDisabled;
         public bool Enabled
         {
             get => _enabled;
@@ -47,6 +48,7 @@ namespace RandomBuff.Render.UI.BuffPack
         {
             this.pluginInfo = pluginInfo;
             this.showDescription = showDescription;
+            _canBeDisabled = canBeDisable;
 
             var info = pluginInfo.GetInfo(Custom.rainWorld.inGameTranslator.currentLanguage);
 
@@ -95,6 +97,8 @@ namespace RandomBuff.Render.UI.BuffPack
 
         private void PackButton_OnClick(UIfocusable trigger)
         {
+            if (!_canBeDisabled)
+                return;
             Enabled = !Enabled;
             ToggleCallBack?.Invoke();
         }

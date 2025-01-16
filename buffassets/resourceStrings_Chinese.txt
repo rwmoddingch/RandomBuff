@@ -2,6 +2,9 @@
 MainMenu_Buff|卡牌
 MainMenu_Cardpedia|卡牌图鉴
 
+//PackMenu
+PackMenu_Show|卡包
+PackMenu_Hide|隐藏
 
 //BuffGameMenu
 BuffGameMenu_NewGame|新游戏
@@ -33,12 +36,14 @@ CardSheetPage_Stack_Untriggerable|自动
 CardInfoDisplay_Missing|???
 CardInfoDisplay_MissingDescription|选择一个buff卡片来查看介绍
 CardInfoDisplay_MissingConflict|选择一个buff卡片来查看冲突
+CardInfoDisplay_MissingPack|选择一个buff卡片来查看其所属卡包
 
 CardInfoDisplay_TypeTitle|类型:
 CardInfoDisplay_TriggerTitle|触发:
 CardInfoDisplay_StackTitle|堆叠:
 CardInfoDisplay_DescriptionTitle|介绍:
 CardInfoDisplay_ConflictTitle|冲突:
+CardInfoDisplay_PackTitle|卡包:
 
 
 //Notification:

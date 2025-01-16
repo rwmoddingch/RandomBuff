@@ -2,6 +2,9 @@
 MainMenu_Buff|BUFF
 MainMenu_Cardpedia|CARDPEDIA
 
+//PackMenu
+PackMenu_Show|Pack
+PackMenu_Hide|Hide
 
 //BuffGameMenu
 BuffGameMenu_NewGame|NEW GAME
@@ -32,12 +35,14 @@ CardSheetPage_Stack_Untriggerable|Automatically
 CardInfoDisplay_Missing|???
 CardInfoDisplay_MissingDescription|Select a buff card to view description
 CardInfoDisplay_MissingConflict|Select a buff card to view conflict
+CardInfoDisplay_MissingPack|elect a buff card to view its pack
 
 CardInfoDisplay_TypeTitle|Type:
 CardInfoDisplay_TriggerTitle|Trigger:
 CardInfoDisplay_StackTitle|Stack:
 CardInfoDisplay_DescriptionTitle|Description:
 CardInfoDisplay_ConflictTitle|Conflict:
+CardInfoDisplay_PackTitle|Pack:
 
 
 //Notification:
