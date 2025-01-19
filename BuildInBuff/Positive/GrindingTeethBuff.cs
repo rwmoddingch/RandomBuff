@@ -52,7 +52,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return GrindingTeeth.GetBuffData().StackLayer;
+                return GrindingTeeth.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

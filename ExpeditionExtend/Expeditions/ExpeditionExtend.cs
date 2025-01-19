@@ -22,7 +22,11 @@ using RandomBuff;
 using RandomBuff.Core.Option;
 using System.Security.Policy;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
+#pragma warning disable CS0618
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618
 namespace BuiltinBuffs.Expeditions
 {
     public class ExpeditionExtend : IBuffEntry

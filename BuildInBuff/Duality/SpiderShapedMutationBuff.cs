@@ -93,7 +93,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return SpiderShapedMutation.GetBuffData().StackLayer;
+                return SpiderShapedMutation.GetBuffData()?.StackLayer ?? 0;
             }
         }
 

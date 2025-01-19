@@ -38,7 +38,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return Stronger.GetBuffData().StackLayer;
+                return Stronger.GetBuffData()?.StackLayer ?? 0;
             }
         }
 
