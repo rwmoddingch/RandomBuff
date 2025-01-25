@@ -95,7 +95,7 @@ namespace BuiltinBuffs.Positive
         {
             get
             {
-                return SporePuff_sCrest.GetBuffData().StackLayer;
+                return SporePuff_sCrest.GetBuffData()?.StackLayer ?? 0;
             }
         }
 
