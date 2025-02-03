@@ -12,10 +12,11 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
 using UnityEngine;
+using RandomBuff.Render.UI.Component;
 
 namespace BuiltinBuffs.Missions
 {
-    internal class ArtOfExplosionMission : Mission, IMissionEntry
+    internal class ArtOfExplosionMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
         public static readonly MissionID ArtOfExplosion = new MissionID(nameof(ArtOfExplosion), true);
 
@@ -70,7 +71,10 @@ namespace BuiltinBuffs.Missions
         {
             MissionRegister.RegisterMission(ArtOfExplosion,new ArtOfExplosionMission());
         }
-    }
 
-    
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
+        }
+    }
 }

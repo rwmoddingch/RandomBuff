@@ -16,10 +16,12 @@ using RandomBuff.Core.SaveData;
 using RandomBuffUtils;
 using TemplateGains;
 using UnityEngine;
+using RandomBuff.Render.UI.Component;
+
 
 namespace BuiltinBuffs.Missions
 {
-    internal class DoomExpressMission : Mission, IMissionEntry
+    internal class DoomExpressMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
 
         public static readonly MissionID DoomExpress = new MissionID(nameof(DoomExpress), true);
@@ -48,6 +50,11 @@ namespace BuiltinBuffs.Missions
         {
             MissionRegister.RegisterMission(DoomExpress,new DoomExpressMission());
             BuffRegister.RegisterCondition<BatteryCondition>(BatteryCondition.Battery,"Battery", true);
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 

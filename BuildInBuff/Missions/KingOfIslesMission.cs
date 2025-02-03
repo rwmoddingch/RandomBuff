@@ -73,7 +73,6 @@ namespace BuiltinBuffs.Missions
             BuffRegister.RegisterMission(KingOfIsles,new KingOfIslesMission());
         }
 
-
         internal class KingOfIslesTemplate : NormalGachaTemplate
         {
             public override GachaTemplateID ID => KingOfIsles;

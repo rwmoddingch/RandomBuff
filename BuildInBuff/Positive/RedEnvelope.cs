@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MoreSlugcats;
+using Music;
+using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RandomBuffUtils;
@@ -66,6 +68,7 @@ namespace HotDogGains.Positive
     class RedEnvelopeBuffData : BuffData { public override BuffID ID => RedEnvelopeBuffEntry.RedEnvelopeID; }
     class RedEnvelopeBuffEntry : IBuffEntry
     {
+        public static string FaCaiBGM => $"BUFF_{RedEnvelopeID.GetStaticData().AssetPath}/music/NY_02 - FaCai";
         public static BuffID RedEnvelopeID = new BuffID("RedEnvelopeID", true);
         public void OnEnable()
         {
@@ -73,7 +76,13 @@ namespace HotDogGains.Positive
         }
         public static void HookOn()
         {
-
+            On.Music.SSSong.ctor_MusicPlayer += SSSong_ctor_MusicPlayer;
+        }
+        private static void SSSong_ctor_MusicPlayer(On.Music.SSSong.orig_ctor_MusicPlayer orig, SSSong self, MusicPlayer musicPlayer)
+        {
+            orig.Invoke(self, musicPlayer);
+            self.subTracks.Clear();
+            self.subTracks.Add(new MusicPiece.SubTrack(self, 0, FaCaiBGM));
         }
     }
 }

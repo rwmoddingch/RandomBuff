@@ -65,7 +65,6 @@ namespace RandomBuff.Core.Hooks
                             self.manager.RequestMainProcessSwitch(BuffEnums.ProcessID.BuffGameMenu);
                             self.PlaySound(SoundID.MENU_Switch_Page_In);
                         }, 0);
-
                 });
             };
 

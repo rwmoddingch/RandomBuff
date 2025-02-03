@@ -734,6 +734,7 @@ namespace RandomBuff.Core.BuffMenu
         MenuLabel extraInfoLabel;
 
         RandomBuffFlagRenderer flagRenderer;
+        internal BuffMissionEffectContainer missionEffect;
 
         TickAnimCmpnt showAnim = AnimMachine.GetTickAnimCmpnt(0, 40, autoStart: false).AutoPause().BindModifier(Helper.EaseInOutCubic);
 
@@ -754,6 +755,8 @@ namespace RandomBuff.Core.BuffMenu
 
             signalToValue = new Dictionary<string, string>();
             InitMenuElements();
+            missionEffect = new BuffMissionEffectContainer(menu, this);
+            subObjects.Add(missionEffect);
             missionInfoBox = new MissionInfoBox(menu, this, Vector2.zero);
             subObjects.Add(missionInfoBox);
             missionSheetBox = new MissionSheetBox(menu, this, Vector2.zero);
@@ -789,8 +792,8 @@ namespace RandomBuff.Core.BuffMenu
             extraInfoLabel = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), new Vector2(Custom.rainWorld.options.ScreenSize.x - 180f, 45f), new Vector2(100f, 30f), false);
             extraInfoLabel.label.shader = Custom.rainWorld.Shaders["MenuText"];
             subObjects.Add(extraInfoLabel);
-
         }
+
         public void UpdateSelectables()
         {
             List<MissionButton> activeButtons = new List<MissionButton>();
@@ -947,6 +950,8 @@ namespace RandomBuff.Core.BuffMenu
 
             if (show)
                 UpdateSelectables();
+            else
+                missionEffect.SetMission(null);
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -978,6 +983,7 @@ namespace RandomBuff.Core.BuffMenu
                             }
                         }
                         missionInfoBox.UpdateMissionInfo(mission.TextCol ,Custom.rainWorld.inGameTranslator.Translate(mission.MissionName), mission.BindSlug == null? "NOBINDSLUG" : mission.BindSlug.value,info, mission.startBuffSet.ToArray());
+                        missionEffect.SetMission(mission);
                         pickedMission = mission;
                         UpdateSelectables();
                         break;
@@ -1048,6 +1054,8 @@ namespace RandomBuff.Core.BuffMenu
             backButton.pos = Vector2.Lerp(new Vector2(1200, 800), new Vector2(1200, 698), showAnim.Get());
             extraInfoButton.pos.y = Mathf.Lerp(1040f, 40f, showAnim.Get());
             extraInfoLabel.pos.y = Mathf.Lerp(1045f, 45f, showAnim.Get());
+            missionEffect.pos.y = Mathf.Lerp(1000f, 0f, showAnim.Get());
+
 
             bool needUpdate = show || flagRenderer.NeedRenderUpdate;
             gameMenu.flagNeedUpdate[flagControlIndex] = needUpdate;
@@ -1063,7 +1071,9 @@ namespace RandomBuff.Core.BuffMenu
         public override void GrafUpdate(float timeStacker)
         {
             base.GrafUpdate(timeStacker);
+
             blackSprite.alpha = showAnim.Get();
+            missionEffect.update = blackSprite.alpha > 0f;
 
             if(show || flagRenderer.NeedRenderUpdate)
             {
