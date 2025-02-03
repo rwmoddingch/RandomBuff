@@ -422,8 +422,8 @@ namespace RandomBuff.Core.Entry
             AllBuffAssemblies.Clear();
             HashSet<string> refLocations = null;
             var entryType = typeof(IBuffEntry);
-
-
+            
+            
             foreach (var mod in ModManager.ActiveMods)
             {
                 string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
@@ -440,6 +440,12 @@ namespace RandomBuff.Core.Entry
                     if (assembly == null)
                     {
                         BuffPlugin.LogWarning($"Skip load {file} because Disabled");
+                        continue;
+                    }
+
+                    if (AllBuffAssemblies.Any(i => i.GetName().Name == assembly.GetName().Name))
+                    {
+                        BuffPlugin.LogException(new Exception($"Duplicate assembly name. At:{path}, name:{assembly.FullName}"));
                         continue;
                     }
                     AllBuffAssemblies.Add(assembly);
@@ -520,6 +526,9 @@ namespace RandomBuff.Core.Entry
 
             #endregion
 
+            /**
+             * 返回 null 时为未启用
+             */
             (Assembly Assembly,bool isNewLoad) CheckAndUpdateBuffPlugin(ModManager.Mod mod, FileInfo file)
             {
                 var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName);

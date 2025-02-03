@@ -29,7 +29,9 @@ namespace RandomBuff.Core.Buff
                 Action<ILProcessor> buffCtor = null,
                 Action<ILProcessor> dataCtor = null)
         {
-            return GenerateBuffType($"{pluginId}_dynamicCache", usedId, needRegisterId, buffCtor, dataCtor);
+			BuffPlugin.LogDebug($"build dynamic buff with cache: {pluginId}.{usedId}");
+
+			return GenerateBuffType($"{pluginId}_dynamicCache", usedId, needRegisterId, buffCtor, dataCtor);
         }
 
         public static (TypeDefinition buffType, TypeDefinition dataType) 
@@ -98,10 +100,11 @@ namespace RandomBuff.Core.Buff
                             .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First()),
                         dataCtor == null ? null : (il) => dataCtor?.Invoke(il));
                 }
-
+                BuffPlugin.LogDebug($"build dynamic buff: {pluginId}.{usedId}");
                 return (buffType, dataType);
             }
-            return (null, null);
+
+			return (null, null);
         }
 
         public static MethodDefinition DefineMethodOverride(this TypeDefinition type, string methodName
