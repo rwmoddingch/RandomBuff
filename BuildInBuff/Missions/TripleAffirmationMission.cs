@@ -18,12 +18,13 @@ using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Render.UI.Component;
 using RandomBuffUtils;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
 {
-    internal class TripleAffirmationMission : Mission, IMissionEntry
+    internal class TripleAffirmationMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
 
         public static readonly MissionID TripleAffirmation = new MissionID(nameof(TripleAffirmation), true);
@@ -59,6 +60,11 @@ namespace BuiltinBuffs.Missions
   
 
             MissionRegister.RegisterMission(TripleAffirmation,new TripleAffirmationMission());
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 

@@ -6,10 +6,11 @@ using RandomBuff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using UnityEngine;
+using RandomBuff.Render.UI.Component;
 
 namespace BuiltinBuffs.Missions
 {
-    public sealed class MidnightSnackMission : Mission, IMissionEntry
+    public sealed class MidnightSnackMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
         public override MissionID ID => new MissionID("MidnightSnack", true);
 
@@ -43,6 +44,11 @@ namespace BuiltinBuffs.Missions
         public void RegisterMission()
         {
             MissionRegister.RegisterMission(ID, new MidnightSnackMission());
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 }

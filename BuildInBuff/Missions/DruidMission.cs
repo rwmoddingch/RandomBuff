@@ -3,11 +3,12 @@ using RandomBuff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Render.UI.Component;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
 {
-    public class DruidMission : Mission, IMissionEntry
+    public class DruidMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
         public override MissionID ID => MissionID.Druid;
 
@@ -34,6 +35,11 @@ namespace BuiltinBuffs.Missions
         public void RegisterMission()
         {
             MissionRegister.RegisterMission(ID, new DruidMission());
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 }

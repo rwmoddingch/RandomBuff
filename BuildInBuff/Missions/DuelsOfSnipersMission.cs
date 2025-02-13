@@ -11,12 +11,13 @@ using RandomBuff.Core.Buff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Render.UI.Component;
 using TemplateGains;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
 {
-    internal class DuelsOfSnipersMission : Mission, IMissionEntry
+    internal class DuelsOfSnipersMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
         public static readonly MissionID DuelsOfSnipers = new MissionID(nameof(DuelsOfSnipers), true);
         public override MissionID ID => DuelsOfSnipers;
@@ -47,6 +48,11 @@ namespace BuiltinBuffs.Missions
         public void RegisterMission()
         {
             MissionRegister.RegisterMission(DuelsOfSnipers,new DuelsOfSnipersMission());
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 }

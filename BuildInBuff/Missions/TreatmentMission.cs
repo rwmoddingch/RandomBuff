@@ -16,10 +16,11 @@ using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using RandomBuff.Render.UI.Component;
 
 namespace BuiltinBuffs.Missions
 {
-    internal class TreatmentMission : Mission, IMissionEntry
+    internal class TreatmentMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
         public static readonly MissionID EmergnshyTreatment = new MissionID(nameof(EmergnshyTreatment), true);
 
@@ -53,6 +54,11 @@ namespace BuiltinBuffs.Missions
             BuffRegister.RegisterCondition<SaveMoonCondition>(SaveMoonCondition.SaveMoon,"Save Moon",true);
 
             MissionRegister.RegisterMission(TreatmentMission.EmergnshyTreatment,new TreatmentMission());
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 

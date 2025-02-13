@@ -4,11 +4,12 @@ using RandomBuff;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.Missions;
+using RandomBuff.Render.UI.Component;
 using UnityEngine;
 
 namespace BuiltinBuffs.Missions
 {
-    public sealed class StrayerMission : Mission, IMissionEntry
+    public sealed class StrayerMission : Mission, IMissionEntry, MissionEffect.IOwnMissionEffect
     {
         public override MissionID ID => new MissionID("Strayer",true);
 
@@ -41,6 +42,11 @@ namespace BuiltinBuffs.Missions
         public void RegisterMission()
         {
             MissionRegister.RegisterMission(ID, new StrayerMission());
+        }
+
+        public MissionEffect InitEffect(BuffMissionEffectContainer container)
+        {
+            return new ExclusiveMissionEffect(container, TextCol);
         }
     }
 }
