@@ -728,8 +728,8 @@ namespace RandomBuff.Core.BuffMenu
         SimpleButton backButton;
         public Dictionary<string, string> signalToValue;
         public static Mission pickedMission;
-        MissionInfoBox missionInfoBox;
-        MissionSheetBox missionSheetBox;
+        internal MissionInfoBox missionInfoBox;
+        internal MissionSheetBox missionSheetBox;
         SimpleImageButton extraInfoButton;
         MenuLabel extraInfoLabel;
 

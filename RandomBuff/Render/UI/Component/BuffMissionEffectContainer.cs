@@ -21,6 +21,8 @@ namespace RandomBuff.Render.UI.Component
 
         public bool update;
 
+        public bool MouseOnStartBotton { get; private set; }
+
         internal BuffMissionEffectContainer(Menu.Menu menu, BuffNewGameMissionPage owner) : base(menu, owner, Vector2.zero)
         {
             container = new FContainer();
@@ -42,7 +44,9 @@ namespace RandomBuff.Render.UI.Component
         {
             base.Update();
 
-            if(activeEffects.Count > 1 && index >= activeEffects.Count - 1)
+            MouseOnStartBotton = (owner as BuffNewGameMissionPage).missionInfoBox.startButton.Selected;
+
+            if (activeEffects.Count > 1 && index >= activeEffects.Count - 1)
             {
                 for (int i = 0; i < activeEffects.Count - 1; i++)//清除淡出动画显示完成的效果
                 {
