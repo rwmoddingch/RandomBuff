@@ -1,0 +1,34 @@
+name: upload-to-workshop
+
+on:
+ push:
+    paths:
+      - 'mod/**'
+    branches:
+      - 'test**'
+      
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Get current date
+      id: date
+      run: |
+        echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+    - name: steam-workshop-upload
+      uses: pkuyo/steam-workshop-upload@main
+      with: 
+        appid: 312520  #rain world
+        itemid: ${{ secrets.ITEM_ID }} 
+        path: 'mod' 
+        visibility: 3
+        title: ${{ secrets.MOD_NAME }}-${{ steps.date.outputs.date }}
+      env:
+        STEAM_USERNAME: ${{ secrets.DEPLOY_USERNAME }} 
+        STEAM_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }} 
