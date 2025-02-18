@@ -269,6 +269,9 @@ namespace RandomBuff.Core.ProgressionUI
             pluginInfos.Remove(builtin);
             pluginInfos.Insert(0, builtin);
 
+            int totQuest = BuffConfigManager.GetQuestIDList().Count;
+            int finishedQuest = 0;
+
             foreach (var questID in BuffConfigManager.GetQuestIDList())
             {
                 BuffQuest questData = BuffConfigManager.GetQuestData(questID);
@@ -303,6 +306,8 @@ namespace RandomBuff.Core.ProgressionUI
                 }
 
                 questInfo.finished = BuffPlayerData.Instance.IsQuestUnlocked(questID);//同步完成信息
+                if (questInfo.finished)
+                    finishedQuest++;
 
                 if (isLevelQuest)//添加至对应quest列表
                 {
@@ -328,13 +333,13 @@ namespace RandomBuff.Core.ProgressionUI
             }
 
 
-
             //构建按钮元素
             Vector2 buttonSize = new Vector2(50, 50);
             Vector2 smallGap = new Vector2(5, 5);
             float bigGap = 20f;
 
             float contentSize = bigGap;//顶部间隙   
+            contentSize += bigGap;//统计信息
 
             int buttonsInALine = Mathf.FloorToInt((size.x - smallGap.x) / (smallGap.x + buttonSize.x));
 
@@ -357,13 +362,23 @@ namespace RandomBuff.Core.ProgressionUI
             float xPtr = smallGap.x;
             float yPtr = contentSize - (bigGap);
 
-            for(int i = 0;i < pluginInfos.Count; i++)
+            var questFinishState = new OpLabel(new Vector2(size.x / 2f, yPtr), new Vector2(bigGap, bigGap), $"{finishedQuest}/{totQuest}", FLabelAlignment.Center);
+            if(finishedQuest == totQuest)
+            {
+                questFinishState.color = Helper.GetRGBColor(255, 194, 65);
+            }
+
+            opScrollBox.AddItems(questFinishState);
+
+            for (int i = 0;i < pluginInfos.Count; i++)
             {
                 yPtr -= bigGap;
 
                 string name = pluginInfos[i].GetInfo(Custom.rainWorld.inGameTranslator.currentLanguage).Name;
 
-                opScrollBox.AddItems(new OpLabel(new Vector2(xPtr, yPtr), new Vector2(bigGap, bigGap), name, FLabelAlignment.Left));
+                var pluginNameLabel = new OpLabel(new Vector2(xPtr, yPtr), new Vector2(bigGap, bigGap), name, FLabelAlignment.Left);
+                pluginNameLabel.label.shader = Custom.rainWorld.Shaders["MenuText"];
+                opScrollBox.AddItems(pluginNameLabel);
                 yPtr -= smallGap.y;
 
                 var subLevelQuests = levelQuests[i];
@@ -389,7 +404,7 @@ namespace RandomBuff.Core.ProgressionUI
                 }
 
                 yPtr -= smallGap.y;
-                opScrollBox.AddItems(new OpHorizontalSplitLine(new Vector2(0f, yPtr), new Vector2(size.x, 2f)));
+                opScrollBox.AddItems(new OpHorizontalSplitLine(new Vector2(0f, yPtr), new Vector2(size.x, 2f), new Color(0.5f, 0.5f, 0.5f)));
                 yPtr -= smallGap.y;
 
                 xPtr = smallGap.x;
@@ -1021,9 +1036,9 @@ namespace RandomBuff.Core.ProgressionUI
     public class OpHorizontalSplitLine : UIelement
     {
         FSprite split;
-        public OpHorizontalSplitLine(Vector2 pos, Vector2 size) : base(pos, size)
+        public OpHorizontalSplitLine(Vector2 pos, Vector2 size, Color color) : base(pos, size)
         {
-            split = new FSprite("pixel", true) { scaleX = size.x, scaleY = size.y };
+            split = new FSprite("pixel", true) { scaleX = size.x, scaleY = size.y, color = color };
             myContainer.AddChild(split);
         }
 
