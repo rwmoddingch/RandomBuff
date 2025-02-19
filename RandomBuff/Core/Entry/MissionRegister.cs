@@ -6,8 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuff.Core.Entry;
+using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Progression;
 using RandomBuff.Core.Progression.Quest;
+using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI.ExceptionTracker;
@@ -44,9 +46,14 @@ namespace RandomBuff.Core.Game.Settings.Missions
                 BuffPlugin.LogError($"Missing some dependence for Mission ID:{ID}");
         }
 
+        internal static void CleanAll()
+        {
+            registeredMissions.Clear();
+        }
+
         internal static void RegisterAllMissions()
         {
-
+            
             foreach (var assembly in BuffRegister.AllBuffAssemblies)
             {
 
@@ -74,7 +81,6 @@ namespace RandomBuff.Core.Game.Settings.Missions
 
             BuffRegister.AllBuffAssemblies.Clear();
 
-            QuestRendererManager.AddProvider(new MissionQuestRendererProvider());
         }
     }
 }

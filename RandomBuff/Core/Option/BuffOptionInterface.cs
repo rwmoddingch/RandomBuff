@@ -1,23 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Menu;
+﻿using Menu;
 using Menu.Remix.MixedUI;
 using Menu.Remix.MixedUI.ValueTypes;
+using RandomBuff.Core.SaveData;
+using RandomBuff.Render.UI.BuffPack;
 using RandomBuffUtils.MixedUI;
 using RWCustom;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace RandomBuff.Core.Option
 {
     internal class BuffOptionInterface : OptionInterface
     {
-        private const float YSize = 40;
+        private const float YSize = 35;
         private const float YItemSize = 30;
         private const float XSpacing = 50;
         private static readonly Color CheatColor = new Color(0.85f, 0.35f, 0.4f);
+
+
+        public List<PackButton> packButtons;
+
+        private bool[] isChanged;
+
+        public bool HasAnyChanged()
+        {
+            return isChanged.Any(i => i);
+        }
+
 
         public static BuffOptionInterface Instance { get; private set; }
 
@@ -37,6 +48,7 @@ namespace RandomBuff.Core.Option
             DisableNotifyDialog = config.Bind(nameof(DisableNotifyDialog), false);
             DisableCardSlotText = config.Bind(nameof(DisableCardSlotText), false);
             CosmeticForEverySlug = config.Bind(nameof(CosmeticForEverySlug), false);
+            DisableCardPocketConflict = config.Bind(nameof(DisableCardPocketConflict), false);
             Instance = this;
 
         }
@@ -56,10 +68,11 @@ namespace RandomBuff.Core.Option
                 configurable.Value.info = new ConfigurableInfo(BuffResourceString.Get($"Remix_{configurable.Key}_Desc", true));
 
             OpTab option = InitNewTab(BuffResourceString.Get("Remix_Option", true));
+            OpTab pack = new OpTab(this, "BuffPack");
             OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
         
 
-            Tabs = new[] { option , cheat };
+            Tabs = new[] { option , pack, cheat };
             
             const float initYIndex = 1.5f + 1f + 2f;
             float yIndex = initYIndex;
@@ -79,9 +92,9 @@ namespace RandomBuff.Core.Option
 
             AppendItems(option, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_CosmeticForEverySlug", true), FLabelAlignment.Left), new OpCheckBox(CosmeticForEverySlug, Vector2.zero));
 
+            AppendItems(option, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_DisableCardPocketConflict", true), FLabelAlignment.Left) { color = CheatColor }, new OpCheckBox(DisableCardPocketConflict, Vector2.zero) { colorEdge = CheatColor });
+
             yIndex++;
-
-
 
             AppendItems(option, ref yIndex,
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionExtend", true), FLabelAlignment.Left),
@@ -123,7 +136,37 @@ namespace RandomBuff.Core.Option
             holdEvent.AddEventHandler(creditButton, Delegate.CreateDelegate(holdEvent.EventHandlerType, this, nameof(SwitchToCredit)));
 
 
+            float sizeY = 0f;
+            packButtons = packButtons = new List<PackButton>();
+           
+            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values)
+            {
+                var button = new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo) { Enabled = pluginInfo.Enabled };
+                var index = packButtons.Count;
+                button.ToggleCallBack += () =>
+                {
+                    isChanged[index] = !isChanged[index];
+                };
+                packButtons.Add(button);
+                sizeY += 120f + 20f;
+            }
 
+            isChanged = new bool[packButtons.Count];
+
+            sizeY = Mathf.Max(sizeY, 560f);
+
+            OpScrollBox scrollBox;
+            pack.AddItems(scrollBox = new OpScrollBox(new Vector2(20f, 20f), new Vector2(560f, 560f), sizeY, hasSlideBar: false));
+
+            float anchorY = sizeY;
+            foreach(var button in packButtons)
+            {
+                anchorY -= button.size.y;
+                anchorY -= 10f;
+                button.SetPos(new Vector2(10f, anchorY));
+                scrollBox.AddItems(button);
+                anchorY -= 10f;
+            }
         }
 
 
@@ -132,7 +175,7 @@ namespace RandomBuff.Core.Option
             base.Update();
             if (!mainExpedition.GetValueBool() && !modExpedition.IsInactive)
             {
-                if(modExpedition.GetValueBool())
+                if (modExpedition.GetValueBool())
                     modExpedition.SetValueBool(false);
                 modExpedition.Deactivate();
             }
@@ -226,6 +269,7 @@ namespace RandomBuff.Core.Option
         public Configurable<bool> DisableCardSlotText { get; private set; }
 
         public Configurable<bool> CosmeticForEverySlug { get; private set; }
+        public Configurable<bool> DisableCardPocketConflict { get; private set; }
 
 
         private OpCheckBox mainExpedition, modExpedition;

@@ -1,0 +1,17 @@
+{
+    "FaceName": "clusterbomb",
+    "BuffID" : "ClusterBomb",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "ff8800",
+    
+    "Chinese" : {
+        "BuffName" : "集束炸弹",
+        "Description" : "伤害较高的爆炸会发射一连串伤害较低的集束炸弹"
+    },
+    "English": {
+        "BuffName" : "Cluster Bomb",
+        "Description" : "Explosions are followed by a chain of lesser blasts."
+    }
+}

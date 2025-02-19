@@ -32,6 +32,16 @@ namespace RandomBuff.Core.Buff
 
         public string Thumbnail { get; private set; } = "buffassets/illustrations/default_thumbnail";
 
+        public string[] Dependencies { get; private set; } = Array.Empty<string>();
+
+        public bool Enabled => BuffPlugin.IsPluginsEnabled(AssemblyName);
+
+        internal Assembly codeAssembly;
+        internal Assembly dataAssembly;
+
+        internal Dictionary<string,Assembly> dynamicAssemblies = new();
+
+        private Dictionary<InGameTranslator.LanguageID, PluginInfo> infos = new();
 
 
         public PluginInfo GetInfo(InGameTranslator.LanguageID id)
@@ -41,7 +51,7 @@ namespace RandomBuff.Core.Buff
             return infos.First().Value;
         }
 
-        private Dictionary<InGameTranslator.LanguageID,PluginInfo> infos = new ();
+
 
         public static bool LoadPluginInfo(string filePath,out BuffPluginInfo newData)
         {
@@ -50,24 +60,25 @@ namespace RandomBuff.Core.Buff
             try
             {
                 var rawData = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(filePath));
-                newData = new BuffPluginInfo { AssemblyName = (string)rawData[loadState = "Assembly"] };
+                newData = new BuffPluginInfo { AssemblyName = new DirectoryInfo(Path.GetDirectoryName(filePath)).Name };
                 bool hasMutli = false;
 
-                //或许未来改成延迟加载
-                if (rawData.TryGetValue(loadState = "Thumbnail", out var thumbnail))
+                //TODO: 或许未来改成延迟加载
+                if (!rawData.TryGetValue(loadState = "Thumbnail", out var thumbnail))
+                    thumbnail = "thumbnail";
+                try
                 {
-                    try
-                    {
-                        Futile.atlasManager.LoadImage("buffplugins" + Path.AltDirectorySeparatorChar + (string)thumbnail);
-                        newData.Thumbnail = "buffplugins" + Path.AltDirectorySeparatorChar + (string)thumbnail;
-
-                    }
-                    catch (FutileException e)
-                    {
-                        BuffPlugin.LogError($"Card image not found at :{"buffplugins" + Path.AltDirectorySeparatorChar + (string)thumbnail}");
-                    }
+                    Futile.atlasManager.LoadImage("buffinfos" + Path.AltDirectorySeparatorChar + newData.AssemblyName + Path.AltDirectorySeparatorChar + (string)thumbnail);
+                    newData.Thumbnail = "buffinfos" + Path.AltDirectorySeparatorChar + newData.AssemblyName + Path.AltDirectorySeparatorChar + (string)thumbnail;
 
                 }
+                catch (FutileException e)
+                {
+                    newData.Thumbnail = "buffassets/illustrations/default_thumbnail";
+                    BuffPlugin.LogWarning($"Card image not found at :{"buffplugins" + Path.AltDirectorySeparatorChar + (string)thumbnail}");
+                }
+
+
 
                 foreach (var language in ExtEnumBase.GetNames(typeof(InGameTranslator.LanguageID)))
                 {
@@ -107,6 +118,13 @@ namespace RandomBuff.Core.Buff
                         info.Description = (string)obj1;
                     newData.infos.Add(InGameTranslator.LanguageID.English, info);
                 }
+
+                if (rawData.TryGetValue(loadState = "Dependencies", out var depend))
+                {
+                    var list = (JArray)depend;
+                    newData.Dependencies = list.Select(i => i.ToString()).ToArray();
+                }
+
                 return true;
             }
             catch (Exception e)
@@ -135,6 +153,14 @@ namespace RandomBuff.Core.Buff
                 builder.AppendLine($"---Name: {info.Value.Name}");
                 builder.AppendLine($"---Description: {info.Value.Description}");
             }
+
+            if (Dependencies.Any())
+            {
+                builder.AppendLine("Dependencies :");
+                foreach (var depend in Dependencies)
+                    builder.AppendLine($"---{depend}");
+                
+            }
             return builder.ToString();
         }
         public class PluginInfo
@@ -145,4 +171,5 @@ namespace RandomBuff.Core.Buff
         }
 
     }
+
 }

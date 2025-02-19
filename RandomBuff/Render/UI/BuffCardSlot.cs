@@ -666,7 +666,7 @@ namespace RandomBuff.Render.UI
                     toggleShowCallBack = (show) =>
                     {
                         BasicSlot.BaseInteractionManager.overrideDisabled = show;
-                    }
+                    },
                 };
                 buttonContainer = new FContainer() { alpha = 0f };
                 Container.AddChild(SandboxPocket.Container);

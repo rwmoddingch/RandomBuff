@@ -1,0 +1,17 @@
+{
+    "FaceName": "pandorabox",
+    "BuffID" : "PandoraBox",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "dedede",
+    
+    "Chinese" : {
+        "BuffName" : "潘多拉魔盒",
+        "Description" : "无论玩家吞下去什么，吐出来的时候都会变成一个新的随机物品"
+    },
+    "English": {
+        "BuffName" : "Pandora's Box",
+        "Description" : "Swallowing an item randomly turns it into something else."
+    }
+}

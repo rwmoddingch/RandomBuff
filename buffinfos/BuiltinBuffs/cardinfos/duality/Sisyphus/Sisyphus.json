@@ -1,0 +1,17 @@
+{
+    "FaceName": "Sisyphus",
+    "ID": "SisyphusID",
+    "BuffType": "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#c9ab75",
+    "Chinese":{
+        "BuffName":"西西弗斯",
+        "Description":"放下石头后会回到拾取时的位置(跨区域不奏效)"
+    },
+    "English": {
+    "BuffName": "Sisyphus",
+    "Description": "After dropping a rock, your slugcat teleports to where it picked it up (as long as it's in the same region)."
+  }
+}

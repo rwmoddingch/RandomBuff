@@ -125,6 +125,7 @@ namespace RandomBuff.Render.CardRender
             if (buffCardRenderer is BuffCardRenderer cardRenderer)
             {
                 cardRenderer.gameObject.SetActive(false);
+                cardRenderer.Deacive();
                 cardRenderer.inactiveTimer = 0f;
                 if (!inactiveCardRenderers.Contains(cardRenderer))//不知道为什么，但有时候会出现重复回收的情况
                     inactiveCardRenderers.Add(cardRenderer);
@@ -226,7 +227,9 @@ namespace RandomBuff.Render.CardRender
 
         public static Texture TextBack { get; private set; }
 
-        public static string MissingFaceTexture { get; private set; }
+        public static Texture MissingFaceTexture { get; private set; }
+
+        public static string MissingFace { get; private set; }
 
         public static Color PositiveColor { get; } = Helper.GetRGBColor(27, 178, 196);
         public static Color NegativeColor { get; } = Helper.GetRGBColor(183, 56, 73);
@@ -304,7 +307,10 @@ namespace RandomBuff.Render.CardRender
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
             TextBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/textback").texture;
-            MissingFaceTexture = Futile.atlasManager.LoadImage("buffassets/cardbacks/missing").name;
+
+            var atlas = Futile.atlasManager.LoadImage("buffassets/cardbacks/missing");
+            MissingFace = atlas.name;
+            MissingFaceTexture = atlas.texture;
 
             BuffPlugin.Log($"tex name : {FPBack.name}, {FPBack.texelSize}");
         }

@@ -1,0 +1,17 @@
+{
+    "FaceName": "BombMania",
+    "ID" : "BombMania",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FF0045",
+    
+    "Chinese" : {
+        "BuffName" : "炸弹狂欢",
+        "Description" : "每个房间会生成相当多的炸弹"
+    },
+    "English": {
+        "BuffName" : "Bomb-O-Mania",
+        "Description" : "Every room spawns with several bombs."
+    }
+}

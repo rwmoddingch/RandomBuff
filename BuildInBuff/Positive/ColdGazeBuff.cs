@@ -906,7 +906,10 @@ namespace BuiltinBuffs.Positive
             if (!ownerRef.TryGetTarget(out var creature))
                 return false;
 
-            if(allowUpdateCount > 0)
+            if (creature.realizedCreature != null && creature.realizedCreature is TentaclePlant)
+                return false;
+
+            if (allowUpdateCount > 0)
                 return true;
 
             return false;
@@ -1427,8 +1430,10 @@ namespace BuiltinBuffs.Positive
                 {
                     this.tentacle.tProps.goalAttractionSpeedTip = Mathf.Lerp(0.15f, 1.9f, Mathf.InverseLerp(40f, 90f, value));
                     //this.tentacle.tProps.goalAttractionSpeedTip = Mathf.Lerp(0.15f, 1.9f, Mathf.InverseLerp(40f, this.AI.searchingGarbage ? 90f : 290f, value));
-                    
-                    if (this.tentacle.backtrackFrom == -1 && player.room.aimap.getTerrainProximity(player.mainBodyChunk.pos) < 2)
+
+                    if (this.tentacle.backtrackFrom == -1 &&
+                        player.room.aimap != null &&
+                        player.room.aimap.getTerrainProximity(player.mainBodyChunk.pos) < 2)
                     {
                         for (int num6 = 0; num6 < 8; num6++)
                         {

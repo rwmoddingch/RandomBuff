@@ -331,6 +331,11 @@ namespace RandomBuff.Core.BuffMenu
                 "NEWGAME_DETAIL_SELECT_MODE", new Vector2(683f - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
                 new Vector2(120, 40)));
             subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 40f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
+
+            var label = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), new Vector2(Custom.rainWorld.options.ScreenSize.x - 180f, 45f), new Vector2(100f, 30f), false);
+            label.label.shader = Custom.rainWorld.Shaders["MenuText"];
+            subObjects.Add(label);
+
             settingButton.menuLabel.text = gameMenu.Translate(gameSetting.TemplateName);
 
             subObjects.Add(nodeWrapper = new FNodeWrapper(gameMenu, this));
@@ -726,6 +731,7 @@ namespace RandomBuff.Core.BuffMenu
         MissionInfoBox missionInfoBox;
         MissionSheetBox missionSheetBox;
         SimpleImageButton extraInfoButton;
+        MenuLabel extraInfoLabel;
 
         RandomBuffFlagRenderer flagRenderer;
 
@@ -779,6 +785,10 @@ namespace RandomBuff.Core.BuffMenu
             subObjects.Add(backButton);
 
             subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 1040f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
+
+            extraInfoLabel = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), new Vector2(Custom.rainWorld.options.ScreenSize.x - 180f, 45f), new Vector2(100f, 30f), false);
+            extraInfoLabel.label.shader = Custom.rainWorld.Shaders["MenuText"];
+            subObjects.Add(extraInfoLabel);
 
         }
         public void UpdateSelectables()
@@ -1037,6 +1047,7 @@ namespace RandomBuff.Core.BuffMenu
             backButton.buttonBehav.greyedOut = MissionInfoBox.hasCardOnDisplay;
             backButton.pos = Vector2.Lerp(new Vector2(1200, 800), new Vector2(1200, 698), showAnim.Get());
             extraInfoButton.pos.y = Mathf.Lerp(1040f, 40f, showAnim.Get());
+            extraInfoLabel.pos.y = Mathf.Lerp(1045f, 45f, showAnim.Get());
 
             bool needUpdate = show || flagRenderer.NeedRenderUpdate;
             gameMenu.flagNeedUpdate[flagControlIndex] = needUpdate;

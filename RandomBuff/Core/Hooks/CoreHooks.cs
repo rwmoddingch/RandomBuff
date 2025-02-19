@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JollyCoop;
 using Menu;
+using Menu.Remix;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
@@ -16,6 +17,7 @@ using RandomBuff.Core.BuffMenu.Test;
 using RandomBuff.Core.Entry;
 using RandomBuff.Core.GachaMenu;
 using RandomBuff.Core.Game;
+using RandomBuff.Core.Option;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.StaticsScreen;
 using RandomBuff.Credit;
@@ -103,6 +105,9 @@ namespace RandomBuff.Core.Hooks
             On.Menu.BackupManager.RestoreSaveFile += BackupManager_RestoreSaveFile;
             On.Options.GetSaveFileName_SavOrExp += Options_GetSaveFileName_SavOrExp;
 
+            On.Menu.ModdingMenu.Singal += ModdingMenu_Singal;
+            On.Menu.Remix.ConfigContainer.HasConfigChanged += ConfigContainer_HasConfigChanged;
+
             InGameHooksInit();
 
 
@@ -110,6 +115,25 @@ namespace RandomBuff.Core.Hooks
 
             //BuffGameMenu = new("BuffGameMenu");
 
+        }
+
+        private static bool ConfigContainer_HasConfigChanged(On.Menu.Remix.ConfigContainer.orig_HasConfigChanged orig)
+        {
+            if (ConfigContainer.ActiveInterface is BuffOptionInterface option && option.HasAnyChanged()) 
+                return true;
+            return orig();
+
+        }
+
+        private static void ModdingMenu_Singal(On.Menu.ModdingMenu.orig_Singal orig, ModdingMenu self, MenuObject sender, string message)
+        {
+            if (message == "APPLY" && ConfigContainer.ActiveInterface is BuffOptionInterface option)
+            {
+                BuffPlugin.UpdateNewEnableList(option.packButtons.Where(i => i.Enabled)
+                    .Select(i => i.pluginInfo.AssemblyName).ToArray());
+                BuffPlugin.ReloadAllBuffs();
+            }
+            orig(self,sender, message);
         }
 
         private static void ProcessManager_PostSwitchMainProcess1(ILContext il)
