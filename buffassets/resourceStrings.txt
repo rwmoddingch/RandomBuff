@@ -11,6 +11,9 @@ BuffGameMenu_NewGame|NEW GAME
 BuffGameMenu_LoadGame|{0} - Cycle: {1} - Buff Count: {2}
 BuffGameMenu_LoadGameUK|UNKNOWN DATA - Buff Count: {0}
 
+//BuffNewGameDetailPage
+BuffNewGameDetailPage_FilterTitle|FILTER
+
 //BuffMissionPage
 BuffMissionPage_General|GENERAL MISSIONS
 BuffMissionPage_Exclusive|EXCLUSIVE<LINE>MISSION
@@ -175,6 +178,23 @@ all types|all types
 Negative|negative
 Positive|positive
 Duality|duality
+
+
+//BuffCondition_ShortName
+ConditionFilter_Cycle_Condition|Minimal Cycle
+ConditionFilter_Card_Condition|Buff Count
+ConditionFilter_Achievement_Condition|Achievement
+ConditionFilter_Like_Condition|like
+ConditionFilter_Meet_SS_and SL|Meet Oracle
+ConditionFilter_Gourmand_Feast|Gourmand Feast
+ConditionFilter_Cycle_Score Condition|Score Within Cycle
+ConditionFilter_Score_Condition|Score
+ConditionFilter_Hunt_Condition|Hunt Specific
+ConditionFilter_Hunt_All_Condition|Hunt
+ConditionFilter_Extermination_Condition|Extermination With Weapon
+ConditionFilter_Death|Maximum Death
+ConditionFilter_Continuous_Survival|Continuous Survival
+ConditionFilter_Distance|Move Distance
 
 
 //BuffCondition_Builtin

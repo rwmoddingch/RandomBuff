@@ -220,26 +220,26 @@ namespace RandomBuff.Core.Game.Settings.Conditions
 
         internal static void Init()
         {
-            BuffRegister.RegisterCondition<CycleCondition>(ConditionID.Cycle, "Cycle Condition");
-            BuffRegister.RegisterCondition<CardCondition>(ConditionID.Card, "Card Condition");
-            BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement Condition");
-            BuffRegister.RegisterCondition<LikeCondition>(ConditionID.Like, "Like Condition");
-            BuffRegister.RegisterCondition<MeetSS_SLCondition>(ConditionID.MeetSS_SL, "Meet SS and SL");
-            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand Feast");
-            BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Score Condition");
+            BuffRegister.RegisterCondition<CycleCondition>(ConditionID.Cycle, "Cycle_Condition");
+            BuffRegister.RegisterCondition<CardCondition>(ConditionID.Card, "Card_Condition");
+            BuffRegister.RegisterCondition<AchievementCondition>(ConditionID.Achievement, "Achievement_Condition");
+            BuffRegister.RegisterCondition<LikeCondition>(ConditionID.Like, "Like_Condition");
+            BuffRegister.RegisterCondition<MeetSS_SLCondition>(ConditionID.MeetSS_SL, "Meet_SS_and_SL");
+            BuffRegister.RegisterCondition<GourmandCondition>(ConditionID.Gourmand, "Gourmand_Feast");
+            BuffRegister.RegisterCondition<CycleScoreCondition>(ConditionID.CycleScore, "Cycle_Score_Condition");
 
-            BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt Condition");
-            BuffRegister.RegisterCondition<HuntAllCondition>(ConditionID.HuntAll, "Hunt All Condition");
+            BuffRegister.RegisterCondition<HuntCondition>(ConditionID.Hunt, "Hunt_Condition");
+            BuffRegister.RegisterCondition<HuntAllCondition>(ConditionID.HuntAll, "Hunt_All_Condition");
 
-            BuffRegister.RegisterCondition<ExterminationCondition>(ConditionID.Extermination, "Extermination Condition");
-            BuffRegister.RegisterCondition<ScoreCondition>(ConditionID.Score, "Score Condition");
+            BuffRegister.RegisterCondition<ExterminationCondition>(ConditionID.Extermination, "Extermination_Condition");
+            BuffRegister.RegisterCondition<ScoreCondition>(ConditionID.Score, "Score_Condition");
             BuffRegister.RegisterCondition<DeathCondition>(ConditionID.Death, "Death");
-            BuffRegister.RegisterCondition<ContinuousSurvivalCondition>(ConditionID.ContinuousSurvival, "Continuous Survival");
+            BuffRegister.RegisterCondition<ContinuousSurvivalCondition>(ConditionID.ContinuousSurvival, "Continuous_Survival");
 
-            BuffRegister.RegisterCondition<FixedCycleCondition>(ConditionID.FixedCycle, "Fix Cycles", true);
-            BuffRegister.RegisterCondition<WithInCycleCondition>(ConditionID.WithInCycle, "WithIn Cycle", true);
+            BuffRegister.RegisterCondition<FixedCycleCondition>(ConditionID.FixedCycle, "Fix_Cycles", true);
+            BuffRegister.RegisterCondition<WithInCycleCondition>(ConditionID.WithInCycle, "WithIn_Cycle", true);
 #if TESTVERSION
-            BuffRegister.RegisterCondition<TestCondition>(TestCondition.id, "TEST CONDITION", true);
+            BuffRegister.RegisterCondition<TestCondition>(TestCondition.id, "TEST_CONDITION", true);
 #endif
         }
 

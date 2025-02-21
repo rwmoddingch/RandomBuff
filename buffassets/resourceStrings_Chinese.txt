@@ -11,6 +11,9 @@ BuffGameMenu_NewGame|新游戏
 BuffGameMenu_LoadGame|{0} - 轮回: {1} - 卡牌数量: {2}
 BuffGameMenu_LoadGameUK|未知数据 - 卡牌数量: {0}
 
+//BuffNewGameDetailPage
+BuffNewGameDetailPage_FilterTitle|条件筛选
+
 //BuffMissionPage
 BuffMissionPage_General|通用使命
 BuffMissionPage_Exclusive|专属使命
@@ -177,6 +180,22 @@ Negative|负面
 Positive|正面
 Duality|双向
 
+
+//BuffCondition_ShortName
+ConditionFilter_Cycle_Condition|最少生存雨循环
+ConditionFilter_Card_Condition|Buff 数量
+ConditionFilter_Achievement_Condition|成就
+ConditionFilter_Like_Condition|好感
+ConditionFilter_Meet_SS_and_SL|拜访迭代器
+ConditionFilter_Gourmand_Feast|饕餮食谱
+ConditionFilter_Cycle_Score_Condition|同循环得分
+ConditionFilter_Score_Condition|得分
+ConditionFilter_Hunt_Condition|猎杀特定生物
+ConditionFilter_Hunt_All_Condition|猎杀生物
+ConditionFilter_Extermination_Condition|使用指定武器猎杀
+ConditionFilter_Death|最大死亡限制
+ConditionFilter_Continuous_Survival|持续存活
+ConditionFilter_Distance|移动距离
 
 //BuffCondition_Builtin
 InRangeDisplayName_WormGrassWipeOutCondition|在一轮回内清除房间内的所有舌草

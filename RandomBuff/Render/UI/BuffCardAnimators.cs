@@ -42,6 +42,11 @@ namespace RandomBuff.Render.UI
         {
 
         }
+
+        public virtual void LastAnimatorHandInfo(BuffCardAnimator lastAnimator)
+        {
+
+        }
     }
 
     #region Test
@@ -120,12 +125,32 @@ namespace RandomBuff.Render.UI
     internal class InGameSlotHideAnimator : BuffCardAnimator
     {
         float targetScale;
+        Vector2 halfScreenSize = Custom.rainWorld.screenSize / 2f;
 
         Vector2 basicTargetPosition;
         Vector2 TargetPosition => basicTargetPosition;
 
         InGameSlotInteractionManager InGameSlotInteractionManager => buffCard.interactionManager as InGameSlotInteractionManager;
         BuffCardTransformSmoother smoother;
+
+
+        bool usingBezierFlipAnim;
+        internal float bezierF;
+        float SmoothBezierF => Helper.EaseInOutCubic(bezierF);
+        float BezierAnimShowScale;
+
+        Vector2 TargetShowPosition
+        {
+            get
+            {
+                return new Vector2(halfScreenSize.x + InGameSlotInteractionManager.IndexBiasInGroupedCards(buffCard) * 100f,
+                                   buffCard.StaticData.BuffType == Core.Buff.BuffType.Positive ? (halfScreenSize.y + 80f) : (halfScreenSize.y - 80f));
+            }
+        }
+        Vector2 BezierHandleA => TargetPosition + Vector2.right * 400f;
+        Vector2 BezierHandleB = new Vector2(Custom.rainWorld.screenSize.x, Custom.rainWorld.screenSize.y / 2f);
+
+
         public InGameSlotHideAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
             buffCard.Highlight = false;
@@ -138,16 +163,40 @@ namespace RandomBuff.Render.UI
             smoother = new BuffCardTransformSmoother(buffCard);
 
             targetScale = BuffCard.normalScale * 0.1f;
+            BezierAnimShowScale = BuffCard.normalScale * 0.5f;
 
             basicTargetPosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * InGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
-
+            bezierF = 0f;
         }
 
         public override void Update()
         {
-            smoother.LerpRotation(Vector3.zero, 0.15f);
-            smoother.LerpPos(TargetPosition, 0.15f);
-            smoother.LerpScale(targetScale, 0.15f);
+            if (usingBezierFlipAnim)
+            {
+                Vector2 target;
+                if (bezierF != 0f)
+                {
+                    bezierF = Mathf.Max(bezierF - 1 / 30f, 0f);
+                    target = Custom.Bezier(TargetPosition, BezierHandleA, TargetShowPosition, BezierHandleB, SmoothBezierF);
+                }
+                else
+                {
+                    target = TargetPosition;
+                    bezierF = 0f;
+                    usingBezierFlipAnim = false;
+                    return;
+                }
+
+                smoother.LerpPos(target, 0.5f);
+                smoother.LerpRotation(new Vector3(0f, 360f * Mathf.Clamp01(SmoothBezierF), 0f), 0.5f);
+                smoother.LerpScale(Mathf.Lerp(targetScale, BezierAnimShowScale, SmoothBezierF), 0.5f);
+            }
+            else
+            {
+                smoother.LerpPos(TargetPosition, 0.15f);
+                smoother.LerpRotation(Vector3.zero, 0.15f);
+                smoother.LerpScale(targetScale, 0.15f);
+            }
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -155,6 +204,26 @@ namespace RandomBuff.Render.UI
             buffCard.Rotation = smoother.SmoothRotation(timeStacker);
             buffCard.Position = smoother.SmoothPos(timeStacker);
             buffCard.Scale = smoother.SmoothScale(timeStacker);
+        }
+
+        public override void LastAnimatorHandInfo(BuffCardAnimator lastAnimator)
+        {
+            if(lastAnimator is InGameSlotShowAnimator showAnimator)
+            {
+                usingBezierFlipAnim = true;
+                bezierF = showAnimator.bezierF;
+                if(bezierF == 1f)
+                {
+                    bezierF += InGameSlotInteractionManager.IndexInManagedCards(buffCard) * 0.015f;
+                    smoother.lastRotation = smoother.rotation = new Vector3(0f, 360f, 0f);
+                }
+            }
+            else if(lastAnimator is InGameSlotExclusiveShowAnimator exclusiveAnimator)
+            {
+                usingBezierFlipAnim = true;
+                bezierF = 1f;
+                bezierF += InGameSlotInteractionManager.IndexInManagedCards(buffCard) * 0.015f;
+            }
         }
     }
 
@@ -178,6 +247,16 @@ namespace RandomBuff.Render.UI
         InGameSlotInteractionManager inGameSlotInteractionManager;
         BuffCardTransformSmoother smoother;
 
+        bool usingBezierFlipAnim;
+        internal float bezierF;
+
+        float SmoothBezierF => Helper.EaseInOutCubic(bezierF);
+        float BezierAnimHideScale;
+        Vector2 basicTargetHidePosition;
+        Vector2 TargetHidePosition => basicTargetHidePosition;
+        Vector2 BezierHandleA => TargetHidePosition + Vector2.right * 400f;
+        Vector2 BezierHandleB = new Vector2(Custom.rainWorld.screenSize.x, Custom.rainWorld.screenSize.y / 2f);
+
         public InGameSlotShowAnimator(BuffCard buffCard, Vector2 initPosition, Vector3 initRotation, float initScale) : base(buffCard, initPosition, initRotation, initScale)
         {
             buffCard.Highlight = false;
@@ -189,6 +268,9 @@ namespace RandomBuff.Render.UI
 
             smoother = new BuffCardTransformSmoother(buffCard);
             inGameSlotInteractionManager = buffCard.interactionManager as InGameSlotInteractionManager;
+            basicTargetHidePosition = new Vector2(Custom.rainWorld.screenSize.x - 40f - 5f * inGameSlotInteractionManager.IndexInManagedCards(buffCard), 40f);
+
+            BezierAnimHideScale = BuffCard.normalScale * 0.1f;
         }
 
         public override void Update()
@@ -198,9 +280,35 @@ namespace RandomBuff.Render.UI
             else if (!buffCard.CurrentFocused && buffCard.Highlight)
                 buffCard.Highlight = false;
 
-            smoother.LerpRotation(targetRotation, 0.15f);
-            smoother.LerpPos(TargetPosition, 0.15f);
-            smoother.LerpScale(TargetScale, 0.15f);
+            if (usingBezierFlipAnim)
+            {
+                Vector2 target;
+                if (bezierF != 1f)
+                {
+                    bezierF = Mathf.Min(bezierF + 1 / 30f, 1f);
+                    target = Custom.Bezier(TargetHidePosition, BezierHandleA, TargetPosition, BezierHandleB, SmoothBezierF);
+                    smoother.LerpScale(Mathf.Lerp(BezierAnimHideScale, TargetScale, SmoothBezierF), 0.5f);
+                }
+                else
+                {
+                    target = TargetPosition;
+                    bezierF = 1f;
+                    smoother.lastRotation -= new Vector3(0f, 360f, 0f);
+                    smoother.rotation -= new Vector3(0f, 360f, 0f);
+                    usingBezierFlipAnim = false;
+                    return;
+                }
+
+                smoother.LerpPos(target, 0.5f);
+                smoother.LerpRotation(new Vector3(0f, 360f * Mathf.Clamp01(SmoothBezierF), 0f), 0.15f);
+                
+            }
+            else
+            {
+                smoother.LerpPos(TargetPosition, 0.15f);
+                smoother.LerpRotation(targetRotation, 0.15f);
+                smoother.LerpScale(TargetScale, 0.15f);
+            } 
         }
 
         public override void GrafUpdate(float timeStacker)
@@ -208,6 +316,19 @@ namespace RandomBuff.Render.UI
             buffCard.Rotation = smoother.SmoothRotation(timeStacker);
             buffCard.Position = smoother.SmoothPos(timeStacker);
             buffCard.Scale = smoother.SmoothScale(timeStacker);
+        }
+
+        public override void LastAnimatorHandInfo(BuffCardAnimator lastAnimator)
+        {
+            if (lastAnimator is InGameSlotHideAnimator hideAnimator)
+            {
+                usingBezierFlipAnim = true;
+                bezierF = hideAnimator.bezierF;
+            }
+            if (bezierF == 0f)
+            {
+                bezierF -= inGameSlotInteractionManager.IndexInManagedCards(buffCard) * 0.015f;
+            }
         }
     }
 
@@ -924,9 +1045,9 @@ namespace RandomBuff.Render.UI
 
     internal class BuffCardTransformSmoother
     {
-        Vector2 lastPos, pos;
-        Vector3 lastRotation, rotation;
-        float lastScale, scale;
+        public Vector2 lastPos, pos;
+        public Vector3 lastRotation, rotation;
+        public float lastScale, scale;
 
         public BuffCardTransformSmoother(BuffCard buffCard)
         {

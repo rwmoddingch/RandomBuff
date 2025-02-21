@@ -274,6 +274,15 @@ namespace RandomBuff.Core.Game.Settings
             conditions.Remove(condition);
         }
 
+        public void AddCondition(Condition condition)
+        {
+            if (!cantAddMore.Contains(condition.ID))
+                cantAddMore.Add(condition.ID);
+            if (!cantAddMoreTmp.Contains(condition.ID))
+                cantAddMoreTmp.Add(condition.ID);
+            conditions.Add(condition);
+        }
+
         public void ClearCondition()
         {
             cantAddMore.Clear();
@@ -287,11 +296,11 @@ namespace RandomBuff.Core.Game.Settings
         /// 如果非得获取那返回(null,false)
         /// </summary>
         /// <returns></returns>
-        public (Condition condition, bool canGetMore) GetRandomCondition()
+        public (Condition condition, bool canGetMore) GetRandomCondition(List<ConditionID> filtedConditions)
         {
             var list = BuffRegister.GetAllConditionList();
             list.RemoveAll(i => cantAddMore.Contains(i) || cantAddMoreTmp.Contains(i) ||
-                                 !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID));
+                                 !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(gachaTemplate.ID) || filtedConditions.Contains(i));
 
             if (list.Count == 0)
                 return (null, false);

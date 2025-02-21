@@ -334,6 +334,7 @@ namespace RandomBuff.Render.UI
             //    Helper.TraceStack();
 
             lastAnimatorState = currentAniamtorState;
+            var lastAnimator = currentAnimator;
             currentAnimator?.Destroy();
             currentAniamtorState = newState;
 
@@ -407,6 +408,7 @@ namespace RandomBuff.Render.UI
             {
                 BuffPlugin.LogWarning($"No matched animator for state {newState}, please check codes");
             }
+            currentAnimator.LastAnimatorHandInfo(lastAnimator);
         }
 
         public void ResetComponents()

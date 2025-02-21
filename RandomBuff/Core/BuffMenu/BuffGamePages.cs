@@ -7,6 +7,7 @@ using RandomBuff.Core.Entry;
 using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Game.Settings.Conditions;
+using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI;
@@ -263,10 +264,12 @@ namespace RandomBuff.Core.BuffMenu
         SymbolButton randomButton;
         SymbolButton minusButton;
         SymbolButton plusButton;
+        SymbolButton filterButton;
         SimpleImageButton extraInfoButton;
 
         SimpleButton jollyToggleConfigMenu;
 
+        List<ConditionID> filtedConditions = new List<ConditionID>();
         ConditionInstance[] conditionInstances = new ConditionInstance[5];
         GameSetting currentGameSetting;
 
@@ -365,6 +368,10 @@ namespace RandomBuff.Core.BuffMenu
                 subObjects.Add(hiddenToggles[i]);
             }
 
+            filterButton = new SymbolButton(menu, this, "filter", "NEWGAME_DETAIL_FILTER", new Vector2(380f, 250f));
+            filterButton.size = new Vector2(40f, 40f);
+            filterButton.roundedRect.size = filterButton.size;
+            subObjects.Add(filterButton);
             //randomButton = new SymbolButton(menu, this, "Sandbox_Randomize", "NEWGAME_DETAIL_RANDOM", new Vector2(430f, 250f));
             //randomButton.size = new Vector2(40f, 40f);
             //randomButton.roundedRect.size = randomButton.size;
@@ -500,6 +507,10 @@ namespace RandomBuff.Core.BuffMenu
                 UpdateActiveConditionCount(true);
                 menu.PlaySound(SoundID.MENU_Button_Standard_Button_Pressed);
             }
+            else if(message == "NEWGAME_DETAIL_FILTER")
+            {
+                menu.manager.ShowDialog(new ConditionFilterDialog(menu.manager, this));
+            }
         }
 
         void RefreshConditionButtonState()
@@ -533,7 +544,7 @@ namespace RandomBuff.Core.BuffMenu
             activeConditionCount = BuffGameMenuStatics.DefaultConditionNum;
             for (int i = 0; i < activeConditionCount; i++)
             {
-                var result = currentGameSetting.GetRandomCondition();
+                var result = currentGameSetting.GetRandomCondition(filtedConditions);
                 conditionInstances[i] = new ConditionInstance(result.condition, false);
                 canAddAnyCondition = result.canGetMore;
                 if (!result.canGetMore)
@@ -548,10 +559,17 @@ namespace RandomBuff.Core.BuffMenu
         void RandomPickConditionAt(int index, bool toggleHide = false)
         {
             var loadedCondition = conditionInstances[index];
+            var removedCondition = loadedCondition.condition;
 
             currentGameSetting.RemoveCondition(loadedCondition.condition);
-            loadedCondition.condition = currentGameSetting.GetRandomCondition().condition;
-            if (toggleHide)
+            loadedCondition.condition = currentGameSetting.GetRandomCondition(filtedConditions).condition;
+
+            if(loadedCondition.condition == null)//无法获取则恢复为上一个condition
+            {
+                currentGameSetting.AddCondition(removedCondition);
+                loadedCondition.condition = removedCondition;
+            }
+            else if (toggleHide)
             {
                 loadedCondition.hide = !loadedCondition.hide;
                 BuffPlugin.Log($"{index} Toggle hide : {conditionInstances[index].hide}");
@@ -573,7 +591,7 @@ namespace RandomBuff.Core.BuffMenu
                     return;
                 activeConditionCount++;
 
-                var result = currentGameSetting.GetRandomCondition();
+                var result = currentGameSetting.GetRandomCondition(filtedConditions);
                 canAddAnyCondition = result.canGetMore;
                 conditionInstances[activeConditionCount - 1] = new ConditionInstance(result.condition, false);
                 BuffPlugin.Log($"Add new condition, {result}, {canAddAnyCondition}");
@@ -621,6 +639,8 @@ namespace RandomBuff.Core.BuffMenu
             Helper.ClearSelectables(minusButton);
             Helper.ClearSelectables(plusButton);
             Helper.ClearSelectables(backButton);
+            Helper.ClearSelectables(filterButton);
+
             for (int i = 0;i < conditionButtons.Length; i++)
             {
                 Helper.ClearSelectables(conditionButtons[i]);
@@ -655,6 +675,8 @@ namespace RandomBuff.Core.BuffMenu
                 plusButton.nextSelectable[3] = startGameButton;
                 if (menu.selectedObject == minusButton)
                     menu.selectedObject = plusButton;
+                filterButton.nextSelectable[2] = plusButton;
+                plusButton.nextSelectable[0] = filterButton;
             }
             else if (plusButton.buttonBehav.greyedOut)
             {
@@ -663,6 +685,8 @@ namespace RandomBuff.Core.BuffMenu
                 minusButton.nextSelectable[3] = startGameButton;
                 if (menu.selectedObject == plusButton)
                     menu.selectedObject = minusButton;
+                filterButton.nextSelectable[2] = minusButton;
+                minusButton.nextSelectable[0] = filterButton;
             }
             else
             {
@@ -674,17 +698,23 @@ namespace RandomBuff.Core.BuffMenu
 
                 minusButton.nextSelectable[3] = startGameButton;
                 plusButton.nextSelectable[3] = startGameButton;
+
+                filterButton.nextSelectable[2] = minusButton;
+                minusButton.nextSelectable[0] = filterButton;
             }
             Helper.LinkEmptyToSelf(minusButton);
             Helper.LinkEmptyToSelf(plusButton);
 
+            filterButton.nextSelectable[0] = startGameButton;
+            filterButton.nextSelectable[1] = topSelectable;
+            filterButton.nextSelectable[3] = startGameButton;
 
             startGameButton.nextSelectable[0] = settingButton;
             startGameButton.nextSelectable[1] = minusButton;
             startGameButton.nextSelectable[2] = extraInfoButton;
             Helper.LinkEmptyToSelf(startGameButton);
 
-            settingButton.nextSelectable[1] = backButton;
+            settingButton.nextSelectable[1] = filterButton;
             settingButton.nextSelectable[2] = startGameButton;
             Helper.LinkEmptyToSelf(settingButton);
 
@@ -696,6 +726,18 @@ namespace RandomBuff.Core.BuffMenu
                 jollyToggleConfigMenu.nextSelectable[0] = backButton;
                 jollyToggleConfigMenu.nextSelectable[3] = backButton.nextSelectable[3];
                 Helper.LinkEmptyToSelf(jollyToggleConfigMenu);
+            }
+        }
+
+        internal void SetFiltedConditions(ConditionID id, bool filted)
+        {
+            if(!filted && filtedConditions.Contains(id))
+            {
+                filtedConditions.Remove(id);
+            }
+            else if(filted && !filtedConditions.Contains(id))
+            {
+                filtedConditions.Add(id);
             }
         }
 
@@ -715,6 +757,199 @@ namespace RandomBuff.Core.BuffMenu
                 if (hide)
                     return "HIDE";
                 return condition.DisplayName(Custom.rainWorld.inGameTranslator);
+            }
+        }
+
+        internal class ConditionFilterDialog : Dialog, CheckBox.IOwnCheckBox
+        {
+            static float halfSelectionWidth = 200f;
+            static float selectionHeight = 35f;
+            static float selectAnimationWidth = 600f;
+            bool[] conditionEnabled;
+            ConditionID[] conditionIDs;
+            CheckBox[] checkBoxes;
+            MenuLabel[] conditionNames;
+
+            CardTitle title;
+            SimpleButton closeButton;
+            CustomFSprite dark;
+
+            BuffNewGameDetailPage buffNewGameDetailPage;
+
+            float[] paramF;
+            float[] lastParamF;
+
+            bool closing;
+
+            Vector2 topAnchor, bottomAnchor;
+
+            public ConditionFilterDialog(ProcessManager manager, BuffNewGameDetailPage buffNewGameDetailPage)
+            : base(manager)
+            {
+                this.buffNewGameDetailPage = buffNewGameDetailPage;
+                Vector2 screenSize = Custom.rainWorld.screenSize;
+                topAnchor = new Vector2(screenSize.x * 4 / 5, screenSize.y - 100f);
+                bottomAnchor = new Vector2(topAnchor.x, 100f);
+
+
+                dark = new CustomFSprite("pixel");
+                pages[0].Container.AddChild(dark);
+
+                dark.MoveVertice(0, new Vector2(screenSize.x / 9f, 0f));
+                dark.MoveVertice(1, new Vector2(screenSize.x / 9f, screenSize.y));
+                dark.MoveVertice(2, new Vector2(screenSize.x + 20f, screenSize.y));
+                dark.MoveVertice(3, new Vector2(screenSize.x + 20f, 0f));
+
+                dark.verticeColors[1] = dark.verticeColors[0] = new Color(0f, 0f, 0f, 0f);
+                dark.verticeColors[2] = dark.verticeColors[3] = new Color(0f, 0f, 0f, 0f);
+
+
+                var allConditionIDs = BuffRegister.GetAllConditionList();
+                allConditionIDs.RemoveAll(i => !BuffRegister.GetConditionType(i).CanUseInCurrentTemplate(buffNewGameDetailPage.currentGameSetting.gachaTemplate.ID));
+
+                conditionIDs = allConditionIDs.ToArray();
+                conditionEnabled = new bool[conditionIDs.Length];
+                checkBoxes = new CheckBox[conditionIDs.Length];
+                conditionNames = new MenuLabel[conditionIDs.Length];
+
+                paramF = new float[conditionIDs.Length + 2];
+                lastParamF = new float[conditionIDs.Length + 2];
+
+                title = new CardTitle(pages[0].Container, CardTitle.GetNormScale(0.2f), topAnchor + new Vector2(0f, 40f), 0.2f, 0.5f, CardTitle.GetNormFlipCounter(false), CardTitle.GetNormFlipDelay(false), CardTitle.GetNormSpanAdjust(0.5f));
+
+                for (int i = 0;i < conditionIDs.Length; i++)
+                {
+                    var name = BuffResourceString.Get($"ConditionFilter_{BuffRegister.GetConditionTypeName(conditionIDs[i])}", false);
+                    conditionNames[i] = new MenuLabel(this, pages[0], name, topAnchor + new Vector2(-halfSelectionWidth, -i * selectionHeight) + new Vector2(selectAnimationWidth, 0f), new Vector2(0f, 0f), true);
+                    conditionNames[i].label.alignment = FLabelAlignment.Left;
+                    conditionNames[i].label.color = MenuColorEffect.rgbMediumGrey;
+
+                    checkBoxes[i] = new CheckBox(this, pages[0], this, topAnchor + new Vector2(halfSelectionWidth, -i * selectionHeight - 12f) + new Vector2(selectAnimationWidth, 0f), 0f, "", i.ToString());
+
+                    conditionEnabled[i] = !buffNewGameDetailPage.filtedConditions.Contains(conditionIDs[i]);
+
+                    pages[0].subObjects.Add(conditionNames[i]);
+                    pages[0].subObjects.Add(checkBoxes[i]);
+                }
+
+                title.RequestSwitchTitle(BuffResourceString.Get("BuffNewGameDetailPage_FilterTitle"));
+
+                closeButton = new SimpleButton(this, pages[0], Translate("CLOSE"), "CLOSE", bottomAnchor - new Vector2(50f, 0f) + new Vector2(selectAnimationWidth, 0f), new Vector2(100f, 35f));
+                pages[0].subObjects.Add(closeButton);
+
+                for (int i = 0; i < paramF.Length; i++)
+                {
+                    paramF[i] -= i * 0.025f;
+                    lastParamF[i] = paramF[i];
+                }
+
+            }
+
+            public override void Update()
+            {
+                base.Update();
+
+                title.Update();
+
+                for(int i = 0;i < paramF.Length;i++)
+                    lastParamF[i] = paramF[i];
+
+                if (!closing)
+                {
+                    for (int i = 0; i < paramF.Length; i++)
+                        paramF[i] = Mathf.Min(1f, paramF[i] + 1/40f);
+                }
+                else
+                {
+                    for (int i = 0; i < paramF.Length; i++)
+                        paramF[i] = Mathf.Max(0f, paramF[i] - 1 / 40f);
+                    if (lastParamF.Last() == 0)
+                    {
+                        manager.StopSideProcess(this);
+                    }
+                }
+
+                bool oneMoreConditionNotFilted = false;
+                int filtedCount = 0;
+
+                for (int i = 0; i < conditionIDs.Length; i++)
+                {
+                    if (conditionEnabled[i])
+                    {
+                        filtedCount++;
+                    }    
+                }
+                oneMoreConditionNotFilted = filtedCount > 1;
+
+                for (int i = 0;i < conditionIDs.Length; i++)
+                {
+                    conditionNames[i].pos = topAnchor + new Vector2(-halfSelectionWidth, -i * selectionHeight) + new Vector2(selectAnimationWidth * (1f - Helper.EaseInOutCubic(Mathf.Clamp01(paramF[i + 1]))), 0f);
+                    checkBoxes[i].pos = topAnchor + new Vector2(halfSelectionWidth, -i * selectionHeight - 12f) + new Vector2(selectAnimationWidth * (1f - Helper.EaseInOutCubic(Mathf.Clamp01(paramF[i + 1]))), 0f);
+                    checkBoxes[i].inactive = closing || (!oneMoreConditionNotFilted && conditionEnabled[i]);
+                }
+
+                closeButton.pos = bottomAnchor - new Vector2(50f, 0f) + new Vector2(400f * (1f - Helper.EaseInOutCubic(Mathf.Clamp01(paramF.Last()))), 0f);
+            }
+
+            public override void GrafUpdate(float timeStacker)
+            {
+                base.GrafUpdate(timeStacker);
+                title.GrafUpdate(timeStacker);
+
+                float f = Mathf.Lerp(lastParamF[0], paramF[0], timeStacker);
+                dark.verticeColors[2] = new Color(0f, 0f, 0f, Mathf.Clamp01(paramF[0]));
+                dark.verticeColors[3] = dark.verticeColors[2];
+                dark.UpdateLocalVertices();
+            }
+
+            public bool GetChecked(CheckBox box)
+            {
+                return conditionEnabled[checkBoxes.IndexOf(box)];
+            }
+
+            public void SetChecked(CheckBox box, bool c)
+            {
+                bool oneMoreConditionNotFilted = false;
+                int filtedCount = 0;
+
+                for (int i = 0; i < conditionIDs.Length; i++)
+                {
+                    if (conditionEnabled[i])
+                    {
+                        filtedCount++;
+                    }
+                }
+                oneMoreConditionNotFilted = filtedCount > 1;
+                if (!oneMoreConditionNotFilted && conditionEnabled[checkBoxes.IndexOf(box)])
+                    return;
+                conditionEnabled[checkBoxes.IndexOf(box)] = c;
+            }
+
+            public override void Singal(MenuObject sender, string message)
+            {
+                base.Singal(sender, message);
+                if(message == "CLOSE")
+                {
+                    closing = true;
+                    title.RequestSwitchTitle("");
+
+                    for (int i = 0; i < paramF.Length; i++)
+                    {
+                        paramF[i] += i * 0.025f;
+                        lastParamF[i] = paramF[i];
+                    }
+
+                    for(int i = 0;i < conditionIDs.Length; i++)
+                    {
+                        buffNewGameDetailPage.SetFiltedConditions(conditionIDs[i], !conditionEnabled[i]);
+                    }
+                    closeButton.inactive = true;
+                }
+            }
+
+            public override void ShutDownProcess()
+            {
+                base.ShutDownProcess();
             }
         }
     }
