@@ -225,7 +225,7 @@ namespace RandomBuff.Core.BuffMenu
                     new Vector2(1056f, y), new Vector2(110f, 30f)));
             y -= 40f;
 
-            page.subObjects.Add(manualButton = new SimpleButton(this, page, base.Translate("MANUAL"), "MANUAL", new Vector2(1056f, y), new Vector2(110f, 30f)));
+            page.subObjects.Add(manualButton = new SimpleButton(this, page, BuffResourceString.Get("MANUAL"), "MANUAL", new Vector2(1056f, y), new Vector2(110f, 30f)));
 
 
             page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));

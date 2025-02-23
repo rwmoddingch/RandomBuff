@@ -62,6 +62,7 @@ Notification_TooManyMods_Info|看起来你启用了很多的mod，请注意这�
 //挨我服了我说不明白人话谁改改这个
 
 //BuffMenu:
+MANUAL|手册
 Survival|生存模式
 Normal|普通模式
 Quick|快速模式
@@ -361,6 +362,7 @@ SleepMenu_UnStack_Title|选择一张卡删除
 
 
 //CardPocket
+CardPocket_PackButton|卡包
 CardPocket_StackButton|增加叠加
 CardPocket_UnstackButton|减少叠加
 CardPocket_ConflictLabel|当前buff与已选择的buff存在冲突
