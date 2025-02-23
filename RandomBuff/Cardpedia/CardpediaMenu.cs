@@ -264,7 +264,7 @@ namespace RandomBuff.Cardpedia
             pages[0].subObjects.Add(sheetPage);
             pages[0].mouseCursor.cursorSprite.MoveToFront();
 
-            packMenu = new PackMenu(manager, new Vector2(80f, 70f), sheetPage.enabledPlugins)
+            packMenu = new PackMenu(manager, new Vector2(80f, 70f), () => sheetPage.enabledPlugins)
             {
                 OnTogglePackCallBack = (lst) =>
                 {

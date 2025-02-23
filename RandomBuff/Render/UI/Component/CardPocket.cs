@@ -33,7 +33,8 @@ namespace RandomBuff.Render.UI.Component
         public Action<bool> toggleShowCallBack;
         public SlugcatStats.Name bindSlug;
 
-        public PackMenu packMenu;
+        //public PackMenu packMenu;
+        public PackMenuDialog packMenuDialog;
 
         bool show = false;
         FContainer container;
@@ -51,7 +52,7 @@ namespace RandomBuff.Render.UI.Component
         public FContainer BottomContainer_1 => bottomContainer_1;
         public FContainer BottomContainer_2 => bottomContainer_2;
         public bool Show => show;
-        public bool EnableInput => packMenu == null || !packMenu.ShowPack;
+        public bool EnableInput => packMenuDialog == null /*|| !packMenu.ShowPack*/;
         public string Title
         {
             get => title;
@@ -133,22 +134,22 @@ namespace RandomBuff.Render.UI.Component
                         container.alpha = 1f;
 
 
-                        if (packMenu == null)
-                        {
-                            packMenu = new PackMenu(Custom.rainWorld.processManager, new Vector2(40f, 40f), currentEnabledBuffPlugins, Container);
-                            Custom.rainWorld.processManager.sideProcesses.Add(packMenu);
-                            packMenu.OnTogglePackCallBack = (lst) =>
-                            {
-                                slot.RecaculateBuffRolls(lst, true);
-                            };
+                        //if (packMenu == null)
+                        //{
+                        //    packMenu = new PackMenu(Custom.rainWorld.processManager, new Vector2(40f, 40f), () => currentEnabledBuffPlugins, Container);
+                        //    Custom.rainWorld.processManager.sideProcesses.Add(packMenu);
+                        //    packMenu.OnTogglePackCallBack = (lst) =>
+                        //    {
+                        //        slot.RecaculateBuffRolls(lst, true);
+                        //    };
 
-                            for (int i = 0; i < 5; i++)
-                            {
-                                packMenu.Update();
-                                packMenu.GrafUpdate(1f);
-                            }
+                        //    for (int i = 0; i < 5; i++)
+                        //    {
+                        //        packMenu.Update();
+                        //        packMenu.GrafUpdate(1f);
+                        //    }
 
-                        }
+                        //}
                     });
             }
             else
@@ -167,11 +168,9 @@ namespace RandomBuff.Render.UI.Component
                        slot.SetShow(false);
                        container.alpha = 0f;
                    });
-                if(packMenu != null)
+                if(packMenuDialog != null)
                 {
-                    packMenu.ShutDownProcess();
-                    Custom.rainWorld.processManager.sideProcesses.Remove(packMenu);
-                    packMenu = null;
+                    packMenuDialog.Singal(null, "Hide_Pack");
                 }
             }
         }
@@ -220,6 +219,23 @@ namespace RandomBuff.Render.UI.Component
             slot?.RecaculateConflictState();
         }
 
+        public void ShowPackMenu()
+        {
+            packMenuDialog = new PackMenuDialog("", Custom.rainWorld.processManager, slot.packButton.pos + new Vector2(-300f, 0f), true, currentEnabledBuffPlugins)
+            {
+                OnTogglePackCallBack = (lst) =>
+                {
+                    slot.RecaculateBuffRolls(lst, true);
+                },
+                ShutDownCallBack = () =>
+                {
+                    packMenuDialog = null;
+                }
+            };
+            Custom.rainWorld.processManager.ShowDialog(packMenuDialog);
+
+        }
+
         public void Destroy()
         {
             container.RemoveFromContainer();
@@ -229,11 +245,9 @@ namespace RandomBuff.Render.UI.Component
             symbolContainer.RemoveAllChildren();
             slot.Destory();
 
-            if (packMenu != null)
+            if (packMenuDialog != null)
             {
-                packMenu.ShutDownProcess();
-                Custom.rainWorld.processManager.sideProcesses.Remove(packMenu);
-                packMenu = null;
+                Custom.rainWorld.processManager.StopSideProcess(packMenuDialog);
             }
         }
 
@@ -265,6 +279,7 @@ namespace RandomBuff.Render.UI.Component
         public TitleRect titleRect;
         public List<SideSingleSelectButton> buffTypeSwitchButtons = new List<SideSingleSelectButton>();
         public SideSingleSelectButton closeButton;
+        public SideSingleSelectButton packButton;
 
         public SideSingleSelectButton unstackButton;
         public SideSingleSelectButton stackButton;
@@ -349,6 +364,16 @@ namespace RandomBuff.Render.UI.Component
                 buffTypeSwitchButtons.Add(newButton);
                 n++;
             }
+
+            packButton = new SideSingleSelectButton(pocket.BottomContainer_2, rectSprite.pos + new Vector2(0f, CardPocket.gap + buttonWidth), buttonWidth, BuffResourceString.Get("CardPocket_PackButton"), "Open_Pack", -90f)
+            {
+                selectedAction = (s) =>
+                {
+                    pocket.ShowPackMenu();
+                    packButton.SetSelected(false);
+                }
+            };
+            
 
             closeButton = new SideSingleSelectButton(pocket.BottomContainer_2, rectSprite.pos + new Vector2(pocket.size.x - CardPocket.gap - 50f, rectSprite.size.y), 50f, "X", "")
             {
@@ -527,6 +552,9 @@ namespace RandomBuff.Render.UI.Component
             closeButton.Update();
             closeButton.enableInput = pocket.EnableInput;
 
+            packButton.Update();
+            packButton.enableInput = pocket.EnableInput;
+
             stackButton.Update();
             stackButton.enableInput = pocket.EnableInput;
             
@@ -541,6 +569,7 @@ namespace RandomBuff.Render.UI.Component
                 closeButton.OnMouseLeftClick();
                 stackButton.OnMouseLeftClick();
                 unstackButton.OnMouseLeftClick();
+                packButton.OnMouseLeftClick();
             }
         }
 
@@ -552,6 +581,7 @@ namespace RandomBuff.Render.UI.Component
             foreach (var button in buffTypeSwitchButtons)
                 button.GrafUpdate(timeStacker);
             closeButton.GrafUpdate(timeStacker);
+            packButton.GrafUpdate(timeStacker);
             stackButton.GrafUpdate(timeStacker);
             unstackButton.GrafUpdate(timeStacker);
         }

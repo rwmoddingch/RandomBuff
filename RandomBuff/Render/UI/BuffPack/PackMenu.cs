@@ -22,23 +22,15 @@ namespace RandomBuff.Render.UI.BuffPack
         Vector2 hidePos;
         Vector2 buttonPackShowPos;
 
-        MenuTabWrapper menuTabWrapper;
-
-        OpScrollBox packButtonScrollBox;
-        List<PackButton> packButtons;
-
         SimpleButton showHideButton;
 
-
-        TickAnimCmpnt showAnim;
-
-        bool _showPack;
-        public bool ShowPack => _showPack;
-
         public Action<List<BuffPluginInfo>> OnTogglePackCallBack;
+        public Func<List<BuffPluginInfo>> GetCurrentPlugins;
 
-        public PackMenu(ProcessManager manager, Vector2 showPos, List<BuffPluginInfo> enabledPlugins = null, FContainer ownerContainer = null) : base(manager, BuffEnums.ProcessID.BuffPackMenu)
+        public PackMenu(ProcessManager manager, Vector2 showPos, Func<List<BuffPluginInfo>> GetCurrentPlugins, FContainer ownerContainer = null) : base(manager, BuffEnums.ProcessID.BuffPackMenu)
         {
+            this.GetCurrentPlugins = GetCurrentPlugins;
+
             if(ownerContainer != null)
             {
                 container.RemoveFromContainer();
@@ -51,145 +43,34 @@ namespace RandomBuff.Render.UI.BuffPack
 
             pages.Add(new Page(this, null, "PackPage", 0));
 
-            menuTabWrapper = new MenuTabWrapper(this, pages[0]);
-            pages[0].subObjects.Add(menuTabWrapper);
+          
             float sizeY = 0f;
-
-            if(enabledPlugins == null)
-                enabledPlugins = new List<BuffPluginInfo>();
-
-            packButtons = new List<PackButton>();
-            foreach (var pluginInfo in BuffConfigManager.PluginInfos.Values.Where(i => i.Enabled))
-            {
-                var packButton = new PackButton(Vector2.zero, packButtonSize, pluginInfo, false, true)
-                {
-                    Enabled = enabledPlugins.Contains(pluginInfo),
-                    ToggleCallBack = OnPackButtonClick
-                };
-                packButtons.Add(packButton);
-                new UIelementWrapper(menuTabWrapper, packButton);
-                sizeY += packButtonSize.y + 10f;
-            }
 
             sizeY = Mathf.Max(sizeY, 400f);
 
-            new UIelementWrapper(menuTabWrapper, packButtonScrollBox = new OpScrollBox(hidePos, ScrollBoxHideSize, sizeY, hasSlideBar: false));
-
-            float anchorY = sizeY;
-            foreach (var button in packButtons)
-            {
-                anchorY -= button.size.y;
-                anchorY -= 5f;
-                button.SetPos(new Vector2(10f, anchorY));
-                packButtonScrollBox.AddItems(button);
-                anchorY -= 5f;
-            }
 
             showHideButton = new SimpleButton(this, pages[0], BuffResourceString.Get("PackMenu_Show"), "Show_Pack", showPos, ScrollBoxHideSize);
             pages[0].subObjects.Add(showHideButton);
-            packButtonScrollBox.Hide();
-            foreach (var button in packButtons)
-                button.Hide();
         }
 
-        public void OnPackButtonClick()
-        {
-            List<BuffPluginInfo> enabledPlugins = new List<BuffPluginInfo>();
-
-            foreach(PackButton button in packButtons)
-            {
-                if (button.Enabled)
-                    enabledPlugins.Add(button.pluginInfo);
-            }
-
-            OnTogglePackCallBack?.Invoke(enabledPlugins);
-        }
-
-        public override void Update()
-        {
-            base.Update();
-        }
 
         public override void Singal(MenuObject sender, string message)
         {
             base.Singal(sender, message);
             if(message == "Show_Pack")
             {
-                _showPack = true;
-
-                int lowBound = 0;
-                if (showAnim != null)
+                manager.ShowDialog(new PackMenuDialog("", manager, showPos, false, GetCurrentPlugins.Invoke())
                 {
-                    lowBound = showAnim.current;
-                    showAnim.Destroy();
-                }
-                
-                showAnim = AnimMachine.GetTickAnimCmpnt(lowBound, 20, autoDestroy: true).BindActions(
-                OnAnimStart:(t) =>
-                {
-                    packButtonScrollBox.pos = showPos;
-                    packButtonScrollBox.lastScreenPos = showPos + packButtonScrollBox.Owner.pos;
-                    packButtonScrollBox.size = ScrollBoxHideSize;
-                    packButtonScrollBox.Update();
-                    packButtonScrollBox.GrafUpdate(1f);
-                    packButtonScrollBox.Show(); 
-                    foreach (var button in packButtons)
-                        button.Show();
-                },
-                OnAnimGrafUpdate: (t, f) =>
-                {
-                    packButtonScrollBox.size = Vector2.Lerp(ScrollBoxHideSize, ScrollBoxShowSize, t.Get());
-                    showHideButton.pos = Vector2.Lerp(showPos, buttonPackShowPos, t.Get());
-                }, 
-                OnAnimFinished:(t) =>
-                {
-                    showAnim = null;
-                    packButtonScrollBox.size = ScrollBoxShowSize;
-                    showHideButton.signalText = "Hide_Pack";
-                    showHideButton.menuLabel.text = BuffResourceString.Get("PackMenu_Hide");
-                    showHideButton.pos = buttonPackShowPos;
-
-                    packButtonScrollBox.Update();
-                    packButtonScrollBox.GrafUpdate(1f);
-                }).BindModifier(Helper.EaseInOutCubic);
-            }
-            else if(message == "Hide_Pack")
-            {
-                int lowBound = 0;
-                if (showAnim != null)
-                {
-                    lowBound = showAnim.current;
-                    showAnim.Destroy();
-                }
-                showAnim = AnimMachine.GetTickAnimCmpnt(lowBound, 20, autoDestroy: true).BindActions(OnAnimGrafUpdate: (t, f) =>
-                {
-                    packButtonScrollBox.size = Vector2.Lerp(ScrollBoxShowSize, ScrollBoxHideSize, t.Get());
-                    showHideButton.pos = Vector2.Lerp(buttonPackShowPos, showPos, t.Get());
-                }, OnAnimFinished: (t) =>
-                {
-                    packButtonScrollBox.pos = hidePos;
-                    packButtonScrollBox.lastScreenPos = hidePos + packButtonScrollBox.Owner.pos;
-                    showAnim = null;
-                    packButtonScrollBox.size = ScrollBoxHideSize;
-                    showHideButton.signalText = "Show_Pack";
-                    showHideButton.menuLabel.text = BuffResourceString.Get("PackMenu_Show");
-                    showHideButton.pos = showPos;
-                    _showPack = false;
-
-                    packButtonScrollBox.Update();
-                    packButtonScrollBox.GrafUpdate(1f);
-                    packButtonScrollBox.Hide();
-                    foreach (var button in packButtons)
-                        button.Hide();
-
-                }).BindModifier(Helper.EaseInOutCubic);
+                    ShutDownCallBack = () => container.isVisible = true,
+                    OnTogglePackCallBack = this.OnTogglePackCallBack
+                });
+                container.isVisible = false;
             }
         }
 
 
         public override void ShutDownProcess()
         {
-            menuTabWrapper.RemoveSprites();
             base.ShutDownProcess();
         }
     }
