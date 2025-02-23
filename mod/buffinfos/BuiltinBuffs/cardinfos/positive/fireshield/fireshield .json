@@ -1,0 +1,20 @@
+{
+  "FaceName": "FireShield ",
+  "BuffID": "FireShield ",
+  "BuffType": "Positive",
+  "BuffProperty": "Special",
+  "Triggerable": true,
+  "Stackable": true,
+  "Color": "E3AB4E",
+  "Tag": [ "Shield" ],
+  "MaxStackLayers": 3,
+
+  "Chinese": {
+    "BuffName": "火焰护盾",
+    "Description": "前置为温度；你周围生成由旋转火球构成的护盾，生物位于火球附近时，高温条快速增加，直至开始燃烧。同时，寒冷离你远去。不过当你浸没在水中时，护盾会暂时消失。按下你设置的按键以开启和关闭护盾。"
+  },
+  "English": {
+    "BuffName": "Fire Shield ",
+    "Description": "Bind with Temperature; A circle of rotating fireballs is appears around slugcat. When a creature touches them, they begin to burn. Fireballs disappear temporarily in water and can be turned on or off at will.Trigger to turn on and off the sheild"
+  }
+}

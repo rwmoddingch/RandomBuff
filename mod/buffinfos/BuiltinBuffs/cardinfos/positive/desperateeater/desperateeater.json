@@ -1,0 +1,17 @@
+{
+    "FaceName": "desperateeater",
+    "BuffID" : "DesperateEater",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "E90000",
+
+    "Chinese" : {
+        "BuffName" : "饥不择食",
+        "Description" : "挨饿状态下，玩家可以像食用可食用物品一样啃食大部分非食物物品（大型尸体除外）。"
+    },
+    "English" : {
+        "BuffName" : "Desperate Eater",
+        "Description" : "When starving, slugcat can consume non edible items like rocks and spears for varying food amounts."
+    }
+}

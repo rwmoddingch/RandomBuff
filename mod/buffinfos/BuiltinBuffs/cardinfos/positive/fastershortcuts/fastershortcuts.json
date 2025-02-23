@@ -1,0 +1,17 @@
+{
+    "FaceName": "fastershortcuts",
+    "ID": "FasterShortCuts",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#ffffff",
+    "Chinese":{
+        "BuffName":"顺滑管道",
+        "Description":"玩家可以以更快的速度完成管道移动"
+    },
+    "English":{
+        "BuffName":"Faster Shortcuts",
+        "Description":"Slugcat travels through pipes significantly faster."
+    }
+}

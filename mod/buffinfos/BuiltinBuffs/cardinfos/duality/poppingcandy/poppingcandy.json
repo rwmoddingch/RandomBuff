@@ -1,0 +1,17 @@
+{
+    "FaceName": "poppingcandy",
+    "BuffID" : "PoppingCandy",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFE7B0",
+    
+    "Chinese" : {
+        "BuffName" : "跳跳糖",
+        "Description" : "食用神经元以后玩家会小范围震颤跳动1秒"
+    },
+    "English": {
+        "BuffName" : "Popping Candy",
+        "Description" : "Eating a neuronfly gives your slugcat a short seizure."
+    }
+}

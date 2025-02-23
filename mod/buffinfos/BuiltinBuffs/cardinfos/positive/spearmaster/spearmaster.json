@@ -1,0 +1,17 @@
+{
+    "FaceName": "spearmaster",
+    "BuffID" : "SpearMaster",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "矛大师",
+        "Description" : "可以将两个普通矛合成更高级的矛（电矛炸矛随机），并且每轮回会刷新更多矛"
+    },
+    "English" : {
+        "BuffName" : "SpearMaster",
+        "Description" : "Allows slugcat to craft two spears into an explosive or electric spear, causes more spears to spawn each cycle."
+    }
+}

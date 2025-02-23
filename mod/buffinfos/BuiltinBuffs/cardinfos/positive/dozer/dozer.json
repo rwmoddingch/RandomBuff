@@ -1,0 +1,17 @@
+{
+    "FaceName": "dozer",
+    "BuffID" : "Dozer",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFC88D",
+
+    "Chinese" : {
+        "BuffName" : "推土机",
+        "Description" : "玩家进行高速移动时会以大力推开挡路的实体"
+    },
+    "English" : {
+        "BuffName" : "Dozer",
+        "Description" : "When moving at high speeds, slugcat will push creatures in it's path with significant force."
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "FaceName": "bouncespear",
+    "BuffID" : "BounceSpear",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "74D8FF",
+
+    "Chinese" : {
+        "BuffName" : "弹射矛",
+        "Description" : "使普通矛和电矛具有弹射效果，命中一个目标后会射向最近的生物"
+    },
+    "English" : {
+        "BuffName" : "BounceSpear",
+        "Description" : "Causes normal and electric spears to ricochet off creatures at other nearby creatures."
+    }
+}

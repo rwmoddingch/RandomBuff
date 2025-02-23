@@ -1,0 +1,17 @@
+{
+    "FaceName": "IntenseSituation",
+    "BuffID": "IntenseSituation",
+    "BuffType": "Positive",
+    "BuffProperty": "Normal",
+    "Triggerable": false,
+    "Color": "ED1C24",
+  
+    "Chinese": {
+      "BuffName": "紧张局势",
+      "Description": "距离有敌意的生物越近，投矛伤害越高，投掷速度越快，移动速度越快"
+    },
+    "English": {
+      "BuffName": "Intense Situation",
+      "Description": "The closer slugcat gets to a hostile creature, the higher it's combat stats become."
+    }
+  }

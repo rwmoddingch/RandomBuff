@@ -1,0 +1,19 @@
+{
+  "FaceName": "HomingShots",
+  "BuffID": "HomingShots",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+  "MaxStackLayers": 3,
+
+  "Chinese": {
+    "BuffName": "追踪法术",
+    "Description": "你的所有投掷物现在会轻微追踪敌人。"
+  },
+  "English": {
+    "BuffName": "Homing Shots",
+    "Description": "Slugcat's thrown projectiles will home slightly towards creatures."
+  }
+}

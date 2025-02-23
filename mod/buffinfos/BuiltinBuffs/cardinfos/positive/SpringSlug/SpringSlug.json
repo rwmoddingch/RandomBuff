@@ -1,0 +1,18 @@
+{
+    "FaceName": "SpringSlug",
+    "ID": "SpringSlugID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#282a36",
+    "Conflict": [ "UpsideDown" ],
+    "Chinese":{
+        "BuffName":"弹力蛞蝓",
+        "Description":"摔落后会以一半的速度弹起"
+    },
+    "English":{
+        "BuffName":"Bouncy Slug",
+        "Description":"When slugcat lands, it bounces off the ground with half of its velocity."
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "FaceName": "SpiderSense",
+    "ID": "SpiderSenseID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "#d2c1ff",
+    "Chinese":{
+        "BuffName":"蜘蛛感应",
+        "Description":"在可以躲避的情况下能自动避开矛击"
+    },
+    "English":{
+        "BuffName":"Spider Sense",
+        "Description":"Slugcat will attempt to automatically dodge an incoming spear."
+    }
+}

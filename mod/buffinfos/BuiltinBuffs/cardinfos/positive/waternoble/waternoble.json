@@ -1,0 +1,17 @@
+{
+    "FaceName": "WaterNoble",
+    "ID": "WaterNobleID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  true,
+    "Color" : "5444b7",
+    "Chinese":{
+        "BuffName":"水中贵族",
+        "Description":"水中获得这张卡数量倍的攻击力"
+    },
+    "English":{
+        "BuffName":"Aquatic Noble",
+        "Description":"When underwater, your throw damage is multiplied by the current stack count of this buff."
+    }
+}

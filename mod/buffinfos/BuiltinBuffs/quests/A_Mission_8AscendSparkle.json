@@ -1,0 +1,17 @@
+{
+    "Name":"Ascend Sparkle",
+    "Color":"A8F156",
+    "ID":"builtin.quest.AscendSparkle",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"TripleAffirmation"
+        }
+    ],
+    "UnlockItem":
+    {
+       "Cosmetic":[
+        "AscendSparkle"
+       ]
+    }
+}

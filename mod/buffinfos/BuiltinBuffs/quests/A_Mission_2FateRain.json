@@ -1,0 +1,17 @@
+{
+    "Name":"Fate Rain",
+    "Color":"FFFFFF",
+    "ID":"builtin.quest.FateRain",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"Strayer"
+        }
+    ],
+    "UnlockItem":
+    {
+       "Cosmetic":[
+        "FateRain"
+       ]
+    }
+}

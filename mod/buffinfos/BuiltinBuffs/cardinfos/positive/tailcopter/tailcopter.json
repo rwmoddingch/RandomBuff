@@ -1,0 +1,17 @@
+{
+    "FaceName": "Tailcopter",
+    "ID": "TailcopterID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "ffe351",
+    "Chinese":{
+        "BuffName":"尾翼直升机",
+        "Description":"连续跳跃可以让尾巴转动起来飞行"
+    },
+    "English":{
+        "BuffName":"Tailcopter",
+        "Description":"By repeatedly jumping, slugcat can use its tail as a propeller and fly."
+    }
+}

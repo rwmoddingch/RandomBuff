@@ -1,0 +1,17 @@
+{
+    "FaceName": "OrbitalRailcannonStrike",
+    "BuffID" : "OrbitalRailcannonStrike",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "轨道炮攻击",
+        "Description" : "主动触发buff且玩家手中仍有空位时，会给予玩家一个只能在本轮回使用的信标，投出后若上方没有遮挡则会在落地时激活轨道炮。轨道炮会自动锁定附近最大的目标并攻击。冷却240秒"
+    },
+    "English" : {
+        "BuffName" : "Orbital Railcannon Strike",
+        "Description" : "When triggered , if slugcat has an open hand grants slugcat a special beacon. When thrown, if there is no ceiling above it, calls down an orbital strike which targets nearby creatures. 4 minute cooldown."
+    }
+}

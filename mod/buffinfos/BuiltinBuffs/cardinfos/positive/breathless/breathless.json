@@ -1,0 +1,18 @@
+{
+  "FaceName": "Breathless",
+  "BuffID": "Breathless",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "屏息静气",
+    "Description": "你被淹没时不会窒息。"
+  },
+  "English": {
+    "BuffName": "Breathless",
+    "Description": "You will no longer drown."
+  }
+}

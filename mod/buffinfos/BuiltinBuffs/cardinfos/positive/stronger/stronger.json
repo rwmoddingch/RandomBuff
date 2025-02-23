@@ -1,0 +1,18 @@
+{
+  "FaceName": "Stronger",
+  "BuffID": "Stronger",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "更强壮",
+    "Description": "你投出的矛伤害增加50%，速度增加25%。"
+  },
+  "English": {
+    "BuffName": "Stronger",
+    "Description": "Increased spear damage by 50% and throw strength by 25%."
+  }
+}

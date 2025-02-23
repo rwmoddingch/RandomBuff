@@ -1,0 +1,17 @@
+{
+    "FaceName": "thor_spower",
+    "BuffID" : "Thor_sPower",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "559EFF",
+
+    "Chinese" : {
+        "BuffName" : "托尔之力",
+        "Description" : "触发后，在当前房间生成一次对玩家无伤害的雷击，并将房间内所有矛转换成电矛。一轮回只能使用一次"
+    },
+    "English" : {
+        "BuffName" : "Thor'sPower",
+        "Description" : "When buff is triggered, summon a lightning strike which converts all spears in the current room into electric spears. Can only be triggered once a cycle"
+    }
+}

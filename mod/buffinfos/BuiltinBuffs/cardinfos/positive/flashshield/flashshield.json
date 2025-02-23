@@ -1,0 +1,19 @@
+{
+  "FaceName": "FlashShield",
+  "BuffID": "FlashShield",
+  "BuffType": "Positive",
+  "BuffProperty": "Special",
+  "Triggerable": true,
+  "Stackable": true,
+  "Color": "E3AB4E",
+  "Tag": [ "Shield" ],
+
+  "Chinese": {
+    "BuffName": "闪光护盾",
+    "Description": "生成发光的能量盾，照亮周围较大面积区域，进入盾内的生物会降低一定移速，并持续受到伤害。按下你设置的按键以开启和关闭护盾。"
+  },
+  "English": {
+    "BuffName": "Flash Shield",
+    "Description": "Generate a glowing energy shield that illuminates a larger area around it. Creatures entering the shield will slow down their movement and continue to suffer damage. Trigger to enable or disable."
+  }
+}

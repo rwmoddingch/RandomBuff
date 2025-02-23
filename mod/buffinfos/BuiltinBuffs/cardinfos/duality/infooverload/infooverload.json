@@ -1,0 +1,17 @@
+{
+    "FaceName": "infooverload",
+    "BuffID" : "InfoOverload",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "ff78f2",
+
+    "Chinese" : {
+        "BuffName" : "信息冗余",
+        "Description" : "将所有非彩色珍珠替换为赞美诗"
+    },
+    "English": {
+        "BuffName" : "Information Overload",
+        "Description" : "All neutral pearls become Halcyon pearls."
+    }
+}

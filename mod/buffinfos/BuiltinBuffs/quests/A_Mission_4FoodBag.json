@@ -1,0 +1,17 @@
+{
+    "Name":"Food Bag",
+    "Color":"f0c197",
+    "ID":"builtin.quest.FoodBag",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"MidnightSnack"
+        }
+    ],
+    "UnlockItem":
+    {
+       "Cosmetic":[
+        "FoodBag"
+       ]
+    }
+}

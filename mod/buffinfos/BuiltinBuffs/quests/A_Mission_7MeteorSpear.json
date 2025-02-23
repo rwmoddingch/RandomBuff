@@ -1,0 +1,17 @@
+{
+    "Name":"Meteor Spear",
+    "Color":"4f2e68",
+    "ID":"builtin.quest.MeteorSpear",
+    "Conditions":[
+        {
+            "Type":"MissionCondition",
+            "MissionID":"DuelsOfSnipers"
+        }
+    ],
+    "UnlockItem":
+    {
+       "Cosmetic":[
+        "MeteorSpear"
+       ]
+    }
+}

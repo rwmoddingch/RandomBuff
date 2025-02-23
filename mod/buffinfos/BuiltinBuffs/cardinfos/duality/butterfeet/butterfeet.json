@@ -1,0 +1,17 @@
+{
+    "FaceName": "butterfeet",
+    "BuffID" : "ButterFeet",
+    "BuffType" : "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFDB78",
+
+    "Chinese" : {
+        "BuffName" : "脚底抹油",
+        "Description" : "玩家行走速度变为原本的1.5倍，但更难转向和停下"
+    },
+    "English" : {
+        "BuffName" : "Butter Feet",
+        "Description" : "Your slugcat walks 50% faster, but its movement becomes slippery!"
+    }
+}

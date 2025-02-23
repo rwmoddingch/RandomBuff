@@ -1,0 +1,18 @@
+{
+  "FaceName": "aggressiveventing",
+  "BuffID": "AggressiveVenting",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": true,
+  "Stackable": false,
+  "Color": "FFEA42",
+
+  "Chinese": {
+    "BuffName": "暴力散热",
+    "Description": "前置为温度；触发时会立刻清空玩家的正温度，并全部转移到附近其他生物上，冷却时间30秒。当玩家的温度打积累到危险值时，buff会自动触发。自动触发时冷却时间45秒。"
+  },
+  "English": {
+    "BuffName": "AggressiveVenting",
+    "Description": "Bind with Temperature; When triggered, it immediately clears the player's positive temperature and transfers it all to other nearby creatures, 30 second cooldown.The buff triggers automatically when the slugcat's temperature reachs a dangerous value. Cooldown is 45 seconds when triggered automatically. "
+  }
+}

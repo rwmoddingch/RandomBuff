@@ -1,0 +1,36 @@
+{"frames": {
+
+"Chesed-D.png":
+{
+	"frame": {"x":0,"y":0,"w":183,"h":168},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":183,"h":168},
+	"sourceSize": {"w":183,"h":168}
+},
+"Chesed-R.png":
+{
+	"frame": {"x":0,"y":168,"w":183,"h":168},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":183,"h":168},
+	"sourceSize": {"w":183,"h":168}
+},
+"Chesed-S.png":
+{
+	"frame": {"x":0,"y":336,"w":183,"h":168},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":183,"h":168},
+	"sourceSize": {"w":183,"h":168}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "ChesedTex.png",
+	"format": "RGBA8888",
+	"size": {"w":183,"h":504},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:5bf0be0a871edeccd1eb6dcda3f99336:81272589ba304c403125ff4f1d7b95b2:5d671ec4348b795d5e05888bd2a81987$"
+}
+}

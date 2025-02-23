@@ -1,0 +1,17 @@
+{
+    "FaceName": "lancethrower",
+    "BuffID" : "LanceThrower",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "FF9E00",
+
+    "Chinese" : {
+        "BuffName" : "掷枪兵",
+        "Description" : "可以蓄力并强力投出矛，造成3倍伤害，可以贯穿附肢和蜥蜴头部。\n只能在地面上进行蓄力，且蓄力时会有较大减速。\n有两种蓄力模式，可在配置中选择：\n模式1：长按攻击键进行蓄力，松开后投掷，此模式会修改原本的投掷逻辑\n模式2：长按配置按键进行蓄力，松开后投掷"
+    },
+    "English": {
+        "BuffName" : "LanceThrower",
+        "Description" : "Slugcats an store up and powerfully throw a spear for 3x damage that can penetrate appendages and lizard heads.\nIt can only be stored up on the ground and has a large slowdown when doing so.\nThere are two storing modes, which can be selected in the cardpedia configuration: \n Mode 1: Hold the throw button to store up, release to throw, this mode will modify the original throwing logic \n Mode 2: Hold the configuration button to store, release to throw"
+    }
+}

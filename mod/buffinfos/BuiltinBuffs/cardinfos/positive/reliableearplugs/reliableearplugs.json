@@ -1,0 +1,17 @@
+{
+    "FaceName": "ReliableEarplugs",
+    "ID": "ReliableEarplugsID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "d94a33",
+    "Chinese":{
+        "BuffName":"可靠的耳塞",
+        "Description":"不会被鞭炮草和炸弹导致耳鸣"
+    },
+    "English":{
+        "BuffName":"Reliable Earplugs",
+        "Description":"Audio is no longer muffled following an explosion."
+    }
+}

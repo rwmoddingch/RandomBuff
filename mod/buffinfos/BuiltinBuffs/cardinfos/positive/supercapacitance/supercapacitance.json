@@ -1,0 +1,22 @@
+{
+    "FaceName": "supercapacitance",
+    "BuffID" : "SuperCapacitance",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "008AF3",
+
+    "MultiLayerFace" : true,
+    "FaceLayer" : 4,
+    "MaxFaceDepth" : 0.6,
+    "FaceBackgroundColor" : "000000",
+
+    "Chinese" : {
+        "BuffName" : "超级电容",
+        "Description" : "受到蜈蚣电击时，玩家免疫其伤害并能把电击转化为电能储存在体内，储存的电能可保存至下个循环。当被其他生物（蜈蚣除外）抓住时，玩家会一次性释放所有电能对抓取者及一定范围内生物造成电击伤害"
+    },
+    "English" : {
+        "BuffName" : "Super Battery",
+        "Description" : "Slugcats are immune to centipede shocks, instead slugcat will store the electricity. If grabbed which charged up, slugcat will release a powerful electric shock with all energy charged which stuns and damages enemies within range."
+    }
+}

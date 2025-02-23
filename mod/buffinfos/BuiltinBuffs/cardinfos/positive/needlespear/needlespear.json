@@ -1,0 +1,17 @@
+{
+    "FaceName": "needlespear",
+    "BuffID" : "NeedleSpear",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFE0DC",
+
+    "Chinese" : {
+        "BuffName" : "面条矛",
+        "Description" : "大面条虫死亡后，可以通过投掷尸体的方式将其当作矛来使用"
+    },
+    "English" : {
+        "BuffName" : "NoodleflySpear",
+        "Description" : "Adult noodlefly corpses act as spears."
+    }
+}

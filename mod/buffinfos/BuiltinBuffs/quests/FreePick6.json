@@ -1,0 +1,17 @@
+{
+    "Name":"FreePick6",
+    "Color":"FFFFFF",
+    "ID":"builtin.quest.FreePick6",
+    "Conditions":[
+        {
+            "Type":"RunCountCondition",
+            "TargetCount":5
+        }
+    ],
+    "UnlockItem":
+    {
+       "FreePick":[
+        "6"
+       ]
+    }
+}

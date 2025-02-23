@@ -1,0 +1,17 @@
+{
+    "FaceName": "superstomach",
+    "ID": "SuperStomach",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "ffffff",
+    "Chinese":{
+        "BuffName":"超级胃袋",
+        "Description":"玩家肚子里可储存更多物品，储存的物品遵守先进后出原则"
+    },
+    "English":{
+        "BuffName":"Super Stomach",
+        "Description":"Slugcat can store more items in their stomach, retrieving items goes from most recent to least recent."
+    }
+}

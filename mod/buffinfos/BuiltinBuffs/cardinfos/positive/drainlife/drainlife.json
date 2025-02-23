@@ -1,0 +1,18 @@
+{
+  "FaceName": "DrainLife",
+  "BuffID": "DrainLife",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "生命汲取",
+    "Description": "每当你对其他生物造成伤害时，根据伤害值回复饱食度。"
+  },
+  "English": {
+    "BuffName": "Drain Life",
+    "Description": "Whenever you deal damage to other creatures, restore food points based on the damage value."
+  }
+}

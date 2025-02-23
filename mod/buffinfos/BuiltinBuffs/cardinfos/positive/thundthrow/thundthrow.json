@@ -1,0 +1,17 @@
+{
+    "FaceName": "thundthrow",
+    "BuffID" : "ThundThrow",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "6459FF",
+
+    "Chinese" : {
+        "BuffName" : "掷地有声",
+        "Description" : "投掷出的石头发生撞击后对撞击点进行一次雷击"
+    },
+    "English" : {
+        "BuffName" : "ThundThrow",
+        "Description" : "Rocks thrown by slugcat summon a lightning strike when they land."
+    }
+}

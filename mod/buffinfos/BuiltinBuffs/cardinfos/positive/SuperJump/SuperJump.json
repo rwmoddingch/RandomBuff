@@ -1,0 +1,17 @@
+{
+    "FaceName": "SuperJump",
+    "ID": "SuperJumpID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  true,
+    "Color" : "ffffff",
+    "Chinese":{
+        "BuffName":"超级跳",
+        "Description":"根据此卡的拥有数来额外提升跳跃高度"
+    },
+    "English":{
+        "BuffName":"Super Jump",
+        "Description":"Increases slugcat jump height."
+    }
+}

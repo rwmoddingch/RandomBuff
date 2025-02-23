@@ -1,0 +1,17 @@
+{
+    "FaceName": "geckostrategy",
+    "BuffID" : "GeckoStrategy",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFFFFF",
+
+    "Chinese" : {
+        "BuffName" : "断尾求生",
+        "Description" : "玩家被其他生物抓住时会自动舍弃尾巴来摆脱抓取，每循环只会生效一次。已获得尾巴直升机或猫经元增益时，该增益不会生效。"
+    },
+    "English" : {
+        "BuffName" : "Tail Escape",
+        "Description" : "When grabbed, slugcat can separate it's tail to escape the creature that grabbed it. Requires a tail to use."
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "FaceName": "flamepurification",
+    "BuffID" : "FlamePurification",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FF2D0E",
+
+    "Chinese" : {
+        "BuffName" : "烈焰净化",
+        "Description" : "前置为温度；地形上燃烧的火焰将可以清除舌草"
+    },
+    "English" : {
+        "BuffName" : "FlamePurification",
+        "Description" : "Bind with Temperature; fire on the ground will destroy wormgrass."
+    }
+}

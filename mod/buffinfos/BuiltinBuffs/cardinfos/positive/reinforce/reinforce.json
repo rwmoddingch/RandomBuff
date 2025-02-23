@@ -1,0 +1,17 @@
+{
+    "FaceName": "reinforce",
+    "BuffID" : "Reinforce",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "3FFFD8",
+
+    "Chinese" : {
+        "BuffName" : "天外援兵",
+        "Description" : "与拾荒的好感达到酋长时，免除拾荒对你的直接友伤，并可以触发buff来召唤一只精英拾荒增援小队。小队一雨循环只能召唤一次。"
+    },
+    "English" : {
+        "BuffName" : "Reinforce",
+        "Description" : "When slugcat is a chieftan, gives it immunity from scav projectiles. Once per cycle, slugcat can summon a scavenger hitsquad to assist in combat."
+    }
+}

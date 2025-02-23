@@ -1,0 +1,18 @@
+{
+    "FaceName": "oribash",
+    "BuffID" : "OriBash",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Stackable" : true,
+    "Color" : "6459FF",
+    "MaxStackLayers": 2,
+    "Chinese" : {
+        "BuffName" : "奥日猛击",
+        "Description" : "靠近生物按鼠标右键或绑定按键选择方向后松开，可以将玩家向对应方向弹射，生物反方向弹射。在堆叠层数大于等于2后可以对物品进行猛击"
+    },
+    "English" : {
+        "BuffName" : "Ori Bash",
+        "Description" : "When close to creature, use your bound key to bash the creature and send it flying."
+    }
+}

@@ -1,0 +1,18 @@
+{
+  "FaceName": "WallNutBowling",
+  "BuffID": "WallNutBowling",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "坚果保龄球",
+    "Description": "你可以持续不断地翻滚，并碾压生物造成伤害，直到松开方向键。"
+  },
+  "English": {
+    "BuffName": "Wall-nut Bowling",
+    "Description": "Slugcat can roll forever and deals damage to anything in its path."
+  }
+}

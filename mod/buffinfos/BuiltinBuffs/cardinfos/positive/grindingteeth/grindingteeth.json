@@ -1,0 +1,18 @@
+{
+  "FaceName": "GrindingTeeth",
+  "BuffID": "GrindingTeeth",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "磨牙",
+    "Description": "如果你不能撕咬生物，则允许你撕咬；否则，每层增加撕咬伤害50%。"
+  },
+  "English": {
+    "BuffName": "Grinding Teeth",
+    "Description": "Gives slugcat the ability to maul a creature, similarly to artificer. If slugcat can already maul, increases the damage by 50% per stack."
+  }
+}

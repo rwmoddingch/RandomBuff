@@ -1,0 +1,17 @@
+{
+    "FaceName": "EmergencyPlatform",
+    "BuffID" : "EmergencyPlatform",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "6459FF",
+
+    "Chinese" : {
+        "BuffName" : "应急平台",
+        "Description" : "激活后会在玩家下方生成一个可以站立的小平台持续10秒，冷却一分钟"
+    },
+    "English" : {
+        "BuffName" : "Emergency Platform",
+        "Description" : "On use, a small platform will be created below slugcat for 10 seconds. 1 minute cooldown"
+    }
+}

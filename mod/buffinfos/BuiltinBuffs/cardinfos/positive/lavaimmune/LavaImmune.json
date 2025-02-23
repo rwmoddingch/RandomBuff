@@ -1,0 +1,18 @@
+{
+  "FaceName": "lavaimmune",
+  "BuffID": "LavaImmune",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "FFBF00",
+
+  "Chinese": {
+    "BuffName": "岩浆免疫",
+    "Description": "所有蛞蝓猫免疫岩浆和酸水的伤害"
+  },
+  "English": {
+    "BuffName": "Lava Immune",
+    "Description": "Makes lava and acid harmless to slugcat."
+  }
+}

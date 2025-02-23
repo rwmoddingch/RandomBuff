@@ -1,0 +1,17 @@
+{
+    "FaceName": "stagnantforcefield",
+    "BuffID" : "StagnantForcefield",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "C2EFFF",
+
+    "Chinese" : {
+        "BuffName" : "凝滞力场",
+        "Description" : "触发卡牌后一段时间内，所有靠近玩家一定距离的物体都会被限制在一定最大速度下。有一定的冷却时间。"
+    },
+    "English" : {
+        "BuffName" : "StagnantForcefield",
+        "Description" : "When triggered, creates a forcefield around slugcat which slows down everything."
+    }
+}

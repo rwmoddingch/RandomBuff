@@ -1,0 +1,18 @@
+{
+  "FaceName": "WaterDancer",
+  "BuffID": "WaterDancer",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "水中舞者",
+    "Description": "首次获取此卡牌时，你的游泳速度和憋气时间增加100%。从第二层开始，每层使你的游泳速度和憋气时间增加50%。"
+  },
+  "English": {
+    "BuffName": "Water Dancer",
+    "Description": "When first acquired, your slugcat's air capacity and swim speed is doubled. Each additional stack increases the effect by 50%."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "FaceName": "PermanentShield",
+  "BuffID": "PermanentShield",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+  "Tag": [ "Shield" ],
+
+  "Chinese": {
+    "BuffName": "永久护盾",
+    "Description": "生成可以偏转投射物的护盾。每次成功偏转后，护盾会暂时消失，在一段时间后恢复。"
+  },
+  "English": {
+    "BuffName": "Permanent Shield",
+    "Description": "Creates a shield around slugcat which deflects spears thrown at it, short cooldown on deflect."
+  }
+}

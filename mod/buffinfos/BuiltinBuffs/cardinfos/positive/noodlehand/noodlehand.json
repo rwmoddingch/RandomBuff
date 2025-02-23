@@ -1,0 +1,17 @@
+{
+    "FaceName": "noodlehand",
+    "BuffID" : "NoodleHand",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFE0DC",
+
+    "Chinese" : {
+        "BuffName" : "面条手",
+        "Description" : "可以拾取到平常两倍远的物体"
+    },
+    "English" : {
+        "BuffName" : "NoodleHand",
+        "Description" : "Doubles slugcat grab range"
+    }
+}

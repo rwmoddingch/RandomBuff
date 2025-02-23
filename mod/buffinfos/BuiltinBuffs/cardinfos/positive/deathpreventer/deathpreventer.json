@@ -1,0 +1,17 @@
+{
+    "FaceName": "deathpreventer",
+    "BuffID" : "DeathFreeMedallion",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFE7B0",
+
+    "Chinese" : {
+        "BuffName" : "免死金牌",
+        "Description" : "抵消一次死亡，并且把玩家传送到安全的地方"
+    },
+    "English" : {
+        "BuffName" : "DeathFreeMedallion",
+        "Description" : "Revives slugcat and teleports it to a safe location once."
+    }
+}

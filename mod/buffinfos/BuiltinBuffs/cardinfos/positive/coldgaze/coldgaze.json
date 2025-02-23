@@ -1,0 +1,19 @@
+{
+  "FaceName": "ColdGaze",
+  "BuffID": "ColdGaze",
+  "BuffType": "Positive",
+  "BuffProperty": "Special",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+  "MaxStackLayers": 3,
+
+  "Chinese": {
+    "BuffName": "冰冷凝视",
+    "Description": "在你注视中的生物将行动困难。此卡牌堆叠到三层以上时，你将变成真正的美杜莎。"
+  },
+  "English": {
+    "BuffName": "Cold Gaze",
+    "Description": "Creatures in the your gaze will have difficulty moving. At 3 stacks, freezes everything in the room until your slugcat leaves."
+  }
+}

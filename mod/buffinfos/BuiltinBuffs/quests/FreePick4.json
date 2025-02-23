@@ -1,0 +1,18 @@
+{
+    "Name":"FreePick4",
+    "Color":"FFFFFF",
+    "ID":"builtin.quest.FreePick4",
+    "Conditions":[
+        {
+            "Type":"CardCondition",
+            "CardType":"Duality",
+            "count":20
+        }
+    ],
+    "UnlockItem":
+    {
+       "FreePick":[
+        "4"
+       ]
+    }
+}

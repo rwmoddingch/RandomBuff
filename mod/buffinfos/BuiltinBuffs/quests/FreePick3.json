@@ -1,0 +1,18 @@
+{
+    "Name":"FreePick3",
+    "Color":"FFFFFF",
+    "ID":"builtin.quest.FreePick3",
+    "Conditions":[
+        {
+            "Type":"CardCondition",
+            "CardType":"Negative",
+            "count":20
+        }
+    ],
+    "UnlockItem":
+    {
+       "FreePick":[
+        "3"
+       ]
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "FaceName": "hardenedmask",
+    "BuffID" : "HardenedMask",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFE0DC",
+
+    "Chinese" : {
+        "BuffName" : "硬质面具",
+        "Description" : "持有面具时，可以弹开面朝方向飞来的矛"
+    },
+    "English" : {
+        "BuffName" : "HardenedMask",
+        "Description" : "Gives vulture masks the ability to deflect spears thrown at slugcat."
+    }
+}

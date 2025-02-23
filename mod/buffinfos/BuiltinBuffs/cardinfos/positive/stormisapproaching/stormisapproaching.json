@@ -1,0 +1,20 @@
+{
+    "FaceName": "stormisapproaching",
+    "BuffID" : "StormIsApproaching",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "03cfff",
+    "MultiLayerFace":true,
+    "FaceLayer":7,
+    "MaxFaceDepth":1.5,
+    "FaceBackgroundColor": "00234e",
+    "Chinese" : {
+        "BuffName" : "风暴迫近",
+        "Description" : "触发卡牌时，时间停止，使用次元斩·绝秒杀当前房间所有玩家外生物，冷却时间240S"
+    },
+    "English" : {
+        "BuffName" : "Storm Is Approaching",
+        "Description" : "When the buuf is triggered, time stops and all creatures other than slugcats in the current room are killed instantly using Dimension Slash. 4 minute cooldown."
+    }
+}

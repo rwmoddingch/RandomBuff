@@ -1,0 +1,17 @@
+{
+    "FaceName": "bountyhunter",
+    "BuffID" : "BountyHunter",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FF9F55",
+
+    "Chinese" : {
+        "BuffName" : "赏金猎人",
+        "Description" : "每过一段时间标记区域内随机一个生物，杀死生物后可以获得一张随机的buff持续到该轮回结束。"
+    },
+    "English" : {
+        "BuffName" : "BountyHunter",
+        "Description" : "Marks a random creature in the current region with an arrow. When the creature is killed, gain a random positive buff for the rest of the cycle."
+    }
+}

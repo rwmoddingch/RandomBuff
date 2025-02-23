@@ -1,0 +1,17 @@
+{
+    "FaceName": "RedEnvelope",
+    "ID": "RedEnvelopeID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  true,
+    "Stackable" :  false,
+    "Color" : "#282a36",
+    "Chinese":{
+        "BuffName":"红包",
+        "Description":"点击拆开红包"
+    },
+    "English":{
+        "BuffName":"Red Envelope",
+        "Description":"Click to open the envelope."
+    }
+}

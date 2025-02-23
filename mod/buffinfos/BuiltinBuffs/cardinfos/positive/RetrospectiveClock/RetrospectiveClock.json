@@ -1,0 +1,17 @@
+{
+    "FaceName": "retrospectiveclock",
+    "BuffID" : "RetrospectiveClock",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "6459FF",
+
+    "Chinese" : {
+        "BuffName" : "回溯之钟",
+        "Description" : "主动触发卡牌，记录玩家触发时的雨循环时间和房间及位置；再次触发卡牌，将恢复雨循环时间至记录点，并将玩家传送至记录的房间及位置(不会重置饱食度和其他卡牌增益效果)；第二次触发后卡牌使用完毕"
+    },
+    "English" : {
+        "BuffName" : "RetrospectiveClock",
+        "Description" : "When triggered, stores slugcat's current position and cycle time. When triggered again, teleports slugcat to it's stored position and sets the rain timer to its stored value."
+    }
+}

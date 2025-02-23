@@ -1,0 +1,17 @@
+{
+    "FaceName": "GoldPower",
+    "ID": "GoldPowerID",
+    "BuffType": "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Stackable" :  false,
+    "Color" : "26ddc8",
+    "Chinese":{
+        "BuffName":"金钱就是力量",
+        "Description":"持有珍珠数量越多,臂力和跳跃能力就越强"
+    },
+    "English":{
+        "BuffName":"Wealth is Power",
+        "Description":"The more pearls slugcat holds, the more powerful its throwing and jump strength becomes."
+    }
+}

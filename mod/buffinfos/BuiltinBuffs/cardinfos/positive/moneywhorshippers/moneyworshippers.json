@@ -1,0 +1,17 @@
+{
+    "FaceName": "moneyworshippers",
+    "BuffID" : "MoneyWorshippers",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "FFD45E",
+
+    "Chinese" : {
+        "BuffName" : "拜金主义者",
+        "Description" : "拾荒不会主动攻击持有珍珠的玩家"
+    },
+    "English" : {
+        "BuffName" : "Money Worshippers",
+        "Description" : "Holding a pearl pacifies any nearby scavengers."
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "FaceName": "shockingspeed",
+    "BuffID" : "ShockingSpeed",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "E4E9BD",
+
+    "Chinese" : {
+        "BuffName" : "闪电之速",
+        "Description" : "危险的放电往往也会带来神秘的速度提升。"
+    },
+    "English" : {
+        "BuffName" : "Shocking Speed",
+        "Description" : "Dangerous electrical discharges tend to also confer mysterious speed boosts."
+    }
+}

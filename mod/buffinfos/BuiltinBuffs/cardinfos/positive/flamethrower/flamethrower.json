@@ -1,0 +1,17 @@
+{
+    "FaceName": "flamethrower",
+    "BuffID" : "FlameThrower",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : true,
+    "Color" : "FF2D0E",
+
+    "Chinese" : {
+        "BuffName" : "喷火器",
+        "Description" : "前置为温度; 触发后获得一个仅能同时存在一个的喷火器（长按拾取键使用），重复召唤将会删去上一个"
+    },
+  "English": {
+    "BuffName": "FlameThrower",
+    "Description": "Bind with Temperature; Trigger spawn a flamethrower which can be used by holding grab. Only one can exist at a time."
+  }
+}

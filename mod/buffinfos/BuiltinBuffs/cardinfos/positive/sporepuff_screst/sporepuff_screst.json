@@ -1,0 +1,18 @@
+{
+  "FaceName": "SporePuff_sCrest",
+  "BuffID": "SporePuff_sCrest",
+  "BuffType": "Positive",
+  "BuffProperty": "Special",
+  "Triggerable": true,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "烟雾果纹章",
+    "Description": "玩家身体周围不断产生孢子烟雾。按下你设置的按键以开启和关闭此卡牌的效果。当你持有蛞蝓仙子或蛛形突变时，此卡牌默认为关闭状态，否则为开启状态。"
+  },
+  "English": {
+    "BuffName": "Spore Puff's Crest",
+    "Description": "Causes a permanent cloud of spore dust around slugcat. Trigger to enable or disable. Pixie Slug and Spider-shaped mutation automatically disable this card."
+  }
+}

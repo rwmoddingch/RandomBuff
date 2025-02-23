@@ -1,0 +1,17 @@
+{
+    "FaceName": "desolatedive",
+    "BuffID" : "DesolateDive",
+    "BuffType" : "Positive",
+    "BuffProperty" : "Normal",
+    "Triggerable" : false,
+    "Color" : "CDD6E4",
+
+    "Chinese" : {
+        "BuffName" : "荒芜俯冲",
+        "Description" : "玩家从高处砸地并按住下时，造成一次房间的颤动，并对撞击点附近一定范围的生物造成眩晕效果"
+    },
+    "English" : {
+        "BuffName" : "DesolateDive",
+        "Description" : "If the player is holding down as they hit the ground from high up, cause a tremor which knocks back and stuns nearby creatures."
+    }
+}
