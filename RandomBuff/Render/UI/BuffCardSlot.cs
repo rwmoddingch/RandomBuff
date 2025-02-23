@@ -558,7 +558,7 @@ namespace RandomBuff.Render.UI
             foreach(var ids in buffIDPages[page])
             {
                 CreateCard(ids);
-                BuffPlugin.LogDebug($"Display buff card {ids} in page {page}");
+                //BuffPlugin.LogDebug($"Display buff card {ids} in page {page}");
             }
 
             foreach(var card in BuffCards)

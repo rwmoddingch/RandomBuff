@@ -41,9 +41,6 @@ namespace RandomBuff.Core.Game
 
             Instance = this;
 
-  
-
-
             if (BuffCustom.TryGetGame(out var game) && game.GetStorySession.saveState.cycleNumber == 0 && !BuffPoolManager.Instance.IsInitHud)
             {
                 BuffPoolManager.Instance.IsInitHud = true;

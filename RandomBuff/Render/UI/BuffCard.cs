@@ -4,6 +4,7 @@ using RandomBuff.Core.SaveData;
 using RandomBuff.Render.CardRender;
 using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI.Component;
+using RandomBuffUtils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -291,6 +292,9 @@ namespace RandomBuff.Render.UI
 
             Reset();
             SetAnimatorState(initState);
+
+            //Helper.TraceStack();
+            //BuffPlugin.Log("BuffCard init");
         }
 
         //更新方法，在交互管理器中调用
@@ -321,6 +325,10 @@ namespace RandomBuff.Render.UI
             Container.RemoveAllChildren();
             Container.RemoveFromContainer();
             _ftexture.RemoveFromContainer();
+
+
+            //Helper.TraceStack();
+            //BuffPlugin.Log("BuffCard Destroy");
         }
 
         //改变卡牌的状态

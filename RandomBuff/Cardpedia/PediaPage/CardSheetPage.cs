@@ -165,6 +165,7 @@ namespace RandomBuff.Cardpedia.PediaPage
             //textBoxManager.Destroy();
             cardpediaSlot.Destory();
             sheetPageContainer.RemoveFromContainer();
+            displayingCard?.Destroy();
         }
 
         public void OnCardPick(BuffCard card)

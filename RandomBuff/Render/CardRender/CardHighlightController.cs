@@ -77,7 +77,7 @@ namespace RandomBuff.Render.CardRender
 
             if(buffCardRenderer._buffStaticData != null && buffCardRenderer._buffStaticData.MultiLayerFace && isFront)
             {
-                BuffPlugin.Log($"Enable key world : {"MultiLayer"}");
+                //BuffPlugin.Log($"Enable key world : {"MultiLayer"}");
                 _MeshRenderer.material.EnableKeyword("MultiLayer");
                 _MeshRenderer.material.SetInt("_LayerCount", buffCardRenderer._buffStaticData.FaceLayer);
                 _MeshRenderer.material.SetFloat("_MaxLayerDepth", buffCardRenderer._buffStaticData.MaxFaceDepth);

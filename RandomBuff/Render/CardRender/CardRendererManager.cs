@@ -159,6 +159,22 @@ namespace RandomBuff.Render.CardRender
                     Object.Destroy(card.gameObject);
                 }
             }
+
+            for(int i = inactiveSingleTextCardRenderer.Count - 1; i >= 0;i--)
+            {
+                inactiveSingleTextCardRenderer[i].inactiveTimer += deltaTime;
+                if (inactiveSingleTextCardRenderer[i].inactiveTimer > maxDestroyTime)
+                {
+                    var card = inactiveSingleTextCardRenderer[i];
+                    card.DestroyRenderer();
+
+                    totalRenderers.Remove(card);
+                    BuffPlugin.LogDebug($"Destroy inactive card renderer of id{card._id}");
+
+                    inactiveSingleTextCardRenderer.RemoveAt(i);
+                    Object.Destroy(card.gameObject);
+                }
+            }
         }
 
         public static void DestroyAllInactiveRenderer()

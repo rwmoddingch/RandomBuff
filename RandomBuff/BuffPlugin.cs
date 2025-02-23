@@ -279,9 +279,7 @@ namespace RandomBuff
 
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();
-
         }
-
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
@@ -289,8 +287,6 @@ namespace RandomBuff
                 ExceptionTracker.TrackExceptionNew(stackTrace, condition);
 
         }
-
-
 
         private void CheckBuffPluginVersion()
         {

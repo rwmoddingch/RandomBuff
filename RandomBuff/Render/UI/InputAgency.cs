@@ -36,7 +36,7 @@ namespace RandomBuff.Render.UI
                     break;
             }
             Current.SwitchBy(last);
-            BuffPlugin.Log($"InputAgency switch to {newType}");
+            //BuffPlugin.Log($"InputAgency switch to {newType}");
         }
 
         public static void AllRelease()

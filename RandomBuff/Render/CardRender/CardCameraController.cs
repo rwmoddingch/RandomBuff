@@ -31,7 +31,10 @@ namespace RandomBuff.Render.CardRender
 
         public void Init(int id)
         {
-            targetTexture = new RenderTexture(CardBasicAssets.RenderTextureSize.x, CardBasicAssets.RenderTextureSize.y, 0);
+            targetTexture = new RenderTexture(CardBasicAssets.RenderTextureSize.x, CardBasicAssets.RenderTextureSize.y, 0)
+            {
+                name = $"CardRenderer_{id}"
+            };
 
             var subObj = new GameObject($"CardCamera_{id}");
             subObj.transform.parent = transform;

@@ -353,11 +353,13 @@ namespace RandomBuff
             for (int i = 0; i < stack.FrameCount; i++)
             {
                 var frame = stack.GetFrame(i);
+                if (frame.GetMethod().Name.Contains("TrackStack"))
+                    continue;
+
                 var trace = ""
-                    + "文件：" + frame.GetFileName()
-                    + "\n函数：" + frame.GetMethod().Name
-                    + "\n行号：" + frame.GetFileLineNumber()
-                    + "\n=>"
+                    + frame.GetFileName()
+                    + "|" + frame.GetMethod().Name
+                    + " ：" + frame.GetFileLineNumber()
                     ;
                 builder.AppendLine(trace);
             }
