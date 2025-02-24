@@ -1,11 +1,11 @@
 name: upload-to-workshop
-
+ 
 on:
  push:
     paths:
       - 'mod/**'
     branches:
-      - 'test**'
+      - 'Test**'
       
 
 jobs:
