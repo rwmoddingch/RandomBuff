@@ -16,6 +16,7 @@ using Menu;
 using RandomBuff.Core.Game;
 using RandomBuff.Render.UI.BuffPack;
 using RandomBuff.Core.Option;
+using UnityEngine.UI;
 
 namespace RandomBuff.Render.UI.Component
 {
@@ -280,7 +281,7 @@ namespace RandomBuff.Render.UI.Component
         public List<SideSingleSelectButton> buffTypeSwitchButtons = new List<SideSingleSelectButton>();
         public SideSingleSelectButton closeButton;
         public SideSingleSelectButton packButton;
-
+        public ScrollBarButton scrollBar;
         public SideSingleSelectButton unstackButton;
         public SideSingleSelectButton stackButton;
         public FContainer stackButtonContainer;
@@ -384,6 +385,9 @@ namespace RandomBuff.Render.UI.Component
                 }
             };
 
+            scrollBar = new ScrollBarButton(pocket.BottomContainer_2, rectSprite.pos + new Vector2(pocket.size.x + CardPocket.gap * 2f, rectSprite.size.y), rectSprite.size.y);
+
+
             stackButtonContainer = new FContainer() { alpha = 0f};
             pocket.BottomContainer_2.AddChild(stackButtonContainer);
 
@@ -408,6 +412,7 @@ namespace RandomBuff.Render.UI.Component
                 enableInput = false
             };
 
+          
             if (!disableConflict)
             {
                 conflictLabel = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("CardPocket_ConflictLabel"))
@@ -419,6 +424,7 @@ namespace RandomBuff.Render.UI.Component
                 pocket.SymbolContainer.AddChild(conflictLabel);
                 conflictLabel.SetPosition(screenSize.x / 2f, 80f);
             }
+            scrollBar?.UpdateScrollBar(this);
         }
 
         public void RecaculateBuffRolls(List<BuffPluginInfo> enabledPlugins = null, bool updateDisplay = false)
@@ -461,13 +467,14 @@ namespace RandomBuff.Render.UI.Component
             {
                 if (currentBuffRolls[buffType].Count > 0)
                     buffRolls[buffType].Add(currentBuffRolls[buffType].ToArray());
-                allContentSize[buffType] = buffRolls[buffType].Count * (buffCardSize.y + CardPocket.gap) + CardPocket.gap;
+                allContentSize[buffType] = Mathf.Max(0f, buffRolls[buffType].Count * (buffCardSize.y + CardPocket.gap) + CardPocket.gap - actualDisplaySize.y);
             }
             
             if (updateDisplay)
             {
                 ScrollToTop();
                 UpdateDisplayRoll(true);
+                scrollBar?.UpdateScrollBar(this);
             }
         }
 
@@ -561,15 +568,23 @@ namespace RandomBuff.Render.UI.Component
             unstackButton.Update();
             unstackButton.enableInput = pocket.EnableInput;
 
-            InputAgency.Current.GetMainFunctionButton(out _, out var single);
-            if (single && pocket.EnableInput)
+            scrollBar.Update(this);
+            scrollBar.SyncScroll(this);
+
+            InputAgency.Current.GetMainFunctionButton(out var down, out var single);
+            if (pocket.EnableInput)
             {
-                foreach (var button in buffTypeSwitchButtons)
-                    button.OnMouseLeftClick();
-                closeButton.OnMouseLeftClick();
-                stackButton.OnMouseLeftClick();
-                unstackButton.OnMouseLeftClick();
-                packButton.OnMouseLeftClick();
+                if (single)
+                {
+                    foreach (var button in buffTypeSwitchButtons)
+                        button.OnMouseLeftClick();
+                    closeButton.OnMouseLeftClick();
+                    stackButton.OnMouseLeftClick();
+                    unstackButton.OnMouseLeftClick();
+                    packButton.OnMouseLeftClick();
+                }
+
+                scrollBar.UpdateMouse(down);
             }
         }
 
@@ -584,6 +599,7 @@ namespace RandomBuff.Render.UI.Component
             packButton.GrafUpdate(timeStacker);
             stackButton.GrafUpdate(timeStacker);
             unstackButton.GrafUpdate(timeStacker);
+            scrollBar.GrafUpdate(timeStacker);
         }
 
         public override void AppendCard(BuffCard buffCard)
@@ -616,6 +632,7 @@ namespace RandomBuff.Render.UI.Component
             ScrollToTop();
             if(updateDisplay)
                 UpdateDisplayRoll();
+            scrollBar?.UpdateScrollBar(this);
         }
 
         public void ScrollToTop()
@@ -814,6 +831,7 @@ namespace RandomBuff.Render.UI.Component
             if (pocket.Show && pocket.EnableInput)
             {
                 yield return closeButton.MiddleOfButton();
+                yield return packButton.MiddleOfButton();
                 foreach (var button in buffTypeSwitchButtons)
                     yield return button.MiddleOfButton();
             }
@@ -1987,6 +2005,119 @@ namespace RandomBuff.Render.UI.Component
             Vector2 smoothPos = Vector2.Lerp(lastPos, pos, timeStacker);
             darkSprite.SetPosition(smoothPos + new Vector2(2f, 0f));
             title.SetPosition(smoothPos + new Vector2(width / 2f, CardPocket.gap / 2f));
+        }
+    }
+
+    internal class ScrollBarButton
+    {
+        static float defaultScrollBarWidth = 20f;
+        static float mouseOverSizeExpand = 10f;
+        static float holdSizeShrink = 15f;
+
+        Vector2 barTopPos;
+
+        Vector2 scrollBarActualSize;//进度条的完整大小，不包括外框
+        Vector2 scrollBarButtonSize;//进度条按钮的大小，实时更新
+
+        Vector2 scroll2TopPos;//滚动顶端和低端位置
+        Vector2 scroll2BottomPos;
+        public Vector2 scrollButtonPos;
+
+        Vector2 animatedScrollBarButtonSize;
+        Vector2 holdStartMousePos;
+        Vector2 holdStartScrollButtonPos;
+
+        bool mouseInside;
+        bool mouseHold;
+        bool mouseHoldInside;
+
+        RoundRectSprites button;
+
+        public ScrollBarButton(FContainer ownerContainer, Vector2 barTopPos, float barVisualHeight)
+        {
+            this.barTopPos = barTopPos;
+            scrollBarButtonSize.x = defaultScrollBarWidth;
+            scrollBarActualSize = new Vector2(defaultScrollBarWidth, barVisualHeight);
+            button = new RoundRectSprites(ownerContainer, barTopPos, new Vector2(defaultScrollBarWidth, 30f), true);
+        }
+
+        public void Update(CardPocketSlot slot)
+        {
+            button.Update();
+
+            var mousePos = InputAgency.Current.GetMousePosition();
+            var delta = mousePos - scrollButtonPos;
+
+            if(delta.x > 0f && delta.x < scrollBarButtonSize.x && delta.y > 0f && delta.y < scrollBarButtonSize.y)
+                mouseInside = true;
+            else
+                mouseInside = mouseHold && (InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default);
+
+            if (mouseInside && mouseHoldInside)
+            {
+                if(InputAgency.CurrentAgencyType == InputAgency.AgencyType.Default)
+                {
+                    float deltaY = mousePos.y - holdStartMousePos.y;
+                    scrollButtonPos.y = Mathf.Clamp(deltaY + holdStartScrollButtonPos.y, scroll2BottomPos.y, scroll2TopPos.y);
+                }
+            }
+
+            Vector2 bumpSize = (mouseInside ? Vector2.one * mouseOverSizeExpand : Vector2.zero)
+                - (mouseHoldInside && mouseInside ? Vector2.one * holdSizeShrink : Vector2.zero);
+            animatedScrollBarButtonSize = Vector2.Lerp(animatedScrollBarButtonSize, scrollBarButtonSize + bumpSize, 0.25f);
+            button.size = animatedScrollBarButtonSize;
+            button.pos = Vector2.Lerp(button.pos, scrollButtonPos - (animatedScrollBarButtonSize - scrollBarButtonSize) / 2f, 0.5f);
+        }
+
+        public void GrafUpdate(float timeStacker)
+        {
+            button.GrafUpdate(timeStacker);
+        }
+
+        public void UpdateScrollBar(CardPocketSlot slot)
+        {
+            if(slot.allContentSize[slot.currentType] == 0f)
+            {
+                scrollBarButtonSize.y = scrollBarActualSize.y;
+            }
+            else
+            {
+                scrollBarButtonSize.y = scrollBarActualSize.y * slot.actualDisplaySize.y / slot.allContentSize[slot.currentType];
+            }
+            scroll2TopPos = barTopPos - new Vector2(0f, scrollBarButtonSize.y);
+            scroll2BottomPos = barTopPos - new Vector2(0f, scrollBarActualSize.y);
+        }
+
+        public void UpdateMouse(bool mouseHold)
+        {
+            bool lastMouseHoldInside = mouseHoldInside;
+            this.mouseHold = mouseHold;
+
+            if (mouseInside)
+                mouseHoldInside = mouseHold;
+            else
+            {
+                mouseInside = false;
+                mouseHoldInside = false;
+            }
+
+            if(!lastMouseHoldInside && mouseHoldInside)
+            {
+                holdStartMousePos = InputAgency.Current.GetMousePosition();
+                holdStartScrollButtonPos = scrollButtonPos;
+            }
+        }
+
+        public void SyncScroll(CardPocketSlot slot)
+        {
+            if (!mouseHoldInside)
+                scrollButtonPos = Vector2.Lerp(scroll2TopPos, scroll2BottomPos, Mathf.InverseLerp(0f, slot.allContentSize[slot.currentType], slot.yPointer));
+            else
+            {
+                slot.StopScroll();
+                slot.yPointer = Mathf.Lerp(0f, slot.allContentSize[slot.currentType], Mathf.InverseLerp(scroll2TopPos.y, scroll2BottomPos.y, scrollButtonPos.y));
+                slot.UpdateDisplayRoll();
+            }
         }
     }
 }
