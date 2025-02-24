@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using static RandomBuff.Render.UI.BuffResolution;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -977,8 +978,9 @@ namespace RandomBuff.Core.BuffMenu
         bool show;
 
         public bool Show => show;
-        Vector2 flagHangPos;
-        Vector2 flagHidePos;
+        Vector2 flagHangPos, flagHidePos;
+        Vector2 backButtonShowPos, backButtonHidePos;
+        float extraInfoShowY,extraInfoHideY;
 
         public BuffNewGameMissionPage(BuffGameMenu menu, MenuObject owner, int index) : base(menu, owner, "BuffNewGameMissionPage", index)
         {
@@ -1005,26 +1007,29 @@ namespace RandomBuff.Core.BuffMenu
         {
             blackSprite = new FSprite("pixel")
             {
-                scale = 1400,
+                scale = Custom.rainWorld.options.ScreenSize.x,
                 color = Color.black,
-                x = 693f,
-                y = 393f,
                 alpha = 0f
             };
+            blackSprite.SetPosition(Convert(HalfDesignedRes, ConvertType.ScaleToCenter));
             Container.AddChild(blackSprite);
 
             flagRenderer = new RandomBuffFlagRenderer(gameMenu.flag, RandomBuffFlagRenderer.FlagType.OuterTriangle, RandomBuffFlagRenderer.FlagColorType.Silver);
-            flagHangPos = new Vector2(Custom.rainWorld.screenSize.x / 2f - gameMenu.flag.rect.x / 2f, 820f);
+            flagHangPos = Convert(new Vector2(HalfDesignedRes.x , 820f), ConvertType.xKeepCenterSpan | ConvertType.yKeepUpSpan) + new Vector2(-gameMenu.flag.rect.x / 2f, 0f);
             flagHidePos = flagHangPos + Vector2.up * 800f;
             flagRenderer.pos = flagHidePos;
             Container.AddChild(flagRenderer.container);
-
-            backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "NEWGAME_MISSION_BACK", new Vector2(1200f, 1400f), new Vector2(110f, 30f));
+            
+            backButtonShowPos = Convert(new Vector2(1200, 698f), ConvertType.xKeepRightSpan | ConvertType.yKeepUpSpan);
+            backButtonHidePos = Convert(new Vector2(1200f, 800f), ConvertType.xKeepRightSpan | ConvertType.yKeepUpSpan);
+            backButton = new SimpleButton(menu, this, menu.Translate("BACK"), "NEWGAME_MISSION_BACK", backButtonHidePos, new Vector2(110f, 30f));
             subObjects.Add(backButton);
 
-            subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 1040f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
+            extraInfoShowY = Convert(new Vector2(DesignedRes.x - 80f, 40f), ConvertType.xKeepRightSpan | ConvertType.yKeepDownSpan).y;
+            extraInfoHideY = Convert(new Vector2(DesignedRes.x - 80f, -200f), ConvertType.xKeepRightSpan | ConvertType.yKeepDownSpan).y;
+            subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, Convert(new Vector2(DesignedRes.x - 80f, 1040f), ConvertType.xKeepRightSpan | ConvertType.yKeepUpSpan), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
 
-            extraInfoLabel = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), new Vector2(Custom.rainWorld.options.ScreenSize.x - 180f, 45f), new Vector2(100f, 30f), false);
+            extraInfoLabel = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), Convert(new Vector2(DesignedRes.x - 180f, 1045f), ConvertType.xKeepRightSpan | ConvertType.yKeepUpSpan), new Vector2(100f, 30f), false);
             extraInfoLabel.label.shader = Custom.rainWorld.Shaders["MenuText"];
             subObjects.Add(extraInfoLabel);
         }
@@ -1286,10 +1291,10 @@ namespace RandomBuff.Core.BuffMenu
         {
             base.Update();
             backButton.buttonBehav.greyedOut = MissionInfoBox.hasCardOnDisplay;
-            backButton.pos = Vector2.Lerp(new Vector2(1200, 800), new Vector2(1200, 698), showAnim.Get());
-            extraInfoButton.pos.y = Mathf.Lerp(1040f, 40f, showAnim.Get());
-            extraInfoLabel.pos.y = Mathf.Lerp(1045f, 45f, showAnim.Get());
-            missionEffect.pos.y = Mathf.Lerp(1000f, 0f, showAnim.Get());
+            backButton.pos = Vector2.Lerp(backButtonHidePos, backButtonShowPos, showAnim.Get());
+            extraInfoButton.pos.y = Mathf.Lerp(extraInfoHideY, extraInfoShowY, showAnim.Get());
+            extraInfoLabel.pos.y = Mathf.Lerp(extraInfoHideY + 5f, extraInfoShowY + 5f, showAnim.Get());
+            missionEffect.pos.y = Mathf.Lerp(ScreenSize.y * 2f, 0f, showAnim.Get());
 
 
             bool needUpdate = show || flagRenderer.NeedRenderUpdate;
@@ -1486,6 +1491,9 @@ namespace RandomBuff.Core.BuffMenu
             public BigArrowButton leftFlipButton;
             public BigArrowButton rightFlipButton;
 
+            Vector2 title_exclusive_hidePos, title_exclusive_showPos;
+            Vector2 title_general_hidePos, title_general_showPos;
+
             public MissionSheetBox(Menu.Menu menu, MenuObject owner, Vector2 pos) : base(menu, owner, pos)
             {
                 if (menu is BuffGameMenu) this.gameMenu = menu as BuffGameMenu;
@@ -1500,12 +1508,19 @@ namespace RandomBuff.Core.BuffMenu
                 generalHoldBox = new EmptyRoundRect(menu, owner, "", new Vector2(448f, 1440f), new Vector2(660f, 260f), 440f, missionPage.showAnim);
                 subObjects.Add(generalHoldBox);
 
+                title_exclusive_showPos = Convert(new Vector2(338f, Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? 640f : 620f), ConvertType.KeepCenterSpan);
+                title_exclusive_hidePos = title_exclusive_showPos + new Vector2(0f, 1000f);
+
                 title_exclusive = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffMissionPage_Exclusive"));
-                title_exclusive.SetPosition(new Vector2(338f, Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese? 640f : 620f));
+                title_exclusive.SetPosition(title_exclusive_hidePos);
                 title_exclusive.alpha = 0f;
                 Container.AddChild(title_exclusive);
+
+                title_general_showPos = Convert(new Vector2(778f, 640f), ConvertType.KeepCenterSpan);
+                title_general_hidePos = title_general_showPos + new Vector2(0f, 1000f);
+
                 title_general = new FLabel(Custom.GetDisplayFont(), BuffResourceString.Get("BuffMissionPage_General"));
-                title_general.SetPosition(new Vector2(778f, 640f));
+                title_general.SetPosition(title_general_hidePos);
                 title_general.alpha = 0f;
                 Container.AddChild(title_general);
 
@@ -1702,9 +1717,9 @@ namespace RandomBuff.Core.BuffMenu
                 base.GrafUpdate(timeStacker);
                 float show = missionPage.showAnim.Get();
                 title_general.alpha = show;
-                title_general.SetPosition(title_general.x, Mathf.Lerp(1400, 640, show));
+                title_general.SetPosition(Vector2.Lerp(title_general_hidePos, title_general_showPos, show));
                 title_exclusive.alpha = show;
-                title_exclusive.SetPosition(title_exclusive.x, Mathf.Lerp(1400, 640, show));
+                title_exclusive.SetPosition(Vector2.Lerp(title_exclusive_hidePos, title_exclusive_showPos, show));
             }
         }
 
@@ -1727,21 +1742,28 @@ namespace RandomBuff.Core.BuffMenu
 
             public static bool hasCardOnDisplay;
             public static float lineH = 30f;
-            public static float firstLineY = 260f;
+            float firstLineY = Convert(new Vector2(0f, 260), ConvertType.KeepCenterSpan).y;
+            float conditionHidePosY = Convert(new Vector2(0f, -100), ConvertType.yKeepDownSpan).y;
 
-            public static float conditionHidePosY = -100f;
+            Vector2 iconShowPos = Convert(new Vector2(HalfDesignedRes.x, 360f), ConvertType.KeepCenterSpan);
+            Vector2 iconHidePos = Convert(new Vector2(HalfDesignedRes.x, 360f), ConvertType.KeepCenterSpan) + Vector2.down * 1000f;
+            Vector2 missionTitleShowPos = Convert(new Vector2(HalfDesignedRes.x, 320f), ConvertType.KeepCenterSpan);
+            Vector2 missionTitleHidePos = Convert(new Vector2(HalfDesignedRes.x, 320f), ConvertType.KeepCenterSpan) + Vector2.down * 1000f;
+            Vector2 conditionTitleShowPos = Convert(new Vector2(440f, 340f), ConvertType.KeepCenterSpan);
+            Vector2 conditionTitleHidePos = Convert(new Vector2(440f, 340f), ConvertType.KeepCenterSpan) + Vector2.down * 1000f;
+            Vector2 buffTitleShowPos = Convert(new Vector2(960f, 340f), ConvertType.KeepCenterSpan);
+            Vector2 buffTitleHidePos = Convert(new Vector2(960f, 340f), ConvertType.KeepCenterSpan) + Vector2.down * 1000f;
+            Vector2 startButtonShowPos = Convert(new Vector2(HalfDesignedRes.x, 160),  ConvertType.yKeepDownSpan);
+            Vector2 startButtonHidePos = Convert(new Vector2(HalfDesignedRes.x, -200f), ConvertType.yKeepDownSpan);
 
-            static Vector2 iconShowPos = new Vector2(688f, 360f);
-            static Vector2 iconHidePos = iconShowPos + Vector2.down * 1000f;
-            static Vector2 missionTitleShowPos = new Vector2(688f, 320f);
-            static Vector2 missionTitleHidePos = missionTitleShowPos + Vector2.down * 1000f;
-            static Vector2 conditionTitleShowPos = new Vector2(440f, 340f);
-            static Vector2 conditionTitleHidePos = conditionTitleShowPos + Vector2.down * 1000f;
-            static Vector2 buffTitleShowPos = new Vector2(960f, 340f);
-            static Vector2 buffTitleHidePos = buffTitleShowPos + Vector2.down * 1000f;
+            Vector2[] conditionHidePos = new Vector2[5];
+            Vector2[] conditionShowPos = new Vector2[5];
 
             public MissionInfoBox(Menu.Menu menu, MenuObject owner, Vector2 pos) : base(menu, owner, pos)
             {
+                BuffPlugin.Log($"MissionInfoBox : startButtonShowPos {startButtonShowPos.x}, {startButtonShowPos.y}");
+                BuffPlugin.Log($"MissionInfoBox : iconShowPos {iconShowPos.x}, {iconShowPos.y}");
+
                 missionPage = owner as BuffNewGameMissionPage;
                 conditionList = new List<FLabel>();
                 buffButtons = new List<CardTitleButton>();
@@ -1752,14 +1774,17 @@ namespace RandomBuff.Core.BuffMenu
                 {
                     var label = new FLabel(Custom.GetDisplayFont(), "");
                     //label.scale = 1.2f;
-                    label.SetPosition(new Vector2(440f, firstLineY - lineH * i));
+                    conditionShowPos[i] = new Vector2(Convert(new Vector2(440f, 0f), ConvertType.KeepCenterSpan).x, firstLineY - lineH * i);
+                    conditionHidePos[i] = new Vector2(conditionShowPos[i].x, conditionHidePosY - lineH * i);
+
+                    label.SetPosition(conditionHidePos[i]);
                     conditionList.Add(label);
                     Container.AddChild(label);                   
                 }
 
                 for (int j = 0; j < 6; j++)
                 {
-                    var button = new CardTitleButton(null, menu, this, new Vector2(840f,firstLineY - 36f * j), missionPage.showAnim);
+                    var button = new CardTitleButton(null, menu, this, Convert(new Vector2(840f, firstLineY - 36f * j), ConvertType.yKeepCenterSpan), missionPage.showAnim);
                     buffButtons.Add(button);
                     subObjects.Add(button);
                 }
@@ -1780,14 +1805,14 @@ namespace RandomBuff.Core.BuffMenu
                 Container.AddChild(conditionTitle);
                 Container.AddChild(buffTitle);
 
-                startButton = new HoldButton(menu, this, BuffResourceString.Get("BuffMissionPage_Start"),"MISSION_START", new Vector2(688f, 160f), 80f);
+                startButton = new HoldButton(menu, this, BuffResourceString.Get("BuffMissionPage_Start"),"MISSION_START", startButtonHidePos, 80f);
                 subObjects.Add(startButton);
 
                 darkSprite = new FSprite("pixel");
                 darkSprite.alpha = 0f;
-                darkSprite.scale = 1400f;
+                darkSprite.scale = ScreenSize.x;
                 darkSprite.color = new Color(0.1f, 0.1f, 0.1f);
-                darkSprite.SetPosition(Custom.rainWorld.screenSize / 2f);
+                darkSprite.SetPosition(HalfScreenSize);
                 menu.cursorContainer.AddChild(darkSprite);
 
                 //quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "MISSION_QUITDISPLAY", new Vector2(638f, 1400f), new Vector2(110f, 30f));
@@ -1816,7 +1841,7 @@ namespace RandomBuff.Core.BuffMenu
                     for (int i = 0; i < 5; i++)
                     {
                         conditionList[i].text = "None";
-                        conditionList[i].y = firstLineY - lineH * i;
+                        //conditionList[i].y = Convert(new Vector2(440f, firstLineY - lineH * i), ConvertType.KeepCenterSpan).y;
                     }
                     for (int j = 0; j < 6; j++)
                     {
@@ -1867,8 +1892,7 @@ namespace RandomBuff.Core.BuffMenu
                 startButton.buttonBehav.greyedOut = hasCardOnDisplay || BuffNewGameMissionPage.pickedMission == null;
 
                 float anim = (owner as BuffNewGameMissionPage).showAnim.Get();
-                startButton.pos.y = Mathf.Lerp(-200f, 160f, anim);
-
+                startButton.pos.y = Mathf.Lerp(startButtonHidePos.y, startButtonShowPos.y, anim);
             }
 
             public override void GrafUpdate(float timeStacker)
@@ -1891,7 +1915,7 @@ namespace RandomBuff.Core.BuffMenu
                 for (int i = 0; i < 5; i++)
                 {
                     conditionList[i].alpha = anim;
-                    conditionList[i].SetPosition(new Vector2(440f, firstLineY - lineH * i - 1000f * (1f - anim)));
+                    conditionList[i].SetPosition(Vector2.Lerp(conditionHidePos[i], conditionShowPos[i], anim));
                 }
             }
 
@@ -1975,7 +1999,7 @@ namespace RandomBuff.Core.BuffMenu
                     }
                     else
                     {
-                        this.pos.y = 1400f;
+                        this.pos.y = ScreenSize.y * 2f;
                     }
                 }
 

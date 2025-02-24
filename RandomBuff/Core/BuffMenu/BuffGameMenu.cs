@@ -26,6 +26,7 @@ using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.BuffMenu.Manual;
 using RandomBuff.Core.Game.Settings;
 using RandomBuff.Core.Option;
+using static RandomBuff.Render.UI.BuffResolution;
 
 namespace RandomBuff.Core.BuffMenu
 {
@@ -97,7 +98,7 @@ namespace RandomBuff.Core.BuffMenu
                 saveGameData.Add(name, SlugcatSelectMenu.MineForSaveData(manager, name));
             }
 
-            flag = new RandomBuffFlag(new IntVector2(60, 30), new Vector2(1200f, 500f));
+            flag = new RandomBuffFlag(new IntVector2(60, 30), BuffResolution.Convert(new Vector2(1200f, 500f), BuffResolution.ConvertType.ScaleToZeroPoint));
             menuSlot.SetupBuffs(slugNameOrders);
 
             int pageIndex = 0;
@@ -228,7 +229,7 @@ namespace RandomBuff.Core.BuffMenu
             page.subObjects.Add(manualButton = new SimpleButton(this, page, BuffResourceString.Get("MANUAL"), "MANUAL", new Vector2(1056f, y), new Vector2(110f, 30f)));
 
 
-            page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(manager.rainWorld.screenSize.x / 2 - 250, 484 - 249f - 80f), new Vector2(500, 50), true));
+            page.subObjects.Add(testLabel = new MenuLabel(this, page, "", new Vector2(HalfDesignedRes.x/* - 250*/, 484 - 249f - 80f), new Vector2(0f, 50), true));
             testLabel.label.alignment = FLabelAlignment.Center;
             testLabel.label.color = MenuColor(MenuColors.White).rgb;
 

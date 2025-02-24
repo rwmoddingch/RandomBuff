@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using static RandomBuff.Render.UI.BuffResolution;
 
 namespace BuiltinBuffs.Missions
 {
@@ -17,6 +18,7 @@ namespace BuiltinBuffs.Missions
         static int totalDustCount = 80;
 
         FSprite bloom;
+        Vector2 bloomTargetPos;
 
         FSprite[] beams;
         Vector2[] pos;
@@ -48,15 +50,15 @@ namespace BuiltinBuffs.Missions
                 ApplyRandomFactorForBeam(i);
                 Container.AddChild(beams[i]);
             }
+
             bloom = new FSprite(BuffUIAssets.MissionInfoBoxBloom1920, true)
             {
                 shader = Custom.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"],
                 color = color,
-                scaleX = Custom.rainWorld.screenSize.x / 1920f,
-                scaleY = Custom.rainWorld.screenSize.y / 1080f,
-                anchorX = 0f,
-                anchorY = 0f,
+                scaleX = DesignedRes.x / 1920f,
+                scaleY = DesignedRes.y / 1080f,
             };
+            bloomTargetPos = HalfDesignedRes;
             Container.AddChild(bloom);
 
             dust = new FSprite[totalDustCount];
@@ -83,7 +85,7 @@ namespace BuiltinBuffs.Missions
         {
             float f = Random.value;
 
-            pos[i] = new Vector2(f * Custom.rainWorld.options.ScreenSize.x, Custom.rainWorld.options.ScreenSize.y);
+            pos[i] = new Vector2(f * ScreenSize.x, ScreenSize.y);
             lastLifes[i] = lifes[i] = Random.value * -1f;
 
             beams[i].scaleX = (Mathf.Pow(0.5f - f, 2f) + 0.5f) * 2f;
@@ -92,8 +94,7 @@ namespace BuiltinBuffs.Missions
 
         void ApplyRandomFactorForDust(int i, float maxExtraLife = -1f)
         {
-            Vector2 screenSize = Custom.rainWorld.options.ScreenSize;
-            lastDustPos[i] = dustPos[i] = new Vector2(Mathf.Lerp(0f, screenSize.x, Random.value), Mathf.Lerp(0f, screenSize.y, Random.value));
+            lastDustPos[i] = dustPos[i] = new Vector2(Mathf.Lerp(0f, ScreenSize.x, Random.value), Mathf.Lerp(0f, ScreenSize.y, Random.value));
             dustVel[i] = Vector2.down * 15f + Custom.RNV() * 8f;
             dustInBackground[i] = Random.value;
             lastDustLife[i] = dustLife[i] = Random.value - maxExtraLife;
@@ -135,10 +136,10 @@ namespace BuiltinBuffs.Missions
         public override void GrafUpdate(Vector2 smoothZeroPoint, float t)
         {
             float smoothAlpha = Mathf.Lerp(LastAlpha, Alpha, t);
-            Vector2 mid = Custom.rainWorld.options.ScreenSize / 2f;
+            Vector2 mid = HalfScreenSize;
 
             bloom.alpha = Mathf.Pow(smoothAlpha, 3f);
-            bloom.SetPosition(smoothZeroPoint);
+            bloom.SetPosition(smoothZeroPoint + bloomTargetPos);
 
             for (int i = 0; i < totalBeamCount; i++)
             {
