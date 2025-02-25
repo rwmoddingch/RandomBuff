@@ -952,7 +952,7 @@ namespace BuiltinBuffs.Duality
                         this.legs[n, m].mode = Limb.Mode.Dangle;
                     }
                     Vector2 vector2 = Custom.DegToVec(num + Mathf.Lerp(40f, 160f, num7) * ((num5 != 0f) ? (-num5) : ((n == 0) ? 1f : -1f)));
-                    Vector2 vector3 = player.bodyChunks[0].pos + Vector3.Slerp(this.legsTravelDirs[n, m], vector2, 0.1f).ToVector2InPoints() * this.legLength * 0.85f * Mathf.Pow(num8, 0.5f);
+                    Vector2 vector3 = player.bodyChunks[0].pos + (Vector2)Vector3.Slerp(this.legsTravelDirs[n, m], vector2, 0.1f) * this.legLength * 0.85f * Mathf.Pow(num8, 0.5f);
                     this.legs[n, m].ConnectToPoint(vector3, this.legLength, false, 0f, player.mainBodyChunk.vel, 0.1f, 0f);
                     this.legs[n, m].ConnectToPoint(player.bodyChunks[0].pos, this.legLength, false, 0f, player.mainBodyChunk.vel, 0.1f, 0f);
                     if (this.legsDangleCounter > 0 || num8 < 0.1f || (this.deadLeg.x == n && this.deadLeg.y == m))
@@ -1302,9 +1302,9 @@ namespace BuiltinBuffs.Duality
                         {
                             this.legs[j, k].mode = Limb.Mode.Dangle;
                             this.legFlips[j, k, 0] = ((j == 0) ? -1f : 1f);
-                            this.legs[j, k].vel += Vector3.Slerp(Custom.DirVec(self.mainBodyChunk.pos, wantPos), 
-                                                                 Custom.PerpendicularVector(self.mainBodyChunk.pos, wantPos) * ((j == 0) ? -1f : 1f), 
-                                                                 (k == 0) ? 0.1f : 0.5f).ToVector2InPoints() * 3f;
+                            this.legs[j, k].vel += (Vector2)Vector3.Slerp(Custom.DirVec(self.mainBodyChunk.pos, wantPos), 
+                                                                          Custom.PerpendicularVector(self.mainBodyChunk.pos, wantPos) * ((j == 0) ? -1f : 1f), 
+                                                                          (k == 0) ? 0.1f : 0.5f) * 3f;
                         }
                     }
                 }
