@@ -285,6 +285,9 @@ namespace RandomBuff.Core.BuffMenu
         Vector2 flagHangPos;
         Vector2 flagHidePos;
 
+        Vector2 hidePos;
+        Vector2 showPos;
+
         //状态变量
         int _showCounter = -1;
         int _targetShowCounter;
@@ -304,7 +307,11 @@ namespace RandomBuff.Core.BuffMenu
             gameMenu = menu as BuffGameMenu;
             myContainer = new FContainer();
             menu.container.AddChild(myContainer);
-            lastPos = pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
+
+            showPos = pos;
+            hidePos = showPos + new Vector2(0f, 1000f);
+
+            lastPos = pos = Vector2.Lerp(hidePos, showPos, Helper.LerpEase(ShowFactor));
 
             Container.AddChild(dark = new FSprite("pixel") { color = Color.black, alpha = 0f, scaleX = Custom.rainWorld.screenSize.x, scaleY = Custom.rainWorld.screenSize.y, x = Custom.rainWorld.screenSize.x / 2f, y = Custom.rainWorld.screenSize.y / 2f });
 
@@ -329,14 +336,14 @@ namespace RandomBuff.Core.BuffMenu
             var gameSetting = BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName);
 
             Vector2 testPos = new Vector2(683f, 85f) + new Vector2(SlugcatSelectMenu.GetRestartTextOffset(gameMenu.CurrLang), 80f);
-            subObjects.Add(startGameButton = new HoldButton(gameMenu, this, BuffResourceString.Get("BuffGameMenu_NewGame"), "NEWGAME_DETAIL_NEWGAME", new Vector2(683f, 85f), 40f));
-            subObjects.Add(backButton = new SimpleButton(gameMenu, this, gameMenu.Translate("BACK"), "NEWGAME_DETAIL_BACK", new Vector2(200f, gameMenu.manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
+            subObjects.Add(startGameButton = new HoldButton(gameMenu, this, BuffResourceString.Get("BuffGameMenu_NewGame"), "NEWGAME_DETAIL_NEWGAME", new Vector2(HalfScreenSize.x, 85f), 40f));
+            subObjects.Add(backButton = new SimpleButton(gameMenu, this, gameMenu.Translate("BACK"), "NEWGAME_DETAIL_BACK", new Vector2(200f, DesignedRes.y - 100f), new Vector2(110f, 30f)));
             subObjects.Add(settingButton = new SimpleButton(gameMenu, this, (BuffDataManager.Instance.GetGameSetting(gameMenu.CurrentName).TemplateName),
-                "NEWGAME_DETAIL_SELECT_MODE", new Vector2(683f - 240f, Mathf.Max(30, Custom.rainWorld.options.SafeScreenOffset.y)),
+                "NEWGAME_DETAIL_SELECT_MODE", Convert(new Vector2(683f - 240f, 30), ConvertType.xKeepCenterSpan | ConvertType.yKeepDownSpan),
                 new Vector2(120, 40)));
-            subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, new Vector2(Custom.rainWorld.options.ScreenSize.x - 80f, 40f), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
+            subObjects.Add(extraInfoButton = new SimpleImageButton(gameMenu, this, Convert(new Vector2(DesignedRes.x - 80f, 40f), ConvertType.xKeepRightSpan | ConvertType.yKeepDownSpan), new Vector2(40f, 40f), BuffUIAssets.CardInfo20, "EXTRAINFOPAGE_SHOW"));
 
-            var label = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), new Vector2(Custom.rainWorld.options.ScreenSize.x - 180f, 45f), new Vector2(100f, 30f), false);
+            var label = new MenuLabel(gameMenu, this, BuffResourceString.Get("ExtraInfo_Label"), Convert(new Vector2(DesignedRes.x - 180f, 45f), ConvertType.xKeepRightSpan | ConvertType.yKeepDownSpan), new Vector2(100f, 30f), false);
             label.label.shader = Custom.rainWorld.Shaders["MenuText"];
             subObjects.Add(label);
 
@@ -361,15 +368,15 @@ namespace RandomBuff.Core.BuffMenu
             for (int i = 0; i < conditionButtons.Length; i++)
             {
                 float num = 50f * (float)i;
-                conditionButtons[i] = new BigSimpleButton(menu, this, "Condition " + i.ToString(), "NEWGAME_DETAIL_CONDITION_" + i.ToString(), new Vector2(360f, 510f - num), new Vector2(600f, 40f), FLabelAlignment.Left, true);
+                conditionButtons[i] = new BigSimpleButton(menu, this, "Condition " + i.ToString(), "NEWGAME_DETAIL_CONDITION_" + i.ToString(), Convert(new Vector2(360f, 510f - num), ConvertType.KeepCenterSpan), new Vector2(600f, 40f), FLabelAlignment.Left, true);
                 subObjects.Add(conditionButtons[i]);
-                hiddenToggles[i] = new SymbolButton(menu, this, "hiddenopen", "NEWGAME_DETAIL_HIDDEN_" + i.ToString(), new Vector2(970f, 510f - num));
+                hiddenToggles[i] = new SymbolButton(menu, this, "hiddenopen", "NEWGAME_DETAIL_HIDDEN_" + i.ToString(), Convert(new Vector2(970f, 510f - num), ConvertType.KeepCenterSpan));
                 hiddenToggles[i].size = new Vector2(40f, 40f);
                 hiddenToggles[i].roundedRect.size = hiddenToggles[i].size;
                 subObjects.Add(hiddenToggles[i]);
             }
 
-            filterButton = new SymbolButton(menu, this, "filter", "NEWGAME_DETAIL_FILTER", new Vector2(380f, 250f));
+            filterButton = new SymbolButton(menu, this, "filter", "NEWGAME_DETAIL_FILTER", Convert(new Vector2(380f, 250f), ConvertType.KeepCenterSpan));
             filterButton.size = new Vector2(40f, 40f);
             filterButton.roundedRect.size = filterButton.size;
             subObjects.Add(filterButton);
@@ -377,22 +384,21 @@ namespace RandomBuff.Core.BuffMenu
             //randomButton.size = new Vector2(40f, 40f);
             //randomButton.roundedRect.size = randomButton.size;
             //subObjects.Add(randomButton);
-            minusButton = new SymbolButton(menu, this, "minus", "NEWGAME_DETAIL_MINUS", new Vector2(900f, 250f));
+            minusButton = new SymbolButton(menu, this, "minus", "NEWGAME_DETAIL_MINUS", Convert(new Vector2(900f, 250f), ConvertType.KeepCenterSpan));
             minusButton.size = new Vector2(40f, 40f);
             minusButton.roundedRect.size = minusButton.size;
             subObjects.Add(minusButton);
-            plusButton = new SymbolButton(menu, this, "plus", "NEWGAME_DETAIL_PLUS", new Vector2(950f, 250f));
+            plusButton = new SymbolButton(menu, this, "plus", "NEWGAME_DETAIL_PLUS", Convert(new Vector2(950f, 250f), ConvertType.KeepCenterSpan));
             plusButton.size = new Vector2(40f, 40f);
             plusButton.roundedRect.size = plusButton.size;
             subObjects.Add(plusButton);
 
             if (ModManager.JollyCoop)
                 page.subObjects.Add(jollyToggleConfigMenu = new SimpleButton(gameMenu, this, gameMenu.Translate("SHOW"), "JOLLY_TOGGLE_CONFIG",
-                    new Vector2(1056f, gameMenu.manager.rainWorld.screenSize.y - 100f), new Vector2(110f, 30f)));
+                    Convert(new Vector2(1056f, DesignedRes.y - 100f), ConvertType.xKeepRightSpan | ConvertType.yKeepUpSpan), new Vector2(110f, 30f)));
 
 
-            Vector2 screenCenter = menu.manager.rainWorld.options.ScreenSize / 2f;
-            titlePos = new Vector2(screenCenter.x, screenCenter.y + 300f);
+            titlePos = new Vector2(HalfScreenSize.x, HalfScreenSize.y + 300f);
             cardTitle = new CardTitle(Container, BuffCard.normalScale * 0.3f, titlePos + pos);
             cardTitle.RequestSwitchTitle(BuffResourceString.Get(gameSetting.TemplateName));
 
@@ -430,7 +436,7 @@ namespace RandomBuff.Core.BuffMenu
                 else if (_showCounter > _targetShowCounter)
                     _showCounter--;
 
-                pos = Vector2.Lerp(BuffGameMenuStatics.HidePos, Vector2.zero, Helper.LerpEase(ShowFactor));
+                pos = Vector2.Lerp(hidePos, showPos, Helper.LerpEase(ShowFactor));
                 //buffLevelBarDynamic.pos = pos + new Vector2(200f, 200f);
                 cardTitle.pos = pos + titlePos;
 
@@ -2071,7 +2077,7 @@ namespace RandomBuff.Core.BuffMenu
             darkSprite.SetPosition(Custom.rainWorld.screenSize / 2f);
             Container.AddChild(darkSprite);
 
-            quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "BuffCardViewPage_QUITDISPLAY", new Vector2(638f, 1400f), new Vector2(110f, 30f));
+            quitDisplayButton = new SimpleButton(menu, this, Custom.rainWorld.inGameTranslator.Translate("BACK"), "BuffCardViewPage_QUITDISPLAY", new Vector2(HalfDesignedRes.x - 55f, 1400f), new Vector2(110f, 30f));
             subObjects.Add(quitDisplayButton);
             interactionManager = new TestBasicInteractionManager(null);
         }
@@ -2085,7 +2091,7 @@ namespace RandomBuff.Core.BuffMenu
                 darkSprite.alpha = 0.5f;
                 var displayCard = new BuffCard(new BuffID(newID));
                 displayCard.Rotation = new Vector3(0f, 0f, 0f);
-                displayCard.Position = new Vector2(693f, 393f);
+                displayCard.Position = Convert(new Vector2(HalfDesignedRes.x, 393f), ConvertType.KeepCenterSpan);
                 displayCard.Scale = 0.6f;
 
                 interactionManager.ManageCard(displayCard);
@@ -2164,6 +2170,9 @@ namespace RandomBuff.Core.BuffMenu
         public float lastAlpha;
         public float y;
 
+        Vector2 instructionShowPos, instructionHidePos;
+
+
         public ModeSelectPage(BuffGameMenu menu, MenuObject owner, Vector2 pos, int index) : base(menu, owner, "ModeSelectPage", index)
         {
             BuffPlugin.Log($"ModeSelectPage : {index}");
@@ -2173,18 +2182,20 @@ namespace RandomBuff.Core.BuffMenu
             darkSprite = new FSprite("pixel")
             {
                 scale = 1400f,
-                x = 693f,
-                y = 393f,
+                x = HalfScreenSize.x,
+                y = HalfScreenSize.y,
                 alpha = 0f,
                 color = Color.black
             };
             Container.AddChild(darkSprite);
 
+            instructionShowPos = Convert(new Vector2(HalfDesignedRes.x, 80f), ConvertType.xKeepCenterSpan | ConvertType.yKeepDownSpan);
+            instructionHidePos = instructionShowPos + Vector2.up * 900f;
             modeIntroduction = new FLabel(Custom.GetDisplayFont(), "") 
             {
                 scale = 1.2f,
-                x = 693f,
-                y = 80f,
+                x = instructionShowPos.x,
+                y = instructionShowPos.y,
                 alpha = 0f,
             };
             Container.AddChild(modeIntroduction);
@@ -2268,7 +2279,7 @@ namespace RandomBuff.Core.BuffMenu
             base.GrafUpdate(timeStacker);
             float num = Mathf.Lerp(lastY, y, timeStacker);
             darkSprite.alpha = 0.5f * num;
-            modeIntroduction.y = Mathf.Lerp(900f, 80f, num);
+            modeIntroduction.SetPosition(Vector2.Lerp(instructionHidePos, instructionShowPos, num));
             modeIntroduction.alpha = Mathf.Lerp(lastAlpha, showTextCounter, timeStacker);
             defaultmodeButton.pos.y = Mathf.Lerp(900f, 400f, num);
             missionmodeButton.pos.y = Mathf.Lerp(900f, 400f, num);
@@ -2281,9 +2292,11 @@ namespace RandomBuff.Core.BuffMenu
         Dictionary<FNode, Vector2> setPositions = new();
         Dictionary<FNode, Vector2> positions = new();
         Dictionary<FNode, Vector2> lastPositions = new();
+        bool useTrueCoord;
 
-        public FNodeWrapper(Menu.Menu menu, MenuObject owner) : base(menu, owner, Vector2.zero)
+        public FNodeWrapper(Menu.Menu menu, MenuObject owner, bool useTrueCoord = true) : base(menu, owner, Vector2.zero)
         {
+            this.useTrueCoord = useTrueCoord;
         }
 
         public void WrapNode(FNode node, Vector2 position)
@@ -2326,8 +2339,10 @@ namespace RandomBuff.Core.BuffMenu
             foreach (var node in nodes)
             {
                 lastPositions[node] = positions[node];
-                positions[node] = setPositions[node] + ScreenPos;
+                positions[node] = setPositions[node] + ScreenPos + new Vector2(useTrueCoord ? Custom.GetScreenOffsets()[0]/2f: 0f, 0f);
             }
+
+            //BuffPlugin.Log($"NodeWrapper : Screen:{ScreenPos.x},{ScreenPos.y} | pos:{pos.x},{pos.y} | offset:{Custom.GetScreenOffsets()[0]}");
         }
 
         public override void GrafUpdate(float timeStacker)

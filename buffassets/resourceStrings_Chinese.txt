@@ -332,6 +332,8 @@ BuffManual_CardPedia_Content_1|选择任意一类buff后，可以通过点击buf
 //Remix
 Remix_Title|Random Buff
 Remix_Option|配置
+Remix_BuffPack|卡包
+Remix_BuffPackDescription|管理所有卡包，启用的卡包将会显示为绿色。<LINE>点击卡包对应的按钮来切换卡包启用状态，内置卡包不可禁用。
 Remix_CardSlotKey|查看卡牌按键
 Remix_KeyBindKey|卡牌绑键按键
 Remix_ShowExceptionLog|报错提示

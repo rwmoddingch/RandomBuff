@@ -5,6 +5,7 @@ using RandomBuff.Render.CardRender;
 using RandomBuff.Render.Quest;
 using RandomBuff.Render.UI.Component;
 using RandomBuffUtils;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace RandomBuff.Render.UI
 {
@@ -69,6 +71,7 @@ namespace RandomBuff.Render.UI
                     _ftexture.scale = value;
                 else
                     _tempScale = value;
+
             }
         }
 
@@ -120,6 +123,7 @@ namespace RandomBuff.Render.UI
 
         //卡牌效果控制
         internal BuffCardRenderer _cardRenderer;
+        internal SpecialBuffEffect _specialBuffEffect;
 
         public bool Highlight
         {
@@ -287,11 +291,15 @@ namespace RandomBuff.Render.UI
             _cardRenderer = CardRendererManager.GetRenderer(buffID);
             Container = new FContainer();
 
+            if(ID.GetStaticData().BuffProperty == BuffProperty.Special || true)
+                _specialBuffEffect = new SpecialBuffEffect(ID.GetStaticData().BuffType, Container);
+
             _ftexture = _cardRenderer.CleanGetTexture();
             Container.AddChild(_cardRenderer.Texture);
 
             Reset();
             SetAnimatorState(initState);
+
 
             //Helper.TraceStack();
             //BuffPlugin.Log("BuffCard init");
@@ -310,11 +318,13 @@ namespace RandomBuff.Render.UI
             //    _texInit = true;
             //}
             currentAnimator?.Update();
+            _specialBuffEffect?.Update(this);
         }
 
         public void GrafUpdate(float timeStacker)
         {
             currentAnimator?.GrafUpdate(timeStacker);
+            _specialBuffEffect?.GrafUpdate(this, timeStacker);
         }
 
         public void Destroy()
@@ -325,7 +335,7 @@ namespace RandomBuff.Render.UI
             Container.RemoveAllChildren();
             Container.RemoveFromContainer();
             _ftexture.RemoveFromContainer();
-
+            _specialBuffEffect?.Destroy();
 
             //Helper.TraceStack();
             //BuffPlugin.Log("BuffCard Destroy");
@@ -518,6 +528,230 @@ namespace RandomBuff.Render.UI
             //卡包卡槽动画状态
             CardPocketSlot_Normal,
             CardPocketSlot_Exclusive,
+        }
+    }
+
+    internal class SpecialBuffEffect
+    {
+        static int particleCount = 80;
+        static float emitRate = 1 / 10f;
+        static Color gold = Custom.hexToColor("FFB81D");
+
+        BuffType buffType;
+
+        FSprite[] particle, light;
+        Vector2[] vel, pos, lastPos;
+        int[] life, lastLife, initLife;
+        float[] scale;
+
+        bool lastEmit;
+        float emitCounter;
+        int continueEmitCounter;
+        Vector2 lastBuffCardPos;
+        Color effectCol;
+        public float alpha;
+
+        public SpecialBuffEffect(BuffType buffType, FContainer container)
+        {
+            this.buffType = buffType;
+
+            particle = new FSprite[particleCount];
+            light = new FSprite[particleCount];
+            pos = new Vector2[particleCount];
+            lastPos = new Vector2[particleCount];
+            life = new int[particleCount];
+            lastLife = new int[particleCount];
+            life = new int[particleCount];
+            initLife = new int[particleCount];
+            scale = new float[particleCount];
+            vel = new Vector2[particleCount];
+
+            if (buffType == BuffType.Positive)
+                effectCol = gold;
+            else if (buffType == BuffType.Negative)
+                effectCol = Custom.hexToColor("80013A");
+            else if (buffType == BuffType.Duality)
+                effectCol = Color.gray;
+
+            for (int i = 0; i < particleCount; i++)
+            {
+                particle[i] = new FSprite(buffType == BuffType.Negative ? BuffUIAssets.CircleGradient20  : "pixel", true)
+                {
+                    color = buffType == BuffType.Negative ? Color.red : Color.white,
+                    alpha = 0f,
+                    shader = Custom.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"],
+                    isVisible = false
+                };
+                container.AddChild(particle[i]);
+                light[i] = new FSprite(buffType == BuffType.Negative ? "buffinfos\\BuiltinBuffs\\cardinfos\\positive\\flamethrower\\flameVFX1" : BuffUIAssets.CircleGradient20, true)
+                {
+                    color = effectCol,
+                    alpha = 0f,
+                    shader = Custom.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"],
+                    isVisible = false
+                };
+                container.AddChild(light[i]);
+            }
+        }
+
+        internal void Update(BuffCard buffCard)
+        {
+
+            if (continueEmitCounter > 0)
+                continueEmitCounter--;
+
+            if(!buffCard.DisplayTitle && lastEmit)
+            {
+                continueEmitCounter = 20;
+            }
+
+            Vector2 deltaVel = Vector2.ClampMagnitude((buffCard.Position - lastBuffCardPos) * 20, 40f);
+            if (buffCard.DisplayTitle || continueEmitCounter > 0)
+            {
+                emitCounter += 1/40f;
+
+                float delta = Vector2.Distance(buffCard.Position, lastBuffCardPos);
+                emitCounter += emitRate * delta / 50f;
+            }
+
+            lastEmit = buffCard.DisplayTitle;
+            lastBuffCardPos = buffCard.Position;
+
+            int emit = 0;
+            while(emitCounter >= emitRate)
+            {
+                emit++;
+                emitCounter -= emitRate;
+            }
+
+            for(int i = 0;i < particleCount; i++)
+            {
+                lastLife[i] = life[i];
+
+                if (life[i] > 0)
+                    life[i]--;
+
+                if (lastLife[i] == life[i] && life[i] == 0)
+                {
+                    if (emit > 0)
+                    {
+                        EmitParticle(buffCard, i, deltaVel);
+                        emit--;
+                    }
+                    else
+                    {
+                        particle[i].isVisible = false;
+                        light[i].isVisible = false;
+                        continue;
+                    }
+                }
+
+                lastPos[i] = pos[i];
+                pos[i] += vel[i] / 40f;
+
+                if(buffType == BuffType.Positive)
+                {
+                    vel[i] *= 0.95f;
+                    vel[i] += Custom.RNV();
+                }
+                else if(buffType == BuffType.Negative)
+                {
+                    vel[i] *= 0.93f;
+                    vel[i].x += Mathf.Sin((life[i] + i) * 0.075f) * life[i] / (float)initLife[i];
+                    vel[i] += Custom.RNV();
+                }
+                else
+                {
+                    vel[i] *= 0.95f;
+                    vel[i] += Custom.RNV();
+                }
+            }
+        }
+
+        void EmitParticle(BuffCard buffCard, int i, Vector2 velEffect)
+        {
+            particle[i].isVisible = true;
+            light[i].isVisible = true;
+            
+
+            if (buffType == BuffType.Positive)
+            {
+                pos[i] = lastPos[i] = buffCard.Position + buffCard.Scale * Custom.RNV() * 50f * Random.value;
+
+                vel[i] = Custom.RNV() * Mathf.Lerp(155f, 185f, Random.value) * buffCard.Scale * 4f;
+                vel[i].x *= 0.6f;
+                vel[i] += velEffect;
+            }
+            else if(buffType == BuffType.Negative)
+            {
+                pos[i] = lastPos[i] = buffCard.Position + buffCard.Scale * Custom.RNV() * 150f * Random.value;
+
+                vel[i] = Custom.RNV() * 50f + Vector2.down * Mathf.Lerp(175f, 195f, Random.value) * buffCard.Scale * 4f;
+                vel[i].x *= 0.6f;
+                vel[i] += velEffect * 0.6f;
+            }
+            else
+            {
+                pos[i] = lastPos[i] = buffCard.Position + buffCard.Scale * Custom.RNV() * 50f * Random.value;
+
+                vel[i] = Custom.RNV() * Mathf.Lerp(155f, 185f, Random.value) * buffCard.Scale * 4f;
+                vel[i].x *= 0.6f;
+                vel[i] += velEffect;
+            }
+            
+            
+            initLife[i] = life[i] = lastLife[i] = 80;
+            scale[i] = buffCard.Scale;
+
+            if(buffType == BuffType.Negative)
+            {
+                particle[i].scale = buffCard.Scale * 2f;
+                light[i].scale = buffCard.Scale * 4f;
+            }
+            else
+            {
+                particle[i].scale = buffCard.Scale * 2f * 4f;
+                light[i].scale = buffCard.Scale * 2f;
+            }
+            
+        }
+
+        public void GrafUpdate(BuffCard buffCard, float timeStacker)
+        {
+            for(int i = 0; i < particle.Length; i++)
+            {
+                if (!particle[i].isVisible)
+                    continue;
+
+                Vector2 smoothPos = Vector2.Lerp(lastPos[i], pos[i], timeStacker);
+                float smoothL = Mathf.Lerp(lastLife[i] , life[i], timeStacker) / initLife[i];
+
+                if(buffType == BuffType.Negative)
+                {
+                    particle[i].alpha = light[i].alpha = (smoothL + Mathf.Sin(smoothL * 40f + Random.value * 1f) * 0.2f) * buffCard.Alpha;
+                    light[i].alpha = particle[i].alpha * 0.5f;
+                }
+                else
+                {
+                    light[i].alpha = particle[i].alpha = light[i].alpha = (smoothL + Mathf.Sin(smoothL * 18f) * 0.1f) * buffCard.Alpha;
+                }
+                
+
+                particle[i].SetPosition(smoothPos);
+                light[i].SetPosition(smoothPos);
+            }
+        }
+
+        public void Destroy()
+        {
+            for(int i = 0; i < particle.Length; ++i)
+            {
+                particle[i].isVisible = false;
+                particle[i].RemoveFromContainer();
+
+                light[i].isVisible = false;
+                light[i].RemoveFromContainer();
+            }
         }
     }
 }

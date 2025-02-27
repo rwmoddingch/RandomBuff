@@ -8,6 +8,7 @@ using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace RandomBuff.Core.Option
@@ -67,7 +68,7 @@ namespace RandomBuff.Core.Option
                 configurable.Value.info = new ConfigurableInfo(BuffResourceString.Get($"Remix_{configurable.Key}_Desc", true));
 
             OpTab option = InitNewTab(BuffResourceString.Get("Remix_Option", true));
-            OpTab pack = new OpTab(this, "BuffPack");
+            OpTab pack = InitNewTab(BuffResourceString.Get("Remix_BuffPack", true));
             OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
         
 
@@ -136,7 +137,7 @@ namespace RandomBuff.Core.Option
            
             foreach (var pluginInfo in BuffConfigManager.GetSortedPluginInfos())
             {
-                var button = new PackButton(Vector2.zero, new Vector2(540f, 120f), pluginInfo, true, pluginInfo.AssemblyName !=  "BuiltinBuffs") { Enabled = pluginInfo.Enabled };
+                var button = new PackButton(Vector2.zero, new Vector2(525f, 120f), pluginInfo, true, pluginInfo.AssemblyName !=  "BuiltinBuffs") { Enabled = pluginInfo.Enabled };
                 var index = packButtons.Count;
                 button.ToggleCallBack += () =>
                 {
@@ -152,7 +153,8 @@ namespace RandomBuff.Core.Option
             sizeY = Mathf.Max(sizeY, 560f);
 
             OpScrollBox scrollBox;
-            pack.AddItems(scrollBox = new OpScrollBox(new Vector2(20f, 20f), new Vector2(560f, 560f), sizeY, hasSlideBar: false));
+            pack.AddItems(new OpLabel(20f, 470f, Regex.Replace(BuffResourceString.Get("Remix_BuffPackDescription", true),"<LINE>","\n")));
+            pack.AddItems(scrollBox = new OpScrollBox(new Vector2(20f, 20f), new Vector2(560f, 420f), sizeY, hasSlideBar: true));
 
             float anchorY = sizeY;
             foreach(var button in packButtons)

@@ -327,6 +327,8 @@ BuffManual_CardPedia_Content_1|After selecting any type of buff, you can view th
 //Remix
 Remix_Title|Random Buff
 Remix_Option|Option
+Remix_BuffPack|BuffPack
+Remix_BuffPackDescription|Manage all buff packs. Enabled buff packs will be displayed in green.<LINE>Click the button corresponding to the buff pack to toggle its enabled status.<LINE>Built-in buff packs cannot be disabled.
 Remix_CardSlotKey|View Card Slot Key
 Remix_KeyBindKey|Card Binding Key
 Remix_ShowExceptionLog|Exception Notifications
