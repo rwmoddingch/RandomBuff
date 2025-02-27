@@ -1,0 +1,21 @@
+{
+  "FaceName": "corruptionshapedmutation",
+  "BuffID": "CorruptionShapedMutation",
+  "BuffType": "Duality",
+  "BuffProperty": "Special",
+  "AsPositive": true,
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "6ABFE5",
+  "Tag": [ "ShapedMutation" ],
+  "Conflict": [ "ShapedMutation" ],
+
+  "Chinese": {
+    "BuffName": "菌形突变",
+    "Description": "你身上长出长腿菌的触手，并以长腿菌的的方式进行移动。你几乎失去了视力，但可以看见声源附近的场景。许多生物开始恐惧你，棕色长腿菌不再对你有敌意，腐化墙壁不再吸附你，而迭代器拒绝和你说话。你的食量增大，并倾向于食肉。你不能拾取和投掷物品，只能使用触手将生物拖至核心吞噬以进食。按住跳跃键时，你可以按方向键使核心移动，不按跳跃键时，你可以按方向键使空闲触手移动。长按投掷键以使触手自动伸向附近的生物，长按拾取键以抓住触手附近的生物。"
+  },
+  "English": {
+    "BuffName": "Corruption-Shaped Mutation",
+    "Description": "You grow tentacles of Long Legs creatures on your body and move in the way of Long Legs creatures. You have almost lost your vision, but you can see the scene near the sound source. Many creatures begin to fear you, Brother Long Legs no longer harbors hostility towards you, Corrupted Wall no longer attracts you, and Iterator refuses to speak to you. Your appetite increases and you tend to eat meat. You cannot pick up or throw items, you can only use tentacles to drag the creature to your core for consumption. When holding down the jump key, you can press the directional keys to move your core. When not pressing the jump key, you can press the directional keys to move the idle tentacles. Long press the throw button to automatically extend the tentacles towards nearby creatures, and long press the pick button to grab the creatures near the tentacles."
+  }
+}

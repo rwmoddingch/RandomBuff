@@ -88,7 +88,6 @@ namespace BuiltinBuffs.Positive
                                         Creature creature = self.room.abstractRoom.creatures[k].realizedCreature;
 
                                         if (ShouldFire(self, creature))
-
                                         {
                                             if (Custom.DistLess(weapon.firstChunk.pos, self.room.abstractRoom.creatures[k].realizedCreature.mainBodyChunk.pos, minDist))
                                             {

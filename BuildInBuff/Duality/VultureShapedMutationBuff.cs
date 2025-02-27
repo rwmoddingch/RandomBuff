@@ -24,6 +24,8 @@ using System.Reflection;
 using System.Drawing;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
+using Newtonsoft.Json;
+using BuiltinBuffs.Positive;
 
 namespace BuiltinBuffs.Duality
 {
@@ -75,6 +77,10 @@ namespace BuiltinBuffs.Duality
     internal class VultureShapedMutationBuffData : BuffData
     {
         public override BuffID ID => VultureShapedMutationBuffEntry.VultureShapedMutation;
+        [JsonProperty] public string[] vultureState_1;
+        [JsonProperty] public string[] vultureState_2;
+        [JsonProperty] public string[] vultureState_3;
+        [JsonProperty] public string[] vultureState_4;
     }
 
     internal class VultureShapedMutationBuffEntry : IBuffEntry
@@ -113,6 +119,8 @@ namespace BuiltinBuffs.Duality
             On.Player.Grabability += Player_Grabability;
 
             On.VultureMask.DrawSprites += VultureMask_DrawSprites;
+
+            On.RainWorldGame.Win += RainWorldGame_Win;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -323,12 +331,104 @@ namespace BuiltinBuffs.Duality
         }
         #endregion
 
+        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+        {
+            try
+            {
+                var buffData = BuffCore.GetBuffData(VultureShapedMutation);
+                if (buffData != null)
+                {
+                    for (int i = 0; i < self.Players.Count; i++)
+                    {
+                        if (self.Players[i].realizedCreature == null) continue;
+                        switch (i)
+                        {
+                            case 0:
+                                {
+                                    if (VultureCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var data0))
+                                    {
+                                        (buffData as VultureShapedMutationBuffData).vultureState_1 = new string[1] { data0.State.ToString() };
+                                    }
+                                    continue;
+                                }
+                            case 1:
+                                {
+                                    if (VultureCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var data1))
+                                    {
+                                        (buffData as VultureShapedMutationBuffData).vultureState_2 = new string[1] { data1.State.ToString() };
+                                    }
+                                    continue;
+                                }
+                            case 2:
+                                {
+                                    if (VultureCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var data2))
+                                    {
+                                        (buffData as VultureShapedMutationBuffData).vultureState_3 = new string[1] { data2.State.ToString() };
+                                    }
+                                    continue;
+                                }
+                            case 3:
+                                {
+                                    if (VultureCatFeatures.TryGetValue(self.Players[i].realizedCreature as Player, out var data3))
+                                    {
+                                        (buffData as VultureShapedMutationBuffData).vultureState_4 = new string[1]{ data3.State.ToString() };
+                                    }
+                                    continue;
+                                }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+            }
+            orig(self, malnourished);
+        }
+
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
             if (!VultureCatFeatures.TryGetValue(self, out _))
             {
-                VultureCatFeatures.Add(self, new VultureCat(self));
+                VultureCat vulture = new VultureCat(self);
+                VultureCatFeatures.Add(self, vulture);
+                var buffData = BuffCore.GetBuffData(VultureShapedMutation);
+                if (buffData != null)
+                {
+                    if (self.IsJollyPlayer)
+                    {
+                        switch (self.playerState.playerNumber)
+                        {
+                            case 1:
+                                {
+                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                                    (buffData as VultureShapedMutationBuffData).vultureState_1 = new string[1] { "" };
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_2);
+                                    (buffData as VultureShapedMutationBuffData).vultureState_2 = new string[1] { "" };
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_3);
+                                    (buffData as VultureShapedMutationBuffData).vultureState_3 = new string[1] { "" };
+                                    break;
+                                }
+                            case 4:
+                                {
+                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_4);
+                                    (buffData as VultureShapedMutationBuffData).vultureState_4 = new string[1] { "" };
+                                    break;
+                                }
+                        }
+                    }
+                    else
+                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                }
             }
         }
 
@@ -1213,25 +1313,32 @@ namespace BuiltinBuffs.Duality
             if (!ownerRef.TryGetTarget(out var player))
                 return;
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
-
-            if ((self.owner as Player).SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)
+            Vector3? color = null;
+            if (player.abstractCreature.world != null && player.abstractCreature.world.game != null)
             {
-                Vector3 vector = Custom.RGB2HSL(self.gills.effectColor);
-                this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
-                this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.1f, 0.1f, randomValueForWingColor[5]), 
-                                           Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]), 
-                                           Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]));
+                color = Custom.RGB2HSL(PlayerGraphics.JollyUniqueColorMenu(player.SlugCatClass,
+                                                        player.abstractCreature.world.game.rainWorld.options.jollyPlayerOptionsArray[player.playerState.playerNumber].playerClass,
+                                                        player.playerState.playerNumber));
             }
-            else if ((self.owner as Player).SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+            if (color != null)
             {
-                Vector3 vector = Custom.RGB2HSL(sLeaser.sprites[self.tailSpecks.startSprite + self.tailSpecks.rows * self.tailSpecks.lines - 1].color);
-                this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
-                this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]), 
-                                           Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
-                                           Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.1f));
-            }
-            else if ((self.owner as Player).SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
-            {
+                Vector3 vector = color.Value;
+                if ((self.owner as Player).SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)
+                {
+                    this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
+                    this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.1f, 0.1f, randomValueForWingColor[5]),
+                                               Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
+                                               Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]));
+                }
+                else if ((self.owner as Player).SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+                {
+                    this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
+                    this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]),
+                                               Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
+                                               Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.1f));
+                }
+                else if ((self.owner as Player).SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+                {/*
                 FSprite sp = null; 
                 Vector3 vector = Custom.RGB2HSL(sLeaser.sprites[12].color);
                 foreach (var sprite in sLeaser.sprites)
@@ -1240,28 +1347,36 @@ namespace BuiltinBuffs.Duality
                 if (sp != null)
                 {
                     vector = Custom.RGB2HSL(sp.color);
+                }*/
+                    this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
+                    this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]),
+                                               Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
+                                               Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.1f));
                 }
-                this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
-                this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]),
-                                           Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
-                                           Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.1f));
-            }
-            else if ((self.owner as Player).SlugCatClass.value == "Outsider")
-            {
+                else if ((self.owner as Player).SlugCatClass.value == "Outsider")
+                {/*
                 FSprite sp = null;
                 Vector3 vector = new Vector3(161f / 360f, 49f / 100f, 90f / 100f);
                 foreach (var sprite in sLeaser.sprites)
                     if (sprite.element.name == "MothWingA1")
                         sp = sprite;
                 if (sp != null)
-                    vector = Custom.RGB2HSL(sp.color);
-                this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
-                this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]),
-                                           Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
-                                           Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.3f));
+                    vector = Custom.RGB2HSL(sp.color); */
+                    this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
+                    this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]),
+                                               Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
+                                               Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.3f));
+                }
+                else if (sLeaser.sprites[0].color == Color.white)
+                    this.albino = true;
+                else
+                {
+                    this.ColorA = new HSLColor(Mathf.Clamp(vector.x, 0f, 0.99f), vector.y, Mathf.Clamp(vector.z, 0.01f, 1f));
+                    this.ColorB = new HSLColor(this.ColorA.hue + Mathf.Lerp(-0.05f, 0.05f, randomValueForWingColor[5]),
+                                               Mathf.Lerp(0.8f, 1f, 1f - randomValueForWingColor[6] * randomValueForWingColor[7]),
+                                               Mathf.Lerp(ColorA.lightness, Mathf.Lerp(0.45f, 1f, randomValueForWingColor[8] * randomValueForWingColor[9]), 0.3f));
+                }
             }
-            else if (sLeaser.sprites[0].color == Color.white)
-                this.albino = true;
         }
 
         public void WingColorForLevel()
