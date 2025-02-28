@@ -458,19 +458,20 @@ namespace RandomBuff.Core.Game
         internal bool TriggerBuff(BuffID id, bool ignoreCheck = false)
         {
             BuffPlugin.Log($"Trigger Buff: {id}, ignoreCheck: {ignoreCheck}");
-            if (TryGetBuff(id, out var buff) && ((BuffConfigManager.GetStaticData(id).Triggerable && buff.Triggerable) || ignoreCheck))
+            if (TryGetBuff(id, out IBuff buff) && ((BuffConfigManager.GetStaticData(id).Triggerable && buff.Triggerable) || ignoreCheck))
             {
-                bool re = false;
+                var re = (false, false);
                 try
                 {
-                    re = buff.Trigger(Game);
+                    re = buff.TriggerWithEffect(Game);
                 }
                 catch (Exception e)
                 {
                     BuffPlugin.LogException(e,$"Exception in BuffPoolManager:TriggerBuff:{id}");
                 }
 
-                BuffHud.Instance.TriggerCard(buff.ID);
+                if(re.Item2)
+                    BuffHud.Instance.TriggerCard(buff.ID);
 
                 if (GameSetting.gachaTemplate is not SandboxGachaTemplate)
                 {
@@ -479,7 +480,7 @@ namespace RandomBuff.Core.Game
                 }
 
 
-                if (re)
+                if (re.Item1)
                 {
                     return UnstackBuff(buff.ID);
                 }

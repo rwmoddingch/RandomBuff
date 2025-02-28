@@ -53,7 +53,7 @@ namespace RandomBuff.Render.UI.Component
         public FContainer BottomContainer_1 => bottomContainer_1;
         public FContainer BottomContainer_2 => bottomContainer_2;
         public bool Show => show;
-        public bool EnableInput => packMenuDialog == null /*|| !packMenu.ShowPack*/;
+        public bool EnableInput => packMenuDialog == null && show /*|| !packMenu.ShowPack*/;
         public string Title
         {
             get => title;
@@ -156,6 +156,7 @@ namespace RandomBuff.Render.UI.Component
             else
             {
                 startAlpha = container.alpha;
+                packMenuDialog?.Singal(null, "Hide_Pack");
                 showAnim = AnimMachine.GetTickAnimCmpnt(0, 20, autoDestroy: true).BindActions(
                    OnAnimGrafUpdate: (a, f) =>
                    {

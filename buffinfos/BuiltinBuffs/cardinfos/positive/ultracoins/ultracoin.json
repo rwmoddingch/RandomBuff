@@ -1,0 +1,23 @@
+{
+  "FaceName": "UltraCoins",
+  "BuffID": "UltraCoins",
+  "BuffType": "Positive",
+  "BuffProperty": "Special",
+  "Triggerable": true,
+  "Stackable": false,
+  "Color": "FFBD1A",
+
+  "MultiLayerFace" : true,
+  "FaceLayer" : 3,
+  "MaxFaceDepth" : 1.0,
+  "FaceBackgroundColor" : "340008",
+
+  "Chinese": {
+    "BuffName": "超级金币",
+    "Description": "TODO"
+  },
+  "English": {
+    "BuffName": "Ultra Coins",
+    "Description": "TODO"
+  }
+}

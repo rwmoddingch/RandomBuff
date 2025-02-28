@@ -26,6 +26,8 @@ namespace RandomBuff.Core.Buff
 
         public bool Trigger(RainWorldGame game);
 
+        public (bool, bool) TriggerWithEffect(RainWorldGame game);
+
         public void Update(RainWorldGame game);
 
         public void Destroy();
@@ -67,6 +69,13 @@ namespace RandomBuff.Core.Buff
         /// <param name="game"></param>
         /// <returns>返回true时，代表该增益已经完全触发，增益将会被减少堆叠层数（或移除）</returns>
         public virtual bool Trigger(RainWorldGame game) => false;
+
+        /// <summary>
+        /// 点击触发方法，仅对可触发的增益有效，可以控制是否触发特效
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns>Item1: 是否完全触发，同Trigger; Item2: 是否显示触发特效</returns>
+        public virtual (bool, bool) TriggerWithEffect(RainWorldGame game) => (Trigger(game), true);
 
         /// <summary>
         /// 卡牌的计时器，在构造方法中赋值后，不可为null
@@ -144,6 +153,10 @@ namespace RandomBuff.Core.Buff
 
         public virtual void Destroy() { }
 
+        public (bool, bool) TriggerWithEffect(RainWorldGame game)
+        {
+            return (Trigger(game), true);
+        }
 
         protected RuntimeBuff() { }
     }

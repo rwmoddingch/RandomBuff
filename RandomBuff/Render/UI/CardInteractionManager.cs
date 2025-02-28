@@ -656,6 +656,7 @@ namespace RandomBuff.Render.UI
         public class KeyBinderProcessor
         {
             public List<BuffID> triggerableBuffIDs = new List<BuffID>();
+            Dictionary<BuffID, bool>lastKeyDowns = new Dictionary<BuffID, bool>();
 
             InGameSlotInteractionManager manager;
 
@@ -673,13 +674,19 @@ namespace RandomBuff.Render.UI
             public void AppendCard(BuffCard card)
             {
                 if(card.StaticData.Triggerable)
+                {
                     triggerableBuffIDs.Add(card.ID);
+                    lastKeyDowns.Add(card.ID, false);
+                }
             }
 
             public void RemoveCard(BuffCard card)
             {
                 if (card.StaticData.Triggerable)
+                {
                     triggerableBuffIDs.Remove(card.ID);
+                    lastKeyDowns.Remove(card.ID);
+                }
             }
 
             public void Update()
@@ -708,11 +715,13 @@ namespace RandomBuff.Render.UI
                     for(int i = triggerableBuffIDs.Count - 1; i >= 0; i--)
                     {
                         var id = triggerableBuffIDs[i];
-                        if (BuffInput.GetKeyDown(BuffPlayerData.Instance.GetKeyBind(id)))
+                        bool keyDown = BuffInput.GetKey(BuffPlayerData.Instance.GetKeyBind(id));
+                        if (!lastKeyDowns[triggerableBuffIDs[i]] && keyDown)
                         {
                             BuffPlugin.Log($"Trigger card {id} by shorcut key {BuffPlayerData.Instance.GetKeyBind(id)}");
                             manager.TriggerCard(id);
                         }
+                        lastKeyDowns[triggerableBuffIDs[i]] = keyDown;
                     }
                 }
             }
