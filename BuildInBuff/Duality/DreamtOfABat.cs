@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using BuiltinBuffs.Negative;
 using BuiltinBuffs.Positive;
 using HotDogGains.Duality;
 using Mono.Cecil.Cil;
@@ -6,76 +12,72 @@ using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
 using RWCustom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using BuiltinBuffs.Negative;
 using UnityEngine;
 
 namespace BuildInBuff.Duality
 {
-    class DreamtOfABatBuff : Buff<DreamtOfABatBuff, DreamtOfABatBuffData> { public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID; }
-    class DreamtOfABatBuffData : CountableBuffData
+    class DreamtOfABatBuff : Buff<DreamtOfABatBuff, DreamtOfABatBuffData>
     {
         public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID;
+    }
+
+    class DreamtOfABatBuffData : BuffData
+    {
+        public override BuffID ID => DreamtOfABatBuffEntry.DreamtOfABatID;
+
         public override bool CanStackMore() => StackLayer < 4;
 
-        public override int MaxCycleCount => 3;
-
+        // public override int MaxCycleCount => 3;
     }
+
     class DreamtOfABatBuffEntry : IBuffEntry
     {
         public static BuffID DreamtOfABatID = new BuffID("DreamtOfABatID", true);
+
         public void OnEnable()
         {
-            BuffRegister.RegisterBuff<DreamtOfABatBuff, DreamtOfABatBuffData, DreamtOfABatBuffEntry>(DreamtOfABatID);
+            BuffRegister.RegisterBuff<DreamtOfABatBuff, DreamtOfABatBuffData,
+                                      DreamtOfABatBuffEntry>(DreamtOfABatID);
         }
+
         public static void HookOn()
         {
-            //ÔÎÑ£µÄÊ±ºò±ä³Éòùòğ
             On.Player.Stun += Player_Stun;
-            //·ÀÖ¹ÏûÊ§Ê±±»ÅĞËÀÍö
             On.Player.Die += Player_Die;
-
-
-            //¸Ä±äÍæ¼ÒòùòğµÄÑÕÉ«
             On.FlyGraphics.ApplyPalette += ButteFly_ApplyPalette;
 
-            //·ÀÖ¹ÈÜ¹âÏûÃğÍæ¼ÒµÄòùòğ
             IL.MeltLights.Update += MeltLights_Update;
         }
 
         private static void MeltLights_Update(MonoMod.Cil.ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
-                (i) => i.MatchLdarg(0),
-                (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
-                (i) => i.MatchLdfld<Room>("physicalObjects"),
-                (i) => i.MatchLdcI4(0),
-                (i) => i.MatchLdelemRef(),
-                (i) => i.MatchLdloc(1),
-                (i) => i.Match(OpCodes.Callvirt)
-                ))
+            if (c.TryGotoNext(MoveType.After, (i) => i.MatchLdarg(0),
+                              (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
+                              (i) => i.MatchLdfld<Room>("physicalObjects"),
+                              (i) => i.MatchLdcI4(0), (i) => i.MatchLdelemRef(),
+                              (i) => i.MatchLdloc(1),
+                              (i) => i.Match(OpCodes.Callvirt)))
             {
                 c.EmitDelegate<Func<PhysicalObject, PhysicalObject>>((obj) =>
                 {
                     if (obj is Fly fly && fly.IsButterFly())
                     {
-                        return null;//Èç¹ûÊÇÃÎµû¾Í´«¸ö¿ÕÖµ
+                        return null; // å¦‚æœæ˜¯è´è¶åˆ™è¿”å›ç©ºå€¼
                     }
                     return obj;
                 });
             }
         }
 
-        private static void ButteFly_ApplyPalette(On.FlyGraphics.orig_ApplyPalette orig, FlyGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        private static void
+        ButteFly_ApplyPalette(On.FlyGraphics.orig_ApplyPalette orig, FlyGraphics self,
+                              RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam,
+                              RoomPalette palette)
         {
             orig.Invoke(self, sLeaser, rCam, palette);
 
-            //ÈÃòùòğÉíÌåµÄÑÕÉ«ºÍÍæ¼ÒµÄÑÕÉ«Ò»Ñù
+            // å°†è´è¶çš„é¢œè‰²è®¾ç½®ä¸ºä¸è´è¶é¢œè‰²ä¸€è‡´
             if (self.fly.IsButterFly(out var butteFly))
             {
                 for (int i = 0; i < 3; i++)
@@ -83,9 +85,7 @@ namespace BuildInBuff.Duality
                     sLeaser.sprites[i].color = butteFly.color;
                 }
             }
-
         }
-
 
         private static void Player_Die(On.Player.orig_Die orig, Player self)
         {
@@ -103,21 +103,28 @@ namespace BuildInBuff.Duality
             orig.Invoke(self);
         }
 
-
         private static void Player_Stun(On.Player.orig_Stun orig, Player self, int st)
         {
             orig.Invoke(self, st);
 
-            if (self.dead) return;
+            if (self.dead)
+                return;
 
             if (self.room != null && self.room.updateList != null)
             {
-                //fp·¿¼äÄÚ²»·¢¶¯¿¨ÅÆ·ÀÖ¹¿¨ËÀ
-                if (self.room.abstractRoom.name.Length > 2 && self.room.abstractRoom.name.Substring(self.room.abstractRoom.name.Length - 2) == "AI") return;
-                if (self.room.abstractRoom.name == "SB_E05SAINT") return;
+                // fpæ¨¡å¼ä¸‹ä¸å¤„ç†æŸäº›ç‰¹å®šæˆ¿é—´
+                if (self.room.abstractRoom.name.Length > 2 &&
+                    self.room.abstractRoom.name.Substring(
+                        self.room.abstractRoom.name.Length - 2) == "AI")
+                    return;
+                if (self.room.abstractRoom.name == "SB_E05SAINT")
+                    return;
+                if (self.room.abstractRoom.name == "MS_CORE")
+                    return;
+                // if (self.room.abstractRoom.name == "MS_bitterstart")
+                //   return;
 
-
-                //ÒÑ¾­
+                // å·²ç»
                 foreach (var item in self.room.updateList)
                 {
                     if (item is BatBody body && body.player == self)
@@ -126,20 +133,23 @@ namespace BuildInBuff.Duality
                     }
                 }
 
-                //ÉÔÎ¢Ìí¼ÓÒ»µããĞÖµ·ÀÖ¹ÄªÃûÆäÃîµÄ·¢¶¯¿¨ÅÆ
-                var activeLimite = 12 - (DreamtOfABatID.GetBuffData().StackLayer > 2 ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5 : 0);
-                //ĞéÈõ×´Ì¬¸üÄÑ·¢¶¯±äòùòğ
+                // è®¡ç®—ä¸€ä¸ªé™åˆ¶å€¼é˜²æ­¢è™è çš„ç”Ÿæˆè¿‡äºé¢‘ç¹
+                var activeLimite =
+                    12 - (DreamtOfABatID.GetBuffData().StackLayer > 2
+                              ? (DreamtOfABatID.GetBuffData().StackLayer - 2) * 5
+                              : 0);
+                // å¦‚æœçŠ¶æ€æ˜¯ç–²æƒ«çš„åˆ™ç¿»å€
                 activeLimite *= self.exhausted ? 2 : 1;
-                if (st > activeLimite) self.room.AddObject(new BatBody(self.abstractCreature, HeartDevouringWormBuffEntry.IsInfected(self)));
+                if (st > activeLimite)
+                    self.room.AddObject(
+                        new BatBody(self.abstractCreature,
+                                    HeartDevouringWormBuffEntry.IsInfected(self)));
             }
-
-
         }
     }
 
     public class BatBody : UpdatableAndDeletable
     {
-
         public AbstractCreature absPlayer;
         public Player player => absPlayer.realizedCreature as Player;
 
@@ -153,29 +163,36 @@ namespace BuildInBuff.Duality
             this.dieAfterDestroy = dieAfterDestroy;
             this.absPlayer = absPlayer;
 
-
-            //ÕÙ»½¸ÄÉ«òùòğ
+            // åˆ›å»ºè™è å®ä½“
             var room = player.room;
-            var absFly = new AbstractCreature(room.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly), null, room.GetWorldCoordinate(player.DangerPos), room.world.game.GetNewID());
+            var absFly = new AbstractCreature(
+                room.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly),
+                null, room.GetWorldCoordinate(player.DangerPos),
+                room.world.game.GetNewID());
 
             absFly.TurnButteFLy(absPlayer.realizedCreature.ShortCutColor());
+
+            absFly.lavaImmune =
+                player.abstractCreature.lavaImmune; // è®©è™è åŒæ­¥ç©å®¶çš„å²©æµ†å…ç–«èƒ½åŠ›
+            absFly.tentacleImmune =
+                player.abstractCreature.tentacleImmune; // è®©è™è åŒæ­¥ç©å®¶çš„è§¦æ‰‹å…ç–«èƒ½åŠ›
 
             room.abstractRoom.AddEntity(absFly);
             absFly.RealizeInRoom();
 
             batBody = absFly.realizedCreature as Fly;
 
-            //ÒÆ¶¯òùòğ
+            // ç§»åŠ¨ä½ç½®
             batBody.firstChunk.HardSetPosition(player.firstChunk.pos);
             batBody.firstChunk.vel += player.firstChunk.vel;
 
+            // batBody.abstractCreature.controlled=true;
 
-            //batBody.abstractCreature.controlled=true;
-
-            //¹âĞ§
+            // æ•ˆæœ
             AddEffect(room);
 
-            if ((ModManager.MSC || ModManager.CoopAvailable) && player.slugOnBack != null && player.slugOnBack.slugcat != null)
+            if ((ModManager.MSC || ModManager.CoopAvailable) &&
+                player.slugOnBack != null && player.slugOnBack.slugcat != null)
             {
                 player.slugOnBack.DropSlug();
             }
@@ -184,11 +201,10 @@ namespace BuildInBuff.Duality
                 player.spearOnBack.DropSpear();
             }
 
-            //ÈÃ·¿¼ä×Ô¶¯É¾³ıÍæ¼Ò
+            // è¯¥æ–¹æ³•è‡ªåŠ¨åˆ é™¤ç©å®¶
             player.slatedForDeletetion = true;
 
             player.wantToPickUp = 0;
-
         }
 
         public override void Destroy()
@@ -197,21 +213,21 @@ namespace BuildInBuff.Duality
             {
                 player.slatedForDeletetion = false;
 
-                //·ÀÖ¹ÖØ¸´Ìí¼ÓÍæ¼Ò
+                // é˜²æ­¢é‡å¤ç”Ÿæˆ
                 bool notHavePlayer = true;
-                //¼ì²éÍæ¼ÒÊÇ·ñÒÑ¾­±»¸´»î
+                // æ£€æŸ¥æˆ¿é—´å†…æ˜¯å¦å·²ç»æœ‰ç©å®¶
                 foreach (var item in room.abstractRoom.creatures)
                 {
-                    if (item == player.abstractCreature) notHavePlayer = false;
+                    if (item == player.abstractCreature)
+                        notHavePlayer = false;
                 }
 
-                //ÖØÏÖÍæ¼Ò
+                // é‡æ–°ç”Ÿæˆ
                 if (notHavePlayer)
                 {
-
-                    //Èç¹ûÍæ¼ÒÃ»ÓĞ¾Í´´ÔìÒ»¸öÍæ¼Ò
-                    //room.abstractRoom.AddEntity(player.abstractCreature);
-                    //player.PlaceInRoom(room);
+                    // å¦‚æœæ²¡æœ‰å°±åˆ›å»ºä¸€ä¸ªæ–°çš„
+                    // room.abstractRoom.AddEntity(player.abstractCreature);
+                    // player.PlaceInRoom(room);
                     var absPlayer = player.abstractCreature;
 
                     if (!room.abstractRoom.creatures.Contains(absPlayer))
@@ -220,15 +236,14 @@ namespace BuildInBuff.Duality
                     if (!room.abstractRoom.realizedRoom.updateList.Contains(player))
                         room.abstractRoom.realizedRoom.AddObject(player);
 
-
-                    //ÈÃÍæ¼Òµ½òùòğÎ»ÖÃ
+                    // è®¾ç½®ç©å®¶ä½ç½®
                     for (int i = 0; i < player.bodyChunks.Length; i++)
                     {
-                        //player.bodyChunks[i].HardSetPosition(batBody.firstChunk.pos);
+                        // player.bodyChunks[i].HardSetPosition(batBody.firstChunk.pos);
 
-                        //player.bodyChunks[i].vel = batBody.firstChunk.vel;
+                        // player.bodyChunks[i].vel = batBody.firstChunk.vel;
                     }
-                    //ÈÃÍæ¼ÒÄÜÕ¾×Å
+                    // è®¾ç½®ç©å®¶ç«™ç«‹
                     player.standing = true;
                     if (dieAfterDestroy)
                     {
@@ -238,18 +253,18 @@ namespace BuildInBuff.Duality
 
                     player.graphicsModule.Reset();
                 }
-
             }
-            if (batBody.dead || batBody.slatedForDeletetion) player.Die();
+            if (batBody.dead || batBody.slatedForDeletetion)
+                player.Die();
 
             batBody.Destroy();
             base.Destroy();
-
         }
 
         public void AddEffect(Room room)
         {
-            room.AddObject(new Explosion.ExplosionLight(player.firstChunk.pos, 80, 1, 20, Custom.hexToColor("93c5d4")));
+            room.AddObject(new Explosion.ExplosionLight(
+                player.firstChunk.pos, 80, 1, 20, Custom.hexToColor("93c5d4")));
             room.AddObject(new SporePlant.BeeSpark(player.firstChunk.pos));
         }
 
@@ -257,39 +272,45 @@ namespace BuildInBuff.Duality
         {
             base.Update(eu);
 
-            //·ÀÖ¹½øÈë¹ÜµÀ
+            // é˜²æ­¢è¿›å…¥æ·å¾„
             batBody.enteringShortCut = null;
             batBody.shortcutDelay = 40;
 
             if (player != null)
             {
-                if (player.dead) batBody.dead = true;
+                if (player.dead)
+                    batBody.dead = true;
 
-                
                 if (batBody.Consious)
                 {
                     if (player.airInLungs > 0)
                     {
-                        player.airInLungs -= 1f / (40f * (player.lungsExhausted ? 4.5f : 9f) * ((float)this.room.game.setupValues.lungs / 100f)) * player.slugcatStats.lungsFac * 2;
+                        player.airInLungs -=
+                            1f /
+                            (40f * (player.lungsExhausted ? 4.5f : 9f) *
+                             ((float)this.room.game.setupValues.lungs / 100f)) *
+                            player.slugcatStats.lungsFac * 2;
                         batBody.drown = 0;
                     }
 
                     if (DreamtOfABatBuffEntry.DreamtOfABatID.GetBuffData().StackLayer > 1)
                     {
                         batBody.abstractCreature.controlled = true;
-                        batBody.inputWithDiagonals = RWInput.PlayerInput(player.playerState.playerNumber);
+                        batBody.inputWithDiagonals =
+                            RWInput.PlayerInput(player.playerState.playerNumber);
                     }
                 }
 
+                if (batBody.slatedForDeletetion)
+                    player.stun = 0;
 
-                if (batBody.slatedForDeletetion) player.stun = 0;
-
-                if (player.stun <= 0) this.Destroy();
+                if (player.stun <= 0)
+                    this.Destroy();
                 else
                 {
                     player.stun--;
                     player.AerobicIncrease(0.1f);
-                    //ÈÃÍæ¼Òµ½òùòğÎ»ÖÃ
+                    // è®¾ç½®ç©å®¶ä½ç½®
                     for (int i = 0; i < player.bodyChunks.Length; i++)
                     {
                         player.bodyChunks[i].HardSetPosition(batBody.firstChunk.pos);
@@ -297,17 +318,16 @@ namespace BuildInBuff.Duality
                     }
                 }
             }
-
-
         }
-
-
     }
 
     public static class EXFly
     {
-        public static bool IsButterFly(this Fly fly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out var butteFly);
-        public static bool IsButterFly(this Fly fly, out ButteFly butteFly) => ButteFly.modules.TryGetValue(fly.abstractCreature, out butteFly);
+        public static bool IsButterFly(this Fly fly) =>
+            ButteFly.modules.TryGetValue(fly.abstractCreature, out var butteFly);
+
+        public static bool IsButterFly(this Fly fly, out ButteFly butteFly) =>
+            ButteFly.modules.TryGetValue(fly.abstractCreature, out butteFly);
 
         public static void TurnButteFLy(this AbstractCreature fly, Color color)
         {
@@ -317,9 +337,11 @@ namespace BuildInBuff.Duality
 
     public class ButteFly
     {
-        public static ConditionalWeakTable<AbstractCreature, ButteFly> modules = new ConditionalWeakTable<AbstractCreature, ButteFly>();
+        public static ConditionalWeakTable<AbstractCreature, ButteFly> modules =
+            new ConditionalWeakTable<AbstractCreature, ButteFly>();
 
         public Color color;
+
         public ButteFly(Color color) { this.color = color; }
     }
 }
