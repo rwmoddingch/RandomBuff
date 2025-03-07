@@ -76,7 +76,7 @@ namespace BuiltinBuffs.Positive
                         if (physicalObject is Weapon && (physicalObject as Weapon).thrownBy == self)
                         {
                             Weapon weapon = physicalObject as Weapon;
-                            Creature target = null;
+                            PhysicalObject target = null;
                             float minDist = 100000f;
 
                             if (weapon.mode == Weapon.Mode.Thrown)
@@ -89,15 +89,36 @@ namespace BuiltinBuffs.Positive
 
                                         if (ShouldFire(self, creature))
                                         {
-                                            if (Custom.DistLess(weapon.firstChunk.pos, self.room.abstractRoom.creatures[k].realizedCreature.mainBodyChunk.pos, minDist))
+                                            if (Custom.DistLess(weapon.firstChunk.pos, creature.mainBodyChunk.pos, minDist))
                                             {
-                                                target = self.room.abstractRoom.creatures[k].realizedCreature;
-                                                minDist = Custom.Dist(weapon.firstChunk.pos, self.room.abstractRoom.creatures[k].realizedCreature.mainBodyChunk.pos);
-                                                minDist = minDist / self.room.abstractRoom.creatures[k].realizedCreature.TotalMass;//会考虑生物体型来索敌
+                                                target = creature;
+                                                minDist = Custom.Dist(weapon.firstChunk.pos, creature.mainBodyChunk.pos);
+                                                minDist = minDist / creature.TotalMass;//会考虑生物体型来索敌
                                             }
                                         }
                                     }
                                 }
+                                for (int k = 0; k < self.room.physicalObjects.Length; k++)
+                                {
+                                    if (self.room.physicalObjects[k] != null)
+                                    {
+                                        for (int l = 0; l < self.room.physicalObjects[k].Count; l++)
+                                        {
+                                            if (self.room.physicalObjects[k][l] is UltraCoin)
+                                            {
+                                                PhysicalObject coin = self.room.physicalObjects[k][l] as UltraCoin;
+
+                                                if (Custom.DistLess(weapon.firstChunk.pos, coin.bodyChunks[0].pos, minDist))
+                                                {
+                                                    target = coin;
+                                                    minDist = Custom.Dist(weapon.firstChunk.pos, coin.bodyChunks[0].pos);
+                                                    minDist = minDist / coin.TotalMass;//会考虑物品重量来索敌
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 if (target != null)
                                 {
                                     float dist = Custom.Dist(weapon.firstChunk.pos, target.firstChunk.pos);

@@ -291,7 +291,7 @@ namespace RandomBuff.Render.UI
             _cardRenderer = CardRendererManager.GetRenderer(buffID);
             Container = new FContainer();
 
-            if(ID.GetStaticData().BuffProperty == BuffProperty.Special || true)
+            if(ID.GetStaticData().BuffProperty == BuffProperty.Special)
                 _specialBuffEffect = new SpecialBuffEffect(ID.GetStaticData().BuffType, Container);
 
             _ftexture = _cardRenderer.CleanGetTexture();
