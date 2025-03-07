@@ -16,6 +16,7 @@ namespace RandomBuff.Render.UI
         public static string CircleGradient20 { get; private set; }
         public static string ConicalLightOpaque400 {  get; private set; }
         public static string MissionInfoBoxBloom1920 {  get; private set; }
+        public static string OnePixelGradient20_2 { get; private set; }
 
         public static void LoadUIAssets()
         {
@@ -27,6 +28,7 @@ namespace RandomBuff.Render.UI
             CircleGradient20 = Futile.atlasManager.LoadImage("buffassets/illustrations/circleGradient20").name;
             ConicalLightOpaque400 = Futile.atlasManager.LoadImage("buffassets/illustrations/conical_light_opaque400").name;
             MissionInfoBoxBloom1920 = Futile.atlasManager.LoadImage("buffassets/illustrations/missionInfoBoxBloom").name;
+            OnePixelGradient20_2 = Futile.atlasManager.LoadImage("buffassets/illustrations/OnePixelGradient20_2").name;
         }
     }
 }

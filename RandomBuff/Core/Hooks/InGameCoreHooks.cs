@@ -135,8 +135,46 @@ namespace RandomBuff.Core.Hooks
             On.ScavengerBomb.Update += ScavengerBomb_Update;
             On.ScavengerBomb.Explode += ScavengerBomb_Explode;
 
-           On.RainWorldGame.BeatGameMode += RainWorldGame_BeatGameMode;
+            On.RainWorldGame.BeatGameMode += RainWorldGame_BeatGameMode;
+            On.Room.ctor += Room_ctor;
+        }
 
+        private static void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom)
+        {
+            try
+            {
+                orig.Invoke(self, game, world, abstractRoom);
+            }
+            catch(Exception e)
+            {
+                self.physicalObjects = new List<PhysicalObject>[3];
+                for (int i = 0; i < self.physicalObjects.Length; i++)
+                {
+                    self.physicalObjects[i] = new List<PhysicalObject>();
+                }
+                self.drawableObjects = new List<IDrawable>();
+                self.accessModifiers = new List<IAccessibilityModifier>();
+                self.updateList = new List<UpdatableAndDeletable>();
+                self.lightSources = new List<LightSource>();
+                self.waterFalls = new WaterFall[0];
+                self.visionObscurers = new List<VisionObscurer>();
+                self.socialEventRecognizer = new SocialEventRecognizer(self);
+                self.cellDistortions = new List<CellDistortion>();
+                self.cosmeticLightSources = new List<LightSource>();
+                self.zapCoils = new List<ZapCoil>();
+                self.lightningMachines = new List<LightningMachine>();
+                self.energySwirls = new List<EnergySwirl>();
+                self.snowSources = new List<SnowSource>();
+                self.localBlizzards = new List<LocalBlizzard>();
+                self.oeSpheres = new List<OEsphere>();
+                self.deathFallFocalPoints = new List<Vector2>();
+                self.blizzard = false;
+                self.dustStorm = false;
+                self.blizzardHeatSources = new List<IProvideWarmth>();
+                self.lockedShortcuts = new List<IntVector2>();
+
+                BuffPlugin.LogException(e);
+            }
         }
 
         private static void RainWorldGame_BeatGameMode(On.RainWorldGame.orig_BeatGameMode orig, RainWorldGame game, bool standardvoidsea)
@@ -326,14 +364,19 @@ namespace RandomBuff.Core.Hooks
             if (Custom.rainWorld.BuffMode())
             {
                 _ = BuffCustom.TryGetGame(out var game);
-                self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
-                if (!IsCurrentFullRoomSettingNeed(BuffPoolManager.Instance?.GameSetting ??
-                                             BuffDataManager.Instance.GetGameSetting(game?.StoryCharacter ??
-                                                 Custom.rainWorld.progression.PlayingAsSlugcat)) &&
-                    IsSpRoomSettingNeedRemoveAtNormal(self.abstractRoom.name))
+                if (self.roomSettings != null && self.roomSettings.placedObjects != null)
                 {
-                    self.roomSettings.roomSpecificScript = false;
+                    self.roomSettings.placedObjects.RemoveAll(i => i.type.value.Contains("Token"));
+                    if (!IsCurrentFullRoomSettingNeed(BuffPoolManager.Instance?.GameSetting ??
+                                                 BuffDataManager.Instance.GetGameSetting(game?.StoryCharacter ??
+                                                     Custom.rainWorld.progression.PlayingAsSlugcat)) &&
+                        IsSpRoomSettingNeedRemoveAtNormal(self.abstractRoom.name))
+                    {
+                        self.roomSettings.roomSpecificScript = false;
+                    }
+
                 }
+               
             }
 
             orig(self);

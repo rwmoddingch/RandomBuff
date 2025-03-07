@@ -17,6 +17,9 @@ using UnityEngine.LowLevel;
 using static SharedPhysics;
 using Random = UnityEngine.Random;
 using RandomBuff;
+using TemplateGains;
+using System.IO;
+using MoreSlugcats;
 
 namespace BuiltinBuffs.Positive
 {
@@ -24,9 +27,36 @@ namespace BuiltinBuffs.Positive
     {
         public override BuffID ID => UltraCoinsBuffEntry.ultraCoinsBuffID;
 
+        FLabel label;
+
+        public UltraCoinsBuff()
+        {
+            label = new FLabel(Custom.GetDisplayFont(), "");
+            Futile.stage.AddChild(label);
+        }
+
         public override (bool, bool) TriggerWithEffect(RainWorldGame game)
         {
             return (Trigger(game), false);
+        }
+
+        public override void Update(RainWorldGame game)
+        {
+            base.Update(game);
+            label.MoveToFront();
+
+            if (game.cameras != null && game.cameras[0] != null && game.cameras[0].room != null)
+            {
+                var tile = game.cameras[0].room.GetTilePosition(new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + game.cameras[0].pos);
+                label.text = $"x:{tile.x}, y:{tile.y}";
+                label.SetPosition(game.cameras[0].room.MiddleOfTile(tile) - game.cameras[0].pos);
+            }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            label.RemoveFromContainer();
         }
 
         public override bool Trigger(RainWorldGame game)
@@ -74,27 +104,28 @@ namespace BuiltinBuffs.Positive
     internal class UltraCoinsBuffEntry : IBuffEntry
     {
         public static BuffID ultraCoinsBuffID = new BuffID("UltraCoins", true);
+        public static string ultraCoinsVFX0;
+        
         public static bool skipGameUpdate;
         public static ConditionalWeakTable<Spear, CoinDeflectCountKeeper> coinDeflectCount = new ConditionalWeakTable<Spear, CoinDeflectCountKeeper>();
+
+        public static Action richshotCallBack;
+        public static Action penetrateCallBack;
 
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<UltraCoinsBuff, UltraCoinsBuffData, UltraCoinsBuffEntry>(ultraCoinsBuffID);
         }
 
+        public static void LoadAssets()
+        {
+            ultraCoinsVFX0 = Futile.atlasManager.LoadImage(ultraCoinsBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "ultracoinspark").elements[0].name;
+        }
         public static void HookOn()
         {
             On.Spear.Update += Spear_Update;
             On.Spear.Thrown += Spear_Thrown;
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-            //On.RainWorldGame.Update += RainWorldGame_Update;
-        }
-
-        private static void RainWorldGame_Update(On.RainWorldGame.orig_Update orig, RainWorldGame self)
-        {
-            if (skipGameUpdate)
-                return;
-            orig.Invoke(self);
         }
 
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
@@ -105,7 +136,7 @@ namespace BuiltinBuffs.Positive
         private static void Spear_Thrown(On.Spear.orig_Thrown orig, Spear self, Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             orig.Invoke(self, thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
-            if((self is Spear) && self.mode == Weapon.Mode.Thrown)//重置Y额外速度防止飞偏
+            if ((self is Spear) && self.mode == Weapon.Mode.Thrown && self.thrownBy is Player)//重置Y额外速度防止飞偏
             {
                 if (throwDir.x != 0)
                 {
@@ -197,10 +228,15 @@ namespace BuiltinBuffs.Positive
         {
             orig.Invoke(self, eu);
 
+            if(!(self.thrownBy is Player))
+            {
+                return;
+            }
+
             bool haveKeeper = coinDeflectCount.TryGetValue(self, out var keeper);
             if (self.mode != Weapon.Mode.Thrown)
             {
-                if(haveKeeper)
+                if (haveKeeper)
                     coinDeflectCount.Remove(self);
                 return;
             }
@@ -212,17 +248,17 @@ namespace BuiltinBuffs.Positive
             RayCastResult res = new RayCastResult();
             bool coinOnlyRayCastSuccess = false;
 
-            if(haveKeeper && keeper.deflectCount > 0)
+            if (haveKeeper && keeper.deflectCount > 0)
             {
                 var returns = CoinOnlyRayCastScan(self, rayCastStartPos, rayCastDir);
                 coinOnlyRayCastSuccess = returns.Item1;
                 res = returns.Item2;
-            } 
+            }
             if (!coinOnlyRayCastSuccess)
             {
                 res = RayCastScan(self, rayCastStartPos, rayCastDir, eu);
             }
-            
+
             rayCastEndPos = res.endPos;
 
             self.room.AddObject(new SpeedTailEffect(self.room, rayCastStartPos, rayCastEndPos, ((haveKeeper && keeper.deflectCount > 0) ? UltraCoin.gold : Color.gray), 120, 5f));
@@ -236,10 +272,13 @@ namespace BuiltinBuffs.Positive
                 else
                     dir = res.deflectDir;
 
+                if (dir == Vector2.zero)
+                    dir = Custom.RNV();
+
                 self.firstChunk.vel = dir * self.firstChunk.vel.magnitude;
                 self.doNotTumbleAtLowSpeed = true;
-                self.spearDamageBonus = (self.spearDamageBonus + 1) * 4f;
-                BuffUtils.Log("UltraCoins", $"{dir.x}, {dir.y}");
+                self.spearDamageBonus = (self.spearDamageBonus + 1);
+                //BuffUtils.Log("UltraCoins", $"{dir.x}, {dir.y}");
             }
 
             //rayCastStartPos = rayCastEndPos;
@@ -307,6 +346,9 @@ namespace BuiltinBuffs.Positive
 
             float accumulateMass = 0f;
             bool accumulateToFreeMode = false;
+
+            List<BodyChunk> hitableChunks = new List<BodyChunk>();
+
             for (int i = 0; i < self.room.physicalObjects[0].Count; i++)
             {
                 if (self.room.physicalObjects[0][i] != self && self.room.physicalObjects[0][i].canBeHitByWeapons)
@@ -318,96 +360,106 @@ namespace BuiltinBuffs.Positive
                         isFromThrower = self.room.physicalObjects[0][i].grabbedBy[j].grabber == self.thrownBy;
                         j++;
                     }
+
                     if (!isFromThrower)
                     {
                         for (int k = 0; k < self.room.physicalObjects[0][i].bodyChunks.Length; k++)
                         {
                             BodyChunk bodyChunk = self.room.physicalObjects[0][i].bodyChunks[k];
-                            float collideF = Custom.CirclesCollisionTime(rayCastStart.x, rayCastStart.y, bodyChunk.pos.x, bodyChunk.pos.y, pos.x - rayCastStart.x, pos.y - self.firstChunk.pos.y, self.firstChunk.rad + ((self.thrownBy != null && self.thrownBy is Player) ? 12f : 0f), bodyChunk.rad * (self.room.physicalObjects[0][i] is UltraCoin ? 5f : 1f));
-                            if (collideF > 0f && collideF < 1f)
+                            float collideF = Custom.CirclesCollisionTime(rayCastStart.x, rayCastStart.y, bodyChunk.pos.x, bodyChunk.pos.y, pos.x - rayCastStart.x, pos.y - self.firstChunk.pos.y, self.firstChunk.rad + ((self.thrownBy != null && self.thrownBy is Player) ? 12f : 0f), bodyChunk.rad + (self.room.physicalObjects[0][i] is UltraCoin ? 15f : 0f));
+                            if (collideF > 0f && collideF < 1f && Vector2.Distance(rayCastStart, bodyChunk.pos) < maxReachDistance)
                             {
-                                if (self.room.physicalObjects[0][i] is Weapon && self.mode == Weapon.Mode.Thrown && (self.room.physicalObjects[0][i] as Weapon).mode == Weapon.Mode.Thrown && (self.room.physicalObjects[0][i] as Weapon).HeavyWeapon)
-                                {
-                                    if (self.HeavyWeapon && Vector2.Distance(rayCastStart, self.room.physicalObjects[0][i].firstChunk.pos) < maxReachDistance)
-                                    {
-                                        result.hitSomething = false;
-                                        result.obj = null;
-                                        result.chunk = null;
-
-                                        pos = self.room.physicalObjects[0][i].firstChunk.pos + Custom.DirVec(self.room.physicalObjects[0][i].firstChunk.pos, rayCastStart) * self.room.physicalObjects[0][i].firstChunk.rad;
-
-                                        self.HitAnotherThrownWeapon(self.room.physicalObjects[0][i] as Weapon);
-                                        accumulateMass = float.MaxValue;
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    if(Vector2.Distance(rayCastStart, self.room.physicalObjects[0][i].firstChunk.pos) < maxReachDistance)
-                                    {
-                                        bodyChunk.vel += self.firstChunk.vel;
-                                        self.HitSomethingWithoutStopping(self.room.physicalObjects[0][i], bodyChunk, null);
-                                        accumulateMass += bodyChunk.mass;
-
-                                        if (self.room.physicalObjects[0][i] is UltraCoin coin && !coin.Deflected)
-                                        {
-                                            rayCastResult.deflect = true;
-                                            rayCastResult.endPos = coin.firstChunk.pos;
-
-                                            if(!coinDeflectCount.TryGetValue(self, out var deflectCountKeeper))
-                                            {
-                                                deflectCountKeeper = new CoinDeflectCountKeeper();
-                                                coinDeflectCount.Add(self, deflectCountKeeper);
-                                            }
-
-                                            coin.SpearDeflectOnThis(deflectCountKeeper.deflectCount);
-                                            deflectCountKeeper.deflectCount++;
-
-                                            BodyChunk nextTarget = CoinDeflectSelectTarget(self, rayCastStart, coin);
-
-                                            if (nextTarget != null)
-                                            {
-                                                rayCastResult.deflectDir = (nextTarget.pos - rayCastResult.endPos).normalized;
-                                                deflectCountKeeper.nextDeflectTarget = new WeakReference<BodyChunk> (nextTarget);
-                                            }
-                                            else
-                                            {
-                                                rayCastResult.deflectDir = Custom.RNV();
-                                                deflectCountKeeper.nextDeflectTarget = null;
-                                            }
-                                            
-                                            return rayCastResult;
-                                        }
-
-                                        if (accumulateMass > 0.6f)
-                                        {
-                                            accumulateToFreeMode = true;
-                                            pos = bodyChunk.pos;
-                                            self.room.PlaySound(SoundID.Spear_Hit_Small_Creature, bodyChunk);
-                                            break;
-                                        }
-                                    }
-                                }
+                                hitableChunks.Add(bodyChunk);
                             }
-                        }
-                        if (accumulateMass <= 0.6f && self.room.physicalObjects[0][i].appendages != null)
-                        {
-                            for (int num11 = 0; num11 < self.room.physicalObjects[0][i].appendages.Count; num11++)
-                            {
-                                if (self.room.physicalObjects[0][i].appendages[num11].canBeHit && self.room.physicalObjects[0][i].appendages[num11].LineCross(rayCastStart, pos))
-                                {
-                                    (self.room.physicalObjects[0][i].appendages[num11].owner as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(new PhysicalObject.Appendage.Pos(self.room.physicalObjects[0][i].appendages[num11], 0, 0.5f), self.firstChunk.vel * self.firstChunk.mass);
-                                    self.HitSomethingWithoutStopping(self.room.physicalObjects[0][i], null, self.room.physicalObjects[0][i].appendages[num11]);
-                                }
-                            }
-                        }
-                        if (accumulateMass > 0.6f)
-                        {
-                            break;
                         }
                     }
                 }
             }
+            hitableChunks.Sort((a, b) => (Vector2.Distance(a.pos, rayCastStart).CompareTo(Vector2.Distance(b.pos, rayCastStart))));
+
+            foreach(var chunk in hitableChunks)
+            {
+                if (chunk.owner is Weapon weapon && weapon.mode == Weapon.Mode.Thrown && weapon.HeavyWeapon)
+                {
+                    result.hitSomething = false;
+                    result.obj = null;
+                    result.chunk = null;
+
+                    pos = chunk.pos + Custom.DirVec(chunk.pos, rayCastStart) * chunk.rad;
+
+                    self.HitAnotherThrownWeapon(chunk.owner as Weapon);
+                    accumulateMass = float.MaxValue;
+                    break;
+                }
+                else
+                {
+                    chunk.vel += self.firstChunk.vel;
+                    self.HitSomethingWithoutStopping(chunk.owner, chunk, null);
+                    accumulateMass += chunk.mass;
+
+                    if (chunk.owner is UltraCoin coin && !coin.Deflected)//金币反射
+                    {
+                        rayCastResult.deflect = true;
+                        rayCastResult.endPos = coin.firstChunk.pos;
+
+                        if (!coinDeflectCount.TryGetValue(self, out var deflectCountKeeper))
+                        {
+                            deflectCountKeeper = new CoinDeflectCountKeeper();
+                            coinDeflectCount.Add(self, deflectCountKeeper);
+                        }
+
+                        coin.SpearDeflectOnThis(deflectCountKeeper.deflectCount);
+                        deflectCountKeeper.deflectCount++;
+
+                        BodyChunk nextTarget = CoinDeflectSelectTarget(self, rayCastResult.endPos, coin);
+                        //BuffUtils.Log("UltraCoins", $"Hit coin next target : {nextTarget?.owner}");
+
+                        if (nextTarget != null)
+                        {
+                            rayCastResult.deflectDir = (nextTarget.pos - rayCastResult.endPos).normalized;
+                            deflectCountKeeper.nextDeflectTarget = new WeakReference<BodyChunk>(nextTarget);
+                        }
+                        else
+                        {
+                            rayCastResult.deflectDir = Custom.RNV();
+                            deflectCountKeeper.nextDeflectTarget = null;
+                        }
+
+                        if (DivisibleSpearBuff.Instance != null)//分裂矛兼容
+                        {
+                            float damage = self.spearDamageBonus;
+                            if (self.bugSpear)
+                            {
+                                damage *= 3f;
+                            }
+                            SplitShot(self, rayCastResult.endPos, damage, nextTarget);
+                        }
+                        richshotCallBack?.Invoke();
+
+                        return rayCastResult;
+                    }        
+                }
+
+                if (accumulateMass <= 0.6f && chunk.owner.appendages != null)
+                {
+                    for (int num11 = 0; num11 < chunk.owner.appendages.Count; num11++)
+                    {
+                        if (chunk.owner.appendages[num11].canBeHit && chunk.owner.appendages[num11].LineCross(rayCastStart, pos))
+                        {
+                            (chunk.owner as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(new PhysicalObject.Appendage.Pos(chunk.owner.appendages[num11], 0, 0.5f), self.firstChunk.vel * self.firstChunk.mass);
+                            self.HitSomethingWithoutStopping(chunk.owner, null, chunk.owner.appendages[num11]);
+                        }
+                    }
+                }
+                else if (accumulateMass > 0.6f)
+                {
+                    accumulateToFreeMode = true;
+                    pos = chunk.pos;
+                    self.room.PlaySound(SoundID.Spear_Hit_Small_Creature, chunk);
+                    break;
+                }
+            }
+
 
             Vector2 startPos = rayCastStart;
             if (result.hitSomething && !accumulateToFreeMode)
@@ -490,25 +542,25 @@ namespace BuiltinBuffs.Positive
 
             UltraCoin hittedCoin = null;
             float dist = float.MaxValue;
-            for(int i = 0; i< self.room.physicalObjects.Length; i++)//检测是否能打中金币
+            for (int i = 0; i < self.room.physicalObjects.Length; i++)//检测是否能打中金币
             {
-                for(int j = 0;j < self.room.physicalObjects[i].Count; j++)
+                for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
                 {
                     if (!(self.room.physicalObjects[i][j] is UltraCoin coin) || coin.Deflected || coin.notDeflectCounter > 0)
                         continue;
 
                     float collideF = Custom.CirclesCollisionTime(rayCastStart.x - rayCastDir.x * 20f, rayCastStart.y - rayCastDir.y * 20f, coin.firstChunk.pos.x, coin.firstChunk.pos.y, pos.x - rayCastStart.x, pos.y - self.firstChunk.pos.y, self.firstChunk.rad + ((self.thrownBy != null && self.thrownBy is Player) ? 12f : 0f), coin.firstChunk.rad * 5f);
 
-                    //BuffUtils.Log("UltraCoins", $"detect coin hit: {coin} {coin.abstractPhysicalObject.ID}, {collideF}");
+                    BuffUtils.Log("UltraCoins", $"detect coin hit: {coin} {coin.abstractPhysicalObject.ID}, {collideF}");
 
                     if (collideF > 0f && collideF < 1f)
                     {
                         float coinDist = Vector2.Distance(rayCastStart, coin.firstChunk.pos);
-                        //BuffUtils.Log("UltraCoins", $"coinDist {coinDist}, dist {dist}");
+                        BuffUtils.Log("UltraCoins", $"coinDist {coinDist}, dist {dist}");
                         if (coinDist >= maxReachDistance)
                             continue;
 
-                        if(coinDist < dist)
+                        if (coinDist < dist)
                         {
                             hittedCoin = coin;
                             dist = coinDist;
@@ -534,12 +586,20 @@ namespace BuiltinBuffs.Positive
                 ApplyDamage(self, rayCastStart, pos, damage);
                 return (deflectCountKeeper.deflectCount > 0, rayCastResult);
             }
-            //else
-            //    BuffUtils.Log("UltraCoins", $"hit coin {hittedCoin} {hittedCoin.abstractPhysicalObject.ID}");
+            
+            BuffUtils.Log("UltraCoins", $"hit coin {hittedCoin} {hittedCoin.abstractPhysicalObject.ID}");
+
+            richshotCallBack?.Invoke();
 
             pos = hittedCoin.firstChunk.pos;
             BodyChunk nextTarget = CoinDeflectSelectTarget(self, pos, hittedCoin);
-    
+            BuffUtils.Log("UltraCoins", $"Hit coin next target : {nextTarget?.owner}");
+
+            if (DivisibleSpearBuff.Instance != null)
+            {
+                SplitShot(self, pos, damage, nextTarget);
+            }
+
             rayCastResult.endPos = pos;
             rayCastResult.deflect = true;
 
@@ -554,52 +614,54 @@ namespace BuiltinBuffs.Positive
             {
                 rayCastResult.deflectDir = Custom.RNV();
             }
-            
+
 
             hittedCoin.SpearDeflectOnThis(deflectCountKeeper.deflectCount);
             deflectCountKeeper.deflectCount++;
 
-            
+
             ApplyDamage(self, rayCastStart, pos, damage);
 
             return (true, rayCastResult);
         }
 
-        static BodyChunk CoinDeflectSelectTarget(Spear self, Vector2 rayCastStart, UltraCoin deflectingCoin)
+        static BodyChunk CoinDeflectSelectTarget(Spear self, Vector2 rayCastStart, UltraCoin deflectingCoin, bool ignoreCoins = false, params PhysicalObject[] ignoreTargets)
         {
-            float dist = float.MaxValue;
+            float dist = float.MinValue;
             BodyChunk nextTarget = null;
             var room = self.room;
 
-            foreach (var obj in room.physicalObjects[0])//选择反射到的目标
+            if (!ignoreCoins)
             {
-                if (obj.room == null)
-                    continue;
-                if (!(obj is UltraCoin nextCoin) || nextCoin == deflectingCoin || nextCoin.Deflected)
-                    continue;
-                if (!room.VisualContact(rayCastStart, obj.firstChunk.pos))
+                foreach (var obj in room.physicalObjects[0])//选择反射到的目标
                 {
-                    //BuffUtils.Log("UltraCoins", $"test coin {obj} {obj.abstractPhysicalObject.ID.number} but cant visual contact");
-                    continue;
-                }
-                if (nextCoin.notDeflectCounter > 0)
-                    continue;
+                    if (obj.room == null)
+                        continue;
+                    if (!(obj is UltraCoin nextCoin) || nextCoin == deflectingCoin || nextCoin.Deflected)
+                        continue;
+                    if (!room.VisualContact(rayCastStart, obj.firstChunk.pos))
+                    {
+                        continue;
+                    }
+                    if (nextCoin.notDeflectCounter > 0)
+                        continue;
 
-                var thisDist = Vector2.Distance(rayCastStart, obj.firstChunk.pos);
-                //BuffUtils.Log("UltraCoins", $"test coin {obj} {obj.abstractPhysicalObject.ID.number}, thisDist {thisDist}, dist {dist}");
-                if (thisDist < dist)
-                {
-                    nextTarget = obj.firstChunk;
-                    dist = thisDist;
+                    var thisDist = Vector2.Distance(rayCastStart, obj.firstChunk.pos);
+                    //BuffUtils.Log("UltraCoins", $"test coin {obj} {obj.abstractPhysicalObject.ID.number}, thisDist {thisDist}, dist {dist}");
+                    if (thisDist > dist)
+                    {
+                        nextTarget = obj.firstChunk;
+                        dist = thisDist;
+                    }
                 }
             }
-            
 
             if (nextTarget == null)
             {
+                dist = float.MaxValue;
                 foreach (var obj in room.physicalObjects[0])
                 {
-                    if (obj.room == null)
+                    if (obj.room == null || ignoreTargets.Contains(obj))
                         continue;
                     if (!(obj is Weapon weapon) || obj == self)
                         continue;
@@ -625,7 +687,7 @@ namespace BuiltinBuffs.Positive
                 {
                     foreach (var obj in self.room.physicalObjects[m])
                     {
-                        if (obj.room == null)
+                        if (obj.room == null || ignoreTargets.Contains(obj))
                             continue;
                         if (!(obj is Creature creature))
                             continue;
@@ -665,37 +727,113 @@ namespace BuiltinBuffs.Positive
             {
                 for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
                 {
-                    if (!(self.room.physicalObjects[i][j] is Creature creature) || creature == self.thrownBy || creature is Player)
+                    var obj = self.room.physicalObjects[i][j];
+
+                    if (!(obj is Creature) && i != 0)//非生物仅检测第一层碰撞
                         continue;
 
-                    for (int k = 0; k < creature.bodyChunks.Length; k++)
+                    if (!obj.canBeHitByWeapons)
+                        continue;
+
+                    for (int k = 0; k < obj.bodyChunks.Length; k++)
                     {
-                        var bodyChunk = creature.bodyChunks[k];
+                        var bodyChunk = obj.bodyChunks[k];
 
                         float collideF = Custom.CirclesCollisionTime(start.x, start.y, bodyChunk.pos.x, bodyChunk.pos.y, end.x - start.x, end.y - start.y, self.firstChunk.rad + ((self.thrownBy != null && self.thrownBy is Player) ? 12f : 0f), bodyChunk.rad);
                         if (collideF > 0f && collideF < 1f)
                         {
-                            if (creature.abstractCreature.creatureTemplate.smallCreature)
-                                creature.Die();
-                            else
-                                creature.Violence(self.firstChunk, self.firstChunk.vel, bodyChunk, null, Creature.DamageType.Stab, damage, 20f);
+                            if(obj is Weapon weapon && weapon != self && weapon.thrownBy != self.thrownBy && weapon.mode == Weapon.Mode.Thrown && weapon.HeavyWeapon)
+                            {
+                                weapon.WeaponDeflect(weapon.firstChunk.pos, (end - start).normalized, weapon.firstChunk.vel.magnitude);
+                            }
+                            else if(obj is ScavengerBomb bomb)
+                            {
+                                bomb.Explode(null);
+                            }
+                            else if((self.room.physicalObjects[i][j] is Creature creature) && creature != self.thrownBy && !(creature is Player))
+                            {
+                                creature.SetKillTag(self.thrownBy?.abstractCreature);
+                                if (creature.abstractCreature.creatureTemplate.smallCreature)
+                                {
+                                    creature.Die();
+                                    if(self is ElectricSpear eSpear)
+                                    {
+                                        eSpear.sparkPoint = bodyChunk.pos;
+                                        eSpear.Spark();
+                                    }
+                                }
+                                else
+                                {
+                                    creature.Violence(self.firstChunk, self.firstChunk.vel, bodyChunk, null, Creature.DamageType.Stab, damage, 20f);
+                                    if(self is ElectricSpear eSpear)
+                                    {
+                                        eSpear.sparkPoint = bodyChunk.pos;
+                                        eSpear.Zap();
+                                    }
+                                    else if (self is ExplosiveSpear eExplosive)
+                                    {
+                                        if (!eExplosive.exploded)
+                                        {
+                                            Vector2 posKeep = eExplosive.firstChunk.pos;
+                                            eExplosive.firstChunk.pos = bodyChunk.pos;
+
+                                            eExplosive.stuckInObject = obj;
+                                            eExplosive.stuckInChunkIndex = k;
+                                            eExplosive.Explode();
+                                            eExplosive.exploded = false;
+                                            eExplosive.slatedForDeletetion = false;
+
+                                            eExplosive.firstChunk.pos = posKeep;
+                                        }
+
+                                    }
+                                }
+
+                                penetrateCallBack?.Invoke();
+                            }
+                            else if (!(obj is UltraCoin))
+                            {
+                                obj.HitByWeapon(self);
+                            }
+
+
                             CreateSparkleEmitter(self.room, bodyChunk.pos, (end - start).normalized * Mathf.Clamp(damage * 30f, 40f, 400f));
                         }
                     }
 
-                    if (creature.appendages != null)
+                    if ((obj is Creature creature1) && creature1 != self.thrownBy && !(creature1 is Player) && creature1.appendages != null)
                     {
-                        for (int appI = 0; appI < creature.appendages.Count; appI++)
+                        for (int appI = 0; appI < creature1.appendages.Count; appI++)
                         {
-                            if (creature.appendages[appI].canBeHit && creature.appendages[appI].LineCross(start, end))
+                            if (creature1.appendages[appI].canBeHit && creature1.appendages[appI].LineCross(start, end))
                             {
-                                (creature.appendages[appI].owner as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(new PhysicalObject.Appendage.Pos(creature.appendages[appI], 0, 0.5f), self.firstChunk.vel * self.firstChunk.mass);
-                                self.HitSomethingWithoutStopping(creature, null, creature.appendages[appI]);
+                                (creature1.appendages[appI].owner as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(new PhysicalObject.Appendage.Pos(creature1.appendages[appI], 0, 0.5f), self.firstChunk.vel * self.firstChunk.mass);
+                                //self.HitSomethingWithoutStopping(creature1, null, creature1.appendages[appI]);
                             }
                         }
                     }
                 }
             }
+        }
+
+        static void SplitShot(Spear self, Vector2 pos, float damage, BodyChunk selectedTarget)
+        {
+            var splitTarget = CoinDeflectSelectTarget(self, pos, null, true, selectedTarget?.owner);
+            var splitShotDir = splitTarget != null ? (splitTarget.pos - pos).normalized : Custom.RNV();
+
+            float splitShotMaxReachDistance = float.MaxValue;
+            Vector2 splitShotEndPos = Custom.RectCollision(pos, pos + splitShotDir * 10000f, self.room.RoomRect.Grow(200f)).GetCorner(FloatRect.CornerLabel.D);
+            splitShotMaxReachDistance = Mathf.Min(splitShotMaxReachDistance, Vector2.Distance(pos, splitShotEndPos));
+
+            var splitShotCollided = RayTraceTilesForTerrainReturnFirstSolid(self.room, self.room.GetTilePosition(pos), self.room.GetTilePosition(splitShotEndPos));
+
+            if (splitShotCollided != null)
+            {
+                splitShotEndPos = pos + splitShotDir * Vector2.Distance(pos, self.room.MiddleOfTile(splitShotCollided.Value));
+            }
+
+            ApplyDamage(self, pos, splitShotEndPos, damage);
+            self.room.AddObject(new SpeedTailEffect(self.room, pos, splitShotEndPos, UltraCoin.gold, 120, 5f));
         }
 
         static void CreateSparkleEmitter(Room room, Vector2 pos, Vector2 movement)
@@ -706,8 +844,8 @@ namespace BuiltinBuffs.Positive
             emitter.ApplyEmitterModule(new SetEmitterLife(emitter, 5, false));
             emitter.ApplyParticleSpawn(new BurstSpawnerModule(emitter, 5));
 
-            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("Futile_White", "FlatLight", alpha: 0.5f)));
-            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "", constCol: Color.white)));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam(ultraCoinsVFX0, "StormIsApproaching.AdditiveDefault", alpha: 0.5f, scale : 0.05f)));
+            emitter.ApplyParticleModule(new AddElement(emitter, new Particle.SpriteInitParam("pixel", "StormIsApproaching.AdditiveDefault", constCol: UltraCoin.gold, scale: 0.5f)));
             emitter.ApplyParticleModule(new SetMoveType(emitter, Particle.MoveType.Global));
             emitter.ApplyParticleModule(new SetRandomLife(emitter, 40, 50));
             emitter.ApplyParticleModule(new SetConstColor(emitter, UltraCoin.gold));
@@ -720,7 +858,7 @@ namespace BuiltinBuffs.Positive
                 {
                     Vector2 dir = Custom.DegToVec(p.randomParam1 * 360f);
                     float radParam = p.randomParam2;
-                    return (dir * StagnantForcefieldBuff.rad * radParam + movement) * Mathf.Min(1f, Helper.LerpEase(l)) + p.emitter.pos;
+                    return (dir * StagnantForcefieldBuff.rad * radParam + movement) * p.randomParam3 * Mathf.Min(1f, Helper.LerpEase(l)) * 0.5f + p.emitter.pos;
                 }));
 
             emitter.ApplyParticleModule(new AlphaOverLife(emitter,
@@ -815,7 +953,6 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-
     [BuffAbstractPhysicalObject]
     public class AbstractUltraCoin : AbstractPhysicalObject
     {
@@ -843,8 +980,9 @@ namespace BuiltinBuffs.Positive
         float rotation;
 
         public int notDeflectCounter = 10;
-        int life = 120;
+        int life = 240;
         float flash, lastFlash, extraFlash;
+        int lastContact;
 
         public bool Deflected { get; private set; }
 
@@ -853,9 +991,10 @@ namespace BuiltinBuffs.Positive
             bodyChunks = new BodyChunk[1];
             bodyChunks[0] = new BodyChunk(this, 0, new Vector2(0f, 0f), 3.5f, 0.1f);
             bodyChunkConnections = new PhysicalObject.BodyChunkConnection[0];
+            canBeHitByWeapons = true;
             airFriction = 0.99f;
             gravity = 0.45f;
-            bounce = 0.9f;
+            bounce = 0.95f;
             surfaceFriction = 0.4f;
             collisionLayer = 0;
             waterFriction = 0.98f;
@@ -869,6 +1008,7 @@ namespace BuiltinBuffs.Positive
             extraFlash = 3f;
             room.PlaySound(SoundID.Spear_Bounce_Off_Creauture_Shell, firstChunk.pos, 1f, 2f + deflectCount * 0.2f);
             room.PlaySound(SoundID.SS_AI_Marble_Hit_Floor, firstChunk.pos, 3f, 1.5f + deflectCount * 0.2f);
+            room.AddObject(new ShockWave(firstChunk.pos, deflectCount * 40f + 80f, 0.02f, 3, false));
             BuffUtils.Instance.StartCoroutine(PauseGameCoroutine(deflectCount));
         }
 
@@ -885,11 +1025,24 @@ namespace BuiltinBuffs.Positive
             base.Update(eu);
             //if (firstChunk.ContactPoint.y == -1)
             //    Destroy();
-            if(life > 0)
+            if (life > 0)
             {
                 life--;
                 if (firstChunk.contactPoint.y == -1)
+                {
                     life--;
+                    if (lastContact != -1 && !Deflected)
+                    {
+                        flash = 0.5f;
+                    }
+                }
+                lastContact = firstChunk.contactPoint.y;
+
+                if (Deflected && life > 40)
+                {
+                    life = 40;
+                }
+
                 if (life <= 0)
                     Destroy();
             }
@@ -917,7 +1070,7 @@ namespace BuiltinBuffs.Positive
                 scaleX = 0.2f,
                 scaleY = 0.4f
             };
-            sLeaser.sprites[1] = new FSprite("buffinfos\\BuiltinBuffs\\cardinfos\\positive\\lancethrower\\lancethrowerspark", true)
+            sLeaser.sprites[1] = new FSprite(UltraCoinsBuffEntry.ultraCoinsVFX0, true)
             {
                 color = gold,
                 shader = rCam.game.rainWorld.Shaders["StormIsApproaching.AdditiveDefault"],
@@ -949,7 +1102,12 @@ namespace BuiltinBuffs.Positive
             sLeaser.sprites[0].SetPosition(pos);
             sLeaser.sprites[1].SetPosition(pos + new Vector2(-2f, 2f));
 
-            sLeaser.sprites[1].scale = Mathf.Lerp(0f, 0.5f + extraFlash * 0.3f, Mathf.Lerp(lastFlash, flash, timeStacker) + extraFlash);
+            sLeaser.sprites[1].scale = Mathf.Lerp(0f, 0.5f + extraFlash * 0.3f, Mathf.Lerp(lastFlash, flash, timeStacker) + extraFlash) * 2f;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $"_{abstractPhysicalObject.ID.number}";
         }
     }
 }
