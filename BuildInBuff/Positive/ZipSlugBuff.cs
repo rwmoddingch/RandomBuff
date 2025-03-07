@@ -642,11 +642,11 @@ public class ZipSlugPlayerData
         // 创建输入方向向量
         Vector2 inputDir = new Vector2(inputX, inputY).normalized;
         
-        // 记录调试信息
-        if (UnityEngine.Time.frameCount % 20 == 0)
-        {
-            RandomBuffUtils.BuffUtils.Log("ZipSlugBuff", $"处理移动输入: ({inputX},{inputY}), 当前位置: {currentPoint}");
-        }
+        // // 记录调试信息
+        // if (UnityEngine.Time.frameCount % 20 == 0)
+        // {
+        //     RandomBuffUtils.BuffUtils.Log("ZipSlugBuff", $"处理移动输入: ({inputX},{inputY}), 当前位置: {currentPoint}");
+        // }
         
         for (int i = 0; i < overseerPathPoints.Count; i++)
         {
@@ -697,15 +697,15 @@ public class ZipSlugPlayerData
             float moveDotProduct = Vector2.Dot(inputDir, moveDir);
             
             // 记录移动日志
-            RandomBuffUtils.BuffUtils.Log("ZipSlugBuff", $"移动到新路径点: 从 {oldPosition} 到 {currentZipPosition}, 距离: {Vector2.Distance(oldPosition, currentZipPosition)}, 输入: ({inputX},{inputY}), 匹配度: {moveDotProduct:F2}");
+            // RandomBuffUtils.BuffUtils.Log("ZipSlugBuff", $"移动到新路径点: 从 {oldPosition} 到 {currentZipPosition}, 距离: {Vector2.Distance(oldPosition, currentZipPosition)}, 输入: ({inputX},{inputY}), 匹配度: {moveDotProduct:F2}");
         }
         else
         {
             // 如果没找到合适的点，记录日志
-            if (UnityEngine.Time.frameCount % 20 == 0)
-            {
-                RandomBuffUtils.BuffUtils.Log("ZipSlugBuff", $"未找到合适的移动目标点，输入: ({inputX},{inputY})");
-            }
+            // if (UnityEngine.Time.frameCount % 20 == 0)
+            // {
+            //     RandomBuffUtils.BuffUtils.Log("ZipSlugBuff", $"未找到合适的移动目标点，输入: ({inputX},{inputY})");
+            // }
         }
     }
 
