@@ -4280,7 +4280,7 @@ namespace BuiltinBuffs.Duality
             {
                 return false;
             }
-            return player.AI.DynamicRelationship(creature.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats;
+            return player.AI != null && player.AI.DynamicRelationship(creature.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats;
         }
 
         public void TryToShoot()

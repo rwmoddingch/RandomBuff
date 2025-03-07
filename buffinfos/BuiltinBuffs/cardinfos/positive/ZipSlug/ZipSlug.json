@@ -1,0 +1,13 @@
+{
+    "FaceName": "ZipSlug",
+    "ID": "ZipSlugID",
+    "BuffType": "Positive",
+    "BuffProperty": "Normal",
+    "Triggerable": false,
+    "Stackable": true,
+    "Color": "#0080C0",
+    "Chinese": {
+        "BuffName": "监视者瞬移",
+        "Description": "滑铲时使用类似监视者的瞬移"
+    }
+}
