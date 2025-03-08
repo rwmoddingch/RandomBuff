@@ -367,5 +367,6 @@ FodyWeavers.xsd
 **/PUBLIC-Assembly-CSharp.dll
 
 .idea/
+.cursor/
 mod/buffassets/cardinfos/QuickAddCard.code-workspace
-mod/buffassets/cardinfos/.vscode/cardInfo.code-snippets
+mod/buffassets/cardinfos/.vscode/
