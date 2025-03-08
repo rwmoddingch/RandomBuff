@@ -225,8 +225,9 @@ SpawnItems
 Wait
     80
 SpawnCreatures
-    0 : Scavenger
-    2 : Scavenger
+    0 : Scavenger : 46933
+    1 : Scavenger : 21918
+    2 : Scavenger : 28626
 Wait
     40
 ClearStage
@@ -237,10 +238,11 @@ Wait
 Wait
     80
 SpawnCreatures
-    0 : Scavenger
-    1 : Scavenger
-    2 : Scavenger
-    6 : Scavenger
+    0 : Scavenger : 26456
+    1 : Scavenger : 49963
+    2 : Scavenger : 2910
+    4 : Scavenger : 91753
+    6 : Scavenger : 58820
 Wait
     40
 ClearStage
@@ -272,8 +274,8 @@ SpawnCreatures
     0 : ScavengerElite
     1 : ScavengerElite
     2 : ScavengerElite
-    9 : Scavenger
-    10 : Scavenger
+    9 : Scavenger : 98090
+    10 : Scavenger : 38206
 Wait
     40
 ClearStage
