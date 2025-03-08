@@ -1,0 +1,279 @@
+Wait
+    160
+SpawnItems
+    0 : Spear
+    3 : Spear
+    5 : Rock
+Wait
+    80
+SpawnCreatures
+    5 : BlueLizard
+    6 : BlueLizard
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    0 : Rock
+    2 : Rock
+    2 : Rock
+    4 : Rock
+    7 : Spear : 1
+    8 : Spear : 1
+    9 : Spear
+    10 : Spear
+Wait
+    80
+SpawnCreatures
+    7 : GreenLizard
+    8 : GreenLizard
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    5 : Spear
+    6 : Spear
+Wait
+    80
+SpawnCreatures
+    0 : PinkLizard
+    1 : PinkLizard
+    2 : PinkLizard
+    3 : PinkLizard
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    5 : Spear
+    5 : ScavengerBomb
+    6 : Spear : 1
+Wait
+    80
+SpawnCreatures
+    0 : YellowLizard
+    1 : YellowLizard
+    2 : YellowLizard
+    3 : YellowLizard
+    4 : YellowLizard
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    1 : Spear
+    2 : Spear
+    3 : Spear
+    4 : Spear
+ExtraBuff
+    ChronoLizard
+Wait
+    80
+SpawnCreatures
+    0 : CyanLizard
+    2 : CyanLizard
+    4 : CyanLizard
+    3 : CyanLizard
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    0 : Spear
+    0 : Rock
+    1 : Spear
+    1 : Rock
+    2 : Spear
+    3 : Spear : 2
+    4 : Spear
+    5 : Spear
+    5 : Rock
+    6 : Spear
+    6 : Rock
+    7 : Spear
+    8 : Spear
+    9 : Spear
+    10 : Spear
+    11 : Spear
+Wait
+    80
+SpawnCreatures
+    9 : RedLizard
+    10 : RedLizard
+Wait
+    40
+ClearStage
+
+
+
+Wait
+    40
+SpawnItems
+    1 : Spear
+    2 : Spear
+    3 : Rock
+    4 : Rock
+Wait
+    80
+SpawnCreatures
+    7 : Centipede
+    9 : Centipede
+    10 : Centipede
+Wait
+    40
+ClearStage
+
+//wave -- 8
+Wait
+    40
+SpawnItems
+    1 : Spear
+    2 : Spear
+    3 : Spear
+    4 : Spear
+Wait
+    80
+SpawnCreatures
+    6 : RedCentipede
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    0 : Spear
+    1 : Spear
+    2 : Spear
+    3 : Spear
+    4 : Spear
+    5 : Spear
+    6 : Spear
+Wait
+    80
+SpawnCreatures
+    5 : Vulture
+    6 : Vulture
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    1 : ScavengerBomb
+    2 : ScavengerBomb
+    3 : ScavengerBomb
+    4 : ScavengerBomb
+    5 : ScavengerBomb
+    6 : ScavengerBomb
+    7 : Spear
+Wait
+    160
+SpawnCreatures
+    5 : MirosVulture
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    1 : Spear
+    2 : Spear
+    3 : Spear
+    4 : Spear
+    5 : Spear
+    7 : Spear
+    9 : Spear
+    11 : Spear
+ExtraBuff
+    ArmedKingVultureID
+Wait
+    80
+SpawnCreatures
+    5 : KingVulture
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+SpawnItems
+    1 : Spear
+    2 : Spear
+    3 : Spear
+    4 : Spear
+Wait
+    80
+SpawnCreatures
+    0 : Scavenger
+    2 : Scavenger
+Wait
+    40
+ClearStage
+
+
+Wait
+    40
+Wait
+    80
+SpawnCreatures
+    0 : Scavenger
+    1 : Scavenger
+    2 : Scavenger
+    6 : Scavenger
+Wait
+    40
+ClearStage
+
+
+
+Wait
+    40
+SpawnItems
+    0 : Spear : 2
+    0 : Rock
+    1 : Spear
+    1 : Rock
+    2 : Spear
+    3 : Spear : 2
+    4 : Spear
+    5 : Spear
+    5 : Rock
+    6 : Spear : 2
+    6 : Rock
+    7 : Spear
+    8 : Spear
+    9 : Spear
+    10 : Spear
+    11 : Spear
+Wait
+    80
+SpawnCreatures
+    0 : ScavengerElite
+    1 : ScavengerElite
+    2 : ScavengerElite
+    9 : Scavenger
+    10 : Scavenger
+Wait
+    40
+ClearStage

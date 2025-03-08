@@ -172,6 +172,7 @@ DisplayName_HuntAll|Kill {0} creatures
 DisplayName_ContinuousSurvival|Survive for {0} consecutive cycles
 DisplayName_WithInCycle|Completed the mission within {0} cycles 
 DisplayName_BreakShellCondition|Penetrate {0} lizards' head and kill them
+DisplayName_UltraKill|Finish waves
 
 
 //BuffCondition_BuffTypes
@@ -244,6 +245,7 @@ Mission_Display_KingOfIsles|KING OF THE ISLES
 Mission_Display_TunnelBattle|TUNNEL BATTLE
 Mission_Display_RegularCleanup|REGULAR CLEANUP
 Mission_Display_ShellBreaker|SHELL PENETRATOR
+Mission_Display_UltraKill|ULTRA KILL SLUG
 
 //Credit
 CreditTitle_Intro|Random Buff
@@ -327,6 +329,8 @@ BuffManual_CardPedia_Content_1|After selecting any type of buff, you can view th
 //Remix
 Remix_Title|Random Buff
 Remix_Option|Option
+Remix_BuffPack|BuffPack
+Remix_BuffPackDescription|Manage all buff packs. Enabled buff packs will be displayed in green.<LINE>Click the button corresponding to the buff pack to toggle its enabled status.<LINE>Built-in buff packs cannot be disabled.
 Remix_CardSlotKey|View Card Slot Key
 Remix_KeyBindKey|Card Binding Key
 Remix_ShowExceptionLog|Exception Notifications
