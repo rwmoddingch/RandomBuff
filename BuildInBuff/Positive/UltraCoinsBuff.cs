@@ -32,7 +32,7 @@ namespace BuiltinBuffs.Positive
         public UltraCoinsBuff()
         {
             label = new FLabel(Custom.GetDisplayFont(), "");
-            Futile.stage.AddChild(label);
+            //Futile.stage.AddChild(label);
         }
 
         public override (bool, bool) TriggerWithEffect(RainWorldGame game)

@@ -43,7 +43,7 @@ namespace RandomBuff.Core.Entry
                  }
                  else
                  {
-                     AllHooks.Add(new ILHook(method, (il) => RegisterBuffHook_Impl(id, type, il, method, HookLifeTimeLevel.InGame)));
+                     AllHooks.Add(new ILHook(method, (il) => RegisterBuffHook_Impl(id, type, il, method, level)));
                  }
              }
              
@@ -117,6 +117,10 @@ namespace RandomBuff.Core.Entry
                     BuffPlugin.LogException(ex, $"BuffHookWarpper : Exception when enable hook for {buffID}:{level}");
                 }
             }
+            // else
+            // {
+            //     BuffPlugin.LogDebug($"HookWarpper Enable Buff None - {buffID}:{level}");
+            // }
         }
 
         public static void DisableBuff(BuffID buffID, HookLifeTimeLevel level)
