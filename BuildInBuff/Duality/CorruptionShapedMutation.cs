@@ -2413,7 +2413,7 @@ namespace BuiltinBuffs.Duality
                 float num2 = (base.Tip.rad + this.grabChunk.rad) / 4f;
                 Vector2 vector = Custom.DirVec(base.Tip.pos, this.grabChunk.pos);
                 //float num3 = this.grabChunk.mass / (this.grabChunk.mass + 0.01f);
-                float num3 = Mathf.Min(0.5f, this.grabChunk.mass / (this.grabChunk.mass + 0.5f * CorruptionShapedMutationBuffEntry.StackLayer));
+                float num3 = Mathf.Clamp(this.grabChunk.mass / (this.grabChunk.mass + 0.1f * CorruptionShapedMutationBuffEntry.StackLayer), 0.5f, 0.8f);
                 float num4 = 1f; 
                 this.grabChunk.vel *= 0.9f; // 试图防止物体乱飞
                 base.Tip.pos += vector * (num - num2) * num3 * num4 * SpeedFac;
