@@ -14,11 +14,13 @@ namespace BuiltinBuffs.Missions.UltraKill
             On.ArtificialIntelligence.StaticRelationship += ArtificialIntelligence_StaticRelationship;
             On.ArtificialIntelligence.Update += ArtificialIntelligence_Update;
             On.ScavengerAI.LikeOfPlayer += ScavengerAI_LikeOfPlayer;
-            On.AgressionTracker.Utility += AgressionTracker_Utility;
+            On.PreyTracker.Utility += PreyTracker_Utility; ;
         }
 
-        private static float AgressionTracker_Utility(On.AgressionTracker.orig_Utility orig, AgressionTracker self)
+        private static float PreyTracker_Utility(On.PreyTracker.orig_Utility orig, PreyTracker self)
         {
+            if(self.AI is CentipedeAI)//修复蜈蚣的bug
+                return orig.Invoke(self);
             return 1f;
         }
 
@@ -36,29 +38,21 @@ namespace BuiltinBuffs.Missions.UltraKill
         private static void ArtificialIntelligence_Update(On.ArtificialIntelligence.orig_Update orig, ArtificialIntelligence self)
         {
             orig.Invoke(self);
-            int j = 0;
-            while (j < self.creature.world.game.Players.Count)
+
+            foreach (var player in self.creature.world.game.Players)
             {
-                if (self.creature.world.game.Players[j].realizedCreature != null && !(self.creature.world.game.Players[j].realizedCreature as Player).dead)
+                if (player.realizedCreature != null && !(player.realizedCreature as Player).dead)
                 {
-                    if (self.creature.Room != self.creature.world.game.Players[j].Room)
-                    {
-                        self.tracker.SeeCreature(self.creature.world.game.Players[j]);
-                        return;
-                    }
-                    break;
-                }
-                else
-                {
-                    j++;
+                    self.tracker.RepresentationForObject(player.realizedCreature, true);
                 }
             }
+
         }
 
         private static CreatureTemplate.Relationship ArtificialIntelligence_StaticRelationship(On.ArtificialIntelligence.orig_StaticRelationship orig, ArtificialIntelligence self, AbstractCreature otherCreature)
         {
             var res = orig.Invoke(self, otherCreature);
-            if (otherCreature.creatureTemplate.type != CreatureTemplate.Type.Slugcat)
+            if (otherCreature != null && otherCreature.creatureTemplate.type != CreatureTemplate.Type.Slugcat)
             {
                 res.type = CreatureTemplate.Relationship.Type.Ignores;
             }

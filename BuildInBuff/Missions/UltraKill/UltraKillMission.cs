@@ -1,4 +1,5 @@
 ﻿using BuiltinBuffs.Positive;
+using MoreSlugcats;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -247,12 +249,22 @@ namespace BuiltinBuffs.Missions.UltraKill
                 foreach (var posInfo in spawnCreatureInfo.spawns.Keys)
                 {
                     int bias = 0;
-                    foreach (var creatureType in spawnCreatureInfo.spawns[posInfo])
+
+                    for (int i = 0; i < spawnCreatureInfo.spawns[posInfo].Count; i++)
                     {
-                        activeWaveObjects.Add(new UltraKillWaveCreatureGenerator(room, UltraKillWave.spawnEnemyPos[posInfo] + new IntVector2(bias, 0), creatureType, GetNewID()));
+                        var creatureType = spawnCreatureInfo.spawns[posInfo][i];
+
+                        if (spawnCreatureInfo.specials[posInfo][i] != 0 && (creatureType == CreatureTemplate.Type.Scavenger || creatureType == MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite))
+                        {
+                            activeWaveObjects.Add(new UltraKillWaveCreatureGenerator(room, UltraKillWave.spawnEnemyPos[posInfo] + new IntVector2(bias, 0), creatureType, new EntityID(-1, spawnCreatureInfo.specials[posInfo][i])));
+                        }
+                        else
+                            activeWaveObjects.Add(new UltraKillWaveCreatureGenerator(room, UltraKillWave.spawnEnemyPos[posInfo] + new IntVector2(bias, 0), creatureType, GetNewID()));
+
                         bias++;
                         BuffUtils.Log("UltraKillMission", $"Wave spawn creature {creatureType} at {UltraKillWave.spawnEnemyPos[posInfo]}");
                     }
+                        
                 }
             }
             else if (waveInfo is UltraKillWave.ExtraBuffInfo extraBuff)
@@ -890,9 +902,17 @@ namespace BuiltinBuffs.Missions.UltraKill
                             if (!creatureInfo.spawns.TryGetValue(index, out var lst))
                             {
                                 creatureInfo.spawns.Add(index, lst = new List<CreatureTemplate.Type>());
+                                creatureInfo.specials.Add(index, new List<int>());
                             }
 
                             lst.Add(new CreatureTemplate.Type(splited[1].Trim()));
+
+                            if (splited.Length > 2)
+                            {
+                                creatureInfo.specials[index].Add(int.Parse(splited[2].Trim()));
+                            }
+                            else
+                                creatureInfo.specials[index].Add(0);
 
                             BuffUtils.Log("UltraKillMission", $"SpawnCreatures {index} {creatureInfo.spawns[index].Last()}");
                         }
@@ -935,6 +955,7 @@ namespace BuiltinBuffs.Missions.UltraKill
         public class SpawnCreatureInfo : WaveInfo
         {
             public Dictionary<int, List<CreatureTemplate.Type>> spawns = new Dictionary<int, List<CreatureTemplate.Type>>();
+            public Dictionary<int, List<int>> specials = new Dictionary<int, List<int>>();
         }
 
         public class SpawnItemInfo : WaveInfo
