@@ -35,6 +35,8 @@ namespace BuiltinBuffs.Duality
             }
         }
 
+        public static int speedLevel;
+
         public int SpiderLevel
         {
             get
@@ -75,6 +77,7 @@ namespace BuiltinBuffs.Duality
         {
             base.Update(game);
             spiderLevel = SpiderLevel;
+            speedLevel = SpeedLevel;
         }
     }
 
@@ -507,7 +510,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return 60f + 30f * SpiderShapedMutationBuff.Instance.SpeedLevel + 10f * SpiderShapedMutationBuff.spiderLevel;
+                return 60f + 30f * SpiderShapedMutationBuff.speedLevel + 10f * SpiderShapedMutationBuff.spiderLevel;
             }
         }
 
@@ -1083,7 +1086,7 @@ namespace BuiltinBuffs.Duality
                     for (int m = 0; m < this.legs.GetLength(1); m++)
                     {
                         if (this.legs[l, m].reachedSnapPosition &&
-                            (!TileAccessibleToPlayer() ||
+                            (!EnoughGripToMove() ||
                             (Custom.DistLess(wantPos, player.mainBodyChunk.pos, 20f) &&
                             Vector2.Dot(wantPos - player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos - player.mainBodyChunk.pos) < 0 &&
                             !Custom.DistLess(player.mainBodyChunk.pos, this.legs[l, m].absoluteHuntPos, this.legLength) &&
@@ -1401,7 +1404,7 @@ namespace BuiltinBuffs.Duality
                 wantPosIsSetY = false;
             }*/
 
-            if (TileAccessibleToPlayer())
+            if (EnoughGripToMove())
             {
                 self.bodyChunks[0].vel *= Custom.LerpMap(self.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
                 self.bodyChunks[0].vel += Vector2.ClampMagnitude(wantPos - self.bodyChunks[0].pos, arthropodSpeed) / arthropodSpeed * 3f;
@@ -1444,7 +1447,7 @@ namespace BuiltinBuffs.Duality
             }
         }
 
-        private bool TileAccessibleToPlayer()
+        private bool EnoughGripToMove()
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return false;

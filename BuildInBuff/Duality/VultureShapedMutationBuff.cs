@@ -45,6 +45,8 @@ namespace BuiltinBuffs.Duality
                 return num;
             }
         }
+
+        public static int speedLevel;
         //发射角矛时会发射可以击落飞行物的防御导弹
         public bool ActiveProtectionSysytem => GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.ActiveProtectionSystemBuffEntry.activeProtectionSysytem);
         //大幅提高角矛的射击和回收速度
@@ -71,6 +73,12 @@ namespace BuiltinBuffs.Duality
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
                 }
             }
+        }
+
+        public override void Update(RainWorldGame game)
+        {
+            base.Update(game);
+            speedLevel = SpeedLevel;
         }
     }
 
@@ -658,7 +666,7 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return 10f + 5f * VultureShapedMutationBuff.Instance.SpeedLevel;
+                return 10f + 5f * VultureShapedMutationBuff.speedLevel;
             }
         }
 

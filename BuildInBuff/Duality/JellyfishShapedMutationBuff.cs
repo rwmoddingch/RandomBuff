@@ -1702,7 +1702,7 @@ namespace BuiltinBuffs.Duality
                 }
                 if (!canBeSurfaceMode)
                 {
-                    if (player.inputWithDiagonals.Value.thrw)
+                    if (player.input[0].thrw)
                     {
                         if (driftGoalPos.y > newBody[0].pos.y)
                         {
@@ -1714,7 +1714,7 @@ namespace BuiltinBuffs.Duality
                         }
                         flag = true;
                     }
-                    else if (player.inputWithDiagonals.Value.jmp)
+                    else if (player.input[0].jmp)
                     {
                         if (driftGoalPos.y > newBody[0].pos.y)
                         {
