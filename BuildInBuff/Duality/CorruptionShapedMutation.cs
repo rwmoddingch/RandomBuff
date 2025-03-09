@@ -20,6 +20,8 @@ using RandomBuff.Core.SaveData;
 using BuiltinBuffs.Positive;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using MonoMod.RuntimeDetour;
 
 namespace BuiltinBuffs.Duality
 {
@@ -112,6 +114,8 @@ namespace BuiltinBuffs.Duality
 
         public static ConditionalWeakTable<Player, CorruptionCat> CorruptionCatFeatures = new ConditionalWeakTable<Player, CorruptionCat>();
 
+        public delegate CreatureTemplate.Relationship orig_IUseARelationshipTracker_UpdateDynamicRelationship(ArtificialIntelligence self, RelationshipTracker.DynamicRelationship dRelation);
+
         public static int StackLayer
         {
             get
@@ -152,6 +156,29 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
 
             On.OracleBehavior.Update += OracleBehavior_Update;
+
+            foreach (var ass in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    foreach(var type in ass.SafeGetTypes())
+                    {
+                        if (type.BaseType == typeof(ArtificialIntelligence) &&
+                            type.GetInterface("IUseARelationshipTracker") != null &&
+                            type.GetMethod("IUseARelationshipTracker.UpdateDynamicRelationship", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)?.DeclaringType == type)
+                        {
+                            //if (BanAi.Contains(type)) continue;
+
+                            _ = new Hook(type.GetMethod("IUseARelationshipTracker.UpdateDynamicRelationship", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+                                typeof(CorruptionShapedMutationBuffEntry).GetMethod(nameof(IUseARelationshipTracker_UpdateDynamicRelationship), BindingFlags.Static | BindingFlags.NonPublic));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    BuffPlugin.LogError(ex);
+                }
+            }
         }
 
         public static void LongLifeCycleHookOn()
@@ -248,7 +275,6 @@ namespace BuiltinBuffs.Duality
         //食量增大（需求+4，存储-2）
         private static IntVector2 SlugcatStats_SlugcatFoodMeter(On.SlugcatStats.orig_SlugcatFoodMeter orig, SlugcatStats.Name slugcat)
         {
-            BuffPlugin.Log("[CorruptionShapedMutation] SlugcatStats_SlugcatFoodMeter!");
             IntVector2 origFoodRequirement = orig(slugcat);
             int newHibernateRequirement = origFoodRequirement.y + (StackLayer >= 3 ? 6 : 4);
             int newTotalFoodRequirement = origFoodRequirement.x + (StackLayer >= 3 ? 3 : 2);
@@ -314,6 +340,18 @@ namespace BuiltinBuffs.Duality
                 }
             }
             BuffPlugin.Log("[CorruptionShapedMutation] EstablishRelationship!");
+        }
+
+        private static CreatureTemplate.Relationship IUseARelationshipTracker_UpdateDynamicRelationship(orig_IUseARelationshipTracker_UpdateDynamicRelationship orig,ArtificialIntelligence self, RelationshipTracker.DynamicRelationship dRelation)
+        {
+            CreatureTemplate.Relationship result = orig(self, dRelation);
+            if (true)
+            {
+                CreatureTemplate slug = StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Slugcat);
+                result = self.creature.creatureTemplate.relationships[slug.index];
+                BuffPlugin.Log($"[CorruptionShapedMutation]The Dynamic Relationship between {self.creature.creatureTemplate.type.ToString()} and {slug.type.ToString()}: {result.ToString()}");
+            }
+            return result;
         }
 
         public static void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)
