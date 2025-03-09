@@ -127,8 +127,6 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
-            IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdateIL;
-
             IL.Player.MovementUpdate += Player_MovementUpdateIL;
 
             On.Player.CanEatMeat += Player_CanEatMeat;
@@ -152,6 +150,8 @@ namespace BuiltinBuffs.Duality
             On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
+
+            On.OracleBehavior.Update += OracleBehavior_Update;
         }
 
         public static void LongLifeCycleHookOn()
@@ -160,6 +160,38 @@ namespace BuiltinBuffs.Duality
             //On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
         }
 
+        #region 迭代器相关
+        public static void OracleBehavior_Update(On.OracleBehavior.orig_Update orig, OracleBehavior self, bool eu)
+        {
+            orig(self, eu);
+            if (self.oracle != null && self.oracle.room != null)
+            {
+                for (int i = 0; i < self.oracle.room.abstractRoom.creatures.Count; i++)
+                {
+                    if (self.oracle.room.abstractRoom.creatures[i].realizedCreature != null &&
+                        self.oracle.room.abstractRoom.creatures[i].realizedCreature is Player player &&
+                        self.player == player)
+                    {
+                        //如果迭代器是跪坐的,则拒绝说话
+                        if (self.oracle.IsTileSolid(0, 0, -1) || (self.oracle.bodyChunks.Length > 1 && self.oracle.IsTileSolid(1, 0, -1)))
+                        {
+                            if (self.oracle.room.game.cameras[0].hud.dialogBox != null &&
+                                self.oracle.room.game.cameras[0].hud.dialogBox.messages != null)
+                                self.oracle.room.game.cameras[0].hud.dialogBox.messages.Clear();
+                        }
+                        //如果迭代器是飘着的，则杀猫
+                        else
+                        {
+                            if (CorruptionCatFeatures.TryGetValue(player, out var corruption))
+                            {
+                                corruption.KillPlayerUpdate(self.oracle);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
         #region 额外特性
         //不抓杆子
         private static void Player_MovementUpdateIL(ILContext il)
@@ -384,7 +416,7 @@ namespace BuiltinBuffs.Duality
             orig(self, ow);
             if (CorruptionCatFeatures.TryGetValue(self.player, out var corruption))
             {
-
+                corruption.graphics.ctor(self, ow);
             }
         }
 
@@ -402,26 +434,6 @@ namespace BuiltinBuffs.Duality
                 corruption.graphics.Reset(self);
         }
         #endregion
-        #region 时缓
-        private static void RainWorldGame_RawUpdateIL(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
-                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
-            {
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate<Action<RainWorldGame>>(game =>
-                {
-                    if (UpdateSpeed < game.framesPerSecond)
-                        game.framesPerSecond = UpdateSpeed;
-                });
-            }
-            else
-                BuffUtils.LogError(CorruptionShapedMutation, "IL HOOK FAILED");
-        }
-
-        public static int UpdateSpeed = 1000;
-        #endregion
     }
 
     internal class CorruptionCat
@@ -429,6 +441,7 @@ namespace BuiltinBuffs.Duality
         WeakReference<Player> ownerRef;
         public BodyChunk[] coreChunks;
         public PhysicalObject.BodyChunkConnection[] coreChunkConnections;
+        public float killFac;
 
         public bool IsDaddy => CorruptionShapedMutationBuffEntry.StackLayer >= 2;
 
@@ -667,7 +680,7 @@ namespace BuiltinBuffs.Duality
         {
             this.ownerRef = new WeakReference<Player>(player);
             this.tentaclesCount = 4 + 1 * CorruptionShapedMutationBuff.corruptionLevel + 2 * CorruptionShapedMutationBuffEntry.StackLayer;
-            this.tentaclesLength = 200f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer;
+            this.tentaclesLength = 150f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer;
             //核心
             this.coreChunks = new BodyChunk[4];
             for (int i = 0; i < this.coreChunks.Length; i++)
@@ -675,14 +688,18 @@ namespace BuiltinBuffs.Duality
                 this.coreChunks[i] = new BodyChunk(player, i, player.bodyChunks[0].pos + 6f * Custom.RNV(), i < 2 ? 4f : 3f, 0.3f);
                 this.coreChunks[i].collideWithTerrain = false;//注意，如果为true，则需要Player.TerrainImpact会报错，可以改但来不及了，所以这里先不管地形碰撞了
             }
-            this.coreChunkConnections = new PhysicalObject.BodyChunkConnection[2 * this.coreChunks.Length];
+            this.coreChunkConnections = new PhysicalObject.BodyChunkConnection[2 * this.coreChunks.Length + 2];
             for (int i = 0; i < this.coreChunks.Length; i++)
             {
                 this.coreChunkConnections[i] = new PhysicalObject.BodyChunkConnection(this.coreChunks[i], player.bodyChunks[0], 
-                    Mathf.Lerp(10f, 22f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
+                    Mathf.Lerp(6f, 16f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
                 this.coreChunkConnections[i + this.coreChunks.Length] = new PhysicalObject.BodyChunkConnection(this.coreChunks[i], player.bodyChunks[1], 
-                    Mathf.Lerp(18f, 8f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
+                    Mathf.Lerp(14f, 6f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
             }
+            this.coreChunkConnections[this.coreChunkConnections.Length - 2] = new PhysicalObject.BodyChunkConnection(this.coreChunks[0], this.coreChunks[1],
+                    5f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
+            this.coreChunkConnections[this.coreChunkConnections.Length - 1] = new PhysicalObject.BodyChunkConnection(this.coreChunks[2], this.coreChunks[3],
+                    5f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
             //触手
             this.tentacles = new CorruptionCatTentacle[this.tentaclesCount];
             for (int i = 0; i < Mathf.Min(player.bodyChunks.Length, this.tentacles.Length); i++)
@@ -846,7 +863,7 @@ namespace BuiltinBuffs.Duality
                 }
                 if (flag && this.WantToHunt)
                 {
-                    /* 将猎物图层置于玩家图层中
+                    /*将猎物图层置于玩家图层中
                     if (player.graphicsModule != null)
                     {
                         if (otherObject is IDrawable)
@@ -1031,7 +1048,7 @@ namespace BuiltinBuffs.Duality
                                 grabSomething = true;
                                 break;
                             }
-                        }
+                        }/*
                         //?，或抓住了物品
                         if (WantToHunt || grabSomething)//!player.input[0].pckp || grabSomething
                         {
@@ -1041,14 +1058,14 @@ namespace BuiltinBuffs.Duality
                         else
                         {
                             this.moving = false;
-                        }
+                        }*/
                     }
                     else
                     {
                         this.moving = false;
                     }
                     //松开触手抓握，(或需要移动)
-                    if ((!player.input[0].thrw && player.input[1].thrw) || (!player.input[0].pckp && player.input[1].pckp))// || player.input[0].jmp
+                    if ((!player.input[0].thrw && !player.input[0].pckp && player.input[1].thrw) || (!player.input[0].pckp && !player.input[0].thrw && player.input[1].pckp))// || player.input[0].jmp
                     {
                         for (int k = 0; k < this.tentacles.Length; k++)
                         {
@@ -1083,12 +1100,13 @@ namespace BuiltinBuffs.Duality
                 }
                 if (this.WantToAutoHunt)
                 {
-                    this.unconditionalSupport = 0f;
+                    //this.unconditionalSupport = 0f;
                     for (int l = 0; l < this.tentacles.Length; l++)
                     {
                         if (this.EnoughGripToMove())
                         {
                             this.tentacles[l].neededForLocomotion = false;
+                            this.tentacles[l].atGrabDest = false;
                             this.tentacles[l].SwitchTask(CorruptionCatTentacle.Task.Hunt);
                         }
                     }
@@ -1506,8 +1524,8 @@ namespace BuiltinBuffs.Duality
             if (this.tentacles == null)
                 return false;
             //BuffPlugin.Log("this.totalGrip + 2f * moveDirGrip: " + (this.TotalGrip + 2f * MoveDirGrip));
-            if (this.TotalGrip > this.tentacles.Length / 2 &&
-                this.TotalGrip + 2f * this.MoveDirGrip >= 5f * player.room.gravity - 4.5f * player.Submersion)
+            if (this.TotalGrip > this.tentacles.Length / 2  * (1f - player.Submersion) &&
+                this.TotalGrip + 2f * this.MoveDirGrip >= 5f * player.room.gravity - 5f * player.Submersion)
                 result = true;
             if (this.TotalGrip > 0 && player.room.aimap!= null &&
                 player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace)
@@ -1647,6 +1665,27 @@ namespace BuiltinBuffs.Duality
             return result;
         }
         #endregion
+
+        public void KillPlayerUpdate(Oracle oracle)
+        {
+            if (!ownerRef.TryGetTarget(out var player))
+                return;
+            if ((!player.dead || killFac > 0.5f) && player.room == oracle.room)
+            {
+                this.killFac += 0.025f;
+                if (this.killFac >= 1f)
+                {
+                    player.mainBodyChunk.vel += Custom.RNV() * 12f;
+                    for (int k = 0; k < 20; k++)
+                    {
+                        oracle.room.AddObject(new Spark(player.mainBodyChunk.pos, Custom.RNV() * Random.value * 40f, new Color(1f, 1f, 1f), null, 30, 120));
+                    }
+                    player.Die();
+                    this.killFac = 0f;
+                    return;
+                }
+            }
+        }
 
         public CreatureTemplate.Relationship DynamicRelationship(AbstractCreature absCrit)//Tracker.CreatureRepresentation rep, 
         {
@@ -1798,9 +1837,17 @@ namespace BuiltinBuffs.Duality
         }
 
         #region 外观
+        public void ctor(PlayerGraphics self, PhysicalObject ow)
+        {
+            if (self.internalContainerObjects == null)
+                self.internalContainerObjects = new List<GraphicsModule.ObjectHeldInInternalContainer>();
+        }
+
         public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            if (self.internalContainerObjects == null)
+                self.internalContainerObjects = new List<GraphicsModule.ObjectHeldInInternalContainer>();
             this.originLength = sLeaser.sprites.Length;
             this.totalLegSprites = 0;
             for (int i = 0; i < this.legGraphics.Length; i++)
@@ -1879,7 +1926,8 @@ namespace BuiltinBuffs.Duality
                     var sprite = sLeaser.sprites[this.originLength + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + i];
                     sprite.RemoveFromContainer();
                     midgroundContainer.AddChild(sprite);
-                    //核心移到身体后方
+                    //一半核心移到身体后方
+                    if (i < this.corruptionCat.coreChunks.Length * 4 / 2)
                     sprite.MoveBehindOtherNode(sLeaser.sprites[0]);
                 }
             }
@@ -1997,7 +2045,7 @@ namespace BuiltinBuffs.Duality
 
         public void RenderSlits(int chunk, Vector2 pos, Vector2 middleOfBody, float rotation, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            if (true && chunk < 2)//this.player.HDmode
+            if (false)//this.player.HDmode && chunk < 2
             {
                 sLeaser.sprites[this.EyeSprite(chunk, 0)].isVisible = false;
                 sLeaser.sprites[this.EyeSprite(chunk, 1)].isVisible = false;
@@ -2040,6 +2088,7 @@ namespace BuiltinBuffs.Duality
                 }
             }
         }
+        
         public Vector2 BulgeVertex(Vector2 v, Vector2 dir, float rad)
         {
             return Vector2.Lerp(v, Vector2.ClampMagnitude(v + dir * rad, rad), dir.magnitude);
@@ -2268,8 +2317,6 @@ namespace BuiltinBuffs.Duality
         public int soundCheckTimer;
         public Vector2? examineSoundPos;
 
-
-
         public CorruptionCatTentacle(Player player, CorruptionCat corruptionCat, BodyChunk bodyChunk, float length, int tentacleNumber, Vector2 tentacleDir) : base(player, bodyChunk, length)
         {
             base.connectedChunk = bodyChunk;
@@ -2329,7 +2376,8 @@ namespace BuiltinBuffs.Duality
                 Vector2 vector = Custom.DirVec(base.Tip.pos, this.grabChunk.pos);
                 //float num3 = this.grabChunk.mass / (this.grabChunk.mass + 0.01f);
                 float num3 = Mathf.Min(0.5f, this.grabChunk.mass / (this.grabChunk.mass + 0.5f * CorruptionShapedMutationBuffEntry.StackLayer));
-                float num4 = 1f;
+                float num4 = 1f; 
+                this.grabChunk.vel *= 0.9f; // 试图防止物体乱飞
                 base.Tip.pos += vector * (num - num2) * num3 * num4 * SpeedFac;
                 base.Tip.vel += vector * (num - num2) * num3 * num4 * SpeedFac;
                 this.grabChunk.pos -= vector * (num - num2) * (1f - num3) * num4 * SpeedFac;
@@ -2542,7 +2590,11 @@ namespace BuiltinBuffs.Duality
         {
             float t = Custom.LerpMap((float)this.corruptionCat.stuckCounter, 50f, 200f, 0.5f, 0.95f);
             if (this.corruptionCat.WantToMoveBody && this.corruptionCat.HaveDirInput)
+            {
                 t = Mathf.Clamp01(Mathf.Pow(t, 0.6f));
+                if (this.OppositeDir)
+                    t = Mathf.Clamp01(Mathf.Pow(t, 0.2f));
+            }
             if (this.chooseToMoveByPlayer && !this.chooseToMoveByPlayerButNotControl &&
                 !this.corruptionCat.WantToMoveBody && this.corruptionCat.HaveDirInput)
                 t = 1f;
@@ -2928,7 +2980,7 @@ namespace BuiltinBuffs.Duality
         public void UpdateClimbGrabPos(ref List<IntVector2> path)
         {
             //按投掷键会自动抓猎物
-            if (this.corruptionCat.WantToAutoHunt && this.huntCreature != null)
+            if (this.corruptionCat.WantToAutoHunt && this.huntCreature != null && this.task == Task.Hunt)
                 return;
             if (this.corruptionCat.TotalGrip <= 2 && this.atGrabDest)
                 return;
