@@ -1632,6 +1632,8 @@ namespace BuiltinBuffs.Duality
                     player.bodyChunks[0].vel += Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) * 
                         Vector2.ClampMagnitude(bodyWantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
                 }
+                if (Custom.Dist(bodyWantPos, wantPos) >= moveSpeed * 2.5f)
+                    bodyWantPos = wantPos;
             }
             else
             {
