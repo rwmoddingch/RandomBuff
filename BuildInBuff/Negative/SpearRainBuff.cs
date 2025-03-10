@@ -18,6 +18,8 @@ using RandomBuff.Core.Entry;
 using RandomBuffUtils;
 using RandomBuffUtils.ParticleSystem;
 using RandomBuffUtils.ParticleSystem.EmitterModules;
+using MonoMod.RuntimeDetour;
+using System.Reflection;
 
 namespace BuiltinBuffs.Negative
 {
@@ -26,6 +28,10 @@ namespace BuiltinBuffs.Negative
     {
         public static BuffID SpearRainBuffID = new BuffID("SpearRain", true);
         public static RoomRain.DangerType SpearRain = new RoomRain.DangerType("SpearRain", true);
+
+        private static BindingFlags propFlags = BindingFlags.Instance | BindingFlags.Public;
+        private static BindingFlags methodFlags = BindingFlags.Static | BindingFlags.Public;
+        public delegate float orig_RainCycle_preCycleRain_Intensity(RainCycle self);
 
         public void OnEnable()
         {
@@ -37,8 +43,32 @@ namespace BuiltinBuffs.Negative
             //IL.RoomRain.Update += RoomRain_Update_IL;
             On.RoomRain.Update += RoomRain_Update;
             On.RoomRain.ctor += RoomRain_ctor;
- 
+
             //IL.RoomRain.DrawSprites += RoomRain_DrawSprites;
+
+            On.RainCycle.Update += RainCycle_Update;
+            Hook hook = new Hook(typeof(RainCycle).GetProperty("preCycleRain_Intensity", SpearRainIBuffEntry.propFlags).GetGetMethod(), 
+                                 typeof(SpearRainIBuffEntry).GetMethod("RainCycle_preCycleRain_Intensity", SpearRainIBuffEntry.methodFlags));
+        }
+
+        public static float RainCycle_preCycleRain_Intensity(SpearRainIBuffEntry.orig_RainCycle_preCycleRain_Intensity orig, RainCycle self)
+        {
+            float result = orig(self);
+
+            float num = 1f - Mathf.Pow(Mathf.InverseLerp((float)self.cycleLength, 0f, (float)self.timer), 24f);
+
+            if (SpearRainBuffID.GetBuffData().StackLayer >= 2)
+                result = (Mathf.Sin(self.preCycleRainPulse_WaveA) + Mathf.Sin(self.preCycleRainPulse_WaveB) / 2f + Mathf.Cos(self.preCycleRainPulse_WaveC) * ((float)(self.timer / self.cycleLength) * 2f)) * num;
+            
+            return result;
+        }
+
+        private static void RainCycle_Update(On.RainCycle.orig_Update orig, RainCycle self)
+        {
+            orig(self);
+
+            if (SpearRainBuffID.GetBuffData().StackLayer >= 2)
+                self.world.game.globalRain.preCycleRainPulse_Scale = 0.005f;
         }
 
         private static void RoomRain_ctor(On.RoomRain.orig_ctor orig, RoomRain self, GlobalRain globalRain, Room rm)
