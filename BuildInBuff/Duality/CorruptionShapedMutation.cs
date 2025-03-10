@@ -132,10 +132,12 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             IL.Player.MovementUpdate += Player_MovementUpdateIL;
+            IL.DaddyCorruption.Bulb.Update += DaddyCorruption_Bulb_UpdateIL;
 
             On.Player.CanEatMeat += Player_CanEatMeat;
             On.SlugcatStats.NourishmentOfObjectEaten += SlugcatStats_NourishmentOfObjectEaten;
             On.MoreSlugcats.SlugNPCAI.TheoreticallyEatMeat += SlugNPCAI_TheoreticallyEatMeat;
+            On.Creature.Violence += Creature_Violence;
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
@@ -240,7 +242,7 @@ namespace BuiltinBuffs.Duality
                 });
             }
             else
-                BuffUtils.LogError(CorruptionCatFeatures, "IL HOOK FAILED");
+                BuffUtils.LogError(CorruptionShapedMutation, "IL HOOK FAILED");
         }
 
         //允许吃肉
@@ -282,7 +284,7 @@ namespace BuiltinBuffs.Duality
             return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
         }
 
-        //只能一次叼一个东西
+        //无法抓取
         private static Player.ObjectGrabability Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
         {
             Player.ObjectGrabability result = orig(self, obj);
@@ -311,6 +313,53 @@ namespace BuiltinBuffs.Duality
                 result = 0f;
             return result;
         }
+
+        //紫菇之前爆炸抗性减弱，并增加了生命值设定
+        private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage,
+            Creature.DamageType type, float damage, float stunBonus)
+        {
+            float origDamage = damage;
+            if (self is Player && type == Creature.DamageType.Explosion &&
+                CorruptionCatFeatures.TryGetValue(self as Player, out _) &&
+                CorruptionCat.Type != MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)
+            {
+                damage *= 0f;
+                stunBonus *= 3f;
+            }
+            orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
+            if (self is Player && CorruptionCatFeatures.TryGetValue(self as Player, out var corruption))
+            {
+                damage = origDamage;
+                float num = damage / self.Template.baseDamageResistance;
+                if (type.Index != -1)
+                {
+                    if (self.Template.damageRestistances[type.Index, 0] > 0f)
+                    {
+                        num /= self.Template.damageRestistances[type.Index, 0];
+                    }
+                }
+                if (ModManager.MSC)
+                {
+                    if (self.room != null && self.room.world.game.IsArenaSession && self.room.world.game.GetArenaGameSession.chMeta != null && self.room.world.game.GetArenaGameSession.chMeta.resistMultiplier > 0f && !(self is Player))
+                    {
+                        num /= self.room.world.game.GetArenaGameSession.chMeta.resistMultiplier;
+                    }
+                    if (self.room != null && self.room.world.game.IsArenaSession && self.room.world.game.GetArenaGameSession.chMeta != null && self.room.world.game.GetArenaGameSession.chMeta.invincibleCreatures && !(self is Player))
+                    {
+                        num = 0f;
+                    }
+                }
+                (corruption.state as HealthState).health -= num;
+                if (StaticWorld.GetCreatureTemplate(CorruptionCat.Type).quickDeath && 
+                    (Random.value < -(corruption.state as HealthState).health || 
+                    (corruption.state as HealthState).health < -1f || 
+                    ((corruption.state as HealthState).health < 0f && Random.value < 0.33f)))
+                {
+                    self.Die();
+                }
+                BuffPlugin.Log($"[CorruptionShapedMutation] Left Health: {(corruption.state as HealthState).health * self.Template.baseDamageResistance}");
+            }
+        }
         #endregion
         #region 生物关系
         //修改生物关系（棕色长腿菌、猎手长腿菌不再攻击玩家，其他生物对蛞蝓猫的生物关系变成对长腿菌的生物关系）
@@ -326,20 +375,20 @@ namespace BuiltinBuffs.Duality
             {
                 return;
             }
-            BuffPlugin.Log($"[CorruptionShapedMutation] StaticWorld.creatureTemplates.Length: {StaticWorld.creatureTemplates.Length}");
+            //BuffPlugin.Log($"[CorruptionShapedMutation] StaticWorld.creatureTemplates.Length: {StaticWorld.creatureTemplates.Length}");
             foreach (CreatureTemplate other in StaticWorld.creatureTemplates)
             {
-                BuffPlugin.Log("[CorruptionShapedMutation] Try to EstablishRelationship...");
+                //BuffPlugin.Log("[CorruptionShapedMutation] Try to EstablishRelationship...");
                 if (other != null)
                 {
                     StaticWorld.EstablishRelationship(other.type, slug.type, other.relationships[daddy.type.Index]);
                     StaticWorld.EstablishRelationship(slug.type, other.type, daddy.relationships[other.type.Index]);
 
-                    BuffPlugin.Log($"[CorruptionShapedMutation]The relationship between {other.type.ToString()} and {slug.type.ToString()}: {other.relationships[daddy.type.Index].ToString()}");
-                    BuffPlugin.Log($"[CorruptionShapedMutation]The relationship between {slug.type.ToString()} and {other.type.ToString()}: {daddy.relationships[other.type.Index].ToString()}");
+                    //BuffPlugin.Log($"[CorruptionShapedMutation]The relationship between {other.type.ToString()} and {slug.type.ToString()}: {other.relationships[daddy.type.Index].ToString()}");
+                    //BuffPlugin.Log($"[CorruptionShapedMutation]The relationship between {slug.type.ToString()} and {other.type.ToString()}: {daddy.relationships[other.type.Index].ToString()}");
                 }
             }
-            BuffPlugin.Log("[CorruptionShapedMutation] EstablishRelationship!");
+            //BuffPlugin.Log("[CorruptionShapedMutation] EstablishRelationship!");
         }
 
         private static CreatureTemplate.Relationship IUseARelationshipTracker_UpdateDynamicRelationship(orig_IUseARelationshipTracker_UpdateDynamicRelationship orig,ArtificialIntelligence self, RelationshipTracker.DynamicRelationship dRelation)
@@ -349,15 +398,48 @@ namespace BuiltinBuffs.Duality
             {
                 CreatureTemplate slug = StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Slugcat);
                 result = self.creature.creatureTemplate.relationships[slug.index];
-                BuffPlugin.Log($"[CorruptionShapedMutation]The Dynamic Relationship between {self.creature.creatureTemplate.type.ToString()} and {slug.type.ToString()}: {result.ToString()}");
+                //BuffPlugin.Log($"[CorruptionShapedMutation]The Dynamic Relationship between {self.creature.creatureTemplate.type.ToString()} and {slug.type.ToString()}: {result.ToString()}");
             }
             return result;
         }
 
-        public static void StaticWorld_InitStaticWorld(On.StaticWorld.orig_InitStaticWorld orig)
+        //免疫香菇墙
+        private static void DaddyCorruption_Bulb_UpdateIL(ILContext il)
         {
-            orig();
-            EstablishRelationship();
+            ILCursor c = new ILCursor(il);
+            ILCursor find = new ILCursor(il);
+            ILLabel pos = null;
+            //找到原方法结束的地方
+            if (find.TryGotoNext(MoveType.After,
+                                 (i) => i.MatchLdfld<DaddyCorruption.Bulb> ("eatChunk"),
+                                 (i) => i.Match(OpCodes.Brfalse),
+                                 (i) => i.MatchLdloc(8)))
+            {
+                find.Emit(OpCodes.Stloc_S, (byte)8);
+                pos = find.MarkLabel();
+                find.Emit(OpCodes.Ldloc_S, (byte)8);
+            }
+            else
+                BuffUtils.LogError(CorruptionShapedMutation, "IL HOOK FAILED (pos)");
+            if (c.TryGotoNext(MoveType.After,
+                              (i) => i.MatchIsinst("DaddyLongLegs"),
+                              (i) => i.Match(OpCodes.Brtrue)))
+            {
+                if (pos != null)
+                {
+                    c.Emit(OpCodes.Ldarg_0);
+                    c.Emit(OpCodes.Ldloc_S, (byte)8);
+                    c.EmitDelegate<Func<DaddyCorruption.Bulb, int, bool>>((self, i) =>
+                    {
+                        return self.owner.room.abstractRoom.creatures[i].realizedCreature != null &&
+                               self.owner.room.abstractRoom.creatures[i].realizedCreature is Player player &&
+                               CorruptionCatFeatures.TryGetValue(player, out _);
+                    });
+                    c.Emit(OpCodes.Brtrue, pos);
+                }
+            }
+            else
+                BuffUtils.LogError(CorruptionShapedMutation, "IL HOOK FAILED (c)");
         }
         #endregion
 
@@ -480,6 +562,7 @@ namespace BuiltinBuffs.Duality
         public BodyChunk[] coreChunks;
         public PhysicalObject.BodyChunkConnection[] coreChunkConnections;
         public float killFac;
+        public DaddyState state;
 
         public bool IsDaddy => CorruptionShapedMutationBuffEntry.StackLayer >= 2;
 
@@ -719,6 +802,7 @@ namespace BuiltinBuffs.Duality
             this.ownerRef = new WeakReference<Player>(player);
             this.tentaclesCount = 4 + 1 * CorruptionShapedMutationBuff.corruptionLevel + 2 * CorruptionShapedMutationBuffEntry.StackLayer;
             this.tentaclesLength = 150f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer;
+            this.state = new DaddyState(this, player.abstractCreature);
             //核心
             this.coreChunks = new BodyChunk[4];
             for (int i = 0; i < this.coreChunks.Length; i++)
@@ -754,8 +838,10 @@ namespace BuiltinBuffs.Duality
             this.graphics = new CorruptionCatGraphics(player, this);
             this.wantPos = player.mainBodyChunk.pos;
             this.bodyWantPos = player.mainBodyChunk.pos;
-            //免疫香菇墙？
+            //免疫香菇触手
             player.abstractCreature.tentacleImmune = true;
+            //立即致死伤害
+            player.Template.instantDeathDamageLimit = this.state.health;
 
             this.NewRoom(player.room);
         }
@@ -767,6 +853,7 @@ namespace BuiltinBuffs.Duality
                 return;
             if (player.room == null)
                 return;
+            player.playerState.permanentDamageTracking = 0f;
             for (int i = 0; i < this.coreChunks.Length; i++)
             {
                 this.coreChunks[i].Update();
@@ -808,25 +895,26 @@ namespace BuiltinBuffs.Duality
                 }
             }
             for (int m = 0; m < this.tentacles.Length; m++)
-            {/*
+            {
+                //触手回血
                 if (ModManager.MSC)
                 {
-                    if ((base.State as DaddyLongLegs.DaddyState).tentacleHealth[m] < 1f)
+                    if ((this.state as DaddyState).tentacleHealth[m] < 1f)
                     {
-                        if (base.abstractCreature.superSizeMe || this.isHD)
+                        if (CorruptionCat.Type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)//base.abstractCreature.superSizeMe || this.isHD
                         {
-                            (base.State as DaddyLongLegs.DaddyState).tentacleHealth[m] += 0.0012f;
+                            (this.state as DaddyState).tentacleHealth[m] += 0.0012f;
                         }
                         else if (this.SizeClass)
                         {
-                            (base.State as DaddyLongLegs.DaddyState).tentacleHealth[m] += 0.0003f;
+                            (this.state as DaddyState).tentacleHealth[m] += 0.0003f;
                         }
                     }
-                    if ((base.State as DaddyLongLegs.DaddyState).tentacleHealth[m] > 1f)
+                    if ((this.state as DaddyState).tentacleHealth[m] > 1f)
                     {
-                        (base.State as DaddyLongLegs.DaddyState).tentacleHealth[m] = 1f;
+                        (this.state as DaddyState).tentacleHealth[m] = 1f;
                     }
-                }*/
+                }
                 this.tentacles[m].Update();
                 this.tentacles[m].retractFac = this.squeezeFac;
             }
@@ -961,6 +1049,9 @@ namespace BuiltinBuffs.Duality
                         player.AddFood((this.eatObjects[i].chunk.owner as Creature).Template.meatPoints);
                     else if (this.eatObjects[i].chunk.owner is PhysicalObject)
                         player.AddFood(Mathf.FloorToInt((this.eatObjects[i].chunk.owner as PhysicalObject).TotalMass));
+                    //击杀生物计算
+                    if (this.eatObjects[i].chunk.owner is Creature creature)
+                        creature.SetKillTag(player.abstractCreature);
                     //删除猎物
                     this.eatObjects[i].chunk.owner.Destroy();
                     this.eatObjects.RemoveAt(i);
@@ -1749,19 +1840,23 @@ namespace BuiltinBuffs.Duality
             return StaticWorld.GetCreatureTemplate(CorruptionCat.Type).CreatureRelationship(absCrit.creatureTemplate);
         }
 
-        //此状态暂未使用
         public class DaddyState : HealthState
         {
-            public DaddyState(AbstractCreature creature) : base(creature)
+            public CorruptionCat owner;
+            public float[] tentacleHealth;
+
+            public DaddyState(CorruptionCat owner, AbstractCreature creature) : base(creature)
             {
-                this.tentacleHealth = new float[13];
+                this.owner = owner;
+                this.tentacleHealth = new float[owner.tentaclesCount];
                 for (int i = 0; i < this.tentacleHealth.Length; i++)
                 {
                     this.tentacleHealth[i] = 1f;
                 }
+                creature.creatureTemplate.baseDamageResistance = StaticWorld.GetCreatureTemplate(CorruptionCat.Type).baseDamageResistance / 10f;
+                //creature.creatureTemplate.baseStunResistance = StaticWorld.GetCreatureTemplate(CorruptionCat.Type).baseStunResistance / 2f;
+                creature.creatureTemplate.damageRestistances[(int)Creature.DamageType.Explosion, 0] = StaticWorld.GetCreatureTemplate(CorruptionCat.Type).damageRestistances[(int)Creature.DamageType.Explosion, 0];
             }
-
-            public float[] tentacleHealth;
         }
 
         public class EatObject
@@ -2402,18 +2497,19 @@ namespace BuiltinBuffs.Duality
                 this.stun--;
                 this.grabChunk = null;
             }
-            /* 触手受击眩晕
-            if (Mathf.Pow(Random.value, 0.35f) > (this.corruptionCat.State as DaddyLongLegs.DaddyState).tentacleHealth[this.tentacleNumber])
+            // 触手受击眩晕
+            if (Mathf.Pow(Random.value, 0.35f) > (this.corruptionCat.state as CorruptionCat.DaddyState).tentacleHealth[this.tentacleNumber])
             {
-                this.stun = Math.Max(this.stun, (int)Mathf.Lerp(-4f, 14f, Mathf.Pow(Random.value, 0.5f + 20f * Mathf.Max(0f, (this.corruptionCat.State as DaddyLongLegs.DaddyState).tentacleHealth[this.tentacleNumber]))));
-            }*/
+                this.stun = Math.Max(this.stun, (int)Mathf.Lerp(-4f, 14f, 
+                    Mathf.Pow(Random.value, 0.5f + 20f * Mathf.Max(0f, (this.corruptionCat.state as CorruptionCat.DaddyState).tentacleHealth[this.tentacleNumber]))));
+            }
             if (this.grabChunk != null)
             {
                 float num = Vector2.Distance(base.Tip.pos, this.grabChunk.pos);
                 float num2 = (base.Tip.rad + this.grabChunk.rad) / 4f;
                 Vector2 vector = Custom.DirVec(base.Tip.pos, this.grabChunk.pos);
                 //float num3 = this.grabChunk.mass / (this.grabChunk.mass + 0.01f);
-                float num3 = Mathf.Clamp(this.grabChunk.mass / (this.grabChunk.mass + 0.1f * CorruptionShapedMutationBuffEntry.StackLayer), 0.5f, 0.8f);
+                float num3 = Mathf.Clamp(this.grabChunk.mass / (this.grabChunk.mass + 0.1f * CorruptionShapedMutationBuffEntry.StackLayer), 0.5f, 0.6f);
                 float num4 = 1f; 
                 this.grabChunk.vel *= 0.9f; // 试图防止物体乱飞
                 base.Tip.pos += vector * (num - num2) * num3 * num4 * SpeedFac;
