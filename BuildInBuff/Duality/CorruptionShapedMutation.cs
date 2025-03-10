@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
+using RandomBuff.Core.SaveData.BuffConfig;
 
 namespace BuiltinBuffs.Duality
 {
@@ -85,6 +86,10 @@ namespace BuiltinBuffs.Duality
     internal class CorruptionShapedMutationBuffData : BuffData
     {
         public override BuffID ID => CorruptionShapedMutationBuffEntry.CorruptionShapedMutation;
+
+        [CustomBuffConfigInfo("HavingVision", "")]
+        [CustomBuffConfigTwoValue(false, true)]
+        public bool HavingVisionKey { get; }
 
         public override void Stack()
         {
