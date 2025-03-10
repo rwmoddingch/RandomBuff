@@ -28,7 +28,44 @@ namespace BuiltinBuffs.Negative
         public static void HookOn()
         {
             On.Creature.Die += Creature_Die;
-        }   
+            On.Creature.Violence += Creature_Violence;
+        }
+
+        private static void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, 
+            UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage,
+            Creature.DamageType type, float damage, float stunBonus)
+        {
+            if (arachnophobiaID.GetBuffData().StackLayer >= 2 &&
+               self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Spider &&
+               self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Leech &&
+               self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.SeaLeech && !self.dead &&
+               !self.Template.smallCreature)
+            {
+                BuffUtils.Log(arachnophobiaID, "Arachnophobia Creature_Violence");
+                int max = Mathf.RoundToInt(Random.Range(5, 12) * Custom.LerpMap(self.TotalMass, 1, 10, 0.35f, 2f) * damage * 0.25f * arachnophobiaID.GetBuffData().StackLayer);
+                for (int i = 0; i < max; i++)
+                {
+                    AbstractCreature creature = new AbstractCreature(self.abstractCreature.world,
+                        StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Spider), null,
+                        self.abstractCreature.pos, self.abstractCreature.world.game.GetNewID());
+
+                    creature.RealizeInRoom();
+                    var targetPos = self.firstChunk.pos;
+                    var targetRad = self.firstChunk.rad;
+                    if ((self.bodyChunkConnections?.Length ?? 0) != 0)
+                    {
+                        var connect = RXRandom.AnyItem(self.bodyChunkConnections);
+                        var r = Random.value;
+                        targetPos = Vector2.Lerp(connect.chunk1.pos, connect.chunk2.pos, r);
+                        targetRad = Mathf.Lerp(connect.chunk1.rad, connect.chunk2.rad, r);
+                    }
+                    foreach (var chunk in creature.realizedCreature.bodyChunks)
+                        chunk.pos = chunk.lastPos = targetPos + Custom.RNV() * Random.Range(0, 1.5f) * targetRad;
+                }
+            }
+
+            orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
+        }
 
         private static void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
