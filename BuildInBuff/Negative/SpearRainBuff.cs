@@ -57,7 +57,7 @@ namespace BuiltinBuffs.Negative
 
             float num = 1f - Mathf.Pow(Mathf.InverseLerp((float)self.cycleLength, 0f, (float)self.timer), 24f);
 
-            if (SpearRainBuffID.GetBuffData().StackLayer >= 2)
+            if ((SpearRainBuffID.GetBuffData()?.StackLayer ?? 0) >= 2)
                 result = (Mathf.Sin(self.preCycleRainPulse_WaveA) + Mathf.Sin(self.preCycleRainPulse_WaveB) / 2f + Mathf.Cos(self.preCycleRainPulse_WaveC) * ((float)(self.timer / self.cycleLength) * 2f)) * num;
             
             return result;
@@ -67,7 +67,7 @@ namespace BuiltinBuffs.Negative
         {
             orig(self);
 
-            if (SpearRainBuffID.GetBuffData().StackLayer >= 2)
+            if ((SpearRainBuffID.GetBuffData()?.StackLayer ?? 0) >= 2)
                 self.world.game.globalRain.preCycleRainPulse_Scale = 0.005f;
         }
 

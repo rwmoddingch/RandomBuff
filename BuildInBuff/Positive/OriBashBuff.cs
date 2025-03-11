@@ -88,6 +88,8 @@ namespace BuiltinBuffs.Positive
         public static void LoadAssets()
         {
             BuffSounds.LoadSound(BashEnd,OriBash.GetStaticData().AssetPath,new BuffSoundGroupData(),new BuffSoundData("bash"));
+            if(Bash.arrow == null)
+                Bash.arrow = Futile.atlasManager.LoadImage($"{OriBash.GetStaticData().AssetPath}/arrow");
         }
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
@@ -179,8 +181,7 @@ namespace BuiltinBuffs.Positive
         {
             startSprite = sLeaser.sprites.Length;
             Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 2);
-            if(arrow == null)
-                arrow = Futile.atlasManager.LoadImage("buffassets/cardinfos/positive/oribash/arrow");
+   
             sLeaser.sprites[startSprite] = new FSprite(arrow.name);
             sLeaser.sprites[startSprite].scale = 0.75f;
             sLeaser.sprites[startSprite].scaleY *= 0.7f;

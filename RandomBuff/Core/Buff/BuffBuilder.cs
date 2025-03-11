@@ -195,7 +195,7 @@ namespace RandomBuff.Core.Buff
         {
             if (hasUse.Contains(pluginId))
             {
-                BuffPlugin.LogError($"Already load dynamic {pluginId}.dll!");
+                BuffPlugin.LogWarning($"Already load dynamic {pluginId}.dll!");
                 yield break;
             }
 

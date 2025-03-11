@@ -1329,7 +1329,7 @@ namespace BuiltinBuffs.Duality
             for (int i = 0; i < Mathf.Min(player.bodyChunks.Length, this.tentacles.Length); i++)
                 this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[i], this.tentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
             if (this.tentacles.Length > player.bodyChunks.Length)
-                for (int i = player.bodyChunks.Length; i < player.bodyChunks.Length + this.coreChunks.Length; i++)
+                for (int i = player.bodyChunks.Length; i < Mathf.Min(player.bodyChunks.Length + this.coreChunks.Length, this.tentacles.Length); i++)
                     this.tentacles[i] = new CorruptionCatTentacle(player, this, this.coreChunks[i - player.bodyChunks.Length], this.tentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
             if (this.tentacles.Length > player.bodyChunks.Length + this.coreChunks.Length)
                 for (int i = player.bodyChunks.Length + this.coreChunks.Length; i < this.tentacles.Length; i++)

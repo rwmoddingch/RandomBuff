@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using RWCustom;
 using Newtonsoft.Json;
 using RandomBuff.Core.Buff;
@@ -17,6 +18,20 @@ using RandomBuff.Render.UI.ExceptionTracker;
 
 namespace RandomBuff.Core.SaveData
 {
+
+    class CurrentBuffDatas
+    {
+        public Dictionary<BuffID, BuffData> datas = new Dictionary<BuffID, BuffData>();
+        
+        public SlugcatStats.Name name = BuffDataManager.Nullptr;
+
+        public void Clear(SlugcatStats.Name name)
+        {
+            this.name = name;
+            datas.Clear();
+        }
+    }
+    
     /// <summary>
     /// 管理本存档下已加载过的全部BuffData（所有猫）
     /// 更换存档会重新创建
@@ -73,6 +88,7 @@ namespace RandomBuff.Core.SaveData
     /// </summary>
     internal sealed partial class BuffDataManager
     {
+   
 
         internal static bool LoadData(string file, BuffFormatVersion formatVersion)
         {
@@ -95,12 +111,8 @@ namespace RandomBuff.Core.SaveData
                 BuffPlugin.LogError("Access BuffDataManager:GetOrCreateBuffData in Game");
                 return BuffPoolManager.Instance.GetBuffData(id) ?? BuffPoolManager.Instance.CreateNewBuffData(id);
             }
-            SlugcatStats.Name name;
-            if (Custom.rainWorld.processManager.currentMainLoop is RainWorldGame game)
-                name = game.StoryCharacter;
-            else
-                name = Custom.rainWorld.progression.miscProgressionData.currentlySelectedSinglePlayerSlugcat;
-            return GetOrCreateBuffData(name,id, createOrStack);
+    
+            return GetOrCreateBuffData(currentDatas.name, id, createOrStack);
         }
 
 
@@ -114,7 +126,7 @@ namespace RandomBuff.Core.SaveData
                     return null;
             }
 
-            Dictionary<BuffID, BuffData> cardInfos = IsHasMalnourished(name) ? malnourishedData!.Value.cardInfos : allDatas[name];
+            Dictionary<BuffID, BuffData> cardInfos = IsHasMalnourished() ? malnourishedData!.Value.cardInfos : currentDatas.datas;
 
             if (!cardInfos.ContainsKey(id))
             {
@@ -152,13 +164,13 @@ namespace RandomBuff.Core.SaveData
             return cardInfos[id];
         }
 
-        internal bool RemoveBuffData(SlugcatStats.Name name, BuffID id)
+        internal bool RemoveBuffData(BuffID id)
         {
             Dictionary<BuffID, BuffData> cardInfos = null;
-            if (IsHasMalnourished(name))
+            if (IsHasMalnourished())
                 cardInfos = malnourishedData!.Value.cardInfos;
             else
-                allDatas.TryGetValue(name, out cardInfos);
+                cardInfos = currentDatas.datas;
             
 
 
@@ -167,12 +179,12 @@ namespace RandomBuff.Core.SaveData
                 if (id.GetStaticData().Stackable && data.StackLayer > 1)
                 {
                     data.StackLayer--;
-                    BuffPlugin.LogDebug($"Unstack buff data outside of game, ID:{id}, Name:{name}");
+                    BuffPlugin.LogDebug($"Unstack buff data outside of game, ID:{id}, Name:{currentDatas.name}");
                 }
                 else
                 {
                     cardInfos.Remove(id);
-                    BuffPlugin.LogDebug($"Remove buff data outside of game, ID:{id}, Name:{name}");
+                    BuffPlugin.LogDebug($"Remove buff data outside of game, ID:{id}, Name:{currentDatas.name}");
                 }
 
                 return true;
@@ -213,7 +225,6 @@ namespace RandomBuff.Core.SaveData
             if (!malnourished)
             {
                 if (!allDatas.ContainsKey(name)) allDatas.Add(name, new());
-                allDatas[name] = tempDatas;
                 gameSettings[name] = setting;
 
                 foreach (var id in allDatas[name].Keys)
@@ -221,10 +232,10 @@ namespace RandomBuff.Core.SaveData
             }
             else
             {
-                malnourishedData = (name, tempDatas, setting);
+                malnourishedData = (tempDatas, setting);
                 BuffPlugin.Log($"SAVE MALNOURISHED DATA, Name:{name}");
             }
-            foreach (var data in tempDatas.ToArray())
+            foreach (var data in tempDatas)
             {
                 try
                 {
@@ -244,16 +255,80 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        internal Dictionary<BuffID, BuffData> GetDataDictionary(SlugcatStats.Name name)
+        internal IEnumerable<BuffID> GetDataList(SlugcatStats.Name name)
         {
 
-            if (IsHasMalnourished(name))
-                return malnourishedData!.Value.cardInfos;
+            if (IsHasMalnourished())
+                return malnourishedData!.Value.cardInfos.Keys;
 
             if (!allDatas.ContainsKey(name))
                 allDatas.Add(name, new());
 
-            return allDatas[name];
+            return allDatas[name].Keys;
+        }
+        
+        /// <summary>
+        /// 激活BuffData
+        /// </summary>
+        /// <param name="name"></param>
+        internal void ActiveBuffData(SlugcatStats.Name name)
+        {
+            BuffPlugin.Log($"Active Buff SaveData:{name}");
+            if (name == currentDatas.name)
+                return;
+            currentDatas.Clear(name);
+
+            if (IsHasMalnourished())
+            {
+                currentDatas.datas = malnourishedData!.Value.cardInfos;
+                return;
+            }
+            
+            foreach (var pair in allDatas[name])
+            {
+                BuffData newData;
+                try
+                {
+                    newData = (BuffData)JsonConvert.DeserializeObject(pair.Value,BuffRegister.GetDataType(pair.Key));
+                    newData.DataLoaded(false);
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e);
+                    BuffPlugin.LogError($"Corrupted Buff Data At : {pair.Value}");
+                    ExceptionTracker.TrackException(e, $"Corrupted Buff Data At : {pair.Value}");
+                    newData = GetOrCreateBuffData(pair.Key, true);
+                    newData.DataLoaded(true);
+                }
+
+                currentDatas.datas.Add(pair.Key, newData);
+            }
+        }
+        
+        /// <summary>
+        /// 同步BuffData数据
+        /// </summary>
+        /// <param name="name"></param>
+        private void SyncToData()
+        {
+            if (currentDatas.name == Nullptr || IsHasMalnourished())
+                return;
+            
+            BuffPlugin.Log($"SyncToData: {currentDatas.name}");
+            allDatas[currentDatas.name].Clear();
+            foreach (var data in currentDatas.datas)
+            {
+                try
+                {
+                    allDatas[currentDatas.name][data.Key] = JsonConvert.SerializeObject(data);
+                }
+                catch (Exception e)
+                {
+                    BuffPlugin.LogException(e);
+                    BuffPlugin.LogError($"Serialize Failed at {currentDatas.name}:{data.Key}, Ignored");
+                    ExceptionTracker.TrackException(e, $"Serialize Failed at {currentDatas.name}:{data.Key}, Ignored");
+                }
+            }
         }
 
         /// <summary>
@@ -264,7 +339,7 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         internal GameSetting GetGameSetting(SlugcatStats.Name name)
         {
-            if (IsHasMalnourished(name))
+            if (IsHasMalnourished())
                 return malnourishedData!.Value.setting;
 
             if(!gameSettings.ContainsKey(name))
@@ -290,9 +365,9 @@ namespace RandomBuff.Core.SaveData
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool IsHasMalnourished(SlugcatStats.Name name)
+        public bool IsHasMalnourished()
         {
-            return malnourishedData != null && malnourishedData.Value.name == name;
+            return malnourishedData != null;
         }
 
 
@@ -303,9 +378,22 @@ namespace RandomBuff.Core.SaveData
         {
             if (malnourishedData != null)
             {
-                BuffPlugin.Log($"clean malnourished data, Name:{malnourishedData.Value.name}");
+                BuffPlugin.Log($"clean malnourished data, Name:{currentDatas.name}");
                 malnourishedData = null;
             }
+        }
+        /// <summary>
+        /// 删除所有临时存档
+        /// </summary>
+        public void CleanTempData()
+        {
+            if (malnourishedData != null)
+            {
+                BuffPlugin.Log($"clean malnourished data, Name:{currentDatas.name}");
+                malnourishedData = null;
+            }
+
+            currentDatas.Clear(Nullptr);
         }
     }
 
@@ -356,6 +444,7 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         internal string ToStringData()
         {
+            SyncToData();
             StringBuilder builder = new();
             builder.Append($"BUFFDATA{SettingSubSplit}");
             foreach (var catData in allDatas)
@@ -364,28 +453,15 @@ namespace RandomBuff.Core.SaveData
                 builder.Append(CatIdSplit);
                 foreach (var buffData in catData.Value)
                 {
-                    string valueData = "";
-                    try
-                    {
-                        valueData = JsonConvert.SerializeObject(buffData.Value);
-
-                    }
-                    catch (Exception e)
-                    {
-                        BuffPlugin.LogException(e);
-                        BuffPlugin.LogError($"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
-                        ExceptionTracker.TrackException(e, $"Serialize Failed at {catData.Key}:{buffData.Key}, Ignored");
-                        continue;
-                    }
                     builder.Append(buffData.Key);
                     builder.Append(BuffIdSplit);
-                    builder.Append(valueData);
+                    builder.Append(buffData.Value);
                     builder.Append(BuffSplit);
                 }
 
-                if (ukBuffDatas.ContainsKey(catData.Key))
+                if (ukBuffDatas.TryGetValue(catData.Key, out var data))
                 {
-                    foreach (var ukBuffData in ukBuffDatas[catData.Key])
+                    foreach (var ukBuffData in data)
                     {
                         builder.Append(ukBuffData);
                         builder.Append(BuffSplit);
@@ -533,30 +609,16 @@ namespace RandomBuff.Core.SaveData
 
                     //重定义提示并返回
                     if (slugDatas.ContainsKey(dataType.id))
-                    {
                         BuffPlugin.LogWarning($"Redefine BuffData Id: {catSplit[0]}:{dataSplit[0]}, Ignore: {dataSplit[1]}");
-                        continue;
-                    }
-
-                    BuffData newData;
-                    try
-                    {
-                        newData = (BuffData)JsonConvert.DeserializeObject(dataSplit[1], dataType.type);
-                        newData.DataLoaded(false);
-                    }
-                    catch (Exception e)
-                    {
-                        BuffPlugin.LogException(e);
-                        BuffPlugin.LogError($"Corrupted Buff Data At : {dataSplit[1]}");
-                        ExceptionTracker.TrackException(e, $"Corrupted Buff Data At : {dataSplit[1]}");
-                        newData = GetOrCreateBuffData(dataType.id, true);
-                        newData.DataLoaded(true);
-                    }
-                    slugDatas.Add(dataType.id, newData);
+                    
+                    slugDatas.Add(dataType.id,dataSplit[1]);
+     
                 }
 
             }
         }
+
+  
 
         /// <summary>
         /// 初始化setting信息
@@ -603,10 +665,15 @@ namespace RandomBuff.Core.SaveData
         /// <summary>
         /// 该存档槽下全部猫的存档数据
         /// </summary>
-        private readonly Dictionary<SlugcatStats.Name, Dictionary<BuffID, BuffData>> allDatas = new();
+        private readonly Dictionary<SlugcatStats.Name, Dictionary<BuffID, string>> allDatas = new();
+
+        /// <summary>
+        /// 激活存档的存档数据
+        /// </summary>
+        internal readonly CurrentBuffDatas currentDatas = new CurrentBuffDatas();
 
 
-        private (SlugcatStats.Name name, Dictionary<BuffID, BuffData> cardInfos, GameSetting setting)? malnourishedData;
+        private (Dictionary<BuffID, BuffData> cardInfos, GameSetting setting)? malnourishedData;
 
         /// 如果被卸载导致slugcat name或data缺失，则暂时储存在此处
         private readonly List<string> ukSlugcatDatas = new();
@@ -617,6 +684,10 @@ namespace RandomBuff.Core.SaveData
 
         private readonly List<string> unrecognizedSaveStrings = new ();
 
+    }
+
+    internal sealed partial class BuffDataManager
+    {
         private const string CatSplit = " <BuA>";
         private const string CatIdSplit = "<BuAI>";
 
@@ -626,6 +697,7 @@ namespace RandomBuff.Core.SaveData
         private const string SettingSplit = "<BuS>";
         private const string SettingSubSplit = "<BuSI>";
 
+        internal static readonly SlugcatStats.Name Nullptr = new SlugcatStats.Name("RandomBuff.Nullptr");
     }
 
 }

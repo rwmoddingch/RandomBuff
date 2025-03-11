@@ -35,7 +35,7 @@ namespace BuiltinBuffs.Negative
             UnityEngine.Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage,
             Creature.DamageType type, float damage, float stunBonus)
         {
-            if (arachnophobiaID.GetBuffData().StackLayer >= 2 &&
+            if ((arachnophobiaID.GetBuffData()?.StackLayer ?? 0) >= 2 &&
                self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Spider &&
                self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Leech &&
                self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.SeaLeech && !self.dead &&

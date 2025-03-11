@@ -39,7 +39,7 @@ namespace RandomBuff.Core.GachaMenu
                         exitCounter = 0;
                         BuffPlugin.Log($"StackAndUnstackMenu, Select Card:{id}");
                         pages[0].selectables.Add(exitButton);
-                        BuffDataManager.Instance.GetOrCreateBuffData(name,id, true);
+                        BuffDataManager.Instance.GetOrCreateBuffData(id, true);
                         BuffFile.Instance.SaveFile();
                     },
                     stackableArray, new BuffID[stackableArray.Length], 1, title, false,
@@ -56,7 +56,7 @@ namespace RandomBuff.Core.GachaMenu
                         BuffPlugin.Log($"StackAndUnstackMenu, Select Card:{id}");
 
                         pages[0].selectables.Add(exitButton);
-                        BuffDataManager.Instance.RemoveBuffData(name, id);
+                        BuffDataManager.Instance.RemoveBuffData(id);
                         BuffFile.Instance.SaveFile();
                     },
                     stackableArray, new BuffID[stackableArray.Length], 1, title, false,

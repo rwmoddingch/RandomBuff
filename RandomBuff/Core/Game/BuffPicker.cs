@@ -46,7 +46,7 @@ namespace RandomBuff.Core.Game
             var conflict = new List<string>();
             if (BuffPoolManager.Instance == null)
             {
-                alreadyHas = BuffDataManager.Instance.GetDataDictionary(name).Keys.Where(i => 
+                alreadyHas = BuffDataManager.Instance.GetDataList(name).Where(i => 
                     types.Contains(i.GetStaticData().BuffType) || i.GetStaticData().BuffType == BuffType.Duality);
             }
             else
