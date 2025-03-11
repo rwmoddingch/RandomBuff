@@ -23,6 +23,7 @@ using System.IO;
 using System.Reflection;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.SaveData.BuffConfig;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BuiltinBuffs.Duality
 {
@@ -56,6 +57,12 @@ namespace BuiltinBuffs.Duality
 
         public static int corruptionLevel;
 
+
+        public BlindWaveEffectManager blindWaveEffectManager;
+        FSprite blindWaveTex;
+        bool containerAdded;
+
+
         public CorruptionShapedMutationBuff()
         {
             if (BuffCustom.TryGetGame(out var game))
@@ -73,6 +80,14 @@ namespace BuiltinBuffs.Duality
                 }
                 CorruptionShapedMutationBuffEntry.EstablishRelationship();
             }
+            blindWaveTex = new FSprite("pixel")
+            {
+                shader = Custom.rainWorld.Shaders["BlindWave"],
+                scale = 1600f,
+                anchorX = 0f,
+                anchorY = 0f,
+            };
+            blindWaveEffectManager = new BlindWaveEffectManager();
         }
 
         public override void Update(RainWorldGame game)
@@ -80,8 +95,451 @@ namespace BuiltinBuffs.Duality
             base.Update(game);
             corruptionLevel = CorruptionLevel;
             speedLevel = SpeedLevel;
+
+            if (!containerAdded)
+            {
+                game.cameras[0].ReturnFContainer("Bloom").AddChild(blindWaveTex);
+                containerAdded = true;
+                blindWaveEffectManager.EffectSprite = blindWaveTex;
+            }
+
+            if (game.cameras != null && game.cameras[0] != null && game.cameras[0].room != null)
+            {
+                if (!blindWaveTex._isOnStage)
+                    containerAdded = false;
+                var tile = game.cameras[0].room.GetTilePosition(new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + game.cameras[0].pos);
+                //test.SetPosition(game.cameras[0].room.MiddleOfTile(tile) - game.cameras[0].pos);
+                blindWaveTex.MoveToFront();
+            }
+
+            blindWaveEffectManager.Update(game);
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            blindWaveTex.RemoveFromContainer();
+            blindWaveEffectManager.Destroy();
         }
     }
+
+    #region BlindWaveManager
+    internal class BlindWaveEffectManager
+    {
+        Vector4[] staticPos = new Vector4[40];
+        Vector4[] soundWaveInfos = new Vector4[50];
+
+        int legalStaticCount;
+        public int legalSoundCount;
+
+        public List<SoundObject> activeWaveObjs = new List<SoundObject>();
+        List<SoundObject> wavesToAdd = new List<SoundObject>();
+        List<Func<SoundObject>> soundsToAdd = new List<Func<SoundObject>>();
+
+        public FSprite EffectSprite;
+        int mapRevealWaveCD;
+        int mapRevealCounter;
+
+        Dictionary<SoundID, int> rateLimit = new Dictionary<SoundID, int>();
+
+        public void Update(RainWorldGame game)
+        {
+            foreach (var obj in soundsToAdd)
+            {
+                activeWaveObjs.Add(obj.Invoke());
+            }
+            soundsToAdd.Clear();
+
+            foreach (var obj in wavesToAdd)
+            {
+                activeWaveObjs.Add(obj);
+            }
+            wavesToAdd.Clear();
+
+            bool anyPlayerHoldMap = false;
+            foreach (var player in game.Players)
+            {
+                if (player.realizedCreature != null && player.realizedCreature.room != null)
+                {
+                    if ((player.realizedCreature as Player).RevealMap)
+                    {
+                        anyPlayerHoldMap = true;
+                    }
+                }
+            }
+            if (anyPlayerHoldMap && mapRevealCounter < 30)
+                mapRevealCounter += ((ModManager.MMF && MMF.cfgFastMapReveal.Value) ? 2 : 1);
+            else if (!anyPlayerHoldMap && mapRevealCounter > 0)
+                mapRevealCounter--;
+
+            if (mapRevealWaveCD > 0)
+                mapRevealWaveCD--;
+
+            if (mapRevealCounter >= 30)
+            {
+                if (mapRevealWaveCD == 0)
+                {
+                    activeWaveObjs.Add(new MapRevealSoundObject());
+                    mapRevealWaveCD = 120;
+                }
+            }
+
+
+            for (int i = activeWaveObjs.Count - 1; i >= 0; i--)
+            {
+                SoundObject waveObj = activeWaveObjs[i];
+                if (waveObj.slateForDeletion)
+                {
+                    activeWaveObjs.RemoveAt(i);
+                    continue;
+                }
+                waveObj.Update(game);
+            }
+
+            foreach (var key in rateLimit.Keys.ToArray())
+            {
+                if (rateLimit[key] > 0)
+                    rateLimit[key]--;
+            }
+        }
+
+        public void RawUpdate(RainWorldGame game, float timeStacker)
+        {
+            if (EffectSprite == null || EffectSprite._renderLayer == null || EffectSprite._renderLayer._material == null)
+                return;
+
+            Vector2 camPos = Vector2.Lerp(game.cameras[0].lastPos, game.cameras[0].pos, timeStacker);
+
+            legalStaticCount = 0;
+            foreach (var player in game.Players)
+            {
+                if (player.realizedCreature != null && player.realizedCreature.room != null && !player.realizedCreature.dead)
+                {
+                    staticPos[legalStaticCount] = Vector2.Lerp(player.realizedCreature.mainBodyChunk.lastPos, player.realizedCreature.mainBodyChunk.pos, timeStacker) - camPos;
+                    legalStaticCount++;
+                }
+                if (legalStaticCount == 40)
+                    break;
+            }
+
+            if (game.cameras[0].room != null && legalStaticCount < 40)
+            {
+                foreach (var shortcut in game.cameras[0].room.shortcuts)
+                {
+                    if (shortcut.shortCutType == ShortcutData.Type.RoomExit || shortcut.shortCutType == ShortcutData.Type.RegionTransportation || shortcut.shortCutType == ShortcutData.Type.Normal)
+                    {
+                        staticPos[legalStaticCount] = game.cameras[0].room.MiddleOfTile(shortcut.StartTile) - camPos;
+                        legalStaticCount++;
+                    }
+                    if (legalStaticCount == 40)
+                        break;
+                }
+            }
+
+            EffectSprite._renderLayer._material.SetInt("legalStaticCount", legalStaticCount);
+            EffectSprite._renderLayer._material.SetVectorArray("staticCenter", staticPos);
+
+            legalSoundCount = 0;
+
+            foreach (var waveObj in activeWaveObjs)
+            {
+                if (waveObj.lastStrength <= 0 && waveObj.strength <= 0)
+                    continue;
+
+                Vector2 pos = Vector2.Lerp(waveObj.lastPos, waveObj.pos, timeStacker) - (waveObj.effectByCamPos ? camPos : Vector2.zero);
+                float rad = waveObj.GetSmoothRad(timeStacker);
+                float strength = Mathf.Clamp01(Mathf.Lerp(waveObj.lastStrength, waveObj.strength, timeStacker));
+                soundWaveInfos[legalSoundCount].x = pos.x;
+                soundWaveInfos[legalSoundCount].y = pos.y;
+                soundWaveInfos[legalSoundCount].z = rad;
+                soundWaveInfos[legalSoundCount].w = strength;
+                legalSoundCount++;
+
+                if (legalSoundCount >= soundWaveInfos.Length) break;
+            }
+
+            EffectSprite._renderLayer._material.SetInt("legalWaveInfoCount", legalSoundCount);
+            EffectSprite._renderLayer._material.SetVectorArray("waveInfos", soundWaveInfos);
+        }
+
+        public void PositonedSoundPlayed(SoundID soundID, VirtualMicrophone.PositionedSound trackSound)
+        {
+            if (!rateLimit.ContainsKey(soundID))
+                rateLimit.Add(soundID, 0);
+            if (rateLimit[soundID] > 0)
+                return;
+            wavesToAdd.Add(new PositionedSoundObjectTracker(trackSound.pos, trackSound));
+            //BuffUtils.Log($"WaveObject", $"New sound : {trackSound.initVol}");
+            rateLimit[soundID] = 20;
+        }
+
+        public void DisembodiedLoopSoundPlayed(SoundID soundID, VirtualMicrophone.DisembodiedLoop disembodiedLoop)
+        {
+            if (!rateLimit.ContainsKey(soundID))
+                rateLimit.Add(soundID, 0);
+            if (rateLimit[soundID] > 0)
+                return;
+            wavesToAdd.Add(new DisembodiedLoopSoundObjectTracker(disembodiedLoop));
+            //BuffUtils.Log($"WaveObject", $"New sound : {trackSound.initVol}");
+            rateLimit[soundID] = 20;
+        }
+
+        public void AmbietnSoundPlayed(AmbientSoundPlayer ambientSoundPlayer)
+        {
+            wavesToAdd.Add(new AmbientSoundObjectTracker(ambientSoundPlayer));
+        }
+
+
+        public void RoomSwitch()
+        {
+            foreach (var obj in activeWaveObjs)
+            {
+                obj.Destroy();
+            }
+            activeWaveObjs.Clear();
+        }
+
+        public void Destroy()
+        {
+            foreach(var activeWaveObj in activeWaveObjs)
+            {
+                activeWaveObj.Destroy();
+            }
+            EffectSprite = null;
+        }
+
+        public class SoundObject
+        {
+            public Vector2 pos, lastPos;
+            public float rad, lastRad, maxRad;
+            public float strength, lastStrength;
+            public bool slateForDeletion;
+            public bool effectByCamPos = true;
+
+            public virtual void Update(RainWorldGame game)
+            {
+
+            }
+
+            public virtual void Destroy()
+            {
+                slateForDeletion = true;
+            }
+
+
+            public virtual float GetSmoothRad(float timeStacker)
+            {
+                float r = Mathf.Lerp(lastRad, rad, timeStacker);
+                r = Helper.LerpEase(r / maxRad) * maxRad;
+                return r;
+            }
+        }
+
+        public class PositionedSoundObjectTracker : SoundObject
+        {
+            public float sDecrease;
+            public float radIncrease;
+            public WeakReference<VirtualMicrophone.PositionedSound> trackedSound;
+
+            public PositionedSoundObjectTracker(Vector2 pos, VirtualMicrophone.PositionedSound trackedSound)
+            {
+                this.pos = this.lastPos = pos;
+                sDecrease = 1 / 80f;
+                this.maxRad = 20f;
+                lastRad = rad = 1f;//防止除以0发生意外，该计算位于shader内
+                radIncrease = maxRad * sDecrease;
+                this.strength = this.lastStrength = 1f;
+                this.trackedSound = new WeakReference<VirtualMicrophone.PositionedSound>(trackedSound);
+            }
+
+            void UpdateRadInfo(VirtualMicrophone.PositionedSound trackedSound)
+            {
+                maxRad = Mathf.Max(maxRad, Mathf.Clamp(trackedSound.volume * 100f, 20f, 1000f));
+                radIncrease = maxRad * sDecrease;
+            }
+
+            public override void Update(RainWorldGame game)
+            {
+                if (slateForDeletion)
+                    return;
+
+                if (lastStrength <= 0 && strength <= 0)
+                {
+                    Destroy();
+                }
+
+                lastStrength = strength;
+                strength -= sDecrease;
+
+                lastRad = rad;
+                rad += radIncrease;
+
+                lastPos = pos;
+                if (trackedSound.TryGetTarget(out var positionedSound))
+                {
+                    pos = positionedSound.pos;
+                    lastPos = positionedSound.lastPos;
+                    UpdateRadInfo(positionedSound);
+                    if (positionedSound.slatedForDeletion)
+                        trackedSound.SetTarget(null);
+                }
+            }
+
+
+            public override void Destroy()
+            {
+                base.Destroy();
+                trackedSound.SetTarget(null);
+            }
+        }
+
+        public class DisembodiedLoopSoundObjectTracker : SoundObject
+        {
+            public WeakReference<VirtualMicrophone.DisembodiedLoop> trackedSound;
+
+            int life, lastLife, initLife;
+
+
+            public DisembodiedLoopSoundObjectTracker(VirtualMicrophone.DisembodiedLoop disembodiedLoop)
+            {
+                trackedSound = new WeakReference<VirtualMicrophone.DisembodiedLoop>(disembodiedLoop);
+                effectByCamPos = false;
+                lastPos = pos = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f * disembodiedLoop.controller.pan + Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
+                initLife = life = lastLife = 160;
+                lastRad = rad = 1f;
+            }
+
+            public override void Update(RainWorldGame game)
+            {
+                if (slateForDeletion)
+                    return;
+
+                lastPos = pos;
+                lastLife = life;
+                lastStrength = strength;
+                lastRad = rad;
+
+                if (life > 0)
+                    life--;
+                if (life == 0 && lastLife == 0)
+                {
+                    Destroy();
+                }
+
+                strength = Mathf.Sin(Mathf.PI * life / (float)initLife) * 0.2f;
+                rad += 400f / 160f;
+
+
+                if (trackedSound.TryGetTarget(out var target))
+                {
+                    if (target.slatedForDeletion || target.controller == null)
+                    {
+                        trackedSound.SetTarget(null);
+                        return;
+                    }
+                    if (life == 0 && target.loop && target.allowPlay)
+                    {
+                        life = lastLife = 160;
+                    }
+                    pos = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f * target.controller.pan + Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
+                }
+            }
+
+            public override float GetSmoothRad(float timeStacker)
+            {
+                return Mathf.Lerp(lastRad, rad, timeStacker);
+            }
+        }
+
+        public class MapRevealSoundObject : SoundObject
+        {
+            int life, lastLife, initLife;
+
+            public MapRevealSoundObject()
+            {
+                effectByCamPos = false;
+                lastPos = pos = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
+                lastRad = rad = 1f;
+                initLife = life = lastLife = 160;
+            }
+
+            public override void Update(RainWorldGame game)
+            {
+                base.Update(game);
+
+
+                lastPos = pos;
+                lastLife = life;
+                lastStrength = strength;
+                lastRad = rad;
+
+                if (life > 0)
+                    life--;
+                if (life == 0 && lastLife == 0)
+                    Destroy();
+
+                strength = life / (float)initLife;
+                rad += 800f / 160f;
+            }
+
+            public override float GetSmoothRad(float timeStacker)
+            {
+                return Mathf.Lerp(lastRad, rad, timeStacker);
+            }
+        }
+
+        public class AmbientSoundObjectTracker : SoundObject
+        {
+            WeakReference<AmbientSoundPlayer> targetPlayer;
+
+            float lifeParam, soundVol;
+
+            public AmbientSoundObjectTracker(AmbientSoundPlayer ambientSoundPlayer)
+            {
+                targetPlayer = new WeakReference<AmbientSoundPlayer>(ambientSoundPlayer);
+                rad = lastRad = 1f;
+                maxRad = (ambientSoundPlayer.aSound as SpotSound).rad;
+                soundVol = ambientSoundPlayer.aSound.volume;
+                pos = lastPos = (ambientSoundPlayer.aSound as SpotSound).pos;
+                lifeParam = Random.value;
+            }
+
+            public override void Update(RainWorldGame game)
+            {
+                base.Update(game);
+                if (slateForDeletion)
+                    return;
+
+                bool delete = false;
+                if (targetPlayer.TryGetTarget(out var player))
+                {
+                    if (player.slatedForDeletion)
+                        Destroy();
+                }
+                else
+                    delete = true;
+                lifeParam += 1 / 160f;
+                if (lifeParam > 1f)
+                {
+                    lifeParam--;
+                    if (delete)
+                        Destroy();
+                }
+
+                lastRad = rad;
+                rad = Mathf.Lerp(1f, maxRad, lifeParam);
+                lastStrength = strength;
+                strength = Mathf.Sin(Mathf.PI * lifeParam) * soundVol;
+            }
+
+            public override float GetSmoothRad(float timeStacker)
+            {
+                return Mathf.Lerp(lastRad, rad, timeStacker);
+            }
+        }
+
+    }
+    #endregion
 
     internal class CorruptionShapedMutationBuffData : BuffData
     {
@@ -125,13 +583,20 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                return CorruptionShapedMutation.GetBuffData().StackLayer;
+                return CorruptionShapedMutation.GetBuffData()?.StackLayer ?? 0;
             }
         }
 
         public void OnEnable()
         {
             BuffRegister.RegisterBuff<CorruptionShapedMutationBuff, CorruptionShapedMutationBuffData, CorruptionShapedMutationBuffEntry>(CorruptionShapedMutation);
+        }
+
+        public static void LoadAssets()
+        {
+            var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/builtinbundle"));
+            Custom.rainWorld.Shaders.Add("BlindWave", FShader.CreateShader($"BlindWave", bundle.LoadAsset<Shader>("blindwave")));
+            bundle.Unload(false);
         }
 
         public static void HookOn()
@@ -186,14 +651,46 @@ namespace BuiltinBuffs.Duality
                     BuffPlugin.LogError(ex);
                 }
             }
-        }
 
+            On.VirtualMicrophone.SoundObject.Play += SoundObject_Play;
+            On.AmbientSoundPlayer.TryInitiation += AmbientSoundPlayer_TryInitiation;
+            On.RainWorldGame.GrafUpdate += RainWorldGame_GrafUpdate;
+        }
+        
         public static void LongLifeCycleHookOn()
         {
             On.SlugcatStats.SlugcatFoodMeter += SlugcatStats_SlugcatFoodMeter;
             //On.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
         }
+        #region BlindWaveRelated
+        private static void RainWorldGame_GrafUpdate(On.RainWorldGame.orig_GrafUpdate orig, RainWorldGame self, float timeStacker)
+        {
+            orig.Invoke(self, timeStacker);
+            CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.RawUpdate(self, timeStacker);
+        }
 
+        private static void AmbientSoundPlayer_TryInitiation(On.AmbientSoundPlayer.orig_TryInitiation orig, AmbientSoundPlayer self)
+        {
+            orig.Invoke(self);
+            if (self.initiated && self.aSound.type == AmbientSound.Type.Spot)
+            {
+                CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.AmbietnSoundPlayed(self);
+            }
+        }
+
+        private static void SoundObject_Play(On.VirtualMicrophone.SoundObject.orig_Play orig, VirtualMicrophone.SoundObject self)
+        {
+            orig.Invoke(self);
+            if (self is VirtualMicrophone.PositionedSound positionedSound)
+            {
+                CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.PositonedSoundPlayed(self.soundData.soundID, positionedSound);
+            }
+            //else if(self is VirtualMicrophone.DisembodiedLoop disembodiedLoop)
+            //{
+            //    UltraCoinsBuff.Instance.blindWaveEffectManager.DisembodiedLoopSoundPlayed(self.soundData.soundID, disembodiedLoop);
+            //}
+        }
+        #endregion
         #region 迭代器相关
         public static void OracleBehavior_Update(On.OracleBehavior.orig_Update orig, OracleBehavior self, bool eu)
         {

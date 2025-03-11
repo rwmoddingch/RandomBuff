@@ -30,22 +30,14 @@ namespace BuiltinBuffs.Positive
         public override BuffID ID => UltraCoinsBuffEntry.ultraCoinsBuffID;
 
         FLabel label;
-        FSprite test;
-        bool containerAdded;
-        public BlindWaveEffectManager blindWaveEffectManager;
+        
+        
 
         public UltraCoinsBuff()
         {
             //label = new FLabel(Custom.GetDisplayFont(), "");
             //Futile.stage.AddChild(label);
-            test = new FSprite("pixel")
-            {
-                shader = Custom.rainWorld.Shaders["BlindWave"],
-                scale = 1600f,
-                anchorX = 0f,
-                anchorY = 0f,
-            };
-            blindWaveEffectManager = new BlindWaveEffectManager();
+            
             label = new FLabel(Custom.GetFont(), "");
         }
 
@@ -58,33 +50,13 @@ namespace BuiltinBuffs.Positive
         {
             base.Update(game);
             //label.MoveToFront();
-            if (!containerAdded)
-            {
-                game.cameras[0].ReturnFContainer("Bloom").AddChild(test);
-                game.cameras[0].ReturnFContainer("HUD").AddChild(label);
-                label.SetPosition(100f, 100f);
-                containerAdded = true;
-                blindWaveEffectManager.EffectSprite = test;
-            }
-
-            if (game.cameras != null && game.cameras[0] != null && game.cameras[0].room != null)
-            {
-                if (!test._isOnStage)
-                    containerAdded = false;
-                var tile = game.cameras[0].room.GetTilePosition(new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + game.cameras[0].pos);
-                //test.SetPosition(game.cameras[0].room.MiddleOfTile(tile) - game.cameras[0].pos);
-                test.MoveToFront();
-                label.MoveToFront();
-                label.text = $"SoundWave count : {blindWaveEffectManager.activeWaveObjs.Count} {blindWaveEffectManager.legalSoundCount}";
-            }
-
-            blindWaveEffectManager.Update(game);
+            
         }
 
         public override void Destroy()
         {
             base.Destroy();
-            test.RemoveFromContainer();
+           
         }
 
         public override bool Trigger(RainWorldGame game)
@@ -124,413 +96,7 @@ namespace BuiltinBuffs.Positive
         }
     }
 
-    internal class BlindWaveEffectManager
-    {
-        Vector4[] staticPos = new Vector4[40];
-        Vector4[] soundWaveInfos = new Vector4[50];
-
-        int legalStaticCount;
-        public int legalSoundCount;
-
-        public List<SoundObject> activeWaveObjs = new List<SoundObject>();
-        List<SoundObject> wavesToAdd = new List<SoundObject>();
-        List<Func<SoundObject>> soundsToAdd = new List<Func<SoundObject>>();
-
-        public FSprite EffectSprite;
-        int mapRevealWaveCD;
-        int mapRevealCounter;
-
-        Dictionary<SoundID, int> rateLimit = new Dictionary<SoundID, int>();
-
-        public void Update(RainWorldGame game)
-        {
-            foreach (var obj in soundsToAdd)
-            {
-                activeWaveObjs.Add(obj.Invoke());
-            }
-            soundsToAdd.Clear();
-
-            foreach (var obj in wavesToAdd)
-            {
-                activeWaveObjs.Add(obj);
-            }
-            wavesToAdd.Clear();
-
-            bool anyPlayerHoldMap = false;
-            foreach (var player in game.Players)
-            {
-                if (player.realizedCreature != null && player.realizedCreature.room != null)
-                {
-                    if((player.realizedCreature as Player).RevealMap)
-                    {
-                        anyPlayerHoldMap = true;
-                    }
-                }
-            }
-            if (anyPlayerHoldMap && mapRevealCounter < 30)
-                mapRevealCounter += ((ModManager.MMF && MMF.cfgFastMapReveal.Value) ? 2 : 1);
-            else if (!anyPlayerHoldMap && mapRevealCounter > 0)
-                mapRevealCounter--;
-
-            if (mapRevealWaveCD > 0)
-                mapRevealWaveCD--;
-
-            if (mapRevealCounter >= 30)
-            {
-                if(mapRevealWaveCD == 0)
-                {
-                    activeWaveObjs.Add(new MapRevealSoundObject());
-                    mapRevealWaveCD = 120;
-                }
-            }
-
-
-            for (int i = activeWaveObjs.Count - 1; i >= 0; i--)
-            {
-                SoundObject waveObj = activeWaveObjs[i];
-                if (waveObj.slateForDeletion)
-                {
-                    activeWaveObjs.RemoveAt(i);
-                    continue;
-                }
-                waveObj.Update(game);
-            }
-
-            foreach(var key in rateLimit.Keys.ToArray())
-            {
-                if (rateLimit[key] > 0)
-                    rateLimit[key]--;
-            }          
-        }
-
-        public void RawUpdate(RainWorldGame game, float timeStacker)
-        {
-            if (EffectSprite == null || EffectSprite._renderLayer == null || EffectSprite._renderLayer._material == null)
-                return;
-
-            Vector2 camPos = Vector2.Lerp(game.cameras[0].lastPos, game.cameras[0].pos, timeStacker);
-
-            legalStaticCount = 0;
-            foreach (var player in game.Players)
-            {
-                if (player.realizedCreature != null && player.realizedCreature.room != null)
-                {
-                    staticPos[legalStaticCount] = Vector2.Lerp(player.realizedCreature.mainBodyChunk.lastPos, player.realizedCreature.mainBodyChunk.pos, timeStacker) - camPos;
-                    legalStaticCount++;
-                }
-                if (legalStaticCount == 40)
-                    break;
-            }
-
-            if (game.cameras[0].room != null && legalStaticCount < 40)
-            {
-                foreach(var shortcut in game.cameras[0].room.shortcuts)
-                {
-                    if(shortcut.shortCutType == ShortcutData.Type.RoomExit || shortcut.shortCutType == ShortcutData.Type.RegionTransportation || shortcut.shortCutType == ShortcutData.Type.Normal)
-                    {
-                        staticPos[legalStaticCount] = game.cameras[0].room.MiddleOfTile(shortcut.StartTile) - camPos;
-                        legalStaticCount++;
-                    }
-                    if (legalStaticCount == 40)
-                        break;
-                }
-            }
-
-            EffectSprite._renderLayer._material.SetInt("legalStaticCount", legalStaticCount);
-            EffectSprite._renderLayer._material.SetVectorArray("staticCenter", staticPos);
-
-            legalSoundCount = 0;
-            
-            foreach(var waveObj in activeWaveObjs)
-            {
-                if (waveObj.lastStrength <= 0 && waveObj.strength <= 0)
-                    continue;
-
-                Vector2 pos = Vector2.Lerp(waveObj.lastPos, waveObj.pos, timeStacker) - (waveObj.effectByCamPos ? camPos : Vector2.zero);
-                float rad = waveObj.GetSmoothRad(timeStacker);
-                float strength = Mathf.Clamp01(Mathf.Lerp(waveObj.lastStrength, waveObj.strength, timeStacker));
-                soundWaveInfos[legalSoundCount].x = pos.x;
-                soundWaveInfos[legalSoundCount].y = pos.y;
-                soundWaveInfos[legalSoundCount].z = rad;
-                soundWaveInfos[legalSoundCount].w = strength;
-                legalSoundCount++;
-
-                if (legalSoundCount >= soundWaveInfos.Length) break;
-            }
-
-            EffectSprite._renderLayer._material.SetInt("legalWaveInfoCount", legalSoundCount);
-            EffectSprite._renderLayer._material.SetVectorArray("waveInfos", soundWaveInfos);
-        }
-
-        public void PositonedSoundPlayed(SoundID soundID, VirtualMicrophone.PositionedSound trackSound)
-        {
-            if (!rateLimit.ContainsKey(soundID))
-                rateLimit.Add(soundID, 0);
-            if (rateLimit[soundID] > 0)
-                return;
-            wavesToAdd.Add(new PositionedSoundObjectTracker(trackSound.pos, trackSound));
-            //BuffUtils.Log($"WaveObject", $"New sound : {trackSound.initVol}");
-            rateLimit[soundID] = 20;
-        }
-
-        public void DisembodiedLoopSoundPlayed(SoundID soundID, VirtualMicrophone.DisembodiedLoop disembodiedLoop)
-        {
-            if (!rateLimit.ContainsKey(soundID))
-                rateLimit.Add(soundID, 0);
-            if (rateLimit[soundID] > 0)
-                return;
-            wavesToAdd.Add(new DisembodiedLoopSoundObjectTracker(disembodiedLoop));
-            //BuffUtils.Log($"WaveObject", $"New sound : {trackSound.initVol}");
-            rateLimit[soundID] = 20;
-        }
-
-        public void AmbietnSoundPlayed(AmbientSoundPlayer ambientSoundPlayer)
-        {
-            wavesToAdd.Add(new AmbientSoundObjectTracker(ambientSoundPlayer));
-        }
-
-
-        public void RoomSwitch()
-        {
-            foreach(var obj in activeWaveObjs)
-            {
-                obj.Destroy();
-            }
-            activeWaveObjs.Clear();
-        }
-
-        public class SoundObject
-        {
-            public Vector2 pos, lastPos;
-            public float rad, lastRad, maxRad;
-            public float strength, lastStrength;
-            public bool slateForDeletion;
-            public bool effectByCamPos = true;
-
-            public virtual void Update(RainWorldGame game)
-            {
-
-            }
-
-            public virtual void Destroy()
-            {
-                slateForDeletion = true;
-            }
-
-
-            public virtual float GetSmoothRad(float timeStacker)
-            {
-                float r = Mathf.Lerp(lastRad, rad, timeStacker);
-                r = Helper.LerpEase(r / maxRad) * maxRad;
-                return r;
-            }
-        }
-
-        public class PositionedSoundObjectTracker : SoundObject
-        {
-            public float sDecrease;
-            public float radIncrease;
-            public WeakReference<VirtualMicrophone.PositionedSound> trackedSound;
-
-            public PositionedSoundObjectTracker(Vector2 pos, VirtualMicrophone.PositionedSound trackedSound)
-            {
-                this.pos = this.lastPos = pos;
-                sDecrease = 1 / 80f;
-                this.maxRad = 20f;
-                lastRad = rad = 1f;//防止除以0发生意外，该计算位于shader内
-                radIncrease = maxRad * sDecrease;
-                this.strength = this.lastStrength = 1f;
-                this.trackedSound = new WeakReference<VirtualMicrophone.PositionedSound>(trackedSound);
-            }
-
-            void UpdateRadInfo(VirtualMicrophone.PositionedSound trackedSound)
-            {
-                maxRad = Mathf.Max(maxRad,  Mathf.Clamp(trackedSound.volume * 100f, 20f, 1000f));
-                radIncrease = maxRad * sDecrease;
-            }
-
-            public override void Update(RainWorldGame game)
-            {
-                if (slateForDeletion)
-                    return;
-
-                if (lastStrength <= 0 && strength <= 0)
-                {
-                    Destroy();
-                }
-
-                lastStrength = strength;
-                strength -= sDecrease;
-
-                lastRad = rad;
-                rad += radIncrease;
-
-                lastPos = pos;
-                if (trackedSound.TryGetTarget(out var positionedSound))
-                {
-                    pos = positionedSound.pos;
-                    lastPos = positionedSound.lastPos;
-                    UpdateRadInfo(positionedSound);
-                    if (positionedSound.slatedForDeletion)
-                        trackedSound.SetTarget(null);
-                }
-            }
-
-
-            public override void Destroy()
-            {
-                base.Destroy();
-                trackedSound.SetTarget(null);
-            }
-        }
-    
-        public class DisembodiedLoopSoundObjectTracker : SoundObject
-        {
-            public WeakReference<VirtualMicrophone.DisembodiedLoop> trackedSound;
-
-            int life, lastLife, initLife;
-
-
-            public DisembodiedLoopSoundObjectTracker(VirtualMicrophone.DisembodiedLoop disembodiedLoop)
-            {
-                trackedSound = new WeakReference<VirtualMicrophone.DisembodiedLoop>(disembodiedLoop);
-                effectByCamPos = false;
-                lastPos = pos = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f * disembodiedLoop.controller.pan + Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
-                initLife = life = lastLife = 160;
-                lastRad = rad = 1f;
-            }
-
-            public override void Update(RainWorldGame game)
-            {
-                if (slateForDeletion)
-                    return;
-
-                lastPos = pos;
-                lastLife = life;
-                lastStrength = strength;
-                lastRad = rad;
-
-                if (life > 0)
-                    life--;
-                if (life == 0 && lastLife == 0)
-                {
-                    Destroy();
-                }
-
-                strength = Mathf.Sin(Mathf.PI * life / (float)initLife) * 0.2f;
-                rad += 400f / 160f;
-
-
-                if (trackedSound.TryGetTarget(out var target))
-                {
-                    if (target.slatedForDeletion || target.controller == null)
-                    {
-                        trackedSound.SetTarget(null);
-                        return;
-                    }
-                    if (life == 0 && target.loop && target.allowPlay)
-                    {
-                        life = lastLife = 160;
-                    }
-                    pos = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f * target.controller.pan + Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
-                }
-            }
-
-            public override float GetSmoothRad(float timeStacker)
-            {
-                return Mathf.Lerp(lastRad, rad, timeStacker);
-            }
-        }
-    
-        public class MapRevealSoundObject : SoundObject
-        {
-            int life, lastLife, initLife;
-
-            public MapRevealSoundObject()
-            {
-                effectByCamPos = false;
-                lastPos = pos = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
-                lastRad = rad = 1f;
-                initLife = life = lastLife = 160;
-            }
-
-            public override void Update(RainWorldGame game)
-            {
-                base.Update(game);
-
-
-                lastPos = pos;
-                lastLife = life;
-                lastStrength = strength;
-                lastRad = rad;
-
-                if (life > 0)
-                    life--;
-                if (life == 0 && lastLife == 0)
-                    Destroy();
-
-                strength = life / (float)initLife;
-                rad += 800f / 160f;
-            }
-
-            public override float GetSmoothRad(float timeStacker)
-            {
-                return Mathf.Lerp(lastRad, rad, timeStacker);
-            }
-        }
-
-        public class AmbientSoundObjectTracker : SoundObject
-        {
-            WeakReference<AmbientSoundPlayer> targetPlayer ;
-
-            float lifeParam, soundVol;
-
-            public AmbientSoundObjectTracker(AmbientSoundPlayer ambientSoundPlayer)
-            {
-                targetPlayer = new WeakReference<AmbientSoundPlayer>(ambientSoundPlayer);
-                rad = lastRad = 1f;
-                maxRad = (ambientSoundPlayer.aSound as SpotSound).rad;
-                soundVol = ambientSoundPlayer.aSound.volume;
-                pos = lastPos = (ambientSoundPlayer.aSound as SpotSound).pos;
-                lifeParam = Random.value;
-            }
-
-            public override void Update(RainWorldGame game)
-            {
-                base.Update(game);
-                if (slateForDeletion)
-                    return;
-
-                bool delete = false;
-                if (targetPlayer.TryGetTarget(out var player))
-                {
-                    if (player.slatedForDeletion)
-                        Destroy();
-                }
-                else
-                    delete = true;
-                lifeParam += 1 / 160f;
-                if (lifeParam > 1f)
-                {
-                    lifeParam--;
-                    if (delete)
-                        Destroy();
-                }
-
-                lastRad = rad;
-                rad = Mathf.Lerp(1f, maxRad, lifeParam);
-                lastStrength = strength;
-                strength = Mathf.Sin(Mathf.PI * lifeParam) * soundVol;
-            }
-
-            public override float GetSmoothRad(float timeStacker)
-            {
-                return Mathf.Lerp(lastRad, rad, timeStacker);
-            }
-        }
-
-    }
-
+ 
 
     internal class UltraCoinsBuffData : BuffData
     {
@@ -556,45 +122,17 @@ namespace BuiltinBuffs.Positive
         public static void LoadAssets()
         {
             ultraCoinsVFX0 = Futile.atlasManager.LoadImage(ultraCoinsBuffID.GetStaticData().AssetPath + Path.DirectorySeparatorChar + "ultracoinspark").elements[0].name;
-
-            var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/builtinbundle"));
-            Custom.rainWorld.Shaders.Add("BlindWave", FShader.CreateShader($"BlindWave", bundle.LoadAsset<Shader>("blindwave"))); 
-            bundle.Unload(false);
         }
         public static void HookOn()
         {
             On.Spear.Update += Spear_Update;
             On.Spear.Thrown += Spear_Thrown;
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-            On.RainWorldGame.GrafUpdate += RainWorldGame_GrafUpdate;
-
-            On.VirtualMicrophone.SoundObject.Play += SoundObject_Play;
-            On.AmbientSoundPlayer.TryInitiation += AmbientSoundPlayer_TryInitiation;
             //On.Room.PlaySound_SoundID_BodyChunk_bool_float_float_bool += Room_PlaySound_SoundID_BodyChunk_bool_float_float_bool;
             //On.Room.PlaySound_SoundID_Vector2_float_float += Room_PlaySound_SoundID_Vector2_float_float;
         }
 
-        private static void AmbientSoundPlayer_TryInitiation(On.AmbientSoundPlayer.orig_TryInitiation orig, AmbientSoundPlayer self)
-        {
-            orig.Invoke(self);
-            if(self.initiated && self.aSound.type == AmbientSound.Type.Spot)
-            {
-                UltraCoinsBuff.Instance.blindWaveEffectManager.AmbietnSoundPlayed(self);
-            }
-        }
-
-        private static void SoundObject_Play(On.VirtualMicrophone.SoundObject.orig_Play orig, VirtualMicrophone.SoundObject self)
-        {
-            orig.Invoke(self);
-            if (self is VirtualMicrophone.PositionedSound positionedSound)
-            {
-                UltraCoinsBuff.Instance.blindWaveEffectManager.PositonedSoundPlayed(self.soundData.soundID, positionedSound);
-            }
-            //else if(self is VirtualMicrophone.DisembodiedLoop disembodiedLoop)
-            //{
-            //    UltraCoinsBuff.Instance.blindWaveEffectManager.DisembodiedLoopSoundPlayed(self.soundData.soundID, disembodiedLoop);
-            //}
-        }
+      
 
         //private static void Room_PlaySound_SoundID_Vector2_float_float(On.Room.orig_PlaySound_SoundID_Vector2_float_float orig, Room self, SoundID soundId, Vector2 pos, float vol, float pitch)
         //{
@@ -608,11 +146,7 @@ namespace BuiltinBuffs.Positive
         //    return orig.Invoke(self, soundId, chunk, loop, vol, pitch, randomStartPosition);
         //}
 
-        private static void RainWorldGame_GrafUpdate(On.RainWorldGame.orig_GrafUpdate orig, RainWorldGame self, float timeStacker)
-        {
-            orig.Invoke(self, timeStacker);
-            UltraCoinsBuff.Instance.blindWaveEffectManager.RawUpdate(self, timeStacker);
-        }
+      
 
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)
         {
