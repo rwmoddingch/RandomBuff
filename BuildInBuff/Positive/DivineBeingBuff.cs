@@ -53,6 +53,7 @@ namespace BuiltinBuffs.Positive
         {
             var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("buffassets/assetBundles/builtinbundle"));
             RingShaderInstance = bundle.LoadAsset<Shader>("divinering");
+            bundle.Unload(false);
         }
 
         public static void HookOn()
