@@ -123,8 +123,9 @@ namespace RandomBuff.Core.Game
             Game = game;
             record = new InGameRecord();
             BuffPlugin.Log("Clone all data to CycleData");
-            foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
-                cycleDatas.Add(data.Key, data.Value.Clone());
+            BuffDataManager.Instance.ActiveBuffData(game.StoryCharacter);
+            cycleDatas = BuffDataManager.Instance.currentDatas.datas;
+            
             BuffHookWarpper.DisableAllUtilQuitNoUsed(cycleDatas.Keys.ToHashSet());
             Instance = this;
 
@@ -143,10 +144,9 @@ namespace RandomBuff.Core.Game
             foreach(var condition in GameSetting.conditions)
                 BuffPlugin.LogDebug($"---condition: {condition.ID}");
 
-            foreach (var data in BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter))
-            {
-                CreateBuff(data.Key);
-            }
+            foreach (var data in BuffDataManager.Instance.GetDataList(game.StoryCharacter))
+                CreateBuff(data);
+            
 
             BuffDataManager.Instance.CleanMalnourishedData();
 
@@ -262,7 +262,7 @@ namespace RandomBuff.Core.Game
         internal static BuffPoolManager LoadGameBuff(RainWorldGame game)
         {
             BuffPlugin.Log($"New game, character: {game.StoryCharacter}, Slot: {game.rainWorld.options.saveSlot}, " +
-                           $"buff count: {BuffDataManager.Instance.GetDataDictionary(game.StoryCharacter).Count}");
+                           $"buff count: {BuffDataManager.Instance.GetDataList(game.StoryCharacter).Count()}");
             return new BuffPoolManager(game);
         }
 

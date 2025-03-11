@@ -526,9 +526,9 @@ namespace RandomBuff.Core.Entry
 
             #endregion
 
-            /**
-             * 返回 null 时为未启用
-             */
+            /// <summary>
+            /// 返回 null 时为未启用
+            /// </summary>
             (Assembly Assembly,bool isNewLoad) CheckAndUpdateBuffPlugin(ModManager.Mod mod, FileInfo file)
             {
                 var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName);
