@@ -47,20 +47,21 @@ namespace RandomBuff.Core.Entry
     
     internal class TopologicalSorter
     {
-        public static List<BuffPluginContext> Sort(List<BuffPluginContext> instances)
+        public static List<T> Sort<T>(Dictionary<BuffPluginInfo,T> instances)
         {
             var adjacencyList = new Dictionary<string, List<string>>();
             var inDegree = new Dictionary<string, int>();
 
-            foreach (var instance in instances)
+            foreach (var pair in instances)
             {
-                if (!adjacencyList.ContainsKey(instance.info.AssemblyName))
+                var instance = pair.Key;
+                if (!adjacencyList.ContainsKey(instance.AssemblyName))
                 {
-                    adjacencyList[instance.info.AssemblyName] = new List<string>();
-                    inDegree[instance.info.AssemblyName] = 0;
+                    adjacencyList[instance.AssemblyName] = new List<string>();
+                    inDegree[instance.AssemblyName] = 0;
                 }
 
-                foreach (var req in instance.info.Dependencies)
+                foreach (var req in instance.Dependencies)
                 {
                     if (!adjacencyList.ContainsKey(req))
                     {
@@ -68,29 +69,29 @@ namespace RandomBuff.Core.Entry
                         inDegree[req] = 0;
                     }
 
-                    adjacencyList[req].Add(instance.info.AssemblyName); 
-                    inDegree[instance.info.AssemblyName]++; 
+                    adjacencyList[req].Add(instance.AssemblyName); 
+                    inDegree[instance.AssemblyName]++; 
                 }
             }
             
-            var queue = new Queue<BuffPluginContext>();
+            var queue = new Queue<BuffPluginInfo>();
             foreach (var node in inDegree.Where(x => x.Value == 0))
-                queue.Enqueue(instances.First(i => i.info.AssemblyName == node.Key));
+                queue.Enqueue(instances.First(i => i.Key.AssemblyName == node.Key).Key);
             
 
             // 拓扑排序
-            var sortedList = new List<BuffPluginContext>();
+            var sortedList = new List<T>();
             while (queue.Count > 0)
             {
                 var current = queue.Dequeue();
-                sortedList.Add(current);
+                sortedList.Add(instances[current]);
                 
-                foreach (var neighbor in adjacencyList[current.info.AssemblyName])
+                foreach (var neighbor in adjacencyList[current.AssemblyName])
                 {
                     inDegree[neighbor]--;
                     if (inDegree[neighbor] == 0)
-                       queue.Enqueue(instances.First(i => i.info.AssemblyName ==
-                                                          neighbor));
+                       queue.Enqueue(instances.First(i => i.Key.AssemblyName ==
+                                                          neighbor).Key);
                     
                 }
             }
@@ -484,7 +485,7 @@ namespace RandomBuff.Core.Entry
             NeedLoadAssetEntries.Clear();
             AllBuffAssemblies.Clear();
 
-            List<BuffPluginContext> plugins = new();
+            Dictionary<BuffPluginInfo,BuffPluginContext> plugins = new();
             HashSet<string> refLocations = null;
             
             foreach (var mod in ModManager.ActiveMods)
@@ -516,13 +517,12 @@ namespace RandomBuff.Core.Entry
                         
                     if (!BuffPlugin.IsPluginsEnabled(assemblyName))
                         continue;
-                    plugins.Add(new BuffPluginContext()
+                    plugins.Add(pluginInfo,new BuffPluginContext()
                     {
                         fileInfo = file,
                         info = pluginInfo,
                         mod = mod
                     });
-                    BuffPlugin.Log($"sdsdsdsd:{mod.name}:{file.Name}");
                 }
                 
             }
