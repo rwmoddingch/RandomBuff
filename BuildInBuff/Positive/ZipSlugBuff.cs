@@ -42,6 +42,7 @@ class ZipSlugBuffEntry : IBuffEntry
         // 检查玩家是否在Zip模式下
         if (self.player.GetZipData().IsInZipMode())
         {
+            self.player.shortcutDelay = 5;
             // 隐藏玩家所有精灵
             for (int i = 0; i < sLeaser.sprites.Length; i++)
             {
