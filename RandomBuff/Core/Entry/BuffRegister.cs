@@ -23,6 +23,7 @@ using Mono.Cecil.Rocks;
 using MonoMod.Cil;
 using MonoMod.Utils;
 using RandomBuff.Core.Buff;
+using RandomBuff.Core.Game;
 using RandomBuff.Core.Game.Settings.Conditions;
 using RandomBuff.Core.Game.Settings.GachaTemplate;
 using RandomBuff.Core.Game.Settings.Missions;
@@ -31,16 +32,78 @@ using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.SaveData.BuffConfig;
 using RandomBuffUtils;
-using UnityEngine;
-using static Rewired.Utils.Classes.Data.TypeWrapper;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
-using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 using SecurityAttribute = Mono.Cecil.SecurityAttribute;
 
 
 namespace RandomBuff.Core.Entry
 {
+    internal class BuffPluginContext
+    {
+        public FileInfo fileInfo;
+        public ModManager.Mod mod;
+        public BuffPluginInfo info;
+    }
+    
+    internal class TopologicalSorter
+    {
+        public static List<BuffPluginContext> Sort(List<BuffPluginContext> instances)
+        {
+            var adjacencyList = new Dictionary<string, List<string>>();
+            var inDegree = new Dictionary<string, int>();
 
+            foreach (var instance in instances)
+            {
+                if (!adjacencyList.ContainsKey(instance.info.AssemblyName))
+                {
+                    adjacencyList[instance.info.AssemblyName] = new List<string>();
+                    inDegree[instance.info.AssemblyName] = 0;
+                }
+
+                foreach (var req in instance.info.Dependencies)
+                {
+                    if (!adjacencyList.ContainsKey(req))
+                    {
+                        adjacencyList[req] = new List<string>();
+                        inDegree[req] = 0;
+                    }
+
+                    adjacencyList[req].Add(instance.info.AssemblyName); 
+                    inDegree[instance.info.AssemblyName]++; 
+                }
+            }
+            
+            var queue = new Queue<BuffPluginContext>();
+            foreach (var node in inDegree.Where(x => x.Value == 0))
+                queue.Enqueue(instances.First(i => i.info.AssemblyName == node.Key));
+            
+
+            // 拓扑排序
+            var sortedList = new List<BuffPluginContext>();
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                sortedList.Add(current);
+                
+                foreach (var neighbor in adjacencyList[current.info.AssemblyName])
+                {
+                    inDegree[neighbor]--;
+                    if (inDegree[neighbor] == 0)
+                       queue.Enqueue(instances.First(i => i.info.AssemblyName ==
+                                                          neighbor));
+                    
+                }
+            }
+
+            // 检查是否有环
+            if (sortedList.Count != instances.Count)
+            {
+                throw new InvalidOperationException("存在循环依赖，无法排序");
+            }
+
+            return sortedList;
+        }
+    }
 
     public enum HookLifeTimeLevel
     {
@@ -414,15 +477,15 @@ namespace RandomBuff.Core.Entry
         }
 
         /// <summary>
-        /// 读取全部Buff信息
+        /// 读取全部Buff信息，按依赖顺序
         /// </summary>
-        internal static void InitAllBuffPlugin()
+        internal static void InitAllBuffPlugins()
         {
             NeedLoadAssetEntries.Clear();
             AllBuffAssemblies.Clear();
+
+            List<BuffPluginContext> plugins = new();
             HashSet<string> refLocations = null;
-            var entryType = typeof(IBuffEntry);
-            
             
             foreach (var mod in ModManager.ActiveMods)
             {
@@ -434,74 +497,42 @@ namespace RandomBuff.Core.Entry
                 
                 foreach (var file in info.GetFiles("*.dll"))
                 {
-                    (Assembly assembly, bool needLoadAsset) = CheckAndUpdateBuffPlugin(mod, file);
-
-                    //代表没启用
-                    if (assembly == null)
+                    using var def = AssemblyDefinition.ReadAssembly(file.FullName);
+                    var assemblyName = def.Name.Name;
+                    var pluginInfo = BuffConfigManager.GetPluginInfo(assemblyName);
+                    foreach (var module in def.Modules)
                     {
-                        BuffPlugin.LogWarning($"Skip load {file} because Disabled");
-                        continue;
-                    }
-
-                    if (AllBuffAssemblies.Any(i => i.GetName().Name == assembly.GetName().Name))
-                    {
-                        BuffPlugin.LogException(new Exception($"Duplicate assembly name. At:{path}, name:{assembly.FullName}"));
-                        continue;
-                    }
-                    AllBuffAssemblies.Add(assembly);
-                    CurrentPluginId = assembly.GetName().Name;
-                    BuffPlugin.Log(
-                        $"load buff plugin, ID:{CurrentPluginId}, Name:{BuffConfigManager.GetPluginInfo(CurrentPluginId).GetInfo(InGameTranslator.LanguageID.English).Name}");
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        
-                        if (entryType.IsAssignableFrom(type))
+                        foreach (var refer in module.AssemblyReferences)
                         {
-                            var obj = Helper.GetUninit<IBuffEntry>(type);
-                            try
+                            if (BuffConfigManager.ContainsPluginInfo(refer.Name) &&
+                                !pluginInfo.Dependencies.Contains(refer.Name))
                             {
-                                obj.OnEnable();
+                                BuffPlugin.LogError($"Missing Dependence: {refer.Name}, At:{assemblyName}");
+                                pluginInfo.Dependencies.Add(refer.Name);
                             }
-                            catch (Exception e)
-                            {
-                                BuffPlugin.LogException(e);
-                                BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
-                            }
-                            if(needLoadAsset)
-                                NeedLoadAssetEntries.Add(type);
-                        }
-                        
-                    }
-
-
-                    try
-                    {
-                        var runtimeAss = BuffBuilder.FinishGenerate(CurrentPluginId);
-                        foreach (var ass in runtimeAss)
-                        {
-                            for (int i = CurrentRuntimeBuffName.Count - 1; i >= 0; i--)
-                            {
-                                var name = CurrentRuntimeBuffName[i];
-                                if (ass.GetType($"{CurrentPluginId}.{name}Buff") is { } type)
-                                {
-                                    InternalRegisterBuff(new BuffID(name),
-                                        type, ass.GetType($"{CurrentPluginId}.{name}BuffData", true));
-                                }
-                                CurrentRuntimeBuffName.Remove(name);
-                            }
-
+                                
                         }
                     }
-                    catch (Exception e)
+                        
+                    if (!BuffPlugin.IsPluginsEnabled(assemblyName))
+                        continue;
+                    plugins.Add(new BuffPluginContext()
                     {
-                        BuffPlugin.LogException(e, $"Exception when load {mod.id}:{assembly.GetName().Name}'s RuntimeBuff");
-                    }
-                    CurrentRuntimeBuffName.Clear();
+                        fileInfo = file,
+                        info = pluginInfo,
+                        mod = mod
+                    });
+                    BuffPlugin.Log($"sdsdsdsd:{mod.name}:{file.Name}");
                 }
-
+                
             }
-
-            CurrentPluginId = string.Empty;
+            
+            var sortedPlugins =  TopologicalSorter.Sort(plugins);
+            
+            
+            foreach(var plugin in sortedPlugins) 
+                InitBuffPlugin(plugin,ref refLocations);
+           
             BuffBuilder.CleanAllDatas();
 
             #region Wawa
@@ -525,60 +556,147 @@ namespace RandomBuff.Core.Entry
             }
 
             #endregion
-
-            /// <summary>
-            /// 返回 null 时为未启用
-            /// </summary>
-            (Assembly Assembly,bool isNewLoad) CheckAndUpdateBuffPlugin(ModManager.Mod mod, FileInfo file)
-            {
-                var assemblyDef = AssemblyDefinition.ReadAssembly(file.FullName);
-                var assemblyName = assemblyDef.Name.Name;
-                assemblyDef.Dispose();
-                if (!BuffPlugin.IsPluginsEnabled(assemblyName))
-                {
-                    BuffConfigManager.GetPluginInfo(assemblyName);
-                    return (null, true);
-                }
-
-                if (BuffConfigManager.GetPluginInfo(assemblyName).codeAssembly is { } assembly)
-                {
-                    BuffPlugin.LogDebug($"Has load assembly for {assembly}");
-                    return (assembly, false);
-                }
-
-                if (!File.Exists(Path.Combine(BuffPlugin.CacheFolder,
-                        $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")) ||
-                    GetTrulyWriteTime(file.FullName) > new FileInfo(Path.Combine(BuffPlugin.CacheFolder,
-                        $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")).LastWriteTime)
-                {
-                    File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dynamicCache.dll");
-                    File.Delete($"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_dataCache.dll");
-
-                    if (refLocations == null)
-                    {
-                        refLocations = new HashSet<string>();
-                        foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
-                            refLocations.Add(
-                                Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies()
-                                    .First(i => i.GetName().Name == refAssembly.Name).Location));
-
-                    }
-
-                    var def = BuildCachePlugin(mod, file.FullName, refLocations, out var hasPdb);
-                    def.Write(
-                        Path.Combine(BuffPlugin.CacheFolder,
-                            $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll"),
-                        new WriterParameters() { WriteSymbols = hasPdb });
-
-                }
-
-                return (BuffConfigManager.GetPluginInfo(assemblyName).codeAssembly = Assembly.LoadFile(
-                    Path.Combine(BuffPlugin.CacheFolder,
-                        $"{mod.id}_{Path.GetFileNameWithoutExtension(file.Name)}_codeCache.dll")), true);
-            }
+            
+            
         }
 
 
+        /// <summary>
+        /// 读取单一BuffPlugin
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="refLocations"></param>
+        private static void InitBuffPlugin(BuffPluginContext ctx, ref HashSet<string> refLocations)
+        {
+   
+
+            BuffPlugin.Log($"Load: {ctx.mod.name}:{ctx.info.AssemblyName}");
+            (Assembly assembly, bool needLoadAsset) = CheckAndUpdateBuffPlugin(ctx, ref refLocations);
+            var entryType = typeof(IBuffEntry);
+
+          
+            if (assembly == null)
+            {
+                BuffPlugin.LogWarning($"Skip load {ctx.fileInfo} because exception");
+                return;
+            }
+
+            if (AllBuffAssemblies.Any(i => i.GetName().Name == assembly.GetName().Name))
+            {
+                BuffPlugin.LogException(new Exception($"Duplicate assembly name. At:{ctx.fileInfo.FullName}," +
+                                                      $" name:{assembly.FullName}"));
+                return;
+            }
+            AllBuffAssemblies.Add(assembly);
+            CurrentPluginId = assembly.GetName().Name;
+            BuffPlugin.Log(
+                $"load buff plugin, ID:{CurrentPluginId}, Name:{BuffConfigManager.GetPluginInfo(CurrentPluginId)
+                    .GetInfo(InGameTranslator.LanguageID.English).Name}");
+            foreach (var type in assembly.GetTypes())
+            {
+                
+                if (entryType.IsAssignableFrom(type))
+                {
+                    var obj = Helper.GetUninit<IBuffEntry>(type);
+                    try
+                    {
+                        obj.OnEnable();
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e);
+                        BuffPlugin.LogError($"Invoke {type.Name}.OnEnable Failed!");
+                    }
+                    if(needLoadAsset)
+                        NeedLoadAssetEntries.Add(type);
+                }
+                
+            }
+
+
+            try
+            {
+                var runtimeAss = BuffBuilder.FinishGenerate(CurrentPluginId);
+                foreach (var ass in runtimeAss)
+                {
+                    for (int i = CurrentRuntimeBuffName.Count - 1; i >= 0; i--)
+                    {
+                        var name = CurrentRuntimeBuffName[i];
+                        if (ass.GetType($"{CurrentPluginId}.{name}Buff") is { } type)
+                        {
+                            InternalRegisterBuff(new BuffID(name),
+                                type, ass.GetType($"{CurrentPluginId}.{name}BuffData", true));
+                        }
+                        CurrentRuntimeBuffName.Remove(name);
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e, $"Exception when load {ctx.mod.id}:{assembly.GetName().Name}'s RuntimeBuff");
+            }
+            CurrentRuntimeBuffName.Clear();
+            
+            CurrentPluginId = string.Empty;
+        }
+        
+        
+      
+        private static (Assembly Assembly,bool isNewLoad) CheckAndUpdateBuffPlugin(BuffPluginContext ctx
+            ,ref HashSet<string> refLocations)
+        {
+
+            if (ctx.info.codeAssembly is { } assembly)
+            {
+                BuffPlugin.LogDebug($"Has load assembly for {assembly}");
+                return (assembly, false);
+            }
+
+            if (!File.Exists(Path.Combine(BuffPlugin.CacheFolder,
+                    $"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_codeCache.dll")) ||
+                GetTrulyWriteTime(ctx.fileInfo.FullName) > GetTrulyWriteTime(Path.Combine(BuffPlugin.CacheFolder,
+                    $"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_codeCache.dll"))
+                )
+            {
+                File.Delete($"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_dynamicCache.dll");
+                File.Delete($"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_dataCache.dll");
+
+                if (refLocations == null)
+                {
+                    refLocations = new HashSet<string>();
+                    foreach (var refAssembly in typeof(BuffPlugin).Assembly.GetReferencedAssemblies())
+                        refLocations.Add(
+                            Path.GetDirectoryName(AppDomain.CurrentDomain.GetAssemblies()
+                                .First(i => i.GetName().Name == refAssembly.Name).Location));
+
+                }
+
+                var def = BuildCachePlugin(ctx.mod, ctx.fileInfo.FullName, refLocations, out var hasPdb);
+                def.Write(
+                    Path.Combine(BuffPlugin.CacheFolder,
+                        $"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_codeCache.dll"),
+                    new WriterParameters() { WriteSymbols = hasPdb });
+
+            }
+
+            try
+            {
+                ctx.info.codeAssembly = Assembly.LoadFile(
+                    Path.Combine(BuffPlugin.CacheFolder,
+                        $"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_codeCache.dll"));
+            }
+            catch (Exception e)
+            {
+                BuffPlugin.LogException(e);
+                ctx.info.codeAssembly = null;
+            }
+            
+            
+            return (ctx.info.codeAssembly, true);
+        }
+        
+        
         /// <summary>
         /// 读取全部buff资源
         /// 注意重复加载忽略
@@ -618,7 +736,6 @@ namespace RandomBuff.Core.Entry
                 foreach (var property in dataType.Value.GetProperties().
                              Where(i => i.GetCustomAttribute<CustomBuffConfigAttribute>(true) != null))
                 {
-            
                     //读取特性
                     var configAttribute = property.GetCustomAttribute<CustomBuffConfigAttribute>();
                     var infoAttribute = property.GetCustomAttribute<CustomBuffConfigInfoAttribute>();//可为null
@@ -729,6 +846,8 @@ namespace RandomBuff.Core.Entry
             AssemblyDefinition assemblyDef = AssemblyDefinition.ReadAssembly(filePath,
                 new ReaderParameters
                     { ReadSymbols = File.Exists(filePath.Replace(".dll", ".pdb")), AssemblyResolver = resolver });
+            //assemblyDef.Name.Name += "codeCache";
+
             if (!assemblyDef.SecurityDeclarations.Any(i => 
                     i.SecurityAttributes.Any(j => 
                         j.Properties.Any(k => k.Name == "SkipVerification") &&
@@ -861,6 +980,8 @@ namespace RandomBuff.Core.Entry
 
         internal static DateTime GetTrulyWriteTime(string path)
         {
+            if (!File.Exists(path))
+                return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var attr = File.GetAttributes(path);
             if ((attr & FileAttributes.ReparsePoint) != 0)
                 return new FileInfo(NativeMethods.GetFinalPathName(path)).LastWriteTime;

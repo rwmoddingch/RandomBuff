@@ -9,5 +9,6 @@
     {
         "Name": "BombExpand",
         "Description":"Add various variant for bombs"
-    }
+    },
+    "Dependencies": ["BuiltinBuffs"]
 }

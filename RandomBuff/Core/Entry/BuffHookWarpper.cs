@@ -511,7 +511,7 @@ namespace RandomBuff.Core.Entry
                 }
             }
         }
-
+        
   
         private static void AddRuntimeHook(IDetour hook, string id, HookLifeTimeLevel level)
         {
