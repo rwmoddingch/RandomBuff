@@ -98,7 +98,8 @@ namespace RandomBuffUtils
                         self.isStreamed = true;
                         self.source.clip = AssetManager.SafeWWWAudioClip(
                             "file://" + AssetManager.ResolveFilePath(self.trackName.Replace("BUFF_", "")+end),
-                            false, true, end == ".ogg" ? AudioType.OGGVORBIS : AudioType.WAV); 
+                            false, true, end == ".ogg" ? AudioType.OGGVORBIS : AudioType.WAV);
+                        preLoadedClips.Add(self.trackName, self.source.clip);
                         BuffUtils.Log(nameof(BuffScene),$"Load buff music at {self.trackName.Replace("BUFF_", "") + end}");
                     }
                 }

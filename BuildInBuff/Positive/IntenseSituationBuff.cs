@@ -27,14 +27,14 @@ namespace BuiltinBuffs.Positive
             PlayerUtils.UndoAll(this);
         }
 
-        private ConditionalWeakTable<Player, List<PlayerUtils.SlugcatStatModifer>> maps =
-            new ConditionalWeakTable<Player, List<PlayerUtils.SlugcatStatModifer>>();
+        private ConditionalWeakTable<AbstractCreature, List<PlayerUtils.SlugcatStatModifer>> maps =
+            new ConditionalWeakTable<AbstractCreature, List<PlayerUtils.SlugcatStatModifer>>();
 
         public void Modify(Player player, float value)
         {
-            if (!maps.TryGetValue(player, out var list))
+            if (!maps.TryGetValue(player.abstractCreature, out var list))
             {
-                maps.Add(player,list = new List<PlayerUtils.SlugcatStatModifer>());
+                maps.Add(player.abstractCreature, list = new List<PlayerUtils.SlugcatStatModifer>());
                 list.Add(player.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac",value));
                 list.Add(player.slugcatStats.Modify(this, PlayerUtils.Multiply, "poleClimbSpeedFac", value));
                 list.Add(player.slugcatStats.Modify(this, PlayerUtils.Multiply, "corridorClimbSpeedFac", value));

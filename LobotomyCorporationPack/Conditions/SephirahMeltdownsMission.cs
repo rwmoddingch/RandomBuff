@@ -78,6 +78,11 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown.Conditions
 
             MissionRegister.RegisterMission(SephirahMeltdowns, new SephirahMeltdownsMission());
             BuffRegister.RegisterGachaTemplate<SephirahMeltdownsTemplate>(SephirahMeltdownsTemplate.SephirahMeltdowns);
+
+            BuffScene.PreloadTrack($"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/SephirahMissionSong");
+            BuffScene.PreloadTrack($"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-1");
+            BuffScene.PreloadTrack($"BUFF_{AyinBuffData.Ayin.GetStaticData().AssetPath}/Ayin-2");
+            BuffScene.PreloadTrack($"BUFF_{BinahBuffData.Binah.GetStaticData().AssetPath}/Binah-Garion");
         }
 
     }

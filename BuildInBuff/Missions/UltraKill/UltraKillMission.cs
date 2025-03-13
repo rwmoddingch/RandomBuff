@@ -50,6 +50,7 @@ namespace BuiltinBuffs.Missions.UltraKill
                 }
             };
             startBuffSet.Add(UltraCoinsBuffEntry.ultraCoinsBuffID);
+            startBuffSet.Add(IntenseSituationBuffEntry.IntenseSituation);
         }
 
         public void RegisterMission()
@@ -214,7 +215,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             }
             if (MusicPlayer.song != null)
             {
-                MusicPlayer.song.baseVolume = Mathf.Lerp(0.15f, 0.30f, Mathf.InverseLerp(0f, 1300f, MusicPlayer.threatTracker.currentThreat));
+                MusicPlayer.song.baseVolume = Mathf.Lerp(0.2f, 0.26f, Mathf.InverseLerp(0f, 1.1f, MusicPlayer.threatTracker.currentMusicAgnosticThreat));
                 //BuffUtils.Log("UltraKillMission", $"{MusicPlayer.threatTracker.currentThreat}");
             }
 
@@ -340,7 +341,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             {
                 MusicPlayer.GameRequestsSongStop(new StopMusicEvent()
                 {
-                    fadeOutTime = 0.5f,
+                    fadeOutTime = 2f,
                     prio = 100,
                     type = StopMusicEvent.Type.AllSongs
                 });

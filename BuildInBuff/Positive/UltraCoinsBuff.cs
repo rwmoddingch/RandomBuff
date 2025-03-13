@@ -45,16 +45,16 @@ namespace BuiltinBuffs.Positive
             reloadProgression = new float[game.Players.Count];
             keyDows = new bool[game.Players.Count];
 
-            for (int i = 0; i < game.Players.Count; i++)
-            {
-                availableCoinsCount[i] = MaxCoinCount;
-                reloadProgression[i] = 0f;
-                BuffUtils.Log("UltraCoin", $"bind key {i} : {Data[i]}");
-            }
-            for(int i = 0;i < 4; i++)
-            {
-                BuffUtils.Log("UltraCoin", $"key {i} : {Data.GetConfigurableValue($"Player{i+1}")}");
-            }
+            //for (int i = 0; i < game.Players.Count; i++)
+            //{
+            //    availableCoinsCount[i] = MaxCoinCount;
+            //    reloadProgression[i] = 0f;
+            //    BuffUtils.Log("UltraCoin", $"bind key {i} : {Data[i]}");
+            //}
+            //for(int i = 0;i < 4; i++)
+            //{
+            //    BuffUtils.Log("UltraCoin", $"key {i} : {Data.GetConfigurableValue($"Player{i+1}")}");
+            //}
         }
 
         public override (bool, bool) TriggerWithEffect(RainWorldGame game)
