@@ -5,10 +5,11 @@
   "BuffProperty": "Special",
   "AsPositive": true,
   "Triggerable": false,
-  "Stackable": false,
+  "Stackable": true,
   "Color": "6ABFE5",
   "Tag": [ "ShapedMutation" ],
   "Conflict": [ "ShapedMutation" ],
+  "MaxStackLayers": 3,
 
   "MultiLayerFace": true,
   "FaceLayer": 8,
