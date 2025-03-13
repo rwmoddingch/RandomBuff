@@ -47,7 +47,7 @@ namespace RandomBuff.Core.Entry
     
     internal class TopologicalSorter
     {
-        public static List<T> Sort<T>(Dictionary<BuffPluginInfo,T> instances)
+        public static (List<T> list, bool circular) Sort<T>(Dictionary<BuffPluginInfo,T> instances)
         {
             var adjacencyList = new Dictionary<string, List<string>>();
             var inDegree = new Dictionary<string, int>();
@@ -95,14 +95,9 @@ namespace RandomBuff.Core.Entry
                     
                 }
             }
+            
 
-            // 检查是否有环
-            if (sortedList.Count != instances.Count)
-            {
-                throw new InvalidOperationException("存在循环依赖，无法排序");
-            }
-
-            return sortedList;
+            return (sortedList,sortedList.Count != instances.Count);
         }
     }
 
@@ -505,11 +500,20 @@ namespace RandomBuff.Core.Entry
                     {
                         foreach (var refer in module.AssemblyReferences)
                         {
-                            if (BuffConfigManager.ContainsPluginInfo(refer.Name) &&
-                                !pluginInfo.Dependencies.Contains(refer.Name))
+                            if (BuffConfigManager.ContainsPluginInfo(refer.Name))
                             {
-                                BuffPlugin.LogError($"Missing Dependence: {refer.Name}, At:{assemblyName}");
-                                pluginInfo.Dependencies.Add(refer.Name);
+                                if (!pluginInfo.Dependencies.Contains(refer.Name))
+                                {
+                                    BuffPlugin.LogError($"Missing Dependence: {refer.Name}, At:{assemblyName}");
+                                    pluginInfo.Dependencies.Add(refer.Name);
+                                }
+
+                                if (!BuffPlugin.IsPluginsEnabled(refer.Name))
+                                {
+                                    BuffPlugin.LogFatal($"Dependence:{refer.Name} is disabled, At:{assemblyName}");
+                                    BuffPlugin.DisablePlugin(assemblyName);
+                                }
+                                    
                             }
                                 
                         }
@@ -527,8 +531,13 @@ namespace RandomBuff.Core.Entry
                 
             }
             
-            var sortedPlugins =  TopologicalSorter.Sort(plugins);
-            
+            var (sortedPlugins,circular) =  TopologicalSorter.Sort(plugins);
+
+            if (circular)
+            {
+                BuffPlugin.LogFatal("Find circular dependency in enable plugins!");
+                BuffPlugin.UpdateNewEnableList(sortedPlugins.Select(i => i.info.AssemblyName).ToArray());
+            }
             
             foreach(var plugin in sortedPlugins) 
                 InitBuffPlugin(plugin,ref refLocations);
@@ -672,7 +681,7 @@ namespace RandomBuff.Core.Entry
 
                 }
 
-                var def = BuildCachePlugin(ctx.mod, ctx.fileInfo.FullName, refLocations, out var hasPdb);
+                using var def = BuildCachePlugin(ctx.mod, ctx.fileInfo.FullName, refLocations, out var hasPdb);
                 def.Write(
                     Path.Combine(BuffPlugin.CacheFolder,
                         $"{ctx.mod.id}_{Path.GetFileNameWithoutExtension(ctx.info.AssemblyName)}_codeCache.dll"),

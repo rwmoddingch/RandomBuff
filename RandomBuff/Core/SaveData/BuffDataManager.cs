@@ -116,7 +116,7 @@ namespace RandomBuff.Core.SaveData
         }
 
 
-        internal BuffData GetOrCreateBuffData(SlugcatStats.Name name, BuffID id, bool createOrStack = false)
+        private BuffData GetOrCreateBuffData(SlugcatStats.Name name, BuffID id, bool createOrStack = false)
         {
             if (!allDatas.ContainsKey(name))
             {
@@ -261,6 +261,9 @@ namespace RandomBuff.Core.SaveData
             if (IsHasMalnourished())
                 return malnourishedData!.Value.cardInfos.Keys;
 
+            if (currentDatas.name == name)
+                return currentDatas.datas.Keys;
+            
             if (!allDatas.ContainsKey(name))
                 allDatas.Add(name, new());
 

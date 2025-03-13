@@ -268,9 +268,32 @@ namespace RandomBuff
             
         }
 
+        /// <summary>
+        /// 更新启用列表
+        /// </summary>
+        /// <param name="list"></param>
         internal static void UpdateNewEnableList(string[] list)
         {
+            EnabledPlugins = list.ToHashSet();
             File.WriteAllLines((SaveFolder + Path.AltDirectorySeparatorChar + "EnableBuffPlugins.txt"), list);
+        }
+
+        /// <summary>
+        /// 禁用buffPlugin
+        /// </summary>
+        /// <param name="name"></param>
+        internal static void DisablePlugin(string name)
+        {
+            EnabledPlugins.Remove(name);
+        }
+        
+        /// <summary>
+        /// 启用buffPlugin
+        /// </summary>
+        /// <param name="name"></param>
+        internal static void EnablePlugin(string name)
+        {
+            EnabledPlugins.Add(name);
         }
 
         private void Update()
