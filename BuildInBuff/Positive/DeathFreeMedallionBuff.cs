@@ -26,8 +26,7 @@ namespace BuiltinBuffs.Positive
 
         public override bool Trigger(RainWorldGame game)
         {
-            if(!BuffPlugin.DevEnabled)
-                triggerdThisCycle = true;
+            triggerdThisCycle = true;
             return base.Trigger(game);
         }
 
