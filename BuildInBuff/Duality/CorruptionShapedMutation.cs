@@ -2804,8 +2804,8 @@ namespace BuiltinBuffs.Duality
             //生物离开房间
             for (int i = this.indicators.Count - 1; i >= 0; i--)
             {
-                if (this.indicators[i].creature == null||
-                    this.indicators[i].creature.room == null || 
+                if (this.indicators[i].creature == null ||
+                    this.indicators[i].creature.room == null ||
                     this.indicators[i].creature.room != this.player.room ||
                     this.indicators[i].alpha <= 0)
                 {
@@ -2818,12 +2818,19 @@ namespace BuiltinBuffs.Duality
             Vector2 camPos = player.room.game.cameras[0].pos;
             foreach (var abscreature in this.player.room.abstractRoom.creatures)
             {
-                if (abscreature.realizedCreature == null || abscreature.realizedCreature == this.player) continue;
-                var creature = abscreature.realizedCreature;
+                if (abscreature.realizedCreature == null || abscreature.realizedCreature == this.player)
+                    continue;
 
+                var creature = abscreature.realizedCreature;
+                bool shouldGoToNext = false;
                 foreach (var indicator in this.indicators)
                     if (indicator.creature == creature)
-                        continue;
+                    {
+                        shouldGoToNext = true;
+                        break;
+                    }
+                if (shouldGoToNext)
+                    continue;
 
                 bool inScreen = creature.DangerPos.x - camPos.x > roomCenter.x - Custom.rainWorld.options.ScreenSize.x / 2f &&
                                 creature.DangerPos.x - camPos.x < roomCenter.x + Custom.rainWorld.options.ScreenSize.x / 2f &&
@@ -2840,7 +2847,8 @@ namespace BuiltinBuffs.Duality
                         inSoundRange = Custom.Dist(CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs[i].pos,
                                                         creature.bodyChunks[j].pos) <
                                                         CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs[i].rad + creature.bodyChunks[j].rad;
-                        if (inSoundRange) break;
+                        if (inSoundRange)
+                            break;
                     }
 
                     if (inSoundRange)
@@ -2848,7 +2856,7 @@ namespace BuiltinBuffs.Duality
                         var indicator = new IndicatorSymbol(this.player, creature, this.player.room);
                         this.indicators.Add(indicator);
                         this.player.room.AddObject(indicator);
-                        BuffPlugin.Log($"[CorruptionShapedMutation] add indicators, now count: {this.indicators.Count}");
+                        BuffPlugin.Log($"[CorruptionShapedMutation] Add indicators, now count: {this.indicators.Count}");
                         break;
                     }
                 }
@@ -4482,6 +4490,7 @@ namespace BuiltinBuffs.Duality
         Vector2 dir;
         public float alpha;
         public float distFac;
+        Color effectColor => Color.blue;
 
         public IndicatorSymbol(Player owner, Creature creature, Room room)
         {
@@ -4503,15 +4512,14 @@ namespace BuiltinBuffs.Duality
             this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.x / 2f, 0f, Mathf.Abs(aim.x), 0f, aim.magnitude) - 50f);
 
             this.distFac = Mathf.Clamp01(Mathf.Pow(100f / (this.creature.DangerPos - this.pos).magnitude, 0.4f));
-
             bool inScreen = creature.DangerPos.x > roomCenter.x - Custom.rainWorld.options.ScreenSize.x / 2f &&
                             creature.DangerPos.x < roomCenter.x + Custom.rainWorld.options.ScreenSize.x / 2f &&
                             creature.DangerPos.y > roomCenter.y - Custom.rainWorld.options.ScreenSize.y / 2f &&
                             creature.DangerPos.y < roomCenter.y + Custom.rainWorld.options.ScreenSize.y / 2f;
             if (CorruptionCatTentacle.VisualContact(this.creature) && !inScreen)
-                this.alpha = Mathf.Min(1f, this.alpha + 0.025f);
+                this.alpha = Mathf.Clamp01(this.alpha + 0.025f);
             else
-                this.alpha = Mathf.Max(0f, this.alpha - 0.025f);
+                this.alpha = Mathf.Clamp01(this.alpha - 0.025f);
         }
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -4530,13 +4538,19 @@ namespace BuiltinBuffs.Duality
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+
             sLeaser.sprites[0].x = Mathf.Lerp(this.pos.x, this.lastPos.x, timeStacker) - camPos.x;
             sLeaser.sprites[0].y = Mathf.Lerp(this.pos.y, this.lastPos.y, timeStacker) - camPos.y;
             sLeaser.sprites[0].alpha = this.alpha * this.distFac;
+            //sLeaser.sprites[0].color = Color.Lerp(this.effectColor, CreatureSymbol.ColorOfCreature(CreatureSymbol.SymbolDataFromCreature(creature.abstractCreature)), this.distFac);
+
             sLeaser.sprites[1].x = sLeaser.sprites[0].x + 25f * dir.x;
             sLeaser.sprites[1].y = sLeaser.sprites[0].y + 25f * dir.y;
             sLeaser.sprites[1].alpha = sLeaser.sprites[0].alpha;
+            sLeaser.sprites[1].color = sLeaser.sprites[0].color;
+
             sLeaser.sprites[1].rotation = Custom.VecToDeg(dir) - 180f;
+
             if (base.slatedForDeletetion || this.room != rCam.room || owner.room == null)
             {
                 sLeaser.CleanSpritesAndRemove();
