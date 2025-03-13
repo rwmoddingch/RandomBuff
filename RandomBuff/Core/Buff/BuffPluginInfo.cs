@@ -48,7 +48,7 @@ namespace RandomBuff.Core.Buff
         /// 依赖关系
         /// </summary>
         [NotNull]
-        public string[] Dependencies { get; private set; } = Array.Empty<string>();
+        public List<string> Dependencies { get; private set; } =new List<string>();
 
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace RandomBuff.Core.Buff
                 if (rawData.TryGetValue(loadState = "Dependencies", out var depend))
                 {
                     var list = (JArray)depend;
-                    newData.Dependencies = list.Select(i => i.ToString()).ToArray();
+                    newData.Dependencies = list.Select(i => i.ToString()).ToList();
                 }
 
                 return true;

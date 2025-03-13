@@ -283,25 +283,29 @@ namespace RandomBuff.Core.SaveData
                 currentDatas.datas = malnourishedData!.Value.cardInfos;
                 return;
             }
-            
-            foreach (var pair in allDatas[name])
-            {
-                BuffData newData;
-                try
-                {
-                    newData = (BuffData)JsonConvert.DeserializeObject(pair.Value,BuffRegister.GetDataType(pair.Key));
-                    newData.DataLoaded(false);
-                }
-                catch (Exception e)
-                {
-                    BuffPlugin.LogException(e);
-                    BuffPlugin.LogError($"Corrupted Buff Data At : {pair.Value}");
-                    ExceptionTracker.TrackException(e, $"Corrupted Buff Data At : {pair.Value}");
-                    newData = GetOrCreateBuffData(pair.Key, true);
-                    newData.DataLoaded(true);
-                }
 
-                currentDatas.datas.Add(pair.Key, newData);
+            if (allDatas.TryGetValue(name, out var datas))
+            {
+                foreach (var pair in datas)
+                {
+                    BuffData newData;
+                    try
+                    {
+                        newData = (BuffData)JsonConvert.DeserializeObject(pair.Value,
+                            BuffRegister.GetDataType(pair.Key));
+                        newData.DataLoaded(false);
+                    }
+                    catch (Exception e)
+                    {
+                        BuffPlugin.LogException(e);
+                        BuffPlugin.LogError($"Corrupted Buff Data At : {pair.Value}");
+                        ExceptionTracker.TrackException(e, $"Corrupted Buff Data At : {pair.Value}");
+                        newData = GetOrCreateBuffData(pair.Key, true);
+                        newData.DataLoaded(true);
+                    }
+
+                    currentDatas.datas.Add(pair.Key, newData);
+                }
             }
         }
         
@@ -320,7 +324,8 @@ namespace RandomBuff.Core.SaveData
             {
                 try
                 {
-                    allDatas[currentDatas.name][data.Key] = JsonConvert.SerializeObject(data);
+                
+                    allDatas[currentDatas.name][data.Key] = JsonConvert.SerializeObject(data.Value);
                 }
                 catch (Exception e)
                 {
@@ -445,6 +450,7 @@ namespace RandomBuff.Core.SaveData
         internal string ToStringData()
         {
             SyncToData();
+            allDatas.Remove(Nullptr);
             StringBuilder builder = new();
             builder.Append($"BUFFDATA{SettingSubSplit}");
             foreach (var catData in allDatas)

@@ -29,7 +29,6 @@ namespace RandomBuff.Core.Buff
                 Action<ILProcessor> buffCtor = null,
                 Action<ILProcessor> dataCtor = null)
         {
-			BuffPlugin.LogDebug($"build dynamic buff with cache: {pluginId}.{usedId}");
 
 			return GenerateBuffType($"{pluginId}_dynamicCache", usedId, needRegisterId, buffCtor, dataCtor);
         }

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -80,6 +81,7 @@ namespace RandomBuff
         {
             LogInstance = this.Logger;
             Instance = this;
+            
 
             try
             {
@@ -245,7 +247,7 @@ namespace RandomBuff
 
             LoadEnabledPlugins();
 
-            BuffRegister.InitAllBuffPlugin();
+            BuffRegister.InitAllBuffPlugins();
             BuffRegister.BuildAllBuffConfigWarpper();
             BuffConfigManager.InitBuffStaticData();
 
@@ -376,7 +378,6 @@ namespace RandomBuff
 
         internal static bool IsPluginsEnabled(string assemblyName)
         {
-            BuffPlugin.LogDebug($"Try {assemblyName}, {EnabledPlugins.Contains(assemblyName)}");
             return EnabledPlugins.Contains(assemblyName);
         }
 

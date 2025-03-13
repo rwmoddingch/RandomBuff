@@ -24,6 +24,7 @@ using System.Reflection;
 using MonoMod.RuntimeDetour;
 using RandomBuff.Core.SaveData.BuffConfig;
 using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.ConstrainedExecution;
 
 namespace BuiltinBuffs.Duality
 {
@@ -80,14 +81,6 @@ namespace BuiltinBuffs.Duality
                 }
                 CorruptionShapedMutationBuffEntry.EstablishRelationship();
             }
-            blindWaveTex = new FSprite("pixel")
-            {
-                shader = Custom.rainWorld.Shaders["BlindWave"],
-                scale = 1600f,
-                anchorX = 0f,
-                anchorY = 0f,
-            };
-            blindWaveEffectManager = new BlindWaveEffectManager();
         }
 
         public override void Update(RainWorldGame game)
@@ -96,30 +89,48 @@ namespace BuiltinBuffs.Duality
             corruptionLevel = CorruptionLevel;
             speedLevel = SpeedLevel;
 
-            if (!containerAdded)
+            if (blindWaveEffectManager == null && !CorruptionShapedMutationBuff.Instance.Data.HavingVisionKey)
             {
-                game.cameras[0].ReturnFContainer("Bloom").AddChild(blindWaveTex);
-                containerAdded = true;
-                blindWaveEffectManager.EffectSprite = blindWaveTex;
+                blindWaveTex = new FSprite("pixel")
+                {
+                    shader = Custom.rainWorld.Shaders["BlindWave"],
+                    scale = 1600f,
+                    anchorX = 0f,
+                    anchorY = 0f,
+                };
+                blindWaveEffectManager = new BlindWaveEffectManager();
             }
 
-            if (game.cameras != null && game.cameras[0] != null && game.cameras[0].room != null)
+            if (blindWaveEffectManager != null)
             {
-                if (!blindWaveTex._isOnStage)
-                    containerAdded = false;
-                var tile = game.cameras[0].room.GetTilePosition(new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + game.cameras[0].pos);
-                //test.SetPosition(game.cameras[0].room.MiddleOfTile(tile) - game.cameras[0].pos);
-                blindWaveTex.MoveToFront();
-            }
+                if (!containerAdded)
+                {
+                    game.cameras[0].ReturnFContainer("Bloom").AddChild(blindWaveTex);
+                    containerAdded = true;
+                    blindWaveEffectManager.EffectSprite = blindWaveTex;
+                }
 
-            blindWaveEffectManager.Update(game);
+                if (game.cameras != null && game.cameras[0] != null && game.cameras[0].room != null)
+                {
+                    if (!blindWaveTex._isOnStage)
+                        containerAdded = false;
+                    var tile = game.cameras[0].room.GetTilePosition(new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + game.cameras[0].pos);
+                    //test.SetPosition(game.cameras[0].room.MiddleOfTile(tile) - game.cameras[0].pos);
+                    blindWaveTex.MoveToFront();
+                }
+
+                blindWaveEffectManager.Update(game);
+            }
         }
 
         public override void Destroy()
         {
             base.Destroy();
-            blindWaveTex.RemoveFromContainer();
-            blindWaveEffectManager.Destroy();
+            if (blindWaveEffectManager != null)
+            {
+                blindWaveTex.RemoveFromContainer();
+                blindWaveEffectManager.Destroy();
+            }
         }
     }
 
@@ -213,10 +224,20 @@ namespace BuiltinBuffs.Duality
             legalStaticCount = 0;
             foreach (var player in game.Players)
             {
+                //身体周围
                 if (player.realizedCreature != null && player.realizedCreature.room != null && !player.realizedCreature.dead)
                 {
                     staticPos[legalStaticCount] = Vector2.Lerp(player.realizedCreature.mainBodyChunk.lastPos, player.realizedCreature.mainBodyChunk.pos, timeStacker) - camPos;
                     legalStaticCount++;
+                    //触手周围
+                    if(CorruptionShapedMutationBuffEntry.CorruptionCatFeatures.TryGetValue(player.realizedCreature as Player, out var corruption))
+                    {
+                        for (int i = 0; i < corruption.tentacles.Length; i++)
+                        {
+                            staticPos[legalStaticCount] = Vector2.Lerp(corruption.tentacles[i].Tip.lastPos, corruption.tentacles[i].Tip.pos, timeStacker) - camPos;
+                            legalStaticCount++;
+                        }
+                    }
                 }
                 if (legalStaticCount == 40)
                     break;
@@ -289,7 +310,6 @@ namespace BuiltinBuffs.Duality
             wavesToAdd.Add(new AmbientSoundObjectTracker(ambientSoundPlayer));
         }
 
-
         public void RoomSwitch()
         {
             foreach (var obj in activeWaveObjs)
@@ -325,7 +345,6 @@ namespace BuiltinBuffs.Duality
             {
                 slateForDeletion = true;
             }
-
 
             public virtual float GetSmoothRad(float timeStacker)
             {
@@ -652,6 +671,7 @@ namespace BuiltinBuffs.Duality
                 }
             }
 
+            //视觉效果
             On.VirtualMicrophone.SoundObject.Play += SoundObject_Play;
             On.AmbientSoundPlayer.TryInitiation += AmbientSoundPlayer_TryInitiation;
             On.RainWorldGame.GrafUpdate += RainWorldGame_GrafUpdate;
@@ -666,13 +686,14 @@ namespace BuiltinBuffs.Duality
         private static void RainWorldGame_GrafUpdate(On.RainWorldGame.orig_GrafUpdate orig, RainWorldGame self, float timeStacker)
         {
             orig.Invoke(self, timeStacker);
-            CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.RawUpdate(self, timeStacker);
+            if (!CorruptionShapedMutationBuff.Instance.Data.HavingVisionKey)
+                CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.RawUpdate(self, timeStacker);
         }
 
         private static void AmbientSoundPlayer_TryInitiation(On.AmbientSoundPlayer.orig_TryInitiation orig, AmbientSoundPlayer self)
         {
             orig.Invoke(self);
-            if (self.initiated && self.aSound.type == AmbientSound.Type.Spot)
+            if (!CorruptionShapedMutationBuff.Instance.Data.HavingVisionKey && self.initiated && self.aSound.type == AmbientSound.Type.Spot)
             {
                 CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.AmbietnSoundPlayed(self);
             }
@@ -681,7 +702,7 @@ namespace BuiltinBuffs.Duality
         private static void SoundObject_Play(On.VirtualMicrophone.SoundObject.orig_Play orig, VirtualMicrophone.SoundObject self)
         {
             orig.Invoke(self);
-            if (self is VirtualMicrophone.PositionedSound positionedSound)
+            if (!CorruptionShapedMutationBuff.Instance.Data.HavingVisionKey && self is VirtualMicrophone.PositionedSound positionedSound)
             {
                 CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.PositonedSoundPlayed(self.soundData.soundID, positionedSound);
             }
@@ -1282,7 +1303,8 @@ namespace BuiltinBuffs.Duality
                 return num;
             }
         }
-
+        #endregion
+        #region 操作
         public bool HaveDirInput => ownerRef.TryGetTarget(out var player) && (player.input[0].x != 0 || player.input[0].y != 0);
         public bool WantToMoveBody => ownerRef.TryGetTarget(out var player) && player.input[0].jmp && this.EnoughGripToMove();
         public bool WantToHunt => ownerRef.TryGetTarget(out var player) && (player.input[0].thrw || player.input[0].pckp);
@@ -1292,18 +1314,16 @@ namespace BuiltinBuffs.Duality
         public CorruptionCatGraphics graphics;
         public CorruptionCatTentacle[] tentacles;
         public int totalLegSprites;
-        public int tentaclesCount;
-        public float tentaclesLength;
         public Color effectColor;
         public Color eyeColor;
         public Color EffectColor => Color.blue;
+        public int TentaclesCount => 4 + 1 * CorruptionShapedMutationBuff.corruptionLevel + 2 * CorruptionShapedMutationBuffEntry.StackLayer;
+        public float TentaclesLength => 150f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer;
         #endregion
 
         public CorruptionCat(Player player)
         {
             this.ownerRef = new WeakReference<Player>(player);
-            this.tentaclesCount = 4 + 1 * CorruptionShapedMutationBuff.corruptionLevel + 2 * CorruptionShapedMutationBuffEntry.StackLayer;
-            this.tentaclesLength = 150f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer;
             this.state = new DaddyState(this, player.abstractCreature);
             //核心
             this.coreChunks = new BodyChunk[4];
@@ -1325,15 +1345,15 @@ namespace BuiltinBuffs.Duality
             this.coreChunkConnections[this.coreChunkConnections.Length - 1] = new PhysicalObject.BodyChunkConnection(this.coreChunks[2], this.coreChunks[3],
                     5f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
             //触手
-            this.tentacles = new CorruptionCatTentacle[this.tentaclesCount];
+            this.tentacles = new CorruptionCatTentacle[this.TentaclesCount];
             for (int i = 0; i < Mathf.Min(player.bodyChunks.Length, this.tentacles.Length); i++)
-                this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[i], this.tentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
+                this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[i], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
             if (this.tentacles.Length > player.bodyChunks.Length)
                 for (int i = player.bodyChunks.Length; i < Mathf.Min(player.bodyChunks.Length + this.coreChunks.Length, this.tentacles.Length); i++)
-                    this.tentacles[i] = new CorruptionCatTentacle(player, this, this.coreChunks[i - player.bodyChunks.Length], this.tentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
+                    this.tentacles[i] = new CorruptionCatTentacle(player, this, this.coreChunks[i - player.bodyChunks.Length], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
             if (this.tentacles.Length > player.bodyChunks.Length + this.coreChunks.Length)
                 for (int i = player.bodyChunks.Length + this.coreChunks.Length; i < this.tentacles.Length; i++)
-                    this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[1], this.tentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
+                    this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[1], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
 
             this.moveSpeed = DefaultMoveSpeed;
             this.eatObjects = new List<CorruptionCat.EatObject>();
@@ -1364,6 +1384,34 @@ namespace BuiltinBuffs.Duality
             {
                 this.coreChunkConnections[j].Update();
             }
+            //即时变更触手状态
+            if (this.tentacles.Length != this.TentaclesCount)
+            {
+                Array.Resize(ref this.tentacles, this.TentaclesCount);
+                for (int i = 0; i < Mathf.Min(player.bodyChunks.Length, this.tentacles.Length); i++)
+                    this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[i], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
+                if (this.tentacles.Length > player.bodyChunks.Length)
+                    for (int i = player.bodyChunks.Length; i < Mathf.Min(player.bodyChunks.Length + this.coreChunks.Length, this.tentacles.Length); i++)
+                        this.tentacles[i] = new CorruptionCatTentacle(player, this, this.coreChunks[i - player.bodyChunks.Length], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
+                if (this.tentacles.Length > player.bodyChunks.Length + this.coreChunks.Length)
+                    for (int i = player.bodyChunks.Length + this.coreChunks.Length; i < this.tentacles.Length; i++)
+                        this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[1], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));
+
+                foreach (var tentacle in tentacles)
+                    tentacle.NewRoom(player.room);
+                this.graphics.legGraphics = new CorruptionCatLegGraphics[this.tentacles.Length];
+                if (BuffCustom.TryGetGame(out var game))
+                    this.graphics.InitiateSprites(game.cameras[0].spriteLeasers.
+                        First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
+
+
+                this.state.tentacleHealth = new float[this.TentaclesCount];
+                for (int i = 0; i < this.state.tentacleHealth.Length; i++)
+                {
+                    this.state.tentacleHealth[i] = 1f;
+                }
+            }
+
             //颜色
             this.effectColor = this.graphics.EffectColorA;
             this.eyeColor = this.graphics.EffectColorB;
@@ -2352,7 +2400,7 @@ namespace BuiltinBuffs.Duality
             public DaddyState(CorruptionCat owner, AbstractCreature creature) : base(creature)
             {
                 this.owner = owner;
-                this.tentacleHealth = new float[owner.tentaclesCount];
+                this.tentacleHealth = new float[owner.TentaclesCount];
                 for (int i = 0; i < this.tentacleHealth.Length; i++)
                 {
                     this.tentacleHealth[i] = 1f;
@@ -2395,13 +2443,18 @@ namespace BuiltinBuffs.Duality
         {
             get
             {
-                Color color = EffectColorA;
-                Vector3 hsl = Custom.RGB2HSL(color);
-                if (hsl.z > 0.5f)
-                    hsl.z -= 0.2f;
-                else
-                    hsl.z += 0.2f;
-                color = Custom.HSL2RGB(hsl.x, hsl.y ,hsl.z);
+                Color color = PlayerGraphics.JollyUniqueColorMenu(player.SlugCatClass,
+                                                        player.abstractCreature.world.game.rainWorld.options.jollyPlayerOptionsArray[player.playerState.playerNumber].playerClass,
+                                                        player.playerState.playerNumber);
+                if (color == EffectColorA)
+                {
+                    Vector3 hsl = Custom.RGB2HSL(color);
+                    if (hsl.z > 0.5f)
+                        hsl.z -= 0.2f;
+                    else
+                        hsl.z += 0.2f;
+                    color = Custom.HSL2RGB(hsl.x, hsl.y, hsl.z);
+                }
                 return color;
             }
         }
@@ -2456,6 +2509,8 @@ namespace BuiltinBuffs.Duality
         public int feelSomethingReactionDelay; 
         public float digesting;
 
+        public List<IndicatorSymbol> indicators;
+
         public CorruptionCatGraphics(Player player, CorruptionCat corruptionCat)
         {
             this.player = player;
@@ -2471,6 +2526,7 @@ namespace BuiltinBuffs.Duality
                 this.chunksRotats[m, 1] = Random.value;
                 this.eyes[m] = new CorruptionCatGraphics.Eye(this, m);
             }
+            this.indicators = new List<IndicatorSymbol>();
         }
 
         #region 外观
@@ -2609,6 +2665,7 @@ namespace BuiltinBuffs.Duality
         public void GraphicsUpdate()
         {
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            this.IndicatorSymbolUpdate();
             foreach (var tentacle in legGraphics)
             {
                 tentacle.Update();
@@ -2729,6 +2786,73 @@ namespace BuiltinBuffs.Duality
         public Vector2 BulgeVertex(Vector2 v, Vector2 dir, float rad)
         {
             return Vector2.Lerp(v, Vector2.ClampMagnitude(v + dir * rad, rad), dir.magnitude);
+        }
+
+        public void IndicatorSymbolUpdate()
+        {
+            //玩家房间为空，或失明特效为空
+            if (this.player.room == null || CorruptionShapedMutationBuff.Instance.blindWaveEffectManager == null)
+            {
+                foreach (var indicator in this.indicators)
+                {
+                    indicator.Destroy();
+                    this.player.room.RemoveObject(indicator);
+                }
+                this.indicators.Clear();
+                return;
+            }
+            //生物离开房间
+            for (int i = this.indicators.Count - 1; i >= 0; i--)
+            {
+                if (this.indicators[i].creature == null||
+                    this.indicators[i].creature.room == null || 
+                    this.indicators[i].creature.room != this.player.room ||
+                    this.indicators[i].alpha <= 0)
+                {
+                    this.indicators[i].Destroy();
+                    this.player.room.RemoveObject(this.indicators[i]);
+                    this.indicators.Remove(this.indicators[i]);
+                }
+            }
+            Vector2 roomCenter = new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
+            Vector2 camPos = player.room.game.cameras[0].pos;
+            foreach (var abscreature in this.player.room.abstractRoom.creatures)
+            {
+                if (abscreature.realizedCreature == null || abscreature.realizedCreature == this.player) continue;
+                var creature = abscreature.realizedCreature;
+
+                foreach (var indicator in this.indicators)
+                    if (indicator.creature == creature)
+                        continue;
+
+                bool inScreen = creature.DangerPos.x - camPos.x > roomCenter.x - Custom.rainWorld.options.ScreenSize.x / 2f &&
+                                creature.DangerPos.x - camPos.x < roomCenter.x + Custom.rainWorld.options.ScreenSize.x / 2f &&
+                                creature.DangerPos.y - camPos.y > roomCenter.y - Custom.rainWorld.options.ScreenSize.y / 2f &&
+                                creature.DangerPos.y - camPos.y < roomCenter.y + Custom.rainWorld.options.ScreenSize.y / 2f;
+                if (inScreen)
+                    continue;
+
+                for (int i = 0; i < CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs.Count; i++)
+                {
+                    bool inSoundRange = false;
+                    for (int j = 0; j < creature.bodyChunks.Length; j++)
+                    {
+                        inSoundRange = Custom.Dist(CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs[i].pos,
+                                                        creature.bodyChunks[j].pos) <
+                                                        CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs[i].rad + creature.bodyChunks[j].rad;
+                        if (inSoundRange) break;
+                    }
+
+                    if (inSoundRange)
+                    {
+                        var indicator = new IndicatorSymbol(this.player, creature, this.player.room);
+                        this.indicators.Add(indicator);
+                        this.player.room.AddObject(indicator);
+                        BuffPlugin.Log($"[CorruptionShapedMutation] add indicators, now count: {this.indicators.Count}");
+                        break;
+                    }
+                }
+            }
         }
 
         public class Eye : DaddyGraphics.DaddyBubbleOwner
@@ -3012,10 +3136,10 @@ namespace BuiltinBuffs.Duality
                 float num = Vector2.Distance(base.Tip.pos, this.grabChunk.pos);
                 float num2 = (base.Tip.rad + this.grabChunk.rad) / 4f;
                 Vector2 vector = Custom.DirVec(base.Tip.pos, this.grabChunk.pos);
-                //float num3 = this.grabChunk.mass / (this.grabChunk.mass + 0.01f);
-                float num3 = Mathf.Clamp(this.grabChunk.mass / (this.grabChunk.mass + 0.1f * CorruptionShapedMutationBuffEntry.StackLayer), 0.5f, 0.6f);
+                float num3 = this.grabChunk.mass / (this.grabChunk.mass + 0.01f);
+                //float num3 = Mathf.Clamp(this.grabChunk.mass / (this.grabChunk.mass + 0.1f * CorruptionShapedMutationBuffEntry.StackLayer), 0.1f, 0.2f);
                 float num4 = 1f; 
-                this.grabChunk.vel *= 0.9f; // 试图防止物体乱飞
+                //this.grabChunk.vel *= 0.9f; // 试图防止物体乱飞
                 base.Tip.pos += vector * (num - num2) * num3 * num4 * SpeedFac;
                 base.Tip.vel += vector * (num - num2) * num3 * num4 * SpeedFac;
                 this.grabChunk.pos -= vector * (num - num2) * (1f - num3) * num4 * SpeedFac;
@@ -3117,6 +3241,8 @@ namespace BuiltinBuffs.Duality
             }
             else if (this.task == CorruptionCatTentacle.Task.Hunt)
             {
+                if (!this.corruptionCat.WantToHunt)
+                    this.SwitchTask(CorruptionCatTentacle.Task.Locomotion);
                 this.Hunt(ref this.scratchPath);
             }
             else if (this.task == CorruptionCatTentacle.Task.ExamineSound)
@@ -3128,6 +3254,8 @@ namespace BuiltinBuffs.Duality
                 base.MoveGrabDest(bodyPos + Custom.DirVec(bodyPos, this.grabChunk.pos) * 20f, ref this.scratchPath);
                 Vector2 p = bodyPos;
                 bool flag2 = this.room.VisualContact(this.grabChunk.pos, bodyPos);
+                if (!this.corruptionCat.WantToHunt)
+                    this.SwitchTask(CorruptionCatTentacle.Task.Locomotion);
                 for (int l = this.tChunks.Length - 1; l >= 0; l--)
                 {
                     Vector2 p2 = base.FloatBase;
@@ -3151,7 +3279,10 @@ namespace BuiltinBuffs.Duality
                 }
                 if (this.task == CorruptionCatTentacle.Task.Grabbing)
                 {
-                    this.grabChunk.vel += (Vector2)Vector3.Slerp(Custom.DirVec(this.grabChunk.pos, p), Custom.DirVec(base.Tip.pos, this.tChunks[this.tChunks.Length - 2].pos), 0.5f) * Custom.LerpMap((float)this.grabPath.Count, 3f, 18f, 0.65f, 0.25f) * (this.corruptionCat.SizeClass ? 1f : 0.45f) / this.grabChunk.mass;
+                    this.grabChunk.vel += (Vector2)Vector3.Slerp(Custom.DirVec(this.grabChunk.pos, p), Custom.DirVec(base.Tip.pos, this.tChunks[this.tChunks.Length - 2].pos), 0.5f) *
+                        Custom.LerpMap((float)this.grabPath.Count, 3f, 18f, 0.65f, 0.25f) / this.grabChunk.mass;
+                    //this.grabChunk.vel += (Vector2)Vector3.Slerp(Custom.DirVec(this.grabChunk.pos, p), Custom.DirVec(base.Tip.pos, this.tChunks[this.tChunks.Length - 2].pos), 0.5f) * 
+                    //    Custom.LerpMap((float)this.grabPath.Count, 3f, 18f, 0.65f, 0.25f) * (this.corruptionCat.SizeClass ? 1f : 0.45f) / this.grabChunk.mass;
                 }
             }
             for (int m = 0; m < this.tChunks.Length; m++)
@@ -4048,7 +4179,24 @@ namespace BuiltinBuffs.Duality
 
         public static bool VisualContact(Creature huntCreature)
         {
-            return true;
+            //有视力时直接为true
+            if (CorruptionShapedMutationBuff.Instance.blindWaveEffectManager == null)
+                return true;
+            //无视力则检查是否在声波中
+            for (int i = 0; i < CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs.Count; i++)
+            {
+                for (int j = 0; j < huntCreature.bodyChunks.Length; j++)
+                {
+                    bool inSoundRange = Custom.Dist(CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs[i].pos,
+                                                    huntCreature.bodyChunks[j].pos) <
+                                                    CorruptionShapedMutationBuff.Instance.blindWaveEffectManager.activeWaveObjs[i].rad + huntCreature.bodyChunks[j].rad;
+                    if (inSoundRange)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /*
@@ -4324,6 +4472,92 @@ namespace BuiltinBuffs.Duality
             public Vector2 pos;
             public float size;
             public float eyeSize;
+        }
+    }
+
+    internal class IndicatorSymbol : CosmeticSprite
+    {
+        public Player owner;
+        public Creature creature;
+        Vector2 dir;
+        public float alpha;
+        public float distFac;
+
+        public IndicatorSymbol(Player owner, Creature creature, Room room)
+        {
+            this.owner = owner;
+            this.creature = creature;
+            this.room = room;
+            this.dir = Vector2.zero;
+            this.alpha = 1.0f;
+        }
+
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            Vector2 camPos = this.room.game.cameras[0].pos;
+            Vector2 roomCenter = camPos + new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
+            Vector2 aim = this.creature.DangerPos - roomCenter;
+            this.lastPos = this.pos;
+            this.dir = Custom.DirVec(roomCenter, creature.DangerPos);
+            this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.x / 2f, 0f, Mathf.Abs(aim.x), 0f, aim.magnitude) - 50f);
+
+            this.distFac = Mathf.Clamp01(Mathf.Pow(100f / (this.creature.DangerPos - this.pos).magnitude, 0.4f));
+
+            bool inScreen = creature.DangerPos.x > roomCenter.x - Custom.rainWorld.options.ScreenSize.x / 2f &&
+                            creature.DangerPos.x < roomCenter.x + Custom.rainWorld.options.ScreenSize.x / 2f &&
+                            creature.DangerPos.y > roomCenter.y - Custom.rainWorld.options.ScreenSize.y / 2f &&
+                            creature.DangerPos.y < roomCenter.y + Custom.rainWorld.options.ScreenSize.y / 2f;
+            if (CorruptionCatTentacle.VisualContact(this.creature) && !inScreen)
+                this.alpha = Mathf.Min(1f, this.alpha + 0.025f);
+            else
+                this.alpha = Mathf.Max(0f, this.alpha - 0.025f);
+        }
+
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            sLeaser.sprites = new FSprite[2];
+            sLeaser.sprites[0] = new FSprite(CreatureSymbol.SpriteNameOfCreature(CreatureSymbol.SymbolDataFromCreature(creature.abstractCreature)));
+            //sLeaser.sprites[0].shader = rCam.game.rainWorld.Shaders["GateHologram"];
+            sLeaser.sprites[1] = new FSprite("Multiplayer_Arrow");
+            sLeaser.sprites[1].scale = 0.8f;
+            //sLeaser.sprites[1].shader = rCam.game.rainWorld.Shaders["GateHologram"];
+            base.InitiateSprites(sLeaser, rCam);
+            this.AddToContainer(sLeaser, rCam, null);
+            this.ApplyPalette(sLeaser, rCam, this.room.game.cameras[0].currentPalette);
+        }
+
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            sLeaser.sprites[0].x = Mathf.Lerp(this.pos.x, this.lastPos.x, timeStacker) - camPos.x;
+            sLeaser.sprites[0].y = Mathf.Lerp(this.pos.y, this.lastPos.y, timeStacker) - camPos.y;
+            sLeaser.sprites[0].alpha = this.alpha * this.distFac;
+            sLeaser.sprites[1].x = sLeaser.sprites[0].x + 25f * dir.x;
+            sLeaser.sprites[1].y = sLeaser.sprites[0].y + 25f * dir.y;
+            sLeaser.sprites[1].alpha = sLeaser.sprites[0].alpha;
+            sLeaser.sprites[1].rotation = Custom.VecToDeg(dir) - 180f;
+            if (base.slatedForDeletetion || this.room != rCam.room || owner.room == null)
+            {
+                sLeaser.CleanSpritesAndRemove();
+            }
+        }
+
+        public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+            base.ApplyPalette(sLeaser, rCam, palette);
+
+            for (int i = 0; i < sLeaser.sprites.Length; i++)
+                sLeaser.sprites[i].color = CreatureSymbol.ColorOfCreature(CreatureSymbol.SymbolDataFromCreature(creature.abstractCreature));
+        }
+
+        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            for (int i = 0; i < sLeaser.sprites.Length; i++)
+            {
+                sLeaser.sprites[i].RemoveFromContainer();
+                rCam.ReturnFContainer("HUD").AddChild(sLeaser.sprites[i]);
+            }
         }
     }
 }

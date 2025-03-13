@@ -1266,6 +1266,9 @@ namespace RandomBuff.Core.BuffMenu
                 BuffHookWarpper.CheckAndDisableAllHook();
                 gameMenu.manager.rainWorld.progression.WipeSaveState(gameMenu.CurrentName);
                 BuffDataManager.Instance.SetGameSetting(gameMenu.CurrentName, currentGameSetting = pickedMission.GameSetting.Clone());
+                
+                BuffDataManager.Instance.ActiveBuffData(gameMenu.CurrentName);
+
                 //currentGameSetting.MissionId = pickedMission.ID.value;
                 gameMenu.manager.rainWorld.progression.currentSaveState = null;
                 menu.manager.arenaSitting = null;

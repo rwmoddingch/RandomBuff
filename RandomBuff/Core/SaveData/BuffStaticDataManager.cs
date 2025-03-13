@@ -84,6 +84,11 @@ namespace RandomBuff.Core.SaveData
             PluginInfos.Add(assemblyName, info = new BuffPluginInfo(assemblyName));
             return info;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool ContainsPluginInfo(string assemblyName)
+            => PluginInfos.ContainsKey(assemblyName);
+        
 
         internal static IEnumerable<BuffPluginInfo> GetEnabledPluginInfos()
         {
