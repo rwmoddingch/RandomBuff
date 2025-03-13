@@ -1,5 +1,6 @@
 ﻿using BuiltinBuffs.Positive;
 using MoreSlugcats;
+using Music;
 using RandomBuff;
 using RandomBuff.Core.Buff;
 using RandomBuff.Core.Entry;
@@ -12,6 +13,7 @@ using RandomBuffUtils;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -139,6 +141,12 @@ namespace BuiltinBuffs.Missions.UltraKill
 
         int inWaveID;
 
+        List<string> songs = new List<string>();
+        int songIndex = 0;
+        int switchSongDelay;
+
+        MusicPlayer MusicPlayer => room.game.manager.musicPlayer;
+
         public UltraKillManager(Room room, Action finishCallBack)
         {
             this.room = room;
@@ -168,6 +176,46 @@ namespace BuiltinBuffs.Missions.UltraKill
                 room.game.cameras[0].hud.AddPart(missionHUD = new UltraKillMissionHUD(room.game, room.game.cameras[0].hud));
                 eventManager = new UltraKillEventManager(missionHUD, room.game);
                 ultraKillPlayerRevulver = new UltraKillPlayerRevulver(this, missionHUD);
+            }
+
+            //if(room.game.manager.musicPlayer.threatTracker.region != "SS")
+            //{
+            //    room.game.manager.musicPlayer.threatTracker.region = "SS";
+            //    room.game.manager.musicPlayer.NewRegion("SS");
+            //}
+
+            //room.game.manager.musicPlayer.threatTracker.currentThreat = 1300f;
+
+            //BuffUtils.Log("UltraKillMission", $"{MusicPlayer.song != null} : {(MusicPlayer.song != null ? MusicPlayer.song.name : null)}");
+            if (switchSongDelay > 0)
+                switchSongDelay--;
+
+            if ((MusicPlayer.song == null) && songs.Count > 0 && switchSongDelay == 0)
+            {
+                MusicPlayer.GameRequestsSong(new MusicEvent()
+                {
+                    fadeInTime = 4f,
+                    roomsRange = -1,
+                    cyclesRest = 0,
+                    volume = 0.15f,
+                    prio = 10f,
+                    stopAtDeath = false,
+                    stopAtGate = false,
+                    loop = false,
+                    maxThreatLevel = 1300,
+                    songName = $"BUFF_{UltraCoinsBuffEntry.ultraCoinsBuffID.GetStaticData().AssetPath}/{songs[songIndex]}",
+                });
+                BuffUtils.Log("UltraKillMission", $"switch song : {songs[songIndex]}");
+                songIndex++;
+                if (songIndex >= songs.Count)
+                {
+                    songIndex = 0;
+                }
+            }
+            if (MusicPlayer.song != null)
+            {
+                MusicPlayer.song.baseVolume = Mathf.Lerp(0.15f, 0.30f, Mathf.InverseLerp(0f, 1300f, MusicPlayer.threatTracker.currentThreat));
+                //BuffUtils.Log("UltraKillMission", $"{MusicPlayer.threatTracker.currentThreat}");
             }
 
             eventManager?.Update();
@@ -288,6 +336,23 @@ namespace BuiltinBuffs.Missions.UltraKill
 
                 activeWaveObjects.Add(new WaveObject());
             }
+            else if(waveInfo is UltraKillWave.SongInfo song)
+            {
+                MusicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                {
+                    fadeOutTime = 0.5f,
+                    prio = 100,
+                    type = StopMusicEvent.Type.AllSongs
+                });
+
+                switchSongDelay = 40;
+                songs.Clear();
+                foreach(var s in song.songName)
+                {
+                    songs.Add(s);
+                }
+                songIndex = 0;
+            }
 
             foreach (var obj in activeWaveObjects)
             {
@@ -364,6 +429,12 @@ namespace BuiltinBuffs.Missions.UltraKill
             eventManager?.Destroy();
             ultraKillPlayerRevulver?.Destroy();
             UltraKillHooks.HookOff();
+            MusicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            {
+                fadeOutTime = 1f,
+                prio = 100,
+                type = StopMusicEvent.Type.AllSongs
+            });
         }
 
         EntityID GetNewID()
@@ -783,9 +854,9 @@ namespace BuiltinBuffs.Missions.UltraKill
 
     internal static class UltraKillWave
     {
-        static string[] waveType = new string[] { "Wait", "SpawnItems", "SpawnCreatures", "ClearStage", "ExtraBuff", "Finish" };
+        static readonly string[] waveType = new string[] { "Wait", "SpawnItems", "SpawnCreatures", "ClearStage", "ExtraBuff", "Finish", "Song" };
         public static List<WaveInfo> waves = new List<WaveInfo>();
-        public static IntVector2[] spawnEnemyPos = new IntVector2[]
+        public static readonly IntVector2[] spawnEnemyPos = new IntVector2[]
         {
             new IntVector2(10, 35),//0
             new IntVector2(27, 34),
@@ -799,7 +870,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             new IntVector2(20, 4),
             new IntVector2(52, 4)//10
         };
-        public static IntVector2[] spawnItemPos = new IntVector2[]
+        public static readonly IntVector2[] spawnItemPos = new IntVector2[]
         {
             new IntVector2(9, 13),
             new IntVector2(17, 13),
@@ -821,9 +892,19 @@ namespace BuiltinBuffs.Missions.UltraKill
             new IntVector2(47, 4),
             new IntVector2(64, 6)//17
         };
-
+        public static readonly string[] BattleSongs = new string[]
+        {
+            "UnstoppableForce",
+            "CastleVein",
+            "Versus"
+        };
         public static void InitWaveInfos()
         {
+            foreach(var song in BattleSongs)
+            {
+                BuffScene.PreloadTrack($"BUFF_{UltraCoinsBuffEntry.ultraCoinsBuffID.GetStaticData().AssetPath}/{song}");
+            }
+
             string path = AssetManager.ResolveFilePath(UltraCoinsBuffEntry.ultraCoinsBuffID.GetStaticData().AssetPath + $"{Path.DirectorySeparatorChar}UltraKillWaves.txt");
             var lines = File.ReadAllLines(path);
             //CreatureTemplate.Type a = CreatureTemplate.Type.YellowLizard;
@@ -855,8 +936,10 @@ namespace BuiltinBuffs.Missions.UltraKill
                             waves.Add(currentWaveInfo = new ClearStageInfo());
                         else if (currentWaveInfoType == "ExtraBuff")
                             waves.Add(currentWaveInfo = new ExtraBuffInfo());
-                        else if(currentWaveInfoType == "Finish")
+                        else if (currentWaveInfoType == "Finish")
                             waves.Add(currentWaveInfo = new FinishInfo());
+                        else if (currentWaveInfoType == "Song")
+                            waves.Add(currentWaveInfo = new SongInfo());
 
                         BuffUtils.Log("UltraKillMission", $"new waveinfo {currentWaveInfoType}");
                         continue;
@@ -930,6 +1013,12 @@ namespace BuiltinBuffs.Missions.UltraKill
                             else
                                 buffInfo.stackCount.Add(1);
                         }
+                        else if(currentWaveInfoType == "Song")
+                        {
+                            var songInfo = currentWaveInfo as SongInfo;
+                            songInfo.songName.Add(trimed);
+                            BuffUtils.Log("UltraKillMission", $"song : {trimed}");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -968,6 +1057,11 @@ namespace BuiltinBuffs.Missions.UltraKill
         {
             public List<BuffID> extraBuffs = new List<BuffID>();
             public List<int> stackCount = new List<int>();
+        }
+
+        public class SongInfo : WaveInfo
+        {
+            public List<string> songName = new List<string>();
         }
     }
 }

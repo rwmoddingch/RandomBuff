@@ -22,23 +22,39 @@ using System.IO;
 using MoreSlugcats;
 using static BuiltinBuffs.Missions.UltraKill.UltraKillWave;
 using static System.Net.Mime.MediaTypeNames;
+using RandomBuff.Core.Game;
+using HUD;
 
 namespace BuiltinBuffs.Positive
 {
-    internal class UltraCoinsBuff : Buff<UltraCoinsBuff, UltraCoinsBuffData>
+    internal class UltraCoinsBuff : Buff<UltraCoinsBuff, UltraCoinsBuffData>, BuffHudPart.IOwnBuffHudPart
     {
         public override BuffID ID => UltraCoinsBuffEntry.ultraCoinsBuffID;
 
-        FLabel label;
-        
-        
+        public static int MaxCoinCount => 6;
+
+        UltraCoinHUD coinHUD;
+        int[] availableCoinsCount;
+        float[] reloadProgression;
+        bool[] keyDows;
 
         public UltraCoinsBuff()
         {
-            //label = new FLabel(Custom.GetDisplayFont(), "");
-            //Futile.stage.AddChild(label);
-            
-            label = new FLabel(Custom.GetFont(), "");
+            BuffCustom.TryGetGame(out var game);
+            availableCoinsCount = new int[game.Players.Count];
+            reloadProgression = new float[game.Players.Count];
+            keyDows = new bool[game.Players.Count];
+
+            for (int i = 0; i < game.Players.Count; i++)
+            {
+                availableCoinsCount[i] = MaxCoinCount;
+                reloadProgression[i] = 0f;
+                BuffUtils.Log("UltraCoin", $"bind key {i} : {Data[i]}");
+            }
+            for(int i = 0;i < 4; i++)
+            {
+                BuffUtils.Log("UltraCoin", $"key {i} : {Data.GetConfigurableValue($"Player{i+1}")}");
+            }
         }
 
         public override (bool, bool) TriggerWithEffect(RainWorldGame game)
@@ -48,9 +64,37 @@ namespace BuiltinBuffs.Positive
 
         public override void Update(RainWorldGame game)
         {
-            base.Update(game);
-            //label.MoveToFront();
-            
+            base.Update(game);        
+            coinHUD?.GameUpdate(game, availableCoinsCount, reloadProgression);
+
+            for(int i = 0;i < availableCoinsCount.Length; i++)
+            {
+                if (availableCoinsCount[i] < MaxCoinCount)
+                {
+                    reloadProgression[i] += 1 / 120f;
+                    if (reloadProgression[i] >= 1f)
+                    {
+                        reloadProgression[i] = 0f;
+                        availableCoinsCount[i]++;
+                    }
+                }
+            }
+
+            bool playSound = false;
+            for(int i = 0;i < game.Players.Count; i++)
+            {
+                bool keydown = Data[i] != KeyCode.None && Input.GetKey(Data[i]);
+                if(keydown && !keyDows[i])
+                {
+                    var p = game.Players[i];
+                    if (p.realizedCreature != null && p.realizedCreature.room != null && availableCoinsCount[i] > 0 && !p.realizedCreature.dead)
+                    {
+                        ThrowCoin(p.realizedCreature as Player, ref playSound);
+                        availableCoinsCount[i]--;
+                    }
+                }
+                keyDows[i] = keydown;
+            }
         }
 
         public override void Destroy()
@@ -62,43 +106,200 @@ namespace BuiltinBuffs.Positive
         public override bool Trigger(RainWorldGame game)
         {
             bool playSound = false;
-            foreach(var p in game.AlivePlayers)
+            for(int i = 0;i < game.Players.Count;i++)
             {
-                if (p.realizedCreature != null && p.realizedCreature.room != null)
+                var p = game.Players[i];
+                if (p.realizedCreature != null && p.realizedCreature.room != null && availableCoinsCount[i] > 0 && !p.realizedCreature.dead)
                 {
-                    var player = p.realizedCreature as Player;
-                    var abCoin = new AbstractUltraCoin(p.world, null, p.pos, player.room.game.GetNewID());
-                    player.room.abstractRoom.AddEntity(abCoin);
-                    abCoin.RealizeInRoom();
+                    ThrowCoin(p.realizedCreature as Player, ref playSound);
 
-                    var coin = abCoin.realizedObject as UltraCoin;
-                    Vector2 extraVel = player.firstChunk.vel + player.input[0].analogueDir * 9f + Vector2.up * 9f + Custom.RNV();
-                    if (player.input[0].IntVec.y == 0)
-                    {
-                        extraVel += (player.flipDirection == 1 ? Vector2.right : Vector2.left) * 9f;
-                    }
-
-                    coin.firstChunk.pos = player.firstChunk.pos + (player.firstChunk.rad + coin.firstChunk.rad) * extraVel.normalized;
-                    coin.firstChunk.lastPos = coin.firstChunk.pos;
-
-                    coin.firstChunk.vel = extraVel;
-
-                    if (!playSound)
-                    {
-                        player.room.PlaySound(SoundID.SS_AI_Marble_Hit_Floor, 0f, 1f, 3f + Random.value * 0.2f);
-                        player.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, 0f, 0.7f, 6f + Random.value * 0.2f);
-                        playSound = true;
-                    }
+                    availableCoinsCount[i]--;
                 }
             }
-
+            //BuffUtils.Log("UltraCoins", $"{game.world.region.name}");
             return false;
+        }
+
+        void ThrowCoin(Player player, ref bool playSound)
+        {
+            var abCoin = new AbstractUltraCoin(player.abstractCreature.world, null, player.abstractCreature.pos, player.room.game.GetNewID());
+            player.room.abstractRoom.AddEntity(abCoin);
+            abCoin.RealizeInRoom();
+
+            var coin = abCoin.realizedObject as UltraCoin;
+            Vector2 extraVel = player.firstChunk.vel + player.input[0].analogueDir * 9f + Vector2.up * 9f + Custom.RNV();
+            if (player.input[0].IntVec.y == 0)
+            {
+                extraVel += (player.flipDirection == 1 ? Vector2.right : Vector2.left) * 9f;
+            }
+
+            coin.firstChunk.pos = player.firstChunk.pos + (player.firstChunk.rad + coin.firstChunk.rad) * extraVel.normalized;
+            coin.firstChunk.lastPos = coin.firstChunk.pos;
+
+            coin.firstChunk.vel = extraVel;
+
+            if (!playSound)
+            {
+                player.room.PlaySound(SoundID.SS_AI_Marble_Hit_Floor, 0f, 1f, 3f + Random.value * 0.2f);
+                player.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, 0f, 0.7f, 6f + Random.value * 0.2f);
+                playSound = true;
+            }
+        }
+
+        public BuffHudPart CreateHUDPart()
+        {
+            return coinHUD = new UltraCoinHUD((Custom.rainWorld.processManager.currentMainLoop as RainWorldGame).Players.Count);    
         }
     }
 
- 
+    internal class UltraCoinHUD : BuffHudPart
+    {
+        public CoinHUD[] coinHUDs;
+        public UltraCoinHUD(int playerCount)
+        {
+            coinHUDs = new CoinHUD[playerCount];
+        }
 
-    internal class UltraCoinsBuffData : BuffData
+        public override void InitSprites(HUD.HUD hud)
+        {
+            base.InitSprites(hud);
+            for(int i = 0;i < coinHUDs.Length;i++)
+            {
+                coinHUDs[i] = new CoinHUD(hud, hud.fContainers[0]);
+            }
+        }
+
+        public override void Update(HUD.HUD hud)
+        {
+            for (int i = 0; i < coinHUDs.Length; i++)
+            {
+                coinHUDs[i].Update();
+            }
+        }
+
+        public void GameUpdate(RainWorldGame game, int[] availableCoins, float[] reloadProg)
+        {
+            for(int i = 0;i < game.Players.Count; i++)
+            {
+                var player = game.Players[i];
+                coinHUDs[i].show = player.realizedCreature != null && player.realizedCreature.room != null && player.realizedCreature.room == game.cameras[0].room && !player.realizedCreature.dead;
+                if (coinHUDs[i].show)
+                {
+                    coinHUDs[i].pos = player.realizedCreature.DangerPos - game.cameras[0].pos;
+                    coinHUDs[i].availableCoinCount = availableCoins[i];
+                    coinHUDs[i].loadProgress = reloadProg[i];
+                }
+            }
+        }
+
+        public override void Draw(HUD.HUD hud, float timeStacker)
+        {
+            for (int i = 0; i < coinHUDs.Length; i++)
+            {
+                coinHUDs[i].Draw(timeStacker);
+            }
+        }
+
+        public override void ClearSprites()
+        {
+            for (int i = 0; i < coinHUDs.Length; i++)
+            {
+                coinHUDs[i].ClearSprites();
+            }
+        }
+
+        internal class CoinHUD
+        {
+            public Vector2 pos, lastPos;
+            public float loadProgress, lastLoadProgress;
+            public int availableCoinCount = 6;
+
+            HUDCircle[] coinSprites;
+            HUDCircle reloadSprite;
+
+            public float showFactor;
+            public float lastShowFactor;
+
+            public bool show;
+
+            public CoinHUD(HUD.HUD hud, FContainer fContainer)
+            {
+                coinSprites = new HUDCircle[UltraCoinsBuff.MaxCoinCount];
+                reloadSprite = new HUDCircle(hud, HUDCircle.SnapToGraphic.smallEmptyCircle, fContainer, 1);
+                reloadSprite.fade = reloadSprite.lastFade = 0;
+
+                for(int i = 0;i < coinSprites.Length; i++)
+                {
+                    coinSprites[i] = new HUDCircle(hud, HUDCircle.SnapToGraphic.smallEmptyCircle, fContainer, 2);
+                    coinSprites[i].fade = coinSprites[i].lastFade = 0;
+                }
+            }
+
+            public void Update()
+            {
+                lastPos = pos;
+                lastLoadProgress = loadProgress;
+                
+                if(show && showFactor < 1)
+                {
+                    showFactor += 1 / 10f;
+                }
+                else if(!show && showFactor > 0)
+                {
+                    showFactor -= 1 / 10f;
+                }
+            
+
+                float smoothShow = Helper.EaseInOutCubic(showFactor);
+
+
+                for(int i = 0;i < coinSprites.Length;i++)
+                {
+                    coinSprites[i].Update();
+                    coinSprites[i].fade = smoothShow * (i < availableCoinCount ? 1f : 0f);
+                    coinSprites[i].snapRad = 0.45f;
+                    coinSprites[i].snapThickness = 0.45f;
+                    coinSprites[i].rad = Mathf.Lerp(0f, 3f, coinSprites[i].fade);
+                    coinSprites[i].pos = CoinPosBias(i) + pos;
+                    coinSprites[i].thickness = 3f;
+
+                }
+                reloadSprite.Update();
+                reloadSprite.fade = smoothShow * (availableCoinCount == UltraCoinsBuff.MaxCoinCount ? 0f : 1f);
+                reloadSprite.thickness = Mathf.Lerp(0f, 3f, loadProgress);
+                reloadSprite.snapRad = 0.45f;
+                reloadSprite.snapThickness = 0.45f;
+                reloadSprite.rad = Mathf.Lerp(0f, 3f, reloadSprite.fade);
+                reloadSprite.pos = CoinPosBias(availableCoinCount) + pos;
+            }
+
+            public void Draw(float timeStacker)
+            {
+                foreach(var circle in coinSprites)
+                {
+                    circle.Draw(timeStacker);
+                }
+                reloadSprite.Draw(timeStacker);
+            }
+
+            public void ClearSprites()
+            {
+                foreach (var circle in coinSprites)
+                    circle.ClearSprite();
+                reloadSprite.ClearSprite();
+            }
+
+            public Vector2 CoinPosBias(int index)
+            {
+                float xbias = (index) % 2 == 0 ? -6f : 6f;
+                float yBias = Mathf.FloorToInt((index) / 2f) * -10f - 40f;
+                return new Vector2(xbias, yBias);
+            }
+        }
+    }
+
+
+    internal class UltraCoinsBuffData : KeyBindBuffData
     {
         public override BuffID ID => UltraCoinsBuffEntry.ultraCoinsBuffID;
     }
@@ -128,24 +329,7 @@ namespace BuiltinBuffs.Positive
             On.Spear.Update += Spear_Update;
             On.Spear.Thrown += Spear_Thrown;
             On.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-            //On.Room.PlaySound_SoundID_BodyChunk_bool_float_float_bool += Room_PlaySound_SoundID_BodyChunk_bool_float_float_bool;
-            //On.Room.PlaySound_SoundID_Vector2_float_float += Room_PlaySound_SoundID_Vector2_float_float;
         }
-
-      
-
-        //private static void Room_PlaySound_SoundID_Vector2_float_float(On.Room.orig_PlaySound_SoundID_Vector2_float_float orig, Room self, SoundID soundId, Vector2 pos, float vol, float pitch)
-        //{
-        //    UltraCoinsBuff.Instance.blindWaveEffectManager.PositonedSoundPlayed(soundId, pos, vol * 100f, null);
-        //    orig.Invoke(self, soundId, pos , vol, pitch);
-        //}
-
-        //private static ChunkSoundEmitter Room_PlaySound_SoundID_BodyChunk_bool_float_float_bool(On.Room.orig_PlaySound_SoundID_BodyChunk_bool_float_float_bool orig, Room self, SoundID soundId, BodyChunk chunk, bool loop, float vol, float pitch, bool randomStartPosition)
-        //{
-        //    UltraCoinsBuff.Instance.blindWaveEffectManager.PositonedSoundPlayed(soundId, chunk.pos, vol * 100f, chunk);
-        //    return orig.Invoke(self, soundId, chunk, loop, vol, pitch, randomStartPosition);
-        //}
-
       
 
         private static void RainWorldGame_RawUpdate(On.RainWorldGame.orig_RawUpdate orig, RainWorldGame self, float dt)

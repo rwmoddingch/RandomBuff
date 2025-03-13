@@ -55,6 +55,30 @@ namespace RandomBuffUtils
         }
 
         private static readonly string[] FileEnd = new[] { ".ogg", ".wav" };
+        private static Dictionary<string, AudioClip> preLoadedClips = new Dictionary<string, AudioClip>();
+
+        /// <summary>
+        /// 提前加载音频到内存，防止卡顿
+        /// </summary>
+        /// <param name="name"></param>
+        public static void PreloadTrack(string name)
+        {
+            if (!preLoadedClips.ContainsKey(name))
+            {
+                foreach (var end in FileEnd)
+                {
+                    if (File.Exists(AssetManager.ResolveFilePath(name.Replace("BUFF_", "") +
+                                                         end)))
+                    {
+                        preLoadedClips.Add(name, AssetManager.SafeWWWAudioClip(
+                           "file://" + AssetManager.ResolveFilePath(name.Replace("BUFF_", "") + end),
+                           false, true, end == ".ogg" ? AudioType.OGGVORBIS : AudioType.WAV));
+                        BuffUtils.Log(nameof(BuffScene), $"Preload buff music at {name.Replace("BUFF_", "") + end}");
+                        break;
+                    }
+                }
+            }
+        }
 
         private static void SubTrack_Update(On.Music.MusicPiece.SubTrack.orig_Update orig, MusicPiece.SubTrack self)        
         {
@@ -62,7 +86,12 @@ namespace RandomBuffUtils
             {
                 foreach (var end in FileEnd)
                 {
-                    if (self.source.clip == null && self.trackName.StartsWith("BUFF_") && File.Exists(
+                    if(self.source.clip == null && preLoadedClips.ContainsKey(self.trackName))
+                    {
+                        self.isStreamed = true;
+                        self.source.clip = preLoadedClips[self.trackName];
+                    }
+                    else if (self.source.clip == null && self.trackName.StartsWith("BUFF_") && File.Exists(
                             AssetManager.ResolveFilePath(self.trackName.Replace("BUFF_", "") +
                                                          end)))
                     {

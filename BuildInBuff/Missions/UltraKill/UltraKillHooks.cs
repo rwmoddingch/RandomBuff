@@ -14,7 +14,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             On.ArtificialIntelligence.StaticRelationship += ArtificialIntelligence_StaticRelationship;
             On.ArtificialIntelligence.Update += ArtificialIntelligence_Update;
             On.ScavengerAI.LikeOfPlayer += ScavengerAI_LikeOfPlayer;
-            On.PreyTracker.Utility += PreyTracker_Utility; ;
+            On.PreyTracker.Utility += PreyTracker_Utility;
         }
 
         private static float PreyTracker_Utility(On.PreyTracker.orig_Utility orig, PreyTracker self)
