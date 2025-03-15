@@ -316,7 +316,7 @@ namespace RandomBuff.Core.SaveData
         /// 同步BuffData数据
         /// </summary>
         /// <param name="name"></param>
-        private void SyncToData()
+        internal void SyncToData()
         {
             if (currentDatas.name == Nullptr || IsHasMalnourished())
                 return;

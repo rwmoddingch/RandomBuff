@@ -1,0 +1,18 @@
+{
+  "FaceName": "Fortitude",
+  "BuffID": "Fortitude",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "坚韧",
+    "Description": "拥有此卡时，每层使你受到的伤害减少25%，被撕咬致死率减少50%。"
+  },
+  "English": {
+    "BuffName": "Fortitude",
+    "Description": "When you have this card, each layer reduces the damage you receive by 25% and the mortality rate from being bitten by 50%."
+  }
+}

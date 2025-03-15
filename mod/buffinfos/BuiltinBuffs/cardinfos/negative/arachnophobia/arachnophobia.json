@@ -1,17 +1,18 @@
 {
-    "FaceName": "arachnophobia",
-    "BuffID" : "Arachnophobia",
-    "BuffType" : "Negative",
-    "BuffProperty" : "Normal",
-    "Triggerable" : false,
-    "Color" : "80003C",
+  "FaceName": "arachnophobia",
+  "BuffID": "Arachnophobia",
+  "BuffType": "Negative",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "80003C",
 
-    "Chinese" : {
-        "BuffName" : "蜘蛛恐惧症",
-        "Description" : "所有生物死后都会生成一大堆小蜘蛛"
-    },
-    "English" : {
-        "BuffName" : "Arachnophobia",
-        "Description" : "Spiders burst from creature corpses."
-    }
+  "Chinese": {
+    "BuffName": "蜘蛛恐惧症",
+    "Description": "所有生物死后都会生成一大堆小蜘蛛。从第二层开始，所有生物受到伤害时都会生成一些小蜘蛛，数量根据叠加层数增加。"
+  },
+  "English": {
+    "BuffName": "Arachnophobia",
+    "Description": "Spiders burst from creature corpses. Starting from the second layer, all creatures will generate some small spiders when they are injured, and the number will increase according to the stacking layers."
+  }
 }

@@ -1,17 +1,19 @@
 {
-    "FaceName": "spearrain",
-    "BuffID" : "SpearRain",
-    "BuffType" : "Negative",
-    "BuffProperty" : "Normal",
-    "Triggerable" : false,
-    "Color" : "B9835D",
+  "FaceName": "spearrain",
+  "BuffID": "SpearRain",
+  "BuffType": "Negative",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": true,
+  "Color": "B9835D",
+  "MaxStackLayers": 2,
 
-    "Chinese" : {
-        "BuffName" : "矛矛雨",
-        "Description" : "下雨时会同时下触地消失的矛，矛可以对生物造成少量伤害"
-    },
-    "English": {
-        "BuffName": "SpearRain",
-        "Description": "It will rain spears, spears do a small amount of damage to anything they hit."
-    }
+  "Chinese": {
+    "BuffName": "矛矛雨",
+    "Description": "下雨时会同时下触地消失的矛，矛可以对生物造成少量伤害。第二层将使循环内随机降下小阵雨。"
+  },
+  "English": {
+    "BuffName": "SpearRain",
+    "Description": "It will rain spears, spears do a small amount of damage to anything they hit. The second layer will cause small showers to randomly fall within the cycle."
+  }
 }

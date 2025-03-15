@@ -8,5 +8,6 @@
     {
         "Name": "Lobotomy Corporation Pack",
         "Description":"Added a series of Lobotomy Corporation related cards"
-    }
+    },
+    "Dependencies": ["BuiltinBuffs"]
 }

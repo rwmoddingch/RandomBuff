@@ -74,8 +74,9 @@ namespace RandomBuff.Core.SaveData
         internal static string GetAssemblyName(BuffID buff) => BuffAssemblyMap[buff];
 
 
-
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        bool IsMissionComplete(string missionId) => BuffPlayerData.Instance.finishedMission.Contains(missionId);
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static BuffPluginInfo GetPluginInfo(string assemblyName)
         {

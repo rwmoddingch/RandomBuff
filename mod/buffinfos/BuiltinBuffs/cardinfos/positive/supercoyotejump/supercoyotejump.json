@@ -1,0 +1,18 @@
+{
+  "FaceName": "SuperCoyoteJump",
+  "BuffID": "SuperCoyoteJump",
+  "BuffType": "Positive",
+  "BuffProperty": "Normal",
+  "Triggerable": false,
+  "Stackable": false,
+  "Color": "E3AB4E",
+
+  "Chinese": {
+    "BuffName": "超级狼跳",
+    "Description": "你能进行狼跳的时长加倍。"
+  },
+  "English": {
+    "BuffName": "SuperCoyoteJump",
+    "Description": "You can double the duration of coyote jumping."
+  }
+}

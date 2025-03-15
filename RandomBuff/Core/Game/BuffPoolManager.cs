@@ -263,6 +263,8 @@ namespace RandomBuff.Core.Game
         {
             BuffPlugin.Log($"New game, character: {game.StoryCharacter}, Slot: {game.rainWorld.options.saveSlot}, " +
                            $"buff count: {BuffDataManager.Instance.GetDataList(game.StoryCharacter).Count()}");
+            
+            BuffDataManager.Instance.ActiveBuffData(BuffDataManager.Nullptr);
             return new BuffPoolManager(game);
         }
 
