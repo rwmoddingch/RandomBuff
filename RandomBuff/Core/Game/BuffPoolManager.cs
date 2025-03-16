@@ -416,12 +416,12 @@ namespace RandomBuff.Core.Game
         internal IBuff CreateBuff(BuffID id, bool needStack = false)
         {
             BuffPlugin.Log($"Create buff instance: {id}");
-            if (buffDictionary.ContainsKey(id))
+            if (buffDictionary.TryGetValue(id, out var buff1))
             {
                 BuffPlugin.LogWarning($"Buff: {id} Already Contain");
                 if(needStack && id.GetStaticData().Stackable)
                     GetBuffData(id).Stack();
-                return buffDictionary[id];
+                return buff1;
             }
 
             if (!cycleDatas.ContainsKey(id))

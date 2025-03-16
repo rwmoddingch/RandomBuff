@@ -42,7 +42,7 @@ namespace BuiltinBuffs.Negative
                !self.Template.smallCreature)
             {
                 BuffUtils.Log(arachnophobiaID, "Arachnophobia Creature_Violence");
-                int max = Mathf.RoundToInt(Random.Range(5, 12) * Custom.LerpMap(self.TotalMass, 1, 10, 0.35f, 2f) * damage * 0.25f * arachnophobiaID.GetBuffData().StackLayer);
+                int max = Mathf.Max(1, Mathf.RoundToInt(Random.Range(5, 12) * Custom.LerpMap(self.TotalMass, 1, 10, 0.35f, 2f) * damage * 0.25f * arachnophobiaID.GetBuffData().StackLayer));
                 for (int i = 0; i < max; i++)
                 {
                     AbstractCreature creature = new AbstractCreature(self.abstractCreature.world,
