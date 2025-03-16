@@ -157,7 +157,7 @@ namespace RandomBuff.Render.UI.BuffPack
             }
         }
 
-        public void OnPackButtonClick()
+        public void OnPackButtonClick(PackButton self)
         {
             List<BuffPluginInfo> enabledPlugins = new List<BuffPluginInfo>();
 

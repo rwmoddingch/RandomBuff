@@ -42,7 +42,7 @@ namespace RandomBuff.Render.UI.BuffPack
             }
         }
 
-        public Action ToggleCallBack;
+        public Action<PackButton> ToggleCallBack;
 
         public PackButton(Vector2 pos, Vector2 size, BuffPluginInfo pluginInfo, bool showDescription = true, bool canBeDisable = true) : base(pos, size, "")
         {
@@ -100,7 +100,7 @@ namespace RandomBuff.Render.UI.BuffPack
             if (!_canBeDisabled)
                 return;
             Enabled = !Enabled;
-            ToggleCallBack?.Invoke();
+            ToggleCallBack?.Invoke(this);
         }
 
         public override void Change()

@@ -3,6 +3,7 @@ using Menu.Remix.MixedUI;
 using Menu.Remix.MixedUI.ValueTypes;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.BuffPack;
+using RandomBuffUtils;
 using RandomBuffUtils.MixedUI;
 using RWCustom;
 using System;
@@ -21,9 +22,10 @@ namespace RandomBuff.Core.Option
         private static readonly Color CheatColor = new Color(0.85f, 0.35f, 0.4f);
 
 
-        public List<PackButton> packButtons;
+        public PackButton[] packButtons;
 
         private bool[] isChanged;
+        private string[] pluginInfoNames;
 
         public bool HasAnyChanged()
         {
@@ -133,22 +135,63 @@ namespace RandomBuff.Core.Option
 
 
             float sizeY = 0f;
-            packButtons = packButtons = new List<PackButton>();
-           
-            foreach (var pluginInfo in BuffConfigManager.GetSortedPluginInfos())
+            
+
+            var infos = BuffConfigManager.GetSortedPluginInfos();
+            packButtons = packButtons = new PackButton[infos.Count()];
+            isChanged = new bool[infos.Count()];
+            pluginInfoNames = new string[infos.Count()];
+
+            int i = 0;
+            foreach (var pluginInfo in infos)
             {
+                
                 var button = new PackButton(Vector2.zero, new Vector2(525f, 120f), pluginInfo, true, pluginInfo.AssemblyName !=  "BuiltinBuffs") { Enabled = pluginInfo.Enabled };
-                var index = packButtons.Count;
-                button.ToggleCallBack += () =>
+
+                button.ToggleCallBack += (self) =>
                 {
-                    isChanged[index] = !isChanged[index];
+                    int buttonIndex = packButtons.IndexOf(self);
+                    isChanged[buttonIndex] = !isChanged[buttonIndex];
+
+                    if (self.Enabled)
+                    {
+                        foreach (var dependentPack in self.pluginInfo.Dependencies)
+                        {
+                            int newIndex = -1;
+                            for (int j = 0;j < pluginInfoNames.Length; j++)
+                            {
+                                if (pluginInfoNames[j].Equals(dependentPack))
+                                    newIndex = j;
+                            }
+                            if(newIndex != -1)
+                            {
+                                isChanged[newIndex] = packButtons[newIndex].Enabled == false;
+                                packButtons[newIndex].Enabled = true;
+                            }
+                   
+                        }
+                    }
+                    else
+                    {
+                        for (int l = 0; l < packButtons.Length; l++)
+                        {
+                            var button = packButtons[l];
+                            if (button.pluginInfo.Dependencies.Contains(self.pluginInfo.AssemblyName))
+                            {
+                                isChanged[l] = button.Enabled == true;
+                                button.Enabled = false;
+                            }
+                        }
+                    }
                 };
-                packButtons.Add(button);
+                packButtons[i] = button;
+                pluginInfoNames[i] = pluginInfo.AssemblyName;
                 sizeY += 120f + 20f;
                 BuffPlugin.Log(pluginInfo.AssemblyName);
+                i++;
             }
 
-            isChanged = new bool[packButtons.Count];
+            
 
             sizeY = Mathf.Max(sizeY, 560f);
 
