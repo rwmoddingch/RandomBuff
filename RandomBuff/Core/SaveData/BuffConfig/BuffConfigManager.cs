@@ -6,24 +6,8 @@ using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
-using MonoMod.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RandomBuff.Core.Buff;
-using RandomBuff.Core.Game.Settings.GachaTemplate;
-using RandomBuff.Core.Option;
-using RandomBuff.Core.Progression;
-using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData.BuffConfig;
 
 namespace RandomBuff.Core.SaveData

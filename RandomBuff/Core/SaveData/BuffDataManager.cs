@@ -21,14 +21,14 @@ namespace RandomBuff.Core.SaveData
 
     class CurrentBuffDatas
     {
-        public Dictionary<BuffID, BuffData> datas = new Dictionary<BuffID, BuffData>();
+        public Dictionary<BuffID, BuffData> datas = new();
         
         public SlugcatStats.Name name = BuffDataManager.Nullptr;
 
         public void Clear(SlugcatStats.Name name)
         {
             this.name = name;
-            datas.Clear();
+            datas = new Dictionary<BuffID, BuffData>();
         }
     }
     
@@ -280,6 +280,9 @@ namespace RandomBuff.Core.SaveData
             if (name == currentDatas.name)
                 return;
             currentDatas.Clear(name);
+
+            if (name == Nullptr)
+                return;
 
             if (IsHasMalnourished())
             {
