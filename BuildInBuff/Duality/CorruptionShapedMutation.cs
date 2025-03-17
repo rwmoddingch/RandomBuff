@@ -571,21 +571,6 @@ namespace BuiltinBuffs.Duality
         public override void Stack()
         {
             base.Stack();
-            if (BuffCustom.TryGetGame(out var game))
-            {
-                foreach (var player in game.AlivePlayers.Select(i => i.realizedCreature as Player)
-                             .Where(i => i != null && i.graphicsModule != null))
-                {
-                    if (CorruptionShapedMutationBuffEntry.CorruptionCatFeatures.TryGetValue(player, out _))
-                        CorruptionShapedMutationBuffEntry.CorruptionCatFeatures.Remove(player);
-                    var corruption = new CorruptionCat(player);
-                    CorruptionShapedMutationBuffEntry.CorruptionCatFeatures.Add(player, corruption);
-                    //corruption.CorruptionArthropod(player.graphicsModule as PlayerGraphics);
-                    corruption.graphics.InitiateSprites(game.cameras[0].spriteLeasers.
-                        First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
-                }
-                CorruptionShapedMutationBuffEntry.EstablishRelationship();
-            }
             CorruptionShapedMutationBuffEntry.EstablishRelationship();
         }
     }
@@ -919,25 +904,31 @@ namespace BuiltinBuffs.Duality
             //其他生物对蛞蝓猫的生物关系变成对棕色长腿菌的生物关系
             CreatureTemplate daddy = StaticWorld.GetCreatureTemplate(CorruptionCat.Type);
             CreatureTemplate slug = StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Slugcat);
+            CreatureTemplate slugpup = StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC);
             if (daddy == null || slug == null || slug.type.Index == -1)
             {
                 return;
             }
-            //BuffPlugin.Log($"[CorruptionShapedMutation] StaticWorld.creatureTemplates.Length: {StaticWorld.creatureTemplates.Length}");
             foreach (CreatureTemplate other in StaticWorld.creatureTemplates)
             {
-                //BuffPlugin.Log("[CorruptionShapedMutation] Try to EstablishRelationship...");
-                //已经是蛞蝓猫的食物则不修改
-                if (other != null && slug.relationships[other.type.Index].type != CreatureTemplate.Relationship.Type.Eats)
+                if (other != null)
                 {
-                    StaticWorld.EstablishRelationship(other.type, slug.type, other.relationships[daddy.type.Index]);
-                    StaticWorld.EstablishRelationship(slug.type, other.type, daddy.relationships[other.type.Index]);
+                    //已经是蛞蝓猫的食物则不修改
+                    if (slugpup.relationships[other.type.Index].type != CreatureTemplate.Relationship.Type.Eats)
+                    {
+                        StaticWorld.EstablishRelationship(other.type, slug.type, other.relationships[daddy.type.Index]);
+                        StaticWorld.EstablishRelationship(slug.type, other.type, daddy.relationships[other.type.Index]);
 
-                    //BuffPlugin.Log($"[CorruptionShapedMutation]The relationship between {other.type.ToString()} and {slug.type.ToString()}: {other.relationships[daddy.type.Index].ToString()}");
-                    //BuffPlugin.Log($"[CorruptionShapedMutation]The relationship between {slug.type.ToString()} and {other.type.ToString()}: {daddy.relationships[other.type.Index].ToString()}");
+                        StaticWorld.EstablishRelationship(other.type, slugpup.type, other.relationships[daddy.type.Index]);
+                        StaticWorld.EstablishRelationship(slugpup.type, other.type, daddy.relationships[other.type.Index]);
+                    }
+                    else
+                    {
+                        StaticWorld.EstablishRelationship(other.type, slug.type, other.relationships[slugpup.type.Index]);
+                        StaticWorld.EstablishRelationship(slug.type, other.type, slugpup.relationships[other.type.Index]);
+                    }
                 }
             }
-            //BuffPlugin.Log("[CorruptionShapedMutation] EstablishRelationship!");
         }
 
         private static CreatureTemplate.Relationship IUseARelationshipTracker_UpdateDynamicRelationship(orig_IUseARelationshipTracker_UpdateDynamicRelationship orig,ArtificialIntelligence self, RelationshipTracker.DynamicRelationship dRelation)
@@ -1378,9 +1369,9 @@ namespace BuiltinBuffs.Duality
                     Mathf.Lerp(18f, 6f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
             }
             this.coreChunkConnections[this.coreChunkConnections.Length - 2] = new PhysicalObject.BodyChunkConnection(this.coreChunks[0], this.coreChunks[1],
-                    5f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
+                    8f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
             this.coreChunkConnections[this.coreChunkConnections.Length - 1] = new PhysicalObject.BodyChunkConnection(this.coreChunks[2], this.coreChunks[3],
-                    5f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
+                    8f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
             //触手
             this.tentacles = new CorruptionCatTentacle[this.TentaclesCount];
             for (int i = 0; i < Mathf.Min(player.bodyChunks.Length, this.tentacles.Length); i++)
@@ -1438,7 +1429,7 @@ namespace BuiltinBuffs.Duality
                     tentacle.NewRoom(player.room);
                 this.graphics.legGraphics = new CorruptionCatLegGraphics[this.tentacles.Length];
                 if (BuffCustom.TryGetGame(out var game))
-                    this.graphics.InitiateSprites(game.cameras[0].spriteLeasers.
+                    this.graphics.ResetSprites(game.cameras[0].spriteLeasers.
                         First(i => i.drawableObject == player.graphicsModule), game.cameras[0]);
 
 
@@ -1560,7 +1551,7 @@ namespace BuiltinBuffs.Duality
             bool wantEatCreatue = otherObject is Creature creature && 
                                   creature != null &&
                                   this.DynamicRelationship(creature.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats;
-            bool wantEatObject = CanEat(otherObject) && otherObject != null;
+            bool wantEatObject = CanEatObjectType(otherObject) && otherObject != null;
             if ((wantEatCreatue || wantEatObject) &&
                 this.CheckDaddyConsumption(otherObject))
             {
@@ -1717,7 +1708,7 @@ namespace BuiltinBuffs.Duality
             }
         }
 
-        public bool CanEat(PhysicalObject obj)
+        public bool CanEatObjectType(PhysicalObject obj)
         {
             bool result = obj is Oracle || //(obj is Oracle && BuffPoolManager.Instance.GameSetting.MissionId == "DevouringMysteries") ||
                           obj is NSHSwarmer ||
@@ -2469,11 +2460,14 @@ namespace BuiltinBuffs.Duality
 
         public CreatureTemplate.Relationship DynamicRelationship(AbstractCreature absCrit)//Tracker.CreatureRepresentation rep, 
         {
-            //测试
-            //return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 1f);
-
             if (!ownerRef.TryGetTarget(out var player))
                 return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+
+            CreatureTemplate other = StaticWorld.GetCreatureTemplate(absCrit.creatureTemplate.type);
+            CreatureTemplate slugpup = StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC);
+            
+            if (slugpup.relationships[other.type.Index].type == CreatureTemplate.Relationship.Type.Eats)
+                return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, slugpup.relationships[other.type.Index].intensity);
             /*
 		    if (rep == null)
 		    {
@@ -2488,7 +2482,7 @@ namespace BuiltinBuffs.Duality
 			    return rep.dynamicRelationship.currentRelationship;
 		    }
 		    return this.StaticRelationship(rep.representedCreature);*/
-            return StaticWorld.GetCreatureTemplate(player.Template.type).CreatureRelationship(absCrit.creatureTemplate);
+            return StaticWorld.GetCreatureTemplate(CorruptionCat.Type).CreatureRelationship(absCrit.creatureTemplate);
         }
 
         public class DaddyState : HealthState
@@ -2603,6 +2597,7 @@ namespace BuiltinBuffs.Duality
         public float[,] chunksRotats;
         public int feelSomethingReactionDelay; 
         public float digesting;
+        private bool setOriginLength;
 
         public List<IndicatorSymbol> indicators;
 
@@ -2636,7 +2631,17 @@ namespace BuiltinBuffs.Duality
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             if (self.internalContainerObjects == null)
                 self.internalContainerObjects = new List<GraphicsModule.ObjectHeldInInternalContainer>();
-            this.originLength = sLeaser.sprites.Length;
+            if (!setOriginLength)
+            {
+                this.originLength = sLeaser.sprites.Length;
+                setOriginLength = true;
+            }
+            this.ResetSprites(sLeaser, rCam);
+        }
+
+        public void ResetSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             this.totalLegSprites = 0;
             for (int i = 0; i < this.legGraphics.Length; i++)
             {
@@ -3913,7 +3918,8 @@ namespace BuiltinBuffs.Duality
                 for (int i = 0; i < this.player.room.abstractRoom.creatures.Count; i++)
                 {
                     if (this.player.abstractCreature != this.player.room.abstractRoom.creatures[i] && 
-                        this.player.room.abstractRoom.creatures[i].realizedCreature != null)
+                        this.player.room.abstractRoom.creatures[i].realizedCreature != null &&
+                        this.corruptionCat.DynamicRelationship(this.player.room.abstractRoom.creatures[i]).type == CreatureTemplate.Relationship.Type.Eats)
                     {
                         float num3 = Custom.AimFromOneVectorToAnother(this.player.mainBodyChunk.pos, this.player.room.abstractRoom.creatures[i].realizedCreature.mainBodyChunk.pos);
                         float num4 = Custom.Dist(this.player.mainBodyChunk.pos, this.player.room.abstractRoom.creatures[i].realizedCreature.mainBodyChunk.pos);
@@ -3943,7 +3949,7 @@ namespace BuiltinBuffs.Duality
                             //判断物品是否应该被抓
                             if (this.room.physicalObjects[i][j] != null && 
                                 !(this.room.physicalObjects[i][j] is Creature) &&
-                                (this.room.physicalObjects[i][j] is OracleSwarmer || this.room.physicalObjects[i][j] is NSHSwarmer))
+                                this.corruptionCat.CanEatObjectType(this.room.physicalObjects[i][j]))
                             {
                                 float num3 = Custom.AimFromOneVectorToAnother(this.player.mainBodyChunk.pos, this.room.physicalObjects[i][j].bodyChunks[0].pos);
                                 float num4 = Custom.Dist(this.player.mainBodyChunk.pos, this.room.physicalObjects[i][j].bodyChunks[0].pos);
@@ -4291,8 +4297,7 @@ namespace BuiltinBuffs.Duality
                                     }
                                     Creature creatureRepresentation = realizedCreature;
                                     if (creatureRepresentation == null ||
-                                        !(this.corruptionCat.DynamicRelationship(creatureRepresentation.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats) ||
-                                        realizedCreature is Overseer)
+                                        !(this.corruptionCat.DynamicRelationship(creatureRepresentation.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats))
                                     {
                                         break;
                                     }
@@ -4375,7 +4380,7 @@ namespace BuiltinBuffs.Duality
                                                 break;
                                             }
                                             bool canEat = false;
-                                            if (obj != null && this.corruptionCat.CanEat(obj))
+                                            if (obj != null && this.corruptionCat.CanEatObjectType(obj))
                                             {
                                                 canEat = true;
                                             }
@@ -4408,7 +4413,7 @@ namespace BuiltinBuffs.Duality
                                             }
                                             PhysicalObject creatureRepresentation = obj;
                                             if (creatureRepresentation == null ||
-                                                !this.corruptionCat.CanEat(obj))
+                                                !this.corruptionCat.CanEatObjectType(obj))
                                             {
                                                 break;
                                             }
@@ -4803,15 +4808,16 @@ namespace BuiltinBuffs.Duality
             Vector2 camPos = this.room.game.cameras[0].pos;
             Vector2 roomCenter = camPos + new Vector2(Custom.rainWorld.options.ScreenSize.x / 2f, Custom.rainWorld.options.ScreenSize.y / 2f);
             Vector2 aim = this.creature.DangerPos - roomCenter;
-            this.lastPos = this.pos;
-            this.dir = Custom.DirVec(roomCenter, creature.DangerPos);
-            this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.x / 2f, 0f, Mathf.Abs(aim.x), 0f, aim.magnitude) - 50f);
-
-            this.distFac = Mathf.Clamp01(Mathf.Pow(100f / (this.creature.DangerPos - this.pos).magnitude, 0.4f));
             bool inScreen = creature.DangerPos.x > roomCenter.x - Custom.rainWorld.options.ScreenSize.x / 2f &&
                             creature.DangerPos.x < roomCenter.x + Custom.rainWorld.options.ScreenSize.x / 2f &&
                             creature.DangerPos.y > roomCenter.y - Custom.rainWorld.options.ScreenSize.y / 2f &&
                             creature.DangerPos.y < roomCenter.y + Custom.rainWorld.options.ScreenSize.y / 2f;
+            this.lastPos = this.pos;
+            this.dir = Custom.DirVec(roomCenter, creature.DangerPos);
+            if (!inScreen)
+                this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.x / 2f, 0f, Mathf.Abs(aim.x), 0f, aim.magnitude) - 50f);
+
+            this.distFac = Mathf.Clamp01(Mathf.Pow(100f / (this.creature.DangerPos - this.pos).magnitude, 0.4f));
             if (CorruptionCatTentacle.VisualContact(this.creature) && !inScreen)
                 this.alpha = Mathf.Clamp01(this.alpha + 0.025f);
             else
