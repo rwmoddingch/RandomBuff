@@ -174,6 +174,7 @@ DisplayName_ContinuousSurvival|连续存活 {0} 轮回
 DisplayName_WithInCycle|在 {0} 轮回内完成使命
 DisplayName_BreakShellCondition|击穿{0}只蜥蜴的头部并击杀
 DisplayName_UltraKill|完成波次
+DisplayName_EatOracleCondition|食用{0}/{1}个迭代器的人偶
 
 
 //BuffCondition_BuffTypes
@@ -254,6 +255,7 @@ Mission_Display_TunnelBattle|管道战
 Mission_Display_RegularCleanup|日常清理
 Mission_Display_ShellBreaker|破甲者
 Mission_Display_UltraKill|超杀蛞蝓
+Mission_Display_DevouringMysteries|吞食之秘
 
 //Credit
 CreditTitle_Intro|Random Buff

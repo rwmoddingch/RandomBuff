@@ -727,14 +727,20 @@ namespace BuiltinBuffs.Duality
                         self.oracle.room.abstractRoom.creatures[i].realizedCreature is Player player &&
                         self.player == player)
                     {
+                        if (self.oracle.room.game.cameras[0].hud.dialogBox != null &&
+                            self.oracle.room.game.cameras[0].hud.dialogBox.messages != null)
+                            self.oracle.room.game.cameras[0].hud.dialogBox.messages.Clear();
                         //如果迭代器是跪坐的,则拒绝说话
-                        if (self.oracle.IsTileSolid(0, 0, -1) || (self.oracle.bodyChunks.Length > 1 && self.oracle.IsTileSolid(1, 0, -1)))
+                        if ((self.oracle.room.world != null && (self.oracle.room.world.region.name == "SL" || self.oracle.room.world.region.name == "CL")) || 
+                            (self.oracle.IsTileSolid(0, 0, -1) || (self.oracle.bodyChunks.Length > 1 && self.oracle.IsTileSolid(1, 0, -1)) ||
+                             self.oracle.bodyChunks[0].ContactPoint.y == -1 || (self.oracle.bodyChunks.Length > 1 && self.oracle.bodyChunks[1].ContactPoint.y == -1)))
                         {
-                            if (self.oracle.room.game.cameras[0].hud.dialogBox != null &&
-                                self.oracle.room.game.cameras[0].hud.dialogBox.messages != null)
-                                self.oracle.room.game.cameras[0].hud.dialogBox.messages.Clear();
+                            if (CorruptionCatFeatures.TryGetValue(player, out var corruption))
+                            {
+                                corruption.killFac = 0f;
+                            }
                         }
-                        //如果迭代器是飘着的，则杀猫
+                        //如果迭代器是飘着的，则拒绝说话，并杀猫
                         else
                         {
                             if (CorruptionCatFeatures.TryGetValue(player, out var corruption))
@@ -1552,7 +1558,7 @@ namespace BuiltinBuffs.Duality
             bool wantEatCreatue = otherObject is Creature creature && 
                                   creature != null &&
                                   this.DynamicRelationship(creature.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats;
-            bool wantEatObject = (otherObject is OracleSwarmer || otherObject is NSHSwarmer) && otherObject != null;
+            bool wantEatObject = CanEat(otherObject) && otherObject != null;
             if ((wantEatCreatue || wantEatObject) &&
                 this.CheckDaddyConsumption(otherObject))
             {
@@ -1609,10 +1615,9 @@ namespace BuiltinBuffs.Duality
             {
                 if (this.eatObjects[i].chunk != null &&
                     this.eatObjects[i].chunk.owner != null &&
-                    !this.eatObjects[i].chunk.owner.slatedForDeletetion)
+                    this.eatObjects[i].chunk.owner.slatedForDeletetion)
                 {
                     //删除猎物
-                    this.eatObjects[i].chunk.owner.Destroy();
                     this.eatObjects.RemoveAt(i);
                     continue;
                 }
@@ -1653,10 +1658,12 @@ namespace BuiltinBuffs.Duality
                     }
                     else if (this.eatObjects[i].chunk.owner is Creature && (this.eatObjects[i].chunk.owner as Creature).Template.meatPoints > 0)
                         player.AddFood((this.eatObjects[i].chunk.owner as Creature).Template.meatPoints);
+                    else if (this.eatObjects[i].chunk.owner is Oracle)
+                        player.AddFood(player.MaxFoodInStomach);
                     else if (this.eatObjects[i].chunk.owner is NSHSwarmer)
                         player.AddQuarterFood();
                     else if (this.eatObjects[i].chunk.owner is PhysicalObject)
-                        for(int k = 0; k < 4f * (this.eatObjects[i].chunk.owner as PhysicalObject).TotalMass; k++) 
+                        for (int k = 0; k < 4f * (this.eatObjects[i].chunk.owner as PhysicalObject).TotalMass; k++)
                             player.AddQuarterFood();
                     //删除猎物
                     this.eatObjects[i].chunk.owner.Destroy();
@@ -1706,6 +1713,14 @@ namespace BuiltinBuffs.Duality
                     }
                 }
             }
+        }
+
+        public bool CanEat(PhysicalObject obj)
+        {
+            bool result = (obj is Oracle && BuffPoolManager.Instance.GameSetting.MissionId == "DevouringMysteries") ||
+                          obj is NSHSwarmer ||
+                          obj is OracleSwarmer;
+            return result;
         }
 
         //调整姿势
@@ -2163,10 +2178,6 @@ namespace BuiltinBuffs.Duality
             }
             moveDirection = (wantPos - player.bodyChunks[0].pos).normalized;
             */
-            if (EnoughGripToMove())
-                BuffPlugin.Log("[CorruptionShapedMutation] Grip Enough To Move!");
-            else
-                BuffPlugin.Log("[CorruptionShapedMutation] Grip Not Enough To Move...");
             if (true)//EnoughGripToMove()
             {
                 //随机速度
@@ -2418,7 +2429,7 @@ namespace BuiltinBuffs.Duality
                 return;
             if ((!player.dead || killFac > 0.5f) && player.room == oracle.room)
             {
-                this.killFac += 0.025f;
+                this.killFac += 0.0125f;
                 if (this.killFac >= 1f)
                 {
                     player.mainBodyChunk.vel += Custom.RNV() * 12f;
@@ -2495,10 +2506,6 @@ namespace BuiltinBuffs.Duality
     {
         public Player player;
         public CorruptionCat corruptionCat;
-
-        public bool IsDaddy => CorruptionShapedMutationBuffEntry.StackLayer >= 2;
-
-        public bool IsTerror => CorruptionShapedMutationBuffEntry.StackLayer >= 3;
 
         #region 外观
         public CorruptionCatLegGraphics[] legGraphics;
@@ -2811,7 +2818,7 @@ namespace BuiltinBuffs.Duality
                 sLeaser.sprites[this.EyeSprite(chunk, 2)].isVisible = false;
                 return;
             }
-            float rad = this.corruptionCat.coreChunks[chunk].rad * 2f;
+            float rad = this.corruptionCat.coreChunks[chunk].rad * 1.8f;//this.corruptionCat.coreChunks[chunk].rad * 2f;
             float num = Mathf.Pow(Mathf.Max(0f, Mathf.Lerp(this.eyes[chunk].lastClosed, this.eyes[chunk].closed, timeStacker)), 0.6f);
             float num2 = (this.SizeClass ? 1f : 0.8f) * (1f - num);
             Vector2 vector = Vector2.Lerp(this.eyes[chunk].lastDir, this.eyes[chunk].dir, timeStacker);
@@ -4261,7 +4268,8 @@ namespace BuiltinBuffs.Duality
                                     }
                                     Creature creatureRepresentation = realizedCreature;
                                     if (creatureRepresentation == null ||
-                                        !(this.corruptionCat.DynamicRelationship(creatureRepresentation.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats))
+                                        !(this.corruptionCat.DynamicRelationship(creatureRepresentation.abstractCreature).type == CreatureTemplate.Relationship.Type.Eats) ||
+                                        realizedCreature is Overseer)
                                     {
                                         break;
                                     }
@@ -4344,7 +4352,7 @@ namespace BuiltinBuffs.Duality
                                                 break;
                                             }
                                             bool canEat = false;
-                                            if (obj != null && (obj is OracleSwarmer || obj is NSHSwarmer))
+                                            if (obj != null && this.corruptionCat.CanEat(obj))
                                             {
                                                 canEat = true;
                                             }
@@ -4377,7 +4385,7 @@ namespace BuiltinBuffs.Duality
                                             }
                                             PhysicalObject creatureRepresentation = obj;
                                             if (creatureRepresentation == null ||
-                                                !(obj is OracleSwarmer || obj is NSHSwarmer))
+                                                !this.corruptionCat.CanEat(obj))
                                             {
                                                 break;
                                             }
