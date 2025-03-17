@@ -173,6 +173,7 @@ DisplayName_ContinuousSurvival|Survive for {0} consecutive cycles
 DisplayName_WithInCycle|Completed the mission within {0} cycles 
 DisplayName_BreakShellCondition|Penetrate {0} lizards' head and kill them
 DisplayName_UltraKill|Finish waves
+DisplayName_EatOracleCondition|Eat{0}/{1}iterator's puppet
 
 
 //BuffCondition_BuffTypes
@@ -246,6 +247,7 @@ Mission_Display_TunnelBattle|TUNNEL BATTLE
 Mission_Display_RegularCleanup|REGULAR CLEANUP
 Mission_Display_ShellBreaker|SHELL PENETRATOR
 Mission_Display_UltraKill|ULTRA KILL SLUG
+Mission_Display_DevouringMysteries|DEVOURING MYSTERIES
 
 //Credit
 CreditTitle_Intro|Random Buff
