@@ -1719,7 +1719,7 @@ namespace BuiltinBuffs.Duality
 
         public bool CanEat(PhysicalObject obj)
         {
-            bool result = (obj is Oracle && BuffPoolManager.Instance.GameSetting.MissionId == "DevouringMysteries") ||
+            bool result = obj is Oracle || //(obj is Oracle && BuffPoolManager.Instance.GameSetting.MissionId == "DevouringMysteries") ||
                           obj is NSHSwarmer ||
                           obj is OracleSwarmer;
             return result;
@@ -1740,6 +1740,20 @@ namespace BuiltinBuffs.Duality
             {
                 player.bodyMode = Player.BodyModeIndex.Default;
                 player.animation = Player.AnimationIndex.None;
+            }
+            //尝试粗暴解决水猫菇在水中下沉的问题
+            if (player.isRivulet && player.Submersion > 0.5f)
+            {
+                if (player.input[0].y >= 0)
+                {
+                    for (int i = 0; i < player.bodyChunks.Length; i++)
+                        player.bodyChunks[i].vel.y += 1.2f * (player.input[0].y > 0f ? 1.85f : 1f);
+                }
+                else
+                {
+                    for (int i = 0; i < player.bodyChunks.Length; i++)
+                        player.bodyChunks[i].vel.y += 0.5f;
+                }
             }
         }
 
