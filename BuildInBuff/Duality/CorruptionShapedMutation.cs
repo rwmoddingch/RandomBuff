@@ -1036,7 +1036,7 @@ namespace BuiltinBuffs.Duality
         private static void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
         {
             if (CorruptionCatFeatures.TryGetValue(self, out var corruption))
-                corruption.MovementUpdate(orig, eu);
+                corruption.MovementUpdate(eu);
             orig(self, eu);
         }
 
@@ -1352,8 +1352,10 @@ namespace BuiltinBuffs.Duality
         public Color effectColor;
         public Color eyeColor;
         public Color EffectColor => Color.blue;
-        public int TentaclesCount => 4 + 1 * CorruptionShapedMutationBuff.corruptionLevel + 2 * CorruptionShapedMutationBuffEntry.StackLayer;
-        public float TentaclesLength => 150f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer;
+        public int TentaclesCount => Mathf.RoundToInt(4 + 1 * CorruptionShapedMutationBuff.corruptionLevel + 2 * CorruptionShapedMutationBuffEntry.StackLayer *
+            (ownerRef.TryGetTarget(out var player) && player.isSlugpup ? 0.75f : 1f));
+        public float TentaclesLength => (150f + 50f * CorruptionShapedMutationBuff.corruptionLevel + 100f * CorruptionShapedMutationBuffEntry.StackLayer) *
+            (ownerRef.TryGetTarget(out var player) && player.isSlugpup ? 0.5f : 1f);
         #endregion
 
         public CorruptionCat(Player player)
@@ -1724,14 +1726,21 @@ namespace BuiltinBuffs.Duality
         }
 
         //调整姿势
-        public void MovementUpdate(On.Player.orig_MovementUpdate orig, bool eu)
+        public void MovementUpdate(bool eu)
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
             if (!player.Consious) return;
 
-            player.bodyMode = Player.BodyModeIndex.Default;
-            player.animation = Player.AnimationIndex.None;
+            if (player.bodyMode != Player.BodyModeIndex.Swimming &&
+                player.bodyMode != Player.BodyModeIndex.ZeroG &&
+                player.animation != Player.AnimationIndex.DeepSwim &&
+                player.animation != Player.AnimationIndex.SurfaceSwim &&
+                player.animation != Player.AnimationIndex.ZeroGSwim)
+            {
+                player.bodyMode = Player.BodyModeIndex.Default;
+                player.animation = Player.AnimationIndex.None;
+            }
         }
 
         public void Act(int legsGrabbing)
@@ -2280,9 +2289,9 @@ namespace BuiltinBuffs.Duality
             if (this.tentacles == null)
                 return false;
             //BuffPlugin.Log("this.totalGrip + 2f * moveDirGrip: " + (this.TotalGrip + 2f * MoveDirGrip));
-            if ((this.TotalGrip > this.tentacles.Length / 2  * (1f - player.Submersion) ||
-                 this.TotalGrip + 2f * this.MoveDirGrip >= 5f * (1f - player.Submersion)) &&
-                this.TotalGrip + 2f * this.MoveDirGrip >= 4f * player.room.gravity - 5f * player.Submersion)
+            if ((this.TotalGrip > this.tentacles.Length / 2  * (player.room.gravity - player.Submersion) ||
+                 this.TotalGrip + 2f * this.MoveDirGrip >= 5f * (player.room.gravity - player.Submersion)) &&
+                this.TotalGrip + 2f * this.MoveDirGrip >= 4f * (player.room.gravity - player.Submersion))
                 result = true;
             if (this.TotalGrip > 0 && player.room.aimap != null &&
                 player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace)
@@ -2411,7 +2420,7 @@ namespace BuiltinBuffs.Duality
 
         #region 拿东西
 
-        //只能一次叼一个东西
+        //不可拾取
         public Player.ObjectGrabability Grabability(Player.ObjectGrabability result, PhysicalObject obj)
         {
             if (!ownerRef.TryGetTarget(out var player))
