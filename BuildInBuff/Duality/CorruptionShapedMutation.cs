@@ -1201,7 +1201,7 @@ namespace BuiltinBuffs.Duality
                 int num = 0;
                 for (int n = 0; n < this.tentacles.GetLength(0); n++)
                 {
-                    if (this.tentacles[n].atGrabDest)
+                    if (this.tentacles[n].atGrabDest || this.tentacles[n].Tip.contactPoint.x != 0 || this.tentacles[n].Tip.contactPoint.y != 0)
                     {
                         num++;
                     }
@@ -1216,7 +1216,7 @@ namespace BuiltinBuffs.Duality
                 int num = 0;
                 for (int n = 0; n < this.tentacles.GetLength(0); n++)
                 {
-                    if (this.tentacles[n].atGrabDest && !this.tentacles[n].OppositeDir)
+                    if ((this.tentacles[n].atGrabDest || this.tentacles[n].Tip.contactPoint.x != 0 || this.tentacles[n].Tip.contactPoint.y != 0) && !this.tentacles[n].OppositeDir)
                     {
                         num++;
                     }
@@ -1365,9 +1365,9 @@ namespace BuiltinBuffs.Duality
             for (int i = 0; i < this.coreChunks.Length; i++)
             {
                 this.coreChunkConnections[i] = new PhysicalObject.BodyChunkConnection(this.coreChunks[i], player.bodyChunks[0], 
-                    Mathf.Lerp(6f, 16f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
+                    Mathf.Lerp(6f, 22f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
                 this.coreChunkConnections[i + this.coreChunks.Length] = new PhysicalObject.BodyChunkConnection(this.coreChunks[i], player.bodyChunks[1], 
-                    Mathf.Lerp(14f, 6f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
+                    Mathf.Lerp(18f, 6f, (float)i / this.coreChunks.Length), PhysicalObject.BodyChunkConnection.Type.Normal, 1f, 0.5f);
             }
             this.coreChunkConnections[this.coreChunkConnections.Length - 2] = new PhysicalObject.BodyChunkConnection(this.coreChunks[0], this.coreChunks[1],
                     5f, PhysicalObject.BodyChunkConnection.Type.Push, 1f, 0.5f);
@@ -2269,10 +2269,11 @@ namespace BuiltinBuffs.Duality
             if (this.tentacles == null)
                 return false;
             //BuffPlugin.Log("this.totalGrip + 2f * moveDirGrip: " + (this.TotalGrip + 2f * MoveDirGrip));
-            if (this.TotalGrip > this.tentacles.Length / 2  * (1f - player.Submersion) &&
-                this.TotalGrip + 2f * this.MoveDirGrip >= 5f * player.room.gravity - 5f * player.Submersion)
+            if ((this.TotalGrip > this.tentacles.Length / 2  * (1f - player.Submersion) ||
+                 this.TotalGrip + 2f * this.MoveDirGrip >= 5f * (1f - player.Submersion)) &&
+                this.TotalGrip + 2f * this.MoveDirGrip >= 4f * player.room.gravity - 5f * player.Submersion)
                 result = true;
-            if (this.TotalGrip > 0 && player.room.aimap!= null &&
+            if (this.TotalGrip > 0 && player.room.aimap != null &&
                 player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace)
                 result = true;
             return result;
