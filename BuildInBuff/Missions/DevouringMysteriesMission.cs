@@ -83,6 +83,9 @@ namespace BuiltinBuffs.Missions
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Add,
                         }
                     },
+                    SPCount = 0, SPSelect = 0, SPShow = 0,
+                    NCount = 0, NSelect = 0, NShow = 0,
+                    PCount = 0, PSelect = 0, PShow = 0,
                     PocketPackMultiply = 0,
                 }
             };
