@@ -165,7 +165,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             }
         }
 
-        bool keyDown;
+        //bool keyDown;
         public override void Update(bool eu)
         {
             base.Update(eu);
@@ -254,20 +254,20 @@ namespace BuiltinBuffs.Missions.UltraKill
             room.game.world.rainCycle.cycleLength = 4800;
             room.game.world.rainCycle.timer = 2400;
 
-            bool thiskeyDown = Input.GetKey(KeyCode.K);
-            if (thiskeyDown && !keyDown)
-            {
-                for (int i = room.updateList.Count - 1; i >= 0; i--)
-                {
-                    if (room.updateList[i] is Player)
-                        continue;
-                    if (room.updateList[i] is Creature creature && !creature.dead)
-                    {
-                        creature.Die();
-                    }
-                }
-            }
-            keyDown = thiskeyDown;
+            //bool thiskeyDown = Input.GetKey(KeyCode.K);
+            //if (thiskeyDown && !keyDown)
+            //{
+            //    for (int i = room.updateList.Count - 1; i >= 0; i--)
+            //    {
+            //        if (room.updateList[i] is Player)
+            //            continue;
+            //        if (room.updateList[i] is Creature creature && !creature.dead)
+            //        {
+            //            creature.Die();
+            //        }
+            //    }
+            //}
+            //keyDown = thiskeyDown;
         }
 
         public void InitNextWave()
