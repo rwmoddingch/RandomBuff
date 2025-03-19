@@ -36,10 +36,13 @@ namespace RandomBuff.Core.GachaMenu
                 var stackableArray = allIds.Where(i => i.GetStaticData().Stackable && i.GetBuffData().CanStackMore()).ToArray();
                 pickerSlot = new CardPickerSlot(inGameSlot, id =>
                     {
-                        exitCounter = 0;
-                        BuffPlugin.Log($"StackAndUnstackMenu, Select Card:{id}");
-                        pages[0].selectables.Add(exitButton);
-                        BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+                        using (_ = new BuffDataModifier())
+                        {
+                            exitCounter = 0;
+                            BuffPlugin.Log($"StackAndUnstackMenu, Select Card:{id}");
+                            pages[0].selectables.Add(exitButton);
+                            BuffDataManager.Instance.GetOrCreateBuffData(id, true);
+                        }
                         BuffFile.Instance.SaveFile();
                     },
                     stackableArray, new BuffID[stackableArray.Length], 1, title, false,
@@ -52,11 +55,15 @@ namespace RandomBuff.Core.GachaMenu
                 var stackableArray = allIds.ToArray();
                 pickerSlot = new CardPickerSlot(inGameSlot, id =>
                     {
-                        exitCounter = 0;
-                        BuffPlugin.Log($"StackAndUnstackMenu, Select Card:{id}");
+                        using (_ = new BuffDataModifier())
+                        {
+                            exitCounter = 0;
+                            BuffPlugin.Log($"StackAndUnstackMenu, Select Card:{id}");
 
-                        pages[0].selectables.Add(exitButton);
-                        BuffDataManager.Instance.RemoveBuffData(id);
+                            pages[0].selectables.Add(exitButton);
+                            BuffDataManager.Instance.RemoveBuffData(id);
+                        }
+
                         BuffFile.Instance.SaveFile();
                     },
                     stackableArray, new BuffID[stackableArray.Length], 1, title, false,

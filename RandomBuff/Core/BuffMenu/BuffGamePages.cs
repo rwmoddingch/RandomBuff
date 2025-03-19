@@ -1261,6 +1261,8 @@ namespace RandomBuff.Core.BuffMenu
             }
             else if (message == "MISSION_START")
             {
+                using var modifier = new BuffDataModifier();
+                
                 if (pickedMission == null) return;
              
                 BuffHookWarpper.CheckAndDisableAllHook();
@@ -1288,7 +1290,6 @@ namespace RandomBuff.Core.BuffMenu
 
                 for (int j = 0; j < pickedMission.startBuffSet.Count; j++)
                     BuffDataManager.Instance.GetOrCreateBuffData(pickedMission.startBuffSet[j], true);
-                BuffDataManager.Instance.SyncToData();
                 
                 gameMenu.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
                 gameMenu.PlaySound(SoundID.MENU_Start_New_Game);    
