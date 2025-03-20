@@ -267,7 +267,7 @@ namespace BuiltinBuffs.Positive //命名空间在BuiltinBuffs的Positive下
         //重写函数，AddToContainer
         public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
-            newContatiner = rCam.ReturnFContainer("Foreground");
+            newContatiner = rCam.ReturnFContainer("HUD");
             newContatiner.AddChild(sLeaser.sprites[0]);
         }
     }
