@@ -191,7 +191,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             if (switchSongDelay > 0)
                 switchSongDelay--;
 
-            if ((MusicPlayer.song == null) && songs.Count > 0 && switchSongDelay == 0)
+            if (MusicPlayer != null && (MusicPlayer.song == null) && songs.Count > 0 && switchSongDelay == 0)
             {
                 MusicPlayer.GameRequestsSong(new MusicEvent()
                 {
@@ -213,7 +213,7 @@ namespace BuiltinBuffs.Missions.UltraKill
                     songIndex = 0;
                 }
             }
-            if (MusicPlayer.song != null)
+            if (MusicPlayer?.song != null)
             {
                 MusicPlayer.song.baseVolume = Mathf.Lerp(0.2f, 0.26f, Mathf.InverseLerp(0f, 1.1f, MusicPlayer.threatTracker.currentMusicAgnosticThreat));
                 //BuffUtils.Log("UltraKillMission", $"{MusicPlayer.threatTracker.currentThreat}");
@@ -339,7 +339,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             }
             else if(waveInfo is UltraKillWave.SongInfo song)
             {
-                MusicPlayer.GameRequestsSongStop(new StopMusicEvent()
+                MusicPlayer?.GameRequestsSongStop(new StopMusicEvent()
                 {
                     fadeOutTime = 2f,
                     prio = 100,
@@ -430,7 +430,7 @@ namespace BuiltinBuffs.Missions.UltraKill
             eventManager?.Destroy();
             ultraKillPlayerRevulver?.Destroy();
             UltraKillHooks.HookOff();
-            MusicPlayer.GameRequestsSongStop(new StopMusicEvent()
+            MusicPlayer?.GameRequestsSongStop(new StopMusicEvent()
             {
                 fadeOutTime = 1f,
                 prio = 100,

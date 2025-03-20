@@ -458,7 +458,7 @@ namespace RandomBuff.Core.Entry
                     BuffTypes.Remove(type);
                     DataTypes.Remove(type);
                     type.Unregister();
-                    return;
+                    continue;
                 }
 
                 if (!BuffConfigManager.ContainsId(type))

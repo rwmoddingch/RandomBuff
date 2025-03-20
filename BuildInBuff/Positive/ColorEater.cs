@@ -372,7 +372,7 @@ namespace BuildInBuff.Positive
     {
         public override BuffID ID => ColorEaterBuffEntry.ColorEaterID;
       
-        //°´ÏÂ°´¼ü¿ÉÒÔÎüÈ¡ÖÜÎ§µÄÑÕÉ«
+        //æŒ‰ä¸‹æŒ‰é”®å¯ä»¥å¸å–å‘¨å›´çš„é¢œè‰²
         public override bool Trigger(RainWorldGame game)
         {
             if (game.AlivePlayers.Count > 0)
@@ -407,7 +407,8 @@ namespace BuildInBuff.Positive
     }
     class ColorEaterBuffEntry : IBuffEntry
     {
-        public static BuffID ColorEaterID = new BuffID("ColorEaterID", true);
+        public static BuffID ColorEaterID = new BuffID("ColorEaterID", false);
+        //!!å¦‚æœéœ€è¦ç»§ç»­åšè¯·å°†falseæ”¹ä¸ºtrue!!
         public void OnEnable()
         {
             //BuffRegister.RegisterBuff<ColorEaterBuff, ColorEaterBuffData, ColorEaterBuffEntry>(ColorEaterID);
@@ -420,7 +421,7 @@ namespace BuildInBuff.Positive
             On.Player.Update += Player_Update;
             On.Player.ShortCutColor += Player_ShortCutColor;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
-            //On.PlayerGraphics.SlugcatColor += PlayerGraphics_SlugcatColor;//ĞĞ²»Í¨µÄ¸ÄÉ«·½·¨
+            //On.PlayerGraphics.SlugcatColor += PlayerGraphics_SlugcatColor;//è¡Œä¸é€šçš„æ”¹è‰²æ–¹æ³•
         }
         private static void AbstractPhysicalObject_Realize(On.AbstractPhysicalObject.orig_Realize orig, AbstractPhysicalObject self)
         {
@@ -483,7 +484,7 @@ namespace BuildInBuff.Positive
                 return;
 
             var plateData = self.EatPlate();
-            //Å¿ÏÂ°´ÏÂÎüÉ«
+            //è¶´ä¸‹æŒ‰ä¸‹å¸è‰²
             if (self.bodyMode == Player.BodyModeIndex.Crawl && self.input[0].y < 0)
             {
                 var color = self.room.game.cameras[0].PixelColorAtCoordinate(self.firstChunk.pos - new Vector2(0, -20));
@@ -491,7 +492,7 @@ namespace BuildInBuff.Positive
                 self.EatPlate().lerpTo(color, 0.1f);
             }
 
-            //¿ÉÒÔÈÃÊ¥Í½ÓÃÉàÍ·ÎüÉ«
+            //å¯ä»¥è®©åœ£å¾’ç”¨èˆŒå¤´å¸è‰²
             if (self.tongue!=null&&self.tongue.Attached)
             {
                 var color = self.room.game.cameras[0].PixelColorAtCoordinate(self.tongue.AttachedPos);
@@ -499,10 +500,10 @@ namespace BuildInBuff.Positive
                 self.EatPlate().lerpTo(color, 0.1f);
             }
 
-            //ÈÃÆ¥ÅäÎüÉ«ºóÍæ¼ÒµÄ±¥Ê³¶È
+            //è®©åŒ¹é…å¸è‰²åç©å®¶çš„é¥±é£Ÿåº¦
             self.slugcatStats.foodToHibernate = Convert.ToInt32(Mathf.Lerp(0, self.slugcatStats.maxFood, plateData.InvertLerpColor()));
 
-            //Èç¹û±¥Ê³¶ÈÏÔÊ¾²»Æ¥Åä¾ÍË¢ĞÂÏÔÊ¾
+            //å¦‚æœé¥±é£Ÿåº¦æ˜¾ç¤ºä¸åŒ¹é…å°±åˆ·æ–°æ˜¾ç¤º
             if (self.room.game.cameras.Any())
             {
                 if (self.room.game.cameras[0].hud.foodMeter.survivalLimit != self.slugcatStats.foodToHibernate)

@@ -33,7 +33,8 @@ namespace BuiltinBuffs.Duality
 
     internal class MobileArsenalBuffEntry : IBuffEntry
     {
-        public static BuffID mobileArsenalID = new BuffID("MobileArsenal", true);
+        public static BuffID mobileArsenalID = new BuffID("MobileArsenal", false);
+        //!!如果需要继续做请将false改为true!!
 
         public void OnEnable()
         {

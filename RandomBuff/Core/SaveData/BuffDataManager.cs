@@ -589,6 +589,9 @@ namespace RandomBuff.Core.SaveData
                 if (!ExtEnumBase.TryParse(typeof(SlugcatStats.Name), catSplit[0], true, out var re) ||
                     re is not SlugcatStats.Name slugName)
                 {
+                    if(catSplit[0] == Nullptr.value)
+                        continue;
+                    
                     BuffPlugin.LogWarning($"Unknown Slugcat Name: {catSplit[0]}");
                     //暂存栏
                     ukSlugcatDatas.Add(catSingle);
@@ -666,6 +669,9 @@ namespace RandomBuff.Core.SaveData
                 if (!ExtEnumBase.TryParse(typeof(SlugcatStats.Name), catSplit[0], true, out var re) ||
                     re is not SlugcatStats.Name slugName)
                 {
+                    if(catSplit[0] == Nullptr.value)
+                        continue;
+                    
                     BuffPlugin.LogWarning($"Unknown Slugcat Name: {catSplit[0]}");
                     //暂存栏
                     ukSlugcatSettings.Add(catSingle);
