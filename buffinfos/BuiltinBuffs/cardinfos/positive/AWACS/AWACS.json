@@ -13,6 +13,6 @@
   },
   "English": {
     "BuffName": "AWACS",
-    "Description": "Displays a HUD that surrounds the slugcat, showing the relative orientation of creatures in the current room to the slugcat.The HUD can be turned off manually."
+    "Description": "Displays a hud around your slugcat which shows the direction of other creatures in the room, toggleable with bind."
   }
 }
