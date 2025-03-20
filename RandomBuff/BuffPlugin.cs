@@ -328,7 +328,23 @@ namespace RandomBuff
             {
                 bool hasDeleteAll = false;
                 var lines = File.ReadAllLines(Path.Combine(SaveFolder, "BuffPluginVersion.txt")).ToList();
-                var lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
+                Dictionary<string, string> lastVersion;
+
+                try
+                {
+                    lastVersion = lines.ToDictionary(i => i.Split('|')[0], i => i.Split('|')[1]);
+                }
+                catch (Exception _)
+                {
+                    lastVersion = new();
+                    LogError("Corrupted BuffPluginVersion.txt");
+                    foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
+                    {
+                        File.Delete(all);
+                        hasDeleteAll = true;
+                    }
+                    
+                }
 
                 foreach (var mod in ModManager.ActiveMods.Where(i =>
                              Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
@@ -356,6 +372,7 @@ namespace RandomBuff
                     {
                         lines.Add($"{mod.id}|{mod.version}");
                         BuffPlugin.Log($"New enable mod : [{mod.id},{mod.version}");
+                        
                     }
                 }
 
