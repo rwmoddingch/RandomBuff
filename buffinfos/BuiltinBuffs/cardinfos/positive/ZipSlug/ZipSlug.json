@@ -9,5 +9,9 @@
     "Chinese": {
         "BuffName": "监视者瞬移",
         "Description": "滑铲时使用类似监视者的瞬移"
+    },
+    "English": {
+        "BuffName": "Overseer Zip",
+        "Description": "While sliding, gain the ability to zip through the environment like an Overseer."
     }
 }
