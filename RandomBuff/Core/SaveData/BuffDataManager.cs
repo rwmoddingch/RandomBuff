@@ -19,6 +19,14 @@ using RandomBuff.Render.UI.ExceptionTracker;
 namespace RandomBuff.Core.SaveData
 {
 
+    class BuffDataModifier : IDisposable
+    {
+        public void Dispose()
+        {
+            BuffDataManager.Instance.SyncToData();
+        }
+    }
+
     class CurrentBuffDatas
     {
         public Dictionary<BuffID, BuffData> datas = new();
@@ -221,6 +229,8 @@ namespace RandomBuff.Core.SaveData
         /// <param name="name"></param>
         internal void WinGame(BuffPoolManager manager, Dictionary<BuffID, BuffData> tempDatas, GameSetting setting, bool malnourished)
         {
+            using var modifier = new BuffDataModifier();
+            
             var name = manager.Game.StoryCharacter;
             if (!malnourished)
             {
@@ -247,6 +257,7 @@ namespace RandomBuff.Core.SaveData
                     BuffPlugin.LogException(e,$"Exception at BuffData:CycleEnd:{data.Key}");
                 }
             }
+            
         }
 
 
@@ -455,7 +466,6 @@ namespace RandomBuff.Core.SaveData
         /// <returns></returns>
         internal string ToStringData()
         {
-            SyncToData();
             allDatas.Remove(Nullptr);
             StringBuilder builder = new();
             builder.Append($"BUFFDATA{SettingSubSplit}");

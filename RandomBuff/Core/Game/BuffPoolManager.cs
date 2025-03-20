@@ -349,7 +349,6 @@ namespace RandomBuff.Core.Game
                     PlayerUtils.RemovePart(PlayerUtils.owners[0]);
                 
             }
-
             GameSetting.OnDestroy();
         }
 
@@ -540,8 +539,8 @@ namespace RandomBuff.Core.Game
 
         internal TemporaryBuffPool GetTemporaryBuffPool(BuffID id)
         {
-            if(temporaryBuffPools.ContainsKey(id))
-                return temporaryBuffPools[id];
+            if(temporaryBuffPools.TryGetValue(id, out var pool))
+                return pool;
 
             TemporaryBuffPool result = new TemporaryBuffPool(this);
             temporaryBuffPools.Add(id, result);

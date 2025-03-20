@@ -93,14 +93,20 @@ namespace RandomBuff.Core.GachaMenu
         public override void ShutDownProcess()
         {
             base.ShutDownProcess();
+       
             InputAgency.AllRelease();
             if (manager.oldProcess != game)
             {
-                var all = BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter);
-                foreach (var con in BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).conditions)
-                    con.GachaEnd(picked,all);
-                BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).fallbackPick = null;
 
+                using (_ = new BuffDataModifier())
+                {
+
+                    var all = BuffDataManager.Instance.GetAllBuffIds(game.StoryCharacter);
+                    foreach (var con in BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).conditions)
+                        con.GachaEnd(picked, all);
+                    BuffDataManager.Instance.GetGameSetting(game.StoryCharacter).fallbackPick = null;
+                }
+                
                 BuffFile.Instance.SaveFile();
                 manager.oldProcess = game;
             }

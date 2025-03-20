@@ -188,7 +188,7 @@ namespace BuiltinBuffs.Duality
             int newTotalFoodRequirement = origFoodRequirement.x + (StackLayer >= 3 ? 2 : 1);
             if (newHibernateRequirement > newTotalFoodRequirement)
             {
-                newHibernateRequirement++;
+                newHibernateRequirement += newHibernateRequirement - newTotalFoodRequirement;
                 newTotalFoodRequirement = newHibernateRequirement;
             }
 

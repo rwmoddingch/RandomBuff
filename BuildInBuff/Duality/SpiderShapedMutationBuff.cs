@@ -269,6 +269,11 @@ namespace BuiltinBuffs.Duality
             IntVector2 origFoodRequirement = orig(slugcat);
             int newHibernateRequirement = origFoodRequirement.y + (StackLayer >= 3 ? 4 : 2);
             int newTotalFoodRequirement = origFoodRequirement.x + (StackLayer >= 3 ? 5 : 3);
+            if (newHibernateRequirement > newTotalFoodRequirement)
+            {
+                newHibernateRequirement += newHibernateRequirement - newTotalFoodRequirement;
+                newTotalFoodRequirement = newHibernateRequirement;
+            }
 
             return new IntVector2(newTotalFoodRequirement, newHibernateRequirement);
         }
