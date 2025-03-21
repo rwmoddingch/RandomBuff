@@ -1,2 +1,0 @@
-Palette: 6
-Subregion: Random Buff
