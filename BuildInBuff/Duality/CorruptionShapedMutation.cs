@@ -1098,9 +1098,9 @@ namespace BuiltinBuffs.Duality
 
         private static void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
         {
-            orig(self);
             if (CorruptionCatFeatures.TryGetValue(self.player, out var corruption))
                 corruption.graphics.GraphicsUpdate();
+            orig(self);
         }
 
         private static void PlayerGraphics_Reset(On.PlayerGraphics.orig_Reset orig, PlayerGraphics self)
@@ -1203,8 +1203,6 @@ namespace BuiltinBuffs.Duality
         private float moveSpeed;
         private Vector2 bodyWantPos;
         private Vector2 wantPos;
-        bool wantPosIsSetX;
-        bool wantPosIsSetY;
         public Vector2 moveDirection;
         public int stuckCounter;
         public int TotalGrip
@@ -2561,7 +2559,28 @@ namespace BuiltinBuffs.Duality
         #region 外观
         public CorruptionCatLegGraphics[] legGraphics;
         public Color blackColor;
-        public Color EffectColorA => PlayerGraphics.DefaultSlugcatColor(player.SlugCatClass);
+        public Color EffectColorA
+        {
+            get
+            {
+                Color color = PlayerGraphics.DefaultSlugcatColor(player.SlugCatClass);
+                if (player.abstractCreature.world != null && player.playerState != null)
+                    color = PlayerGraphics.JollyBodyColorMenu(player.SlugCatClass,
+                                                              player.abstractCreature.world.game.rainWorld.options.jollyPlayerOptionsArray[player.playerState.playerNumber].playerClass);
+                if (player.room != null && player.room.game.cameras[0].spriteLeasers != null)
+                {
+                    foreach (var spriteLeaser in player.room.game.cameras[0].spriteLeasers)
+                    {
+                        if (spriteLeaser.drawableObject == player.graphicsModule && spriteLeaser.sprites != null)
+                        {
+                            color = spriteLeaser.sprites[0].color;
+                            break;
+                        }
+                    }
+                }
+                return color;
+            }
+        }
         public Color EffectColorB
         {
             get
@@ -2578,9 +2597,10 @@ namespace BuiltinBuffs.Duality
                 }
                 else
                 {
-                    color = PlayerGraphics.JollyUniqueColorMenu(player.SlugCatClass,
-                                                            player.abstractCreature.world.game.rainWorld.options.jollyPlayerOptionsArray[player.playerState.playerNumber].playerClass,
-                                                            player.playerState.playerNumber);
+                    if (player.abstractCreature.world != null && player.playerState != null)
+                        color = PlayerGraphics.JollyUniqueColorMenu(player.SlugCatClass,
+                                                                    player.abstractCreature.world.game.rainWorld.options.jollyPlayerOptionsArray[player.playerState.playerNumber].playerClass,
+                                                                    player.playerState.playerNumber);
                     if (color == EffectColorA)
                     {
                         Vector3 hsl = Custom.RGB2HSL(color);
@@ -2603,7 +2623,7 @@ namespace BuiltinBuffs.Duality
         #endregion
 
         #region 序号
-        public int originLength;
+        public int startSprite;
         public int totalLegSprites;
         public int totalCoreSprites;
         public int totalDanglers;
@@ -2619,23 +2639,23 @@ namespace BuiltinBuffs.Duality
 
         public int BodySprite(int chunk)
         {
-            return this.originLength + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + chunk;
+            return this.startSprite + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + chunk;
         }
         public int DanglerSprite(int dangler)
         {
-            return this.originLength + dangler;
+            return this.startSprite + dangler;
         }
         public int DeadLegSprite(int leg)
         {
-            return this.originLength + this.totalDanglers + this.totalLegSprites + leg;
+            return this.startSprite + this.totalDanglers + this.totalLegSprites + leg;
         }
         public int DummySprite()
         {
-            return this.originLength + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + this.corruptionCat.coreChunks.Length * 4;
+            return this.startSprite + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + this.corruptionCat.coreChunks.Length * 4;
         }
         public int EyeSprite(int eye, int part)
         {
-            return this.originLength + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + this.corruptionCat.coreChunks.Length + eye * 3 + part;
+            return this.startSprite + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + this.corruptionCat.coreChunks.Length + eye * 3 + part;
             //return this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + this.player.bodyChunks.Length + eye * (this.daddy.HDmode ? 3 : 2) + part;
         }
         #endregion
@@ -2644,7 +2664,6 @@ namespace BuiltinBuffs.Duality
         public float[,] chunksRotats;
         public int feelSomethingReactionDelay; 
         public float digesting;
-        private bool setOriginLength;
 
         public List<IndicatorSymbol> indicators;
 
@@ -2654,6 +2673,7 @@ namespace BuiltinBuffs.Duality
             this.corruptionCat = corruptionCat;
             this.totalLegSprites = 0;
             this.legGraphics = new CorruptionCatLegGraphics[corruptionCat.tentacles.Length];
+            this.indicators = new List<IndicatorSymbol>();
 
             this.chunksRotats = new float[this.corruptionCat.coreChunks.Length, 2];
             this.eyes = new CorruptionCatGraphics.Eye[this.corruptionCat.coreChunks.Length];
@@ -2663,7 +2683,6 @@ namespace BuiltinBuffs.Duality
                 this.chunksRotats[m, 1] = Random.value;
                 this.eyes[m] = new CorruptionCatGraphics.Eye(this, m);
             }
-            this.indicators = new List<IndicatorSymbol>();
         }
 
         #region 外观
@@ -2671,6 +2690,16 @@ namespace BuiltinBuffs.Duality
         {
             if (self.internalContainerObjects == null)
                 self.internalContainerObjects = new List<GraphicsModule.ObjectHeldInInternalContainer>();
+            if (self.drawPositions.GetLength(0) != player.bodyChunks.Length)
+            {
+                self.drawPositions = new Vector2[player.bodyChunks.Length, 2];
+                for (int m = 0; m < player.bodyChunks.Length; m++)
+                {
+                    self.drawPositions[m, 0] = player.bodyChunks[m].pos;
+                    self.drawPositions[m, 1] = player.bodyChunks[m].lastPos;
+                }
+            }
+            this.startSprite = 0;
         }
 
         public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -2678,22 +2707,50 @@ namespace BuiltinBuffs.Duality
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             if (self.internalContainerObjects == null)
                 self.internalContainerObjects = new List<GraphicsModule.ObjectHeldInInternalContainer>();
-            this.originLength = sLeaser.sprites.Length;
+            if (self.drawPositions.GetLength(0) != player.bodyChunks.Length)
+            {
+                self.drawPositions = new Vector2[player.bodyChunks.Length, 2];
+                for (int m = 0; m < player.bodyChunks.Length; m++)
+                {
+                    self.drawPositions[m, 0] = player.bodyChunks[m].pos;
+                    self.drawPositions[m, 1] = player.bodyChunks[m].lastPos;
+                }
+            }
+            this.startSprite = 0;
             this.ResetSprites(sLeaser, rCam);
         }
 
         public void ResetSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            if (this.startSprite != 0)
+            {
+                for (int i = this.startSprite; i < this.startSprite + this.TotalSprites; i++)
+                {
+                    sLeaser.sprites[i].isVisible = false;
+                }/*
+                for (int i = this.startSprite + this.TotalSprites - 1; i >= this.startSprite; i--)
+                {
+                    sLeaser.sprites[i].RemoveFromContainer();
+                    sLeaser.sprites[i] = null;
+                }
+                for (int i = this.startSprite; i < sLeaser.sprites.Length - this.TotalSprites; i++)
+                {
+                    sLeaser.sprites[i] = sLeaser.sprites[i + this.TotalSprites];
+                }
+                Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length - this.TotalSprites);*/
+            }
+
+            this.startSprite = sLeaser.sprites.Length;
             this.totalLegSprites = 0;
             for (int i = 0; i < this.legGraphics.Length; i++)
             {
-                this.legGraphics[i] = new CorruptionCatLegGraphics(this, i, this.originLength + this.totalLegSprites);// + 12
+                this.legGraphics[i] = new CorruptionCatLegGraphics(this, i, this.startSprite + this.totalLegSprites);// + 12
                 this.totalLegSprites += this.legGraphics[i].sprites;
             }
             this.totalCoreSprites = 4 * this.corruptionCat.coreChunks.Length;
             //this.totalCoreSprites = (this.daddy.HDmode ? 4 : 3) * this.corruptionCat.coreChunks.Length;
-            Array.Resize(ref sLeaser.sprites, this.originLength + this.TotalSprites);
+            Array.Resize(ref sLeaser.sprites, this.startSprite + this.TotalSprites);
             for (int i = 0; i < this.corruptionCat.coreChunks.Length; i++)
             {
                 sLeaser.sprites[this.BodySprite(i)] = new FSprite("Futile_White", true);
@@ -2708,7 +2765,7 @@ namespace BuiltinBuffs.Duality
                     sLeaser.sprites[this.EyeSprite(i, 2)].scale = 0.0625f * this.corruptionCat.coreChunks[i].rad * 2f; //0.0625f * this.corruptionCat.coreChunks[i].rad * 2f;
                 }
             }
-            foreach (var tentacle in legGraphics)
+            foreach (var tentacle in this.legGraphics)
             {
                 tentacle.InitiateSprites(sLeaser, rCam);
             }/*
@@ -2724,7 +2781,6 @@ namespace BuiltinBuffs.Duality
             {
                 this.dummy.InitiateSprites(sLeaser, rCam);
             }*/
-
             this.AddToContainer(sLeaser, rCam, null);
             self.ApplyPalette(sLeaser, rCam, rCam.currentPalette);
         }
@@ -2744,14 +2800,14 @@ namespace BuiltinBuffs.Duality
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             if (self == null || corruptionCat == null)
                 return;
-            if (originLength >= 1 && sLeaser.sprites.Length >= originLength + TotalSprites)
+            if (startSprite >= 1 && sLeaser.sprites.Length >= startSprite + TotalSprites)
             {
                 var foregroundContainer = rCam.ReturnFContainer("Foreground");
                 var midgroundContainer = newContatiner != null ? newContatiner : rCam.ReturnFContainer("Midground");
 
                 for (int i = 0; i < totalLegSprites; i++)
                 {
-                    var sprite = sLeaser.sprites[originLength + this.totalDanglers + i];
+                    var sprite = sLeaser.sprites[startSprite + this.totalDanglers + i];
                     sprite.RemoveFromContainer();
                     midgroundContainer.AddChild(sprite);
                     //触手移到身体后方
@@ -2759,12 +2815,12 @@ namespace BuiltinBuffs.Duality
                 }
                 for (int i = 0; i < totalCoreSprites; i++)
                 {
-                    var sprite = sLeaser.sprites[this.originLength + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + i];
+                    var sprite = sLeaser.sprites[this.startSprite + this.totalLegSprites + this.totalDeadLegSprites + this.totalDanglers + i];
                     sprite.RemoveFromContainer();
                     midgroundContainer.AddChild(sprite);
                     //一半核心移到身体后方
                     if (i < this.corruptionCat.coreChunks.Length * 4 / 2)
-                    sprite.MoveBehindOtherNode(sLeaser.sprites[0]);
+                        sprite.MoveBehindOtherNode(sLeaser.sprites[0]);
                 }
             }
         }
@@ -2808,10 +2864,32 @@ namespace BuiltinBuffs.Duality
         public void GraphicsUpdate()
         {
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+            //由于此段的存在，GraphicsUpdate在hook中应该位于orig之前
+            if ((player.graphicsModule as PlayerGraphics).drawPositions.GetLength(0) != player.bodyChunks.Length)
+            {
+                (player.graphicsModule as PlayerGraphics).drawPositions = new Vector2[player.bodyChunks.Length, 2];
+                for (int m = 0; m < player.bodyChunks.Length; m++)
+                {
+                    (player.graphicsModule as PlayerGraphics).drawPositions[m, 0] = player.bodyChunks[m].pos;
+                    (player.graphicsModule as PlayerGraphics).drawPositions[m, 1] = player.bodyChunks[m].lastPos;
+                }
+            }
+
             this.IndicatorSymbolUpdate();
             foreach (var tentacle in legGraphics)
             {
                 tentacle.Update();
+            }
+            if (this.eyes.Length != this.corruptionCat.coreChunks.Length)
+            {
+                this.chunksRotats = new float[this.corruptionCat.coreChunks.Length, 2];
+                this.eyes = new CorruptionCatGraphics.Eye[this.corruptionCat.coreChunks.Length];
+                for (int m = 0; m < this.corruptionCat.coreChunks.Length; m++)
+                {
+                    this.chunksRotats[m, 0] = Random.value * 360f;
+                    this.chunksRotats[m, 1] = Random.value;
+                    this.eyes[m] = new CorruptionCatGraphics.Eye(this, m);
+                }
             }
             for (int l = 0; l < this.corruptionCat.coreChunks.Length; l++)
             {
