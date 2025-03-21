@@ -2303,7 +2303,6 @@ namespace BuiltinBuffs.Duality
             //按住跳跃键时，可以按方向键使核心移动
             if (WantToMoveBody)
             {
-                BuffPlugin.Log("this.moveDirection: " + this.moveDirection.ToString());
                 bodyWantPos = wantPos;
                 player.bodyChunks[0].vel *= Custom.LerpMap(player.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
                 player.bodyChunks[0].vel += Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) *
@@ -2311,15 +2310,31 @@ namespace BuiltinBuffs.Duality
                 //在管道附近额外助推
                 foreach (var shortcut in player.room.shortcuts)
                 {
-                    if (Vector2.Dot(player.bodyChunks[0].vel, this.moveDirection) < 0 && 
+                    if (Vector2.Dot(player.bodyChunks[0].vel, this.moveDirection) < 0 &&
                         Custom.Dist(player.DangerPos, player.room.MiddleOfTile(shortcut.StartTile)) < 20f)
-                        if (shortcut.shortCutType == ShortcutData.Type.RoomExit || shortcut.shortCutType == ShortcutData.Type.RegionTransportation || shortcut.shortCutType == ShortcutData.Type.Normal)
+                    {
+                        for (int i = 0; i < player.room.updateList.Count; i++)
                         {
-                            player.bodyChunks[0].vel *= 0f;
-                            player.bodyChunks[0].pos += 2f * Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) *
-                                Vector2.ClampMagnitude(wantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
-                            BuffPlugin.Log("add speed, player.bodyChunks[0].vel: " + player.bodyChunks[0].vel.ToString());
+                            if (player.room.updateList[i] is ShortcutHelper)
+                            {
+                                ShortcutHelper sh = player.room.updateList[i] as ShortcutHelper;
+                                foreach (var push in sh.pushers)
+                                {
+                                    if (push.shortCutPos != shortcut.StartTile)
+                                        continue;
+                                    //身体卡在了助推点下方)
+                                    if (Vector2.Dot(push.pushPos - player.bodyChunks[0].pos, this.moveDirection) > 0)
+                                        if (shortcut.shortCutType == ShortcutData.Type.RoomExit || shortcut.shortCutType == ShortcutData.Type.RegionTransportation || shortcut.shortCutType == ShortcutData.Type.Normal)
+                                        {
+                                            player.bodyChunks[0].vel *= 0f;
+                                            player.bodyChunks[0].pos = push.pushPos + 10f * (push.pushPos - player.bodyChunks[0].pos).normalized;
+                                        }
+                                    break;
+                                }
+                                break;
+                            }
                         }
+                    }
                 }
             }
             //不按跳跃键时，核心位置不移动
