@@ -222,6 +222,7 @@ namespace BuiltinBuffs.Duality
             Vector2 camPos = Vector2.Lerp(game.cameras[0].lastPos, game.cameras[0].pos, timeStacker);
 
             legalStaticCount = 0;
+
             foreach (var player in game.Players)
             {
                 //身体周围
@@ -234,19 +235,30 @@ namespace BuiltinBuffs.Duality
                     //触手周围
                     if (CorruptionShapedMutationBuffEntry.CorruptionCatFeatures.TryGetValue(player.realizedCreature as Player, out var corruption))
                     {
+                        bool notOnePlayer = false;
+                        foreach (var otherPlayer in game.Players)
+                        {
+                            if (otherPlayer != player && otherPlayer.Room == player.Room)
+                            {
+                                notOnePlayer = true;
+                            }
+                        }
                         for (int i = 0; i < corruption.tentacles.Length; i++)
                         {
-                            bool skip = false;
-                            foreach (var sp in staticPos)
+                            if (notOnePlayer)
                             {
-                                if (Custom.Dist(sp, corruption.tentacles[i].Tip.pos) < 40f)
+                                bool skip = false;
+                                foreach (var sp in staticPos)
                                 {
-                                    skip = true;
-                                    break;
+                                    if (Custom.Dist(sp, corruption.tentacles[i].Tip.pos) < 40f)
+                                    {
+                                        skip = true;
+                                        break;
+                                    }
                                 }
+                                if (skip)
+                                    continue;
                             }
-                            if (skip)
-                                continue;
                             staticPos[legalStaticCount] = Vector2.Lerp(corruption.tentacles[i].Tip.lastPos, corruption.tentacles[i].Tip.pos, timeStacker) - camPos;
                             legalStaticCount++;
                             if (legalStaticCount == 40)
@@ -1644,6 +1656,13 @@ namespace BuiltinBuffs.Duality
                     this.eatObjects.RemoveAt(i);
                     continue;
                 }
+                if (this.eatObjects[i].chunk.owner.room == null ||
+                    player.room == null ||
+                    this.eatObjects[i].chunk.owner.room != player.room)
+                {
+                    this.eatObjects.RemoveAt(i);
+                    continue;
+                }
                 /*
                 if (this.eatObjects[i].chunk.owner is Creature)
                     (this.eatObjects[i].chunk.owner as Creature).SetKillTag(player.abstractCreature);*/
@@ -2177,7 +2196,7 @@ namespace BuiltinBuffs.Duality
         {
             if (!ownerRef.TryGetTarget(out var player))
                 return;
-
+            //BuffPlugin.Log("EnoughGripToMove(): " + EnoughGripToMove());
             this.wantPos = player.bodyChunks[0].lastPos + moveSpeed * new Vector2(player.input[0].x, player.input[0].y);
             this.moveDirection = (wantPos - player.bodyChunks[0].lastPos).normalized;
 
@@ -2224,98 +2243,94 @@ namespace BuiltinBuffs.Duality
             }
             moveDirection = (wantPos - player.bodyChunks[0].pos).normalized;
             */
-            if (true)//EnoughGripToMove()
+            //随机速度
+            //player.bodyChunks[0].vel += Custom.RNV() * Random.value * 0.5f;
+            //player.bodyChunks[1].vel *= 0.9f;
+
+            for (int n = 0; n < this.tentacles.GetLength(0); n++)
             {
-                //随机速度
-                //player.bodyChunks[0].vel += Custom.RNV() * Random.value * 0.5f;
-                //player.bodyChunks[1].vel *= 0.9f;
+                if (this.tentacles[n].atGrabDest)
+                    this.tentacles[n].chooseToMoveByPlayer = false;
 
-                for (int n = 0; n < this.tentacles.GetLength(0); n++)
-                {
-                    if (this.tentacles[n].atGrabDest)
-                        this.tentacles[n].chooseToMoveByPlayer = false;
+                if (this.tentacles[n].chooseToMoveByPlayer &&
+                    (!this.HaveDirInput ||
+                     (!player.input[0].jmp &&
+                      ((this.tentacles[n].grabDest != null &&
+                        Custom.Dist(this.tentacles[n].Tip.pos, this.tentacles[n].connectedChunk.pos) > this.tentacles[n].idealLength / 3f &&
+                        (this.ChoosedTentaclesCount - this.ChoosedTentaclesButNotControlCount) >= 1) ||
+                       this.tentacles[n].chooseToMoveCount >= 150))
+                     ))
+                    this.tentacles[n].chooseToMoveByPlayerButNotControl = true;
 
-                    if (this.tentacles[n].chooseToMoveByPlayer &&
-                        (!this.HaveDirInput ||
-                         (!player.input[0].jmp && 
-                          ((this.tentacles[n].grabDest != null && 
-                            Custom.Dist(this.tentacles[n].Tip.pos, this.tentacles[n].connectedChunk.pos) > this.tentacles[n].idealLength / 3f && 
-                            (this.ChoosedTentaclesCount - this.ChoosedTentaclesButNotControlCount) >= 1) || 
-                           this.tentacles[n].chooseToMoveCount >= 150))
-                         ))
-                        this.tentacles[n].chooseToMoveByPlayerButNotControl = true;
-
-                    if (!this.tentacles[n].chooseToMoveByPlayer)
-                        this.tentacles[n].chooseToMoveByPlayerButNotControl = false;
-                }
-
-                float releaseScore = float.MinValue;
-                float secondReleaseScore = float.MinValue;
-                int moveIndex = -1;
-                int secondMoveIndex = -1;
-                for (int num9 = 0; num9 < this.tentacles.Length; num9++)
-                {
-                    if (this.tentacles[num9].huntObj == null && 
-                        this.tentacles[num9].ReleaseScoreForAngle() > secondReleaseScore)
-                    {
-                        secondReleaseScore = this.tentacles[num9].ReleaseScoreForAngle();
-                        secondMoveIndex = num9;
-                    }
-                    if (this.tentacles[num9].atGrabDest && this.tentacles[num9].huntObj == null && 
-                        this.tentacles[num9].ReleaseScore() > releaseScore)
-                    {
-                        releaseScore = this.tentacles[num9].ReleaseScore();
-                        moveIndex = num9;
-                        //secondMoveIndex = moveIndex;
-                    }
-                }
-                if (this.ChoosedTentaclesCount < 2 && this.OppositeDirCount >= 1)
-                {
-                    int n = secondMoveIndex > -1 ? secondMoveIndex : Random.Range(0, this.tentacles.GetLength(0));
-                    this.tentacles[n].chooseToMoveByPlayer = true;
-                    this.tentacles[n].atGrabDest = false;
-                }
-                if (moveIndex > -1 &&
-                    !this.tentacles[moveIndex].atGrabDest && this.tentacles[moveIndex].OppositeDir &&
-                    this.ChoosedTentaclesCount < 2 && this.OppositeDirCount >= 1)// && this.totalGrip >= 1
-                {
-                    this.tentacles[moveIndex].chooseToMoveByPlayer = true;
-                    this.tentacles[moveIndex].atGrabDest = false;
-                }
-
-                //按住跳跃键时，可以按方向键使核心移动
-                if (WantToMoveBody)
-                {
-                    bodyWantPos = wantPos;
-                    player.bodyChunks[0].vel *= Custom.LerpMap(player.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
-                    player.bodyChunks[0].vel += Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) * 
-                        Vector2.ClampMagnitude(wantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
-                }
-                //不按跳跃键时，核心位置不移动
-                else
-                {
-                    player.bodyChunks[0].vel *= Custom.LerpMap(player.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
-                    player.bodyChunks[0].vel += Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) * 
-                        Vector2.ClampMagnitude(bodyWantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
-                }
-                if (Custom.Dist(bodyWantPos, wantPos) >= moveSpeed * 2.5f)
-                    bodyWantPos = wantPos;
+                if (!this.tentacles[n].chooseToMoveByPlayer)
+                    this.tentacles[n].chooseToMoveByPlayerButNotControl = false;
             }
+
+            float releaseScore = float.MinValue;
+            float secondReleaseScore = float.MinValue;
+            int moveIndex = -1;
+            int secondMoveIndex = -1;
+            for (int num9 = 0; num9 < this.tentacles.Length; num9++)
+            {
+                if (this.tentacles[num9].huntObj == null &&
+                    this.tentacles[num9].ReleaseScoreForAngle() > secondReleaseScore)
+                {
+                    secondReleaseScore = this.tentacles[num9].ReleaseScoreForAngle();
+                    secondMoveIndex = num9;
+                }
+                if (this.tentacles[num9].atGrabDest && this.tentacles[num9].huntObj == null &&
+                    this.tentacles[num9].ReleaseScore() > releaseScore)
+                {
+                    releaseScore = this.tentacles[num9].ReleaseScore();
+                    moveIndex = num9;
+                    //secondMoveIndex = moveIndex;
+                }
+            }
+            if (this.ChoosedTentaclesCount < 2 && this.OppositeDirCount >= 1)
+            {
+                int n = secondMoveIndex > -1 ? secondMoveIndex : Random.Range(0, this.tentacles.GetLength(0));
+                this.tentacles[n].chooseToMoveByPlayer = true;
+                this.tentacles[n].atGrabDest = false;
+            }
+            if (moveIndex > -1 &&
+                !this.tentacles[moveIndex].atGrabDest && this.tentacles[moveIndex].OppositeDir &&
+                this.ChoosedTentaclesCount < 2 && this.OppositeDirCount >= 1)// && this.totalGrip >= 1
+            {
+                this.tentacles[moveIndex].chooseToMoveByPlayer = true;
+                this.tentacles[moveIndex].atGrabDest = false;
+            }
+
+            //按住跳跃键时，可以按方向键使核心移动
+            if (WantToMoveBody)
+            {
+                BuffPlugin.Log("this.moveDirection: " + this.moveDirection.ToString());
+                bodyWantPos = wantPos;
+                player.bodyChunks[0].vel *= Custom.LerpMap(player.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
+                player.bodyChunks[0].vel += Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) *
+                    Vector2.ClampMagnitude(wantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
+                //在管道附近额外助推
+                foreach (var shortcut in player.room.shortcuts)
+                {
+                    if (Vector2.Dot(player.bodyChunks[0].vel, this.moveDirection) < 0 && 
+                        Custom.Dist(player.DangerPos, player.room.MiddleOfTile(shortcut.StartTile)) < 20f)
+                        if (shortcut.shortCutType == ShortcutData.Type.RoomExit || shortcut.shortCutType == ShortcutData.Type.RegionTransportation || shortcut.shortCutType == ShortcutData.Type.Normal)
+                        {
+                            player.bodyChunks[0].vel *= 0f;
+                            player.bodyChunks[0].pos += 2f * Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) *
+                                Vector2.ClampMagnitude(wantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
+                            BuffPlugin.Log("add speed, player.bodyChunks[0].vel: " + player.bodyChunks[0].vel.ToString());
+                        }
+                }
+            }
+            //不按跳跃键时，核心位置不移动
             else
             {
-                if (!WantToMoveBody)
-                {
-                    bodyWantPos = Vector2.Lerp(bodyWantPos, player.bodyChunks[0].pos, player.bodyChunks[0].vel.magnitude / 10f);
-                }
-                for (int n = 0; n < this.tentacles.GetLength(0); n++)
-                {
-                    if (this.tentacles[n].atGrabDest)
-                    {
-                        for (int i = 0; i < player.bodyChunks.GetLength(0); i++)
-                            player.bodyChunks[i].vel *= 0.9f;
-                    }
-                }
+                player.bodyChunks[0].vel *= Custom.LerpMap(player.bodyChunks[0].vel.magnitude, 1f, 6f, 0.99f, 0.9f);
+                player.bodyChunks[0].vel += Mathf.Clamp01((float)(this.TotalGrip + 2f * this.MoveDirGrip) / 2f) *
+                    Vector2.ClampMagnitude(bodyWantPos - player.bodyChunks[0].pos, moveSpeed) / moveSpeed * 3f;
             }
+            if (Custom.Dist(bodyWantPos, wantPos) >= moveSpeed * 2.5f)
+                bodyWantPos = wantPos;
         }
 
         private bool EnoughGripToMove()
@@ -2326,13 +2341,29 @@ namespace BuiltinBuffs.Duality
             if (this.tentacles == null)
                 return false;
             //BuffPlugin.Log("this.totalGrip + 2f * moveDirGrip: " + (this.TotalGrip + 2f * MoveDirGrip));
-            if ((this.TotalGrip > this.tentacles.Length / 2  * (player.room.gravity - player.buoyancy * player.Submersion) ||
+            if ((this.TotalGrip > this.tentacles.Length / 2 * (player.room.gravity - player.buoyancy * player.Submersion) ||
                  this.TotalGrip + 2f * this.MoveDirGrip >= 5f * (player.room.gravity - player.buoyancy * player.Submersion)) &&
-                this.TotalGrip + 2f * this.MoveDirGrip >= 4f * (player.room.gravity - player.buoyancy * player.Submersion))
+                 this.TotalGrip + 2f * this.MoveDirGrip >= 4f * (player.room.gravity - player.buoyancy * player.Submersion))
                 result = true;
             if (this.TotalGrip > 0 && player.room.aimap != null &&
                 player.room.aimap.getAItile(player.bodyChunks[0].pos).narrowSpace)
                 result = true;
+
+            foreach (var shortcut in player.room.shortcuts)
+            {
+                if (Custom.Dist(player.DangerPos, player.room.MiddleOfTile(shortcut.StartTile)) < 40f)
+                    if (shortcut.shortCutType == ShortcutData.Type.RoomExit || shortcut.shortCutType == ShortcutData.Type.RegionTransportation || shortcut.shortCutType == ShortcutData.Type.Normal)
+                        result = true;
+            }
+            /*
+            for (int i = 0; i < player.bodyChunks.Length; i++)
+            {
+                if ((player.IsTileSolid(i, 1, 0) && player.IsTileSolid(i, -1, 0)) ||
+                    (player.IsTileSolid(i, 0, 1) && player.IsTileSolid(i, 0, -1)) ||
+                    (player.IsTileSolid(i, 1, 1) && player.IsTileSolid(i, -1, -1)) ||
+                    (player.IsTileSolid(i, -1, 1) && player.IsTileSolid(i, 1, -1)))
+                    result = true;
+            }*/
             return result;
         }
 
@@ -2564,7 +2595,9 @@ namespace BuiltinBuffs.Duality
             get
             {
                 Color color = PlayerGraphics.DefaultSlugcatColor(player.SlugCatClass);
-                if (player.abstractCreature.world != null && player.playerState != null)
+                if (player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Slugpup)
+                    color = player.ShortCutColor();
+                else if (player.abstractCreature.world != null && player.playerState != null)
                     color = PlayerGraphics.JollyBodyColorMenu(player.SlugCatClass,
                                                               player.abstractCreature.world.game.rainWorld.options.jollyPlayerOptionsArray[player.playerState.playerNumber].playerClass);
                 if (player.room != null && player.room.game.cameras[0].spriteLeasers != null)
@@ -4945,7 +4978,10 @@ namespace BuiltinBuffs.Duality
             this.lastPos = this.pos;
             this.dir = Custom.DirVec(roomCenter, creature.DangerPos);
             if (!inScreen)
-                this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.x / 2f, 0f, Mathf.Abs(aim.x), 0f, aim.magnitude) - 50f);
+                if (Mathf.Abs(this.dir.x) > Mathf.Abs(this.dir.y))
+                    this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.x / 2f, 0f, Mathf.Abs(aim.x), 0f, aim.magnitude) - 50f);
+                else
+                    this.pos = roomCenter + this.dir * (Custom.LerpMap(Custom.rainWorld.options.ScreenSize.y / 2f, 0f, Mathf.Abs(aim.y), 0f, aim.magnitude) - 50f);
 
             this.distFac = Mathf.Clamp01(Mathf.Pow(100f / (this.creature.DangerPos - this.pos).magnitude, 0.4f));
             if (CorruptionCatTentacle.VisualContact(this.creature) && !inScreen)
