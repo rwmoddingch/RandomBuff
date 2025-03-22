@@ -1,0 +1,11 @@
+LANG_Chinese
+DEV_seron
+2:其实我在涡轮推进这张卡牌里藏了一个小彩蛋，不过似乎并没有多少人发现这个?
+0:如果你使用的角色是The Traveler，你可能会注意到进行推进加速时，角色的尾部并不会像正常情况一样旋转起来…
+1:另外，推进过程中产生的粒子效果也会有所不同，不论如何 这并不会影响这张卡牌的实际效果。
+
+LANG_English
+DEV_seron
+2: Actually, I hid a little Easter egg in the TurboBoost buff, but it seems not many people have noticed it?
+0: If you are using The Traveler as your character, you might notice that during the boost acceleration, the character's tail does not spin as it normally would...
+1: Additionally, the particle effects generated during the boost are also different. However, this does not affect the actual performance of the card in any way.

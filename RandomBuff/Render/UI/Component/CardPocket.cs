@@ -1620,6 +1620,7 @@ namespace RandomBuff.Render.UI.Component
         {
             for (int i = 0; i < this.sprites.Length; i++)
             {
+                sprites[i].isVisible = false;
                 sprites[i].RemoveFromContainer();
             }
         }

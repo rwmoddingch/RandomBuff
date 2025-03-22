@@ -1,0 +1,15 @@
+LANG_Chinese
+DEV_qed
+0 : 最阴间的buff是哪一个？相信你肯定有自己的答案。
+0 : 不过，对我来说，我会投早期的高ping战士一票。
+2 : 如今的高ping战士延迟为0.2秒，但已经让许多玩家叫苦不迭……
+2 : 你或许想不到，在收集点子的时候，高ping战士的效果是延迟5秒！
+0 : 当然，经过测试和平衡性调整，它变成了现在的样子。否则我是绝对不会在游玩中选择这个buff的……
+
+LANG_English
+DEV_qed
+0: Which buff is the most hellish? I'm sure you have your own answer.
+0: However, for me, I would cast my vote for the early version of the HighPing.
+2: Nowadays, the HighPing has a delay of 0.2 seconds, but it has already caused many players to complain bitterly...
+2: You might not imagine that when collecting ideas, the effect of the HighPing was a delay of 5 seconds!
+0: Of course, after testing and balance adjustments, it has become what it is now. Otherwise, I would definitely never choose this buff while playing...

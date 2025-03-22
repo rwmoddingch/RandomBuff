@@ -1,0 +1,19 @@
+LANG_Chinese
+DEV_harvie
+4 : 以下是一些我自己的刻板印象
+3 : 寂空贡献了全部代码里最多最详细的注释~
+2 : 我补充了最多次的遗漏资源
+5 : 小风是一声不吭发布超大更新的神秘人！
+0 : 诺普是小修bug专精！
+1 : qed是突变领域专家！
+4 : 闪卡是最佳点子王！
+
+LANG_English
+DEV_harvie
+4: Here are some of my own stereotypes.
+3: Seron contributed the most and most detailed comments in the entire codebase~
+2: I made the most additions to the missing resources.
+5: CuteFatalis is the mysterious person who silently releases massive updates!
+0: Pkuyo specializes in fixing small bugs!
+1: Quaeledy is an expert in the field of mutations!
+4: ShanKa is the king of best ideas!

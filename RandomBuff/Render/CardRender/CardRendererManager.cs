@@ -24,6 +24,7 @@ namespace RandomBuff.Render.CardRender
         static List<BuffCardRendererBase> totalRenderers = new List<BuffCardRendererBase>();
         static List<BuffCardRenderer> inactiveCardRenderers = new List<BuffCardRenderer>();
         static List<SingleTextCardRenderer> inactiveSingleTextCardRenderer = new List<SingleTextCardRenderer>();
+        static List<PlainWhiteCardRenderer> inactivePlainWhiteCardRenderer = new List<PlainWhiteCardRenderer>();
 
         public static int NextLegalID
         {
@@ -120,6 +121,33 @@ namespace RandomBuff.Render.CardRender
             }
         }
 
+        public static PlainWhiteCardRenderer GetPlainWhiteRenderer()
+        {
+            PlainWhiteCardRenderer result;
+            if (inactivePlainWhiteCardRenderer.Count > 0)
+            {
+                result = inactivePlainWhiteCardRenderer.Pop();
+                result.gameObject.SetActive(true);
+                result.Init(result._id, null);
+            }
+            else
+                result = GetNewRenderer();
+            return result;
+
+            PlainWhiteCardRenderer GetNewRenderer()
+            {
+                int id = NextLegalID;
+                var cardObj = new GameObject($"PlainWhiteCard_{id}");
+                cardObj.transform.position = new Vector3(id * 20, 0, 0);
+                PlainWhiteCardRenderer _cardRenderer = cardObj.AddComponent<PlainWhiteCardRenderer>();
+                _cardRenderer.Init(id, null);
+                BuffPlugin.LogDebug($"Get new PlainWhiteCardRenderer of id {id}");
+                totalRenderers.Add(_cardRenderer);
+
+                return _cardRenderer;
+            }
+        }
+
         public static void RecycleCardRenderer(BuffCardRendererBase buffCardRenderer)
         {
             if (buffCardRenderer is BuffCardRenderer cardRenderer)
@@ -135,6 +163,15 @@ namespace RandomBuff.Render.CardRender
                 singleTextCardRenderer.gameObject.SetActive(false);
                 if(!inactiveSingleTextCardRenderer.Contains(singleTextCardRenderer))
                     inactiveSingleTextCardRenderer.Add(singleTextCardRenderer);
+            }
+            else if(buffCardRenderer is PlainWhiteCardRenderer plainWhiteCardRenderer)
+            {
+                plainWhiteCardRenderer.DestroyRenderer();
+
+                totalRenderers.Remove(plainWhiteCardRenderer);
+                BuffPlugin.LogDebug($"Destroy inactive card renderer of id{plainWhiteCardRenderer._id}");
+
+                Object.Destroy(plainWhiteCardRenderer.gameObject);
             }
         }
 
@@ -245,6 +282,8 @@ namespace RandomBuff.Render.CardRender
 
         public static Texture MissingFaceTexture { get; private set; }
 
+        public static Texture PlainWiteTex { get; private set; }
+
         public static string MissingFace { get; private set; }
 
         public static Color PositiveColor { get; } = Helper.GetRGBColor(27, 178, 196);
@@ -323,6 +362,7 @@ namespace RandomBuff.Render.CardRender
             FPBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/fpback").texture;
             SlugBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/slugback").texture;
             TextBack = Futile.atlasManager.LoadImage("buffassets/cardbacks/textback").texture;
+            PlainWiteTex = new Texture2D(600, 1300, TextureFormat.ARGB32, false);
 
             var atlas = Futile.atlasManager.LoadImage("buffassets/cardbacks/missing");
             MissingFace = atlas.name;

@@ -473,7 +473,10 @@ namespace RandomBuff.Core.SaveData
 
         }
 
+        public static void AllExclusiveMissionFinished()
+        {
 
+        }
         #region cache
 
         private static bool CreateStaticDataCache(ModuleDefinition module, string modId, string pluginId)

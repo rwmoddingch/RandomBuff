@@ -1,0 +1,9 @@
+LANG_Chinese
+DEV_Seron
+0:如你所见，卡牌“两面性”的封面可能非常….奇特？
+1:事实上 这个封面是直接在Blender里面截图后经过简单处理与调色得到的，有意地保留了一种粗糙、欠缺完善的感觉…
+
+LANG_English
+DEV_Seron
+0: As you can see, the cover of the buff Two Sides might be quite... peculiar?
+1: In fact, this cover was directly captured from Blender, then underwent simple processing and color grading, intentionally retaining a rough, unfinished feel...

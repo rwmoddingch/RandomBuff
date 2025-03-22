@@ -1,6 +1,7 @@
 ﻿using Menu;
 using Menu.Remix.MixedUI;
 using Menu.Remix.MixedUI.ValueTypes;
+using RandomBuff.Core.Progression.Quest;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Render.UI.BuffPack;
 using RandomBuffUtils;
@@ -20,6 +21,8 @@ namespace RandomBuff.Core.Option
         private const float YItemSize = 30;
         private const float XSpacing = 50;
         private static readonly Color CheatColor = new Color(0.85f, 0.35f, 0.4f);
+        private static readonly Color gradientA = Custom.hexToColor("7BFFD2");
+        private static readonly Color gradientB = Custom.hexToColor("A67BFF");
 
 
         public PackButton[] packButtons;
@@ -51,6 +54,8 @@ namespace RandomBuff.Core.Option
             DisableCardSlotText = config.Bind(nameof(DisableCardSlotText), false);
             CosmeticForEverySlug = config.Bind(nameof(CosmeticForEverySlug), false);
             DisableCardPocketConflict = config.Bind(nameof(DisableCardPocketConflict), false);
+            EnableDevChat = config.Bind(nameof(EnableDevChat), false);
+            ShowUnlockWawaFuncNotification = config.Bind(nameof(ShowUnlockWawaFuncNotification), true);
             Instance = this;
 
         }
@@ -69,15 +74,27 @@ namespace RandomBuff.Core.Option
             foreach (var configurable in config.configurables)
                 configurable.Value.info = new ConfigurableInfo(BuffResourceString.Get($"Remix_{configurable.Key}_Desc", true));
 
-            OpTab option = InitNewTab(BuffResourceString.Get("Remix_Option", true));
-            OpTab pack = InitNewTab(BuffResourceString.Get("Remix_BuffPack", true));
-            OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
-        
-
-            Tabs = new[] { option , pack, cheat };
-            
             const float initYIndex = 1.5f + 1f + 2f;
             float yIndex = initYIndex;
+
+            List<OpTab> initTab = new List<OpTab>();
+            OpTab option = InitNewTab(BuffResourceString.Get("Remix_Option", true));
+            initTab.Add(option);
+            OpTab pack = InitNewTab(BuffResourceString.Get("Remix_BuffPack", true));
+            initTab.Add(pack);
+            OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
+            initTab.Add(cheat);
+            if(BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || true)
+            {
+                OpTab wawa = InitNewTab(BuffResourceString.Get("Remix_Wawa", true));
+                initTab.Add(wawa);
+
+                AppendItems(wawa, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableDevChat", true), FLabelAlignment.Left), new OpCheckBox(EnableDevChat, Vector2.zero));
+            }
+
+            Tabs = initTab.ToArray();
+            
+           
 
             //Options
             AppendItems(option, ref yIndex,
@@ -210,6 +227,16 @@ namespace RandomBuff.Core.Option
             }
         }
 
+        public override void Update()
+        {
+            base.Update();
+            if(Tabs.Length > 3)
+            {
+                Color gradient = Color.Lerp(gradientA, gradientB, Mathf.Sin(Time.time * Mathf.PI * 0.2f));
+                Tabs[3].colorButton = gradient;
+                Tabs[3].colorCanvas = gradient;
+            }
+        }
 
 
         public void SwitchToCredit(UIfocusable trigger)
@@ -296,7 +323,8 @@ namespace RandomBuff.Core.Option
 
         public Configurable<bool> CosmeticForEverySlug { get; private set; }
         public Configurable<bool> DisableCardPocketConflict { get; private set; }
-
+        public Configurable<bool> EnableDevChat { get; private set; }
+        public Configurable<bool> ShowUnlockWawaFuncNotification { get; private set; }
 
 
         private OpHoldButton cheatButton;

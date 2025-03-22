@@ -1,0 +1,13 @@
+LANG_Chinese
+DEV_harvie
+0 : RandomBuff的代码里有许多不那么严谨的命名
+3 : 比如有一个叫做 CommmmmmmmmmmmmmpleteInGameSlot 的类型
+5 : 实际上是因为键盘出了点小问题导致的名称，但也得到了莫名其妙的保留
+1 : 以及用来和你交流的对话框叫 WawaChat
+
+LANG_English
+DEV_harvie
+0: The code for RandomBuff has many names that are not very precise.
+3: For example, there is a type called CommmmmmmmmmmmmmpleteInGameSlot.
+5: Actually, the name was due to a minor keyboard issue, but it was inexplicably kept.
+1: And the dialog box used to communicate with you is called WawaChat.

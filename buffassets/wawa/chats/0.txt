@@ -1,0 +1,15 @@
+LANG_Chinese
+DEV_harvie
+1 : 也许你会发现，启用温度的情况下烈焰蜈蚣也很难烧死
+0 : 这是因为蜈蚣体节很多，散热性能很棒
+3 : 无论从代码还是设定角度来说都很合理
+pkuyo : 3 : 真的假的啊
+harvie : 2 : 嗯……
+
+LANG_English
+DEV_harvie
+1: You might find that even with the temperature enabled, it's quite difficult to burn the Red Centipede to death.
+0: This is because the centipede has many body segments, giving it excellent heat dissipation capabilities.
+3: It makes perfect sense both from a coding and a design perspective.
+pkuyo: 3: Really? Is that true?
+harvie: 2: Yeeeah...

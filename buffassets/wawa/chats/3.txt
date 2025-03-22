@@ -1,0 +1,11 @@
+LANG_Chinese
+DEV_harvie
+2 : 实际上惊喜礼盒开出来烈焰蜥蜴也是我故意的
+1 : 但原因比较搞笑，因为看buff描述的时候看走眼了
+0 : 后来因为节目效果比较好于是就保留了这个功能
+
+LANG_English
+DEV_harvie
+2: Actually, it was also intentional for me to get the RedLizard from the Surprise Gift Box.
+1: But the reason is quite funny, because I misread the buff description.
+0: Later, since it turned out to have a good show effect, we decided to keep this feature.

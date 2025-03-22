@@ -172,6 +172,12 @@ namespace RandomBuff.Core.BuffMenu
                     BuffOptionInterface.Instance.DisableNotifyDialog.Value = true;
                     BuffOptionInterface.SaveConfig();
                 }
+                if((BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || true) && BuffOptionInterface.Instance.ShowUnlockWawaFuncNotification.Value)
+                {
+                    testNotification.NewInfoNotification(BuffResourceString.Get("Notification_UnlockWawa_Title"), BuffResourceString.Get("Notification_UnlockWawa_Info"));
+                    BuffOptionInterface.Instance.ShowUnlockWawaFuncNotification.Value = false;
+                    BuffOptionInterface.SaveConfig();
+                }
             });
             UpdateSelectables();
         }

@@ -30,6 +30,7 @@ using Steamworks;
 using RandomBuff.Render.UI;
 using RandomBuff.Render.UI.ExceptionTracker;
 using RandomBuff.Core.Progression.Quest;
+using RandomBuff.Wawa;
 
 
 #pragma warning disable CS0618
@@ -174,7 +175,7 @@ namespace RandomBuff
 
 
                     QuestUnlockedType.Init();
-
+                    Wawa.Wawa.Init();
 
                     MachineConnector.SetRegisteredOI(ModId, Option);
                     StartCoroutine(ExceptionTracker.LateCreateExceptionTracker());

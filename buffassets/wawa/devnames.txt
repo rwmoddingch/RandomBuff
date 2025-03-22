@@ -1,0 +1,15 @@
+LANG_English
+harvie:Harvie
+qed:Quaeledy
+pkuyo:Pkuyo
+seron:Seron
+cutefatalis:CuteFatalis
+shanka:ShanKa
+
+LANG_Chinese
+harvie:哈维
+qed:Quaeledy
+pkuyo:诺普
+seron:寂空
+cutefatalis:小风
+shanka:闪卡

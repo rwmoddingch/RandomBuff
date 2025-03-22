@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Random = UnityEngine.Random;
 namespace RandomBuffUtils.ParticleSystem.EmitterModules
 {
@@ -87,6 +88,50 @@ namespace RandomBuffUtils.ParticleSystem.EmitterModules
             }
         }
     }
+
+    public class CustomRateSpawnerModule : SpawnModule
+    {
+        static float secPerFrame = 1 / 40f;
+        private float secNeed;
+        private float counter;
+
+        Func<float> rateFunc;
+        public CustomRateSpawnerModule(ParticleEmitter emitter, int maxParticleCount, Func<float> rateFunc) : base(emitter, maxParticleCount)
+        {
+            secNeed = 1f;
+            this.rateFunc = rateFunc;
+        }
+
+        public override void Init()
+        {
+            counter = 0;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+            if (emitter.slateForDeletion)
+                return;
+
+            counter += secPerFrame;
+            float newRate = rateFunc.Invoke();
+            if (newRate <= 0.001f)
+                return;
+            secNeed = 1f / newRate;
+            while (counter > secNeed)
+            {
+                counter -= secNeed;
+
+                if (emitter.Particles.Count < maxParitcleCount)
+                {
+                    emitter.SpawnParticle();
+                }
+            }
+        }
+    }
+
+
     public sealed class BurstSpawnerModule : SpawnModule
     {
         public bool emitted;

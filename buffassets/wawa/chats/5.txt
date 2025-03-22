@@ -1,0 +1,13 @@
+LANG_Chinese
+DEV_cutefatalis
+0 : 本末倒置有个特性
+1 : 和弹力蛞蝓一起生效时, 可能导致玩家在狭窄处因触发弹射摔死，而且还会越弹越快根本停不下来
+2 : 因为怎么修都无法完全避免，所以干脆让玩家在同时启用这两个buff时不会摔死
+3 : 一直弹一直爽（被打
+
+LANG_English
+DEV_cutefatalis
+0 : "Upside Down" has a glitch
+1 : When enabled with "Bouncy Slug", it may cause player dying from fast and heavy bouncing in narrow space, and bouncing can even speed up gradually
+2 : It was hard to fix, so I just made player immune to impact damage if the 2 buffs were both enabled
+3 : Enternal bouncing go brrrrrr

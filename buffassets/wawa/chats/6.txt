@@ -1,0 +1,12 @@
+LANG_Chinese
+DEV_cutefatalis
+3 : 俄罗斯转盘在某次玩家投票中荣获“最不受欢迎buff”称号，撒花～
+4 :（然后被关起来了
+5 : 目前寂空老师正在改进轮盘机制，敬请期待～
+
+LANG_English
+DEV_cutefatalis
+CuteFatalis
+3 : "Russian Roulette" once got "The Most Hated Buff" title in a player vote, congratulations~
+4 : *Get thrown into a jail
+5 : Seron is improving its mechanism, stay tuned~

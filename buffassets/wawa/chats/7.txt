@@ -1,0 +1,18 @@
+LANG_Chinese
+DEV_qed
+0 : 你是否疑惑过，RandomBuff的封面是一群展示buff效果的蛞蝓猫，其中一个双手变为鸟翼的效果却从未在游戏中出现过？
+1 : 实际上，这是一个存在于早期版本中的buff，鸟形突变。这个buff的动画效果接近离群者，但操作更加简单。
+1 : 只需在空中按跳跃起飞，然后按上下左右键即可平行移动。
+0 : 然而，考虑到雨世界本身的生态风格，这个buff最终变成了如今的鹫形突变buff——秃鹫正是雨世界中的飞行鸟类。
+1 : 尽管修改过程十分艰辛，但成果是令我满意的。
+1 : 变成雨世界的秃鹫，而非我们通常所说的鸟，不仅在画风上更适合雨世界，同时也给能力的拓展提供了更加丰富的内容。叠加层数，就能化身魔王鹫发射角矛、追杀蜥蜴……祝你玩得愉快！
+
+LANG_English
+DEV_qed
+0: Have you ever wondered why the cover of RandomBuff features a group of slugcats demonstrating buff effects, yet one of them, with wings for hands, showcases an effect that never appears in the game?
+1: Actually, this was a buff that existed in an early version, called BirdShapeMutation. The animation for this buff was similar to that of the Outsider, but the controls were simpler.
+1: All you had to do was press jump to take off while in the air, and then use the arrow keys to move horizontally.
+0: However, considering the ecological style of Rain World itself, this buff was eventually transformed into the current VultureShapeMutation buff—vultures being the flying birds of Rain World.
+1: Although the revision process was quite arduous, the result is satisfying to me.
+1: Becoming a vulture of Rain World, rather than a bird as we commonly know it, not only fits the artistic style of Rain World better but also provides richer content for the expansion of abilities.
+1:Stack the layers, and you can transform into a King Vulture, launching tusks and hunting lizards... Enjoy your play!

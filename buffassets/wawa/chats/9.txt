@@ -1,0 +1,13 @@
+LANG_Chinese
+DEV_qed
+1 : 水世界，这是一个效果非常简单的buff，让房间去下半部分充满水。
+0 : 不过，你注意到这张卡的描述了吗？
+1 : 当你同时持有本末倒置buff时，水世界buff的效果会变成房间的上半部分充满水！
+1 : 这个建议来自测试玩家，我觉得这很有趣，所以实现了它。希望你也喜欢！
+
+LANG_English
+DEV_qed
+1: Water World, this is a very simple buff that fills the lower half of the room with water.
+0: However, have you noticed the description of this buff?
+1: When you also have the UpsideDown buff, the effect of the Water World buff changes to fill the upper half of the room with water!
+1: This suggestion came from a beta tester, and I thought it was interesting, so I implemented it. I hope you like it too!
