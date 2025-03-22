@@ -98,7 +98,7 @@ namespace RandomBuff.Core.Option
 
             yIndex++;
 
-
+            
             AppendItems(option, ref yIndex,
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionModExtend", true), FLabelAlignment.Left),
                 new OpCheckBox(EnableExpeditionModExtend, Vector2.zero));
