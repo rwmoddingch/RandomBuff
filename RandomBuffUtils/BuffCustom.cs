@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Menu.Remix.MixedUI;
 using RWCustom;
 
 namespace RandomBuffUtils
@@ -30,7 +31,28 @@ namespace RandomBuffUtils
             }
             return types;
         }
-
+        public static void AddEvent(this UIelement owner, string eventName, string func)
+        {
+            var type = owner.GetType();
+            EventInfo eInfo = type.GetEvent(eventName);
+            eInfo.GetAddMethod().Invoke(owner,
+                new[]
+                {
+                    Delegate.CreateDelegate(eInfo.EventHandlerType, owner,
+                        type.GetMethod(func, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                });
+        }
+        public static void AddEvent(this UIelement owner, string eventName,object funcOwner, string func)
+        {
+            var type = owner.GetType();
+            EventInfo eInfo = type.GetEvent(eventName);
+            eInfo.GetAddMethod().Invoke(owner,
+                new[]
+                {
+                    Delegate.CreateDelegate(eInfo.EventHandlerType, funcOwner,
+                        funcOwner.GetType().GetMethod(func, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                });
+        }
         public static float TimeSpeed => (Custom.rainWorld.processManager.currentMainLoop?.framesPerSecond ?? 40) / 40f;
         
     }

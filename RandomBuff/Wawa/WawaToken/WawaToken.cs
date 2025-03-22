@@ -387,7 +387,7 @@ namespace RandomBuff.Wawa.WawaToken
             tokenEnabled = false;
             rotY = 0f;
             //lastTokenAlive = tokenAlive = 0f;
-
+            WawaSaveData.hasRead.Add(convID);
             room.AddObject(new WawaChatHUD(room, WawaChatLoader.convs[convID]));
             room.PlaySound(SoundID.Token_Collect, hoverPos, 1f, 1f);
 

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using RandomBuffUtils;
 using UnityEngine;
 
 namespace RandomBuff.Render.UI.BuffPack
@@ -80,19 +81,7 @@ namespace RandomBuff.Render.UI.BuffPack
                 descriptionLabel.color = MenuColorEffect.rgbMediumGrey;
             }
 
-            AddEvent(this, "OnClick", "PackButton_OnClick");
-        }
-
-        private void AddEvent(object owner, string eventName, string func)
-        {
-            var type = owner.GetType();
-            EventInfo eInfo = type.GetEvent(eventName);
-            eInfo.GetAddMethod().Invoke(owner,
-                new[]
-                {
-                    Delegate.CreateDelegate(eInfo.EventHandlerType, this,
-                        type.GetMethod(func, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                });
+            this.AddEvent("OnClick", "PackButton_OnClick");
         }
 
         private void PackButton_OnClick(UIfocusable trigger)

@@ -169,6 +169,7 @@ namespace RandomBuff
                     CoreHooks.OnModsInit();
                     SoapBubblePool.Hook();
                     AnimMachine.Init();
+                    WawaSaveData.OnModsInit();
 
 
                     BuffConfigManager.InitBuffPluginInfo();
@@ -339,6 +340,7 @@ namespace RandomBuff
                 {
                     lastVersion = new();
                     LogError("Corrupted BuffPluginVersion.txt");
+                    lines.Clear();
                     foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
                     {
                         File.Delete(all);

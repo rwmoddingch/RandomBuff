@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RandomBuff.Core.Game.Settings.CustomMissions.MixedUI;
 using UnityEngine;
 
 namespace RandomBuff.Core.Option
@@ -90,12 +91,22 @@ namespace RandomBuff.Core.Option
                 initTab.Add(wawa);
 
                 AppendItems(wawa, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableDevChat", true), FLabelAlignment.Left), new OpCheckBox(EnableDevChat, Vector2.zero));
+               
+                var tot = YSize * 6;
+                var treeView = new OpTreeView(new Vector2(XSpacing, (yIndex) * YSize), 500, YItemSize, tot, "HelloWorld");
+                wawa.AddItems(treeView,treeView.HeaderButton);
+                treeView.AddItems(new OpLabel(XSpacing,tot - YSize,"11111"),
+                    new OpLabel(XSpacing,tot - YSize*2,"22222"),
+                    new OpLabel(XSpacing,tot -YSize*3,"33333"),
+                    new OpLabel(XSpacing,tot-YSize*4,"44444"),
+                    new OpLabel(XSpacing,tot -YSize*5,"55555"));
             }
 
             Tabs = initTab.ToArray();
             
            
-
+            yIndex = initYIndex;
+            
             //Options
             AppendItems(option, ref yIndex,
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_CardSlotKey", true),FLabelAlignment.Left),
@@ -120,6 +131,8 @@ namespace RandomBuff.Core.Option
                 new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableExpeditionModExtend", true), FLabelAlignment.Left),
                 new OpCheckBox(EnableExpeditionModExtend, Vector2.zero));
 
+
+            
             yIndex = initYIndex;
 
             //Cheats
@@ -136,8 +149,7 @@ namespace RandomBuff.Core.Option
                     new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_CheatAllCosmetics", true), FLabelAlignment.Left) { color = CheatColor },
                     new OpCheckBox(CheatAllCosmetics, Vector2.zero) { colorEdge = CheatColor }));
 
-            var holdEvent = cheatButton.GetType().GetEvent("OnPressDone");
-            holdEvent.AddEventHandler(cheatButton, Delegate.CreateDelegate(holdEvent.EventHandlerType,this,nameof(ShowCheatLayer)));
+            cheatButton.AddEvent("OnPressDone",this,nameof(ShowCheatLayer));
 
             foreach (var ele in cheatList)
                 ele.Hide();
@@ -147,10 +159,8 @@ namespace RandomBuff.Core.Option
                 BuffResourceString.Get("Remix_Credit", true)));
 
        
-            holdEvent = creditButton.GetType().GetEvent("OnClick");
-            holdEvent.AddEventHandler(creditButton, Delegate.CreateDelegate(holdEvent.EventHandlerType, this, nameof(SwitchToCredit)));
-
-
+            creditButton.AddEvent("OnClick",this,nameof(SwitchToCredit));
+            
             float sizeY = 0f;
             
 

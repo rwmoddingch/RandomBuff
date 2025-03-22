@@ -11,7 +11,7 @@ namespace RandomBuff.Wawa
 {
     internal static class WawaChatRoomSettings
     {
-        public static Dictionary<string, PlacedObject> placedTokens = new Dictionary<string, PlacedObject>();
+        public static Dictionary<string, PlacedObject> placedTokens = new ();
         public static string settingFilePath;
 
         public static void LoadSetting()
