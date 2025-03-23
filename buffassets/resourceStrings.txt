@@ -58,6 +58,9 @@ Notification_CardReward|Unlock card
 Notification_FreePickReward|Unlock free pick count
 Notification_TooManyMods_Title|Mod amount warning:
 Notification_TooManyMods_Info|It seems you have enabled too many mods, be aware that this may cause more exception or crash.<LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
+Notification_UnlockWawa_Title|Hiden function unlocked:
+Notification_UnlockWawa_Info|Hiden function unlocked! Go to mod options in Remix for details.
+
 
 //BuffMenu:
 MANUAL|MANUAL
@@ -332,6 +335,7 @@ BuffManual_CardPedia_Content_1|After selecting any type of buff, you can view th
 Remix_Title|Random Buff
 Remix_Option|Option
 Remix_BuffPack|BuffPack
+Remix_Wawa|Wawa
 Remix_BuffPackDescription|Manage all buff packs. Enabled buff packs will be displayed in green.<LINE>Click the button corresponding to the buff pack to toggle its enabled status.<LINE>Built-in buff packs cannot be disabled.
 Remix_CardSlotKey|View Card Slot Key
 Remix_KeyBindKey|Card Binding Key
@@ -353,6 +357,7 @@ Remix_EnableExpeditionExtend_Desc|NEED RESTART TO APPLY, Converts Expedition and
 Remix_EnableExpeditionModExtend_Desc|NEED RESTART TO APPLY, Converts perks and burdens from other mods into cards. This may cause compatibility issues.
 Remix_CosmeticForEverySlug_Desc|Allow enabled cosmetics for every slugcats to use
 Remix_DisableCardPocketConflict_Desc|Allow you to pick conflict buffs in card pocket, this may cause more unexpected problems.
+Remix_EnableDevChat|?Enable Dev Chat?
 
 
 //SleepMenu

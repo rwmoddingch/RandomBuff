@@ -1,0 +1,9 @@
+LANG_Chinese
+DEV_pkuyo
+0:鼠目寸光这张卡的地图放大效果的实现灵感其实是来自隐秘花园(Concealed Garden)的生命游戏房间
+1:什么？没玩过那个mod，快去1.5版本玩一下！
+
+LANG_English
+DEV_pkuyo
+0: The inspiration for the map zoom effect of the "Short-Sighted" buff actually came from the Game of Life room in the Concealed Garden mod.
+1: What? You haven't played that mod yet? Go try it out in version 1.5!

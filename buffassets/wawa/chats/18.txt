@@ -1,0 +1,15 @@
+LANG_Chinese
+DEV_harvie
+1:其实RandomBuff中有多处地方使用了3D渲染
+5:比如UI中的卡牌渲染和内置卡包中的喷火器
+3:每个卡牌都有一个摄像机对它进行拍摄，然后把绘制结果渲染到一张贴图上。
+2:最早计划是使用纯2d的顶点偏移来模拟3d效果，但实际发现没有真实透视效果会看起来很奇怪。
+4:不过最后结果很满意，甚至有看到别人复刻这个卡牌效果。
+
+LANG_English
+DEV_harvie
+1: Actually, there are multiple places in RandomBuff where 3D rendering is used.
+5: For example, the card rendering in the UI and the FlameThrower in the built-in buff pack.
+3: Each card has a camera that captures it, and then the rendering result is mapped onto a texture.
+2: Initially, the plan was to use pure 2D vertex offset to simulate a 3D effect, but in practice, it looked strange without real perspective.
+4: However, the final result was very satisfying, and I've even seen others replicate this card effect.

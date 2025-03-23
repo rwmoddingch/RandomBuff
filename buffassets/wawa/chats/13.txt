@@ -1,0 +1,13 @@
+LANG_Chinese
+DEV_pkuyo
+0:其实buff的独立存档实现的非常直接，就是原来存档位置+99
+1:（关于为什么不用负数......因为任何负数都会被判定为探险模式的存档...嗯...）
+2:然后后来出现了Unlimited Saves这个mod，导致最开始的写法直接会被判定成100+存档槽（非常壮观）
+0:然后紧急改了（！
+
+LANG_English
+DEV_pkuyo
+0: Actually, the implementation of the independent save for buff is very straightforward; it's just the original save position + 99.
+1: (As for why negative numbers aren't used... it's because any negative number is judged as a save for the exploration mode... um...)
+2: Then later, the mod Unlimited Saves appeared, which caused the initial code to be directly judged as 100+ save slots. (very spectacular)
+0: So it was urgently changed. (!

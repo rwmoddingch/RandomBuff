@@ -1,0 +1,13 @@
+LANG_Chinese
+DEV_harvie
+1:最早加入游戏的buff按前后顺序分别是蓝果炸弹，弹射矛，免死金牌。
+0:不过免死金牌的卡面插画完成的时间更早一点。
+5:最早理想的卡面插画风格应该是统一成免死金牌、弹射矛、荒芜俯冲类似的风格。
+2:不过个人能力不足以完成那么多卡面的插画绘制，所以只能放弃这个想法了。
+
+LANG_English
+DEV_harvie
+1: The buffs added to the game earliest, in order, were DangleFruitBomb, BounceSpear, and DeathFreeMedallion
+0: However, the buff illustration for DeathFreeMedallion was completed a bit earlier.
+5: Initially, the ideal style for the buff illustrations was supposed to be unified, similar to those buffs above.
+2: But my personal ability wasn't sufficient to complete the illustrations for so many buffs, so I had to give up on that idea.

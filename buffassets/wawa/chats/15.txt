@@ -1,0 +1,11 @@
+LANG_Chinese
+DEV_pkuyo
+0:如果你玩过正式版1.0.6以下的，你可能会发现击杀生物条件的计算可能有时候会存在计入问题
+2:但是直到最后反馈的都是“蛞蝓猫被击杀也会计入条件”，其实问题大得多————任何生物被击杀无论是不是玩家击杀都会被计入......
+2:于是偷偷改掉了（希望没人发现.jpg）
+
+LANG_English
+DEV_pkuyo
+0: If you've played versions below the official 1.0.6, you might have noticed that the calculation for the creature kill condition sometimes had issues with being counted correctly.
+2: However, the only feedback we received until the end was "slugcats being killed also count towards the condition," but the problem was actually much bigger—any creature killed, whether by the player or not, was being counted...
+2: So I secretly fixed it (hoping no one would notice.jpg).

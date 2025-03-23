@@ -96,6 +96,14 @@ namespace RandomBuff.Wawa
             if (slatedForDeletetion)
                 return;
 
+            foreach (var crit in room.abstractRoom.creatures)
+            {
+                if (crit.realizedCreature != null && crit.realizedCreature.room != null && crit.realizedCreature is not Player)
+                {
+                    crit.realizedCreature.stun = 40;
+                }
+            }
+
             if(roundRectSprites != null)
             {
                 roundRectSprites.Update();

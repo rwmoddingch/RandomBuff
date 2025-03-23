@@ -1,4 +1,4 @@
-//MainMenu
+//MainMenuFinish 
 MainMenu_Buff|卡牌
 MainMenu_Cardpedia|卡牌图鉴
 
@@ -59,6 +59,8 @@ Notification_CardReward|解锁卡牌
 Notification_FreePickReward|解锁自由抽卡数
 Notification_TooManyMods_Title|启用mod数量警告:
 Notification_TooManyMods_Info|看起来你启用了很多的mod，请注意这有可能会造成更多的异常或游戏崩溃。<LINE>如果出现异常，请留意 报错提示（如有启用）和 以下文件：<LINE>exceptionLog.txt（位于 雨世界根目录）<LINE>buffcore.txt（位于 Rain World\RainWorld_Data\StreamingAssets）
+Notification_UnlockWawa_Title|隐藏功能解锁:
+Notification_UnlockWawa_Info|隐藏功能已解锁！请在拓展页面里的mod配置查看详情
 //挨我服了我说不明白人话谁改改这个
 
 //BuffMenu:
@@ -337,6 +339,7 @@ BuffManual_CardPedia_Content_1|选择任意一类buff后，可以通过点击buf
 Remix_Title|Random Buff
 Remix_Option|配置
 Remix_BuffPack|卡包
+Remix_Wawa|Wawa
 Remix_BuffPackDescription|管理所有卡包，启用的卡包将会显示为绿色。<LINE>点击卡包对应的按钮来切换卡包启用状态，内置卡包不可禁用。
 Remix_CardSlotKey|查看卡牌按键
 Remix_KeyBindKey|卡牌绑键按键
@@ -358,6 +361,7 @@ Remix_EnableExpeditionExtend_Desc|需要重启以应用，将探险以及多猫�
 Remix_EnableExpeditionModExtend_Desc|需要重启以应用，将其他mod的增益和负担转化为卡牌，可能存在兼容性问题
 Remix_CosmeticForEverySlug_Desc|让启用的装饰品对所有猫生效
 Remix_DisableCardPocketConflict_Desc|允许在选卡卡包中选择冲突的卡牌，有可能导致更多意外的问题
+Remix_EnableDevChat|?启用开发者杂谈?
 
 
 //SleepMenu

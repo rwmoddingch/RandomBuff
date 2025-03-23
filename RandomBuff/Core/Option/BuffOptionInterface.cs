@@ -242,7 +242,7 @@ namespace RandomBuff.Core.Option
             base.Update();
             if(Tabs.Length > 3)
             {
-                Color gradient = Color.Lerp(gradientA, gradientB, Mathf.Sin(Time.time * Mathf.PI * 0.2f));
+                Color gradient = Color.Lerp(gradientA, gradientB, Mathf.Sin(Time.time * Mathf.PI * 0.2f) * 0.5f + 0.5f);
                 Tabs[3].colorButton = gradient;
                 Tabs[3].colorCanvas = gradient;
             }

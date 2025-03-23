@@ -4,7 +4,9 @@ DEV_harvie
 5 : RandomBuff曾经叫RandomGains
 3 : 但是因为gain这个单词看起来比较奇怪，所以在后来重构项目后改成了如今的名字
 2 : RandomGains时期的玩法设计相当单一，甚至只是剧情模式的一个附加玩法
-0 : 不过多亏了小风、诺普和其他开发者的努力，玩法来到了目前的模式
+0 : 不过多亏了小风和其他开发者的努力，玩法来到了目前的模式
+pkuyo:1:我呢我呢？新模式好歹是我设想的
+harvie:2:啊对诺普也帮了很大的忙
 
 LANG_English
 DEV_harvie
@@ -12,4 +14,6 @@ DEV_harvie
 5: RandomBuff used to be called RandomGains.
 3: But because the word "gains" seemed a bit odd, it was changed to its current name after the project was later restructured.
 2: The gameplay design during the RandomGains era was quite monotonous, even just an additional mode to the story campaign.
-0: However, thanks to the efforts of CuteFatalis, Pkuyo, and other developers, the gameplay has evolved into its current form.
+0: However, thanks to the efforts of CuteFatalis and other developers, the gameplay has evolved into its current form.
+pkuyo: 1: What about me? The new mode was at least my idea.
+harvie: 2: Ah, right, Pkuyo also helped a lot.

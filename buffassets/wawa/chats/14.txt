@@ -1,0 +1,11 @@
+LANG_Chinese
+DEV_pkuyo
+1:被害妄想症这个卡其实是从我的一个猫的构想中提出来的，最开始想的是全都是虚假的生物。
+3:然后发现这样玩家很快就适应了，于是加上了1/50概率遇到真的生物这个功能。（喂
+2:至于可以通过地图或者其他方式区分假生物其实是我的编写失误...（但是我感觉我改掉会被打死于是保留了（目移）
+
+LANG_English
+DEV_pkuyo
+1: The buff "Paranoia" actually originated from an idea I had about my cat. Initially, I thought of making all the creatures illusory.
+3: But then I realized that players would adapt to it too quickly, so I added a feature where there's a 1/50 chance of encountering a real creature. (Hey
+2: As for the fact that players can distinguish fake creatures through the map or other methods, that was actually a mistake in my coding... (But I feel like I'd get beaten up if I fixed it, so I left it as is (shifts gaze)).

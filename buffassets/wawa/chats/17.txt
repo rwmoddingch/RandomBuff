@@ -1,0 +1,15 @@
+LANG_Chinese
+DEV_pkuyo
+0:Random Gain最开始是哈维主要负责框架，我主要负责界面设计这样
+2:但是我并不擅长界面设计（让我写动效会死人的！），哈维也不算很擅长框架，总之就写的很烂...
+1:于是干脆重头开始写更名为Random Buff，顺便交换了主要职责，然后写的顺畅多了（嗯）
+1:有人好奇的话这里有Random Gain的下载链接（只兼容1.9.07b
+0:pan.baidu.com/s/1CfttOfOloZlt3yLUE5-4Ow?pwd=1907
+
+LANG_English
+DEV_pkuyo
+0: Initially, Harvie was mainly responsible for the framework of Random Gain, while I was primarily in charge of the interface design.
+2: But I'm not really good at interface design (making me write animations would be a nightmare!), and Harvey isn't particularly great at frameworks either, so overall, it was pretty poorly done...
+1: So we decided to start over from scratch, renamed it to Random Buff, swapped our main responsibilities, and then things went much smoother (yeah).
+1: If anyone's curious, here's the download link for Random Gain (only compatible with 1.9.07b).
+0:drive.google.com/file/d/1B7FZ49w6qv5rCOm4xcS1elKR5qrptdnQ/view?usp=sharing
