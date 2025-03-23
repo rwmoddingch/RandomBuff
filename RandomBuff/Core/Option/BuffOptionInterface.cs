@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using RandomBuff.Core.Game.Settings.CustomMissions.MixedUI;
+using RandomBuff.Core.Game.Settings.CustomMissions;
 using UnityEngine;
 
 namespace RandomBuff.Core.Option
@@ -85,21 +85,26 @@ namespace RandomBuff.Core.Option
             initTab.Add(pack);
             OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
             initTab.Add(cheat);
-            if(BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || BuffPlugin.DevEnabled)
+            if(BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || BuffPlugin.DevEnabled || true)
             {
                 OpTab wawa = InitNewTab(BuffResourceString.Get("Remix_Wawa", true));
                 initTab.Add(wawa);
 
                 AppendItems(wawa, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableDevChat", true), FLabelAlignment.Left), new OpCheckBox(EnableDevChat, Vector2.zero));
-               
-                // var tot = YSize * 6;
-                // var treeView = new OpTreeView(new Vector2(XSpacing, (yIndex) * YSize), 500, YItemSize, tot, "HelloWorld");
-                // wawa.AddItems(treeView,treeView.HeaderButton);
-                // treeView.AddItems(new OpLabel(XSpacing,tot - YSize,"11111"),
-                //     new OpLabel(XSpacing,tot - YSize*2,"22222"),
-                //     new OpLabel(XSpacing,tot -YSize*3,"33333"),
-                //     new OpLabel(XSpacing,tot-YSize*4,"44444"),
-                //     new OpLabel(XSpacing,tot -YSize*5,"55555"));
+
+
+                var box = new TreeView(new OpTreeView(new Vector2(20, wawa.CanvasSize.y - yIndex * YSize ),
+                    500,YSize, 10,"Test1"));
+                wawa.AddItems((OpTreeView)box.Holder,((OpTreeView)box.Holder).HeaderButton);
+                
+                var tree = new TreeView(new OpTreeView(new Vector2(20, Element.YSpacing), 
+                    500, YSize, 10, "Test"));
+                box.AddObject(new ElementWithLabel("Test2",YSize,new OpSimpleButton(Vector2.zero,Vector2.zero,"Click Me!")));
+                box.AddObject(tree);
+                box.AddObject(new ElementWithLabel("Test2",YSize,new OpSimpleButton(Vector2.zero,Vector2.zero,"Click Me!")));
+                tree.AddObject(new ElementWithLabel("Wawa",YSize));
+                tree.AddObject(new ElementWithLabel("Wawa2",YSize));
+                
             }
 
             Tabs = initTab.ToArray();
