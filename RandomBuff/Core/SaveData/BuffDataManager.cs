@@ -336,7 +336,8 @@ namespace RandomBuff.Core.SaveData
                 return;
             
             BuffPlugin.Log($"SyncToData: {currentDatas.name}");
-            allDatas[currentDatas.name].Clear();
+            if(allDatas.TryGetValue(currentDatas.name,out var data1))
+                data1.Clear();
             foreach (var data in currentDatas.datas)
             {
                 try

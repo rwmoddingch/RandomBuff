@@ -7,13 +7,30 @@ using Object = UnityEngine.Object;
 
 namespace RandomBuff.Core.Game.Settings.CustomMissions.MixedUI;
 
+public class OpHeaderButton : OpSimpleButton
+{
+    public OpHeaderButton(Vector2 pos, Vector2 size, string displayText = "") : base(pos, size, displayText)
+    {
+        headerSprite = new FSprite("Futile_White") {width = size.y/2, height = size.y / 2, x = size.y /2, y = size.y/4, anchorX = 0, anchorY = 0};
+        myContainer.AddChild(headerSprite);
+        this.AddEvent("OnClick",nameof(ButtonOnClick));
+    }
+    
+    private void ButtonOnClick(UIfocusable trigger)
+    {
+        headerSprite.rotation = headerSprite.rotation == 0 ? 90 : 0;
+    }
+
+    private FSprite headerSprite;
+}
+
 public class OpTreeView : UIfocusable, IHoldUIelements
 {
     public OpTreeView(Vector2 pos, float width, float headerHeight, float contentHeight,string displayName) : base(pos, new Vector2(width,headerHeight))
     {
         ContentHeight = contentHeight;
         HeaderHeight = headerHeight;
-        HeaderButton = new OpSimpleButton(pos, new Vector2(width, headerHeight), displayName);
+        HeaderButton = new OpHeaderButton(pos, new Vector2(width, headerHeight), displayName);
         HeaderButton.AddEvent("OnClick",this,"HeaderButton_OnClick");
         
         GameObject gameObject = new GameObject("OpTreeView Camera " + camIndex);
@@ -76,7 +93,7 @@ public class OpTreeView : UIfocusable, IHoldUIelements
     public override void Update()
     {
         size = new(size.x, Mathf.Lerp(size.y, isExpand ? ContentHeight+HeaderHeight : HeaderHeight, 0.2f));
-        MoveCam();
+        lastScrollOffset = ScrollOffset;
         if (firstUpdate)
         {
             firstUpdate = false;
@@ -85,15 +102,22 @@ public class OpTreeView : UIfocusable, IHoldUIelements
         base.Update();
     }
 
+    public override void GrafUpdate(float timeStacker)
+    {
+        base.GrafUpdate(timeStacker);
+        MoveCam(timeStacker);
+    }
+
     public override void Change()
     {
         base.Change();
         UpdateCam();
     }
 
-    private void MoveCam()
+    private void MoveCam(float timeStacker = 0)
     {
-        Vector3 vector = (Vector3)camPos + new Vector3(size.x / 2f, ContentHeight/2, -50f) + Vector3.down * ScrollOffset;
+        Vector3 vector = (Vector3)camPos + new Vector3(size.x / 2f, ContentHeight/2, -50f) +
+                         Vector3.down * Mathf.Lerp(lastScrollOffset,ScrollOffset,timeStacker);
         if (Owner != null)
             vector += (Vector3)Owner.ScreenPos;
         if (tab != null)
@@ -145,12 +169,14 @@ public class OpTreeView : UIfocusable, IHoldUIelements
     public bool IsTab => false;
     public Vector2 CanvasSize =>  size;
     public float ScrollOffset => ContentHeight - CurrentHeight;
+
+    public float lastScrollOffset;
     
     public float ContentHeight { get; }
     
     public float HeaderHeight { get; }
     public float CurrentHeight => size.y - HeaderHeight;
-    
+
     private bool isExpand = false;
 
     private OpScrollBox fakeScrollBox;

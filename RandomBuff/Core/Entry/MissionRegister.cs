@@ -65,7 +65,7 @@ namespace RandomBuff.Core.Game.Settings.Missions
                         var obj = Helper.GetUninit<IMissionEntry>(type);
                         try
                         {
-                            type.GetMethod("RegisterMission").Invoke(obj, Array.Empty<object>());
+                            obj.RegisterMission();
                             BuffPlugin.Log("Registered mission: " + type.Name);
                         }
                         catch (Exception ex)

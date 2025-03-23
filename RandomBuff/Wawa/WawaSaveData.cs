@@ -37,7 +37,6 @@ public class WawaSaveData
 
         }
     }
-
-    [JsonProperty] 
+    
     public static HashSet<int> hasRead = new();
 }

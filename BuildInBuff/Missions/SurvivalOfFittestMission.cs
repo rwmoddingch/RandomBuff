@@ -58,7 +58,7 @@ namespace BuiltinBuffs.Missions
             JellyfishShapedMutationBuffEntry.JellyfishShapedMutation,
             SpiderShapedMutationBuffEntry.SpiderShapedMutation,
             PixieSlugBuffEntry.PixieSlug,
-            SlugSlugBuffEntry.SlugSlugID,
+            CorruptionShapedMutationBuffEntry.CorruptionShapedMutation
         };
 
 

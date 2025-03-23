@@ -941,8 +941,9 @@ namespace BuiltinBuffs.Missions.UltraKill
                             waves.Add(currentWaveInfo = new FinishInfo());
                         else if (currentWaveInfoType == "Song")
                             waves.Add(currentWaveInfo = new SongInfo());
-
+#if TESTVERSION
                         BuffUtils.Log("UltraKillMission", $"new waveinfo {currentWaveInfoType}");
+#endif
                         continue;
                     }
                     else
@@ -950,7 +951,9 @@ namespace BuiltinBuffs.Missions.UltraKill
                         if (currentWaveInfoType == "Wait")
                         {
                             (currentWaveInfo as WaitInfo).waitTime = int.Parse(trimed);
+#if TESTVERSION
                             BuffUtils.Log("UltraKillMission", $"WaitInfo {(currentWaveInfo as WaitInfo).waitTime}");
+#endif
                         }
                         else if (currentWaveInfoType == "SpawnItems")
                         {
@@ -973,8 +976,9 @@ namespace BuiltinBuffs.Missions.UltraKill
                             }
                             else
                                 itemInfo.specials[index].Add(0);
-
+#if TESTVERSION
                             BuffUtils.Log("UltraKillMission", $"SpawnItems {index} {itemInfo.spawns[index].Last()} {itemInfo.specials[index].Last()}");
+#endif
                         }
                         else if (currentWaveInfoType == "SpawnCreatures")
                         {
@@ -997,8 +1001,9 @@ namespace BuiltinBuffs.Missions.UltraKill
                             }
                             else
                                 creatureInfo.specials[index].Add(0);
-
+#if TESTVERSION
                             BuffUtils.Log("UltraKillMission", $"SpawnCreatures {index} {creatureInfo.spawns[index].Last()}");
+#endif
                         }
                         else if (currentWaveInfoType == "ExtraBuff")
                         {
@@ -1018,7 +1023,9 @@ namespace BuiltinBuffs.Missions.UltraKill
                         {
                             var songInfo = currentWaveInfo as SongInfo;
                             songInfo.songName.Add(trimed);
+#if TESTVERSION
                             BuffUtils.Log("UltraKillMission", $"song : {trimed}");
+#endif
                         }
                     }
                 }

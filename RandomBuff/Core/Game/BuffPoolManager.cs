@@ -144,7 +144,7 @@ namespace RandomBuff.Core.Game
             foreach(var condition in GameSetting.conditions)
                 BuffPlugin.LogDebug($"---condition: {condition.ID}");
 
-            foreach (var data in BuffDataManager.Instance.GetDataList(game.StoryCharacter))
+            foreach (var data in BuffDataManager.Instance.GetDataList(game.StoryCharacter).ToList())
                 CreateBuff(data);
             
 

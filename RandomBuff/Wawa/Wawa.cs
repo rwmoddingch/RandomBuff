@@ -13,7 +13,7 @@ namespace RandomBuff.Wawa
 {
     internal static class Wawa
     {
-        public static PlacedObject.Type WawaTokenPlacedType = new PlacedObject.Type("WawaToken", true);
+        public static PlacedObject.Type WawaTokenPlacedType = new ("WawaToken", true);
 
         public static bool EnableDevChat => BuffOptionInterface.Instance.EnableDevChat.Value;
         public static void Init()

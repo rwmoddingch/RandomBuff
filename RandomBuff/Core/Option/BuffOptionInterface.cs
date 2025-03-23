@@ -85,21 +85,21 @@ namespace RandomBuff.Core.Option
             initTab.Add(pack);
             OpTab cheat = InitNewTab(BuffResourceString.Get("Remix_Cheat", true), CheatColor);
             initTab.Add(cheat);
-            if(BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || true)
+            if(BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || BuffPlugin.DevEnabled)
             {
                 OpTab wawa = InitNewTab(BuffResourceString.Get("Remix_Wawa", true));
                 initTab.Add(wawa);
 
                 AppendItems(wawa, ref yIndex, new OpLabel(Vector2.zero, Vector2.zero, BuffResourceString.Get("Remix_EnableDevChat", true), FLabelAlignment.Left), new OpCheckBox(EnableDevChat, Vector2.zero));
                
-                var tot = YSize * 6;
-                var treeView = new OpTreeView(new Vector2(XSpacing, (yIndex) * YSize), 500, YItemSize, tot, "HelloWorld");
-                wawa.AddItems(treeView,treeView.HeaderButton);
-                treeView.AddItems(new OpLabel(XSpacing,tot - YSize,"11111"),
-                    new OpLabel(XSpacing,tot - YSize*2,"22222"),
-                    new OpLabel(XSpacing,tot -YSize*3,"33333"),
-                    new OpLabel(XSpacing,tot-YSize*4,"44444"),
-                    new OpLabel(XSpacing,tot -YSize*5,"55555"));
+                // var tot = YSize * 6;
+                // var treeView = new OpTreeView(new Vector2(XSpacing, (yIndex) * YSize), 500, YItemSize, tot, "HelloWorld");
+                // wawa.AddItems(treeView,treeView.HeaderButton);
+                // treeView.AddItems(new OpLabel(XSpacing,tot - YSize,"11111"),
+                //     new OpLabel(XSpacing,tot - YSize*2,"22222"),
+                //     new OpLabel(XSpacing,tot -YSize*3,"33333"),
+                //     new OpLabel(XSpacing,tot-YSize*4,"44444"),
+                //     new OpLabel(XSpacing,tot -YSize*5,"55555"));
             }
 
             Tabs = initTab.ToArray();
