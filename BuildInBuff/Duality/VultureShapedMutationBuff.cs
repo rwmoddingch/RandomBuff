@@ -439,7 +439,10 @@ namespace BuiltinBuffs.Duality
                         }
                     }
                     else
-                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                    {
+                        if ((buffData as VultureShapedMutationBuffData).vultureState_1 != null)
+                            vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                    }
                 }
             }
         }
