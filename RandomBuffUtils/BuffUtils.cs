@@ -10,6 +10,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using RandomBuffUtils.FutileExtend;
+using RandomBuffUtils.MixedUI;
 using RandomBuffUtils.SimplyOracle;
 using UnityEngine;
 
@@ -52,6 +53,7 @@ namespace RandomBuffUtils
             BuffScene.OnModsInit();
             OracleHooks.OnModsInit();
             InGameTranslatorExtend.OnModsInit();
+            MixedUIHooks.OnModsInit();
 
             UniformLighting.OnModsInit();
             everInit = true;

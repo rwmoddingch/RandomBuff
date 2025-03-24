@@ -42,7 +42,9 @@ namespace RandomBuff.Wawa.ChatConv
                     Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
                     AssetManager.SafeWWWLoadTexture(ref texture, "file:///" + expPath, false, true);
                     Futile.atlasManager.LoadAtlasFromTexture(devExpressionName[dev] + i.ToString(), texture, false);
-                    BuffUtils.Log("WawaChatLoader", $"Load expression : {devExpressionName[dev] + i.ToString()} - {expPath}");
+#if TESTVERSION
+                        BuffUtils.Log("WawaChatLoader", $"Load expression : {devExpressionName[dev] + i.ToString()} - {expPath}");
+#endif
                     i++;
                 }
             }
@@ -117,8 +119,9 @@ namespace RandomBuff.Wawa.ChatConv
                         wawaChatConv.convs[lastLangID].Add(splited[2].Trim());
                     }
      
-
+#if TESTVERSION
                     BuffUtils.Log("WawaChatLoader", $"Load Conv {lastLangID} {wawaChatConv.devs.Last()}, {wawaChatConv.expression.Last()}, {wawaChatConv.convs[lastLangID].Last()}");
+#endif
                 }
                 convs.Add(wawaChatConv);
                 fileIndex++;

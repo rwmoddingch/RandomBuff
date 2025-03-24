@@ -30,7 +30,9 @@ namespace RandomBuff.Wawa
                     var newPlaced = new PlacedObject(PlacedObject.Type.None, null);
                     newPlaced.FromString(array);
                     placedTokens.Add(room, newPlaced);
+#if TESTVERSION
                     BuffUtils.Log("WawaChatRoomSettings", $"Load : {room}, {newPlaced.type}, {newPlaced.data.GetType()}, {newPlaced.data.ToString()}");
+#endif
                 }
             }
         }

@@ -483,7 +483,7 @@ namespace RandomBuff.Core.Hooks
                     foreach (var buff in BuffCore.GetAllBuffIds(win.name))
                         BuffHookWarpper.DisableBuff(buff, HookLifeTimeLevel.UntilQuit);
                 }
-                BuffDataManager.Instance.CleanTempData();
+                BuffDataManager.Instance?.CleanTempData();
             }
 
 

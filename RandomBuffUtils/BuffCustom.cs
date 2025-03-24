@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Menu.Remix.MixedUI;
@@ -17,6 +18,21 @@ namespace RandomBuffUtils
             game = Custom.rainWorld.processManager.currentMainLoop as RainWorldGame;
             return game != null;
         }
+        /// <summary>
+        /// 获取未初始化的实例
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T GetUninit<T>()
+        {
+            return (T)FormatterServices.GetSafeUninitializedObject(typeof(T));
+        }
+
+        public static T GetUninit<T>(Type type)
+        {
+            return (T)FormatterServices.GetSafeUninitializedObject(type);
+        }
+
 
         public static Type[] SafeGetTypes(this Assembly assembly)
         {

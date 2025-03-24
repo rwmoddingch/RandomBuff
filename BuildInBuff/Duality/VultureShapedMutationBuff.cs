@@ -410,32 +410,39 @@ namespace BuiltinBuffs.Duality
                         {
                             case 1:
                                 {
-                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                                    if ((buffData as VultureShapedMutationBuffData).vultureState_1 != null)
+                                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
                                     (buffData as VultureShapedMutationBuffData).vultureState_1 = new string[1] { "" };
                                     break;
                                 }
                             case 2:
                                 {
-                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_2);
+                                    if ((buffData as VultureShapedMutationBuffData).vultureState_2 != null)
+                                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_2);
                                     (buffData as VultureShapedMutationBuffData).vultureState_2 = new string[1] { "" };
                                     break;
                                 }
                             case 3:
                                 {
-                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_3);
+                                    if ((buffData as VultureShapedMutationBuffData).vultureState_3 != null)
+                                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_3);
                                     (buffData as VultureShapedMutationBuffData).vultureState_3 = new string[1] { "" };
                                     break;
                                 }
                             case 4:
                                 {
-                                    vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_4);
+                                    if ((buffData as VultureShapedMutationBuffData).vultureState_4 != null)
+                                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_4);
                                     (buffData as VultureShapedMutationBuffData).vultureState_4 = new string[1] { "" };
                                     break;
                                 }
                         }
                     }
                     else
-                        vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                    {
+                        if ((buffData as VultureShapedMutationBuffData).vultureState_1 != null)
+                            vulture.State.LoadFromString((buffData as VultureShapedMutationBuffData).vultureState_1);
+                    }
                 }
             }
         }
@@ -2778,8 +2785,9 @@ namespace BuiltinBuffs.Duality
 
         public override void LoadFromString(string[] s)
         {
-            base.LoadFromString(s);
             string rColor = "";
+            if (s == null)
+                return;
             for (int i = 0; i < s.Length; i++)
             {
                 string text = Regex.Split(s[i], "<cC>")[0];
