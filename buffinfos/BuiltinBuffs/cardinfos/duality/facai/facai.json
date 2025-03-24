@@ -1,0 +1,17 @@
+{
+    "FaceName": "facai",
+    "ID": "FaCai",
+    "BuffType": "Duality",
+    "BuffProperty" : "Normal",
+    "Triggerable" :  false,
+    "Color" : "#FFB100",
+    
+    "Chinese":{
+        "BuffName":"恭喜发财",
+        "Description":"恭喜你发财，恭喜你精彩(在特定情况下为你播放一首特殊bgm)"
+    },
+    "English":{
+        "BuffName":"Gong Xi Fa Cai",
+        "Description":"In specific situations, play a special BGM for you"
+    }
+}
