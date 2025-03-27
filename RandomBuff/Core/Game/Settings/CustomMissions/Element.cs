@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Menu.Remix.MixedUI;
@@ -173,5 +174,41 @@ public class TreeView(OpTreeView tree,float XOffset = 20) : Panel(tree,true)
     public override float Height => tree.size.y;
     public override float NeedHeight => tree.ContentHeight + tree.HeaderHeight;
 
+}
+
+public class ListTreeView : TreeView
+{
+    public ListTreeView(ElementBuilderContext ctx, ObjectContext objCtx, OpTreeView tree, float XOffset = 20) : base(tree, XOffset)
+    {
+        this.objCtx = objCtx;
+        var list = (IList)objCtx.GetMethod();
+        var treeView = new TreeView(new OpTreeView(Vector2.zero,
+            10,ElementBuilderContext.DefaultHeight,1,objCtx.Attr.Name));
+        
+        ctx.holder.AddObject(treeView);
+
+        using (_ = new ModifyBuilderContext(ctx, treeView))
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                var i1 = i;
+                ViewBuilder.Build(ctx, new ObjectContext(new ElementPropertyAttribute($"{i}")
+                    , () => list[i1], (a) => list[i1] = a), list.GetType().GenericTypeArguments[0]);
+            }
+            //添加添加与删除操作
+        }
+    }
+
+    public void Add() 
+    {
+        
+    }
+
+    public void RemoveAt(int index)
+    {
+        
+    }
+
+    private ObjectContext objCtx;
 }
 

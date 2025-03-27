@@ -7,15 +7,37 @@ using Menu.Remix;
 using Menu.Remix.MixedUI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using RandomBuffUtils.MixedUI;
+using UnityEngine;
+using Object = System.Object;
 
 namespace RandomBuff.Core.Game.Settings.CustomMissions;
 
-internal class ElementBuilderContext
+public class ModifyBuilderContext : IDisposable
 {
-    public IHoldUIelements holder;
+    public ModifyBuilderContext(ElementBuilderContext ctx, Panel newHolder)
+    {
+        this.ctx = ctx;
+        oldHolder = ctx.holder;
+        ctx.holder = newHolder;
+    }
+    public void Dispose()
+    {
+        ctx.holder = oldHolder;
+    }
+
+    private readonly ElementBuilderContext ctx;
+    private readonly Panel oldHolder;
 }
 
-internal class ObjectContext
+public class ElementBuilderContext
+{
+    public Panel holder;
+
+    public const float DefaultHeight = 25;
+}
+
+public class ObjectContext
 {
     public ElementPropertyAttribute Attr { get; }
     public Func<object> GetMethod{ get; }
@@ -31,9 +53,9 @@ internal class ObjectContext
 
 internal static class ViewBuilder
 {
-    public static void Build(ElementBuilderContext ctx, ObjectContext objCtx,Type type)
+    public static Element Build(ElementBuilderContext ctx, ObjectContext objCtx,Type type)
     {
-        GetElementBuilder(type)
+        return GetElementBuilder(type)
             .BuildElement(ctx,objCtx);
     }
     public static void Build(object obj)
@@ -104,14 +126,14 @@ internal abstract class ElementBuilder
 
     public virtual bool IsPrecise => true;
 
-    public abstract void BuildElement(ElementBuilderContext ctx, ObjectContext objCtx);
+    public abstract Element BuildElement(ElementBuilderContext ctx, ObjectContext objCtx);
 
 }
 
 internal class FallBackElementBuilder : ElementBuilder
 {
     public override Type ElementType => null;
-    public override void BuildElement(ElementBuilderContext ctx, ObjectContext objCtx)
+    public override Element BuildElement(ElementBuilderContext ctx, ObjectContext objCtx)
     {
         throw new NotImplementedException();
     }
@@ -121,17 +143,8 @@ internal class ListElementBuilder : ElementBuilder
 {
     public override Type ElementType => typeof(List<>);
     
-    public override void BuildElement(ElementBuilderContext ctx, ObjectContext objCtx)
+    public override Element BuildElement(ElementBuilderContext ctx, ObjectContext objCtx)
     {
-        var list = (IList)objCtx.GetMethod();
-        //修改位置
-        for(int i = 0; i < list.Count;i++)
-        {
-            var i1 = i;
-            ViewBuilder.Build(ctx,new ObjectContext(new ElementPropertyAttribute($"{i}")
-            ,() => list[i1], (a) => list[i1] = a), list.GetType().GenericTypeArguments[0]);  
-        }
-        //添加添加与删除操作
-        //复位S
+        throw new NotImplementedException();
     }
 }
