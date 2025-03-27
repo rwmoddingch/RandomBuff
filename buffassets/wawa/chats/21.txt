@@ -1,0 +1,21 @@
+LANG_Chinese
+shanka:0:空中火力张卡牌吧，其实最开始我是写魔王直升秃鹫的东西，特别帅的那个长了二十根毛的设计。刚开始写得像锤头鲨，放到Discode里还被大家觉得很好笑，后来调整了。
+shanka:0:这个主意一听就觉得太夸张了，太酷了对吧？魔王秃鹫长一根两根角矛已经很有压迫感了，长二十根脚毛一听就想笑。
+shanka:3:然后我开始研究怎么做这个东西，也研究了半天。后来去群里问有没有人想画这个东西，这么酷的设计，那些强大的艺术家肯定会迫不及待地画出一些精美图。
+shanka:1:还真有艺术家画了两个特别酷炫的图，怎么能浪费他们的心血呢？于是我又做了一张牌，一张是提升火力的，感觉更符合卡牌的视觉效果。
+shanka:1:另一张就用给魔王直升鹫，那个太帅了，矛长得很有压迫感。写卡牌的时候其实挺纠结的，想要做到很帅的效果，同时兼容性也要好。
+shanka:4:那个时候我对IL代码不熟悉，没办法很精细地用IL控制每个点位。好多东西要改，记得要看很多代码。魔王秃鹫的矛是各种矢量绘制出来的，数学特别酷。
+shanka:4:我数学不好，没怎么读书，但还是硬写做出来了。最后效果太酷了，矛的发射和回收花了不少时间调整，不然根本玩不了或者没效果。
+shanka:2:展示视频我记得好像是用旅者猫搞的，那个时候真是太帅了。像动漫高手一样，一个闪身微小地躲开一点距离就避开了喷射长矛。
+shanka:0:这个卡牌我还是挺喜欢的，卡图我还问了作者同意，印了个手机壳。虽然之后不喜欢用手机壳，但当时觉得很有纪念意义。
+
+LANG_English
+shanka:0: The "Aerial Firepower" buff... Actually, I initially designed it as the "King Vulture Helicopter" thing—that super cool concept with twenty feather blades. At first, it looked more like a hammerhead shark, and when I posted it on Discord, everyone found it hilarious. I tweaked it later.
+shanka:0: Just hearing the idea sounds ridiculously over-the-top, right? Like, a King Vulture with one or two spear-like feathers already feels intimidating, but twenty? It's so absurd it's funny.
+shanka:3: Then I spent a long time figuring out how to actually implement it. Later, I asked in the group if anyone wanted to draw it—such an awesome design, surely the talented artists would jump at the chance to create something amazing.
+shanka:1: And sure enough, an artist actually drew two incredibly sick versions! How could I let their hard work go to waste? So I made two cards: one focused on firepower upgrades (which fit the card’s visual theme better), and the other for the Demon King Vulture Helicopter—that one turned out so badass, with those menacing spears.
+shanka:1: Designing the card was a struggle, though. I wanted it to look cool while still being mechanically balanced.
+shanka:4: Back then, I wasn't familiar with IL code, so I couldn't precisely control every detail with it. Had to tweak so many things—I remember digging through tons of code. The vulture's spears were all vector-drawn; the math behind it was really slick.
+shanka:4: I’m not great at math, never studied much, but I brute-forced my way through it. The final effect was awesome, but getting the spear launch and retrieval animations right took forever. Without those adjustments, it'd either be unplayable or just not impactful.
+shanka:2: I think I used the Traveler Cat for the showcase video back then—it looked so cool. Like an anime master dodging at the last second, narrowly avoiding the barrage of spears.
+shanka:0: I still really like this card. I even got the artist's permission to print the art on a phone case. I don't really use phone cases anymore, but at the time, it felt like a nice keepsake.

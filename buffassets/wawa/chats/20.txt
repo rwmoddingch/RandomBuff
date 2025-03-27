@@ -1,0 +1,37 @@
+LANG_Chinese
+shanka:0:不会空翻张牌，我也是挺喜欢的，虽然卡图啊，我自己也紧急的画了一下，有点丑丑的哈，但是我觉得真的是很有设计感。
+shanka:0:为什么呢？首先就是卡图，我是既融合了空翻的要素哦，又融合了空翻可能会死的要素。
+shanka:0:然后其实你看后面那个速度线我居然是用画出了一个这个死死的形状的速度线，虽然很抽象吧，但是你仔细看确实是可以看到后面那个速度线现在是一个死的形状。
+shanka:2:哎，其实就是暗示了你空翻的结局啊，如果你是会中文的话啊，其实。我其实好像应该有可能是可以看出来，但是好像大家都没看出来，大家都很好奇这张卡就是什么，我把话说的那么含糊啊。
+shanka:0:对呀，空翻的后果你希望你能了解，我听了我都想笑啊。
+shanka:1:然后然后大家不出所料肯定是一出门立刻空翻，哎。直接就是。对吧？
+shanka:3:然后呢，我这个卡牌好像设计是一个轮回吧，毕竟你是一直不空翻太难受了。
+shanka:0:这个让大家满足下好奇心，乐一乐就挺搞笑的啊。
+shanka:0:然后这卡牌我刚开始写，为什么会写张卡其实是我刚学会怎么用slugbase做那个CG哦。
+shanka:3:那个时候好像是正好是朋友天天叫我做CG啊，做CG做CG我就想，哎呀这CG我要怎么做对吧？
+shanka:0:你这CG原来可以这么做!然后就可以想要发挥一下创意啊。
+shanka:3:虽然其实我先写了一张测试的卡牌测试，就是，呃，做了一个那个"玻璃棒棒"然后蛞蝓猫在那跳舞，但是我一直卡不了点啊，所以那张卡是我是没有放进去的，我记得是没有放进去的啊，应该是没有放进去的，应该是已经删了吧。
+shanka:0:对吧，毕竟里面还放了一盒那么长的歌曲，就是那个什么魔法使马修吗？好像是那个时候不是挺火的嘛，我也做了一个蛞蝓猫版本的。
+shanka:0:我也不太想发什么视频什么的，这这种东西放到Mod里就挺合适的对吧？而且非常的出乎意料。
+shanka:0:好，反正我就是做了那个之后，我觉得哎呀，可以做一个用CG,有CG效果的这个卡牌啊!
+shanka:0:然后我就自己画了一个连环画连环的动图，然后这样子在你一出场直接这可以...超越死亡的强制直接进CG。
+shanka:5:连那些死亡躲避的卡都没有办法奏效然后直接就是触发死亡然后那然后就是放那个小丑一样的BGM太搞笑了。
+
+LANG_English
+shanka:0: DontKnowHowFlip,I still really like this card. Although the card art... I hastily drew it myself, so it looks a bit rough, huh? But I genuinely think it has a lot of design flair.
+shanka:0: Why? Well, first, the card art—I incorporated elements of a backflip while also hinting at the possibility of dying from a backflip.
+shanka:0: And if you look at the speed lines in the background, I actually shaped them into the Chinese character for "death". It's pretty abstract, but if you look closely, you can see the speed lines forming the character "death."
+shanka:2: Honestly, it's a subtle hint at the outcome of attempting a backflip. If you understand Chinese, you might be able to spot it, but it seems like nobody noticed. Everyone was just curious about what this card was supposed to mean, especially since I was being so vague.
+shanka:0: Yeah, the consequences of a backflip—I hope you understand. Just thinking about it makes me laugh.
+shanka:1: And, as expected, everyone inevitably attempts a backflip the moment they step outside. Boom. Just like that, right?
+shanka:3: Also, I designed this card with a looping effect in mind—after all, not attempting a backflip is just too unbearable.
+shanka:0: It's just for fun, to satisfy everyone's curiosity. It's pretty hilarious.
+shanka:0: As for why I made this card in the first place—it was because I had just learned how to use Slugbase to create CG (cutscene graphics).
+shanka:3: At the time, my friend kept pestering me, "Make CG! Make CG! Make CG!" And I was like, "Ugh, how am I supposed to make CG?!"
+shanka:0: Then I realized—oh, so this is how you make CG! And that got me feeling creative.
+shanka:3: Though, initially, I made a test card—like, a "Glass Stick" where the slugcat dances, but I couldn't get the timing right, so I didn't include it. I'm pretty sure I didn't include it… I think I deleted it.
+shanka:0: Right? Because it had that super long song—what was it, "Mashle: Magic and Muscles"? It was pretty popular back then, so I made a slugcat version.
+shanka:0: I didn't really want to post it as a video or anything. Stuff like this fits better in a mod, don't you think? Plus, it's really unexpected.
+shanka:0: Anyway, after making that, I thought, "Hey, I could make a card with CG effects!"
+shanka:0: So I drew a looping animation, and when you play the card—bam! It forces you into a CG cutscene, skipping past death itself.
+shanka:5: Not even death-evading cards can stop it. You just instantly die, and then that clown-like BGM plays—it's so funny.

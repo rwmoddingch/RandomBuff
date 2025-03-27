@@ -1,0 +1,29 @@
+LANG_Chinese
+shanka:0:蝓梦蝙蝠这张牌应该算是我最喜欢的卡牌设计了。之前刚开始设计的时候就是。
+shanka:4:又联想到那个哦，好好，好像是有其他的朋友提出过这个想法吧，可能也可能是我自己想的，好像好像是我自己想的，应该是我自己想的。
+shanka:1:然后。然后那个时候正好有多卡牌吧，就是多层卡牌刚。刚搞出来。所以我也想画一张多重多重的卡牌试一下。
+shanka:0:我平时就周比较有空，然后就和妹妹一起画了这个多层卡牌，一起茶绘，这个感觉效果还是挺不错的，看着更是非常的爽。
+shanka:1:然后这个效果呢。我觉得也是非常拓展性的，虽然说是有点强力对吧，死不掉一样的，每次一晕就可以飞起来。
+shanka:2:但是呢？他又我又给他加入了脆弱的部分就是你进入蝙蝠状态很容易很容易死是吧？
+shanka:6:其实刚开始设计的时候其实更更加的夸张，呃，几乎是完全死不掉，不过呃，后来找到问题啊什么的，修正了一下，现在应该算是。比较正好，然后还挺有bug的把这张卡，呃。
+shanka:2:嗯，之前就是刚发布那段时间就会出现，呃，比如说有些特定剧情或者特定场景。有些场景像是像是水猫吧，好像你在安装电池的时候，那个巨大的激流就会把你震晕。
+shanka:2:其实我本来是设计师蝙蝠形态，是遇水即死的啊，对吧？结果。结果这么个尴尬的场景导致就是我后来还是给蝙蝠加上了氧气值。
+shanka:6:然后还有像是有一些比较炎热的场景，他们其实是不存在蝙蝠的，所以导致一些奇怪的bug,后来也都修复了。
+shanka:1:好这个能力我觉得是非常的有。可玩性和扩展性。毕竟你可以在这个晕眩啊或者蝙蝠上做很多文章。
+shanka:0:我其实也另外写了一张牌吧，叫钢铁蝙蝠，可以让蝙蝠像金刚之身一样弹开一切的这个锚机。在提升它的这个生存能力啊，对吧？
+shanka:1:然后这张卡另一张卡也是。哦，多层卡牌3D卡牌，好看特别好看。
+
+LANG_English
+shanka:0: DreamOfABat can be considered my favorite card design. It was like that from the very beginning of the design process.
+shanka:4: It reminds me of that... oh, right, right. I think some other friends might have suggested this idea before, or maybe it was my own thought. It seems like it was my own idea—it should be my own idea.
+shanka:1: And... at that time, there happened to be multi-layer cards, right? The multi-layer card system had just been introduced. So I wanted to try drawing a multi-layered card myself.
+shanka:0: I usually have more free time on weekends, so I worked on this multi-layer card with my sister. We drew together, and the result was pretty good—it looked very satisfying.
+shanka:1: As for the effect, I think it's very expandable. Although it's a bit overpowered, right? It's like you can't die—every time you get stunned, you can just fly away.
+shanka:2: But then... I also added a vulnerable aspect to it. When you enter bat form, you're very, very easy to kill, right?
+shanka:6: Actually, during the initial design phase, it was even more exaggerated—it was practically unkillable. But later, we identified the issues and made adjustments. Now it should be fairly balanced, though the card still has some bugs, uh...
+shanka:2: Hmm, back when it was first released, there were situations like... certain specific story events or scenarios. For example, in scenes like the Water Cat stage, when you're installing batteries, the strong currents would stun you.
+shanka:2: Originally, I designed the bat form to die immediately upon contact with water, right? But because of this awkward scenario, I eventually had to give the bat an oxygen meter.
+shanka:6: And then there were some extremely hot environments where bats couldn't logically exist, which led to some weird bugs. Those were fixed later too.
+shanka:1: Overall, I think this ability is very fun and expandable. After all, you can do a lot with the stun or bat mechanics.
+shanka:0: I actually designed another card called "Steel Bat," which makes the bat invulnerable like a diamond body, deflecting all attacks. It further enhances survivability, right?
+shanka:1: And this other card is also... oh, a multi-layer 3D card. So cool, really cool.

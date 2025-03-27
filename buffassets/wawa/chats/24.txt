@@ -1,0 +1,33 @@
+LANG_Chinese
+shanka:0:抛物线张牌，其实我也不太清楚是不是我的灵感啊，我感觉应该算是我的灵感吧。
+shanka:1:我好像是写自己想到的东西比较多一些，毕竟我时间有限。
+shanka:0:一想到一些好玩的我就自己写了，可能也可能是对吧,群里之前收集的...
+shanka:2:我想应该是我的吧。
+shanka:6:毕竟这么这么有病的一个想法。
+shanka:3:这个灵感来源我记得是最开始入门，大概两年前吧。
+shanka:4:好像不知道是一年前还是两年前，刚开始玩雨世界。
+shanka:1:其实我也玩的很少，我就一直玩的slugbase啊啥的对吧？
+shanka:5:然后这个slugbase呢，里面可以调人物的重量哈。
+shanka:7:有时候把重量调成负数啊什么的，拟态草他就不会把你拉进去，他会把你推开哦。
+shanka:0:特别特别搞笑，然后我就根据那种感觉吧。
+shanka:1:我就在那天突然想到我要做一个卡牌，把过去的那种感觉写进去。
+shanka:0:然后我那天我就把这个卡牌写了。
+shanka:7:抓到你的时候不会把你吃进去啊，把你丢出去特别特别的好玩儿啊。
+shanka:0:可以反复地就是，反正就很奇怪吧，特别好玩儿。
+
+LANG_English
+shanka:0: The "Parabola" card... actually, I'm not entirely sure if it was my idea. I feel like it should count as mine, though.
+shanka:1: I tend to write things based on my own thoughts more often—after all, I have limited time.
+shanka:0: Whenever I think of something fun, I just write it myself. Though, maybe... it could've also come from earlier discussions in the group...
+shanka:2: I think it's probably mine.
+shanka:6: I mean, it's such a ridiculous idea.
+shanka:3: I remember the inspiration came when I was just starting out, around two years ago.
+shanka:4: Wait, was it one year or two? Back when I first started playing Rain World.
+shanka:1: Honestly, I didn't play much—I mostly stuck to Slugbase and stuff, you know?
+shanka:5: And in Slugbase, you can tweak the character's weight, right?
+shanka:7: Sometimes, if you set the weight to a negative value, the mimic grass won't pull you in—it'll push you away instead.
+shanka:0: It's hilariously funny. So I tried to capture that feeling...
+shanka:1: Then one day, it suddenly hit me—I wanted to make a card that recreates that old sensation.
+shanka:0: So that day, I went ahead and designed this card.
+shanka:7: Instead of swallowing you when it catches you, it throws you away. It's so much fun.
+shanka:0: You can just... keep doing it over and over. It's weird, but incredibly entertaining.

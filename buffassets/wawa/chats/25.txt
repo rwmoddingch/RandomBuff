@@ -1,0 +1,29 @@
+LANG_Chinese
+shanka:0:我手疼这张卡，我其实也是蛮喜欢的哦，这个应该是其他朋友们提供的想法，但是这个想法非常完善。
+shanka:0:相对于那些其他的头疼啊，什么疼来说真的是好了非常非常多。
+shanka:2:为什么这么说？首先它并不是。他是一个比较概念化的东西，他是手疼对吧？
+shanka:3:他连爬杆子都会疼，爬杆子都会自己松掉吧。我记得是我那个时候写的这个还写得挺用心的。
+shanka:3:你可能手有个疲劳值一样的东西哦，你抓这个东西过久了诶它就会掉下去。
+shanka:6:虽然确实挺恼人，但是挺有意思的。我感觉挺有设计感。
+shanka:3:你抓着一个杆子抓久了哦，就会掉下来啊，怎么样的，太恶心了。
+shanka:6:但是呢？哦，这又有点诶，等一下，我现在想一想，会不会就是高墙有些地方不好爬呢...
+shanka:6:好像也没人说过这个事，可能大家都不会去抽这种卡。
+shanka:3:最比较细节的一个点啊，就是你比如说两只手拿东西手疼，但是你可以换手。
+shanka:0:换手之后你的手就不疼了，你就可以换手拿。
+shanka:0:像你去超市买东西提着一打水什么的，你不是拿一下可能诶换一只手。
+shanka:1:哎呀，这个手好累啊，换一只手拿啊，就可以避免掉这个卡牌的效果啊，我觉得就是很有意思。
+
+LANG_English
+shanka:0: The "Sore Hands" card - I actually quite like this one. It was probably suggested by other friends, but the idea is very well-developed.
+shanka:0: Compared to other "pain" cards like headaches or whatever, this one is so much better.
+shanka:2: Why do I say that? First of all, it's not... it's more conceptual. It's about sore hands, right?
+shanka:3: It even affects pole climbing - your hands will just let go by themselves. I remember putting quite some thought into this when I wrote it.
+shanka:3: It's like your hands have a fatigue meter - if you hold onto something for too long, you'll just drop it.
+shanka:6: While admittedly annoying, it's quite interesting. I think it's well-designed.
+shanka:3: If you hold onto a pole for too long, you'll just fall off... ugh, so disgusting.
+shanka:6: But then... oh wait, now that I think about it, does this make some parts of The Wall harder to climb...
+shanka:6: Though I don't think anyone's mentioned that - probably because nobody actually picks this card.
+shanka:3: The most detailed aspect is... say you're holding something with both hands and they get sore, but you can switch hands.
+shanka:0: After switching, your other hand isn't sore anymore, so you can keep holding it.
+shanka:0: Like when you're carrying groceries - a pack of water bottles or something - you might switch hands after a while.
+shanka:1: "Oh, this hand's tired, let's switch to the other one" - you can avoid the card's effect this way. I think that's really clever.

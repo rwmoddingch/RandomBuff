@@ -1,0 +1,16 @@
+LANG_Chinese
+shanka:0:蓝色蛹蜥这张牌的话，我记得当时正好发现了一个有趣的机制。蓝色果子掉下去的时候，居然有个检测判定！这样的话就好办多了。
+shanka:0:我当时就在想，这张卡是我自己的创意，还是大家的想法？不过确实是因为看到了这个判定点，我才开始设计这张卡。
+shanka:2:当时我刚知道蓝果砸下去后会触发一个判定点。我就想着，这个机制挺有意思的，就开始写了。
+shanka:1:我觉得这个设计相当不错。蓝果在绳子脱离的瞬间，有概率触发判定，而且不会重复触发。
+shanka:1:毕竟绳子只会脱离一次，一脱离就会掉下一个小蓝色蜥蜴。哎呀，真是非常可爱！
+shanka:5:蓝色蜥蜴那么小一只，挺有意思的。好像也有其他蜥蜴会吃它？反正这个机制设计得很有趣。
+
+LANG_English
+shanka:0: For the "Blue Chrysalis Lizard" card, I remember we discovered an interesting mechanic at the time. When the blue fruit falls, there's actually a detection check! That made things much easier.
+shanka:0: I was wondering—was this card my own idea, or did it come from others? But it was definitely after noticing that detection point that I started designing this card.
+shanka:2: Back then, I had just learned that the blue fruit triggers a check when it falls. I thought, "This mechanic is pretty interesting," and started working on it.
+shanka:1: I think this design is really good. The blue fruit has a chance to trigger the check the moment the rope detaches, and it won't trigger repeatedly.
+shanka:1: After all, the rope only detaches once, and when it does, a tiny blue lizard drops down. Ah, it's so adorable!
+shanka:5: The blue lizard is so tiny—it's pretty funny. I think there are other lizards that might eat it? Anyway, the mechanic is designed in a really fun way.
+

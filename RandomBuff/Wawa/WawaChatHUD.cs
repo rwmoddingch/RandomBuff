@@ -26,6 +26,7 @@ namespace RandomBuff.Wawa
         FSprite expressionSprite;
         FSprite arrow;
         FLabel conv, devLabel;
+        int rainCycleKeeper;
 
         //expression
         float baseScale;
@@ -54,6 +55,7 @@ namespace RandomBuff.Wawa
         {
             this.convToRead = wawaChatConv;
             this.room = room;
+            rainCycleKeeper = room.game.world.rainCycle.timer;
             targetSize = new Vector2(Custom.rainWorld.options.ScreenSize.x - Gap.x * 2f, height);
             convMaxWidth = targetSize.x - 20f * 2f - targetExpressionSize.x - 20f;
 
@@ -87,8 +89,25 @@ namespace RandomBuff.Wawa
 
             currentConvIndex = -1;//为了加1后是读的第一段对话
             charStep = Custom.rainWorld.inGameTranslator.currentLanguage == InGameTranslator.LanguageID.Chinese ? 2 : 4;
+            LockShortcuts();
             TryNextConv();
         }
+
+        void LockShortcuts()
+        {
+            if (room.lockedShortcuts.Count == 0)
+            {
+                for (int i = 0; i < room.shortcutsIndex.Length; i++)
+                {
+                    room.lockedShortcuts.Add(room.shortcutsIndex[i]);
+                }
+            }
+        }
+        void UnlockShortcuts()
+        {
+            room.lockedShortcuts.Clear();
+        }
+
 
         public override void Update(bool eu)
         {
@@ -100,11 +119,12 @@ namespace RandomBuff.Wawa
             {
                 if (crit.realizedCreature != null && crit.realizedCreature.room != null && crit.realizedCreature is not Player)
                 {
-                    crit.realizedCreature.stun = 40;
+                    crit.realizedCreature.stun = 120;
                 }
             }
+            room.game.world.rainCycle.timer = rainCycleKeeper;
 
-            if(roundRectSprites != null)
+            if (roundRectSprites != null)
             {
                 roundRectSprites.Update();
                 roundRectSprites.size = Vector2.Lerp(Vector2.zero, targetSize, Helper.EaseInOutCubic(show));
@@ -219,6 +239,7 @@ namespace RandomBuff.Wawa
         {
             if (slatedForDeletetion)
                 return;
+            UnlockShortcuts();
 
             if(roundRectSprites != null)
             {
