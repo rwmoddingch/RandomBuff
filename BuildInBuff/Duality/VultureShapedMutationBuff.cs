@@ -3277,7 +3277,10 @@ namespace BuiltinBuffs.Duality
                     impaleChunk.vel = Vector2.ClampMagnitude(impaleChunk.vel, 50f);
                     if (impaleChunk.owner is Creature)
                     {
-                        (impaleChunk.owner as Creature).Violence(null, null, impaleChunk, null, Creature.DamageType.Stab, 1.5f, 0f);
+                        (impaleChunk.owner as Creature).Violence(this.player.mainBodyChunk, null, impaleChunk, null, Creature.DamageType.Stab, 1.5f, 0f);
+                        (impaleChunk.owner as Creature).killTag = player.abstractCreature;
+                        (impaleChunk.owner as Creature).SetKillTag(this.player.abstractCreature);
+                        BuffPlugin.Log($"SetKillTag! {(impaleChunk.owner as Creature).abstractCreature.type} will be killed by Player!");
                     }
                     shootDir = Vector3.Slerp(shootDir, Custom.DirVec(vector2, impaleChunk.pos), 0.4f);
                     if (impaleChunk.rotationChunk != null)

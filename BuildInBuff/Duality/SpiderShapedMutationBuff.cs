@@ -542,6 +542,7 @@ namespace BuiltinBuffs.Duality
         private Vector2 aimDir;
         private Vector2 targetPoint;
         private Tracker.CreatureRepresentation spitAtCrit;
+        public List<DartMaggot> dartMaggots;
         private int ammo = 4;
         private float ammoRegen;
         private bool fastAmmoRegen;
@@ -657,6 +658,7 @@ namespace BuiltinBuffs.Duality
                 self.slugcatStats.Modify(this, PlayerUtils.Multiply, "runspeedFac", 0.5f);
                 self.slugcatStats.Modify(this, PlayerUtils.Subtraction, "throwingSkill", SpiderShapedMutationBuffEntry.StackLayer - 1);
             }
+            this.dartMaggots = new List<DartMaggot>();
         }
 
         #region 外观
@@ -1055,7 +1057,20 @@ namespace BuiltinBuffs.Duality
                 return;
             if (player.room == null)
                 return;
-
+            foreach (var dartMaggot in this.dartMaggots)
+            {
+                if (dartMaggot == null || dartMaggot.slatedForDeletetion)
+                {
+                    this.dartMaggots.Remove(dartMaggot);
+                    continue;
+                }
+                if (dartMaggot.stuckInChunk != null && dartMaggot.stuckInChunk.owner != null &&
+                    dartMaggot.stuckInChunk.owner is Creature creature)
+                {
+                    creature.killTag = player.abstractCreature;
+                    creature.SetKillTag(player.abstractCreature);
+                }
+            }
             if (player.grasps[0] != null && player.grasps[1] != null)
             {
                 player.ReleaseGrasp(1);
@@ -1648,6 +1663,8 @@ namespace BuiltinBuffs.Duality
             AbstractPhysicalObject absPhysicalObject = new AbstractPhysicalObject(player.room.world, AbstractPhysicalObject.AbstractObjectType.DartMaggot, null, player.abstractCreature.pos, player.room.game.GetNewID());
             absPhysicalObject.RealizeInRoom();
             (absPhysicalObject.realizedObject as DartMaggot).Shoot(player.mainBodyChunk.pos, shootDir, player);
+            this.dartMaggots.Add(absPhysicalObject.realizedObject as DartMaggot);
+            //player.room.AddObject(new DartMaggot.Umbilical(player.room, absPhysicalObject.realizedObject as DartMaggot, player, (absPhysicalObject.realizedObject as DartMaggot).firstChunk.vel));
             player.room.PlaySound(SoundID.Big_Spider_Spit, player.mainBodyChunk);
             this.SpiderHasSpit();
         }
