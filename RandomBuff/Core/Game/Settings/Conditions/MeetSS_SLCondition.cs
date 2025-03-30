@@ -119,9 +119,10 @@ namespace RandomBuff.Core.Game.Settings.Conditions
             if (ModManager.MSC)
             {
                 var timeline = SlugcatStats.SlugcatTimelineOrder().ToList();
-                int indexOfArtificer = timeline.IndexOf(MoreSlugcatsEnums.SlugcatStatsName.Artificer);
-                int indexOfSofanthiel = timeline.IndexOf(MoreSlugcatsEnums.SlugcatStatsName.Sofanthiel);
-                int indexOfThis = timeline.IndexOf(name);
+                int indexOfArtificer = timeline.IndexOf(SlugcatStats.Timeline.Artificer);
+                int indexOfSofanthiel = timeline.IndexOf(SlugcatStats.Timeline.Sofanthiel);
+                
+                int indexOfThis = timeline.IndexOf(SlugcatStats.SlugcatToTimeline(name));
 
                 //BuffPlugin.Log($"MeetSS_SL {indexOfThis}-{indexOfArtificer}-{indexOfSofanthiel}");
 

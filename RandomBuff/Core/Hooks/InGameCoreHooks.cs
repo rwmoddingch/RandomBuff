@@ -137,13 +137,14 @@ namespace RandomBuff.Core.Hooks
 
             On.RainWorldGame.BeatGameMode += RainWorldGame_BeatGameMode;
             On.Room.ctor += Room_ctor;
+            
         }
 
-        private static void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom)
+        private static void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom,bool devui)
         {
             try
             {
-                orig.Invoke(self, game, world, abstractRoom);
+                orig.Invoke(self, game, world, abstractRoom,devui);
             }
             catch(Exception e)
             {
@@ -458,10 +459,10 @@ namespace RandomBuff.Core.Hooks
 
         #region PoolManager
 
-        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarp)
         {
             BuffPoolManager.Instance?.WinGame(malnourished);
-            orig(self, malnourished);
+            orig(self, malnourished,fromWarp);
         }
 
 

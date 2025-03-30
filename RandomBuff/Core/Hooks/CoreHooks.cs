@@ -190,7 +190,7 @@ namespace RandomBuff.Core.Hooks
             else if (message == "RANDOMBUFF_YES_ENDRUN")
             {
                 BuffPoolManager.Instance.ForceSettlement = true;
-                self.game.Win(false);
+                self.game.Win(false,false);
                 self.PlaySound(SoundID.HUD_Exit_Game);
                 self.ShutDownProcess();
             }

@@ -277,7 +277,7 @@ namespace RandomBuff.Core.Game
 
             if(!lastbuttonPressed && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A) && BuffPlugin.DevEnabled)
             {
-                game.Win(false);
+                game.Win(false,false);
             }
 
             lastbuttonPressed = Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.A);

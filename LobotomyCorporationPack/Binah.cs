@@ -421,7 +421,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             On.RegionGate.customKarmaGateRequirements += RegionGate_customKarmaGateRequirements;
             On.RegionGate.Update += RegionGate_Update;
 
-            On.SlugcatStats.SpearSpawnModifier += SlugcatStats_SpearSpawnModifier;
+            On.SlugcatStats.SpearSpawnModifier_Name_float += SlugcatStats_SpearSpawnModifier;
+            On.SlugcatStats.SpearSpawnModifier_Timeline_float += SlugcatStats_SpearSpawnModifier_Timeline_float;
+
             On.Explosion.ctor += Explosion_ctor;
 
             currentDarkness = 0;
@@ -431,6 +433,9 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
 
             _ = new Hook(typeof(RoomSettings).GetProperty("RandomItemDensity").GetGetMethod(), typeof(BinahHook).GetMethod("Room_RandomItemDensity" , BindingFlags.Static | BindingFlags.NonPublic));
         }
+
+
+
         private static bool Freeze_ShouldSkipUpdate(Func<Freeze, bool> orig, Freeze self)
         {
             if (self.ownerRef.TryGetTarget(out var target) &&
@@ -471,13 +476,21 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
             else return orig(self) * 1.35f;
         }
 
-        private static float SlugcatStats_SpearSpawnModifier(On.SlugcatStats.orig_SpearSpawnModifier orig, SlugcatStats.Name index, float originalSpearChance)
+        private static float SlugcatStats_SpearSpawnModifier_Timeline_float(On.SlugcatStats.orig_SpearSpawnModifier_Timeline_float orig, SlugcatStats.Timeline index, float originalspearchance)
+        {
+            if (SephirahMeltdownEntry.Hell)
+                return orig(index, originalspearchance);
+            else
+                return orig(index, originalspearchance) * 6f;
+        }
+        private static float SlugcatStats_SpearSpawnModifier(On.SlugcatStats.orig_SpearSpawnModifier_Name_float orig, SlugcatStats.Name index, float originalSpearChance)
         {
             if (SephirahMeltdownEntry.Hell)
                 return orig(index, originalSpearChance);
             else
                 return orig(index, originalSpearChance) * 6f;
         }
+        
 
         private static void TempleGuard_Update(On.TempleGuard.orig_Update orig, TempleGuard self, bool eu)
         {
