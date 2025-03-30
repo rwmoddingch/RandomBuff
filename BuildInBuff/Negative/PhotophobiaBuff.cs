@@ -54,33 +54,26 @@ namespace BuiltinBuffs.Negative
 
         private static void FlareBomb_UpdateIL(ILContext il)
         {
-            try
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(MoveType.After,
+                (i) => i.MatchCallvirt<Creature>("get_abstractCreature"),
+                (i) => i.MatchCallvirt<Creature>("SetKillTag"),
+                (i) => i.Match(OpCodes.Ldarg_0));
             {
-                ILCursor c = new ILCursor(il);
-                if (c.TryGotoNext(MoveType.After,
-                    (i) => i.MatchCallvirt<Creature>("get_abstractCreature"),
-                    (i) => i.MatchCallvirt<Creature>("SetKillTag"),
-                    (i) => i.Match(OpCodes.Ldarg_0)))
+                c.Emit(OpCodes.Ldloc_0);
+                c.EmitDelegate<Action<FlareBomb, int>>((self, i) =>
                 {
-                    c.Emit(OpCodes.Ldloc_0);
-                    c.EmitDelegate<Action<FlareBomb, int>>((self, i) =>
+                    if (self.room.abstractRoom.creatures[i].realizedCreature is Player)
                     {
-                        if (self.room.abstractRoom.creatures[i].realizedCreature is Player)
+                        Player player = self.room.abstractRoom.creatures[i].realizedCreature as Player;
+                        player.Die();
+                        if (self.thrownBy != null)
                         {
-                            Player player = self.room.abstractRoom.creatures[i].realizedCreature as Player;
-                            player.Die();
-                            if (self.thrownBy != null)
-                            {
-                                player.SetKillTag(self.thrownBy.abstractCreature);
-                            }
+                            player.SetKillTag(self.thrownBy.abstractCreature);
                         }
-                    });
-                    c.Emit(OpCodes.Ldarg_0);
-                }
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogException(e);
+                    }
+                });
+                c.Emit(OpCodes.Ldarg_0);
             }
         }
 

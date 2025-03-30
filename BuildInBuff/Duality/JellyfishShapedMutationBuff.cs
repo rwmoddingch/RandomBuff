@@ -152,23 +152,22 @@ namespace BuiltinBuffs.Duality
             try
             {
                 ILCursor c = new ILCursor(il);
-                if (c.TryGotoNext(MoveType.After,
+                c.GotoNext(MoveType.After,
                     (i) => i.MatchCallvirt<BodyChunk>("get_submersion"),
                     (i) => i.Match(OpCodes.Ldc_R4),
                     (i) => i.Match(OpCodes.Blt_S),
                     (i) => i.Match(OpCodes.Ldarg_0),
-                    (i) => i.MatchCall<Player>("get_isRivulet")))
+                    (i) => i.MatchCall<Player>("get_isRivulet"));
+                
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Func<bool, Player, bool>>((isRivulet, self) =>
                 {
-                    c.Emit(OpCodes.Ldarg_0);
-                    c.EmitDelegate<Func<bool, Player, bool>>((isRivulet, self) =>
+                    if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
                     {
-                        if (JellyfishCatFeatures.TryGetValue(self, out var jellyfishCat))
-                        {
-                            return true;
-                        }
-                        return isRivulet;
-                    });
-                }
+                        return true;
+                    }
+                    return isRivulet;
+                });
             }
             catch (Exception e)
             {
@@ -242,7 +241,7 @@ namespace BuiltinBuffs.Duality
             orig(self);
         }
 
-        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished,bool fromWarp)
         {
             try
             {
@@ -294,7 +293,7 @@ namespace BuiltinBuffs.Duality
             {
                 UnityEngine.Debug.LogException(ex);
             }
-            orig(self, malnourished);
+            orig(self, malnourished,fromWarp);
         }
 
         //电击抵抗
@@ -363,15 +362,15 @@ namespace BuiltinBuffs.Duality
         //修改生物关系（水蛭不再攻击玩家）
         public static void EstablishRelationship()
         {
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.BigJelly, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(DLCSharedEnums.CreatureTemplateType.BigJelly, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.SeaLeech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.JungleLeech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(DLCSharedEnums.CreatureTemplateType.JungleLeech, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
 
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.BigJelly, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(DLCSharedEnums.CreatureTemplateType.BigJelly, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.SeaLeech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.JungleLeech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+            StaticWorld.EstablishRelationship(DLCSharedEnums.CreatureTemplateType.JungleLeech, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
         }
 
         //修改生物关系（巨型水母不再攻击玩家）
@@ -527,8 +526,8 @@ namespace BuiltinBuffs.Duality
         private static void RainWorldGame_RawUpdate(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
-                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
+            c.GotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
+                i => i.MatchStfld<MainLoopProcess>("framesPerSecond"));
             {
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Action<RainWorldGame>>(game =>
@@ -537,8 +536,6 @@ namespace BuiltinBuffs.Duality
                         game.framesPerSecond = UpdateSpeed;
                 });
             }
-            else
-                BuffUtils.LogError(JellyfishShapedMutation, "IL HOOK FAILED");
         }
 
         public static int UpdateSpeed = 1000;
@@ -703,7 +700,7 @@ namespace BuiltinBuffs.Duality
                     return false;
                 if (surfaceMode)
                 {
-                    return player.room.FloatWaterLevel(newBody[CoreChunk].pos.x) < newBody[0].pos.y + 14f;
+                    return player.room.FloatWaterLevel(newBody[CoreChunk].pos) < newBody[0].pos.y + 14f;
                 }
                 return false;
             }
@@ -1224,7 +1221,7 @@ namespace BuiltinBuffs.Duality
                 Vector2 vector5 = Custom.PerpendicularVector(nowRotation) * -1.6f + nowRotation * 0.6f + Vector2.Lerp(MouthLeftPos(timeStacker), MouthRightPos(timeStacker), t); //Custom.PerpendicularVector(nowRotation) * -8f + nowRotation * 3f + Vector2.Lerp(MouthLeftPos(timeStacker), MouthRightPos(timeStacker), t);
                 if (canBeSurfaceMode && player.Submersion > 0.1f)
                 {
-                    num = player.room.FloatWaterLevel(vector5.x) - (float)(player.room.defaultWaterLevel + 1) * 20f;
+                    num = player.room.FloatWaterLevel(vector5) - (float)(player.room.defaultWaterLevel + 1) * 20f;
                     num /= 2f;
                 }
                 Vector2 nowRotationFac = nowRotation * num;
@@ -2047,7 +2044,7 @@ namespace BuiltinBuffs.Duality
                             Vector2 vector6 = AttachPos(i * tentacles.GetLength(1) + j, 1f);
                             if (canBeSurfaceMode && player.Submersion > 0.1f)
                             {
-                                num4 = (player.room.FloatWaterLevel(vector6.x) - (float)(player.room.defaultWaterLevel + 1) * 20f) / 1.9f;
+                                num4 = (player.room.FloatWaterLevel(vector6) - (float)(player.room.defaultWaterLevel + 1) * 20f) / 1.9f;
                             }
                             Vector2 vector7 = rotation * num4;
                             Vector2 perp = width * Custom.PerpendicularVector(rotation);
@@ -2281,7 +2278,7 @@ namespace BuiltinBuffs.Duality
                 player.room.AddObject(new UnderwaterShock(player.room, player, otherObject.bodyChunks[otherChunk].pos, 14, 80f, 10f, player, new Color(0.7f, 0.7f, 1f)));
                 for (int i = 0; i < 4; i++)
                 {
-                    player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Volt_Shock, otherObject.bodyChunks[otherChunk].pos, 1f, Random.value * 0.5f + 0.4f);
+                    player.room.PlaySound(DLCSharedEnums.SharedSoundID.Volt_Shock, otherObject.bodyChunks[otherChunk].pos, 1f, Random.value * 0.5f + 0.4f);
                 }
                 player.room.PlaySound(SoundID.Zapper_Zap, otherObject.bodyChunks[otherChunk].pos, 1f, 2f);
                 (otherObject as Creature).Die();
@@ -2395,8 +2392,8 @@ namespace BuiltinBuffs.Duality
             {
                 BuffUtils.Log("JellyfishShapedMutation","Moo!");
                 mooCounter = 140;
-                player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
-                player.room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
+                player.room.PlaySound(DLCSharedEnums.SharedSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
+                player.room.PlaySound(DLCSharedEnums.SharedSoundID.Terror_Moo, newBody[CoreChunk].pos, 1f, 0.75f + Random.value * 0.5f);
                 for (int num = Random.Range(16, 36); num > 0; num--)
                 {
                     player.room.AddObject(new Bubble(newBody[CoreChunk].pos + new Vector2(Random.Range(-28f, 28f), Random.Range(-38f, 20f)), new Vector2(Random.Range(-4f, 4f), 0f), bottomBubble: false, fakeWaterBubble: false));

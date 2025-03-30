@@ -1160,7 +1160,7 @@ namespace BuiltinBuffs.Duality
             }
             else
             {
-                submerged = pos.y - 5f <= room.FloatWaterLevel(pos.x);
+                submerged = pos.y - 5f <= room.FloatWaterLevel(pos);
             }
             if (submerged)
                 Destroy();

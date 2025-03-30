@@ -17,6 +17,7 @@ using RandomBuff.Core.Game.Settings.Conditions;
 using UnityEngine;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using Mono.Cecil.Rocks;
+using RandomBuffUtils;
 
 namespace RandomBuff.Core.Entry
 {
@@ -108,13 +109,14 @@ namespace RandomBuff.Core.Entry
 
                 try
                 {
-                    action.Invoke(buffID.value);
                     HasEnabled[buffID][level] = true;
+                    action.Invoke(buffID.value);
                     BuffPlugin.Log($"HookWarpper Enable Buff - {buffID}:{level}");
                 }
                 catch (Exception ex)
                 {
                     BuffPlugin.LogException(ex, $"BuffHookWarpper : Exception when enable hook for {buffID}:{level}");
+                    throw ex;
                 }
             }
             // else
@@ -136,13 +138,14 @@ namespace RandomBuff.Core.Entry
 
                 try
                 {
-                    action.Invoke(buffID.value);
                     HasEnabled[buffID][level] = false;
+                    action.Invoke(buffID.value); 
                     BuffPlugin.Log($"HookWarpper Disable Buff - {buffID}:{level}");
                 }
                 catch (Exception ex)
                 {
                     BuffPlugin.LogException(ex, $"BuffHookWarpper : Exception when enable hook for {buffID}:{level}");
+                    throw ex;
                 }
             }
         }
@@ -289,6 +292,7 @@ namespace RandomBuff.Core.Entry
 
                 il.Body.Variables.Add(new VariableDefinition(il.Body.Method.Module.ImportReference(typeof(IDetour))));
                 ILCursor c = new ILCursor(il);
+                BuffUtils.ForceGoto = false;
                 while (c.TryGotoNext(MoveType.After, i => i.MatchNewobj(out var newObj) && newObj.DeclaringType.HasInterface<IDetour>()))
                 {
                     c.Emit(OpCodes.Dup);
@@ -299,6 +303,7 @@ namespace RandomBuff.Core.Entry
                     c.Emit(OpCodes.Ldloc, tmpValueIndex);
                     c.Emit(OpCodes.Call, typeof(List<IDetour>).GetMethod(nameof(List<IDetour>.Add)));
                 }
+                BuffUtils.ForceGoto = true;
 
             }));
    

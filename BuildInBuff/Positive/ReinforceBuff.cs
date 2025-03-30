@@ -42,7 +42,7 @@ namespace BuiltinBuffs.Positive
             string idLog = "";
             for(int i = 0;i < 4; i++)
             {
-                AbstractCreature scav = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite/*CreatureTemplate.Type.Scavenger*/), null, new WorldCoordinate(room.index, 0, 0, -1), game.GetNewID());
+                AbstractCreature scav = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(DLCSharedEnums.CreatureTemplateType.ScavengerElite/*CreatureTemplate.Type.Scavenger*/), null, new WorldCoordinate(room.index, 0, 0, -1), game.GetNewID());
                 room.AddEntity(scav);
                 idLog += $"{scav.ID.number} ";
                 if (squad == null)

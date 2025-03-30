@@ -335,8 +335,10 @@ namespace BuiltinBuffs.Negative
             while (c.TryGotoNext(MoveType.After,
                        i => i.MatchLdfld<BodyChunk>("mass")))
             {
+                BuffUtils.ForceGoto = false;
                 c.EmitDelegate<Func<float, float>>((re) => Mathf.Max(0.6f, re));
             }
+            BuffUtils.ForceGoto = true;
         }
 
 

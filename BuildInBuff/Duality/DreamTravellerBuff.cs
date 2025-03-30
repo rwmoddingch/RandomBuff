@@ -144,11 +144,11 @@ namespace BuiltinBuffs.Duality
         private static void SaveState_BringUpToDate(MonoMod.Cil.ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdloc(2),
                 i => i.Match(OpCodes.Ldfld),
-                i => i.Match(OpCodes.Stfld)))
+                i => i.Match(OpCodes.Stfld));
             {
                 c.Emit(OpCodes.Ldarg_0);
                 c.Emit(OpCodes.Ldarg_1);

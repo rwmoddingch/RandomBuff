@@ -25,6 +25,7 @@ using MonoMod.RuntimeDetour;
 using RandomBuff.Core.SaveData.BuffConfig;
 using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.ConstrainedExecution;
+using static DaddyGraphics;
 
 namespace BuiltinBuffs.Duality
 {
@@ -873,7 +874,7 @@ namespace BuiltinBuffs.Duality
             float origDamage = damage;
             if (self is Player && type == Creature.DamageType.Explosion &&
                 CorruptionCatFeatures.TryGetValue(self as Player, out _) &&
-                CorruptionCat.Type != MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)
+                CorruptionCat.Type !=  DLCSharedEnums.CreatureTemplateType.TerrorLongLegs)
             {
                 damage *= 0f;
                 stunBonus *= 3f;
@@ -977,15 +978,16 @@ namespace BuiltinBuffs.Duality
             ILCursor c = new ILCursor(il);
             ILCursor find = new ILCursor(il);
             ILLabel pos = null;
+            int local = 9;
             //找到原方法结束的地方
             if (find.TryGotoNext(MoveType.After,
                                  (i) => i.MatchLdfld<DaddyCorruption.Bulb> ("eatChunk"),
                                  (i) => i.Match(OpCodes.Brfalse),
-                                 (i) => i.MatchLdloc(8)))
+                                 (i) => i.MatchLdloc(out local)))
             {
-                find.Emit(OpCodes.Stloc_S, (byte)8);
+                find.Emit(OpCodes.Stloc_S, (byte)local);
                 pos = find.MarkLabel();
-                find.Emit(OpCodes.Ldloc_S, (byte)8);
+                find.Emit(OpCodes.Ldloc_S, (byte)local);
             }
             else
                 BuffUtils.LogError(CorruptionShapedMutation, "IL HOOK FAILED (pos)");
@@ -996,7 +998,7 @@ namespace BuiltinBuffs.Duality
                 if (pos != null)
                 {
                     c.Emit(OpCodes.Ldarg_0);
-                    c.Emit(OpCodes.Ldloc_S, (byte)8);
+                    c.Emit(OpCodes.Ldloc_S, (byte)local);
                     c.EmitDelegate<Func<DaddyCorruption.Bulb, int, bool>>((self, i) =>
                     {
                         return self.owner.room.abstractRoom.creatures[i].realizedCreature != null &&
@@ -1137,7 +1139,7 @@ namespace BuiltinBuffs.Duality
             get
             {
                 return CorruptionShapedMutationBuffEntry.StackLayer >= 2;
-                //return (ModManager.MSC && (base.Template.type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs || this.world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear || this.world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)) || base.Template.type == CreatureTemplate.Type.DaddyLongLegs;
+                //return (ModManager.MSC && (base.Template.type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs || this.world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear || this.world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)) || base.Template.type == CreatureTemplate.Type.DaddyLongLegs;
             }
         }
 
@@ -1204,9 +1206,9 @@ namespace BuiltinBuffs.Duality
                     case 2:
                         return CreatureTemplate.Type.DaddyLongLegs;
                     case 3:
-                        return MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs;
+                        return DLCSharedEnums.CreatureTemplateType.TerrorLongLegs;
                     default:
-                        return MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs;
+                        return DLCSharedEnums.CreatureTemplateType.TerrorLongLegs;
                 }
             }
         }
@@ -1532,7 +1534,7 @@ namespace BuiltinBuffs.Duality
                 {
                     if ((this.state as DaddyState).tentacleHealth[m] < 1f)
                     {
-                        if (CorruptionCat.Type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)//base.abstractCreature.superSizeMe || this.isHD
+                        if (CorruptionCat.Type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs)//base.abstractCreature.superSizeMe || this.isHD
                         {
                             (this.state as DaddyState).tentacleHealth[m] += 0.0012f;
                         }
@@ -1833,7 +1835,7 @@ namespace BuiltinBuffs.Duality
                 {
                     num = 0.25f;
                 }
-                else if (player.abstractCreature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)
+                else if (player.abstractCreature.creatureTemplate.type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs)
                 {
                     num = 0.15f;
                 }
@@ -2472,8 +2474,8 @@ namespace BuiltinBuffs.Duality
                     {
                         result = true;
                     }
-                    if (ModManager.MSC && (otherObject as DaddyLongLegs).Template.type != MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs &&
-                        CorruptionCat.Type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)
+                    if (ModManager.MSC && (otherObject as DaddyLongLegs).Template.type != DLCSharedEnums.CreatureTemplateType.TerrorLongLegs &&
+                        CorruptionCat.Type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs)
                     {
                         result = true;
                     }
@@ -3132,7 +3134,7 @@ namespace BuiltinBuffs.Duality
             }
         }
 
-        public class Eye : DaddyGraphics.DaddyBubbleOwner
+        public class Eye : DaddyBubbleOwner
         {
             public BodyChunk chunk
             {
@@ -3140,6 +3142,11 @@ namespace BuiltinBuffs.Duality
                 {
                     return this.owner.corruptionCat.coreChunks[this.index];
                 }
+            }
+
+            public Color GetEyeColor()
+            {
+                return renderColor;
             }
 
             public Eye(CorruptionCatGraphics owner, int index)

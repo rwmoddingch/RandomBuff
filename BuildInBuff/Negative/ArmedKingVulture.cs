@@ -47,10 +47,10 @@ namespace HotDogGains.Negative
         {
             var c = new ILCursor(il);
 
-            if (c.TryGotoNext(MoveType.Before,
+            c.GotoNext(MoveType.Before,
                 i => i.MatchCall<KingTusks>("TryToShoot"),
                 i => i.Match(OpCodes.Br_S)
-                ))
+            );
             {
                 c.Remove();
                 c.EmitDelegate<Action<KingTusks>>(

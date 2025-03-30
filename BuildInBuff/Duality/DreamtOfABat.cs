@@ -52,22 +52,22 @@ namespace BuildInBuff.Duality
         private static void MeltLights_Update(MonoMod.Cil.ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After, (i) => i.MatchLdarg(0),
-                              (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
-                              (i) => i.MatchLdfld<Room>("physicalObjects"),
-                              (i) => i.MatchLdcI4(0), (i) => i.MatchLdelemRef(),
-                              (i) => i.MatchLdloc(1),
-                              (i) => i.Match(OpCodes.Callvirt)))
+            c.GotoNext(MoveType.After, (i) => i.MatchLdarg(0),
+                (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
+                (i) => i.MatchLdfld<Room>("physicalObjects"),
+                (i) => i.MatchLdcI4(0), (i) => i.MatchLdelemRef(),
+                (i) => i.MatchLdloc(1),
+                (i) => i.Match(OpCodes.Callvirt));
+            
+            c.EmitDelegate<Func<PhysicalObject, PhysicalObject>>((obj) =>
             {
-                c.EmitDelegate<Func<PhysicalObject, PhysicalObject>>((obj) =>
+                if (obj is Fly fly && fly.IsButterFly())
                 {
-                    if (obj is Fly fly && fly.IsButterFly())
-                    {
-                        return null; // 如果是蝴蝶则返回空值
-                    }
-                    return obj;
-                });
-            }
+                    return null; // 如果是蝴蝶则返回空值
+                }
+                return obj;
+            });
+            
         }
 
         private static void

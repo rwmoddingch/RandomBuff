@@ -33,7 +33,7 @@ namespace BuiltinBuffs.Missions
                 {
                     new CycleScoreCondition(){targetScore = 120},
                     new HuntCondition()
-                        { killCount = 30, type = MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite },
+                        { killCount = 30, type = DLCSharedEnums.CreatureTemplateType.ScavengerElite },
                     new HuntCondition() { killCount = 10, type = CreatureTemplate.Type.RedCentipede },
                     new HuntCondition() { killCount = 10, type = CreatureTemplate.Type.RedLizard }
 

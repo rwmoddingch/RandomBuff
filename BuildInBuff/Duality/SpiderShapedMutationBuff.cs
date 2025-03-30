@@ -147,30 +147,29 @@ namespace BuiltinBuffs.Duality
             try
             {
                 ILCursor c = new ILCursor(il);
-                if (c.TryGotoNext(MoveType.After,
+                c.GotoNext(MoveType.After,
                     (i) => i.MatchCallvirt<Creature>("get_abstractCreature"),
                     (i) => i.MatchCallvirt<Creature>("SetKillTag"),
-                    (i) => i.Match(OpCodes.Ldarg_0)))
+                    (i) => i.Match(OpCodes.Ldarg_0));
+                
+                c.Emit(OpCodes.Ldloc_0);
+                c.EmitDelegate<Action<FlareBomb, int>>((self, i) =>
                 {
-                    c.Emit(OpCodes.Ldloc_0);
-                    c.EmitDelegate<Action<FlareBomb, int>>((self, i) =>
+                        if (self.room.abstractRoom.creatures[i].realizedCreature is Player)
                     {
-                            if (self.room.abstractRoom.creatures[i].realizedCreature is Player)
+                        Player player = self.room.abstractRoom.creatures[i].realizedCreature as Player;
+                        if (SpiderCatFeatures.TryGetValue(player, out var spider) &&
+                            !spider.IsSpitter)
                         {
-                            Player player = self.room.abstractRoom.creatures[i].realizedCreature as Player;
-                            if (SpiderCatFeatures.TryGetValue(player, out var spider) &&
-                                !spider.IsSpitter)
+                            player.Die();
+                            if (self.thrownBy != null)
                             {
-                                player.Die();
-                                if (self.thrownBy != null)
-                                {
-                                    player.SetKillTag(self.thrownBy.abstractCreature);
-                                }
+                                player.SetKillTag(self.thrownBy.abstractCreature);
                             }
                         }
-                    });
-                    c.Emit(OpCodes.Ldarg_0);
-                }
+                    }
+                });
+                c.Emit(OpCodes.Ldarg_0);
             }
             catch (Exception e)
             {
@@ -463,8 +462,8 @@ namespace BuiltinBuffs.Duality
         private static void RainWorldGame_RawUpdate(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
-                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
+            c.GotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
+                i => i.MatchStfld<MainLoopProcess>("framesPerSecond"));
             {
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Action<RainWorldGame>>(game =>
@@ -473,8 +472,6 @@ namespace BuiltinBuffs.Duality
                         game.framesPerSecond = UpdateSpeed;
                 });
             }
-            else
-                BuffUtils.LogError(SpiderShapedMutation, "IL HOOK FAILED");
         }
 
         public static int UpdateSpeed = 1000;
@@ -1201,7 +1198,7 @@ namespace BuiltinBuffs.Duality
                     creature.SetKillTag(player.abstractCreature);
                     creature.Violence(player.bodyChunks[0], new Vector2?(new Vector2(0f, 0f)), player.grasps[graspIndex].grabbedChunk, null, Creature.DamageType.Bite, 1f, 15f);
                     creature.stun = 5;
-                    if (creature.abstractCreature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.Inspector)
+                    if (creature.abstractCreature.creatureTemplate.type == DLCSharedEnums.CreatureTemplateType.Inspector)
                     {
                         creature.Die();
                     }

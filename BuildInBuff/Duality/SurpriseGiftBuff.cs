@@ -109,7 +109,7 @@ namespace BuiltinBuffs.Duality
         static void ScavengerAbstractAI_InitGearUp(MonoMod.Cil.ILContext il)
         {
             var c1 = new ILCursor(il);
-            c1.TryGotoPrev(MoveType.After, (i) => i.MatchRet());
+            c1.GotoPrev(MoveType.After, (i) => i.MatchRet());
             c1.Emit(OpCodes.Ldarg_0);
             c1.Emit(OpCodes.Ldloc_0);
             c1.EmitDelegate<Action<ScavengerAbstractAI, int>>((self, i) =>

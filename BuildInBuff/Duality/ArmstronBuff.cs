@@ -36,9 +36,24 @@ namespace BuiltinBuffs.Duality
 
         public static void HookOn()
         {
-            On.Room.ctor += Room_ctor;
+            On.Room.ctor += RoomOnctor;
             On.AntiGravity.Update += AntiGravity_Update;
             //BuffEvent.OnCreatureKilled += BuffEvent_OnCreatureKilled;
+        }
+
+        private static void RoomOnctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractroom, bool devui)
+        {
+            orig.Invoke(self, game, world, abstractroom,devui);
+            if (BuffPoolManager.Instance.GameSetting.MissionId != "DoomExpress")
+            {
+                if (game?.session is StoryGameSession storyGameSession)
+                {
+                    if (storyGameSession.saveState.miscWorldSaveData.EverMetMoon)
+                    {
+                        self.gravity /= 6f;
+                    }
+                }
+            }
         }
 
 
@@ -52,20 +67,6 @@ namespace BuiltinBuffs.Duality
                 self.room.gravity /= 6f;
             }
         }
-
-        private static void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom)
-        {
-            orig.Invoke(self, game, world, abstractRoom);
-            if (BuffPoolManager.Instance.GameSetting.MissionId != "DoomExpress")
-            {
-                if (game?.session is StoryGameSession storyGameSession)
-                {
-                    if (storyGameSession.saveState.miscWorldSaveData.EverMetMoon)
-                    {
-                        self.gravity /= 6f;
-                    }
-                }
-            }
-        }
+        
     }
 }

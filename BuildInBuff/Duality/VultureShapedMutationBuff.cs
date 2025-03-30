@@ -318,11 +318,11 @@ namespace BuiltinBuffs.Duality
         private static void Player_MovementUpdate(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
-                              i => i.Match(OpCodes.Ldc_I4_1),
-                              i => i.Match(OpCodes.Br_S),
-                              i => i.Match(OpCodes.Ldc_I4_0),
-                              i => i.MatchStfld<Player>("wantToGrab")))
+            c.GotoNext(MoveType.After,
+                i => i.Match(OpCodes.Ldc_I4_1),
+                i => i.Match(OpCodes.Br_S),
+                i => i.Match(OpCodes.Ldc_I4_0),
+                i => i.MatchStfld<Player>("wantToGrab"));
             {
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Action<Player>>((player) =>
@@ -334,12 +334,10 @@ namespace BuiltinBuffs.Duality
                     }
                 });
             }
-            else
-                BuffUtils.LogError(VultureShapedMutation, "IL HOOK FAILED");
         }
         #endregion
 
-        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarpPoint)
         {
             try
             {
@@ -391,7 +389,7 @@ namespace BuiltinBuffs.Duality
             {
                 UnityEngine.Debug.LogException(ex);
             }
-            orig(self, malnourished);
+            orig(self, malnourished, fromWarpPoint);
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -538,8 +536,8 @@ namespace BuiltinBuffs.Duality
         private static void RainWorldGame_RawUpdate(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
-                                              i => i.MatchStfld<MainLoopProcess>("framesPerSecond")))
+            c.GotoNext(MoveType.After, i => i.MatchLdfld<MainLoopProcess>("framesPerSecond"),
+                i => i.MatchStfld<MainLoopProcess>("framesPerSecond"));
             {
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Action<RainWorldGame>>(game =>
@@ -548,8 +546,6 @@ namespace BuiltinBuffs.Duality
                         game.framesPerSecond = UpdateSpeed;
                 });
             }
-            else
-                BuffUtils.LogError(VultureShapedMutation, "IL HOOK FAILED");
         }
 
         public static int UpdateSpeed = 1000;
@@ -2753,7 +2749,7 @@ namespace BuiltinBuffs.Duality
         public VultureCatState(AbstractCreature creature, VultureCat vultureCat)
             : base(creature)
         {
-            bool flag = ModManager.MSC && creature.creatureTemplate.type == MoreSlugcatsEnums.CreatureTemplateType.MirosVulture;
+            bool flag = ModManager.MSC && creature.creatureTemplate.type == DLCSharedEnums.CreatureTemplateType.MirosVulture;
             wingHealth = new float[flag ? 2 : 1, 2];
             for (int i = 0; i < wingHealth.GetLength(0); i++)
                 for (int j = 0; j < wingHealth.GetLength(1); j++)

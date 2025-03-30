@@ -36,18 +36,12 @@ namespace HotDogGains.Duality
         private static void RainWorldGame_RawUpdate1(MonoMod.Cil.ILContext il)
         {
             var c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdcI4(40)
-                ))
+            );
             {
-                c.EmitDelegate<Func<int, int>>((number) =>
-                {
-                    return (int)stagnant;
-
-                    return number;
-                });
-
+                c.EmitDelegate<Func<int, int>>((number) => (int)stagnant);
             }
         }
 
@@ -57,7 +51,7 @@ namespace HotDogGains.Duality
             if (self.Consious&& self.bodyChunks[1].contactPoint.y >= 0 && self.bodyChunks[0].contactPoint.y >= 0 && self.bodyMode != Player.BodyModeIndex.WallClimb && self.bodyMode != Player.BodyModeIndex.Swimming && self.bodyMode != Player.BodyModeIndex.ClimbingOnBeam &&
                 self.bodyMode != Player.BodyModeIndex.ClimbIntoShortCut && self.bodyMode != Player.BodyModeIndex.CorridorClimb&&self.mainBodyChunk.vel.y<0)
             {
-                //if (!stagnant)FeatherfallBuff.Instance.TriggerSelf(true);//µ¯³ö¿¨ÅÆÊ¹ÓÃÌáÊ¾
+                //if (!stagnant)FeatherfallBuff.Instance.TriggerSelf(true);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½Ê¾
                 stagnant = Custom.LerpAndTick(40,20,stagnant,0.2f);
             }
             else stagnant = Custom.LerpAndTick(20, 40, stagnant, 0.2f);

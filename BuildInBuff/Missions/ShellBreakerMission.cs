@@ -154,26 +154,18 @@ namespace BuiltinBuffs.Missions
 
         private void Lizard_Violence(MonoMod.Cil.ILContext il)
         {
-            ILCursor c1 = new ILCursor(il);
-            if (!c1.TryGotoNext(MoveType.After, 
+            ILCursor c1 = new ILCursor(il); 
+            c1.GotoNext(MoveType.After, 
                 (i) => i.MatchLdarg(0),
                 (i) => i.Match(OpCodes.Ldarga_S),
                 (i) => i.Match(OpCodes.Call), 
-                (i) => i.MatchCall<Lizard>("HitHeadShield")))
-            {
-                BuffUtils.Log("BreakShellCondition", "c1 1 failed");
-                return;
-            }
+                (i) => i.MatchCall<Lizard>("HitHeadShield"));
 
-            if (!c1.TryGotoNext(MoveType.After, 
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchLdloc(0),
                 (i) => i.MatchLdcR4(0.1f),
                 (i) => i.MatchMul(),
-                (i) => i.MatchStloc(0)))
-            {
-                BuffUtils.Log("BreakShellCondition", "c1 2 failed");
-                return;
-            }
+                (i) => i.MatchStloc(0));
 
             c1.Emit(OpCodes.Ldarg_0);
             c1.Emit(OpCodes.Ldarg_3);

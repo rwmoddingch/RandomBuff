@@ -253,104 +253,98 @@ namespace BuiltinBuffs.Positive
 
         private static void Room_UpdateIL(ILContext il)
         {
-            try
+            ILCursor c = new ILCursor(il);
+            //找到ShouldBeDeferred结束的地方
+            c.GotoNext(MoveType.After,
+                (i) => i.MatchLdloc(10),
+                (i) => i.MatchCall<Room>("ShouldBeDeferred"),
+                (i) => i.MatchStloc(11));
             {
-                ILCursor c = new ILCursor(il);
-                //找到ShouldBeDeferred结束的地方
-                if (c.TryGotoNext(MoveType.After,
-                    (i) => i.MatchLdloc(10),
-                    (i) => i.MatchCall<Room>("ShouldBeDeferred"),
-                    (i) => i.MatchStloc(11)))
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldloc_S, (byte)10);
+                c.Emit(OpCodes.Ldloc_S, (byte)11);
+                c.EmitDelegate<Func<Room, UpdatableAndDeletable, bool, bool>>((self, updatableAndDeletable, flag) =>
                 {
-                    c.Emit(OpCodes.Ldarg_0);
-                    c.Emit(OpCodes.Ldloc_S, (byte)10);
-                    c.Emit(OpCodes.Ldloc_S, (byte)11);
-                    c.EmitDelegate<Func<Room, UpdatableAndDeletable, bool, bool>>((self, updatableAndDeletable, flag) =>
-                    {
-                        bool newFlag = false;
+                    bool newFlag = false;
 
-                        if ((updatableAndDeletable is Creature creature) &&
-                             FreezeFeatures.TryGetValue(creature.abstractCreature, out var freeze))
+                    if ((updatableAndDeletable is Creature creature) &&
+                         FreezeFeatures.TryGetValue(creature.abstractCreature, out var freeze))
+                    {
+                        freeze.Update();
+                        newFlag = freeze.ShouldSkipUpdate() && !freeze.ShouldAllowUpdate();
+                        if (newFlag && creature is Deer)
                         {
-                            freeze.Update();
-                            newFlag = freeze.ShouldSkipUpdate() && !freeze.ShouldAllowUpdate();
-                            if (newFlag && creature is Deer)
+                            bool eu = true;
+                            Deer deer = (Deer) creature;
+                            if(deer.graphicsModule != null)
                             {
-                                bool eu = true;
-                                Deer deer = (Deer) creature;
-                                if(deer.graphicsModule != null)
+                                for (int n = 0; n < deer.room.game.Players.Count; n++)
                                 {
-                                    for (int n = 0; n < deer.room.game.Players.Count; n++)
+                                    if (deer.room.game.Players[n].pos.room == deer.room.abstractRoom.index && 
+                                        deer.room.game.Players[n].realizedCreature != null && 
+                                        (deer.room.game.Players[n].realizedCreature as Player).wantToGrab > 0 && 
+                                        Custom.DistLess(deer.room.game.Players[n].realizedCreature.mainBodyChunk.pos, deer.antlers.pos, deer.antlers.rad))
                                     {
-                                        if (deer.room.game.Players[n].pos.room == deer.room.abstractRoom.index && 
-                                            deer.room.game.Players[n].realizedCreature != null && 
-                                            (deer.room.game.Players[n].realizedCreature as Player).wantToGrab > 0 && 
-                                            Custom.DistLess(deer.room.game.Players[n].realizedCreature.mainBodyChunk.pos, deer.antlers.pos, deer.antlers.rad))
+                                        (deer.room.game.Players[n].realizedCreature as Player).wantToGrab = 0;
+                                        bool flag2 = true;
+                                        int num5 = 0;
+                                        while (num5 < deer.playersInAntlers.Count && flag2)
                                         {
-                                            (deer.room.game.Players[n].realizedCreature as Player).wantToGrab = 0;
-                                            bool flag2 = true;
-                                            int num5 = 0;
-                                            while (num5 < deer.playersInAntlers.Count && flag2)
-                                            {
-                                                flag2 = (deer.playersInAntlers[num5].player != deer.room.game.Players[n].realizedCreature as Player);
-                                                num5++;
-                                            }
-                                            if (flag2)
-                                            {
-                                                if ((deer.room.game.Players[n].realizedCreature as Player).playerInAntlers != null)
-                                                {
-                                                    (deer.room.game.Players[n].realizedCreature as Player).playerInAntlers.playerDisconnected = true;
-                                                }
-                                                deer.playersInAntlers.Add(new Deer.PlayerInAntlers(deer.room.game.Players[n].realizedCreature as Player, deer));
-                                            }
+                                            flag2 = (deer.playersInAntlers[num5].player != deer.room.game.Players[n].realizedCreature as Player);
+                                            num5++;
                                         }
-                                    }
-                                    for (int num6 = deer.playersInAntlers.Count - 1; num6 >= 0; num6--)
-                                    {
-                                        if (deer.playersInAntlers[num6].playerDisconnected)
+                                        if (flag2)
                                         {
-                                            deer.playersInAntlers.RemoveAt(num6);
-                                        }
-                                        else
-                                        {
-                                            deer.playersInAntlers[num6].Update(eu);
+                                            if ((deer.room.game.Players[n].realizedCreature as Player).playerInAntlers != null)
+                                            {
+                                                (deer.room.game.Players[n].realizedCreature as Player).playerInAntlers.playerDisconnected = true;
+                                            }
+                                            deer.playersInAntlers.Add(new Deer.PlayerInAntlers(deer.room.game.Players[n].realizedCreature as Player, deer));
                                         }
                                     }
                                 }
-                                else
+                                for (int num6 = deer.playersInAntlers.Count - 1; num6 >= 0; num6--)
                                 {
-                                    deer.playersInAntlers.Clear();
+                                    if (deer.playersInAntlers[num6].playerDisconnected)
+                                    {
+                                        deer.playersInAntlers.RemoveAt(num6);
+                                    }
+                                    else
+                                    {
+                                        deer.playersInAntlers[num6].Update(eu);
+                                    }
                                 }
                             }
+                            else
+                            {
+                                deer.playersInAntlers.Clear();
+                            }
                         }
-                        
-                        return flag || newFlag;
-                    });
-                    c.Emit(OpCodes.Stloc_S, (byte)11);
-                }
+                    }
+                    
+                    return flag || newFlag;
+                });
+                c.Emit(OpCodes.Stloc_S, (byte)11);
+            }
 
-                //找到即将绘图的地方
-                if (c.TryGotoNext(MoveType.After,
-                    (i) => i.MatchLdloc(10),
-                    (i) => i.MatchIsinst<PhysicalObject>(),
-                    (i) => i.Match(OpCodes.Brfalse_S),
-                    (i) => i.MatchLdloc(11)))
-                {
-                    c.Emit(OpCodes.Ldarg_0);
-                    c.Emit(OpCodes.Ldloc_S, (byte)10);
-                    c.EmitDelegate<Func<bool, Room, UpdatableAndDeletable, bool>>((flag, self, updatableAndDeletable) =>
-                    {
-                        flag = self.ShouldBeDeferred(updatableAndDeletable);
-                        return flag;
-                    });
-                    c.Emit(OpCodes.Stloc_S, (byte)11);
-                    c.Emit(OpCodes.Ldloc_S, (byte)11);
-                }
-            }
-            catch (Exception e)
+            //找到即将绘图的地方
+            c.GotoNext(MoveType.After,
+                (i) => i.MatchLdloc(10),
+                (i) => i.MatchIsinst<PhysicalObject>(),
+                (i) => i.Match(OpCodes.Brfalse_S),
+                (i) => i.MatchLdloc(11));
             {
-                UnityEngine.Debug.LogException(e);
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldloc_S, (byte)10);
+                c.EmitDelegate<Func<bool, Room, UpdatableAndDeletable, bool>>((flag, self, updatableAndDeletable) =>
+                {
+                    flag = self.ShouldBeDeferred(updatableAndDeletable);
+                    return flag;
+                });
+                c.Emit(OpCodes.Stloc_S, (byte)11);
+                c.Emit(OpCodes.Ldloc_S, (byte)11);
             }
+            
         }
 
         private static void RoomCamera_SpriteLeaser_Update(On.RoomCamera.SpriteLeaser.orig_Update orig, RoomCamera.SpriteLeaser self, float timeStacker, RoomCamera rCam, Vector2 camPos)

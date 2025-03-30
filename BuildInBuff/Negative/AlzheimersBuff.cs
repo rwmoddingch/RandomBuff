@@ -31,10 +31,10 @@ namespace BuiltinBuffs.Negative
         private static void CoralNeuronSystem_PlaceSwarmers(MonoMod.Cil.ILContext il)
         {
             ILCursor c1 = new ILCursor(il);
-            if(c1.TryGotoNext(MoveType.After,
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchLdloc(5),
                 (i) => i.MatchLdloc(2),
-                (i) => i.Match(OpCodes.Blt_S)))
+                (i) => i.Match(OpCodes.Blt_S));
             {
                 c1.Index--;
                 c1.EmitDelegate<Func<int, int>>((orig) =>

@@ -35,9 +35,9 @@ namespace BuiltinBuffs.Negative
         private static void LizardSpit_Update(ILContext il)
         {
             ILCursor c1 = new ILCursor(il);
-            if (c1.TryGotoNext(MoveType.After,
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchCallvirt<Creature>("Violence")
-            ))
+            );
             {
                 c1.Emit(OpCodes.Ldarg_0);
                 c1.EmitDelegate <Action<LizardSpit>>((self) =>
@@ -73,10 +73,6 @@ namespace BuiltinBuffs.Negative
                     self.room.ScreenMovement(new Vector2?(vector), default(Vector2), 1.3f);
                     self.room.PlaySound(SoundID.Bomb_Explode, vector);
                 });
-            }
-            else
-            {
-                Debug.LogException(new Exception("LizardSpit_Update cant find!"));
             }
         }
     }

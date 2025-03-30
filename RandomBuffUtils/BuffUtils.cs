@@ -21,6 +21,8 @@ namespace RandomBuffUtils
 {
     public static class BuffUtils
     {
+        public static bool ForceGoto = true;
+
         static bool everInit;
         private static bool canAccessLog =true;
         public static void OnEnable()

@@ -26,21 +26,19 @@ namespace BuiltinBuffs.Positive
         private static void Player_PickupCandidate(MonoMod.Cil.ILContext il)
         {
             ILCursor c1 = new ILCursor(il);
-            if (c1.TryGotoNext(MoveType.After,
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchLdcR4(40),
                 (i) => i.MatchAdd()
-                ))
-            {
-                c1.EmitDelegate<Func<float, float>>(TwiceRange);
-            }
+            );
+            c1.EmitDelegate<Func<float, float>>(TwiceRange);
+            
 
-            if (c1.TryGotoNext(MoveType.After,
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchLdcR4(20),
                 (i) => i.MatchAdd()
-                ))
-            {
-                c1.EmitDelegate<Func<float, float>>(TwiceRange);
-            }
+            );
+            c1.EmitDelegate<Func<float, float>>(TwiceRange);
+            
 
             float TwiceRange(float orig)
             {

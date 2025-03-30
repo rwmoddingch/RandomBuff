@@ -32,7 +32,7 @@ namespace HotDogGains.Negative
             var c = new ILCursor(il);
 
             //修改每口的间隔
-            if (c.TryGotoNext(MoveType.Before,
+            c.GotoNext(MoveType.Before,
                 i => i.MatchStfld<Player>("eatCounter"),
                 i => i.MatchLdarg(0),
                 i => i.MatchLdarg(1),
@@ -41,36 +41,13 @@ namespace HotDogGains.Negative
                 i => i.MatchLdarg(0),
                 i => i.MatchLdfld<Player>("eatCounter"),
                 i => i.MatchLdcI4(20)
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldc_I4, 80);
                 c.Emit(OpCodes.Add);
 
             }
-
-            //进食预备时间
-            if (c.TryGotoNext(MoveType.After,
-                i => i.MatchLdarg(0),
-                i => i.MatchLdarg(0),
-                i => i.MatchLdfld<Player>("eatCounter"),
-                i => i.MatchLdcI4(1),
-                i => i.MatchSub(),
-                i => i.MatchStfld<Player>("eatCounter"),
-
-                i => i.Match(OpCodes.Br_S),
-
-                i => i.MatchLdloc(0),
-                i => i.Match(OpCodes.Brtrue_S),
-
-                i => i.MatchLdarg(0),
-                i => i.MatchLdfld<Player>("eatCounter"),
-                i => i.MatchLdcI4(40)
-                ))
-            {
-                // c.Emit(OpCodes.Ldarg_0);//这里开始0号位是input[0].x的值,1号位是玩家
-                //c.Emit(OpCodes.Ldc_I4, (int)400);
-                //c.Emit(OpCodes.Add);
-            }
+          
 
         }
     }

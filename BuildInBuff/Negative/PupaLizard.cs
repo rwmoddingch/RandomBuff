@@ -31,11 +31,11 @@ namespace HotDogGains.Negative
             var c = new ILCursor(il);
 
             //修改每口的间隔
-            if (c.TryGotoNext(MoveType.Before,
+            c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdnull(),
                 i => i.MatchStfld<DangleFruit.Stalk>("fruit")
-                ))
+            );
             {
                 //Debug.Log("找到了蓝果变蜥蜴");
                 c.Emit(OpCodes.Ldarg_0);

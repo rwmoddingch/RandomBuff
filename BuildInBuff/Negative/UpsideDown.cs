@@ -61,11 +61,11 @@ namespace BuiltinBuffs.Negative
             ILCursor c = new ILCursor(il);
             ILLabel label = null;
             fieldInfo = typeof(UpsideDownBuffEntry).GetField(nameof(conflicted), BindingFlags.Static | BindingFlags.Public);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg((byte)3),
                 i => i.Match(OpCodes.Ldloc_0),
                 i => i.MatchBleUn(out label)
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldarg_1);
                 c.Emit(OpCodes.Ldc_I4_2);
@@ -75,11 +75,11 @@ namespace BuiltinBuffs.Negative
             }
 
             ILLabel label2 = null;
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg((byte)3),
                 i => i.Match(OpCodes.Ldloc_1),
                 i => i.MatchBleUn(out label2)
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldarg_1);
                 c.Emit(OpCodes.Ldc_I4_2);
@@ -107,13 +107,13 @@ namespace BuiltinBuffs.Negative
         private static void PlayerGraphics_Update1(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.Match(OpCodes.Ldc_I4_1),
                 i => i.Match(OpCodes.Ldc_I4_0),
                 i => i.Match(OpCodes.Call),
                 i => i.Match(OpCodes.Newobj),
                 i => i.Match(OpCodes.Stfld)
-                ))
+            );
             {
                 //UnityEngine.Debug.Log("Tongue IL Hook 3");
                 c.Emit(OpCodes.Ldarg_0);
@@ -128,11 +128,11 @@ namespace BuiltinBuffs.Negative
         private static void PlayerGraphics_MSCUpdate(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.Match(OpCodes.Callvirt),
                 i => i.Match(OpCodes.Ldfld),
                 i => i.Match(OpCodes.Callvirt)
-                ))
+            );
             {
                 //UnityEngine.Debug.Log("Tongue IL Hook 2");
                 c.Emit(OpCodes.Ldarg_0);
@@ -231,13 +231,13 @@ namespace BuiltinBuffs.Negative
         private static void Player_TongueUpdate(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.Match(OpCodes.Ldarg_0),
                 i => i.Match(OpCodes.Ldfld),
                 i => i.Match(OpCodes.Ldarg_0),
                 i => i.Match(OpCodes.Call),
                 i => i.Match(OpCodes.Stfld)
-                ))
+            );
             {
                 //UnityEngine.Debug.Log("Tongue IL Hook");
                 c.Emit(OpCodes.Ldarg_0);
@@ -399,13 +399,13 @@ namespace BuiltinBuffs.Negative
         {
             ILCursor c = new ILCursor(il);
             ILCursor c2 = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 (i) => i.Match(OpCodes.Ldfld),
                 (i) => i.Match(OpCodes.Ldfld),
                 (i) => i.Match(OpCodes.Ldarg_3),
                 (i) => i.Match(OpCodes.Call),
                 (i) => i.Match(OpCodes.Stloc_3)
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldarg_0);
                 c.Emit(OpCodes.Ldloc_3);
@@ -424,11 +424,11 @@ namespace BuiltinBuffs.Negative
                 c.Emit(OpCodes.Stloc_3);
             }
 
-            if (c2.TryGotoNext(MoveType.After,
+            c2.GotoNext(MoveType.After,
                 i => i.Match(OpCodes.Ldc_R4),
                 i => i.Match(OpCodes.Call),
                 i => i.Match(OpCodes.Stloc_S)
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldloc_2);
                 c.Emit(OpCodes.Ldloc_1);

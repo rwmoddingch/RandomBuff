@@ -29,7 +29,7 @@ namespace HotDogGains.Negative
         private static void Tusk_Shoot(On.KingTusks.Tusk.orig_Shoot orig, KingTusks.Tusk self, Vector2 tuskHangPos)
         {
             orig.Invoke(self,tuskHangPos);
-            //Éä»÷ºóÏÂ¸öÃ¬µÄcd
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¸ï¿½Ã¬ï¿½ï¿½cd
             self.owner.noShootDelay = 3;
             self.laserPower = 1f;
         }
@@ -47,7 +47,7 @@ namespace HotDogGains.Negative
         {
             var c = new ILCursor(il);
 
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdfld<KingTusks.Tusk>("modeCounter"),
                 i => i.MatchLdarg(0),
@@ -56,65 +56,65 @@ namespace HotDogGains.Negative
                 i => i.Match(OpCodes.Brtrue_S),
                 i => i.MatchLdcI4(25)
 
-                ))
+            );
             {
                 c.EmitDelegate<Func<int, int>>(
                    (modeCount) =>
                    {
-                       //Ã»Ãé×¼µÄÉä»÷ËùÐèÊ±¼ä
+                       //Ã»ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
                        return 10;
                    }
                );
             }
-            if (c.TryGotoNext(MoveType.After,
+
+            c.GotoNext(MoveType.After,
                 i => i.Match(OpCodes.Br_S),
                 i => i.MatchLdcI4(10)
-                ))
+            );
             {
                 c.EmitDelegate<Func<int, int>>(
                    (modeCount) =>
                    {
-                       //Ãé×¼ÁËºóµÄÉä»÷ËùÐèÊ±¼ä
+                       //ï¿½ï¿½×¼ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
                        return 5;
                    }
                );
             }
 
 
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdcR4(0.0f),
                 i => i.MatchStfld<KingTusks.Tusk>("attached"),
                 i => i.MatchLdarg(0),
                 i => i.MatchLdfld<KingTusks.Tusk>("modeCounter"),
                 i => i.MatchLdcI4(80)
-                ))
+            );
             {
                 c.EmitDelegate<Func<int, int>>(
                    (modeCount) =>
                    {
-                       //Debug.Log("¿ìËÙ½øÈëÀ­Éþ");
+                       //Debug.Log("ï¿½ï¿½ï¿½Ù½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
                        return 0;
                    }
                );
 
             }
 
-            //ÐÞ¸ÄÒ»´Î»ØÊÕµÄÉþ×Ó³¤¶È
-            if (c.TryGotoNext(MoveType.After,
+            //ï¿½Þ¸ï¿½Ò»ï¿½Î»ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdarg(0),
                 i => i.MatchLdcR4(0.0f),
                 i => i.MatchLdarg(0),
                 i => i.MatchLdfld<KingTusks.Tusk>("currWireLength"),
                 i => i.MatchLdsfld<KingTusks.Tusk>("maxWireLength"),
                 i => i.MatchLdcR4(90)
-
-                ))
+            );
             {
                 c.EmitDelegate<Func<float,float>>(
                    (speed) =>
                    {
-                       //Debug.Log("¼ÓËÙ»ØÊÕ");
+                       //Debug.Log("ï¿½ï¿½ï¿½Ù»ï¿½ï¿½ï¿½");
                        return 4f;
                    }
                );

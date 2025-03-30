@@ -79,10 +79,11 @@ namespace RandomBuffUtils.ObjectExtend
             var abType = il.Module.ImportReference(typeof(AbstractPhysicalObject));
             var ctorInvokeRef =
                 il.Module.ImportReference(typeof(ConstructorInfo).GetMethod(nameof(ConstructorInfo.Invoke), new[] { typeof(object[]) }));
+            
             while (c.TryGotoNext(i => i.MatchNewobj(out var method) &&
                                       method.DeclaringType.IsDerivedType(abType)))
             {
-
+                BuffUtils.ForceGoto = false;
                 var method = c.Next.Operand as MethodReference;
                 c.Emit(OpCodes.Ldloc_0);
                 c.EmitDelegate<Func<string[], ConstructorInfo>>((split) =>
@@ -129,7 +130,7 @@ namespace RandomBuffUtils.ObjectExtend
                 c.MarkLabel(label2);
 
             }
-
+            BuffUtils.ForceGoto = true;
 
             void EmitArray(ILCursor c, MethodReference method, byte index)
             {

@@ -146,28 +146,23 @@ namespace BuiltinBuffs.Positive
 
         public static void Player_CanMaulCreatureIL(ILContext il)
         {
-            try
+     
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(MoveType.After,
+                (i) => i.MatchCallvirt<Creature>("get_Stunned"));
             {
-                ILCursor c = new ILCursor(il);
-                if (c.TryGotoNext(MoveType.After,
-                    (i) => i.MatchCallvirt<Creature>("get_Stunned")))
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Func<bool, Player, bool>>((Stunned, self) =>
                 {
-                    c.Emit(OpCodes.Ldarg_0);
-                    c.EmitDelegate<Func<bool, Player, bool>>((Stunned, self) =>
+                    if (GrindingTeethFeatures.TryGetValue(self, out var grindingTeeth) &&
+                        grindingTeeth.abilities.Contains(Positive.GrindingTeeth.Ability.StrengthenMaul))
                     {
-                        if (GrindingTeethFeatures.TryGetValue(self, out var grindingTeeth) &&
-                            grindingTeeth.abilities.Contains(Positive.GrindingTeeth.Ability.StrengthenMaul))
-                        {
-                            return true;
-                        }
-                        return Stunned;
-                    });
-                }
+                        return true;
+                    }
+                    return Stunned;
+                });
             }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogException(e);
-            }
+          
         }
     }
     internal class GrindingTeeth

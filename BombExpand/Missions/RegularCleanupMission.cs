@@ -49,7 +49,7 @@ namespace BuiltinBuffs.Missions
                     {
                         new GachaTemplate.BoostCreatureInfo()
                         {
-                            baseCrit = MoreSlugcatsEnums.CreatureTemplateType.Inspector,
+                            baseCrit = DLCSharedEnums.CreatureTemplateType.Inspector,
                             boostCrit = CreatureTemplate.Type.DaddyLongLegs,
                             boostCount = 1,
                             boostType = GachaTemplate.BoostCreatureInfo.BoostType.Replace

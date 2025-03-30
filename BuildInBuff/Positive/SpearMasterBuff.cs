@@ -24,8 +24,14 @@ namespace BuiltinBuffs.Positive
         {
             On.Player.GraspsCanBeCrafted += Player_GraspsCanBeCrafted;
             On.Player.SpitUpCraftedObject += Player_SpitUpCraftedObject;
-            On.SlugcatStats.SpearSpawnModifier += SlugcatStats_SpearSpawnModifier;
+            On.SlugcatStats.SpearSpawnModifier_Name_float += SlugcatStats_SpearSpawnModifier;
+            On.SlugcatStats.SpearSpawnModifier_Timeline_float += SlugcatStats_SpearSpawnModifier_Timeline_float;
             On.Player.Grabability += Player_Grabability;
+        }
+
+        private static float SlugcatStats_SpearSpawnModifier_Timeline_float(On.SlugcatStats.orig_SpearSpawnModifier_Timeline_float orig, SlugcatStats.Timeline index, float originalspearchance)
+        {
+            return orig(index,originalspearchance) * 2;
         }
 
         private static bool Player_GraspsCanBeCrafted(On.Player.orig_GraspsCanBeCrafted orig, Player self)
@@ -39,7 +45,7 @@ namespace BuiltinBuffs.Positive
             return orig(self,obj);
         }
 
-        private static float SlugcatStats_SpearSpawnModifier(On.SlugcatStats.orig_SpearSpawnModifier orig, SlugcatStats.Name index, float originalSpearChance)
+        private static float SlugcatStats_SpearSpawnModifier(On.SlugcatStats.orig_SpearSpawnModifier_Name_float orig, SlugcatStats.Name index, float originalSpearChance)
         {
             return orig(index, originalSpearChance) * 2;
             

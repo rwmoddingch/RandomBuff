@@ -434,7 +434,7 @@ namespace BuiltinBuffs.Positive
                 return float.MaxValue;
 
             if (room.PointSubmerged(tilePos))
-                value += 10f * Mathf.Abs(tilePos.y - room.waterObject.DetailedWaterLevel(tilePos.x));
+                value += 10f * Mathf.Abs(tilePos.y - room.waterObject.DetailedWaterLevel(tilePos));
 
             foreach (var obj in room.updateList)
             {

@@ -36,28 +36,27 @@ namespace BuiltinBuffs.Duality
         {
             ILCursor c1 = new ILCursor(il);
             ILLabel jumpLabel = null;
-            if(c1.TryGotoNext(MoveType.After,
-                (i) => i.MatchLdsfld<ModManager>("MSC"),
+            c1.GotoNext(MoveType.After,
+                (i) => i.MatchCall<ModManager>("get_DLCShared"),
                 (i) => i.MatchBrfalse(out _),
                 (i) => i.MatchLdarg(0),
                 (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
                 (i) => i.MatchLdfld<Room>("blizzardGraphics"),
-                (i) => i.MatchBrfalse(out _)))
-            {
-                jumpLabel = c1.MarkLabel();
-                BuffUtils.Log("Hypothermia", "label marked");
-            }
+                (i) => i.MatchBrfalse(out _));
+            
+            jumpLabel = c1.MarkLabel();
+            BuffUtils.Log("Hypothermia", "label marked");
 
-            if(c1.TryGotoPrev(MoveType.Before,(i) => i.MatchLdsfld<ModManager>("MSC")))
+
+            c1.GotoPrev(MoveType.Before, (i) => i.MatchCall<ModManager>("get_DLCShared"));
+            BuffUtils.Log("Hypothermia", "IL match");
+            c1.Emit(OpCodes.Ldarg_0);
+            c1.EmitDelegate<Func<Creature, bool>>((self) =>
             {
-                BuffUtils.Log("Hypothermia", "IL match");
-                c1.Emit(OpCodes.Ldarg_0);
-                c1.EmitDelegate<Func<Creature, bool>>((self) =>
-                {
-                    return ModManager.MSC && self.Submersion > 0f;
-                });
-                c1.Emit(OpCodes.Brtrue, jumpLabel);
-            }
+                return ModManager.MSC && self.Submersion > 0f;
+            });
+            c1.Emit(OpCodes.Brtrue, jumpLabel);
+            
         }
 
         private static void Creature_HypothermiaUpdate(On.Creature.orig_HypothermiaUpdate orig, Creature self)

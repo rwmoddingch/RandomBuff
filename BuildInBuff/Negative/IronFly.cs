@@ -24,13 +24,13 @@ namespace BuildInBuff.Negative
         public static void HookOn()
         {
 
-            //ÈÃÃ¬Ã»·¨Ôú³Éòùòð·¨ÕÈ
+            //ï¿½ï¿½Ã¬Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             On.Spear.TryImpaleSmallCreature += Spear_TryImpaleSmallCreature;
 
-            //ÈÃòùòð²»»á±»Ã¬ºÍÊ¯Í·ÖÂËÀ
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ð²»»á±»Ã¬ï¿½ï¿½Ê¯Í·ï¿½ï¿½ï¿½ï¿½
             IL.Weapon.HitSomethingWithoutStopping += Weapon_HitSomethingWithoutStopping;
 
-            //·ÀÖ¹Ã¬´óÊ¦³Ôµ½òùòð
+            //ï¿½ï¿½Ö¹Ã¬ï¿½ï¿½Ê¦ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½
             IL.Spear.HitSomethingWithoutStopping += Spear_HitSomethingWithoutStopping;
         }
 
@@ -98,9 +98,9 @@ namespace BuildInBuff.Negative
         private static void Weapon_HitSomethingWithoutStopping(MonoMod.Cil.ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.Before,
+            c.GotoNext(MoveType.Before,
                 (i) => i.MatchIsinst("Spear")
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldarg_1);
                 c.EmitDelegate<Func<PhysicalObject, PhysicalObject, PhysicalObject>>((weapon, creature) =>
@@ -114,9 +114,9 @@ namespace BuildInBuff.Negative
                 });
             }
 
-            if (c.TryGotoNext(MoveType.Before,
+            c.GotoNext(MoveType.Before,
                 (i) => i.MatchIsinst("Rock")
-                ))
+            );
             {
                 c.Emit(OpCodes.Ldarg_1);
                 c.EmitDelegate<Func<PhysicalObject, PhysicalObject, PhysicalObject>>((weapon, creature) =>
@@ -134,10 +134,10 @@ namespace BuildInBuff.Negative
         private static void Spear_HitSomethingWithoutStopping(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.Before,
+            c.GotoNext(MoveType.Before,
                 (i) => i.MatchIsinst("Fly"),
                 (i) => i.Match(OpCodes.Brfalse)
-                ))
+            );
             {
                 c.EmitDelegate<Func<PhysicalObject, PhysicalObject>>((creature) =>
                 {

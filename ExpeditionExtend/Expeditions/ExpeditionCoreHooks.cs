@@ -159,9 +159,11 @@ namespace BuiltinBuffs.Expeditions
             while (c.TryGotoNext(MoveType.Before,
                        i => i.MatchLdsfld(out var fld) && fld.Name.Contains("expeditionComplete")))
             {
+                BuffUtils.ForceGoto = false;
                 c.EmitDelegate<Action>(() => ExpeditionGame.expeditionComplete &= !Custom.rainWorld.BuffMode());
                 c.GotoNext(MoveType.After, i => i.MatchLdsfld(out var fld) && fld.Name.Contains("expeditionComplete"));
             }
+            BuffUtils.ForceGoto = true;
         }
 
         private static void WinState_CycleCompleted(On.WinState.orig_CycleCompleted orig, WinState self, RainWorldGame game)

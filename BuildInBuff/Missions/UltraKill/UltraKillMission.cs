@@ -242,7 +242,7 @@ namespace BuiltinBuffs.Missions.UltraKill
                 if(finishWaitCounter == 0)
                 {
                     //BuffUtils.Log("UltraKillMission", $"Win");
-                    room.game.Win(false);
+                    room.game.Win(false,false);
                 }
             }
 
@@ -303,7 +303,7 @@ namespace BuiltinBuffs.Missions.UltraKill
                     {
                         var creatureType = spawnCreatureInfo.spawns[posInfo][i];
 
-                        if (spawnCreatureInfo.specials[posInfo][i] != 0 && (creatureType == CreatureTemplate.Type.Scavenger || creatureType == MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite))
+                        if (spawnCreatureInfo.specials[posInfo][i] != 0 && (creatureType == CreatureTemplate.Type.Scavenger || creatureType == DLCSharedEnums.CreatureTemplateType.ScavengerElite))
                         {
                             activeWaveObjects.Add(new UltraKillWaveCreatureGenerator(room, UltraKillWave.spawnEnemyPos[posInfo] + new IntVector2(bias, 0), creatureType, new EntityID(-1, spawnCreatureInfo.specials[posInfo][i])));
                         }

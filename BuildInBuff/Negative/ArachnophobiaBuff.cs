@@ -70,7 +70,7 @@ namespace BuiltinBuffs.Negative
         private static void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
             if(self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Spider &&
-               self.abstractCreature.creatureTemplate.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MotherSpider &&
+               self.abstractCreature.creatureTemplate.type != DLCSharedEnums.CreatureTemplateType.MotherSpider &&
                self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.Leech &&
                self.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.SeaLeech && !self.dead &&
                !self.Template.smallCreature)

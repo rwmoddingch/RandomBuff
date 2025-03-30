@@ -55,39 +55,37 @@ namespace HotDogGains.Duality
 
             byte index = 6;
 
-            if (c.TryGotoNext(MoveType.After,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdfld<BodyChunk>("mass"),
                 i => i.MatchLdcR4(0.18f),
                 i => i.MatchAdd(),
                 i => i.MatchDiv(),
                 i => i.MatchStloc(6)
-                ))
-            {
-                c.Emit(OpCodes.Ldloc_S, index);
-                c.EmitDelegate<Func<float, float>>(
-                    (vel) =>
-                    {
-                        //Debug.Log("反转抓取");
-                        return -vel;
-                    }
-                );
-                c.Emit(OpCodes.Stloc_S, index);
-            }
+            );
+            c.Emit(OpCodes.Ldloc_S, index);
+            c.EmitDelegate<Func<float, float>>(
+                (vel) =>
+                {
+                    //Debug.Log("锟斤拷转抓取");
+                    return -vel;
+                }
+            );
+            c.Emit(OpCodes.Stloc_S, index);
 
-            if (c.TryGotoNext(MoveType.After,
+
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdelemRef(),
                 i => i.MatchCallvirt<Creature.Grasp>("get_grabbedChunk"),
                 i => i.MatchLdfld<BodyChunk>("mass")
-                ))
-            {
-                //c.Emit(OpCodes.Ldloc_S, 6);
-                c.EmitDelegate<Func<float, float>>(
-                    (vel) =>
-                    {
-                        return -vel;
-                    }
-                );
-            }
+            );
+            //c.Emit(OpCodes.Ldloc_S, 6);
+            c.EmitDelegate<Func<float, float>>(
+                (vel) =>
+                {
+                    return -vel;
+                }
+            );
+            
         }
 
     }

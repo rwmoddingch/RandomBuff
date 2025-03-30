@@ -251,10 +251,10 @@ namespace BuiltinBuffs.Positive
         {
             ILCursor c1 = new ILCursor(il);
 
-            if (c1.TryGotoNext(MoveType.After,
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchLdarg(0),
                 (i) => i.Match(OpCodes.Ldarg_S),
-                (i) => i.MatchCall<Lizard>("HitHeadShield")))
+                (i) => i.MatchCall<Lizard>("HitHeadShield"));
             {
                 c1.Emit(OpCodes.Ldarg_1);
                 c1.EmitDelegate<Func<bool, Weapon, bool>>((orig, weapon) =>
@@ -269,8 +269,6 @@ namespace BuiltinBuffs.Positive
                     return result;
                 });
             }
-            else
-                BuffUtils.Log("LanceThrower", "Lizard_SpearStick c1 failed");
         }
 
         private static void Lizard_Violence(ILContext il)

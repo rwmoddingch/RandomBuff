@@ -62,7 +62,7 @@ namespace BuiltinBuffs.Positive
 
         private static void Room_Loaded(MonoMod.Cil.ILContext il)
         {
-            if (!ApplySkip(il, (i) => i.MatchLdloc(1)))
+            if (!ApplySkip(il, (i) => i.MatchLdloc(3)))
                 BuffUtils.Log(HerbicideBuffID, "Room_Loaded hook failure");
         }
 
@@ -72,7 +72,7 @@ namespace BuiltinBuffs.Positive
             ILCursor emitCursor = new ILCursor(il);
             ILLabel label = null;
 
-            Func<Instruction, bool>[] predicts = new Func<Instruction, bool>[]
+            Func<Instruction, bool>[] predicts = new []
             {
                 (i) => i.MatchLdarg(0),
                 (i) => i.MatchLdarg(0),

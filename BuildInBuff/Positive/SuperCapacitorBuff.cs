@@ -70,7 +70,7 @@ namespace BuiltinBuffs.Positive
             orig(self, eu);
         }
 
-        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+        private static void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarpPoint)
         {
             try
             {
@@ -122,7 +122,7 @@ namespace BuiltinBuffs.Positive
             {
                 UnityEngine.Debug.LogException(ex);
             }
-            orig(self, malnourished);
+            orig(self, malnourished,fromWarpPoint);
         }
 
         private static void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)

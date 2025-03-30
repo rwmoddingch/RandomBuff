@@ -90,10 +90,10 @@ namespace BuiltinBuffs.Positive
             {
                 ILCursor c = new ILCursor(il);
                 //找到ShouldBeDeferred结束的地方
-                if (c.TryGotoNext(MoveType.After,
+                c.GotoNext(MoveType.After,
                     (i) => i.MatchLdloc(10),
                     (i) => i.MatchCall<Room>("ShouldBeDeferred"),
-                    (i) => i.MatchStloc(11)))
+                    (i) => i.MatchStloc(11));
                 {
                     c.Emit(OpCodes.Ldarg_0);
                     c.Emit(OpCodes.Ldloc_S, (byte)10);
@@ -115,11 +115,11 @@ namespace BuiltinBuffs.Positive
                 }
 
                 //找到即将绘图的地方
-                if (c.TryGotoNext(MoveType.After,
+                c.GotoNext(MoveType.After,
                     (i) => i.MatchLdloc(10),
                     (i) => i.MatchIsinst<PhysicalObject>(),
                     (i) => i.Match(OpCodes.Brfalse_S),
-                    (i) => i.MatchLdloc(11)))
+                    (i) => i.MatchLdloc(11));
                 {
                     c.Emit(OpCodes.Ldarg_0);
                     c.Emit(OpCodes.Ldloc_S, (byte)10);

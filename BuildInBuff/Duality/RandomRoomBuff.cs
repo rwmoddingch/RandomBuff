@@ -247,9 +247,9 @@ namespace BuiltinBuffs.Duality
             On.OverWorld.WorldLoaded += OverWorld_WorldLoaded;
         }
 
-        private static void OverWorld_WorldLoaded(On.OverWorld.orig_WorldLoaded orig, OverWorld self)
+        private static void OverWorld_WorldLoaded(On.OverWorld.orig_WorldLoaded orig, OverWorld self,  bool warpused)
         {
-            orig.Invoke(self);
+            orig.Invoke(self,warpused);
             RandomRoomBuff.Instance.ChangeRegion();
         }
     }

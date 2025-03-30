@@ -90,14 +90,12 @@ namespace BuiltinBuffs.Negative.SephirahMeltdown
         private static void RainCycle_UpdateIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if(c.TryGotoNext(MoveType.After,i => i.MatchStfld<RainCycle>("pause")
-                   ,i => i.Match(OpCodes.Br)
-                   ,i => i.MatchLdsfld<ModManager>("MSC")))
-            {
-                c.EmitDelegate<Func<bool, bool>>((re) => re && RainInst <= 0);
-            }
-            else
-                BuffUtils.LogError(TipherethBuffData.Tiphereth,"hook failed");
+            c.GotoNext(MoveType.After, i => i.MatchStfld<RainCycle>("pause")
+                , i => i.Match(OpCodes.Br)
+                , i => i.MatchCall<ModManager>("get_PrecycleModule"));
+            
+            c.EmitDelegate<Func<bool, bool>>((re) => re && RainInst <= 0);
+            
             
         }
 

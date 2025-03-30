@@ -86,7 +86,7 @@ namespace BuiltinBuffs.Negative
             }
             else if (origType == CreatureTemplate.Type.RedCentipede) result = CreatureTemplate.Type.RedCentipede;
             else if (origType == CreatureTemplate.Type.RedLizard) result = origType;
-            else if (origType == CreatureTemplate.Type.GreenLizard) result = MoreSlugcatsEnums.CreatureTemplateType.SpitLizard;
+            else if (origType == CreatureTemplate.Type.GreenLizard) result = DLCSharedEnums.CreatureTemplateType.SpitLizard;
             else if (origType == CreatureTemplate.Type.PinkLizard || origType == CreatureTemplate.Type.BlueLizard) result = CreatureTemplate.Type.CyanLizard;
             else if (origType == CreatureTemplate.Type.CyanLizard)
             {
@@ -99,29 +99,29 @@ namespace BuiltinBuffs.Negative
             else if (origType == CreatureTemplate.Type.Salamander)
             {
                 if (Random.value < 0.5f) result = origType;
-                else result = MoreSlugcatsEnums.CreatureTemplateType.EelLizard;
+                else result = DLCSharedEnums.CreatureTemplateType.EelLizard;
             }
             else if (StaticWorld.GetCreatureTemplate(origType).ancestor != null && StaticWorld.GetCreatureTemplate(origType).ancestor.type == CreatureTemplate.Type.LizardTemplate)
             {
                 if (Random.value < 0.3f) result = MoreSlugcatsEnums.CreatureTemplateType.TrainLizard;
                 else result = CreatureTemplate.Type.RedLizard;
             }
-            else if (origType == CreatureTemplate.Type.Scavenger) result = MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite;
+            else if (origType == CreatureTemplate.Type.Scavenger) result = DLCSharedEnums.CreatureTemplateType.ScavengerElite;
             else if (origType == CreatureTemplate.Type.BigSpider) result = CreatureTemplate.Type.SpitterSpider;
             else if (origType == CreatureTemplate.Type.Vulture)
             {
-                if (Random.value < 0.3f) result = MoreSlugcatsEnums.CreatureTemplateType.MirosVulture;
+                if (Random.value < 0.3f) result = DLCSharedEnums.CreatureTemplateType.MirosVulture;
                 else result = CreatureTemplate.Type.KingVulture;
             }
             else if (origType == CreatureTemplate.Type.KingVulture) result = origType;
-            else if (origType == MoreSlugcatsEnums.CreatureTemplateType.MirosVulture) result = origType;
+            else if (origType == DLCSharedEnums.CreatureTemplateType.MirosVulture) result = origType;
             else if (origType == CreatureTemplate.Type.MirosBird) result = origType;
             else if (origType == CreatureTemplate.Type.BrotherLongLegs) result = CreatureTemplate.Type.DaddyLongLegs;
-            else if (origType == CreatureTemplate.Type.DaddyLongLegs) result = MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs;
+            else if (origType == CreatureTemplate.Type.DaddyLongLegs) result = DLCSharedEnums.CreatureTemplateType.TerrorLongLegs;
             else if (origType == CreatureTemplate.Type.SmallNeedleWorm) result = CreatureTemplate.Type.BigNeedleWorm;
             else if (origType == CreatureTemplate.Type.DropBug)
             {
-                if (Random.value < 0.2f) result = MoreSlugcatsEnums.CreatureTemplateType.StowawayBug;
+                if (Random.value < 0.2f) result = DLCSharedEnums.CreatureTemplateType.StowawayBug;
                 else result = origType;
             }
             else if (origType == CreatureTemplate.Type.EggBug) result = MoreSlugcatsEnums.CreatureTemplateType.FireBug;

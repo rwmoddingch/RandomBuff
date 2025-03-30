@@ -248,7 +248,7 @@ namespace TemplateGains
                 this.moveDir += Mathf.Lerp(-1f, 1f, Random.value) * 50f;
                 if (this.room.PointSubmerged(this.pos))
                 {
-                    this.pos.y = this.room.FloatWaterLevel(this.pos.x);
+                    this.pos.y = this.room.FloatWaterLevel(this.pos);
                 }
                 this.counter++;
                 if (this.room.GetTile(this.pos).Solid && !this.room.GetTile(this.lastPos).Solid)

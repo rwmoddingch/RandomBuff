@@ -31,10 +31,12 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
             while(c.TryGotoNext(MoveType.After,
                 (i) => i.MatchLdsfld<SoundID>("Fire_Spear_Explode")))
             {
+                BuffUtils.ForceGoto = false;
                 c.GotoNext(MoveType.After, (i) => i.MatchCallvirt<Room>("PlaySound"));
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Action<Player>>(PyroJumped);
             }
+            BuffUtils.ForceGoto = true;
         }
 
         public override void StartGame(RainWorldGame game)

@@ -47,7 +47,7 @@ namespace BuiltinBuffs.Duality
 
                 if(self.room.updateList.Count(u => u is PhysicalObject physical && (physical.abstractPhysicalObject.type == MoreSlugcatsEnums.AbstractObjectType.HRGuard)) > 0)
                 {
-                    self.objectInStomach = new AbstractPhysicalObject(self.room.world, MoreSlugcatsEnums.AbstractObjectType.SingularityBomb, null, self.coord, self.room.game.GetNewID());
+                    self.objectInStomach = new AbstractPhysicalObject(self.room.world, DLCSharedEnums.AbstractObjectType.SingularityBomb, null, self.coord, self.room.game.GetNewID());
                     replaceSuccessfully = true;
                     orig.Invoke(self);
                 }

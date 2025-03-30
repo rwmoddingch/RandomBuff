@@ -100,20 +100,16 @@ namespace BuiltinBuffs.Duality
         private static void ApplyILHook<T>(ILContext il,Action<T> func)
         {
             ILCursor c1 = new ILCursor(il);
-            if (c1.TryGotoNext(MoveType.Before,
+            c1.GotoNext(MoveType.Before,
                (i) => i.MatchLdarg(0),
                (i) => i.MatchCallvirt<UpdatableAndDeletable>("Destroy"),
                (i) => i.MatchRet()
-            ))
+            );
             {
                 c1.Index++;
                 c1.EmitDelegate<Action<T>>(func);
                 c1.Emit(OpCodes.Ret);
                 c1.Emit(OpCodes.Ldarg_0);
-            }
-            else
-            {
-                BuffUtils.Log(UnlimitedFirepowerBuffID, new NullReferenceException("c1 cant find"));
             }
         }
 

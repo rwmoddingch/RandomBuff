@@ -39,24 +39,18 @@ namespace HotDogGains.Negative
 
         private static void Player_EatMeatUpdateIL(ILContext il)
         {
-            try
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(MoveType.After,
+                (i) => i.MatchCall<Player>("AddFood"),
+                (i) => i.Match(OpCodes.Ldarg_0));
             {
-                ILCursor c = new ILCursor(il);
-                if (c.TryGotoNext(MoveType.After,
-                    (i) => i.MatchCall<Player>("AddFood"),
-                    (i) => i.Match(OpCodes.Ldarg_0)))
+                c.EmitDelegate<Action<Player>>((self) =>
                 {
-                    c.EmitDelegate<Action<Player>>((self) =>
-                    {
-                        self.Stun(20*StomachAcheID.GetBuffData().StackLayer);
-                    });
-                    c.Emit(OpCodes.Ldarg_0);
-                }
+                    self.Stun(20*StomachAcheID.GetBuffData().StackLayer);
+                });
+                c.Emit(OpCodes.Ldarg_0);
             }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogException(e);
-            }
+      
         }
 
         private static void Player_ObjectEaten(On.Player.orig_ObjectEaten orig, Player self, IPlayerEdible edible)

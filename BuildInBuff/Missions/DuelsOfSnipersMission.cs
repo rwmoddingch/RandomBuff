@@ -32,9 +32,9 @@ namespace BuiltinBuffs.Missions
                 conditions = new List<Condition>()
                 {
                     new HuntCondition() { killCount = 20, type = CreatureTemplate.Type.Scavenger },
-                    new HuntCondition() { killCount = 10, type = MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite },
+                    new HuntCondition() { killCount = 10, type = DLCSharedEnums.CreatureTemplateType.ScavengerElite },
                     new HuntCondition() { killCount = 5, type = CreatureTemplate.Type.KingVulture },
-                    new HuntCondition() { killCount = 5, type = MoreSlugcatsEnums.CreatureTemplateType.MirosVulture }
+                    new HuntCondition() { killCount = 5, type = DLCSharedEnums.CreatureTemplateType.MirosVulture }
                 }
             };
             startBuffSet.Add(LightSpeedSpearIBuffEntry.LightSpeedSpearBuffID);

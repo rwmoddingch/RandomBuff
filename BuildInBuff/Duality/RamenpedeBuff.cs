@@ -29,16 +29,15 @@ namespace BuiltinBuffs.Duality
         private static void Centipede_ctor(ILContext il)
         {
             ILCursor c1 = new ILCursor(il);
-            if(c1.TryGotoNext(MoveType.After,i => i.MatchNewarr<BodyChunk>()))
+            c1.GotoNext(MoveType.After, i => i.MatchNewarr<BodyChunk>());
+            c1.Emit(OpCodes.Ldarg_0);
+            c1.EmitDelegate<Func<BodyChunk[],Centipede, BodyChunk[]>>((orig,self) =>
             {
-                c1.Emit(OpCodes.Ldarg_0);
-                c1.EmitDelegate<Func<BodyChunk[],Centipede, BodyChunk[]>>((orig,self) =>
-                {
-                    if(!self.Small)
-                        return new BodyChunk[orig.Length * 2];
-                    return orig;
-                });
-            }
+                if(!self.Small)
+                    return new BodyChunk[orig.Length * 2];
+                return orig;
+            });
+            
         }
     }
 }

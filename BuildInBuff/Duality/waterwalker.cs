@@ -29,7 +29,7 @@ namespace BuildInBuff.Duality
         {
             foreach (var body in self.bodyChunks)
             {
-                var waterPosY = (self.room.FloatWaterLevel(body.pos.x) + body.rad);
+                var waterPosY = (self.room.FloatWaterLevel(body.pos) + body.rad);
                 if (body.pos.y < waterPosY && Math.Abs(body.pos.y - waterPosY) < walkRange && !self.GoThroughFloors)
                 {
                     return true;
@@ -51,7 +51,7 @@ namespace BuildInBuff.Duality
         {
             foreach (var body in self.bodyChunks)
             {
-                var waterPosY = (self.room.FloatWaterLevel(body.pos.x) + body.rad) + 2f;
+                var waterPosY = (self.room.FloatWaterLevel(body.pos) + body.rad) + 2f;
                 if (body.pos.y < waterPosY && Math.Abs(body.pos.y - waterPosY) < walkRange)
                 {
                     body.contactPoint.y = -1;
@@ -63,7 +63,7 @@ namespace BuildInBuff.Duality
             {
                 foreach (var body in self.bodyChunks)
                 {
-                    var waterPosY = (self.room.FloatWaterLevel(body.pos.x) + body.rad) + 1;
+                    var waterPosY = (self.room.FloatWaterLevel(body.pos) + body.rad) + 1;
                     if (body.pos.y < waterPosY && Math.Abs(body.pos.y - waterPosY) < walkRange)
                     {
                         self.canJump = 5;

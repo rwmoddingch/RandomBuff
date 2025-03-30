@@ -174,7 +174,7 @@ namespace BuiltinBuffs.Negative
         public static bool ValuableItem(AbstractPhysicalObject type)
         {
             if (type.type == AbstractPhysicalObject.AbstractObjectType.DataPearl || type.type == AbstractPhysicalObject.AbstractObjectType.VultureMask || type.type == AbstractPhysicalObject.AbstractObjectType.ScavengerBomb ||
-                type.type == AbstractPhysicalObject.AbstractObjectType.OverseerCarcass || type.type == MoreSlugcatsEnums.AbstractObjectType.SingularityBomb
+                type.type == AbstractPhysicalObject.AbstractObjectType.OverseerCarcass || type.type == DLCSharedEnums.AbstractObjectType.SingularityBomb
                 || (type is AbstractSpear && ((type as AbstractSpear).explosive || (type as AbstractSpear).electric)))
             {
                 return true;

@@ -58,13 +58,15 @@ namespace BuiltinBuffs.Negative
         {
             ILCursor c1 = new ILCursor(il);
 
-            if(c1.TryGotoNext(MoveType.After, 
+            c1.GotoNext(MoveType.After,
                 (i) => i.MatchLdarg(0),
                 (i) => i.MatchLdfld<UpdatableAndDeletable>("room"),
                 (i) => i.MatchLdsfld<SoundID>("Seed_Cob_Pop"),
                 (i) => i.MatchLdloc(6),
+                (i) => i.MatchLdarg(0),
+                i => i.MatchLdfld<PhysicalObject>("abstractPhysicalObject"),
                 (i) => i.MatchCallvirt<Room>("PlaySound")
-            ))
+            );
             {
                 c1.Emit(OpCodes.Ldarg_0);//this
                 c1.Emit(OpCodes.Ldloc_3);//i

@@ -21,6 +21,7 @@ using RandomBuff.Core.Option;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.StaticsScreen;
 using RandomBuff.Credit;
+using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;
 using static RandomBuff.Core.BuffMenu.BuffGameMenu;
@@ -79,10 +80,12 @@ namespace RandomBuff.Core.Hooks
                     ILCursor c = new ILCursor(il);
                     while (c.TryGotoNext(MoveType.After, i => i.MatchStloc(1)))
                     {
+                        BuffUtils.ForceGoto = false;
                         c.Emit(OpCodes.Ldloc_1);
                         c.EmitDelegate<Func<int, int>>(orig => Mathf.Min(11, orig + 2));
                         c.Emit(OpCodes.Stloc_1);
                     }
+                    BuffUtils.ForceGoto = true;
                 }
                 else
                 {

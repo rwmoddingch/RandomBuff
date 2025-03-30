@@ -77,7 +77,7 @@ namespace BuiltinBuffs.Duality
         {
             if (abstractPhysicalObject == null)
                 return false;
-            if (abstractPhysicalObject.type == MoreSlugcats.MoreSlugcatsEnums.AbstractObjectType.SingularityBomb)
+            if (abstractPhysicalObject.type == DLCSharedEnums.AbstractObjectType.SingularityBomb)
             {
                 return true;
             }

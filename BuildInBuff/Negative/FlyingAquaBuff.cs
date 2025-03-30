@@ -116,7 +116,7 @@ namespace BuiltinBuffs.Negative
 
         public FlyingAquaBuff()
         {
-            var aqua = StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.AquaCenti);
+            var aqua = StaticWorld.GetCreatureTemplate(DLCSharedEnums.CreatureTemplateType.AquaCenti);
             aqua.canFly = true;
             aqua.throughSurfaceVision = 0.8f;
             aqua.waterRelationship = CreatureTemplate.WaterRelationship.Amphibious;
@@ -128,7 +128,7 @@ namespace BuiltinBuffs.Negative
         public override void Destroy()
         {
             base.Destroy();
-            var aqua = StaticWorld.GetCreatureTemplate(MoreSlugcatsEnums.CreatureTemplateType.AquaCenti);
+            var aqua = StaticWorld.GetCreatureTemplate(DLCSharedEnums.CreatureTemplateType.AquaCenti);
             aqua.canFly = false;
             aqua.throughSurfaceVision = 0.2f;
             aqua.waterRelationship = CreatureTemplate.WaterRelationship.WaterOnly;

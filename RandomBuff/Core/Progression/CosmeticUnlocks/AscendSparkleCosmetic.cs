@@ -39,23 +39,22 @@ namespace RandomBuff.Core.Progression.CosmeticUnlocks
         private static void Player_ClassMechanicsSaint(MonoMod.Cil.ILContext il)
         {
             ILCursor c1 = new ILCursor(il);
-            if(c1.TryGotoNext(MoveType.After,
-                (i) => i.MatchLdsfld<SoundID>("Firecracker_Bang")))
+            c1.GotoNext(MoveType.After,
+                (i) => i.MatchLdsfld<SoundID>("Firecracker_Bang"));
+            BuffPlugin.LogDebug("Player_ClassMechanicsSaint 1");
+            c1.GotoNext(MoveType.After, (i) => i.MatchPop());
             {
-                BuffPlugin.LogDebug("Player_ClassMechanicsSaint 1");
-                if(c1.TryGotoNext(MoveType.After, (i) => i.MatchPop()))
+                BuffPlugin.LogDebug("Player_ClassMechanicsSaint 2");
+                c1.Emit(OpCodes.Ldarg_0);
+                c1.EmitDelegate<Action<Player>>((p) =>
                 {
-                    BuffPlugin.LogDebug("Player_ClassMechanicsSaint 2");
-                    c1.Emit(OpCodes.Ldarg_0);
-                    c1.EmitDelegate<Action<Player>>((p) =>
+                    if (PlayerUtils.TryGetGraphicPart<AscendSparkleGraphicModule, AscendSparkleUtils>(p, out var part))
                     {
-                        if (PlayerUtils.TryGetGraphicPart<AscendSparkleGraphicModule, AscendSparkleUtils>(p, out var part))
-                        {
-                            part.Burst(p.graphicsModule as PlayerGraphics);
-                        }
-                    });
-                }
+                        part.Burst(p.graphicsModule as PlayerGraphics);
+                    }
+                });
             }
+            
         }
     }
 

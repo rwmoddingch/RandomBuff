@@ -25,6 +25,10 @@ using RandomBuff.Core.Progression.Quest.Condition;
 using RandomBuff.Render.UI.Component;
 using RandomBuff.Render.Quest;
 using Kittehface.Framework20;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
+using RandomBuff.Core.Buff;
 using RandomBuff.Core.Option;
 using Steamworks;
 using RandomBuff.Render.UI;
@@ -82,7 +86,7 @@ namespace RandomBuff
         {
             LogInstance = this.Logger;
             Instance = this;
-            
+
 
             try
             {
@@ -128,7 +132,7 @@ namespace RandomBuff
 
             OnModsInit();
         }
-
+        
 
         private void OnModsInit()
         {
@@ -136,7 +140,8 @@ namespace RandomBuff
             {
                 if (!isLoaded)
                 {
-
+                    HookILCursor();
+                    
                     basePath = ModManager.ActiveMods.First(i => i.id == ModId).basePath;
                     Log($"Version: {ModVersion}, Current save version: {saveVersion}, {DateTime.Now}");
 
@@ -170,7 +175,7 @@ namespace RandomBuff
                     SoapBubblePool.Hook();
                     AnimMachine.Init();
                     WawaSaveData.OnModsInit();
-
+                    
 
                     BuffConfigManager.InitBuffPluginInfo();
 
@@ -306,8 +311,14 @@ namespace RandomBuff
 
             SoapBubblePool.UpdateInactiveItems();
             FakeFoodPool.UpdateInactiveItems();
+            if (Input.GetKey(KeyCode.Z) && Input.GetKeyDown(KeyCode.K) && DevEnabled)
+            {
+                TestHookForBuff();
+                TestHookForConditionForBuff();
+            }
         }
-
+        
+        
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception && BuffOptionInterface.Instance.ShowExceptionLog.Value)
@@ -489,4 +500,126 @@ namespace RandomBuff
         }
     }
 
+    internal partial class BuffPlugin
+    {
+        void HookILCursor()
+        {
+                            
+            _ = new Hook(typeof(ILCursor).GetMethod(nameof(ILCursor.TryGotoNext),new []{typeof(MoveType),typeof(Func<Instruction, bool>[])}),
+                (Func<ILCursor,MoveType, Func<Instruction, bool>[], bool> orig,
+                    ILCursor self, MoveType moveType,
+                    params  Func<Instruction, bool>[] predicates) =>
+                {
+                    if (!orig(self,moveType,predicates))
+                        if (BuffUtils.ForceGoto)
+                            throw new KeyNotFoundException();
+                        else
+                            return false;
+                    return true;
+                });
+            _ = new Hook(typeof(ILCursor).GetMethod(nameof(ILCursor.TryGotoPrev),new []{typeof(MoveType),typeof(Func<Instruction, bool>[])}),
+                (Func<ILCursor,MoveType, Func<Instruction, bool>[], bool> orig,
+                    ILCursor self, MoveType moveType,
+                    params Func<Instruction, bool>[] predicates) =>
+                {
+                    if (!orig(self, moveType, predicates))
+                        if (BuffUtils.ForceGoto)
+                            throw new KeyNotFoundException();
+                        else
+                            return false;
+                    return true;
+                });
+        }
+        void TestHookForBuff()
+        {
+            string str = "";
+            foreach (var a in BuffID.values.entries)
+            {
+                var (re, msg) = TestSingle(a);
+                if (re)
+                {
+                    str +=msg;
+                }
+            }
+            (bool re, string message) TestSingle(string a)
+            {
+                bool re = false;
+                string message = $"{a}\n";
+                BuffID b = new(a);
+                try
+                {
+                    BuffHookWarpper.EnableBuff(b, HookLifeTimeLevel.InGame);
+          
+                }
+                catch (Exception e)
+                {
+                    message += "----INGAME----\n" + e.ToString() + "\n";
+                    re = true;
+                }
+                try
+                {
+                    BuffHookWarpper.EnableBuff(b, HookLifeTimeLevel.UntilQuit);
+                }
+                catch (Exception e)
+                {
+                    message +=  "----UntilQuit----\n" + e.ToString() + "\n";
+                    re = true;
+                }
+                try
+                {
+                    BuffHookWarpper.DisableBuff(b, HookLifeTimeLevel.InGame);
+                }
+                catch (Exception e) { }
+                try
+                {
+                    BuffHookWarpper.DisableBuff(b, HookLifeTimeLevel.UntilQuit);
+                }
+                catch (Exception e) { }
+
+                BuffPlugin.Log($"{a}, {re}");
+                return (re, message);
+            }
+            File.WriteAllText("TestOutput.txt",str);
+        }
+
+        void TestHookForConditionForBuff()
+        {
+            string str = "";
+            foreach (var a in ConditionID.values.entries)
+            {
+                var (re, msg) = TestSingleC(a);
+                if (re)
+                {
+                    str +=msg;
+                }
+            }
+            (bool re, string message) TestSingleC(string a)
+            {
+                bool re = false;
+                string message = $"{a}\n";
+                var c = (Condition)Activator.CreateInstance(BuffRegister.GetConditionType(new(a)).Type);
+                try
+                {
+                    c.HookOn();
+          
+                }
+                catch (Exception e)
+                {
+                    message += "----INGAME----\n" + e.ToString() + "\n";
+                    re = true;
+                }
+           
+                try
+                {
+                    c.DisableHook();
+                }
+                catch (Exception e) { }
+                BuffPlugin.Log($"{a}, {re}");
+                return (re, message);
+            }
+            File.WriteAllText("TestOutputC.txt",str);
+        }
+
+       
+    }
 }

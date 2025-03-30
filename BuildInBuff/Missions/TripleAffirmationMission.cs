@@ -263,7 +263,7 @@ namespace BuiltinBuffs.Missions
         private void Room_Loaded(On.Room.orig_Loaded orig, Room self)
         {
             if (self.roomSettings.DangerType == RoomRain.DangerType.AerieBlizzard ||
-                self.roomSettings.DangerType == MoreSlugcatsEnums.RoomRainDangerType.Blizzard)
+                self.roomSettings.DangerType == DLCSharedEnums.RoomRainDangerType.Blizzard)
                 self.roomSettings.DangerType = RoomRain.DangerType.Flood;
             if (self.world.rainCycle.CycleProgression >= 0.99f)
                 self.water = true;

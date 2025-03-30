@@ -59,7 +59,7 @@ namespace BuiltinBuffs.Expeditions
         {
             {"unl-gun" , MoreSlugcatsEnums.AbstractObjectType.JokeRifle},
             {"unl-vulture", AbstractPhysicalObject.AbstractObjectType.VultureMask},
-            {"unl-sing" , MoreSlugcatsEnums.AbstractObjectType.SingularityBomb},
+            {"unl-sing" , DLCSharedEnums.AbstractObjectType.SingularityBomb},
         };
 
         private static readonly Dictionary<string, int> Stackable = new Dictionary<string, int>()

@@ -58,10 +58,10 @@ namespace BuiltinBuffs.Duality
                 if (WaterWorldBuff.Instance.GetTemporaryBuffPool().allBuffIDs.Contains(BuiltinBuffs.Negative.UpsideDownBuffEntry.UpsideDownID))
                 {
                     //本末倒置使每个房间变成上半部分被淹没
-                    if (self.roomSettings.GetEffect(MoreSlugcatsEnums.RoomEffectType.InvertedWater) == null)
-                        self.roomSettings.effects.Add(new RoomSettings.RoomEffect(MoreSlugcatsEnums.RoomEffectType.InvertedWater, 1f, false));
-                    else if (self.roomSettings.GetEffect(MoreSlugcatsEnums.RoomEffectType.InvertedWater).amount < 1f)
-                        self.roomSettings.GetEffect(MoreSlugcatsEnums.RoomEffectType.InvertedWater).amount = 1f;
+                    if (self.roomSettings.GetEffect(DLCSharedEnums.RoomEffectType.InvertedWater) == null)
+                        self.roomSettings.effects.Add(new RoomSettings.RoomEffect(DLCSharedEnums.RoomEffectType.InvertedWater, 1f, false));
+                    else if (self.roomSettings.GetEffect(DLCSharedEnums.RoomEffectType.InvertedWater).amount < 1f)
+                        self.roomSettings.GetEffect(DLCSharedEnums.RoomEffectType.InvertedWater).amount = 1f;
                     self.waterInverted = true;
                 }
                 if (self.waterObject == null)
