@@ -57,6 +57,7 @@ namespace RandomBuff.Core.Option
             DisableCardPocketConflict = config.Bind(nameof(DisableCardPocketConflict), false);
             EnableDevChat = config.Bind(nameof(EnableDevChat), false);
             ShowUnlockWawaFuncNotification = config.Bind(nameof(ShowUnlockWawaFuncNotification), true);
+            HasShownWarning = config.Bind(nameof(HasShownWarning), false);
             Instance = this;
 
         }
@@ -329,6 +330,8 @@ namespace RandomBuff.Core.Option
         public Configurable<bool> ShowExceptionLog { get; private set; }
 
         public Configurable<bool> CheatAllCards { get; private set; }
+        
+        public Configurable<bool> HasShownWarning { get; private set; }
         public Configurable<bool> CheatAllCosmetics { get; private set; }
 
         public Configurable<bool> EnableExpeditionModExtend { get; private set; }

@@ -172,6 +172,13 @@ namespace RandomBuff.Core.BuffMenu
                     BuffOptionInterface.Instance.DisableNotifyDialog.Value = true;
                     BuffOptionInterface.SaveConfig();
                 }
+
+                if (BuffPlugin.GameVersion != "v1.9.15b" && !BuffOptionInterface.Instance.HasShownWarning.Value)
+                {
+                    testNotification.NewInfoNotification(BuffResourceString.Get("Notification_WatcherVersionWarning_Title"),BuffResourceString.Get("Notification_WatcherVersionWarning_Info"));
+                    BuffOptionInterface.Instance.HasShownWarning.Value = true;
+                    BuffOptionInterface.SaveConfig();
+                }
                 if((BuffConfigManager.IsItemLocked(QuestUnlockedType.Cosmetic, "Crown") || BuffPlugin.DevEnabled) && BuffOptionInterface.Instance.ShowUnlockWawaFuncNotification.Value)
                 {
                     testNotification.NewInfoNotification(BuffResourceString.Get("Notification_UnlockWawa_Title"), BuffResourceString.Get("Notification_UnlockWawa_Info"));

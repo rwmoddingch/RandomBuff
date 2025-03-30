@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -26,6 +27,32 @@ namespace RandomBuff
     /// </summary>
     public static class Helper
     {
+
+        public static string BestMatchedPath(this ModManager.Mod mod)
+        {
+            if (mod.hasTargetedVersionFolder)
+                return mod.TargetedPath;
+            else if (mod.hasNewestFolder)
+                return mod.NewestPath;
+            return mod.path;
+        }
+        
+        public static string BestMatchedPath(this ModManager.Mod mod, string withCheck)
+        {
+            if (mod.hasTargetedVersionFolder && Directory.Exists(Path.Combine(mod.TargetedPath,withCheck)))
+                return mod.TargetedPath;
+            else if (mod.hasNewestFolder && Directory.Exists(Path.Combine(mod.NewestPath,withCheck)))
+                return mod.NewestPath;
+            return mod.path;
+        }
+        public static IEnumerable<string> SortedPaths(this ModManager.Mod mod)
+        {
+            if (mod.hasTargetedVersionFolder)
+                yield return mod.TargetedPath;
+            if (mod.hasNewestFolder)
+                yield return mod.NewestPath;
+            yield return mod.path;
+        }
         /// <summary>
         /// 按键跟踪简化类
         /// </summary>

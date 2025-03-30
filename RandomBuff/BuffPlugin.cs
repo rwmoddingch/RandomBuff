@@ -60,7 +60,7 @@ namespace RandomBuff
 
         public const string ModId = "randombuff";
 
-        public const string ModVersion = "1.1.1";
+        public const string ModVersion = "1.1.2";
 
         public static string CacheFolder { get; private set; }
 
@@ -73,6 +73,8 @@ namespace RandomBuff
 
         private static bool isLoaded = false;
         private static bool canAccessLog = true;
+
+        public static string GameVersion;
 
 #if TESTVERSION
         internal static bool DevEnabled => true;
@@ -87,7 +89,10 @@ namespace RandomBuff
             LogInstance = this.Logger;
             Instance = this;
 
-
+            var replace = File.ReadAllLines("doorstop_config.ini").First(i => 
+                i.Contains("enabledVersionPath=")).Replace("enabledVersionPath=","");
+            GameVersion = File.ReadAllText(replace);
+            
             try
             {
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
@@ -143,9 +148,8 @@ namespace RandomBuff
                     HookILCursor();
                     
                     basePath = ModManager.ActiveMods.First(i => i.id == ModId).basePath;
-                    Log($"Version: {ModVersion}, Current save version: {saveVersion}, {DateTime.Now}");
-
-
+                    Log($"Version: {ModVersion},Game Version:{GameVersion}," +
+                        $" Current save version: {saveVersion}, {DateTime.Now}");
 
                     CheckBuffPluginVersion();
 
@@ -361,8 +365,8 @@ namespace RandomBuff
                 }
 
                 foreach (var mod in ModManager.ActiveMods.Where(i =>
-                             Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
-                             Directory.Exists(Path.Combine(i.basePath, "buffassets"))))
+                             Directory.Exists(Path.Combine(i.BestMatchedPath("buffplugins"), "buffplugins")) ||
+                             Directory.Exists(Path.Combine(i.BestMatchedPath("buffassets"), "buffassets"))))
                 {
                     if (lastVersion.TryGetValue(mod.id, out var version))
                     {
@@ -397,8 +401,8 @@ namespace RandomBuff
                 foreach (var all in Directory.GetFiles(CacheFolder, $"*"))
                     File.Delete(all);
                 File.WriteAllLines(Path.Combine(SaveFolder, "BuffPluginVersion.txt"), ModManager.ActiveMods.Where(i =>
-                        Directory.Exists(Path.Combine(i.basePath, "buffplugins")) ||
-                        Directory.Exists(Path.Combine(i.basePath, "buffassets")))
+                        Directory.Exists(Path.Combine(i.BestMatchedPath("buffplugins"), "buffplugins")) ||
+                        Directory.Exists(Path.Combine(i.BestMatchedPath("buffassets"), "buffassets")))
                     .Select(i => $"{i.id}|{i.version}")
                     .ToArray());
             }

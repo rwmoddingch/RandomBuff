@@ -186,7 +186,7 @@ namespace RandomBuff.Core.SaveData
             Futile.atlasManager.LoadImage("buffassets/illustrations/default_thumbnail");
             foreach (var mod in ModManager.ActiveMods)
             {
-                string root = Path.Combine(mod.basePath, "buffinfos");
+                string root = Path.Combine(mod.BestMatchedPath("buffinfos"), "buffinfos");
                 if (!Directory.Exists(root))
                     continue;
                 foreach (var dir in new DirectoryInfo(root).GetDirectories())
@@ -225,7 +225,7 @@ namespace RandomBuff.Core.SaveData
 
         private static IEnumerable<string> GetPluginFolder(ModManager.Mod mod, string folderName)
         {
-            string root = Path.Combine(mod.basePath, "buffinfos");
+            string root = Path.Combine(mod.BestMatchedPath("buffinfos"), "buffinfos");
             if (!Directory.Exists(root))
                 yield break;
 
@@ -239,9 +239,10 @@ namespace RandomBuff.Core.SaveData
         }
         private static IEnumerable<(string, string)> GetPluginFolderWithId(ModManager.Mod mod, string folderName)
         {
-            string root = Path.Combine(mod.basePath, "buffinfos");
+            string root = Path.Combine(mod.BestMatchedPath("buffinfos"),"buffinfos");
             if (!Directory.Exists(root))
                 yield break;
+            
 
             foreach (var dir in new DirectoryInfo(root).GetDirectories())
             {
@@ -306,7 +307,7 @@ namespace RandomBuff.Core.SaveData
                         new CustomAttributeArgument(assembly.MainModule.TypeSystem.Boolean, true)));
 
                     PluginStaticDataTable.Add(pluginId, new());
-                    LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.path).FullName, pluginId);
+                    LoadInDirectory(new DirectoryInfo(path), new DirectoryInfo(mod.BestMatchedPath("buffinfo")).FullName, pluginId);
 
                     if (CreateStaticDataCache(assembly.MainModule, mod.id, pluginId))
                         assembly.Write(Path.Combine(BuffPlugin.CacheFolder, $"{mod.id}_{pluginId}_dataCache.dll"));

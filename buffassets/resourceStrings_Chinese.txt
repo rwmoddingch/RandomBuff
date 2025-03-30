@@ -57,6 +57,8 @@ Notification_MissionReward_Unique|解锁专属使命
 Notification_CosmeticReward|解锁装饰品
 Notification_CardReward|解锁卡牌
 Notification_FreePickReward|解锁自由抽卡数
+Notification_WatcherVersionWarning_Title|版本不稳定警告:
+Notification_WatcherVersionWarning_Info|新版本下卡牌mod暂时还不稳定，可能会有异常或或导致游戏崩溃。<LINE>如果出现异常，请留意 报错提示（如有启用）和 以下文件：<LINE>exceptionLog.txt（位于 雨世界根目录）<LINE>buffcore.txt（位于 Rain World\RainWorld_Data\StreamingAssets）
 Notification_TooManyMods_Title|启用mod数量警告:
 Notification_TooManyMods_Info|看起来你启用了很多的mod，请注意这有可能会造成更多的异常或游戏崩溃。<LINE>如果出现异常，请留意 报错提示（如有启用）和 以下文件：<LINE>exceptionLog.txt（位于 雨世界根目录）<LINE>buffcore.txt（位于 Rain World\RainWorld_Data\StreamingAssets）
 Notification_UnlockWawa_Title|隐藏功能解锁:

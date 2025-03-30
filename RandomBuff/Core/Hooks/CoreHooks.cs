@@ -21,6 +21,7 @@ using RandomBuff.Core.Option;
 using RandomBuff.Core.SaveData;
 using RandomBuff.Core.StaticsScreen;
 using RandomBuff.Credit;
+using RandomBuff.Render.UI.Notification;
 using RandomBuffUtils;
 using RWCustom;
 using UnityEngine;

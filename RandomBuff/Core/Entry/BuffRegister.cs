@@ -485,9 +485,10 @@ namespace RandomBuff.Core.Entry
             
             foreach (var mod in ModManager.ActiveMods)
             {
-                string path = mod.path + Path.DirectorySeparatorChar + "buffplugins";
-                if (!Directory.Exists(path))
+                string path = Path.Combine(mod.BestMatchedPath("buffplugins"), "buffplugins");
+                if(!Directory.Exists(path))
                     continue;
+                
                 BuffPlugin.Log($"Find correct path in {mod.id} to load plugins");
                 DirectoryInfo info = new DirectoryInfo(path);
                 
@@ -840,8 +841,8 @@ namespace RandomBuff.Core.Entry
         {
             hasPdb = File.Exists(filePath.Replace(".dll", ".pdb"));
             var resolver = new DefaultAssemblyResolver();
-            resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/plugins");
-            resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).path + "/buffplugins");
+            resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).BestMatchedPath("plugins") + "/plugins");
+            resolver.AddSearchDirectory(ModManager.ActiveMods.First(i => i.id == BuffPlugin.ModId).BestMatchedPath("buffplugins") + "/buffplugins");
 
             foreach (var modPath in ModManager.ActiveMods.Where(i => mod.requirements.Contains(i.id)
                                                                      && i.requirements.Contains(BuffPlugin.ModId)))

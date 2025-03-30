@@ -56,6 +56,8 @@ Notification_MissionReward_Unique|Unlock exclusive mission
 Notification_CosmeticReward|Unlock cosmetic
 Notification_CardReward|Unlock card
 Notification_FreePickReward|Unlock free pick count
+Notification_WatcherVersionWarning_Title|Unstable Version Warning:
+Notification_WatcherVersionWarning_Info|Random Buff may be unstable in the new version and could cause exceptions or game crashes. <LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
 Notification_TooManyMods_Title|Mod amount warning:
 Notification_TooManyMods_Info|It seems you have enabled too many mods, be aware that this may cause more exception or crash.<LINE>If an exception occurs, please keep an eye on the exception notifications (if enabled) and files below:<LINE>exceptionLog.txt (locate at root path of rainworld)<LINE>buffcore.txt (locate at Rain World\RainWorld_Data\StreamingAssets)
 Notification_UnlockWawa_Title|Hiden function unlocked:
