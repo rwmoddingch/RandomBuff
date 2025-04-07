@@ -176,7 +176,17 @@ namespace RandomBuffUtils.ObjectExtend
             string[] split = Regex.Split(objString, "<oA>");
             try
             {
-                EntityID id = EntityID.FromString(split[0]);
+                EntityID id;
+                int rippleLayer = 0;
+                if (split[0].Contains("<oB>"))
+                {
+                    string[] array2 = Regex.Split(split[0], "<oB>");
+                    id = EntityID.FromString(array2[0]);
+                    rippleLayer = int.Parse(array2[1]);
+                }
+                else
+                    id = EntityID.FromString(split[0]);
+                
                 AbstractPhysicalObject.AbstractObjectType abstractObjectType =
                     new AbstractPhysicalObject.AbstractObjectType(split[1], false);
                 WorldCoordinate pos = WorldCoordinate.FromString(split[2]);
@@ -260,6 +270,8 @@ namespace RandomBuffUtils.ObjectExtend
                                 $"Can't find field or property for Type: {abstractObjectType}, Name: {attrSplit[0]}!");
 
                         }
+
+                        re.rippleLayer = rippleLayer;
                     }
 
                 }

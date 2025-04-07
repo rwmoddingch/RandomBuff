@@ -929,7 +929,6 @@ namespace BuiltinBuffs.Duality
         {
             StaticWorld.EstablishRelationship(CreatureTemplate.Type.BrotherLongLegs, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
             StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.HunterDaddy, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
-            
             //其他生物对蛞蝓猫的生物关系变成对棕色长腿菌的生物关系
             CreatureTemplate daddy = StaticWorld.GetCreatureTemplate(CorruptionCat.Type);
             CreatureTemplate slug = StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Slugcat);
