@@ -145,7 +145,7 @@ namespace RandomBuff
             {
                 if (!isLoaded)
                 {
-                    HookILCursor();
+                    //HookILCursor();
                     
                     basePath = ModManager.ActiveMods.First(i => i.id == ModId).basePath;
                     Log($"Version: {ModVersion},Game Version:{GameVersion}," +
