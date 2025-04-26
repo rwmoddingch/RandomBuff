@@ -1467,9 +1467,10 @@ namespace BuiltinBuffs.Duality
                 if (this.tentacles.Length > player.bodyChunks.Length + this.coreChunks.Length)
                     for (int i = player.bodyChunks.Length + this.coreChunks.Length; i < this.tentacles.Length; i++)
                         this.tentacles[i] = new CorruptionCatTentacle(player, this, player.bodyChunks[1], this.TentaclesLength, i, Custom.DegToVec(i * 60f + 30f));*/
-
+                this.NewRoom(player.room);
+                /*
                 foreach (var tentacle in tentacles)
-                    tentacle.NewRoom(player.room);
+                    tentacle.NewRoom(player.room);*/
                 this.graphics.legGraphics = new CorruptionCatLegGraphics[this.tentacles.Length];
                 if (BuffCustom.TryGetGame(out var game))
                     this.graphics.ResetSprites(game.cameras[0].spriteLeasers.
@@ -2503,7 +2504,6 @@ namespace BuiltinBuffs.Duality
         }
 
         #region 拿东西
-
         //不可拾取
         public Player.ObjectGrabability Grabability(Player.ObjectGrabability result, PhysicalObject obj)
         {
@@ -2598,7 +2598,7 @@ namespace BuiltinBuffs.Duality
         }
     }
 
-    internal class CorruptionCatGraphics
+    internal class CorruptionCatGraphics// : DaddyGraphics.IHaveRotGraphics
     {
         public Player player;
         public CorruptionCat corruptionCat;
@@ -2756,6 +2756,14 @@ namespace BuiltinBuffs.Duality
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             if (self.internalContainerObjects == null)
                 self.internalContainerObjects = new List<GraphicsModule.ObjectHeldInInternalContainer>();
+            this.startSprite = 0;
+            this.ResetSprites(sLeaser, rCam);
+        }
+
+        public void ResetSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
+
             if (self.drawPositions.GetLength(0) != player.bodyChunks.Length)
             {
                 self.drawPositions = new Vector2[player.bodyChunks.Length, 2];
@@ -2765,13 +2773,7 @@ namespace BuiltinBuffs.Duality
                     self.drawPositions[m, 1] = player.bodyChunks[m].lastPos;
                 }
             }
-            this.startSprite = 0;
-            this.ResetSprites(sLeaser, rCam);
-        }
 
-        public void ResetSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-        {
-            PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             if (this.startSprite != 0)
             {
                 for (int i = this.startSprite; i < this.startSprite + this.TotalSprites; i++)
@@ -2878,6 +2880,7 @@ namespace BuiltinBuffs.Duality
         {
             if (player.graphicsModule == null || sLeaser == null || player.room == null)
                 return;
+
             PlayerGraphics self = player.graphicsModule as PlayerGraphics;
             //隐藏四肢
             if (sLeaser.sprites.Length >= 9)
@@ -3653,6 +3656,12 @@ namespace BuiltinBuffs.Duality
                     base.PushChunksApart(m, n);
                 }
             }*/
+        }
+
+        public override void NewRoom(Room room)
+        {
+            base.NewRoom(room);
+            this.SwitchTask(CorruptionCatTentacle.Task.Locomotion);
         }
 
         public void Climb(ref List<IntVector2> path)
@@ -4808,19 +4817,27 @@ namespace BuiltinBuffs.Duality
 
         public override void Update()
         {
-            base.Update();
             int listCount = 0;
             base.AddToPositionsList(listCount++, this.tentacle.FloatBase);
             for (int i = 0; i < this.tentacle.tChunks.Length; i++)
             {
                 for (int j = 1; j < this.tentacle.tChunks[i].rope.TotalPositions; j++)
                 {
-                    base.AddToPositionsList(listCount++,
-                        this.tentacle.tChunks[i].rope.GetPosition(j) + Custom.RNV() * Mathf.InverseLerp(4f, 14f, (float)this.tentacle.stun) * 4f * UnityEngine.Random.value);
+                    base.AddToPositionsList(listCount++, this.tentacle.tChunks[i].rope.GetPosition(j) + Custom.RNV() * Mathf.InverseLerp(4f, 14f, (float)this.tentacle.stun) * 4f * Random.value);
                 }
             }
             base.AlignAndConnect(listCount);
         }
+
+        public override void ConnectPhase(float totalRopeLength)
+        {
+        }
+
+        public override void DrawSprite(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            base.DrawSprite(sLeaser, rCam, timeStacker, camPos);
+        }
+
         public int tentacleIndex;
     }
 
@@ -4908,6 +4925,7 @@ namespace BuiltinBuffs.Duality
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
+            base.ApplyPalette(sLeaser, rCam, palette);
             for (int i = 0; i < (sLeaser.sprites[this.firstSprite] as TriangleMesh).vertices.Length; i++)
             {
                 float floatPos = Mathf.InverseLerp(0.3f, 1f, (float)i / (float)((sLeaser.sprites[this.firstSprite] as TriangleMesh).vertices.Length - 1));
@@ -5028,8 +5046,8 @@ namespace BuiltinBuffs.Duality
         {
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
 
-            sLeaser.sprites[0].x = Mathf.Lerp(this.pos.x, this.lastPos.x, timeStacker) - camPos.x;
-            sLeaser.sprites[0].y = Mathf.Lerp(this.pos.y, this.lastPos.y, timeStacker) - camPos.y;
+            sLeaser.sprites[0].x = Mathf.Lerp(this.lastPos.x, this.pos.x, timeStacker) - camPos.x;
+            sLeaser.sprites[0].y = Mathf.Lerp(this.lastPos.y, this.pos.y, timeStacker) - camPos.y;
             sLeaser.sprites[0].alpha = this.alpha * this.distFac;
             //sLeaser.sprites[0].color = Color.Lerp(this.effectColor, CreatureSymbol.ColorOfCreature(CreatureSymbol.SymbolDataFromCreature(creature.abstractCreature)), this.distFac);
 
