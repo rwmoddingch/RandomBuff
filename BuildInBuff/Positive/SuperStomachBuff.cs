@@ -196,7 +196,7 @@ namespace BuiltinBuffs.Positive
                 {
                     if (self.objectInStomach != null && module.objectsInStomach.Count < 3 && pckpHold)
                     {
-                        if (self.grasps[0] != null && self.grasps[0].grabbed != null)
+                        if (self.grasps[0] != null && self.grasps[0].grabbed != null && self.CanBeSwallowed(self.grasps[0].grabbed))
                         {
                             canRegurgitate = false;
                             isLeftHandProcessing = true;
@@ -211,7 +211,7 @@ namespace BuiltinBuffs.Positive
                             }
                         }
 
-                        if (!isLeftHandProcessing && self.grasps[1] != null && self.grasps[1].grabbed != null)
+                        if (!isLeftHandProcessing && self.grasps[1] != null && self.grasps[1].grabbed != null && self.CanBeSwallowed(self.grasps[1].grabbed))
                         {
                             canRegurgitate = false;
                             if (module.swallowCounter < 90) module.swallowCounter++;
