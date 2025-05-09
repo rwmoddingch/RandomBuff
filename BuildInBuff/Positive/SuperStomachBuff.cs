@@ -179,6 +179,7 @@ namespace BuiltinBuffs.Positive
                 bool pckpHold = self.input[0].pckp && self.input[0].y == 0;
                 bool canRegurgitate = true;
                 bool shouldUpdate = true;
+                bool isLeftHandProcessing = false;
                 for (int i = 0; i < self.grasps.Length; i++)
                 {
                     if (self.grasps[i] != null && self.grasps[i].grabbed != null && self.grasps[i].grabbed is IPlayerEdible)
@@ -195,20 +196,31 @@ namespace BuiltinBuffs.Positive
                 {
                     if (self.objectInStomach != null && module.objectsInStomach.Count < 3 && pckpHold)
                     {
-                        for (int i = 0; i < self.grasps.Length; i++)
+                        if (self.grasps[0] != null && self.grasps[0].grabbed != null && self.CanBeSwallowed(self.grasps[0].grabbed))
                         {
-                            if (self.grasps[i] != null && self.grasps[i].grabbed != null && self.CanBeSwallowed(self.grasps[i].grabbed))
+                            canRegurgitate = false;
+                            isLeftHandProcessing = true;
+                            if (module.swallowCounter < 90) module.swallowCounter++;
+                            self.swallowAndRegurgitateCounter = 0;
+                            if (module.swallowCounter >= 90)
                             {
-                                canRegurgitate = false;
-                                if (module.swallowCounter < 90) module.swallowCounter++;
-                                self.swallowAndRegurgitateCounter = 0;
-                                if (module.swallowCounter >= 90)
-                                {
-                                    SwallowToExtraStomach(self, i, module);
-                                    if (self.graphicsModule != null) (self.graphicsModule as PlayerGraphics).swallowing = 20;
-                                    module.swallowCounter = 0;
-                                    break;
-                                }
+                                SwallowToExtraStomach(self, 0, module);
+                                if (self.graphicsModule != null) (self.graphicsModule as PlayerGraphics).swallowing = 20;
+                                module.swallowCounter = 0;
+                                isLeftHandProcessing = false;
+                            }
+                        }
+
+                        if (!isLeftHandProcessing && self.grasps[1] != null && self.grasps[1].grabbed != null && self.CanBeSwallowed(self.grasps[1].grabbed))
+                        {
+                            canRegurgitate = false;
+                            if (module.swallowCounter < 90) module.swallowCounter++;
+                            self.swallowAndRegurgitateCounter = 0;
+                            if (module.swallowCounter >= 90)
+                            {
+                                SwallowToExtraStomach(self, 1, module);
+                                if (self.graphicsModule != null) (self.graphicsModule as PlayerGraphics).swallowing = 20;
+                                module.swallowCounter = 0;
                             }
                         }
 
@@ -226,15 +238,6 @@ namespace BuiltinBuffs.Positive
                     else
                     {
                         if (module.swallowCounter > 0) module.swallowCounter--;
-
-                        for (int i = 0; i < self.grasps.Length; i++)
-                        {
-                            if (self.grasps[i] != null && self.grasps[i].grabbed != null && self.CanBeSwallowed(self.grasps[i].grabbed))
-                            {
-                                canRegurgitate = false;
-                                break;
-                            }
-                        }
 
                         if (canRegurgitate && pckpHold && module.objectsInStomach.Count > 0)
                         {
@@ -327,7 +330,7 @@ namespace BuiltinBuffs.Positive
                         {
                             switch (self.playerState.playerNumber)
                             {
-                                case 1:
+                                case 0:
                                     {
                                         if (!string.IsNullOrEmpty((buffData as SuperStomachBuffData).storageData_1))
                                         {
@@ -336,7 +339,7 @@ namespace BuiltinBuffs.Positive
                                         }
                                         break;
                                     }
-                                case 2:
+                                case 1:
                                     {
                                         if (!string.IsNullOrEmpty((buffData as SuperStomachBuffData).storageData_2))
                                         {
@@ -345,7 +348,7 @@ namespace BuiltinBuffs.Positive
                                         }
                                         break;
                                     }
-                                case 3:
+                                case 2:
                                     {
                                         if (!string.IsNullOrEmpty((buffData as SuperStomachBuffData).storageData_3))
                                         {
@@ -354,7 +357,7 @@ namespace BuiltinBuffs.Positive
                                         }
                                         break;
                                     }
-                                case 4:
+                                case 3:
                                     {
                                         if (!string.IsNullOrEmpty((buffData as SuperStomachBuffData).storageData_4))
                                         {
@@ -370,6 +373,7 @@ namespace BuiltinBuffs.Positive
                             if (!string.IsNullOrEmpty((buffData as SuperStomachBuffData).storageData_1))
                             {
                                 module.AbsObjFromString(self.room.world, (buffData as SuperStomachBuffData).storageData_1);
+                                (buffData as SuperStomachBuffData).storageData_1 = string.Empty;
                             }
                         }
                     }
@@ -461,6 +465,7 @@ namespace BuiltinBuffs.Positive
                 {
                     (self.room.game.session as StoryGameSession).RemovePersistentTracker(abstractPhysicalObject);
                 }
+                self.room.PlaySound(SoundID.Slugcat_Swallow_Item, self.mainBodyChunk);
                 self.ReleaseGrasp(grasp);
                 realizedObj.RemoveFromRoom();
                 abstractPhysicalObject.Abstractize(self.abstractCreature.pos);
