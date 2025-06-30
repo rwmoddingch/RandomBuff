@@ -51,16 +51,15 @@ namespace BuiltinBuffs.Positive
 
         public override bool Trigger(RainWorldGame game)
         {
+            bool? state = null;
             foreach (var player in SporePuff_sCrestBuffEntry.PlayerList)
             {
-                if (SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.TryGetValue(player, out var sporePuff_sCrest) &&
-                    BuffInput.GetKeyDown(GetBindKey()))
-                {
-                    if (sporePuff_sCrest.IsActivate)
-                        sporePuff_sCrest.Deactivate();
-                    else if (!sporePuff_sCrest.IsActivate)
-                        sporePuff_sCrest.Activate();
-                }
+                if (!SporePuff_sCrestBuffEntry.SporePuff_sCrestStateFeatures.TryGetValue(player, out var sporePuff_sCrest)) continue;
+                if (state is null) state = sporePuff_sCrest.IsActivate;
+                if (state.Value) 
+                    sporePuff_sCrest.Deactivate();
+                else 
+                    sporePuff_sCrest.Activate();
             }
             return false;
         }
