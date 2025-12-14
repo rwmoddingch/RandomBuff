@@ -118,7 +118,21 @@ namespace RandomBuffUtils
                 sounds[i].minPitch = datas[i].minPitch;
                 sounds[i].maxVol = datas[i].maxVol;
                 sounds[i].minVol = datas[i].minVol;
-                if (sounds[i].audioClip >= loader.unityAudio.Length)
+                //TODO: is loader.soundImporter.LoadFile() viable here?
+                if (sounds[i].audioClip >= loader.allAudio.Length)
+                {
+                    Array.Resize(ref loader.unityAudioLoaders, loader.unityAudioLoaders.Length + 1);
+                    loader.unityAudioLoaders[sounds[i].audioClip] = new AssetBundleLoadAssetOperation[sounds[i].audioClip];
+
+                    Array.Resize(ref loader.allAudio,loader.allAudio.Length+1);
+                    var tmp = new SoundLoader.ClipLoadData();
+                    tmp.name = $"BUFF-{soundPath}/{datas[i].soundName}";
+                    tmp.unityAudioCached = false;
+                    tmp.audioClipThroughUnity = false;
+                    LoadSingleClips(ref tmp.audio,soundPath,datas[i].soundName);
+                    loader.allAudio[sounds[i].audioClip] = tmp;
+                }
+                /*if (sounds[i].audioClip >= loader.unityAudio.Length)
                 {
                     Array.Resize(ref loader.audioClipNames, loader.audioClipNames.Length + 1);
                     loader.audioClipNames[sounds[i].audioClip] = $"BUFF-{soundPath}/{datas[i].soundName}";
@@ -145,8 +159,9 @@ namespace RandomBuffUtils
                     LoadSingleClips(ref loader.externalAudio[sounds[i].audioClip], soundPath, datas[i].soundName);
                     //BuffUtils.Log(nameof(BuffSounds), $"Loaded audio clip, Name:{datas[i].soundName}, Count:{loader.externalAudio[sounds[i].audioClip].Length}, ID:{sounds[i].audioClip}");
                 }
-
+*/
             }
+                
 
             BuffUtils.Log(nameof(BuffSounds), $"Loaded sound, ID:{id}, Clips Count:{datas.Length}, folder:{soundPath}");
 
@@ -154,7 +169,8 @@ namespace RandomBuffUtils
         }
 
 
-        internal static void LoadSingleClips(ref AudioClip[] clips, string path,string name)
+
+      internal static void LoadSingleClips(ref AudioClip[] clips, string path,string name)
         {
             for (int i = 0; i < clips.Length; i++)
             {
@@ -164,7 +180,7 @@ namespace RandomBuffUtils
                     WWW www = new WWW("file://" + fileName);
                     AudioClip myAudioClip = www.GetAudioClip();
                     while (myAudioClip.loadState != AudioDataLoadState.Loaded &&
-                           myAudioClip.loadState != AudioDataLoadState.Failed) /*Empty loop*/ ;
+                           myAudioClip.loadState != AudioDataLoadState.Failed)  ;
                     AudioClip audioClip = www.GetAudioClip(false);
                     audioClip.name = name;
                     clips[i] = audioClip;
@@ -174,13 +190,17 @@ namespace RandomBuffUtils
                     BuffUtils.LogError(nameof(BuffSounds),$"can't find file at :{fileName}");
                 }
             }
-        }
+        } 
 
 
         internal static int FindIndex(this SoundLoader loader, string name)
         {
-            var index = loader.audioClipNames.IndexOf(name);
-            return index == -1 ? loader.audioClipNames.Length : index;
+            var tmp = loader.allAudio.FirstOrDefault<SoundLoader.ClipLoadData>(clipLoadData =>
+            {
+                return clipLoadData.name == name;
+            }); //this would yield default constructed struct.
+            var index = Array.IndexOf(loader.allAudio,tmp);
+            return index == -1 ? loader.allAudio.Length : index;
         }
 
         private static readonly Dictionary<SoundID,BuffSoundPack> soundDics = new();
