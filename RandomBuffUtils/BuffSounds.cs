@@ -135,34 +135,6 @@ namespace RandomBuffUtils
                     LoadSingleClips(ref tmp.audio,soundPath,datas[i].soundName);
                     loader.allAudio[sounds[i].audioClip] = tmp;
                 }
-                /*if (sounds[i].audioClip >= loader.unityAudio.Length)
-                {
-                    Array.Resize(ref loader.audioClipNames, loader.audioClipNames.Length + 1);
-                    loader.audioClipNames[sounds[i].audioClip] = $"BUFF-{soundPath}/{datas[i].soundName}";
-
-                    Array.Resize(ref loader.soundVariations, loader.soundVariations.Length + 1);
-                    loader.soundVariations[sounds[i].audioClip] =
-                        loader.VariationsForSound(loader.audioClipNames[sounds[i].audioClip]);
-
-                    Array.Resize(ref loader.unityAudio,  loader.unityAudio.Length + 1);
-                    loader.unityAudio[sounds[i].audioClip] = new AudioClip[loader.soundVariations[sounds[i].audioClip]];
-
-                    Array.Resize(ref loader.unityAudioLoaders, loader.unityAudioLoaders.Length + 1);
-                    loader.unityAudioLoaders[sounds[i].audioClip] = new AssetBundleLoadAssetOperation[sounds[i].audioClip];
-
-                    Array.Resize(ref loader.unityAudioCached, loader.unityAudioCached.Length + 1);
-                    loader.unityAudioCached[sounds[i].audioClip] = false;
-
-                    Array.Resize(ref loader.audioClipsThroughUnity, loader.unityAudioCached.Length + 1);
-                    loader.audioClipsThroughUnity[sounds[i].audioClip] = false;
-
-                    Array.Resize(ref loader.externalAudio, loader.externalAudio.Length + 1);
-                    loader.externalAudio[sounds[i].audioClip] = new AudioClip[loader.soundVariations[sounds[i].audioClip]];
-
-                    LoadSingleClips(ref loader.externalAudio[sounds[i].audioClip], soundPath, datas[i].soundName);
-                    //BuffUtils.Log(nameof(BuffSounds), $"Loaded audio clip, Name:{datas[i].soundName}, Count:{loader.externalAudio[sounds[i].audioClip].Length}, ID:{sounds[i].audioClip}");
-                }
-*/
             }
                 
 
