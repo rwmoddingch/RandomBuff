@@ -94,7 +94,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\include\Unity.TextMeshPro_publicized.dll</HintPath>
+      <HintPath>..\include\publicized_assemblies\Unity.TextMeshPro_publicized.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">

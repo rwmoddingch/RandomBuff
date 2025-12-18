@@ -85,10 +85,10 @@ namespace BuiltinBuffs.Duality
         public static void HookOn()
         {
             On.HUD.DialogBox.NewMessage_string_float_float_int += DialogBox_NewMessage_string_float_float_int;
-            On.HUD.DialogBox.Interrupt += DialogBox_Interrupt;
+            On.HUD.DialogBox.Interrupt_string_int += DialogBox_Interrupt_string_int;
         }
 
-        private static void DialogBox_Interrupt(On.HUD.DialogBox.orig_Interrupt orig, DialogBox self, string text, int extraLinger)
+        private static void DialogBox_Interrupt_string_int(On.HUD.DialogBox.orig_Interrupt_string_int orig, DialogBox self, string text, int extraLinger)
         {
             if (!ExtraDialogBoxInstance.IsExtraDialogBox(self))
                 ParrotFashionBuff.Instance.Interrupt();
