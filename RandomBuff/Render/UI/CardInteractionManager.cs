@@ -656,7 +656,7 @@ namespace RandomBuff.Render.UI
         public class KeyBinderProcessor
         {
             public List<BuffID> triggerableBuffIDs = new List<BuffID>();
-            Dictionary<BuffID, bool>lastKeyDowns = new Dictionary<BuffID, bool>();
+            static Dictionary<BuffID, bool>lastKeyDowns = new Dictionary<BuffID, bool>();
 
             InGameSlotInteractionManager manager;
 
@@ -676,7 +676,7 @@ namespace RandomBuff.Render.UI
                 if(card.StaticData.Triggerable)
                 {
                     triggerableBuffIDs.Add(card.ID);
-                    lastKeyDowns.Add(card.ID, false);
+                    lastKeyDowns[card.ID] = false;
                 }
             }
 
